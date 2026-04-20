@@ -24,8 +24,6 @@
     <sys:String x:Key="Nav.Screener.Tooltip">技術選股</sys:String>
     <sys:String x:Key="Nav.MarketInfo">市場資訊</sys:String>
     <sys:String x:Key="Nav.MarketInfo.Tooltip">市場資訊</sys:String>
-    <sys:String x:Key="MarketInfo.Tab.News">新聞</sys:String>
-    <sys:String x:Key="MarketInfo.Tab.Flash">快訊</sys:String>
     <sys:String x:Key="Nav.Alerts">警示</sys:String>
     <sys:String x:Key="Nav.Alerts.Tooltip">價格警示</sys:String>
     <sys:String x:Key="Nav.AiChat">AI 助理</sys:String>
@@ -69,105 +67,21 @@
     <sys:String x:Key="StatusBar.VolumeUnit">億</sys:String>
 
     <!--  Watchlist  -->
-    <sys:String x:Key="Watchlist.Heatmap.Title">今日漲跌熱圖</sys:String>
-    <sys:String x:Key="Watchlist.Heatmap.Subtitle">方塊大小＝成交量；顏色＝今日漲跌幅；點擊任一方塊切回個股圖表</sys:String>
-    <sys:String x:Key="Watchlist.Heatmap.Toggle">切換熱圖／個股圖表</sys:String>
-    <sys:String x:Key="Watchlist.AddStock">＋ 新增個股</sys:String>
-    <sys:String x:Key="Watchlist.Change">漲跌</sys:String>
-    <sys:String x:Key="Watchlist.ChangePercent">漲幅%</sys:String>
-    <sys:String x:Key="Watchlist.Volume">成交量</sys:String>
-    <sys:String x:Key="Watchlist.Empty">尚未新增自選股</sys:String>
-    <sys:String x:Key="Watchlist.EmptySubtitle">點擊下方 ＋ 新增</sys:String>
-    <sys:String x:Key="Watchlist.SelectFromList">從左側清單選擇個股</sys:String>
-    <sys:String x:Key="Watchlist.Mode.List">列表</sys:String>
-    <sys:String x:Key="Watchlist.Mode.Analysis">分析</sys:String>
-    <sys:String x:Key="Watchlist.Mode.Heatmap">熱力圖</sys:String>
 
     <!--  Analysis  -->
-    <sys:String x:Key="Analysis.ReturnToList">返回列表</sys:String>
-    <sys:String x:Key="Analysis.ComingSoon">即將推出</sys:String>
-    <sys:String x:Key="Analysis.Tab.Overview">走勢</sys:String>
-    <sys:String x:Key="Analysis.Tab.Technical">技術</sys:String>
-    <sys:String x:Key="Analysis.Tab.Fundamentals">基本面</sys:String>
-    <sys:String x:Key="Analysis.Tab.Chips">籌碼</sys:String>
-    <sys:String x:Key="Analysis.Tab.Financials">財報</sys:String>
-    <sys:String x:Key="Analysis.Tab.News">新聞</sys:String>
-    <sys:String x:Key="Analysis.Tab.Ai">AI 分析</sys:String>
 
     <!--  Analysis — Technical tab  -->
-    <sys:String x:Key="Analysis.Technical.OverallScore">技術綜合評分</sys:String>
-    <sys:String x:Key="Analysis.Technical.Signal.Bullish">偏多</sys:String>
-    <sys:String x:Key="Analysis.Technical.Signal.Bearish">偏空</sys:String>
-    <sys:String x:Key="Analysis.Technical.Signal.Neutral">中性</sys:String>
-    <sys:String x:Key="Analysis.Technical.Rsi">RSI (14)</sys:String>
-    <sys:String x:Key="Analysis.Technical.Rsi.Overbought">超買區</sys:String>
-    <sys:String x:Key="Analysis.Technical.Rsi.Oversold">超賣區</sys:String>
-    <sys:String x:Key="Analysis.Technical.Rsi.Neutral">中性區</sys:String>
-    <sys:String x:Key="Analysis.Technical.Kd">KD</sys:String>
-    <sys:String x:Key="Analysis.Technical.Macd">MACD</sys:String>
-    <sys:String x:Key="Analysis.Technical.Cross.Golden">黃金交叉</sys:String>
-    <sys:String x:Key="Analysis.Technical.Cross.Death">死亡交叉</sys:String>
-    <sys:String x:Key="Analysis.Technical.Cross.None">無訊號</sys:String>
-    <sys:String x:Key="Analysis.Technical.Ma">均線</sys:String>
-    <sys:String x:Key="Analysis.Technical.Ma.Bullish">多頭排列</sys:String>
-    <sys:String x:Key="Analysis.Technical.Ma.Bearish">空頭排列</sys:String>
-    <sys:String x:Key="Analysis.Technical.Ma.Tangled">糾結</sys:String>
-    <sys:String x:Key="Analysis.Technical.BollingerPosition">布林帶位置</sys:String>
-    <sys:String x:Key="Analysis.Technical.BollingerPositionDesc">0% 為下軌，100% 為上軌</sys:String>
-    <sys:String x:Key="Analysis.Technical.SupportResistance">支撐 / 壓力</sys:String>
-    <sys:String x:Key="Analysis.Technical.Support">支撐</sys:String>
-    <sys:String x:Key="Analysis.Technical.Resistance">壓力</sys:String>
 
     <!--  Analysis — Fundamentals tab  -->
-    <sys:String x:Key="Analysis.Fundamentals.PeRatio">本益比 (TTM)</sys:String>
-    <sys:String x:Key="Analysis.Fundamentals.GrossMargin">毛利率</sys:String>
-    <sys:String x:Key="Analysis.Fundamentals.OperatingMargin">營業利益率</sys:String>
-    <sys:String x:Key="Analysis.Fundamentals.NetMargin">淨利率</sys:String>
-    <sys:String x:Key="Analysis.Fundamentals.RevenueYoy">營收年增率</sys:String>
-    <sys:String x:Key="Analysis.Fundamentals.EpsHistory">季 EPS（近 8 季）</sys:String>
-    <sys:String x:Key="Analysis.Fundamentals.RevenueHistory">季營收（億元，近 8 季）</sys:String>
 
     <!--  Analysis — Chips tab  -->
-    <sys:String x:Key="Analysis.Chips.TotalNet30d">三大法人 30 日累計買賣超</sys:String>
-    <sys:String x:Key="Analysis.Chips.LatestMargin">融資餘額（最新）</sys:String>
-    <sys:String x:Key="Analysis.Chips.MarginChange30d">融資餘額 30 日變化</sys:String>
-    <sys:String x:Key="Analysis.Chips.InstitutionalChart">三大法人日淨買賣（張）</sys:String>
-    <sys:String x:Key="Analysis.Chips.MarginChart">融資餘額走勢（張）</sys:String>
 
     <!--  Analysis — Financials tab  -->
-    <sys:String x:Key="Analysis.Financials.IncomeStatement">損益表</sys:String>
-    <sys:String x:Key="Analysis.Financials.BalanceSheet">資產負債表</sys:String>
-    <sys:String x:Key="Analysis.Financials.CashFlow">現金流量表</sys:String>
-    <sys:String x:Key="Analysis.Financials.Item">項目</sys:String>
-    <sys:String x:Key="Analysis.Financials.UnitHint">金額單位：百萬元新台幣；EPS 為元/股</sys:String>
-    <sys:String x:Key="Analysis.Financials.Row.Revenue">營業收入</sys:String>
-    <sys:String x:Key="Analysis.Financials.Row.GrossProfit">營業毛利</sys:String>
-    <sys:String x:Key="Analysis.Financials.Row.OperatingIncome">營業利益</sys:String>
-    <sys:String x:Key="Analysis.Financials.Row.NetIncome">稅後淨利</sys:String>
-    <sys:String x:Key="Analysis.Financials.Row.Eps">每股盈餘 (EPS)</sys:String>
-    <sys:String x:Key="Analysis.Financials.Row.TotalAssets">資產總計</sys:String>
-    <sys:String x:Key="Analysis.Financials.Row.TotalLiabilities">負債總計</sys:String>
-    <sys:String x:Key="Analysis.Financials.Row.Equity">歸屬母公司權益</sys:String>
-    <sys:String x:Key="Analysis.Financials.Row.CfOperating">營運活動現金流</sys:String>
-    <sys:String x:Key="Analysis.Financials.Row.CfInvesting">投資活動現金流</sys:String>
-    <sys:String x:Key="Analysis.Financials.Row.CfFinancing">融資活動現金流</sys:String>
 
     <!--  Analysis — News tab  -->
-    <sys:String x:Key="Analysis.News.Title">相關新聞</sys:String>
-    <sys:String x:Key="Analysis.News.Loading">載入中…</sys:String>
-    <sys:String x:Key="Analysis.News.Empty">找不到相關新聞</sys:String>
 
     <!--  Analysis — AI tab  -->
-    <sys:String x:Key="Analysis.Ai.Title">AI 綜合分析</sys:String>
-    <sys:String x:Key="Analysis.Ai.Subtitle">結合技術、基本面、籌碼與新聞，產生一份結構化報告</sys:String>
-    <sys:String x:Key="Analysis.Ai.Generate">產生分析</sys:String>
-    <sys:String x:Key="Analysis.Ai.Regenerate">重新產生</sys:String>
-    <sys:String x:Key="Analysis.Ai.Generating">AI 正在分析中…</sys:String>
-    <sys:String x:Key="Analysis.Ai.EmptyHint">點「產生分析」開始 — 將基於目前載入的資料呼叫設定中的 AI Provider</sys:String>
-    <sys:String x:Key="Analysis.Ai.ErrorTitle">產生失敗</sys:String>
-    <sys:String x:Key="Analysis.Ai.Disclaimer">※ 本分析由 AI 依據即時資料產生，僅供參考，不構成投資建議。實際買賣請自行評估風險。</sys:String>
 
-    <sys:String x:Key="Watchlist.Remove">移除</sys:String>
 
     <!--  Portfolio  -->
     <sys:String x:Key="Portfolio.PnL">淨損益</sys:String>
@@ -442,138 +356,12 @@
     <sys:String x:Key="Common.All">全部</sys:String>
 
     <!--  Strategy  -->
-    <sys:String x:Key="Strategy.TechnicalTab">技術篩選</sys:String>
-    <sys:String x:Key="Strategy.AiTab">AI 研究員</sys:String>
-    <sys:String x:Key="Strategy.CreateWithAi">＋ AI 建立策略</sys:String>
-    <sys:String x:Key="Strategy.StartScan">開始掃描</sys:String>
-    <sys:String x:Key="Strategy.Scanning">掃描中…</sys:String>
-    <sys:String x:Key="Strategy.Watchlist">觀察名單</sys:String>
-    <sys:String x:Key="Strategy.AllMarket">全市場</sys:String>
-    <sys:String x:Key="Strategy.AiParse">AI 解析</sys:String>
-    <sys:String x:Key="Strategy.Parsing">解析中…</sys:String>
-    <sys:String x:Key="Strategy.Placeholder">例：找 MACD 金叉且成交量放大的股票…</sys:String>
-    <sys:String x:Key="Strategy.ConditionLogic">條件邏輯</sys:String>
-    <sys:String x:Key="Strategy.ConditionOr">OR（任一）</sys:String>
-    <sys:String x:Key="Strategy.ConditionAnd">AND（全符）</sys:String>
-    <sys:String x:Key="Strategy.CreateStrategy">AI 建立策略</sys:String>
-    <sys:String x:Key="Strategy.Symbol">代號</sys:String>
-    <sys:String x:Key="Strategy.Result">結果</sys:String>
-    <sys:String x:Key="Strategy.Detail">詳情</sys:String>
-    <sys:String x:Key="Strategy.Preset.Title">篩選預設集</sys:String>
-    <sys:String x:Key="Strategy.Preset.Load">載入</sys:String>
-    <sys:String x:Key="Strategy.Preset.Save">儲存</sys:String>
-    <sys:String x:Key="Strategy.Preset.Delete">刪除預設集</sys:String>
-    <sys:String x:Key="Strategy.Preset.NamePlaceholder">預設集名稱...</sys:String>
-    <sys:String x:Key="Strategy.Preset.Saved">已儲存「{0}」</sys:String>
-    <sys:String x:Key="Strategy.Preset.Loaded">已載入「{0}」</sys:String>
-    <sys:String x:Key="Strategy.Preset.Deleted">已刪除「{0}」</sys:String>
-    <sys:String x:Key="Strategy.Preset.NoConditions">請先新增條件</sys:String>
-    <sys:String x:Key="Strategy.Preset.SaveFailed">儲存失敗，請稍後重試</sys:String>
-    <sys:String x:Key="Strategy.ScanHint">請在左側勾選策略，再點擊「開始掃描」</sys:String>
-    <sys:String x:Key="Strategy.WatchlistOnly">限觀察名單</sys:String>
-    <sys:String x:Key="Strategy.Tools">工具：</sys:String>
-    <sys:String x:Key="Strategy.Name">名稱</sys:String>
-    <sys:String x:Key="Strategy.Exchange">市場</sys:String>
     <!--  Strategy Groups  -->
-    <sys:String x:Key="Strategy.Group.均線">均線</sys:String>
-    <sys:String x:Key="Strategy.Group.MACD">MACD</sys:String>
-    <sys:String x:Key="Strategy.Group.RSI">RSI</sys:String>
-    <sys:String x:Key="Strategy.Group.乖離">乖離</sys:String>
-    <sys:String x:Key="Strategy.Group.量能">量能</sys:String>
-    <sys:String x:Key="Strategy.Group.籌碼">籌碼</sys:String>
-    <sys:String x:Key="Strategy.Group.自訂策略">自訂策略</sys:String>
     <!--  Strategy Items  -->
-    <sys:String x:Key="Strategy.Item.MA多頭排列">MA多頭排列</sys:String>
-    <sys:String x:Key="Strategy.Item.MA空頭排列">MA空頭排列</sys:String>
-    <sys:String x:Key="Strategy.Item.MA5穿越MA20">MA5穿越MA20</sys:String>
-    <sys:String x:Key="Strategy.Item.股價在MA20上方">股價在MA20上方</sys:String>
-    <sys:String x:Key="Strategy.Item.股價在MA20下方">股價在MA20下方</sys:String>
-    <sys:String x:Key="Strategy.Item.股價在MA60上方">股價在MA60上方</sys:String>
-    <sys:String x:Key="Strategy.Item.股價在MA60下方">股價在MA60下方</sys:String>
-    <sys:String x:Key="Strategy.Item.MACD金叉">MACD金叉</sys:String>
-    <sys:String x:Key="Strategy.Item.MACD死叉">MACD死叉</sys:String>
-    <sys:String x:Key="Strategy.Item.RSI超賣(&lt;30)">RSI超賣(&lt;30)</sys:String>
-    <sys:String x:Key="Strategy.Item.RSI超買(&gt;70)">RSI超買(&gt;70)</sys:String>
-    <sys:String x:Key="Strategy.Item.負乖離&gt;5%">負乖離&gt;5%</sys:String>
-    <sys:String x:Key="Strategy.Item.負乖離&gt;3%">負乖離&gt;3%</sys:String>
-    <sys:String x:Key="Strategy.Item.量增價漲">量增價漲</sys:String>
-    <sys:String x:Key="Strategy.Item.連續3日上漲">連續3日上漲</sys:String>
-    <sys:String x:Key="Strategy.Item.突破近60日高點">突破近60日高點</sys:String>
-    <sys:String x:Key="Strategy.Item.強勢突破(3日漲幅&gt;8%)">強勢突破(3日漲幅&gt;8%)</sys:String>
-    <sys:String x:Key="Strategy.Item.月K突破年線">月K突破年線</sys:String>
-    <sys:String x:Key="Strategy.Item.三大法人連續買超">三大法人連續買超</sys:String>
-    <sys:String x:Key="Strategy.Item.融資餘額遞減">融資餘額遞減</sys:String>
     <!--  Condition Builder  -->
-    <sys:String x:Key="Strategy.AddCondition">＋ 新增條件</sys:String>
-    <sys:String x:Key="Strategy.RemoveCondition">移除條件</sys:String>
-    <sys:String x:Key="Strategy.CustomStrategies">自訂策略</sys:String>
-    <sys:String x:Key="Strategy.Validation.OutOfRange">數值需在 {0} ~ {1} 之間</sys:String>
     <!--  Condition Type Display Names  -->
-    <sys:String x:Key="Strategy.Type.MA多頭排列">MA多頭排列</sys:String>
-    <sys:String x:Key="Strategy.Type.MA空頭排列">MA空頭排列</sys:String>
-    <sys:String x:Key="Strategy.Type.MA5穿越MA20">MA5穿越MA20</sys:String>
-    <sys:String x:Key="Strategy.Type.股價在MA20上方">股價在MA20上方</sys:String>
-    <sys:String x:Key="Strategy.Type.股價在MA20下方">股價在MA20下方</sys:String>
-    <sys:String x:Key="Strategy.Type.股價在MA60上方">股價在MA60上方</sys:String>
-    <sys:String x:Key="Strategy.Type.股價在MA60下方">股價在MA60下方</sys:String>
-    <sys:String x:Key="Strategy.Type.MACD金叉">MACD金叉</sys:String>
-    <sys:String x:Key="Strategy.Type.MACD死叉">MACD死叉</sys:String>
-    <sys:String x:Key="Strategy.Type.RSI">RSI</sys:String>
-    <sys:String x:Key="Strategy.Type.乖離率">乖離率</sys:String>
-    <sys:String x:Key="Strategy.Type.量增價漲">量增價漲</sys:String>
-    <sys:String x:Key="Strategy.Type.連續3日上漲">連續3日上漲</sys:String>
-    <sys:String x:Key="Strategy.Type.突破近60日高點">突破近60日高點</sys:String>
-    <sys:String x:Key="Strategy.Type.3日漲幅">3日漲幅</sys:String>
-    <sys:String x:Key="Strategy.Type.成交值">成交值</sys:String>
-    <sys:String x:Key="Strategy.Type.月K突破年線">月K突破年線</sys:String>
-    <sys:String x:Key="Strategy.Type.三大法人連續買超">三大法人連續買超</sys:String>
-    <sys:String x:Key="Strategy.Type.融資餘額遞減">融資餘額遞減</sys:String>
-    <sys:String x:Key="Strategy.NoResults">無符合條件的股票</sys:String>
-    <sys:String x:Key="Strategy.AddToWatchlist">加入自選股</sys:String>
-    <sys:String x:Key="Strategy.BuilderTitle">AI 策略建立器</sys:String>
-    <sys:String x:Key="Strategy.BuilderConditionLabel">用中文描述你的選股條件</sys:String>
-    <sys:String x:Key="Strategy.BuilderGenerate">AI 生成程式碼</sys:String>
-    <sys:String x:Key="Strategy.BuilderGenerating">生成中…</sys:String>
-    <sys:String x:Key="Strategy.BuilderCodeLabel">生成的程式碼（可編輯）</sys:String>
-    <sys:String x:Key="Strategy.BuilderSave">儲存策略</sys:String>
-    <sys:String x:Key="Strategy.BuilderCompile">試編譯</sys:String>
-    <sys:String x:Key="Strategy.BuilderNamePlaceholder">為策略命名…</sys:String>
-    <sys:String x:Key="Strategy.BuilderSaveTemplate">儲存模板</sys:String>
-    <sys:String x:Key="Strategy.BuilderTemplateName">模板名稱…</sys:String>
-    <sys:String x:Key="Strategy.ResearchPlaceholder">描述你的研究需求，例如：找出近期三大法人持續買超、且股價仍在年線以上的電子股…</sys:String>
-    <sys:String x:Key="Strategy.ResearchStart">開始研究</sys:String>
-    <sys:String x:Key="Strategy.ResearchStarting">研究中…</sys:String>
-    <sys:String x:Key="Strategy.Tool.Quote">報價</sys:String>
-    <sys:String x:Key="Strategy.Tool.Chart">K線圖</sys:String>
-    <sys:String x:Key="Strategy.Tool.News">新聞</sys:String>
-    <sys:String x:Key="Strategy.Tool.DevScan">負乖離掃描</sys:String>
-    <sys:String x:Key="Strategy.Tool.Watchlist">自選股</sys:String>
-    <sys:String x:Key="Strategy.Step.StockResearch">查詢個股報價</sys:String>
-    <sys:String x:Key="Strategy.Step.ChartAnalysis">分析技術指標</sys:String>
-    <sys:String x:Key="Strategy.Step.NewsSummary">取得最新新聞</sys:String>
-    <sys:String x:Key="Strategy.Step.Screener">策略篩選</sys:String>
-    <sys:String x:Key="Strategy.Step.AddToWatchlist">管理自選股</sys:String>
-    <sys:String x:Key="Strategy.Step.DeviationScan">負乖離掃描</sys:String>
-    <sys:String x:Key="Strategy.Step.StrategyBuilder">策略建立</sys:String>
-    <sys:String x:Key="Strategy.ResearchEmpty">輸入問題，讓 AI 用工具查找股票</sys:String>
-    <sys:String x:Key="Strategy.ResearchEmptyDesc">AI 會查詢報價、K線、新聞等真實數據後回答</sys:String>
-    <sys:String x:Key="Strategy.ResearchTemplates">研究模板：</sys:String>
-    <sys:String x:Key="Strategy.DeleteTemplate">刪除模板</sys:String>
 
     <!--  News  -->
-    <sys:String x:Key="News.Title">市場新聞</sys:String>
-    <sys:String x:Key="News.Refresh">重新整理</sys:String>
-    <sys:String x:Key="News.SearchPlaceholder">搜尋新聞標題…</sys:String>
-    <sys:String x:Key="News.Empty">尚無新聞，點擊右上角重新整理</sys:String>
-    <sys:String x:Key="News.LoadMore">載入更多</sys:String>
-    <sys:String x:Key="News.OpenInBrowser">在瀏覽器開啟</sys:String>
-    <sys:String x:Key="News.CopyLink">複製網址</sys:String>
-    <sys:String x:Key="News.Expand">展開至全版</sys:String>
-    <sys:String x:Key="News.Restore">還原分割視圖</sys:String>
-    <sys:String x:Key="News.CloseArticle">關閉文章</sys:String>
-    <sys:String x:Key="News.NotLoaded">尚未載入</sys:String>
-    <sys:String x:Key="News.LastFetched">最後更新 {0}　顯示 {1}/{2} 則</sys:String>
-    <sys:String x:Key="News.SelectToRead">選擇左側新聞以開始閱讀</sys:String>
 
     <!--  Alerts  -->
     <sys:String x:Key="Alerts.Symbol">代號</sys:String>
@@ -594,49 +382,10 @@
     <sys:String x:Key="Alerts.ConditionBelow">跌破</sys:String>
 
     <!--  Flash News  -->
-    <sys:String x:Key="Flash.Title">快訊</sys:String>
-    <sys:String x:Key="Flash.Subtitle">每 30 秒自動更新 · 金十數據 · 重大事件推送通知</sys:String>
-    <sys:String x:Key="Flash.Refresh">立即更新</sys:String>
-    <sys:String x:Key="Flash.SearchPlaceholder">搜尋快訊標題…</sys:String>
-    <sys:String x:Key="Flash.FilterAll">全部</sys:String>
-    <sys:String x:Key="Flash.FilterNormal">一般</sys:String>
-    <sys:String x:Key="Flash.FilterSource">來源：</sys:String>
-    <sys:String x:Key="Flash.SourceJin10">金十</sys:String>
-    <sys:String x:Key="Flash.SourceCnyes">鉅亨網</sys:String>
-    <sys:String x:Key="Flash.SourceWallstreetcn">華爾街見聞</sys:String>
-    <sys:String x:Key="Flash.FilterMyPositions">只看我的持倉</sys:String>
-    <sys:String x:Key="Flash.FilterTime">時間：</sys:String>
-    <sys:String x:Key="Flash.Time1h">1 小時</sys:String>
-    <sys:String x:Key="Flash.Time6h">6 小時</sys:String>
-    <sys:String x:Key="Flash.Time24h">24 小時</sys:String>
-    <sys:String x:Key="Flash.FilterBreaking">重大</sys:String>
-    <sys:String x:Key="Flash.Empty">尚無快訊，稍後自動載入</sys:String>
-    <sys:String x:Key="Flash.ErrorPrefix">快訊載入失敗：</sys:String>
-    <sys:String x:Key="Flash.LastFetched">最後更新 {0}</sys:String>
-    <sys:String x:Key="Flash.Copied">已複製</sys:String>
 
     <!--  AI Chat  -->
-    <sys:String x:Key="AiChat.Title">AI 助理</sys:String>
-    <sys:String x:Key="AiChat.Close">關閉</sys:String>
-    <sys:String x:Key="AiChat.Clear">清除</sys:String>
-    <sys:String x:Key="AiChat.ApiKeyRequired">請設定 ANTHROPIC_API_KEY 以啟用 AI 助理</sys:String>
-    <sys:String x:Key="AiChat.ConfirmOperation">確認操作</sys:String>
-    <sys:String x:Key="AiChat.ConfirmExecute">確認執行</sys:String>
-    <sys:String x:Key="AiChat.Cancel">取消</sys:String>
-    <sys:String x:Key="AiChat.Confirmed">✓ 已確認執行</sys:String>
-    <sys:String x:Key="AiChat.Cancelled">✕ 已取消</sys:String>
-    <sys:String x:Key="AiChat.Thinking">思考中…</sys:String>
-    <sys:String x:Key="AiChat.Send">送出</sys:String>
 
     <!--  Stock Detail  -->
-    <sys:String x:Key="Detail.Open">開盤</sys:String>
-    <sys:String x:Key="Detail.High">最高</sys:String>
-    <sys:String x:Key="Detail.Low">最低</sys:String>
-    <sys:String x:Key="Detail.PrevClose">昨收</sys:String>
-    <sys:String x:Key="Detail.Volume">成交量</sys:String>
-    <sys:String x:Key="Detail.LatestEps">最新季 EPS</sys:String>
-    <sys:String x:Key="Detail.TtmEps">TTM EPS（近 4 季）</sys:String>
-    <sys:String x:Key="Detail.Loading">載入中…</sys:String>
     <!--  Chart Indicators  -->
     <sys:String x:Key="Chart.Indicator.BB">布林帶</sys:String>
     <sys:String x:Key="Chart.Indicator.VolMA">量均</sys:String>
@@ -721,25 +470,7 @@
     <sys:String x:Key="Calendar.Today">今天</sys:String>
 
     <!--  Dashboard  -->
-    <sys:String x:Key="Dashboard.GoalProgress">目標達成</sys:String>
-    <sys:String x:Key="Dashboard.GoalTarget">目標：</sys:String>
-    <sys:String x:Key="Dashboard.TenDayTrend">淨值走勢（近 10 日）</sys:String>
-    <sys:String x:Key="Dashboard.AllocationHealth">配置健康度</sys:String>
-    <sys:String x:Key="Dashboard.TopHoldings">熱門持倉</sys:String>
-    <sys:String x:Key="Dashboard.RecentTrades">交易記錄</sys:String>
-    <sys:String x:Key="Dashboard.ViewDetail">詳情</sys:String>
 
-    <sys:String x:Key="Strategy.Saved">策略「{0}」已儲存</sys:String>
-    <sys:String x:Key="Strategy.Deleted">策略「{0}」已刪除</sys:String>
-    <sys:String x:Key="Strategy.DeleteFailed">刪除失敗，請稍後再試。</sys:String>
-    <sys:String x:Key="Strategy.QuotaExceeded.Scan">FinMind API 使用次數已達上限，無法掃描。請切換資料來源或等待配額重置（每小時重置）</sys:String>
-    <sys:String x:Key="Strategy.QuotaExceeded.Chip">FinMind API 使用次數已達上限，法人／融資策略今日無法取得資料</sys:String>
-    <sys:String x:Key="Strategy.AlreadyInWatchlist">{0} {1} 已在觀察名單中</sys:String>
-    <sys:String x:Key="Strategy.AddedToWatchlist">{0} {1} 已加入自選股</sys:String>
-    <sys:String x:Key="Strategy.Template.Saved">模板「{0}」已儲存</sys:String>
-    <sys:String x:Key="Strategy.Template.SaveFailed">儲存模板失敗，請稍後再試。</sys:String>
-    <sys:String x:Key="Strategy.Template.Deleted">模板「{0}」已刪除</sys:String>
-    <sys:String x:Key="Strategy.Template.DeleteFailed">刪除模板失敗，請稍後再試。</sys:String>
     <sys:String x:Key="Alerts.Added">已新增警示：{0} {1} {2}</sys:String>
     <sys:String x:Key="Alerts.Updated">已更新 {0} 警示規則</sys:String>
     <sys:String x:Key="Alerts.ToastMessage">🔔 {0}{1}：{2} {3}</sys:String>
@@ -756,4 +487,15 @@
     <sys:String x:Key="FinancialOverview.Section.Assets">資產</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Investments">投資</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Liabilities">負債</sys:String>
+    <sys:String x:Key="Nav.Portfolio">投資組合</sys:String>
+    <sys:String x:Key="Nav.FinancialOverview">財務總覽</sys:String>
+    <sys:String x:Key="Settings.Title">設定</sys:String>
+    <sys:String x:Key="Settings.Section.Appearance">外觀</sys:String>
+    <sys:String x:Key="Settings.DarkTheme">深色主題</sys:String>
+    <sys:String x:Key="Settings.ColorScheme.Taiwan">台灣（紅漲綠跌）</sys:String>
+    <sys:String x:Key="Settings.ColorScheme.International">國際（綠漲紅跌）</sys:String>
+    <sys:String x:Key="Settings.Section.Language">語言</sys:String>
+    <sys:String x:Key="Settings.PrimaryCurrency">主要貨幣</sys:String>
+    <sys:String x:Key="StatusBar.MarketOpen">盤中</sys:String>
+    <sys:String x:Key="StatusBar.MarketClosed">休市</sys:String>
 </ResourceDictionary>
