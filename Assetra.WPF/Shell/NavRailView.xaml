@@ -84,17 +84,6 @@
                     </Border>
                 </Grid>
 
-                <!--  Settings  -->
-                <RadioButton
-                    Content="{DynamicResource Nav.Settings}"
-                    GroupName="NavSections"
-                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Settings}"
-                    Style="{StaticResource NavRailBtn}"
-                    Tag="&#xE713;">
-                    <RadioButton.ToolTip>
-                        <ToolTip Content="{DynamicResource Nav.Settings}" Style="{DynamicResource NavRailToolTip}" />
-                    </RadioButton.ToolTip>
-                </RadioButton>
 
             </StackPanel>
 
