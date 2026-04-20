@@ -162,11 +162,36 @@ internal static class AppBootstrapper
         services.AddSingleton<NavRailViewModel>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<StatusBarViewModel>();
-        services.AddSingleton<PortfolioViewModel>();
+        services.AddSingleton<PortfolioViewModel>(sp => new PortfolioViewModel(
+            new PortfolioRepositories(
+                sp.GetRequiredService<IPortfolioRepository>(),
+                sp.GetRequiredService<IPortfolioSnapshotRepository>(),
+                sp.GetRequiredService<IPortfolioPositionLogRepository>(),
+                sp.GetRequiredService<ITradeRepository>(),
+                sp.GetRequiredService<IAssetRepository>()),
+            new PortfolioServices(
+                sp.GetRequiredService<IStockService>(),
+                sp.GetRequiredService<IStockSearchService>(),
+                sp.GetRequiredService<PortfolioSnapshotService>(),
+                sp.GetRequiredService<PortfolioBackfillService>(),
+                sp.GetRequiredService<IStockHistoryProvider>(),
+                sp.GetRequiredService<ICurrencyService>(),
+                sp.GetRequiredService<ICryptoService>(),
+                sp.GetRequiredService<ITransactionService>(),
+                sp.GetRequiredService<IBalanceQueryService>(),
+                sp.GetRequiredService<IPositionQueryService>()),
+            new PortfolioUiServices(
+                System.Reactive.Concurrency.DefaultScheduler.Instance,
+                sp.GetService<IThemeService>(),
+                sp.GetRequiredService<IAppSettingsService>(),
+                sp.GetRequiredService<ISnackbarService>())));
         services.AddSingleton<AllocationViewModel>(sp => new AllocationViewModel(
             sp.GetRequiredService<PortfolioViewModel>(),
             sp.GetRequiredService<IAppSettingsService>()));
-        services.AddSingleton<FinancialOverviewViewModel>();
+        services.AddSingleton<FinancialOverviewViewModel>(sp => new FinancialOverviewViewModel(
+            sp.GetRequiredService<IAssetRepository>(),
+            sp.GetRequiredService<IBalanceQueryService>(),
+            sp.GetRequiredService<PortfolioViewModel>()));
         services.AddSingleton<AlertsViewModel>();
         services.AddSingleton<SettingsViewModel>();
         // Singleton: CLAUDE.md mandates all VMs be singletons; Reset() is called on dialog open.
