@@ -1,0 +1,71 @@
+<Window
+    x:Class="Assetra.WPF.Shell.SplashScreen"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Assetra"
+    Width="320"
+    Height="260"
+    AllowsTransparency="True"
+    Background="Transparent"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterScreen"
+    WindowStyle="None">
+
+    <Border
+        Background="{DynamicResource AppBackground}"
+        BorderBrush="{DynamicResource AppBorder}"
+        BorderThickness="1"
+        CornerRadius="12">
+        <StackPanel
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+
+            <!--  Logo — PNG placeholders to be added in Phase 7  -->
+            <Image
+                Width="72"
+                Height="72"
+                HorizontalAlignment="Center"
+                RenderOptions.BitmapScalingMode="HighQuality"
+                Source="pack://application:,,,/Assetra.WPF;component/Assets/assetra.ico" />
+
+            <!--  App name  -->
+            <TextBlock
+                Margin="0,14,0,0"
+                HorizontalAlignment="Center"
+                FontFamily="{StaticResource FontBase}"
+                FontSize="{StaticResource FontSizeXl}"
+                FontWeight="Bold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="Assetra" />
+
+            <!--  Tagline  -->
+            <TextBlock
+                Margin="0,4,0,0"
+                HorizontalAlignment="Center"
+                FontFamily="{StaticResource FontBase}"
+                FontSize="{StaticResource FontSizeSm}"
+                Foreground="{DynamicResource AppTextMuted}"
+                Text="{DynamicResource About.Description}" />
+
+            <!--  Progress bar  -->
+            <ProgressBar
+                x:Name="LoadingBar"
+                Width="200"
+                Height="4"
+                Margin="0,18,0,0"
+                HorizontalAlignment="Center"
+                Maximum="100"
+                Minimum="0"
+                Value="0" />
+
+            <!--  Status text  -->
+            <TextBlock
+                x:Name="StatusText"
+                Margin="0,8,0,0"
+                HorizontalAlignment="Center"
+                FontFamily="{StaticResource FontBase}"
+                FontSize="{StaticResource FontSizeXs}"
+                Foreground="{DynamicResource AppTextMuted}" />
+        </StackPanel>
+    </Border>
+</Window>

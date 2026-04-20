@@ -1,0 +1,103 @@
+<UserControl
+    x:Class="Assetra.WPF.Shell.NavRailView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="clr-namespace:Assetra.WPF.Infrastructure.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Shell"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:MainViewModel},
+                                     IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <!--
+        NavRailView — icon-only navigation rail (44 px).
+        DataContext = MainViewModel (set by MainWindow).
+    -->
+    <Border
+        x:Name="NavRailBorder"
+        Width="44"
+        Background="{DynamicResource AppSurface}"
+        BorderBrush="{DynamicResource AppBorder}"
+        BorderThickness="0,0,1,0">
+        <DockPanel ClipToBounds="True">
+
+            <!--  ── Top spacer ──  -->
+            <Border Height="6" DockPanel.Dock="Top" />
+
+            <!--  ── Main section buttons ──  -->
+            <StackPanel>
+                <!--  Portfolio  -->
+                <RadioButton
+                    Content="{DynamicResource Nav.Portfolio}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Portfolio}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE8D7;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource Nav.Portfolio}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
+                <!--  FinancialOverview (Allocation Treemap + 再平衡 + 財務總覽)  -->
+                <RadioButton
+                    Content="{DynamicResource FinancialOverview.Nav.Label}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=FinancialOverview}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE81E;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource FinancialOverview.Nav.Label}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
+                <!--  警示 with triggered-count badge  -->
+                <Grid>
+                    <RadioButton
+                        Content="{DynamicResource Nav.Alerts}"
+                        GroupName="NavSections"
+                        IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Alerts}"
+                        Style="{StaticResource NavRailBtn}"
+                        Tag="&#xEA8F;">
+                        <RadioButton.ToolTip>
+                            <ToolTip Content="{DynamicResource Nav.Alerts.Tooltip}" Style="{DynamicResource NavRailToolTip}" />
+                        </RadioButton.ToolTip>
+                    </RadioButton>
+                    <Border
+                        Width="16"
+                        Height="16"
+                        Margin="14,4,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Background="{DynamicResource AppDown}"
+                        CornerRadius="8"
+                        IsHitTestVisible="False"
+                        Visibility="{Binding Alerts.HasTriggeredAlerts, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource FontTabular}"
+                            FontSize="8"
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource AppTextOnAccent}"
+                            Text="{Binding Alerts.TriggeredBadge}" />
+                    </Border>
+                </Grid>
+
+                <!--  Settings  -->
+                <RadioButton
+                    Content="{DynamicResource Nav.Settings}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Settings}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE713;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource Nav.Settings}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
+            </StackPanel>
+
+        </DockPanel>
+    </Border>
+</UserControl>

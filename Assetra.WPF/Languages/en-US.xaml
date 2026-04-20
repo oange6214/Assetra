@@ -1,0 +1,757 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!--  App  -->
+    <sys:String x:Key="App.Title">Assetra</sys:String>
+
+    <!--  Splash  -->
+    <sys:String x:Key="Splash.Init">Initializing…</sys:String>
+    <sys:String x:Key="Splash.Services">Starting data services…</sys:String>
+    <sys:String x:Key="Splash.Watchlist">Loading watchlist…</sys:String>
+    <sys:String x:Key="Splash.Portfolio">Loading portfolio…</sys:String>
+    <sys:String x:Key="Splash.Alerts">Loading alerts…</sys:String>
+    <sys:String x:Key="Splash.News">Loading market news…</sys:String>
+
+    <!--  Navigation  -->
+            <sys:String x:Key="TitleBar.Search.Hint">Type a stock symbol or name to search</sys:String>
+    <sys:String x:Key="TitleBar.Search.Placeholder">Search stocks...</sys:String>
+    <sys:String x:Key="Nav.Watchlist">Watchlist</sys:String>
+    <sys:String x:Key="Nav.Screener">Screener</sys:String>
+    <sys:String x:Key="Nav.AssetManagement.Short">Assets</sys:String>
+    <sys:String x:Key="Nav.AssetManagement.Full">Asset Management</sys:String>
+        <sys:String x:Key="Nav.Screener.Tooltip">Stock screener</sys:String>
+        <sys:String x:Key="Nav.MarketInfo">Market</sys:String>
+    <sys:String x:Key="Nav.MarketInfo.Tooltip">Market info</sys:String>
+    <sys:String x:Key="MarketInfo.Tab.News">News</sys:String>
+    <sys:String x:Key="MarketInfo.Tab.Flash">Flash</sys:String>
+    <sys:String x:Key="Nav.Alerts">Alerts</sys:String>
+    <sys:String x:Key="Nav.Alerts.Tooltip">Price Alerts</sys:String>
+    <sys:String x:Key="Nav.AiChat">AI Chat</sys:String>
+    <sys:String x:Key="Nav.Settings">Settings</sys:String>
+    <sys:String x:Key="Nav.GoBack">Go back</sys:String>
+    <sys:String x:Key="Nav.GoForward">Go forward</sys:String>
+
+    <!--  Menu  -->
+    <sys:String x:Key="About.Title">About Assetra</sys:String>
+    <sys:String x:Key="About.Description">Taiwan Stock Real-time Dashboard</sys:String>
+    <sys:String x:Key="About.Version">Version {0}</sys:String>
+    <sys:String x:Key="About.Copyright">© 2026 Assetra. All rights reserved.</sys:String>
+    <sys:String x:Key="About.Close">Close</sys:String>
+
+    <!--  Auth  -->
+
+    <!--  Common  -->
+    <sys:String x:Key="Common.Symbol">Symbol</sys:String>
+    <sys:String x:Key="Common.Name">Name</sys:String>
+    <sys:String x:Key="Common.Asset">Asset</sys:String>
+    <sys:String x:Key="Common.Price">Price</sys:String>
+    <sys:String x:Key="Common.Cancel">Cancel</sys:String>
+    <sys:String x:Key="Common.Save">Save</sys:String>
+    <sys:String x:Key="Common.CreatedDate">Created</sys:String>
+    <sys:String x:Key="Common.Confirm">Confirm</sys:String>
+
+    <!--  Severity  -->
+    <sys:String x:Key="Severity.Normal">Normal</sys:String>
+    <sys:String x:Key="Severity.Breaking">Breaking</sys:String>
+
+    <!--  StatusBar  -->
+    <sys:String x:Key="StatusBar.Taiex">Taiex</sys:String>
+    <sys:String x:Key="StatusBar.AlertsTooltip">Click to review triggered alerts</sys:String>
+    <sys:String x:Key="StatusBar.AlertsPopupTitle">Triggered Alerts</sys:String>
+    <sys:String x:Key="StatusBar.AlertsCurrentPrice"> · Current </sys:String>
+    <sys:String x:Key="StatusBar.AlertsViewAll">View all →</sys:String>
+    <sys:String x:Key="StatusBar.Volume">Vol</sys:String>
+    <sys:String x:Key="StatusBar.Futures">TXF</sys:String>
+    <sys:String x:Key="StatusBar.Connecting">Connecting...</sys:String>
+    <sys:String x:Key="StatusBar.Connected">Connected · Last updated {0}</sys:String>
+    <sys:String x:Key="StatusBar.VolumeUnit">B</sys:String>
+
+    <!--  Watchlist  -->
+    <sys:String x:Key="Watchlist.Heatmap.Title">Today's Heatmap</sys:String>
+    <sys:String x:Key="Watchlist.Heatmap.Subtitle">Tile size = volume; color = today's % change; click a tile to open its chart</sys:String>
+    <sys:String x:Key="Watchlist.Heatmap.Toggle">Toggle heatmap / chart view</sys:String>
+    <sys:String x:Key="Watchlist.AddStock">＋ Add stock</sys:String>
+    <sys:String x:Key="Watchlist.Change">Change</sys:String>
+    <sys:String x:Key="Watchlist.ChangePercent">Change%</sys:String>
+    <sys:String x:Key="Watchlist.Volume">Volume</sys:String>
+    <sys:String x:Key="Watchlist.Empty">No stocks yet</sys:String>
+    <sys:String x:Key="Watchlist.EmptySubtitle">Click ＋ below to add</sys:String>
+    <sys:String x:Key="Watchlist.SelectFromList">Select a stock from the list</sys:String>
+    <sys:String x:Key="Watchlist.Remove">Remove</sys:String>
+    <sys:String x:Key="Watchlist.Mode.List">List</sys:String>
+    <sys:String x:Key="Watchlist.Mode.Analysis">Analysis</sys:String>
+    <sys:String x:Key="Watchlist.Mode.Heatmap">Heatmap</sys:String>
+
+    <!--  Analysis  -->
+    <sys:String x:Key="Analysis.ReturnToList">Back to list</sys:String>
+    <sys:String x:Key="Analysis.ComingSoon">Coming soon</sys:String>
+    <sys:String x:Key="Analysis.Tab.Overview">Overview</sys:String>
+    <sys:String x:Key="Analysis.Tab.Technical">Technical</sys:String>
+    <sys:String x:Key="Analysis.Tab.Fundamentals">Fundamentals</sys:String>
+    <sys:String x:Key="Analysis.Tab.Chips">Chips</sys:String>
+    <sys:String x:Key="Analysis.Tab.Financials">Financials</sys:String>
+    <sys:String x:Key="Analysis.Tab.News">News</sys:String>
+    <sys:String x:Key="Analysis.Tab.Ai">AI Analysis</sys:String>
+
+    <!--  Analysis — Technical tab  -->
+    <sys:String x:Key="Analysis.Technical.OverallScore">Technical composite score</sys:String>
+    <sys:String x:Key="Analysis.Technical.Signal.Bullish">Bullish</sys:String>
+    <sys:String x:Key="Analysis.Technical.Signal.Bearish">Bearish</sys:String>
+    <sys:String x:Key="Analysis.Technical.Signal.Neutral">Neutral</sys:String>
+    <sys:String x:Key="Analysis.Technical.Rsi">RSI (14)</sys:String>
+    <sys:String x:Key="Analysis.Technical.Rsi.Overbought">Overbought</sys:String>
+    <sys:String x:Key="Analysis.Technical.Rsi.Oversold">Oversold</sys:String>
+    <sys:String x:Key="Analysis.Technical.Rsi.Neutral">Neutral</sys:String>
+    <sys:String x:Key="Analysis.Technical.Kd">KD</sys:String>
+    <sys:String x:Key="Analysis.Technical.Macd">MACD</sys:String>
+    <sys:String x:Key="Analysis.Technical.Cross.Golden">Golden cross</sys:String>
+    <sys:String x:Key="Analysis.Technical.Cross.Death">Death cross</sys:String>
+    <sys:String x:Key="Analysis.Technical.Cross.None">No signal</sys:String>
+    <sys:String x:Key="Analysis.Technical.Ma">Moving averages</sys:String>
+    <sys:String x:Key="Analysis.Technical.Ma.Bullish">Bullish alignment</sys:String>
+    <sys:String x:Key="Analysis.Technical.Ma.Bearish">Bearish alignment</sys:String>
+    <sys:String x:Key="Analysis.Technical.Ma.Tangled">Tangled</sys:String>
+    <sys:String x:Key="Analysis.Technical.BollingerPosition">Bollinger position</sys:String>
+    <sys:String x:Key="Analysis.Technical.BollingerPositionDesc">0% at lower band, 100% at upper band</sys:String>
+    <sys:String x:Key="Analysis.Technical.SupportResistance">Support / Resistance</sys:String>
+    <sys:String x:Key="Analysis.Technical.Support">Support</sys:String>
+    <sys:String x:Key="Analysis.Technical.Resistance">Resistance</sys:String>
+
+    <!--  Analysis — Fundamentals tab  -->
+    <sys:String x:Key="Analysis.Fundamentals.PeRatio">P/E (TTM)</sys:String>
+    <sys:String x:Key="Analysis.Fundamentals.GrossMargin">Gross margin</sys:String>
+    <sys:String x:Key="Analysis.Fundamentals.OperatingMargin">Operating margin</sys:String>
+    <sys:String x:Key="Analysis.Fundamentals.NetMargin">Net margin</sys:String>
+    <sys:String x:Key="Analysis.Fundamentals.RevenueYoy">Revenue YoY</sys:String>
+    <sys:String x:Key="Analysis.Fundamentals.EpsHistory">Quarterly EPS (last 8)</sys:String>
+    <sys:String x:Key="Analysis.Fundamentals.RevenueHistory">Quarterly revenue (100M NT$, last 8)</sys:String>
+
+    <!--  Analysis — Chips tab  -->
+    <sys:String x:Key="Analysis.Chips.TotalNet30d">Institutional 30d net buy/sell</sys:String>
+    <sys:String x:Key="Analysis.Chips.LatestMargin">Margin balance (latest)</sys:String>
+    <sys:String x:Key="Analysis.Chips.MarginChange30d">Margin balance 30d change</sys:String>
+    <sys:String x:Key="Analysis.Chips.InstitutionalChart">Institutional daily net (lots)</sys:String>
+    <sys:String x:Key="Analysis.Chips.MarginChart">Margin balance trend (lots)</sys:String>
+
+    <!--  Analysis — Financials tab  -->
+    <sys:String x:Key="Analysis.Financials.IncomeStatement">Income Statement</sys:String>
+    <sys:String x:Key="Analysis.Financials.BalanceSheet">Balance Sheet</sys:String>
+    <sys:String x:Key="Analysis.Financials.CashFlow">Cash Flow</sys:String>
+    <sys:String x:Key="Analysis.Financials.Item">Item</sys:String>
+    <sys:String x:Key="Analysis.Financials.UnitHint">Amounts in NT$ millions; EPS in NT$/share</sys:String>
+    <sys:String x:Key="Analysis.Financials.Row.Revenue">Revenue</sys:String>
+    <sys:String x:Key="Analysis.Financials.Row.GrossProfit">Gross profit</sys:String>
+    <sys:String x:Key="Analysis.Financials.Row.OperatingIncome">Operating income</sys:String>
+    <sys:String x:Key="Analysis.Financials.Row.NetIncome">Net income</sys:String>
+    <sys:String x:Key="Analysis.Financials.Row.Eps">EPS</sys:String>
+    <sys:String x:Key="Analysis.Financials.Row.TotalAssets">Total assets</sys:String>
+    <sys:String x:Key="Analysis.Financials.Row.TotalLiabilities">Total liabilities</sys:String>
+    <sys:String x:Key="Analysis.Financials.Row.Equity">Equity (parent)</sys:String>
+    <sys:String x:Key="Analysis.Financials.Row.CfOperating">Operating cash flow</sys:String>
+    <sys:String x:Key="Analysis.Financials.Row.CfInvesting">Investing cash flow</sys:String>
+    <sys:String x:Key="Analysis.Financials.Row.CfFinancing">Financing cash flow</sys:String>
+
+    <!--  Analysis — News tab  -->
+    <sys:String x:Key="Analysis.News.Title">Related News</sys:String>
+    <sys:String x:Key="Analysis.News.Loading">Loading…</sys:String>
+    <sys:String x:Key="Analysis.News.Empty">No related news found</sys:String>
+
+    <!--  Analysis — AI tab  -->
+    <sys:String x:Key="Analysis.Ai.Title">AI Analysis</sys:String>
+    <sys:String x:Key="Analysis.Ai.Subtitle">Structured report combining technical, fundamentals, chips, and news</sys:String>
+    <sys:String x:Key="Analysis.Ai.Generate">Generate</sys:String>
+    <sys:String x:Key="Analysis.Ai.Regenerate">Regenerate</sys:String>
+    <sys:String x:Key="Analysis.Ai.Generating">AI is analyzing…</sys:String>
+    <sys:String x:Key="Analysis.Ai.EmptyHint">Click Generate to start — will use the AI Provider configured in Settings, against the currently loaded data</sys:String>
+    <sys:String x:Key="Analysis.Ai.ErrorTitle">Generation failed</sys:String>
+    <sys:String x:Key="Analysis.Ai.Disclaimer">※ Generated by AI from live data. For reference only, not investment advice. Assess risk yourself before trading.</sys:String>
+
+    <!--  Portfolio  -->
+    <sys:String x:Key="Portfolio.PnL">Net P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.PnL.NetTooltip">Net P&amp;L = Net Value − Cost = (Market Value − est. sell fees) − Cost&#x0a;• Est. sell fees = commission + securities tax (ETF 0.1% / Stock 0.3%)&#x0a;• Cost includes the buy-side commission actually paid&#x0a;Matches the Net Value column on the same row.</sys:String>
+    <sys:String x:Key="Portfolio.History.MarketValue">Market value</sys:String>
+    <sys:String x:Key="Portfolio.Symbol">Symbol</sys:String>
+    <sys:String x:Key="Portfolio.Shares">Qty</sys:String>
+    <sys:String x:Key="Portfolio.CostPerShare">Avg Cost</sys:String>
+    <sys:String x:Key="Portfolio.EditCostPerShareHint">Cost per unit including buy commission. For averaged positions, enter the weighted average cost.</sys:String>
+    <sys:String x:Key="Portfolio.Price">Price</sys:String>
+    <sys:String x:Key="Portfolio.PnLPct">Net P&amp;L %</sys:String>
+    <sys:String x:Key="Portfolio.MarketVal">Mkt val</sys:String>
+    <sys:String x:Key="Portfolio.NetVal">Net val</sys:String>
+    <sys:String x:Key="Portfolio.PercentOfPortfolio">Weight</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Action.Buy">Buy</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Action.Sell">Sell</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Action.Dividend">Dividend</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Action.Edit">Edit</sys:String>
+    <sys:String x:Key="Portfolio.NetVal.Tooltip">Net Value = Market Value − est. sell commission − securities tax&#x0a;Tax rate by asset: ETF 0.1% / Stock 0.3%&#x0a;Represents the actual cash received if sold at current price.</sys:String>
+    <sys:String x:Key="Portfolio.Cancel">Cancel edit</sys:String>
+    <sys:String x:Key="Portfolio.Empty">No positions — click "+ New" to add</sys:String>
+    <sys:String x:Key="Portfolio.Filter.SearchPositions">Search symbol or name…</sys:String>
+    <sys:String x:Key="Portfolio.Filter.SearchAccounts">Search accounts…</sys:String>
+    <sys:String x:Key="Portfolio.Filter.SearchLiabilities">Search liabilities…</sys:String>
+    <sys:String x:Key="Portfolio.Filter.SearchTrades">Search trades…</sys:String>
+    <sys:String x:Key="Portfolio.TotalCostPaid">Total Cost</sys:String>
+    <sys:String x:Key="Portfolio.SellConfirmLabel">Sell price</sys:String>
+    <sys:String x:Key="Portfolio.SellConfirm">Confirm Sell</sys:String>
+<!-- Portfolio.TradeHistory.RealizedPnL / PnLPct removed — see zh-TW for note. -->
+    <sys:String x:Key="Portfolio.TradeHistory.Date">Date</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Type">Type</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.UnitPrice">Unit Price</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Total">Total</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Commission">Commission</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.GrossAmount">Gross Amount</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Empty">No trades recorded yet</sys:String>
+    <sys:String x:Key="Portfolio.Confirm.Title">Confirm</sys:String>
+    <sys:String x:Key="Portfolio.Confirm.Delete">Delete</sys:String>
+    <sys:String x:Key="Portfolio.Confirm.DeleteTrade">Delete this trade? This cannot be undone.</sys:String>
+    <sys:String x:Key="Portfolio.Confirm.DeleteAccount">Delete this account? This cannot be undone.</sys:String>
+    <sys:String x:Key="Portfolio.Confirm.ArchiveAccount">Archive this account? (Balance and trade history are preserved)</sys:String>
+    <sys:String x:Key="Portfolio.Account.HasReferencesError">Cannot delete: {0} trade(s) reference this account</sys:String>
+    <sys:String x:Key="Portfolio.Account.ViewReferences">View referenced trades</sys:String>
+    <sys:String x:Key="Portfolio.TradeCount.Unit">items</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CommissionDiscount">Commission discount</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CommissionDiscountHint">0.1–1.0 (1.0 = full, 0.6 = 40% off)</sys:String>
+    <sys:String x:Key="Portfolio.Tab.Overview">Dashboard</sys:String>
+    <sys:String x:Key="Portfolio.History.Title">History</sys:String>
+    <sys:String x:Key="Portfolio.Tab.Positions">Investments</sys:String>
+    <sys:String x:Key="Portfolio.Tab.Cash">Accounts</sys:String>
+    <sys:String x:Key="Portfolio.Tab.Liability">Liabilities</sys:String>
+    <sys:String x:Key="Portfolio.Tab.Allocation">Allocation Analysis</sys:String>
+    <sys:String x:Key="Portfolio.Tab.Trades">Trade History</sys:String>
+    <sys:String x:Key="Portfolio.Liability.TotalRemaining">Remaining</sys:String>
+    <sys:String x:Key="Portfolio.Liability.PaidPercent">Paid</sys:String>
+    <sys:String x:Key="Portfolio.Liability.TotalLoan">Total Loan</sys:String>
+    <sys:String x:Key="Portfolio.Liability.DebtRatio">Debt Ratio</sys:String>
+    <sys:String x:Key="Portfolio.Liability.LeverageRatio">Leverage</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Health.Label">Leverage Health</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Health.Healthy">Healthy</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Health.Warning">Caution</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Health.Danger">Danger</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Health.Tooltip">Debt ratio thresholds:&#x0a;　• Healthy &lt; 30%&#x0a;　• Caution 30% ~ 50%&#x0a;　• Danger ≥ 50%</sys:String>
+    <sys:String x:Key="Portfolio.DayChange">Day P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.AddNew">Transaction</sys:String>
+    <sys:String x:Key="Portfolio.AddCash">Account</sys:String>
+    <sys:String x:Key="Portfolio.AddLiability">Liability</sys:String>
+    <sys:String x:Key="Portfolio.Cash.AddHint">Once created, add a "Deposit" entry in Trade History to record the amount. Deposits and withdrawals accumulate automatically.</sys:String>
+    <sys:String x:Key="Portfolio.TotalAssets">Total Assets</sys:String>
+    <sys:String x:Key="Portfolio.Header.NetWorth">Net Worth</sys:String>
+    <sys:String x:Key="Portfolio.Header.DailyPnL">Daily P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.Header.MarketValue">Market Value</sys:String>
+    <sys:String x:Key="Portfolio.Header.Cash">Cash</sys:String>
+    <sys:String x:Key="Portfolio.Header.Liabilities">Liabilities</sys:String>
+    <sys:String x:Key="Portfolio.Allocation.Empty">No asset data available</sys:String>
+    <sys:String x:Key="Portfolio.Pagination.JumpTo">Page:</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AllAssets">All Assets</sys:String>
+    <sys:String x:Key="Portfolio.Filter.DateRangePlaceholder">Select date range</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetsCountUnit">assets</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Category.Investment">Investment</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Category.Cash">Cash</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Category.Liability">Liability</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Empty">No accounts — click "+ New" to add one</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Name">Account name</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Amount">Balance</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Default">Default</sys:String>
+    <sys:String x:Key="Portfolio.Cash.SetDefault">Set as Default</sys:String>
+    <sys:String x:Key="Portfolio.Cash.UnsetDefault">Remove Default</sys:String>
+    <sys:String x:Key="Portfolio.Cash.DefaultHint">Auto-selected in new transactions</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Emergency.Title">Emergency Fund</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Emergency.Months">months</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Emergency.MonthlyExpense">Monthly expenses</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Emergency.MonthlyExpenseHint">Enter to calculate runway</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Emergency.Safe">Safe</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Emergency.Warning">Caution</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Emergency.Danger">Danger</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Emergency.NotSet">Set monthly expenses to calculate emergency runway</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Empty">No loans yet. Add one via New Transaction → Borrow.</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Name">Liability name</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Amount">Remaining balance</sys:String>
+    <sys:String x:Key="Portfolio.Liability.OriginalAmount">Total loan amount</sys:String>
+    <sys:String x:Key="Portfolio.Liability.AddHint">Once created, add a "Borrow" entry in Trade History to record the amount. Repayment progress accumulates automatically.</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Overview">Overview</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Trades">Transactions</sys:String>
+    <sys:String x:Key="Portfolio.Detail.TotalDeposits">Total deposits</sys:String>
+    <sys:String x:Key="Portfolio.Detail.TotalWithdrawals">Total withdrawals</sys:String>
+    <sys:String x:Key="Portfolio.Detail.TotalBorrows">Total borrowed</sys:String>
+    <sys:String x:Key="Portfolio.Detail.RemainingDebt">Remaining debt</sys:String>
+    <sys:String x:Key="Common.MarketValue">Market value</sys:String>
+    <sys:String x:Key="Common.TotalPnL">Net P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Subtitle">View performance metrics, transactions, and manage your asset details.</sys:String>
+    <sys:String x:Key="Portfolio.Detail.PriceAvg">Price / Avg cost</sys:String>
+    <sys:String x:Key="Portfolio.Detail.AvgPrice">Avg cost</sys:String>
+    <sys:String x:Key="Portfolio.Detail.TradeAvgPrice">Trade avg</sys:String>
+    <sys:String x:Key="Portfolio.Detail.CostAvgPrice">Cost avg</sys:String>
+    <sys:String x:Key="Portfolio.Trade.NetCash">Net cash</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Holdings">Holdings</sys:String>
+    <sys:String x:Key="Portfolio.Detail.MarketValueCost">Net / Market / Cost</sys:String>
+    <sys:String x:Key="Portfolio.Detail.MarketValue">Market val</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Cost">Cost</sys:String>
+    <sys:String x:Key="Portfolio.Detail.RealizedPnL">Realized P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.Detail.TotalRealized">Total realized (Dividends + Capital)</sys:String>
+    <sys:String x:Key="Portfolio.Detail.CapitalGain">Capital gain</sys:String>
+    <sys:String x:Key="Portfolio.Detail.DividendIncome">Dividend income</sys:String>
+    <sys:String x:Key="Portfolio.Detail.DeleteAsset">Delete asset</sys:String>
+    <sys:String x:Key="Portfolio.Detail.DangerZone">Danger zone</sys:String>
+    <sys:String x:Key="Portfolio.Detail.DeleteAccount">Delete account</sys:String>
+    <sys:String x:Key="Portfolio.Detail.DeleteLiability">Delete liability</sys:String>
+    <sys:String x:Key="Portfolio.Detail.DeleteWarning">This cannot be undone. Please confirm before proceeding.</sys:String>
+    <sys:String x:Key="Portfolio.Detail.NoTrades">No related transactions</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.TypeStock">Stock / ETF</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.TypeFund">Fund</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.TypeMetal">Precious Metal</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.TypeBond">Bond</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.TypeCrypto">Crypto</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.TypeCash">Account</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.TypeLiability">Liability</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.AddName">Name</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.AddCost">Purchase Cost</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.CryptoSymbol">Symbol (e.g. BTC, ETH)</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.CryptoQty">Quantity held</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.CryptoPrice">Purchase price per unit (TWD)</sys:String>
+    <sys:String x:Key="Portfolio.AssetType">Type</sys:String>
+    <sys:String x:Key="Portfolio.AssetType.Stock">Stock / ETF</sys:String>
+    <sys:String x:Key="Portfolio.AssetType.Fund">Fund</sys:String>
+    <sys:String x:Key="Portfolio.AssetType.Metal">Precious Metal</sys:String>
+    <sys:String x:Key="Portfolio.AssetType.Bond">Bond</sys:String>
+    <sys:String x:Key="Portfolio.AssetType.Crypto">Crypto</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Buy">Buy</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Sell">Sell</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Income">Income</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Dividend">Dividend</sys:String>
+
+
+    <sys:String x:Key="Portfolio.Tx.Title">Add Transaction</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Income">Income</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CashDiv">Cash Dividend</sys:String>
+    <sys:String x:Key="Portfolio.Tx.StockDiv">Stock Dividend</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Date">Date</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Amount">Amount (TWD)</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Note">Description</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CashAccount">Account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.NoCashLink">No Linkage</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Stock">Stock</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DivPerShare">Dividend / Share</sys:String>
+    <sys:String x:Key="Portfolio.Tx.HeldShares">Shares Held</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DivTotal">Total</sys:String>
+    <sys:String x:Key="Portfolio.Tx.NewShares">New Shares</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Confirm">Confirm</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Save">Save</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Delete">Delete</sys:String>
+
+    <sys:String x:Key="Portfolio.Sell.CashAccount">Deposit Into</sys:String>
+    <sys:String x:Key="Portfolio.Sell.NoCashLink">No Linkage</sys:String>
+    <sys:String x:Key="Portfolio.AddPrice">Price / Share</sys:String>
+    <sys:String x:Key="Portfolio.AddQuantity">Quantity (shares)</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.Buy">Buy</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.Sell">Sell</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.Income">Income</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.CashDividend">Cash Dividend</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.StockDividend">Stock Dividend</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.Deposit">Deposit</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.Withdrawal">Withdrawal</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.LoanBorrow">Borrow</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.LoanRepay">Repay</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.Transfer">Transfer</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferSourceAccount">Source account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferSourceAmount">Send amount</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferTargetAccount">Destination account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferTargetAmount">Receive amount</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferImpliedRate">Implied rate</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Deposit">Deposit</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Withdrawal">Withdrawal</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Transfer">Transfer</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Loan">Loans</sys:String>
+    <sys:String x:Key="Portfolio.Filter.LoanBorrow">Borrow</sys:String>
+    <sys:String x:Key="Portfolio.Filter.LoanRepay">Repay</sys:String>
+    <sys:String x:Key="Portfolio.Filter.CashDividend">Cash Div</sys:String>
+    <sys:String x:Key="Portfolio.Filter.StockDividend">Stock Div</sys:String>
+    <sys:String x:Key="Portfolio.Filter.TypesCountUnit">types</sys:String>
+    <sys:String x:Key="Portfolio.Filter.PopupSearch">Search…</sys:String>
+    <sys:String x:Key="Portfolio.Filter.ClearInPopup">Clear filters</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AllTypes">All Types</sys:String>
+    <sys:String x:Key="Portfolio.Tx.LoanLabel">Loan name</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Principal">Principal (repayment)</sys:String>
+    <sys:String x:Key="Portfolio.Tx.InterestPaid">Interest paid</sys:String>
+    <sys:String x:Key="Portfolio.Tx.LoanRepayTotalHint">Total repayment = principal + interest; the sum will be deducted from the account.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.LoanCashAccount">Select account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.LoanCashAccountHint">Borrow credits this account; Repay deducts from it. Any fee you entered is also deducted from the same account.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.WillCreateNew">(Typing a new name creates a new account)</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Fee">Fee (optional)</sys:String>
+    <sys:String x:Key="Portfolio.Tx.FeeOverrideHint">When provided, overrides the auto-calculated fee. Leave blank to use "discount × standard rate".</sys:String>
+    <sys:String x:Key="Portfolio.Tx.BuyMode">Buy mode</sys:String>
+    <sys:String x:Key="Portfolio.Tx.BuyModeFull">With trade</sys:String>
+    <sys:String x:Key="Portfolio.Tx.BuyModeMetaOnly">Register only</sys:String>
+    <sys:String x:Key="Portfolio.Tx.PriceMode">Price input mode</sys:String>
+    <sys:String x:Key="Portfolio.Tx.PriceModeUnit">Unit price</sys:String>
+    <sys:String x:Key="Portfolio.Tx.PriceModeTotal">Total</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TotalAmount">Total amount</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Subtotal">Subtotal</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DivInputMode">Input mode</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DivModePerShare">Per share</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DivModeTotal">Total dividend</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DivTotalAmount">Total dividend amount</sys:String>
+    <sys:String x:Key="Portfolio.Tx.UseLoanCashAccount">Deduct from / deposit to account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.EditTitle">Edit Transaction</sys:String>
+    <sys:String x:Key="Portfolio.Tx.MetaOnlyHint">Only date and note can be changed for this trade. To correct amount or quantity, delete and re-create; stock positions can also be edited directly on the Investment tab.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Buy">Buy</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Sell">Sell</sys:String>
+    <sys:String x:Key="Portfolio.Tx.SellPosition">Select position</sys:String>
+    <sys:String x:Key="Portfolio.Tx.SellPrice">Sell price</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.Title">Edit Asset</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.Subtitle">Update asset details.</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.TypeLabel">Type</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.Symbol">Symbol</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.Currency">Currency</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.CurrencyHint">Ensure the currency matches what your broker uses for this account.</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.Update">Update</sys:String>
+    <sys:String x:Key="Portfolio.Account.Title">New Account</sys:String>
+    <sys:String x:Key="Portfolio.Account.Archive">Archive</sys:String>
+    <sys:String x:Key="Portfolio.Account.PermanentDelete">Permanent delete…</sys:String>
+    <sys:String x:Key="Portfolio.Account.ShowArchived">Show archived</sys:String>
+    <sys:String x:Key="Portfolio.Position.ShowArchived">Show archived</sys:String>
+    <sys:String x:Key="Portfolio.Position.HideEmpty">Hide empty</sys:String>
+    <sys:String x:Key="Portfolio.Position.Summary.MarketValue">Total Market Value</sys:String>
+    <sys:String x:Key="Portfolio.Position.Summary.TotalCost">Total Cost</sys:String>
+    <sys:String x:Key="Portfolio.Position.Summary.Pnl">Unrealized P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.Position.Summary.DayChange">Today's Change</sys:String>
+    <sys:String x:Key="Portfolio.Position.Summary.Loading">Loading quotes...</sys:String>
+    <sys:String x:Key="Portfolio.DivCalendar.Title">Dividend Calendar</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Clear">Clear Filters</sys:String>
+    <sys:String x:Key="Portfolio.Add.GrossAmount">Gross Amount</sys:String>
+    <sys:String x:Key="Portfolio.Add.Commission">Commission</sys:String>
+    <sys:String x:Key="Portfolio.Add.TotalCost">Total Cost</sys:String>
+    <sys:String x:Key="Portfolio.Add.CostPerShare">Cost / Share</sys:String>
+    <sys:String x:Key="Portfolio.Sell.EstPnL">Est. P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.Sell.GrossAmount">Gross Amount</sys:String>
+    <sys:String x:Key="Portfolio.Sell.Commission">Commission</sys:String>
+    <sys:String x:Key="Portfolio.Sell.TransactionTax">Sec. Tax</sys:String>
+    <sys:String x:Key="Portfolio.Sell.NetAmount">Net Proceeds</sys:String>
+    <sys:String x:Key="Portfolio.Sell.CostLabel">Cost</sys:String>
+    <sys:String x:Key="Settings.CurrencySection">Currency</sys:String>
+    <sys:String x:Key="Settings.Currency">Display Currency</sys:String>
+    <sys:String x:Key="Settings.Currency.Select">Display Currency</sys:String>
+    <sys:String x:Key="Settings.Currency.SelectDesc">Choose the unit for all displayed amounts</sys:String>
+    <sys:String x:Key="Settings.Currency.Rates">Exchange Rates</sys:String>
+    <sys:String x:Key="Settings.Currency.RatesDesc">Source: Frankfurter (auto-updated)</sys:String>
+    <sys:String x:Key="Settings.Currency.RefreshRates">Refresh</sys:String>
+    <sys:String x:Key="Settings.Currency.RefreshRatesTooltip">Fetch latest rates from Frankfurter</sys:String>
+
+    <!--  Screener  -->
+    <sys:String x:Key="Common.All">All</sys:String>
+
+    <!--  Strategy  -->
+    <sys:String x:Key="Strategy.TechnicalTab">Technical</sys:String>
+    <sys:String x:Key="Strategy.AiTab">AI Research</sys:String>
+    <sys:String x:Key="Strategy.CreateWithAi">＋ Build with AI</sys:String>
+    <sys:String x:Key="Strategy.StartScan">Start scan</sys:String>
+    <sys:String x:Key="Strategy.Scanning">Scanning…</sys:String>
+    <sys:String x:Key="Strategy.Watchlist">Watchlist</sys:String>
+    <sys:String x:Key="Strategy.AllMarket">All market</sys:String>
+    <sys:String x:Key="Strategy.AiParse">AI parse</sys:String>
+    <sys:String x:Key="Strategy.Parsing">Parsing…</sys:String>
+    <sys:String x:Key="Strategy.Placeholder">e.g. Find stocks with MACD golden cross and rising volume…</sys:String>
+    <sys:String x:Key="Strategy.ConditionLogic">Condition logic</sys:String>
+    <sys:String x:Key="Strategy.ConditionOr">OR (any)</sys:String>
+    <sys:String x:Key="Strategy.ConditionAnd">AND (all)</sys:String>
+    <sys:String x:Key="Strategy.CreateStrategy">Build strategy with AI</sys:String>
+    <sys:String x:Key="Strategy.Symbol">Symbol</sys:String>
+    <sys:String x:Key="Strategy.Result">Result</sys:String>
+    <sys:String x:Key="Strategy.Detail">Detail</sys:String>
+        <sys:String x:Key="Strategy.Preset.Title">Screener Presets</sys:String>
+    <sys:String x:Key="Strategy.Preset.Load">Load</sys:String>
+    <sys:String x:Key="Strategy.Preset.Save">Save</sys:String>
+    <sys:String x:Key="Strategy.Preset.Delete">Delete preset</sys:String>
+    <sys:String x:Key="Strategy.Preset.NamePlaceholder">Preset name...</sys:String>
+    <sys:String x:Key="Strategy.Preset.Saved">Saved "{0}"</sys:String>
+    <sys:String x:Key="Strategy.Preset.Loaded">Loaded "{0}"</sys:String>
+    <sys:String x:Key="Strategy.Preset.Deleted">Deleted "{0}"</sys:String>
+    <sys:String x:Key="Strategy.Preset.NoConditions">Add at least one condition first</sys:String>
+    <sys:String x:Key="Strategy.Preset.SaveFailed">Save failed, please try again</sys:String>
+<sys:String x:Key="Strategy.ScanHint">Select strategies on the left, then click "Start scan"</sys:String>
+    <sys:String x:Key="Strategy.WatchlistOnly">Watchlist only</sys:String>
+    <sys:String x:Key="Strategy.Tools">Tools:</sys:String>
+    <sys:String x:Key="Strategy.Name">Name</sys:String>
+    <sys:String x:Key="Strategy.Exchange">Market</sys:String>
+    <!--  Strategy Groups  -->
+    <sys:String x:Key="Strategy.Group.均線">Moving Avg</sys:String>
+    <sys:String x:Key="Strategy.Group.MACD">MACD</sys:String>
+    <sys:String x:Key="Strategy.Group.RSI">RSI</sys:String>
+    <sys:String x:Key="Strategy.Group.乖離">Deviation</sys:String>
+    <sys:String x:Key="Strategy.Group.量能">Volume</sys:String>
+    <sys:String x:Key="Strategy.Group.籌碼">Chip Flow</sys:String>
+    <sys:String x:Key="Strategy.Group.自訂策略">Custom</sys:String>
+    <!--  Strategy Items  -->
+    <sys:String x:Key="Strategy.Item.MA多頭排列">MA Uptrend</sys:String>
+    <sys:String x:Key="Strategy.Item.MA空頭排列">MA Downtrend</sys:String>
+    <sys:String x:Key="Strategy.Item.MA5穿越MA20">MA5 cross MA20</sys:String>
+    <sys:String x:Key="Strategy.Item.股價在MA20上方">Price above MA20</sys:String>
+    <sys:String x:Key="Strategy.Item.股價在MA20下方">Price below MA20</sys:String>
+    <sys:String x:Key="Strategy.Item.股價在MA60上方">Price above MA60</sys:String>
+    <sys:String x:Key="Strategy.Item.股價在MA60下方">Price below MA60</sys:String>
+    <sys:String x:Key="Strategy.Item.MACD金叉">MACD Golden Cross</sys:String>
+    <sys:String x:Key="Strategy.Item.MACD死叉">MACD Death Cross</sys:String>
+    <sys:String x:Key="Strategy.Item.RSI超賣(&lt;30)">RSI Oversold (&lt;30)</sys:String>
+    <sys:String x:Key="Strategy.Item.RSI超買(&gt;70)">RSI Overbought (&gt;70)</sys:String>
+    <sys:String x:Key="Strategy.Item.負乖離&gt;5%">Neg Dev &gt;5%</sys:String>
+    <sys:String x:Key="Strategy.Item.負乖離&gt;3%">Neg Dev &gt;3%</sys:String>
+    <sys:String x:Key="Strategy.Item.量增價漲">Vol Up + Price Up</sys:String>
+    <sys:String x:Key="Strategy.Item.連續3日上漲">3-day Rally</sys:String>
+    <sys:String x:Key="Strategy.Item.突破近60日高點">Break 60D High</sys:String>
+    <sys:String x:Key="Strategy.Item.強勢突破(3日漲幅&gt;8%)">Strong Rally &gt;8%</sys:String>
+    <sys:String x:Key="Strategy.Item.月K突破年線">Monthly &gt; Annual MA</sys:String>
+    <sys:String x:Key="Strategy.Item.三大法人連續買超">Institution Buying</sys:String>
+    <sys:String x:Key="Strategy.Item.融資餘額遞減">Margin Declining</sys:String>
+    <!--  Condition Builder  -->
+    <sys:String x:Key="Strategy.AddCondition">＋ Add Condition</sys:String>
+    <sys:String x:Key="Strategy.RemoveCondition">Remove</sys:String>
+    <sys:String x:Key="Strategy.CustomStrategies">Custom Strategies</sys:String>
+    <sys:String x:Key="Strategy.Validation.OutOfRange">Value must be between {0} and {1}</sys:String>
+    <sys:String x:Key="Strategy.Type.MA多頭排列">MA Bullish Alignment</sys:String>
+    <sys:String x:Key="Strategy.Type.MA空頭排列">MA Bearish Alignment</sys:String>
+    <sys:String x:Key="Strategy.Type.MA5穿越MA20">MA5 Cross Above MA20</sys:String>
+    <sys:String x:Key="Strategy.Type.股價在MA20上方">Price Above MA20</sys:String>
+    <sys:String x:Key="Strategy.Type.股價在MA20下方">Price Below MA20</sys:String>
+    <sys:String x:Key="Strategy.Type.股價在MA60上方">Price Above MA60</sys:String>
+    <sys:String x:Key="Strategy.Type.股價在MA60下方">Price Below MA60</sys:String>
+    <sys:String x:Key="Strategy.Type.MACD金叉">MACD Golden Cross</sys:String>
+    <sys:String x:Key="Strategy.Type.MACD死叉">MACD Death Cross</sys:String>
+    <sys:String x:Key="Strategy.Type.RSI">RSI</sys:String>
+    <sys:String x:Key="Strategy.Type.乖離率">Deviation Rate</sys:String>
+    <sys:String x:Key="Strategy.Type.量增價漲">Vol. Up + Price Up</sys:String>
+    <sys:String x:Key="Strategy.Type.連續3日上漲">3 Consecutive Up Days</sys:String>
+    <sys:String x:Key="Strategy.Type.突破近60日高點">60-Day High Breakout</sys:String>
+    <sys:String x:Key="Strategy.Type.3日漲幅">3-Day Return</sys:String>
+    <sys:String x:Key="Strategy.Type.成交值">Trade Value</sys:String>
+    <sys:String x:Key="Strategy.Type.月K突破年線">Monthly &gt; Annual MA</sys:String>
+    <sys:String x:Key="Strategy.Type.三大法人連續買超">Institution Buying</sys:String>
+    <sys:String x:Key="Strategy.Type.融資餘額遞減">Margin Declining</sys:String>
+    <sys:String x:Key="Strategy.NoResults">No stocks matched the condition</sys:String>
+    <sys:String x:Key="Strategy.AddToWatchlist">Add to Watchlist</sys:String>
+    <sys:String x:Key="Strategy.BuilderTitle">AI Strategy Builder</sys:String>
+    <sys:String x:Key="Strategy.BuilderConditionLabel">Describe your stock filter in natural language</sys:String>
+    <sys:String x:Key="Strategy.BuilderGenerate">Generate Code</sys:String>
+    <sys:String x:Key="Strategy.BuilderGenerating">Generating…</sys:String>
+    <sys:String x:Key="Strategy.BuilderCodeLabel">Generated Code (editable)</sys:String>
+    <sys:String x:Key="Strategy.BuilderSave">Save Strategy</sys:String>
+    <sys:String x:Key="Strategy.BuilderCompile">Test Compile</sys:String>
+    <sys:String x:Key="Strategy.BuilderNamePlaceholder">Name your strategy…</sys:String>
+    <sys:String x:Key="Strategy.BuilderSaveTemplate">Save Template</sys:String>
+    <sys:String x:Key="Strategy.BuilderTemplateName">Template name…</sys:String>
+    <sys:String x:Key="Strategy.ResearchPlaceholder">Describe your research — e.g. find stocks with 3 consecutive days of institutional buying above the annual MA…</sys:String>
+    <sys:String x:Key="Strategy.ResearchStart">Start Research</sys:String>
+    <sys:String x:Key="Strategy.ResearchStarting">Researching…</sys:String>
+    <sys:String x:Key="Strategy.Tool.Quote">Quote</sys:String>
+    <sys:String x:Key="Strategy.Tool.Chart">Chart</sys:String>
+    <sys:String x:Key="Strategy.Tool.News">News</sys:String>
+    <sys:String x:Key="Strategy.Tool.DevScan">Dev Scan</sys:String>
+    <sys:String x:Key="Strategy.Tool.Watchlist">Watchlist</sys:String>
+    <sys:String x:Key="Strategy.Step.StockResearch">Query Stock Quote</sys:String>
+    <sys:String x:Key="Strategy.Step.ChartAnalysis">Analyze Technical Indicators</sys:String>
+    <sys:String x:Key="Strategy.Step.NewsSummary">Fetch Latest News</sys:String>
+    <sys:String x:Key="Strategy.Step.Screener">Strategy Screener</sys:String>
+    <sys:String x:Key="Strategy.Step.AddToWatchlist">Manage Watchlist</sys:String>
+    <sys:String x:Key="Strategy.Step.DeviationScan">Deviation Scan</sys:String>
+    <sys:String x:Key="Strategy.Step.StrategyBuilder">Strategy Builder</sys:String>
+    <sys:String x:Key="Strategy.ResearchEmpty">Ask a question — AI will use tools to find stocks</sys:String>
+    <sys:String x:Key="Strategy.ResearchEmptyDesc">AI queries real data: quotes, charts, news, and more</sys:String>
+    <sys:String x:Key="Strategy.ResearchTemplates">Templates:</sys:String>
+    <sys:String x:Key="Strategy.DeleteTemplate">Delete Template</sys:String>
+
+    <!--  News  -->
+    <sys:String x:Key="News.Title">Market News</sys:String>
+    <sys:String x:Key="News.Refresh">Refresh</sys:String>
+    <sys:String x:Key="News.SearchPlaceholder">Search news headlines…</sys:String>
+    <sys:String x:Key="News.Empty">No news — click refresh in the top-right</sys:String>
+    <sys:String x:Key="News.LoadMore">Load more</sys:String>
+    <sys:String x:Key="News.OpenInBrowser">Open in browser</sys:String>
+    <sys:String x:Key="News.CopyLink">Copy link</sys:String>
+    <sys:String x:Key="News.Expand">Expand to full width</sys:String>
+    <sys:String x:Key="News.Restore">Restore split view</sys:String>
+    <sys:String x:Key="News.CloseArticle">Close article</sys:String>
+    <sys:String x:Key="News.NotLoaded">Not loaded</sys:String>
+    <sys:String x:Key="News.LastFetched">Updated {0}  ·  {1}/{2} articles</sys:String>
+    <sys:String x:Key="News.SelectToRead">Select an article to start reading</sys:String>
+
+    <!--  Alerts  -->
+    <sys:String x:Key="Alerts.Symbol">Symbol</sys:String>
+    <sys:String x:Key="Alerts.Name">Name</sys:String>
+    <sys:String x:Key="Alerts.Condition">Condition</sys:String>
+    <sys:String x:Key="Alerts.TargetPrice">Target price</sys:String>
+    <sys:String x:Key="Alerts.CurrentPrice">Price</sys:String>
+    <sys:String x:Key="Alerts.Status">Status</sys:String>
+    <sys:String x:Key="Alerts.Triggered">Triggered</sys:String>
+    <sys:String x:Key="Alerts.Monitoring">Monitoring</sys:String>
+    <sys:String x:Key="Alerts.Edit">Edit alert</sys:String>
+    <sys:String x:Key="Alerts.Delete">Delete alert</sys:String>
+    <sys:String x:Key="Alerts.Save">Save</sys:String>
+    <sys:String x:Key="Alerts.Cancel">Cancel</sys:String>
+    <sys:String x:Key="Alerts.Empty">No alerts — add one below</sys:String>
+    <sys:String x:Key="Alerts.AddAlert">＋ Add alert</sys:String>
+    <sys:String x:Key="Alerts.ConditionAbove">Above</sys:String>
+    <sys:String x:Key="Alerts.ConditionBelow">Below</sys:String>
+
+    <!--  Flash News  -->
+    <sys:String x:Key="Flash.Title">Flash</sys:String>
+    <sys:String x:Key="Flash.Subtitle">Auto-updates every 30s · Jin10 · Breaking events push notifications</sys:String>
+    <sys:String x:Key="Flash.Refresh">Refresh now</sys:String>
+    <sys:String x:Key="Flash.SearchPlaceholder">Search flash news…</sys:String>
+    <sys:String x:Key="Flash.FilterAll">All</sys:String>
+    <sys:String x:Key="Flash.FilterNormal">Normal</sys:String>
+    <sys:String x:Key="Flash.FilterBreaking">Breaking</sys:String>
+    <sys:String x:Key="Flash.FilterSource">Source:</sys:String>
+    <sys:String x:Key="Flash.SourceJin10">Jin10</sys:String>
+    <sys:String x:Key="Flash.SourceCnyes">cnYES</sys:String>
+    <sys:String x:Key="Flash.SourceWallstreetcn">Wallstreetcn</sys:String>
+    <sys:String x:Key="Flash.FilterMyPositions">My positions only</sys:String>
+    <sys:String x:Key="Flash.FilterTime">Time:</sys:String>
+    <sys:String x:Key="Flash.Time1h">1 hr</sys:String>
+    <sys:String x:Key="Flash.Time6h">6 hrs</sys:String>
+    <sys:String x:Key="Flash.Time24h">24 hrs</sys:String>
+    <sys:String x:Key="Flash.Empty">No flash news yet — loading soon…</sys:String>
+    <sys:String x:Key="Flash.ErrorPrefix">Failed to load flash news:</sys:String>
+    <sys:String x:Key="Flash.LastFetched">Updated {0}</sys:String>
+    <sys:String x:Key="Flash.Copied">Copied</sys:String>
+
+    <!--  AI Chat  -->
+    <sys:String x:Key="AiChat.Title">AI Assistant</sys:String>
+    <sys:String x:Key="AiChat.Close">Close</sys:String>
+    <sys:String x:Key="AiChat.Clear">Clear</sys:String>
+    <sys:String x:Key="AiChat.ApiKeyRequired">Set ANTHROPIC_API_KEY to enable the AI assistant</sys:String>
+    <sys:String x:Key="AiChat.ConfirmOperation">Confirm action</sys:String>
+    <sys:String x:Key="AiChat.ConfirmExecute">Confirm</sys:String>
+    <sys:String x:Key="AiChat.Cancel">Cancel</sys:String>
+    <sys:String x:Key="AiChat.Confirmed">✓ Confirmed</sys:String>
+    <sys:String x:Key="AiChat.Cancelled">✕ Cancelled</sys:String>
+    <sys:String x:Key="AiChat.Thinking">Thinking…</sys:String>
+    <sys:String x:Key="AiChat.Send">Send</sys:String>
+
+    <!--  Stock Detail  -->
+    <sys:String x:Key="Detail.Open">Open</sys:String>
+    <sys:String x:Key="Detail.High">High</sys:String>
+    <sys:String x:Key="Detail.Low">Low</sys:String>
+    <sys:String x:Key="Detail.PrevClose">Prev close</sys:String>
+    <sys:String x:Key="Detail.Volume">Volume</sys:String>
+    <sys:String x:Key="Detail.LatestEps">Latest quarterly EPS</sys:String>
+    <sys:String x:Key="Detail.TtmEps">TTM EPS (last 4Q)</sys:String>
+    <sys:String x:Key="Detail.Loading">Loading…</sys:String>
+    <!--  Chart Indicators  -->
+    <sys:String x:Key="Chart.Indicator.BB">Bollinger</sys:String>
+    <sys:String x:Key="Chart.Indicator.VolMA">Vol MA</sys:String>
+    <sys:String x:Key="Chart.Indicator.RSI">RSI</sys:String>
+    <sys:String x:Key="Chart.Indicator.KD">KD</sys:String>
+    <sys:String x:Key="Chart.Indicator.MACD">MACD</sys:String>
+
+    <!--  Settings  -->
+    <sys:String x:Key="Settings.General">General</sys:String>
+    <sys:String x:Key="Settings.RefreshInterval">Quote refresh interval</sys:String>
+    <sys:String x:Key="Settings.RefreshIntervalDesc">How often live stock quotes are automatically updated</sys:String>
+    <sys:String x:Key="Settings.Notifications">Notifications</sys:String>
+    <sys:String x:Key="Settings.AlertNotifications">Price alert notifications</sys:String>
+    <sys:String x:Key="Settings.AlertNotificationsDesc">Show a system notification when an alert condition is triggered</sys:String>
+    <sys:String x:Key="Settings.Appearance">Appearance</sys:String>
+    <sys:String x:Key="Settings.DarkMode">Dark mode</sys:String>
+    <sys:String x:Key="Settings.DarkModeDesc">Toggle dark / light interface theme</sys:String>
+    <sys:String x:Key="Settings.ColorScheme">Price color scheme</sys:String>
+    <sys:String x:Key="Settings.ColorSchemeDesc">TW convention: red=up, green=down　Global: green=up, red=down</sys:String>
+    <sys:String x:Key="Settings.ColorSchemeTW">Taiwan (red up / green down)</sys:String>
+    <sys:String x:Key="Settings.ColorSchemeIntl">Global (green up / red down)</sys:String>
+    <sys:String x:Key="Settings.Language">Language</sys:String>
+    <sys:String x:Key="Settings.LanguageDesc">Choose the interface display language</sys:String>
+    <sys:String x:Key="Settings.UiScale">Interface size</sys:String>
+    <sys:String x:Key="Settings.UiScaleDesc">Drag to adjust scale (0.75× – 1.50×)</sys:String>
+    <sys:String x:Key="Settings.DataSource">Historical data source</sys:String>
+    <sys:String x:Key="Settings.DataSourceDesc">Takes effect immediately, no restart needed</sys:String>
+    <sys:String x:Key="Settings.LlmProvider">AI Provider</sys:String>
+    <sys:String x:Key="Settings.LlmProviderDesc">Select an AI provider and enter the corresponding API key</sys:String>
+    <sys:String x:Key="Settings.OllamaLocal">Ollama (Local)</sys:String>
+    <sys:String x:Key="Settings.OllamaInstall">Install local AI (Ollama + qwen3-coder:8b)</sys:String>
+    <sys:String x:Key="Settings.OllamaStartInstall">Start install</sys:String>
+    <sys:String x:Key="Settings.OllamaInstalling">Installing…</sys:String>
+    <sys:String x:Key="Settings.Model">Model</sys:String>
+    <sys:String x:Key="Settings.ModelRefresh">Refresh available models</sys:String>
+    <sys:String x:Key="Settings.Loading">Loading…</sys:String>
+    <sys:String x:Key="Settings.TestConnection">Test connection</sys:String>
+    <sys:String x:Key="Settings.About">About</sys:String>
+    <sys:String x:Key="Settings.DataDir">Data directory</sys:String>
+    <sys:String x:Key="Settings.OpenDir">Open</sys:String>
+    <sys:String x:Key="Settings.Show">Show</sys:String>
+    <sys:String x:Key="Settings.Hide">Hide</sys:String>
+    <sys:String x:Key="Settings.FinMindToken">FinMind API Token</sys:String>
+    <sys:String x:Key="Settings.TranslateFlash">Auto-translate flash news (requires AI Provider)</sys:String>
+    <sys:String x:Key="Settings.TranslateFlashDesc">Newly arrived flash items are translated to the UI language</sys:String>
+    <sys:String x:Key="Settings.Jin10AppId">Jin10 App ID</sys:String>
+    <sys:String x:Key="Settings.Jin10AppIdDesc">Get your App ID from the jin10.com profile page</sys:String>
+    <sys:String x:Key="Settings.Jin10Test">Test</sys:String>
+    <sys:String x:Key="Settings.Jin10Testing">Testing…</sys:String>
+    <sys:String x:Key="Settings.Jin10TestOk">✓ Connection OK</sys:String>
+    <sys:String x:Key="Settings.Jin10TestFail">✗ Connection failed — check your App ID</sys:String>
+
+    <!--  ── Asset Allocation ──  -->
+    <sys:String x:Key="Allocation.Tab.Overview">Overview</sys:String>
+    <sys:String x:Key="Allocation.Tab.Rebalance">Rebalance</sys:String>
+    <sys:String x:Key="Allocation.Overview.Title">Allocation Overview</sys:String>
+    <sys:String x:Key="Allocation.Summary.Investment">Holdings</sys:String>
+    <sys:String x:Key="Allocation.Summary.Cash">Cash</sys:String>
+    <sys:String x:Key="Allocation.Summary.Total">Total Assets</sys:String>
+    <sys:String x:Key="Allocation.Summary.Pnl">Net P&amp;L</sys:String>
+    <sys:String x:Key="Allocation.Col.Asset">Asset</sys:String>
+    <sys:String x:Key="Allocation.Col.Price">Price</sys:String>
+    <sys:String x:Key="Allocation.Col.Value">Value</sys:String>
+    <sys:String x:Key="Allocation.Col.ValueTwd">Value (TWD)</sys:String>
+    <sys:String x:Key="Allocation.Col.ActualPct">Actual %</sys:String>
+    <sys:String x:Key="Allocation.Col.TargetPct">Target %</sys:String>
+    <sys:String x:Key="Allocation.Col.Deviation">Deviation</sys:String>
+    <sys:String x:Key="Allocation.Col.Suggestion">Action</sys:String>
+    <sys:String x:Key="Allocation.Col.TotalPnl">Net P&amp;L</sys:String>
+    <sys:String x:Key="Allocation.Col.AllocChange">Allocation Change</sys:String>
+    <sys:String x:Key="Allocation.CashFlow.Desc">Deploy new capital into underweight positions proportionally</sys:String>
+    <sys:String x:Key="Allocation.CashFlow.Total">Total</sys:String>
+    <sys:String x:Key="Allocation.CashFlow.InputLabel">Invest Amount</sys:String>
+    <sys:String x:Key="Allocation.Rebalance.Title">Rebalance</sys:String>
+    <sys:String x:Key="Allocation.Rebalance.Subtitle">Analyze and fine-tune your asset allocation.</sys:String>
+    <sys:String x:Key="Allocation.Rebalance.Full">Full Rebalance</sys:String>
+    <sys:String x:Key="Allocation.Rebalance.CashFlow">Cash Flow</sys:String>
+    <sys:String x:Key="Allocation.Rebalance.EditTargets">Edit Targets</sys:String>
+    <sys:String x:Key="Allocation.EditTargets.Title">Edit Target Allocation</sys:String>
+
+    <!--  Calendar  -->
+    <sys:String x:Key="Calendar.Today">Today</sys:String>
+
+    <!--  Dashboard  -->
+    <sys:String x:Key="Dashboard.GoalProgress">Goal Progress</sys:String>
+    <sys:String x:Key="Dashboard.GoalTarget">Target: </sys:String>
+    <sys:String x:Key="Dashboard.TenDayTrend">Net Worth (10-Day)</sys:String>
+    <sys:String x:Key="Dashboard.AllocationHealth">Allocation Health</sys:String>
+    <sys:String x:Key="Dashboard.TopHoldings">Top Holdings</sys:String>
+    <sys:String x:Key="Dashboard.RecentTrades">Recent Trades</sys:String>
+    <sys:String x:Key="Dashboard.ViewDetail">Details</sys:String>
+
+    <sys:String x:Key="Strategy.Saved">Strategy "{0}" saved</sys:String>
+    <sys:String x:Key="Strategy.Deleted">Strategy "{0}" deleted</sys:String>
+    <sys:String x:Key="Strategy.DeleteFailed">Delete failed, please try again.</sys:String>
+    <sys:String x:Key="Strategy.QuotaExceeded.Scan">FinMind API quota exceeded. Switch data source or wait for hourly reset.</sys:String>
+    <sys:String x:Key="Strategy.QuotaExceeded.Chip">FinMind API quota exceeded. Institutional / margin strategies unavailable today.</sys:String>
+    <sys:String x:Key="Strategy.AlreadyInWatchlist">{0} {1} is already in the watchlist</sys:String>
+    <sys:String x:Key="Strategy.AddedToWatchlist">{0} {1} added to watchlist</sys:String>
+    <sys:String x:Key="Strategy.Template.Saved">Template "{0}" saved</sys:String>
+    <sys:String x:Key="Strategy.Template.SaveFailed">Template save failed, please try again.</sys:String>
+    <sys:String x:Key="Strategy.Template.Deleted">Template "{0}" deleted</sys:String>
+    <sys:String x:Key="Strategy.Template.DeleteFailed">Template delete failed, please try again.</sys:String>
+    <sys:String x:Key="Alerts.Added">Alert added: {0} {1} {2}</sys:String>
+    <sys:String x:Key="Alerts.Updated">Updated alert rule for {0}</sys:String>
+    <sys:String x:Key="Alerts.ToastMessage">🔔 {0}{1}: {2} {3}</sys:String>
+    <sys:String x:Key="Portfolio.Sell.TradeSaveFailed">Sell completed, but saving the trade record failed</sys:String>
+    <sys:String x:Key="Portfolio.Trade.DeleteFailed">Failed to delete trade record, please try again</sys:String>
+    <sys:String x:Key="Portfolio.Trade.OldDeleteFailed">Failed to delete old trade records; possible duplicates in DB. Try refreshing or restarting.</sys:String>
+
+    <!--  Financial Overview  -->
+    <sys:String x:Key="FinancialOverview.Nav.Label">Financial Overview</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.NetWorth">Net Worth</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.Assets">Assets</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.Investments">Investments</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.Liabilities">Liabilities</sys:String>
+    <sys:String x:Key="FinancialOverview.Section.Assets">Assets</sys:String>
+    <sys:String x:Key="FinancialOverview.Section.Investments">Investments</sys:String>
+    <sys:String x:Key="FinancialOverview.Section.Liabilities">Liabilities</sys:String>
+</ResourceDictionary>

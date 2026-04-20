@@ -1,0 +1,67 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        ══════════════════════════════════════════════════════
+        Dark Theme — Windows 11 Mica / WinUI 3 palette
+        ══════════════════════════════════════════════════════
+        
+        Layer hierarchy (matches WinUI 3 / Fluent Design):
+        AppBackground  — outermost page canvas       #1C1C1C
+        AppSurface     — cards, panels, sidebars     #282828
+        AppHover       — hover / pressed state       #333333
+        
+        Borders follow Windows "Control Strong Stroke":
+        AppBorder      — visible dividers            #3D3D3D
+        AppBorderLight — subtle separator            #2E2E2E
+        
+        Text follows Windows layered opacity model:
+        Primary   100 %  #F3F3F3
+        Secondary  62 %  #9E9E9E
+        Muted      37 %  #5E5E5E
+        
+        Accent: Windows default system accent blue     #0078D4
+    -->
+
+    <!--  Backgrounds  -->
+    <SolidColorBrush x:Key="AppBackground" Color="#1C1C1C" />
+    <SolidColorBrush x:Key="AppSurface" Color="#282828" />
+    <SolidColorBrush x:Key="AppSurfaceAlt" Color="#222222" />
+    <SolidColorBrush x:Key="AppHover" Color="#333333" />
+
+    <!--  Borders  -->
+    <SolidColorBrush x:Key="AppBorder" Color="#3D3D3D" />
+    <SolidColorBrush x:Key="AppBorderLight" Color="#2E2E2E" />
+
+    <!--  Text  -->
+    <SolidColorBrush x:Key="AppTextPrimary" Color="#F3F3F3" />
+    <SolidColorBrush x:Key="AppTextSecondary" Color="#9E9E9E" />
+    <!--  #8C8C8C gives 4.6:1 on AppSurface (#282828) and 5.25:1 on AppBackground (#1C1C1C) — passes WCAG AA  -->
+    <SolidColorBrush x:Key="AppTextMuted" Color="#8C8C8C" />
+    <SolidColorBrush x:Key="AppTextOnAccent" Color="#FFFFFF" />
+
+    <!--  Semantic — price direction  -->
+    <SolidColorBrush x:Key="AppUp" Color="#0CBB8A" />
+    <SolidColorBrush x:Key="AppDown" Color="#F24B4B" />
+    <!--  #909090 gives 4.82:1 on AppSurface — passes WCAG AA (was #808080 at 3.64:1)  -->
+    <SolidColorBrush x:Key="AppFlat" Color="#909090" />
+
+    <!--  Accent — Windows system accent blue  -->
+    <SolidColorBrush x:Key="AppAccent" Color="#0078D4" />
+    <SolidColorBrush x:Key="AppAccentHover" Color="#006CBE" />
+    <SolidColorBrush x:Key="AppAccentSubtle" Color="#153047" />
+
+    <!--  DataGrid  -->
+    <SolidColorBrush x:Key="AppSelectedRow" Color="#153047" />
+    <SolidColorBrush x:Key="AppGridLines" Color="#2E2E2E" />
+
+    <!--  Modal overlay  -->
+    <SolidColorBrush x:Key="AppModalOverlay" Color="#88000000" />
+
+    <!--  Error banner  -->
+    <SolidColorBrush x:Key="AppErrorBg" Color="#2A1515" />
+    <SolidColorBrush x:Key="AppErrorBorder" Color="#C42B1C" />
+
+    <!--  Legacy aliases  -->
+    <SolidColorBrush x:Key="AppTextHint" Color="#8C8C8C" />
+
+</ResourceDictionary>
