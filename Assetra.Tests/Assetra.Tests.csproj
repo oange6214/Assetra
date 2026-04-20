@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <UseWPF>true</UseWPF>
     <IsTestProject>true</IsTestProject>
     <RootNamespace>Assetra.Tests</RootNamespace>
     <AssemblyName>Assetra.Tests</AssemblyName>
@@ -25,6 +26,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
     <ProjectReference Include="..\Assetra.Core\Assetra.Core.csproj" />
     <ProjectReference Include="..\Assetra.Infrastructure\Assetra.Infrastructure.csproj" />
+    <ProjectReference Include="..\Assetra.WPF\Assetra.WPF.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="MinVer" Version="7.0.0" />

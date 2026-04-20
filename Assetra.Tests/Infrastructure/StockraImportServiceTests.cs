@@ -1,3 +1,4 @@
+using System.IO;
 using Microsoft.Data.Sqlite;
 using Xunit;
 using Assetra.Infrastructure.Persistence;
