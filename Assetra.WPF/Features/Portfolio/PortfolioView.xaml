@@ -96,7 +96,7 @@
         <!--  ── Row 1: Welcome banner ──  -->
         <Border
             Grid.Row="1"
-            Padding="16,10"
+            Padding="20,14"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="0,0,0,1"
@@ -108,13 +108,13 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                     <TextBlock
-                        FontSize="{StaticResource FontSizeSm}"
+                        FontSize="{StaticResource FontSizeMd}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Onboarding.Banner.Title}" />
                     <TextBlock
-                        Margin="0,3,0,0"
-                        FontSize="{StaticResource FontSizeXs}"
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource FontSizeBase}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Onboarding.Banner.Steps}" />
                 </StackPanel>
