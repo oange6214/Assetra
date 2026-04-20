@@ -37,6 +37,7 @@
   <ItemGroup>
     <!-- icon placeholders to be added in Phase 7 -->
     <Resource Include="Assets\assetra.ico" />
+    <Resource Include="Assets\assetra_icon_64.png" />
     <Content Include="Assets\*.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -62,7 +62,7 @@
                 Background="Transparent"
                 Foreground="{DynamicResource AppTextPrimary}">
                 <ui:TitleBar.Icon>
-                    <ui:ImageIcon RenderOptions.BitmapScalingMode="HighQuality" Source="pack://application:,,,/Assetra.WPF;component/Assets/assetra.ico" />
+                    <ui:ImageIcon RenderOptions.BitmapScalingMode="HighQuality" Source="pack://application:,,,/Assetra.WPF;component/Assets/assetra_icon_64.png" />
                 </ui:TitleBar.Icon>
                 <ui:TitleBar.Header>
                     <!--
