@@ -1,0 +1,159 @@
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Assetra.Core.Interfaces;
+using Assetra.WPF.Infrastructure;
+using Wpf.Ui.Appearance;
+
+namespace Assetra.WPF.Features.Settings;
+
+public sealed record LanguageOption(string Code, string Display);
+
+/// <summary>
+/// Minimal settings surface for Assetra.
+///
+/// Trimmed from Stockra's large SettingsViewModel (LLM providers, Jin10 flash,
+/// FinMind token, screener presets, strategy library etc. are all removed).
+///
+/// Kept:
+///   • Theme switcher (Light / Dark / System) via IThemeService
+///   • Language switcher (zh-TW / en-US) via ILocalizationService
+///   • Primary currency dropdown via ICurrencyService
+///   • Colour-scheme toggle (Taiwan red-up / International green-up)
+///     — persisted to AppSettings.TaiwanColorScheme
+///
+/// Note: CommissionDiscount and TaiwanStyleFees from the Phase 5 spec are
+/// not yet fields on AppSettings, so the UI omits them. Per-trade discount
+/// is already entered inline in the PortfolioView transaction dialog.
+/// </summary>
+public partial class SettingsViewModel : ObservableObject, IDisposable
+{
+    public static IReadOnlyList<LanguageOption> SupportedLanguages { get; } =
+    [
+        new("zh-TW", "正體中文"),
+        new("en-US", "English"),
+    ];
+
+    public static IReadOnlyList<ApplicationTheme> Themes { get; } =
+    [
+        ApplicationTheme.Light,
+        ApplicationTheme.Dark,
+    ];
+
+    private readonly IAppSettingsService _settings;
+    private readonly IThemeService _theme;
+    private readonly ILocalizationService _localization;
+    private readonly ICurrencyService _currencyService;
+
+    private bool _isLoading;
+
+    [ObservableProperty] private string _language = "zh-TW";
+    [ObservableProperty] private bool _useTaiwanColors = true;
+
+    /// <summary>Mirror property for the "國際 / International" RadioButton — inverse of <see cref="UseTaiwanColors"/>.</summary>
+    public bool UseInternationalColors
+    {
+        get => !UseTaiwanColors;
+        set { if (value) UseTaiwanColors = false; }
+    }
+
+    [ObservableProperty] private bool _isDarkTheme;
+    [ObservableProperty] private string _primaryCurrency = "TWD";
+
+    public ObservableCollection<string> SupportedCurrencies { get; } = [];
+
+    public SettingsViewModel(
+        IAppSettingsService settings,
+        IThemeService theme,
+        ILocalizationService localization,
+        ICurrencyService currencyService)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(theme);
+        ArgumentNullException.ThrowIfNull(localization);
+        ArgumentNullException.ThrowIfNull(currencyService);
+
+        _settings = settings;
+        _theme = theme;
+        _localization = localization;
+        _currencyService = currencyService;
+
+        foreach (var code in _currencyService.SupportedCurrencies)
+            SupportedCurrencies.Add(code);
+
+        LoadFromSettings();
+
+        _theme.ThemeChanged += OnThemeChanged;
+    }
+
+    private void LoadFromSettings()
+    {
+        _isLoading = true;
+        try
+        {
+            var s = _settings.Current;
+            Language = s.Language;
+            UseTaiwanColors = s.TaiwanColorScheme;
+            IsDarkTheme = _theme.CurrentTheme == ApplicationTheme.Dark;
+            PrimaryCurrency = string.IsNullOrWhiteSpace(s.PreferredCurrency)
+                ? "TWD"
+                : s.PreferredCurrency;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    partial void OnLanguageChanged(string value)
+    {
+        if (_isLoading) return;
+        _localization.SetLanguage(value);
+        _ = SaveAsync();
+    }
+
+    partial void OnUseTaiwanColorsChanged(bool value)
+    {
+        OnPropertyChanged(nameof(UseInternationalColors));
+        if (_isLoading) return;
+        ColorSchemeService.Apply(value, _theme.CurrentTheme);
+        _ = SaveAsync();
+    }
+
+    partial void OnIsDarkThemeChanged(bool value)
+    {
+        if (_isLoading) return;
+        _theme.Apply(value ? ApplicationTheme.Dark : ApplicationTheme.Light);
+    }
+
+    partial void OnPrimaryCurrencyChanged(string value)
+    {
+        if (_isLoading) return;
+        _ = _currencyService.ApplyAsync(value);
+    }
+
+    private void OnThemeChanged(ApplicationTheme theme)
+    {
+        _isLoading = true;
+        try { IsDarkTheme = theme == ApplicationTheme.Dark; }
+        finally { _isLoading = false; }
+
+        // Re-apply colour scheme so up/down brushes track the new theme
+        ColorSchemeService.Apply(UseTaiwanColors, theme);
+    }
+
+    private async Task SaveAsync()
+    {
+        var updated = _settings.Current with
+        {
+            Language = Language,
+            TaiwanColorScheme = UseTaiwanColors,
+            PreferredCurrency = PrimaryCurrency,
+        };
+        await _settings.SaveAsync(updated);
+    }
+
+    public void Dispose()
+    {
+        _theme.ThemeChanged -= OnThemeChanged;
+    }
+}

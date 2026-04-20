@@ -1,0 +1,52 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Portfolio.Controls.TxForms.StockDividendTxForm"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
+                                     IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <!--  ======== 股票股利欄位 ========  -->
+    <StackPanel Visibility="{Binding TxTypeIsStockDiv, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <TextBlock
+            Margin="0,0,0,4"
+            FontSize="{StaticResource FontSizeXs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Portfolio.Tx.Stock}" />
+        <ComboBox
+            Margin="0,0,0,12"
+            IsEnabled="{Binding AreEconomicFieldsEditable}"
+            ItemsSource="{Binding Positions}"
+            SelectedItem="{Binding TxStockDivPosition, Mode=TwoWay}"
+            Style="{StaticResource FormComboBox}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,8,0"
+                            FontFamily="{StaticResource FontTabular}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppAccent}"
+                            Text="{Binding Symbol}" />
+                        <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{Binding Name}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <TextBlock
+            Margin="0,0,0,4"
+            FontSize="{StaticResource FontSizeXs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Portfolio.Tx.NewShares}" />
+        <TextBox
+            IsEnabled="{Binding AreEconomicFieldsEditable}"
+            Style="{StaticResource FormTextBox}"
+            Text="{Binding TxStockDivNewShares, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+</UserControl>

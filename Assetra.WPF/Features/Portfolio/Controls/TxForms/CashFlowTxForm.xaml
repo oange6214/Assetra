@@ -1,0 +1,70 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Portfolio.Controls.TxForms.CashFlowTxForm"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
+                                     IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <!--  ======== 存入/提款欄位 ========  -->
+    <StackPanel Visibility="{Binding TxTypeIsCashFlow, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <TextBlock
+            Margin="0,0,0,4"
+            FontSize="{StaticResource FontSizeXs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Portfolio.Tx.Amount}" />
+        <TextBox
+            Margin="0,0,0,12"
+            Style="{StaticResource FormTextBox}"
+            Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
+
+        <TextBlock
+            Margin="0,0,0,4"
+            FontSize="{StaticResource FontSizeXs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Portfolio.Tx.CashAccount}" />
+        <ComboBox
+            Margin="0,0,0,4"
+            DisplayMemberPath="Name"
+            IsEditable="True"
+            IsTextSearchEnabled="True"
+            ItemsSource="{Binding CashAccounts}"
+            SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
+            Style="{StaticResource FormComboBox}"
+            Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <ComboBox.Resources>
+                <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
+            </ComboBox.Resources>
+        </ComboBox>
+        <TextBlock
+            Margin="0,2,0,8"
+            FontSize="{StaticResource FontSizeXs}"
+            Foreground="{DynamicResource AppAccent}"
+            Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
+            Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <TextBlock
+            Margin="0,0,0,4"
+            FontSize="{StaticResource FontSizeXs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Portfolio.Tx.Fee}" />
+        <TextBox
+            Margin="0,0,0,12"
+            Style="{StaticResource FormTextBox}"
+            Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
+
+        <TextBlock
+            Margin="0,0,0,4"
+            FontSize="{StaticResource FontSizeXs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Portfolio.Tx.Note}" />
+        <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+</UserControl>

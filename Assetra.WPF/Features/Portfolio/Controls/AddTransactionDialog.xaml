@@ -1,0 +1,254 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Portfolio.Controls.AddTransactionDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:Assetra.WPF.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:system="clr-namespace:System;assembly=mscorlib"
+    xmlns:txforms="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
+                                     IsDesignTimeCreatable=False}"
+    Visibility="{Binding IsTxDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}"
+    mc:Ignorable="d">
+
+    <Grid>
+        <!--  半透明背景幕  -->
+        <Border Background="{DynamicResource AppModalOverlay}" />
+
+        <!--  Dialog card  -->
+        <Border
+            Width="{StaticResource DialogWidth}"
+            MaxHeight="{StaticResource DialogMaxHeight}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="{DynamicResource AppSurface}"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="1"
+            CornerRadius="{StaticResource RadiusMd}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <!--  Header  -->
+                    <RowDefinition Height="*" />
+                    <!--  Content (scroll)  -->
+                    <RowDefinition Height="Auto" />
+                    <!--  Footer  -->
+                </Grid.RowDefinitions>
+
+                <!--  Header  -->
+                <Border
+                    Grid.Row="0"
+                    Padding="20,14"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="0,0,0,1">
+                    <DockPanel>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeSm}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.Title}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.EditTitle}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Button
+                            Width="28"
+                            Height="28"
+                            HorizontalAlignment="Right"
+                            Command="{Binding CloseTxDialogCommand}"
+                            DockPanel.Dock="Right"
+                            Style="{StaticResource BtnIcon}">
+                            <TextBlock
+                                FontFamily="Segoe MDL2 Assets"
+                                FontSize="12"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="&#xE8BB;" />
+                        </Button>
+                    </DockPanel>
+                </Border>
+
+                <!--  Scrollable content  -->
+                <ScrollViewer
+                    Grid.Row="1"
+                    Padding="20,16"
+                    VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+
+                        <!--  Meta-only edit banner: shown for Sell / legacy-unlinked Buy/StockDiv  -->
+                        <Border
+                            Margin="0,0,0,12"
+                            Padding="10,8"
+                            Background="{DynamicResource AppSurface}"
+                            BorderBrush="{DynamicResource AppAccent}"
+                            BorderThickness="3,0,0,0"
+                            CornerRadius="{StaticResource RadiusSm}"
+                            Visibility="{Binding IsEditingMetaOnly, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Portfolio.Tx.MetaOnlyHint}"
+                                TextWrapping="Wrap" />
+                        </Border>
+
+                        <!--  Type selector (10 types: Buy/Sell + 8 existing)  -->
+                        <WrapPanel Margin="0,0,0,12">
+                            <RadioButton
+                                Content="{DynamicResource Portfolio.Tx.Buy}"
+                                GroupName="TxType"
+                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=buy, Mode=TwoWay}"
+                                Style="{StaticResource SegmentBtn}" />
+                            <RadioButton
+                                Content="{DynamicResource Portfolio.Tx.Sell}"
+                                GroupName="TxType"
+                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=sell, Mode=TwoWay}"
+                                Style="{StaticResource SegmentBtn}" />
+                            <RadioButton
+                                Content="{DynamicResource Portfolio.Tx.Income}"
+                                GroupName="TxType"
+                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=income, Mode=TwoWay}"
+                                Style="{StaticResource SegmentBtn}" />
+                            <RadioButton
+                                Content="{DynamicResource Portfolio.Tx.CashDiv}"
+                                GroupName="TxType"
+                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=cashDiv, Mode=TwoWay}"
+                                Style="{StaticResource SegmentBtn}" />
+                            <RadioButton
+                                Content="{DynamicResource Portfolio.Tx.StockDiv}"
+                                GroupName="TxType"
+                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=stockDiv, Mode=TwoWay}"
+                                Style="{StaticResource SegmentBtn}" />
+                            <RadioButton
+                                Content="{DynamicResource Portfolio.TradeType.Deposit}"
+                                GroupName="TxType"
+                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=deposit, Mode=TwoWay}"
+                                Style="{StaticResource SegmentBtn}" />
+                            <RadioButton
+                                Content="{DynamicResource Portfolio.TradeType.Withdrawal}"
+                                GroupName="TxType"
+                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=withdrawal, Mode=TwoWay}"
+                                Style="{StaticResource SegmentBtn}" />
+                            <RadioButton
+                                Content="{DynamicResource Portfolio.TradeType.Transfer}"
+                                GroupName="TxType"
+                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=transfer, Mode=TwoWay}"
+                                Style="{StaticResource SegmentBtn}" />
+                            <RadioButton
+                                Content="{DynamicResource Portfolio.TradeType.LoanBorrow}"
+                                GroupName="TxType"
+                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=loanBorrow, Mode=TwoWay}"
+                                Style="{StaticResource SegmentBtn}" />
+                            <RadioButton
+                                Content="{DynamicResource Portfolio.TradeType.LoanRepay}"
+                                GroupName="TxType"
+                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=loanRepay, Mode=TwoWay}"
+                                Style="{StaticResource SegmentBtn}" />
+                        </WrapPanel>
+
+                        <!--  日期（共用）  -->
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            FontSize="{StaticResource FontSizeXs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Tx.Date}" />
+                        <controls:FormDatePicker
+                            Margin="0,0,0,12"
+                            DisplayDateEnd="{x:Static system:DateTime.Today}"
+                            SelectedDate="{Binding TxDate, Mode=TwoWay}"
+                            ShowTime="True" />
+
+                        <!--  ======== 買入欄位 ========  -->
+                        <txforms:BuyTxForm />
+
+                        <!--  ======== 賣出欄位 ========  -->
+                        <txforms:SellTxForm />
+
+                        <!--  ======== 收入欄位 ========  -->
+                        <txforms:IncomeTxForm />
+
+                        <!--  ======== 現金股利欄位 ========  -->
+                        <txforms:CashDividendTxForm />
+
+                        <!--  ======== 股票股利欄位 ========  -->
+                        <txforms:StockDividendTxForm />
+
+                        <!--  ======== 存入/提款欄位 ========  -->
+                        <txforms:CashFlowTxForm />
+
+                        <!--  ======== 借款/還款欄位 ========  -->
+                        <txforms:LoanTxForm />
+
+                        <!--  ======== 轉帳欄位 ========  -->
+                        <txforms:TransferTxForm />
+
+                        <!--  Error  -->
+                        <TextBlock
+                            Margin="0,12,0,0"
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{DynamicResource AppDown}"
+                            Text="{Binding TxError}"
+                            Visibility="{Binding TxError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!--  Footer  -->
+                <Border
+                    Grid.Row="2"
+                    Padding="20,12"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="0,1,0,0">
+                    <DockPanel>
+                        <!--  刪除按鈕（僅編輯模式）  -->
+                        <Button
+                            Height="30"
+                            Padding="14,0"
+                            Command="{Binding DeleteTradeCommand}"
+                            DockPanel.Dock="Left"
+                            Style="{StaticResource BtnDanger}"
+                            Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Tx.Delete}" />
+                        </Button>
+                        <!--  取消 / 儲存（靠右）  -->
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                            <Button
+                                Height="30"
+                                Margin="0,0,8,0"
+                                Padding="14,0"
+                                Command="{Binding CloseTxDialogCommand}"
+                                Style="{StaticResource BtnGhost}">
+                                <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Cancel}" />
+                            </Button>
+                            <Button
+                                Height="30"
+                                Padding="14,0"
+                                Command="{Binding ConfirmTxCommand}"
+                                Style="{StaticResource BtnPrimary}">
+                                <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.Confirm}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.Save}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Button>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

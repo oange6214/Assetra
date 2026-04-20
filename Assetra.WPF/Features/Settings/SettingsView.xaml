@@ -1,0 +1,146 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Settings.SettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Settings"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:SettingsViewModel},
+                                     IsDesignTimeCreatable=False}"
+    d:DesignHeight="600"
+    d:DesignWidth="800"
+    Background="{DynamicResource AppBackground}"
+    mc:Ignorable="d">
+
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        Padding="24"
+        VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="640" HorizontalAlignment="Left">
+
+            <!--  Page title  -->
+            <TextBlock
+                Margin="0,0,0,16"
+                FontSize="{StaticResource FontSizeLg}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource Settings.Title}" />
+
+            <!--  ── 外觀 / Appearance ──  -->
+            <TextBlock
+                Margin="0,0,0,8"
+                FontSize="{StaticResource FontSizeMd}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource Settings.Section.Appearance}" />
+
+            <Border
+                Margin="0,0,0,20"
+                Padding="16"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource RadiusSm}">
+                <StackPanel>
+                    <!--  Theme  -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Settings.DarkTheme}" />
+                        <CheckBox
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            IsChecked="{Binding IsDarkTheme}" />
+                    </Grid>
+
+                    <!--  Colour scheme  -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Settings.ColorScheme}" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <RadioButton
+                                Margin="0,0,16,0"
+                                VerticalAlignment="Center"
+                                Content="{DynamicResource Settings.ColorScheme.Taiwan}"
+                                GroupName="ColorScheme"
+                                IsChecked="{Binding UseTaiwanColors}" />
+                            <RadioButton
+                                VerticalAlignment="Center"
+                                Content="{DynamicResource Settings.ColorScheme.International}"
+                                GroupName="ColorScheme"
+                                IsChecked="{Binding UseInternationalColors}" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!--  ── 語言與區域 / Language & Region ──  -->
+            <TextBlock
+                Margin="0,0,0,8"
+                FontSize="{StaticResource FontSizeMd}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource Settings.Section.Language}" />
+
+            <Border
+                Margin="0,0,0,20"
+                Padding="16"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource RadiusSm}">
+                <StackPanel>
+                    <!--  Language  -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Settings.Language}" />
+                        <ComboBox
+                            Grid.Column="1"
+                            Width="220"
+                            HorizontalAlignment="Left"
+                            DisplayMemberPath="Display"
+                            ItemsSource="{x:Static vm:SettingsViewModel.SupportedLanguages}"
+                            SelectedValue="{Binding Language}"
+                            SelectedValuePath="Code" />
+                    </Grid>
+
+                    <!--  Primary currency  -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Settings.PrimaryCurrency}" />
+                        <ComboBox
+                            Grid.Column="1"
+                            Width="220"
+                            HorizontalAlignment="Left"
+                            ItemsSource="{Binding SupportedCurrencies}"
+                            SelectedItem="{Binding PrimaryCurrency}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

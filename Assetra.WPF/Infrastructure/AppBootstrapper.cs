@@ -104,11 +104,23 @@ internal static class AppBootstrapper
         // Shared FinMind availability state — both history provider and data service update it
         services.AddSingleton<FinMindApiStatus>();
 
+        // FinMindService is registered first so DynamicHistoryProvider can depend on it.
+        // Assetra uses FinMind anonymously (empty token). The Settings UI does not expose
+        // a token field; see Features/Settings/SettingsViewModel for the trimmed surface.
+        services.AddSingleton<FinMindService>(sp =>
+            new FinMindService(
+                sp.GetRequiredService<HttpClient>(),
+                token: string.Empty,
+                sp.GetRequiredService<FinMindApiStatus>(),
+                sp.GetRequiredService<ILogger<FinMindService>>()));
+        services.AddSingleton<IFinMindService>(sp => sp.GetRequiredService<FinMindService>());
+
         // History provider — DynamicHistoryProvider reads IAppSettingsService.Current at call time
         services.AddSingleton<IStockHistoryProvider>(sp =>
         {
             var settingsSvc = sp.GetRequiredService<IAppSettingsService>();
             var http = sp.GetRequiredService<HttpClient>();
+            var finMindService = sp.GetRequiredService<FinMindService>();
             var finMindStatus = sp.GetRequiredService<FinMindApiStatus>();
 
             var envOverride = Environment.GetEnvironmentVariable("STOCK_HISTORY_PROVIDER");
@@ -117,18 +129,8 @@ internal static class AppBootstrapper
                 _ = settingsSvc.SaveAsync(settingsSvc.Current with { HistoryProvider = envOverride });
             }
 
-            return new DynamicHistoryProvider(http, settingsSvc, finMindStatus);
+            return new DynamicHistoryProvider(http, settingsSvc, finMindService, finMindStatus);
         });
-
-        // FinMindService is registered as both concrete and interface singleton so
-        // SettingsViewModel can call UpdateToken() for hot-update without a restart.
-        services.AddSingleton<FinMindService>(sp =>
-            new FinMindService(
-                sp.GetRequiredService<HttpClient>(),
-                sp.GetRequiredService<IAppSettingsService>().Current.FinMindApiKey,
-                sp.GetRequiredService<FinMindApiStatus>(),
-                sp.GetRequiredService<ILogger<FinMindService>>()));
-        services.AddSingleton<IFinMindService>(sp => sp.GetRequiredService<FinMindService>());
 
         // In-app Snackbar service
         services.AddSingleton<SnackbarViewModel>();
