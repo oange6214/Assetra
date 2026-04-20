@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Assetra.Core/Assetra.Core.csproj" />
+  <Project Path="Assetra.Infrastructure/Assetra.Infrastructure.csproj" />
+  <Project Path="Assetra.Tests/Assetra.Tests.csproj" />
+  <Project Path="Assetra.WPF/Assetra.WPF.csproj" />
+</Solution>
