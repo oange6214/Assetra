@@ -1,0 +1,50 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test results & coverage
+TestResults/
+coverage*/
+*.coverage
+*.coveragexml
+
+# Logs
+*.log
+logs/
+
+# User-specific settings (may contain API keys)
+appsettings.*.json
+!appsettings.Development.json
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Generated
+*.g.cs
+*.g.i.cs
+
+# Node.js
+node_modules/
+
+# Git worktrees
+.worktrees/

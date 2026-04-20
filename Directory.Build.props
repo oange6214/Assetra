@@ -1,0 +1,27 @@
+<Project>
+
+  <!-- 所有專案共用屬性 -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <!-- 自動從 git tag 推算版本（MinVer）
+       規則：打 tag v1.2.3 → 版本 1.2.3
+             tag 之後有 commit → 1.2.4-alpha.0.N（N = 距 tag 的 commit 數）
+       MinVerDefaultPreReleaseIdentifiers：未打 tag 前的預設識別符 -->
+  <PropertyGroup>
+    <MinVerDefaultPreReleaseIdentifiers>dev</MinVerDefaultPreReleaseIdentifiers>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MinVer" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
