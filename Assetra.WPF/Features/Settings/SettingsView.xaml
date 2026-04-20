@@ -16,17 +16,26 @@
         HorizontalScrollBarVisibility="Disabled"
         Padding="24"
         VerticalScrollBarVisibility="Auto">
-        <StackPanel MaxWidth="640" HorizontalAlignment="Left">
+
+        <!--
+            HorizontalAlignment="Stretch" 讓 Grid 星號欄能正確撐開；
+            MaxWidth 限制最大寬度避免過寬。
+            Grid.IsSharedSizeScope="True" 讓兩個 section 的 label 欄共享同一寬度。
+        -->
+        <StackPanel
+            MaxWidth="600"
+            HorizontalAlignment="Stretch"
+            Grid.IsSharedSizeScope="True">
 
             <!--  Page title  -->
             <TextBlock
-                Margin="0,0,0,16"
+                Margin="0,0,0,20"
                 FontSize="{StaticResource FontSizeLg}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextPrimary}"
                 Text="{DynamicResource Settings.Title}" />
 
-            <!--  ── 外觀 / Appearance ──  -->
+            <!--  ── 外觀 ──  -->
             <TextBlock
                 Margin="0,0,0,8"
                 FontSize="{StaticResource FontSizeMd}"
@@ -35,57 +44,61 @@
                 Text="{DynamicResource Settings.Section.Appearance}" />
 
             <Border
-                Margin="0,0,0,20"
-                Padding="16"
+                Margin="0,0,0,24"
+                Padding="16,12"
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
                 CornerRadius="{StaticResource RadiusSm}">
-                <StackPanel>
-                    <!--  Theme  -->
-                    <Grid Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="200" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{DynamicResource Settings.DarkTheme}" />
-                        <CheckBox
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            IsChecked="{Binding IsDarkTheme}" />
-                    </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <!--  SharedSizeGroup 讓兩個 section label 欄等寬  -->
+                        <ColumnDefinition SharedSizeGroup="LabelCol" Width="Auto" MinWidth="130" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
 
-                    <!--  Colour scheme  -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="200" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock
+                    <!--  深色主題  -->
+                    <TextBlock
+                        Grid.Row="0" Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Settings.DarkTheme}" />
+                    <CheckBox
+                        Grid.Row="0" Grid.Column="1"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left"
+                        IsChecked="{Binding IsDarkTheme}" />
+
+                    <!--  漲跌配色  -->
+                    <TextBlock
+                        Grid.Row="1" Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Settings.ColorScheme}" />
+                    <StackPanel
+                        Grid.Row="1" Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <RadioButton
+                            Margin="0,0,20,0"
                             VerticalAlignment="Center"
-                            Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{DynamicResource Settings.ColorScheme}" />
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <RadioButton
-                                Margin="0,0,16,0"
-                                VerticalAlignment="Center"
-                                Content="{DynamicResource Settings.ColorScheme.Taiwan}"
-                                GroupName="ColorScheme"
-                                IsChecked="{Binding UseTaiwanColors}" />
-                            <RadioButton
-                                VerticalAlignment="Center"
-                                Content="{DynamicResource Settings.ColorScheme.International}"
-                                GroupName="ColorScheme"
-                                IsChecked="{Binding UseInternationalColors}" />
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
+                            Content="{DynamicResource Settings.ColorScheme.Taiwan}"
+                            GroupName="ColorScheme"
+                            IsChecked="{Binding UseTaiwanColors}" />
+                        <RadioButton
+                            VerticalAlignment="Center"
+                            Content="{DynamicResource Settings.ColorScheme.International}"
+                            GroupName="ColorScheme"
+                            IsChecked="{Binding UseInternationalColors}" />
+                    </StackPanel>
+                </Grid>
             </Border>
 
-            <!--  ── 語言與區域 / Language & Region ──  -->
+            <!--  ── 語言與區域  ──  -->
             <TextBlock
                 Margin="0,0,0,8"
                 FontSize="{StaticResource FontSizeMd}"
@@ -94,51 +107,52 @@
                 Text="{DynamicResource Settings.Section.Language}" />
 
             <Border
-                Margin="0,0,0,20"
-                Padding="16"
+                Margin="0,0,0,24"
+                Padding="16,12"
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
                 CornerRadius="{StaticResource RadiusSm}">
-                <StackPanel>
-                    <!--  Language  -->
-                    <Grid Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="200" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{DynamicResource Settings.Language}" />
-                        <ComboBox
-                            Grid.Column="1"
-                            Width="220"
-                            HorizontalAlignment="Left"
-                            DisplayMemberPath="Display"
-                            ItemsSource="{x:Static vm:SettingsViewModel.SupportedLanguages}"
-                            SelectedValue="{Binding Language}"
-                            SelectedValuePath="Code" />
-                    </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelCol" Width="Auto" MinWidth="130" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
 
-                    <!--  Primary currency  -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="200" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{DynamicResource Settings.PrimaryCurrency}" />
-                        <ComboBox
-                            Grid.Column="1"
-                            Width="220"
-                            HorizontalAlignment="Left"
-                            ItemsSource="{Binding SupportedCurrencies}"
-                            SelectedItem="{Binding PrimaryCurrency}" />
-                    </Grid>
-                </StackPanel>
+                    <!--  語言  -->
+                    <TextBlock
+                        Grid.Row="0" Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Settings.Language}" />
+                    <ComboBox
+                        Grid.Row="0" Grid.Column="1"
+                        Width="220"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left"
+                        DisplayMemberPath="Display"
+                        ItemsSource="{x:Static vm:SettingsViewModel.SupportedLanguages}"
+                        SelectedValue="{Binding Language}"
+                        SelectedValuePath="Code" />
+
+                    <!--  主要貨幣  -->
+                    <TextBlock
+                        Grid.Row="1" Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Settings.PrimaryCurrency}" />
+                    <ComboBox
+                        Grid.Row="1" Grid.Column="1"
+                        Width="220"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left"
+                        ItemsSource="{Binding SupportedCurrencies}"
+                        SelectedItem="{Binding PrimaryCurrency}" />
+                </Grid>
             </Border>
 
         </StackPanel>
