@@ -101,7 +101,9 @@
     <sys:String x:Key="Portfolio.Detail.Action.Edit">Edit</sys:String>
     <sys:String x:Key="Portfolio.NetVal.Tooltip">Net Value = Market Value − est. sell commission − securities tax&#x0a;Tax rate by asset: ETF 0.1% / Stock 0.3%&#x0a;Represents the actual cash received if sold at current price.</sys:String>
     <sys:String x:Key="Portfolio.Cancel">Cancel edit</sys:String>
-    <sys:String x:Key="Portfolio.Empty">No positions — click "+ New" to add</sys:String>
+    <sys:String x:Key="Portfolio.Empty">No positions yet</sys:String>
+    <sys:String x:Key="Portfolio.Empty.Hint">Track stocks, ETFs, and funds to monitor P&amp;L and allocation</sys:String>
+    <sys:String x:Key="Portfolio.Empty.Cta">Add your first position</sys:String>
     <sys:String x:Key="Portfolio.Filter.SearchPositions">Search symbol or name…</sys:String>
     <sys:String x:Key="Portfolio.Filter.SearchAccounts">Search accounts…</sys:String>
     <sys:String x:Key="Portfolio.Filter.SearchLiabilities">Search liabilities…</sys:String>
@@ -374,7 +376,9 @@
     <sys:String x:Key="Alerts.Delete">Delete alert</sys:String>
     <sys:String x:Key="Alerts.Save">Save</sys:String>
     <sys:String x:Key="Alerts.Cancel">Cancel</sys:String>
-    <sys:String x:Key="Alerts.Empty">No alerts — add one below</sys:String>
+    <sys:String x:Key="Alerts.Empty">No alerts yet</sys:String>
+    <sys:String x:Key="Alerts.Empty.Hint">Set price alerts to get notified when a stock breaks above or below your target</sys:String>
+    <sys:String x:Key="Alerts.Empty.Cta">Add your first alert using the form below</sys:String>
     <sys:String x:Key="Alerts.AddAlert">＋ Add alert</sys:String>
     <sys:String x:Key="Alerts.ConditionAbove">Above</sys:String>
     <sys:String x:Key="Alerts.ConditionBelow">Below</sys:String>
@@ -487,6 +491,8 @@
     <sys:String x:Key="FinancialOverview.Section.Liabilities">Liabilities</sys:String>
     <sys:String x:Key="Nav.Portfolio">Portfolio</sys:String>
     <sys:String x:Key="Nav.FinancialOverview">Overview</sys:String>
+    <sys:String x:Key="Onboarding.Banner.Title">Welcome to Assetra</sys:String>
+    <sys:String x:Key="Onboarding.Banner.Steps">① Add a position  →  ② View allocation analysis  →  ③ Set price alerts</sys:String>
     <sys:String x:Key="Settings.Title">Settings</sys:String>
     <sys:String x:Key="Settings.Section.Appearance">Appearance</sys:String>
     <sys:String x:Key="Settings.DarkTheme">Dark theme</sys:String>

@@ -31,4 +31,6 @@ public sealed record AppSettings(
     /// </summary>
     Guid? DefaultCashAccountId = null,
     /// <summary>目標淨資產（台幣），用於儀表板目標進度列。預設 0 表示未設定。</summary>
-    decimal GoalNetWorth = 0m);
+    decimal GoalNetWorth = 0m,
+    /// <summary>首次啟動歡迎橫幅已關閉。false = 顯示，true = 已忽略。</summary>
+    bool HasShownWelcomeBanner = false);

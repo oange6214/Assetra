@@ -422,21 +422,33 @@
             </DataGrid>
 
             <!--  Empty state  -->
-            <Border Visibility="{Binding HasNoRules, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Opacity="0.4">
+            <Border
+                Padding="32"
+                Visibility="{Binding HasNoRules, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock
                         Margin="0,0,0,12"
                         HorizontalAlignment="Center"
                         FontSize="{StaticResource FontSize3xl}"
+                        Opacity="0.45"
                         Text="🔔" />
                     <TextBlock
                         HorizontalAlignment="Center"
                         FontSize="{StaticResource FontSizeMd}"
-                        Foreground="{DynamicResource AppTextMuted}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Alerts.Empty}" />
+                    <TextBlock
+                        Margin="0,6,0,20"
+                        HorizontalAlignment="Center"
+                        FontSize="{StaticResource FontSizeSm}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Alerts.Empty.Hint}" />
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        FontSize="{StaticResource FontSizeXs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Alerts.Empty.Cta}" />
                 </StackPanel>
             </Border>
         </Grid>

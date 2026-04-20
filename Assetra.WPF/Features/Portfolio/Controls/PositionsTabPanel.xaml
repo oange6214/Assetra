@@ -236,20 +236,35 @@
                 Padding="32"
                 Background="{DynamicResource AppBackground}"
                 Visibility="{Binding HasNoPositions, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Opacity="0.4">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock
-                        Margin="0,0,0,6"
+                        Margin="0,0,0,12"
                         HorizontalAlignment="Center"
-                        FontSize="{StaticResource FontSize2xl}"
+                        FontSize="{StaticResource FontSize3xl}"
+                        Opacity="0.45"
                         Text="&#x1F4BC;" />
                     <TextBlock
                         HorizontalAlignment="Center"
+                        FontSize="{StaticResource FontSizeMd}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Portfolio.Empty}" />
+                    <TextBlock
+                        Margin="0,6,0,20"
+                        HorizontalAlignment="Center"
                         FontSize="{StaticResource FontSizeSm}"
                         Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Portfolio.Empty}" />
+                        Text="{DynamicResource Portfolio.Empty.Hint}" />
+                    <Button
+                        Height="34"
+                        Padding="20,0"
+                        HorizontalAlignment="Center"
+                        Command="{Binding GlobalAddCommand}"
+                        Style="{StaticResource BtnPrimary}">
+                        <TextBlock
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                            Text="{DynamicResource Portfolio.Empty.Cta}" />
+                    </Button>
                 </StackPanel>
             </Border>
 
@@ -713,21 +728,38 @@
             </DataGrid>
 
             <!--  Empty state  -->
-            <Border Visibility="{Binding HasNoPositions, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Opacity="0.4">
+            <Border
+                Padding="32"
+                Visibility="{Binding HasNoPositions, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock
                         Margin="0,0,0,12"
                         HorizontalAlignment="Center"
                         FontSize="{StaticResource FontSize3xl}"
+                        Opacity="0.45"
                         Text="&#x1F4BC;" />
                     <TextBlock
                         HorizontalAlignment="Center"
                         FontSize="{StaticResource FontSizeMd}"
-                        Foreground="{DynamicResource AppTextSecondary}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Portfolio.Empty}" />
+                    <TextBlock
+                        Margin="0,6,0,20"
+                        HorizontalAlignment="Center"
+                        FontSize="{StaticResource FontSizeSm}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Empty.Hint}" />
+                    <Button
+                        Height="34"
+                        Padding="20,0"
+                        HorizontalAlignment="Center"
+                        Command="{Binding GlobalAddCommand}"
+                        Style="{StaticResource BtnPrimary}">
+                        <TextBlock
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                            Text="{DynamicResource Portfolio.Empty.Cta}" />
+                    </Button>
                 </StackPanel>
             </Border>
         </Grid>

@@ -66,6 +66,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     [ObservableProperty] private decimal _totalPnlPercent;
     [ObservableProperty] private bool _isTotalPositive;
     [ObservableProperty] private bool _hasNoPositions = true;
+    [ObservableProperty] private bool _showWelcomeBanner;
 
     // 現金 / 負債 / 總資產 / 淨資產
     [ObservableProperty] private decimal _totalCash;
@@ -265,6 +266,21 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         {
             // 儲存偏好設定失敗不影響主要功能
             System.Diagnostics.Debug.WriteLine($"[Portfolio] SaveMonthlyExpense failed: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task DismissWelcomeBannerAsync()
+    {
+        ShowWelcomeBanner = false;
+        if (_settingsService is null) return;
+        try
+        {
+            await _settingsService.SaveAsync(_settingsService.Current with { HasShownWelcomeBanner = true });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Portfolio] DismissWelcomeBanner failed: {ex.Message}");
         }
     }
 
@@ -982,6 +998,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     {
         // Restore persisted monthly expense (set via property to avoid triggering save-back on load)
         SetProperty(ref _monthlyExpense, _settingsService?.Current?.MonthlyExpense ?? 0m, nameof(MonthlyExpense));
+        ShowWelcomeBanner = !(_settingsService?.Current?.HasShownWelcomeBanner ?? false);
 
         await LoadPositionsAsync();
 
