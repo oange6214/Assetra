@@ -1081,8 +1081,7 @@
                                                         Padding="8,0"
                                                         HorizontalAlignment="Right"
                                                         Command="{Binding DataContext.ConfirmLoanPaymentCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                        CommandParameter="{Binding}"
-                                                        Style="{StaticResource BtnPrimary}">
+                                                        CommandParameter="{Binding}">
                                                         <Button.Style>
                                                             <Style BasedOn="{StaticResource BtnPrimary}" TargetType="Button">
                                                                 <Style.Triggers>
