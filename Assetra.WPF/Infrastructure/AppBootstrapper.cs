@@ -184,10 +184,14 @@ internal static class AppBootstrapper
                 System.Reactive.Concurrency.DefaultScheduler.Instance,
                 sp.GetService<IThemeService>(),
                 sp.GetRequiredService<IAppSettingsService>(),
-                sp.GetRequiredService<ISnackbarService>())));
+                sp.GetRequiredService<ISnackbarService>(),
+                sp.GetRequiredService<ILocalizationService>())));
         services.AddSingleton<AllocationViewModel>(sp => new AllocationViewModel(
             sp.GetRequiredService<PortfolioViewModel>(),
             sp.GetRequiredService<IAppSettingsService>()));
+        services.AddSingleton<DashboardViewModel>(sp => new DashboardViewModel(
+            sp.GetRequiredService<PortfolioViewModel>(),
+            sp.GetService<IThemeService>()));
         services.AddSingleton<FinancialOverviewViewModel>(sp => new FinancialOverviewViewModel(
             sp.GetRequiredService<IAssetRepository>(),
             sp.GetRequiredService<IBalanceQueryService>(),
@@ -217,9 +221,17 @@ internal static class AppBootstrapper
             localization.SetLanguage(savedSettings.Language);
 
         // Refresh exchange rates in the background on startup — silently falls back to defaults on failure
-        _ = Task.Run(() =>
-            provider.GetRequiredService<ICurrencyService>()
-                    .RefreshRatesAsync());
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await provider.GetRequiredService<ICurrencyService>().RefreshRatesAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Background task {Task} failed at startup", nameof(ICurrencyService.RefreshRatesAsync));
+            }
+        });
 
         // Download fresh stock lists from TWSE/TPEX APIs, then warm up search service
         _ = Task.Run(async () =>
@@ -234,12 +246,12 @@ internal static class AppBootstrapper
                     if (search is StockSearchService svc)
                         svc.Reload(assetsDir);
                 }
+                provider.GetRequiredService<IStockSearchService>().GetAll();
             }
             catch (Exception ex)
             {
-                Serilog.Log.Warning(ex, "Failed to update stock list from TWSE/TPEX; existing CSV files will be used");
+                Log.Warning(ex, "Background task {Task} failed at startup", nameof(StockListDownloader.UpdateAsync));
             }
-            provider.GetRequiredService<IStockSearchService>().GetAll();
         });
 
         return host;

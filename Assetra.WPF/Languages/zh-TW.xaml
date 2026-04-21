@@ -9,31 +9,23 @@
     <!--  Splash  -->
     <sys:String x:Key="Splash.Init">正在初始化…</sys:String>
     <sys:String x:Key="Splash.Services">正在啟動資料服務…</sys:String>
-    <sys:String x:Key="Splash.Watchlist">正在載入自選股…</sys:String>
     <sys:String x:Key="Splash.Portfolio">正在載入投資組合…</sys:String>
     <sys:String x:Key="Splash.Alerts">正在載入價格警示…</sys:String>
-    <sys:String x:Key="Splash.News">正在載入市場新聞…</sys:String>
 
     <!--  Navigation  -->
     <sys:String x:Key="TitleBar.Search.Hint">輸入股票代號或名稱搜尋</sys:String>
     <sys:String x:Key="TitleBar.Search.Placeholder">搜尋股票...</sys:String>
-    <sys:String x:Key="Nav.Watchlist">自選股</sys:String>
-    <sys:String x:Key="Nav.Screener">選股</sys:String>
     <sys:String x:Key="Nav.AssetManagement.Short">資產</sys:String>
     <sys:String x:Key="Nav.AssetManagement.Full">資產管理</sys:String>
-    <sys:String x:Key="Nav.Screener.Tooltip">技術選股</sys:String>
-    <sys:String x:Key="Nav.MarketInfo">市場資訊</sys:String>
-    <sys:String x:Key="Nav.MarketInfo.Tooltip">市場資訊</sys:String>
     <sys:String x:Key="Nav.Alerts">警示</sys:String>
     <sys:String x:Key="Nav.Alerts.Tooltip">價格警示</sys:String>
-    <sys:String x:Key="Nav.AiChat">AI 助理</sys:String>
     <sys:String x:Key="Nav.Settings">設定</sys:String>
     <sys:String x:Key="Nav.GoBack">上一頁</sys:String>
     <sys:String x:Key="Nav.GoForward">下一頁</sys:String>
 
     <!--  Menu  -->
     <sys:String x:Key="About.Title">關於 Assetra</sys:String>
-    <sys:String x:Key="About.Description">台股即時儀表板</sys:String>
+    <sys:String x:Key="About.Description">個人資產追蹤與投資管理</sys:String>
     <sys:String x:Key="About.Version">版本 {0}</sys:String>
     <sys:String x:Key="About.Copyright">© 2026 Assetra. All rights reserved.</sys:String>
     <sys:String x:Key="About.Close">關閉</sys:String>
@@ -49,6 +41,7 @@
     <sys:String x:Key="Common.Save">儲存</sys:String>
     <sys:String x:Key="Common.CreatedDate">建立日期</sys:String>
     <sys:String x:Key="Common.Confirm">確認</sys:String>
+    <sys:String x:Key="Common.Close">關閉</sys:String>
 
     <!--  Severity  -->
     <sys:String x:Key="Severity.Normal">一般</sys:String>
@@ -314,6 +307,7 @@
     <sys:String x:Key="Portfolio.Tx.Buy">買入</sys:String>
     <sys:String x:Key="Portfolio.Tx.Sell">賣出</sys:String>
     <sys:String x:Key="Portfolio.Tx.SellPosition">選擇持倉</sys:String>
+    <sys:String x:Key="Portfolio.Tx.SellQuantity">賣出股數</sys:String>
     <sys:String x:Key="Portfolio.Tx.SellPrice">賣出價格</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Title">編輯資產</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Subtitle">更新資產詳細資訊。</sys:String>
@@ -417,30 +411,10 @@
     <sys:String x:Key="Settings.UiScaleDesc">0.75× ～ 1.5×，拖曳調整介面縮放</sys:String>
     <sys:String x:Key="Settings.DataSource">歷史資料來源</sys:String>
     <sys:String x:Key="Settings.DataSourceDesc">切換後立即生效，無需重新啟動</sys:String>
-    <sys:String x:Key="Settings.LlmProvider">AI Provider</sys:String>
-    <sys:String x:Key="Settings.LlmProviderDesc">選擇 AI 提供者並輸入對應的 API Key</sys:String>
-    <sys:String x:Key="Settings.OllamaLocal">Ollama（本地）</sys:String>
-    <sys:String x:Key="Settings.OllamaInstall">一鍵安裝本地 AI（Ollama + qwen3-coder:8b）</sys:String>
-    <sys:String x:Key="Settings.OllamaStartInstall">開始安裝</sys:String>
-    <sys:String x:Key="Settings.OllamaInstalling">安裝中…</sys:String>
-    <sys:String x:Key="Settings.Model">模型</sys:String>
-    <sys:String x:Key="Settings.ModelRefresh">重新查詢可用模型</sys:String>
-    <sys:String x:Key="Settings.Loading">載入中…</sys:String>
-    <sys:String x:Key="Settings.TestConnection">測試連線</sys:String>
     <sys:String x:Key="Settings.About">關於</sys:String>
     <sys:String x:Key="Settings.DataDir">資料目錄</sys:String>
     <sys:String x:Key="Settings.OpenDir">開啟</sys:String>
-    <sys:String x:Key="Settings.Show">顯示</sys:String>
-    <sys:String x:Key="Settings.Hide">隱藏</sys:String>
     <sys:String x:Key="Settings.FinMindToken">FinMind API Token</sys:String>
-    <sys:String x:Key="Settings.TranslateFlash">自動翻譯快訊（需設定 AI Provider）</sys:String>
-    <sys:String x:Key="Settings.TranslateFlashDesc">新到達的快訊內容自動翻譯成介面語言</sys:String>
-    <sys:String x:Key="Settings.Jin10AppId">金十 App ID</sys:String>
-    <sys:String x:Key="Settings.Jin10AppIdDesc">從 jin10.com 個人頁面取得 App ID，用於金十快訊 API</sys:String>
-    <sys:String x:Key="Settings.Jin10Test">測試</sys:String>
-    <sys:String x:Key="Settings.Jin10Testing">測試中…</sys:String>
-    <sys:String x:Key="Settings.Jin10TestOk">✓ 連線成功</sys:String>
-    <sys:String x:Key="Settings.Jin10TestFail">✗ 連線失敗，請確認 ID 是否正確</sys:String>
 
     <!--  ── 資產配置 ──  -->
     <sys:String x:Key="Allocation.Tab.Overview">配置概覽</sys:String>
@@ -474,6 +448,10 @@
     <sys:String x:Key="Calendar.Today">今天</sys:String>
 
     <!--  Dashboard  -->
+    <sys:String x:Key="Dashboard.TenDayTrend">近 10 日走勢</sys:String>
+    <sys:String x:Key="Dashboard.TopHoldings">主要持股</sys:String>
+    <sys:String x:Key="Dashboard.RecentTrades">近期交易</sys:String>
+    <sys:String x:Key="Dashboard.ViewDetail">詳細</sys:String>
 
     <sys:String x:Key="Alerts.Added">已新增警示：{0} {1} {2}</sys:String>
     <sys:String x:Key="Alerts.Updated">已更新 {0} 警示規則</sys:String>
@@ -481,6 +459,7 @@
     <sys:String x:Key="Portfolio.Sell.TradeSaveFailed">賣出已完成，但交易記錄儲存失敗</sys:String>
     <sys:String x:Key="Portfolio.Trade.DeleteFailed">刪除交易記錄失敗，請稍後再試</sys:String>
     <sys:String x:Key="Portfolio.Trade.OldDeleteFailed">舊交易記錄刪除失敗，資料庫可能存在重複筆數，建議重新整理或重啟應用程式</sys:String>
+    <sys:String x:Key="Portfolio.Trade.DeleteBlockedBySell">請先刪除此股票的賣出記錄，再刪除（或修改）此買入記錄。</sys:String>
 
     <!--  Financial Overview  -->
     <sys:String x:Key="FinancialOverview.Nav.Label">財務總覽</sys:String>
@@ -502,6 +481,7 @@
     <sys:String x:Key="Settings.ColorScheme.International">國際（綠漲紅跌）</sys:String>
     <sys:String x:Key="Settings.Section.Language">語言</sys:String>
     <sys:String x:Key="Settings.PrimaryCurrency">主要貨幣</sys:String>
+    <sys:String x:Key="Settings.Section.Data">資料</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">盤中</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">休市</sys:String>
 </ResourceDictionary>

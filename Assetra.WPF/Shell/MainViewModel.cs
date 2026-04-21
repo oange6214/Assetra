@@ -1,7 +1,10 @@
+using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Assetra.Core.Interfaces;
+using Assetra.Core.Models;
 using Assetra.WPF.Features.Alerts;
 using Assetra.WPF.Features.Allocation;
 using Assetra.WPF.Features.Portfolio;
@@ -21,6 +24,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public StatusBarViewModel StatusBar { get; }
     public PortfolioViewModel Portfolio { get; }
     public AllocationViewModel Allocation { get; }
+    public DashboardViewModel Dashboard { get; }
     public FinancialOverviewViewModel FinancialOverview { get; }
     public AlertsViewModel Alerts { get; }
     public SettingsViewModel Settings { get; }
@@ -30,15 +34,48 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private bool _isSearchOpen;
 
+    public ObservableCollection<StockSearchResult> SearchResults { get; } = new();
+
     [RelayCommand]
     private void ToggleSearch() => IsSearchOpen = !IsSearchOpen;
 
-    // Clear the query whenever the popup closes — covers outside-click dismiss
+    partial void OnSearchTextChanged(string value) => PerformSearch(value);
+
+    private void PerformSearch(string query)
+    {
+        if (query.Length < 1)
+        {
+            SearchResults.Clear();
+            return;
+        }
+
+        var fresh = _searchService.Search(query);
+
+        // Remove items no longer in results
+        for (var i = SearchResults.Count - 1; i >= 0; i--)
+        {
+            if (!fresh.Any(r => r.Symbol == SearchResults[i].Symbol))
+                SearchResults.RemoveAt(i);
+        }
+
+        // Add new items not already present
+        var existingSymbols = new HashSet<string>(SearchResults.Select(r => r.Symbol));
+        foreach (var result in fresh)
+        {
+            if (!existingSymbols.Contains(result.Symbol))
+                SearchResults.Add(result);
+        }
+    }
+
+    // Clear the query and results whenever the popup closes — covers outside-click dismiss
     // (two-way bound from Popup.IsOpen) as well as the toggle command path.
     partial void OnIsSearchOpenChanged(bool value)
     {
         if (!value)
+        {
             SearchText = string.Empty;
+            SearchResults.Clear();
+        }
     }
 
     // Navigation
@@ -48,6 +85,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     // Theme
 
+    private readonly IStockSearchService _searchService;
     private readonly IThemeService _themeService;
 
     [ObservableProperty] private ApplicationTheme _currentTheme;
@@ -76,21 +114,25 @@ public partial class MainViewModel : ObservableObject, IDisposable
         StatusBarViewModel statusBar,
         PortfolioViewModel portfolio,
         AllocationViewModel allocation,
+        DashboardViewModel dashboard,
         FinancialOverviewViewModel financialOverview,
         AlertsViewModel alerts,
         SettingsViewModel settings,
         SnackbarViewModel snackbar,
-        IThemeService themeService)
+        IThemeService themeService,
+        IStockSearchService searchService)
     {
         NavRail = navRail;
         StatusBar = statusBar;
         Portfolio = portfolio;
         Allocation = allocation;
+        Dashboard = dashboard;
         FinancialOverview = financialOverview;
         Alerts = alerts;
         Settings = settings;
         Snackbar = snackbar;
         _themeService = themeService;
+        _searchService = searchService;
         CurrentTheme = themeService.CurrentTheme;
     }
 

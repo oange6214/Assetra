@@ -9,31 +9,23 @@
     <!--  Splash  -->
     <sys:String x:Key="Splash.Init">Initializing…</sys:String>
     <sys:String x:Key="Splash.Services">Starting data services…</sys:String>
-    <sys:String x:Key="Splash.Watchlist">Loading watchlist…</sys:String>
     <sys:String x:Key="Splash.Portfolio">Loading portfolio…</sys:String>
     <sys:String x:Key="Splash.Alerts">Loading alerts…</sys:String>
-    <sys:String x:Key="Splash.News">Loading market news…</sys:String>
 
     <!--  Navigation  -->
             <sys:String x:Key="TitleBar.Search.Hint">Type a stock symbol or name to search</sys:String>
     <sys:String x:Key="TitleBar.Search.Placeholder">Search stocks...</sys:String>
-    <sys:String x:Key="Nav.Watchlist">Watchlist</sys:String>
-    <sys:String x:Key="Nav.Screener">Screener</sys:String>
     <sys:String x:Key="Nav.AssetManagement.Short">Assets</sys:String>
     <sys:String x:Key="Nav.AssetManagement.Full">Asset Management</sys:String>
-        <sys:String x:Key="Nav.Screener.Tooltip">Stock screener</sys:String>
-        <sys:String x:Key="Nav.MarketInfo">Market</sys:String>
-    <sys:String x:Key="Nav.MarketInfo.Tooltip">Market info</sys:String>
     <sys:String x:Key="Nav.Alerts">Alerts</sys:String>
     <sys:String x:Key="Nav.Alerts.Tooltip">Price Alerts</sys:String>
-    <sys:String x:Key="Nav.AiChat">AI Chat</sys:String>
     <sys:String x:Key="Nav.Settings">Settings</sys:String>
     <sys:String x:Key="Nav.GoBack">Go back</sys:String>
     <sys:String x:Key="Nav.GoForward">Go forward</sys:String>
 
     <!--  Menu  -->
     <sys:String x:Key="About.Title">About Assetra</sys:String>
-    <sys:String x:Key="About.Description">Taiwan Stock Real-time Dashboard</sys:String>
+    <sys:String x:Key="About.Description">Personal Asset Tracking &amp; Portfolio Management</sys:String>
     <sys:String x:Key="About.Version">Version {0}</sys:String>
     <sys:String x:Key="About.Copyright">© 2026 Assetra. All rights reserved.</sys:String>
     <sys:String x:Key="About.Close">Close</sys:String>
@@ -49,6 +41,7 @@
     <sys:String x:Key="Common.Save">Save</sys:String>
     <sys:String x:Key="Common.CreatedDate">Created</sys:String>
     <sys:String x:Key="Common.Confirm">Confirm</sys:String>
+    <sys:String x:Key="Common.Close">Close</sys:String>
 
     <!--  Severity  -->
     <sys:String x:Key="Severity.Normal">Normal</sys:String>
@@ -313,6 +306,7 @@
     <sys:String x:Key="Portfolio.Tx.Buy">Buy</sys:String>
     <sys:String x:Key="Portfolio.Tx.Sell">Sell</sys:String>
     <sys:String x:Key="Portfolio.Tx.SellPosition">Select position</sys:String>
+    <sys:String x:Key="Portfolio.Tx.SellQuantity">Sell quantity</sys:String>
     <sys:String x:Key="Portfolio.Tx.SellPrice">Sell price</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Title">Edit Asset</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Subtitle">Update asset details.</sys:String>
@@ -415,30 +409,10 @@
     <sys:String x:Key="Settings.UiScaleDesc">Drag to adjust scale (0.75× – 1.50×)</sys:String>
     <sys:String x:Key="Settings.DataSource">Historical data source</sys:String>
     <sys:String x:Key="Settings.DataSourceDesc">Takes effect immediately, no restart needed</sys:String>
-    <sys:String x:Key="Settings.LlmProvider">AI Provider</sys:String>
-    <sys:String x:Key="Settings.LlmProviderDesc">Select an AI provider and enter the corresponding API key</sys:String>
-    <sys:String x:Key="Settings.OllamaLocal">Ollama (Local)</sys:String>
-    <sys:String x:Key="Settings.OllamaInstall">Install local AI (Ollama + qwen3-coder:8b)</sys:String>
-    <sys:String x:Key="Settings.OllamaStartInstall">Start install</sys:String>
-    <sys:String x:Key="Settings.OllamaInstalling">Installing…</sys:String>
-    <sys:String x:Key="Settings.Model">Model</sys:String>
-    <sys:String x:Key="Settings.ModelRefresh">Refresh available models</sys:String>
-    <sys:String x:Key="Settings.Loading">Loading…</sys:String>
-    <sys:String x:Key="Settings.TestConnection">Test connection</sys:String>
     <sys:String x:Key="Settings.About">About</sys:String>
     <sys:String x:Key="Settings.DataDir">Data directory</sys:String>
     <sys:String x:Key="Settings.OpenDir">Open</sys:String>
-    <sys:String x:Key="Settings.Show">Show</sys:String>
-    <sys:String x:Key="Settings.Hide">Hide</sys:String>
     <sys:String x:Key="Settings.FinMindToken">FinMind API Token</sys:String>
-    <sys:String x:Key="Settings.TranslateFlash">Auto-translate flash news (requires AI Provider)</sys:String>
-    <sys:String x:Key="Settings.TranslateFlashDesc">Newly arrived flash items are translated to the UI language</sys:String>
-    <sys:String x:Key="Settings.Jin10AppId">Jin10 App ID</sys:String>
-    <sys:String x:Key="Settings.Jin10AppIdDesc">Get your App ID from the jin10.com profile page</sys:String>
-    <sys:String x:Key="Settings.Jin10Test">Test</sys:String>
-    <sys:String x:Key="Settings.Jin10Testing">Testing…</sys:String>
-    <sys:String x:Key="Settings.Jin10TestOk">✓ Connection OK</sys:String>
-    <sys:String x:Key="Settings.Jin10TestFail">✗ Connection failed — check your App ID</sys:String>
 
     <!--  ── Asset Allocation ──  -->
     <sys:String x:Key="Allocation.Tab.Overview">Overview</sys:String>
@@ -472,6 +446,10 @@
     <sys:String x:Key="Calendar.Today">Today</sys:String>
 
     <!--  Dashboard  -->
+    <sys:String x:Key="Dashboard.TenDayTrend">10-Day Trend</sys:String>
+    <sys:String x:Key="Dashboard.TopHoldings">Top Holdings</sys:String>
+    <sys:String x:Key="Dashboard.RecentTrades">Recent Trades</sys:String>
+    <sys:String x:Key="Dashboard.ViewDetail">Details</sys:String>
 
     <sys:String x:Key="Alerts.Added">Alert added: {0} {1} {2}</sys:String>
     <sys:String x:Key="Alerts.Updated">Updated alert rule for {0}</sys:String>
@@ -479,6 +457,7 @@
     <sys:String x:Key="Portfolio.Sell.TradeSaveFailed">Sell completed, but saving the trade record failed</sys:String>
     <sys:String x:Key="Portfolio.Trade.DeleteFailed">Failed to delete trade record, please try again</sys:String>
     <sys:String x:Key="Portfolio.Trade.OldDeleteFailed">Failed to delete old trade records; possible duplicates in DB. Try refreshing or restarting.</sys:String>
+    <sys:String x:Key="Portfolio.Trade.DeleteBlockedBySell">Delete the related sell trade first before removing or editing this buy.</sys:String>
 
     <!--  Financial Overview  -->
     <sys:String x:Key="FinancialOverview.Nav.Label">Financial Overview</sys:String>
@@ -500,6 +479,7 @@
     <sys:String x:Key="Settings.ColorScheme.International">International (green up / red down)</sys:String>
     <sys:String x:Key="Settings.Section.Language">Language</sys:String>
     <sys:String x:Key="Settings.PrimaryCurrency">Primary currency</sys:String>
+    <sys:String x:Key="Settings.Section.Data">Data</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">Market open</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">Market closed</sys:String>
 </ResourceDictionary>
