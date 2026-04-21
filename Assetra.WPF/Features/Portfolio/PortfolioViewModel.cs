@@ -491,7 +491,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                     _assetRepo,
                     _loanScheduleRepo,
                     _txService)
-                : new NullLoanMutationWorkflowService(_transactionWorkflowService));
+                : new NullLoanMutationWorkflowService(_transactionWorkflowService, _txService));
         _summaryService = services.Summary ?? new PortfolioSummaryService();
         _historyMaintenanceService = services.HistoryMaintenance
             ?? new NullPortfolioHistoryMaintenanceService();
@@ -1251,14 +1251,26 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private sealed class NullLoanMutationWorkflowService : ILoanMutationWorkflowService
     {
         private readonly ITransactionWorkflowService _transactionWorkflowService;
+        private readonly ITransactionService _transactionService;
 
-        public NullLoanMutationWorkflowService(ITransactionWorkflowService transactionWorkflowService)
+        public NullLoanMutationWorkflowService(
+            ITransactionWorkflowService transactionWorkflowService,
+            ITransactionService transactionService)
         {
             _transactionWorkflowService = transactionWorkflowService;
+            _transactionService = transactionService;
         }
 
-        public Task<TransactionWorkflowPlan> RecordAsync(LoanTransactionRequest request, CancellationToken ct = default)
-            => Task.FromResult(_transactionWorkflowService.CreateLoanPlan(request));
+        public async Task<TransactionWorkflowPlan> RecordAsync(LoanTransactionRequest request, CancellationToken ct = default)
+        {
+            var plan = _transactionWorkflowService.CreateLoanPlan(request);
+            foreach (var trade in plan.Trades)
+            {
+                ct.ThrowIfCancellationRequested();
+                await _transactionService.RecordAsync(trade).ConfigureAwait(false);
+            }
+            return plan;
+        }
     }
 
     private sealed class NullLoanScheduleQueryService : ILoanScheduleQueryService
