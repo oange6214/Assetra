@@ -15,6 +15,7 @@ using Assetra.WPF.Features.AddStock;
 using Assetra.WPF.Features.Alerts;
 using Assetra.WPF.Features.Allocation;
 using Assetra.WPF.Features.Portfolio;
+using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Features.Settings;
 using Assetra.WPF.Features.Snackbar;
 using Assetra.WPF.Features.StatusBar;
@@ -212,22 +213,26 @@ internal static class ServiceCollectionExtensions
                 HistoryMaintenance: sp.GetRequiredService<IPortfolioHistoryMaintenanceService>(),
                 HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
                 TradeDeletionWorkflow: sp.GetRequiredService<ITradeDeletionWorkflowService>(),
-                TradeMetadataWorkflow: sp.GetRequiredService<ITradeMetadataWorkflowService>(),
-                SellWorkflow: sp.GetRequiredService<ISellWorkflowService>(),
                 PositionDeletionWorkflow: sp.GetRequiredService<IPositionDeletionWorkflowService>(),
                 PositionMetadataWorkflow: sp.GetRequiredService<IPositionMetadataWorkflowService>(),
-                AccountMutationWorkflow: sp.GetRequiredService<IAccountMutationWorkflowService>(),
-                AccountUpsertWorkflow: sp.GetRequiredService<IAccountUpsertWorkflowService>(),
-                LoanPaymentWorkflow: sp.GetRequiredService<ILoanPaymentWorkflowService>(),
                 LoanMutationWorkflow: sp.GetRequiredService<ILoanMutationWorkflowService>(),
                 Load: sp.GetRequiredService<IPortfolioLoadService>(),
-                AddAssetWorkflow: sp.GetRequiredService<IAddAssetWorkflowService>(),
                 History: sp.GetRequiredService<IStockHistoryProvider>(),
                 Currency: sp.GetRequiredService<ICurrencyService>(),
                 Crypto: sp.GetRequiredService<ICryptoService>(),
                 BalanceQuery: sp.GetRequiredService<IBalanceQueryService>(),
                 PositionQuery: sp.GetRequiredService<IPositionQueryService>(),
-                TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>())
+                TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>(),
+                // Pre-built Sub-VMs that don't require parent-VM callbacks at construction
+                // time. The parent PortfolioViewModel wires the delegate properties afterward.
+                AddAssetDialog: new AddAssetDialogViewModel(
+                    sp.GetRequiredService<IAddAssetWorkflowService>(),
+                    sp.GetRequiredService<IAccountUpsertWorkflowService>()),
+                SellPanel: new SellPanelViewModel(
+                    sp.GetRequiredService<ISellWorkflowService>(),
+                    new PortfolioSellPanelController(),
+                    sp.GetRequiredService<ISnackbarService>(),
+                    sp.GetRequiredService<ILocalizationService>()))
             {
                 Summary = sp.GetRequiredService<IPortfolioSummaryService>(),
             },

@@ -28,8 +28,6 @@ public sealed record PortfolioServices(
     IPortfolioHistoryMaintenanceService? HistoryMaintenance = null,
     IPortfolioHistoryQueryService? HistoryQuery = null,
     IPortfolioLoadService? Load = null,
-    IAddAssetWorkflowService? AddAssetWorkflow = null,
-    ITradeMetadataWorkflowService? TradeMetadataWorkflow = null,
     IStockHistoryProvider? History = null,
     ICurrencyService? Currency = null,
     ICryptoService? Crypto = null,
@@ -51,11 +49,7 @@ public sealed record PortfolioServices(
     ITransactionWorkflowService? TransactionWorkflow = null,
     ITradeDeletionWorkflowService? TradeDeletionWorkflow = null,
     IPositionDeletionWorkflowService? PositionDeletionWorkflow = null,
-    ISellWorkflowService? SellWorkflow = null,
     IPositionMetadataWorkflowService? PositionMetadataWorkflow = null,
-    IAccountMutationWorkflowService? AccountMutationWorkflow = null,
-    IAccountUpsertWorkflowService? AccountUpsertWorkflow = null,
-    ILoanPaymentWorkflowService? LoanPaymentWorkflow = null,
     ILoanMutationWorkflowService? LoanMutationWorkflow = null,
     /// <summary>
     /// Optional pre-built <see cref="AddAssetDialogViewModel"/>. When null the

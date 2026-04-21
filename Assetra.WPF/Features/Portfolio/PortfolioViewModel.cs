@@ -48,18 +48,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly IBalanceQueryService _balanceQuery;
     private readonly IPositionQueryService _positionQuery;
     private readonly IPortfolioLoadService _loadService;
-    private readonly IAddAssetWorkflowService _addAssetWorkflowService;
     private readonly ITransactionWorkflowService _transactionWorkflowService;
     private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
-    private readonly ITradeMetadataWorkflowService _tradeMetadataWorkflowService;
-    private readonly ISellWorkflowService _sellWorkflowService;
     private readonly PortfolioSellPanelController _sellPanelController = new();
     private readonly PortfolioTradeDialogController _tradeDialogController = new();
     private readonly IPositionDeletionWorkflowService _positionDeletionWorkflowService;
     private readonly IPositionMetadataWorkflowService _positionMetadataWorkflowService;
-    private readonly IAccountMutationWorkflowService _accountMutationWorkflowService;
-    private readonly IAccountUpsertWorkflowService _accountUpsertWorkflowService;
-    private readonly ILoanPaymentWorkflowService _loanPaymentWorkflowService;
     private readonly ILoanMutationWorkflowService _loanMutationWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly IPortfolioHistoryMaintenanceService _historyMaintenanceService;
@@ -491,36 +485,14 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _balanceQuery,
             _assetRepo);
         var fallbackTxService = new NullTransactionService();
-        _addAssetWorkflowService = services.AddAssetWorkflow ?? new AddAssetWorkflowService(
-            _search,
-            _historyProvider,
-            _repo,
-            _logRepo,
-            fallbackTxService);
         _transactionWorkflowService = services.TransactionWorkflow
             ?? new TransactionWorkflowService(fallbackTxService);
         _tradeDeletionWorkflowService = services.TradeDeletionWorkflow
             ?? new TradeDeletionWorkflowService(_tradeRepo, _repo, _positionQuery);
-        _tradeMetadataWorkflowService = services.TradeMetadataWorkflow
-            ?? new TradeMetadataWorkflowService(_tradeRepo);
-        _sellWorkflowService = services.SellWorkflow
-            ?? new SellWorkflowService(_tradeRepo, _repo, _logRepo, _positionQuery);
         _positionDeletionWorkflowService = services.PositionDeletionWorkflow
             ?? new PositionDeletionWorkflowService(_tradeRepo, _repo);
         _positionMetadataWorkflowService = services.PositionMetadataWorkflow
             ?? new PositionMetadataWorkflowService(_repo);
-        _accountMutationWorkflowService = services.AccountMutationWorkflow
-            ?? (_assetRepo is not null
-                ? new AccountMutationWorkflowService(_assetRepo)
-                : new NullAccountMutationWorkflowService());
-        _accountUpsertWorkflowService = services.AccountUpsertWorkflow
-            ?? (_assetRepo is not null
-                ? new AccountUpsertWorkflowService(_assetRepo)
-                : new NullAccountUpsertWorkflowService());
-        _loanPaymentWorkflowService = services.LoanPaymentWorkflow
-            ?? (_loanScheduleRepo is not null
-                ? new LoanPaymentWorkflowService(_tradeRepo, _loanScheduleRepo)
-                : new NullLoanPaymentWorkflowService());
         _loanMutationWorkflowService = services.LoanMutationWorkflow
             ?? (_assetRepo is not null && _loanScheduleRepo is not null
                 ? new LoanMutationWorkflowService(
@@ -541,16 +513,31 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         TradeFilter = new TradeFilterViewModel(() => Trades, ui.Localization ?? NullLocalizationService.Instance);
         TradeFilter.AttachTradesCollection(Trades);
 
+        // Build inline workflow services needed only for Sub-VM construction (not held as fields).
+        var addAssetWorkflow = new AddAssetWorkflowService(
+            _search, _historyProvider, _repo, _logRepo, fallbackTxService);
+        var accountUpsertWorkflow = _assetRepo is not null
+            ? (IAccountUpsertWorkflowService)new AccountUpsertWorkflowService(_assetRepo)
+            : new NullAccountUpsertWorkflowService();
+        var accountMutationWorkflow = _assetRepo is not null
+            ? (IAccountMutationWorkflowService)new AccountMutationWorkflowService(_assetRepo)
+            : new NullAccountMutationWorkflowService();
+        var sellWorkflow = (ISellWorkflowService)new SellWorkflowService(_tradeRepo, _repo, _logRepo, _positionQuery);
+        var tradeMetadataWorkflow = (ITradeMetadataWorkflowService)new TradeMetadataWorkflowService(_tradeRepo);
+        var loanPaymentWorkflow = _loanScheduleRepo is not null
+            ? (ILoanPaymentWorkflowService)new LoanPaymentWorkflowService(_tradeRepo, _loanScheduleRepo)
+            : new NullLoanPaymentWorkflowService();
+
         // Build the AddAssetDialog sub-VM. Tx-dialog field delegates are wired below after
         // the Transaction sub-VM is constructed (delegates reference Transaction properties).
         AddAssetDialog = services.AddAssetDialog ?? new AddAssetDialogViewModel(
-            _addAssetWorkflowService,
-            _accountUpsertWorkflowService);
+            addAssetWorkflow,
+            accountUpsertWorkflow);
         AddAssetDialog.AssetAdded += OnAssetAdded;
 
         // Build the SellPanel sub-VM and wire delegates for Tx-dialog fields it needs.
         SellPanel = services.SellPanel ?? new SellPanelViewModel(
-            _sellWorkflowService,
+            sellWorkflow,
             _sellPanelController,
             ui.Snackbar,
             ui.Localization)
@@ -565,8 +552,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         // (passed as a delegate to Transaction) can safely read Account.DefaultCashAccountId.
         Account = services.Account ?? new SubViewModels.AccountDialogViewModel(
             new SubViewModels.AccountDialogDependencies(
-                AccountUpsert: _accountUpsertWorkflowService,
-                AccountMutation: _accountMutationWorkflowService,
+                AccountUpsert: accountUpsertWorkflow,
+                AccountMutation: accountMutationWorkflow,
                 PositionMetadata: _positionMetadataWorkflowService,
                 AssetRepo: _assetRepo,
                 Snackbar: _snackbar,
@@ -584,7 +571,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             new SubViewModels.TransactionDialogDependencies(
                 TransactionWorkflow: _transactionWorkflowService,
                 TradeDeletion: _tradeDeletionWorkflowService,
-                TradeMetadata: _tradeMetadataWorkflowService,
+                TradeMetadata: tradeMetadataWorkflow,
                 LoanMutation: _loanMutationWorkflowService,
                 Search: _search,
                 TradeDialogController: _tradeDialogController,
@@ -610,7 +597,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         // Build the Loan sub-VM with delegates into parent state.
         Loan = services.Loan ?? new SubViewModels.LoanDialogViewModel(
             new SubViewModels.LoanDialogDependencies(
-                LoanPayment: _loanPaymentWorkflowService,
+                LoanPayment: loanPaymentWorkflow,
                 LoanScheduleRepo: _loanScheduleRepo,
                 GetSelectedLiabilityRow: () => SelectedLiabilityRow,
                 GetTxCashAccountId: () => Transaction.TxCashAccount?.Id,
