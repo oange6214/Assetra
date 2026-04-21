@@ -1,0 +1,40 @@
+<h2>Assetra.Application 架構缺點評估</h2>
+<p class="subtitle">選擇你最想優先解決的問題（可多選）</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>ViewModel 注入 15 個服務</h3>
+      <p>建構子過長，PortfolioViewModel 職責過廣，難以測試與維護</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Pass-through 服務沒有附加價值</h3>
+      <p>AlertQueryService、LoanScheduleQueryService 只包一層 repo，增加複雜度卻無實質好處</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>執行責任不一致</h3>
+      <p>TransactionWorkflowService 回傳 Plan（ViewModel 再持久化）vs SellWorkflowService 自己持久化，兩種模式混用</p>
+    </div>
+  </div>
+  <div class="option" data-choice="d" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>Namespace 不一致</h3>
+      <p>專案資料夾 Assetra.Application，但 namespace 是 Assetra.AppLayer</p>
+    </div>
+  </div>
+  <div class="option" data-choice="e" onclick="toggleSelect(this)">
+    <div class="letter">E</div>
+    <div class="content">
+      <h3>Anemic Domain Model 風險</h3>
+      <p>Core Model 逐漸變成純資料容器，計算邏輯全移至 Application 層，領域知識碎片化</p>
+    </div>
+  </div>
+</div>
