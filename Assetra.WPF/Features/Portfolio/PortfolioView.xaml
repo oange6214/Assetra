@@ -625,6 +625,14 @@
                                 GroupName="LiabilityDetailTab"
                                 IsChecked="{Binding IsDetailTradesTab, Mode=OneWay}"
                                 Style="{StaticResource NavTabBtn}" />
+                            <RadioButton
+                                Command="{Binding SwitchDetailTabCommand}"
+                                CommandParameter="schedule"
+                                Content="{DynamicResource Portfolio.Loan.Schedule}"
+                                GroupName="LiabilityDetailTab"
+                                IsChecked="{Binding IsDetailScheduleTab, Mode=OneWay}"
+                                Style="{StaticResource NavTabBtn}"
+                                Visibility="{Binding SelectedLiabilityRow.IsLoan, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                         </StackPanel>
                     </Border>
 
@@ -846,6 +854,256 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </Grid>
+
+                            <!--  ── 攤還表 tab ──  -->
+                            <StackPanel Margin="16,12,16,16" Visibility="{Binding IsDetailScheduleTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                                <!--  Loan metadata  -->
+                                <DockPanel Margin="0,0,0,8">
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        Foreground="{DynamicResource AppTextMuted}">
+                                        <Run Text="{DynamicResource Portfolio.Loan.Rate}" />
+                                        <Run Text=":" />
+                                        <Run FontFamily="{StaticResource FontTabular}" Text="{Binding SelectedLiabilityRow.RateDisplay, FallbackValue='—'}" />
+                                        <Run Text="  " />
+                                        <Run Text="{DynamicResource Portfolio.Loan.Term}" />
+                                        <Run Text=":" />
+                                        <Run FontFamily="{StaticResource FontTabular}" Text="{Binding SelectedLiabilityRow.TermDisplay, FallbackValue='—'}" />
+                                    </TextBlock>
+                                </DockPanel>
+
+                                <!--  3 summary cards  -->
+                                <UniformGrid
+                                    Margin="0,0,0,12"
+                                    Columns="3">
+                                    <Border
+                                        Margin="0,0,4,0"
+                                        Padding="10,8"
+                                        Background="{DynamicResource AppBackground}"
+                                        BorderBrush="{DynamicResource AppBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource RadiusSm}">
+                                        <StackPanel>
+                                            <TextBlock
+                                                FontSize="{StaticResource FontSizeXs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.Loan.PaidPrincipal}" />
+                                            <TextBlock
+                                                Margin="0,4,0,0"
+                                                FontFamily="{StaticResource FontTabular}"
+                                                FontSize="{StaticResource FontSizeSm}"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppUp}"
+                                                Text="{Binding SelectedLiabilityRow.PaidPrincipal, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue='—'}" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border
+                                        Margin="2,0,2,0"
+                                        Padding="10,8"
+                                        Background="{DynamicResource AppBackground}"
+                                        BorderBrush="{DynamicResource AppBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource RadiusSm}">
+                                        <StackPanel>
+                                            <TextBlock
+                                                FontSize="{StaticResource FontSizeXs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.Loan.PaidInterest}" />
+                                            <TextBlock
+                                                Margin="0,4,0,0"
+                                                FontFamily="{StaticResource FontTabular}"
+                                                FontSize="{StaticResource FontSizeSm}"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding SelectedLiabilityRow.PaidInterest, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue='—'}" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border
+                                        Margin="4,0,0,0"
+                                        Padding="10,8"
+                                        Background="{DynamicResource AppBackground}"
+                                        BorderBrush="{DynamicResource AppBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource RadiusSm}">
+                                        <StackPanel>
+                                            <TextBlock
+                                                FontSize="{StaticResource FontSizeXs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.Loan.RemainingBalance}" />
+                                            <TextBlock
+                                                Margin="0,4,0,0"
+                                                FontFamily="{StaticResource FontTabular}"
+                                                FontSize="{StaticResource FontSizeSm}"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppDown}"
+                                                Text="{Binding SelectedLiabilityRow.RemainingFromSchedule, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue='—'}" />
+                                        </StackPanel>
+                                    </Border>
+                                </UniformGrid>
+
+                                <!--  Empty state  -->
+                                <TextBlock
+                                    Margin="0,16,0,0"
+                                    HorizontalAlignment="Center"
+                                    FontSize="{StaticResource FontSizeSm}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Portfolio.Loan.NoSchedule}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedLiabilityRow.HasSchedule, FallbackValue=False}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <!--  Schedule DataGrid  -->
+                                <DataGrid
+                                    x:Name="ScheduleGrid"
+                                    AutoGenerateColumns="False"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    CanUserAddRows="False"
+                                    CanUserDeleteRows="False"
+                                    CanUserReorderColumns="False"
+                                    CanUserResizeColumns="False"
+                                    CanUserSortColumns="False"
+                                    EnableRowVirtualization="True"
+                                    FontFamily="{StaticResource FontBase}"
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    GridLinesVisibility="None"
+                                    HeadersVisibility="Column"
+                                    IsReadOnly="True"
+                                    ItemsSource="{Binding SelectedLiabilityRow.ScheduleEntries}"
+                                    RowHeight="32"
+                                    SelectionMode="Single"
+                                    Visibility="{Binding SelectedLiabilityRow.HasSchedule, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                                    <DataGrid.ColumnHeaderStyle>
+                                        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
+                                    </DataGrid.ColumnHeaderStyle>
+                                    <DataGrid.CellStyle>
+                                        <Style BasedOn="{StaticResource AppDataGridCell}" TargetType="DataGridCell" />
+                                    </DataGrid.CellStyle>
+                                    <DataGrid.RowStyle>
+                                        <Style BasedOn="{StaticResource AppDataGridRowSelectable}" TargetType="DataGridRow">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsPaid}" Value="True">
+                                                    <Setter Property="Opacity" Value="0.45" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </DataGrid.RowStyle>
+                                    <DataGrid.Columns>
+                                        <!--  #  -->
+                                        <DataGridTemplateColumn Width="32" SortMemberPath="Period">
+                                            <DataGridTemplateColumn.Header>
+                                                <TextBlock Text="{DynamicResource Portfolio.Loan.Period}" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        FontFamily="{StaticResource FontTabular}"
+                                                        Foreground="{DynamicResource AppTextMuted}"
+                                                        Text="{Binding Period}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <!--  應繳日  -->
+                                        <DataGridTemplateColumn Width="82" SortMemberPath="DueDate">
+                                            <DataGridTemplateColumn.Header>
+                                                <TextBlock Text="{DynamicResource Portfolio.Loan.DueDate}" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        FontFamily="{StaticResource FontTabular}"
+                                                        Foreground="{DynamicResource AppTextSecondary}"
+                                                        Text="{Binding DueDateDisplay}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <!--  本金  -->
+                                        <DataGridTemplateColumn Width="72">
+                                            <DataGridTemplateColumn.HeaderStyle>
+                                                <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                                                    <Setter Property="HorizontalContentAlignment" Value="Right" />
+                                                </Style>
+                                            </DataGridTemplateColumn.HeaderStyle>
+                                            <DataGridTemplateColumn.Header>
+                                                <TextBlock Text="{DynamicResource Portfolio.Loan.Principal}" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Center"
+                                                        FontFamily="{StaticResource FontTabular}"
+                                                        Text="{Binding PrincipalAmount, StringFormat=N0}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <!--  利息  -->
+                                        <DataGridTemplateColumn Width="60">
+                                            <DataGridTemplateColumn.HeaderStyle>
+                                                <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                                                    <Setter Property="HorizontalContentAlignment" Value="Right" />
+                                                </Style>
+                                            </DataGridTemplateColumn.HeaderStyle>
+                                            <DataGridTemplateColumn.Header>
+                                                <TextBlock Text="{DynamicResource Portfolio.Loan.Interest}" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Center"
+                                                        FontFamily="{StaticResource FontTabular}"
+                                                        Foreground="{DynamicResource AppTextSecondary}"
+                                                        Text="{Binding InterestAmount, StringFormat=N0}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <!--  確認繳款 按鈕  -->
+                                        <DataGridTemplateColumn Width="*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Button
+                                                        Height="22"
+                                                        Margin="2,2"
+                                                        Padding="8,0"
+                                                        HorizontalAlignment="Right"
+                                                        Command="{Binding DataContext.ConfirmLoanPaymentCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource BtnPrimary}">
+                                                        <Button.Style>
+                                                            <Style BasedOn="{StaticResource BtnPrimary}" TargetType="Button">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsPaid}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                        <TextBlock
+                                                            FontSize="{StaticResource FontSizeXs}"
+                                                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                            Text="{DynamicResource Portfolio.Loan.ConfirmPayment}" />
+                                                    </Button>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+
                         </Grid>
                     </ScrollViewer>
 
@@ -1633,6 +1891,7 @@
         <pcontrols:AddTransactionDialog Grid.RowSpan="3" Panel.ZIndex="210" />
         <pcontrols:AddAssetDialog Grid.RowSpan="3" Panel.ZIndex="200" />
         <pcontrols:EditAssetDialog Grid.RowSpan="3" Panel.ZIndex="205" />
+        <pcontrols:AddLoanDialog Grid.RowSpan="3" Panel.ZIndex="208" />
 
         <!--  ── Confirm dialog ──  -->
         <Grid

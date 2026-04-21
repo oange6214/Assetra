@@ -30,12 +30,16 @@ public sealed class AssetSqliteRepository : IAssetRepository
     private static readonly HashSet<string> AssetAllowedColumns = new(StringComparer.OrdinalIgnoreCase)
     {
         "is_active", "updated_at",
+        "loan_annual_rate", "loan_term_months", "loan_start_date", "loan_handling_fee",
     };
 
     private static readonly HashSet<string> AssetAllowedTypeDefs = new(StringComparer.OrdinalIgnoreCase)
     {
         "INTEGER NOT NULL DEFAULT 1",
         "TEXT NOT NULL DEFAULT ''",
+        "REAL",
+        "INTEGER",
+        "TEXT",
     };
 
     public AssetSqliteRepository(string dbPath)
@@ -118,6 +122,16 @@ public sealed class AssetSqliteRepository : IAssetRepository
             SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
                 "updated_at", "TEXT NOT NULL DEFAULT ''",
                 AssetAllowedColumns, AssetAllowedTypeDefs);
+
+            // Wave 10 — loan amortization metadata (nullable; NULL = not a loan)
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+                "loan_annual_rate", "REAL", AssetAllowedColumns, AssetAllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+                "loan_term_months", "INTEGER", AssetAllowedColumns, AssetAllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+                "loan_start_date", "TEXT", AssetAllowedColumns, AssetAllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+                "loan_handling_fee", "REAL", AssetAllowedColumns, AssetAllowedTypeDefs);
 
             using (var idx = conn.CreateCommand())
             {
@@ -236,7 +250,7 @@ public sealed class AssetSqliteRepository : IAssetRepository
         await conn.OpenAsync().ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText =
-            "SELECT id, name, asset_type, group_id, currency, created_date, is_active, updated_at " +
+            "SELECT id, name, asset_type, group_id, currency, created_date, is_active, updated_at, loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee " +
             "FROM asset ORDER BY rowid;";
         return await ReadItemsAsync(cmd).ConfigureAwait(false);
     }
@@ -247,7 +261,7 @@ public sealed class AssetSqliteRepository : IAssetRepository
         await conn.OpenAsync().ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText =
-            "SELECT id, name, asset_type, group_id, currency, created_date, is_active, updated_at " +
+            "SELECT id, name, asset_type, group_id, currency, created_date, is_active, updated_at, loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee " +
             "FROM asset WHERE asset_type=$type ORDER BY rowid;";
         cmd.Parameters.AddWithValue("$type", type.ToString());
         return await ReadItemsAsync(cmd).ConfigureAwait(false);
@@ -259,7 +273,7 @@ public sealed class AssetSqliteRepository : IAssetRepository
         await conn.OpenAsync().ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText =
-            "SELECT id, name, asset_type, group_id, currency, created_date, is_active, updated_at " +
+            "SELECT id, name, asset_type, group_id, currency, created_date, is_active, updated_at, loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee " +
             "FROM asset WHERE id=$id;";
         cmd.Parameters.AddWithValue("$id", id.ToString());
         await using var r = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
@@ -273,8 +287,9 @@ public sealed class AssetSqliteRepository : IAssetRepository
         await conn.OpenAsync().ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            INSERT OR IGNORE INTO asset (id, name, asset_type, group_id, currency, created_date, is_active, updated_at)
-            VALUES ($id, $name, $type, $grp, $cur, $dt, $ia, $ua);
+            INSERT OR IGNORE INTO asset (id, name, asset_type, group_id, currency, created_date, is_active, updated_at,
+                loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee)
+            VALUES ($id, $name, $type, $grp, $cur, $dt, $ia, $ua, $lar, $ltm, $lsd, $lhf);
             """;
         BindItem(cmd, item);
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
@@ -288,7 +303,8 @@ public sealed class AssetSqliteRepository : IAssetRepository
         await using var cmd = conn.CreateCommand();
         cmd.CommandText =
             "UPDATE asset SET name=$name, asset_type=$type, group_id=$grp, currency=$cur, " +
-            "is_active=$ia, updated_at=$ua " +
+            "is_active=$ia, updated_at=$ua, " +
+            "loan_annual_rate=$lar, loan_term_months=$ltm, loan_start_date=$lsd, loan_handling_fee=$lhf " +
             "WHERE id=$id;";
         BindItem(cmd, item);
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
@@ -478,6 +494,10 @@ public sealed class AssetSqliteRepository : IAssetRepository
             if (!string.IsNullOrEmpty(s) && DateTime.TryParse(s, out var dt))
                 updatedAt = dt;
         }
+        decimal? loanAnnualRate  = r.IsDBNull(8)  ? null : (decimal)r.GetDouble(8);
+        int?     loanTermMonths  = r.IsDBNull(9)  ? null : r.GetInt32(9);
+        DateOnly? loanStartDate  = r.IsDBNull(10) ? null : DateOnly.Parse(r.GetString(10));
+        decimal? loanHandlingFee = r.IsDBNull(11) ? null : (decimal)r.GetDouble(11);
         return new AssetItem(
             Guid.Parse(r.GetString(0)),
             r.GetString(1),
@@ -486,7 +506,11 @@ public sealed class AssetSqliteRepository : IAssetRepository
             r.IsDBNull(4) ? "TWD" : r.GetString(4),
             DateOnly.Parse(r.GetString(5)),
             isActive,
-            updatedAt);
+            updatedAt,
+            loanAnnualRate,
+            loanTermMonths,
+            loanStartDate,
+            loanHandlingFee);
     }
 
     private static void BindItem(SqliteCommand cmd, AssetItem i)
@@ -497,8 +521,12 @@ public sealed class AssetSqliteRepository : IAssetRepository
         cmd.Parameters.AddWithValue("$grp",  i.GroupId.HasValue ? (object)i.GroupId.Value.ToString() : DBNull.Value);
         cmd.Parameters.AddWithValue("$cur",  i.Currency);
         cmd.Parameters.AddWithValue("$dt",   i.CreatedDate.ToString("yyyy-MM-dd"));
-        cmd.Parameters.AddWithValue("$ia",   i.IsActive ? 1 : 0);
-        cmd.Parameters.AddWithValue("$ua",   (i.UpdatedAt ?? DateTime.UtcNow).ToString("o"));
+        cmd.Parameters.AddWithValue("$ia",  i.IsActive ? 1 : 0);
+        cmd.Parameters.AddWithValue("$ua",  (i.UpdatedAt ?? DateTime.UtcNow).ToString("o"));
+        cmd.Parameters.AddWithValue("$lar", i.LoanAnnualRate.HasValue  ? (object)(double)i.LoanAnnualRate.Value  : DBNull.Value);
+        cmd.Parameters.AddWithValue("$ltm", i.LoanTermMonths.HasValue  ? (object)i.LoanTermMonths.Value          : DBNull.Value);
+        cmd.Parameters.AddWithValue("$lsd", i.LoanStartDate.HasValue   ? (object)i.LoanStartDate.Value.ToString("yyyy-MM-dd") : DBNull.Value);
+        cmd.Parameters.AddWithValue("$lhf", i.LoanHandlingFee.HasValue ? (object)(double)i.LoanHandlingFee.Value : DBNull.Value);
     }
 
     private static AssetEvent MapEvent(SqliteDataReader r) => new(

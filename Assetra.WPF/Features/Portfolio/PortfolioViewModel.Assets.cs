@@ -6,11 +6,15 @@ using CommunityToolkit.Mvvm.Input;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
+using Assetra.Core.Services;
 using Assetra.Core.Trading;
 
 namespace Assetra.WPF.Features.Portfolio;
 
-public sealed record CurrencyOption(string Code, string Display);
+public sealed record CurrencyOption(string Code, string Display)
+{
+    public override string ToString() => Display;
+}
 
 /// <summary>
 /// Add-asset dialog state, symbol suggestions, close-price fetching,
@@ -32,6 +36,13 @@ public partial class PortfolioViewModel
     [ObservableProperty] private string _addQuantity = string.Empty;
     [ObservableProperty] private string _addError = string.Empty;
 
+    // ── 欄位驗證訊息（空字串 = 無錯誤）──
+    [ObservableProperty] private string _addPriceError = string.Empty;
+    [ObservableProperty] private string _addQuantityError = string.Empty;
+    [ObservableProperty] private string _addCostError = string.Empty;
+    [ObservableProperty] private string _addCryptoQtyError = string.Empty;
+    [ObservableProperty] private string _addCryptoPriceError = string.Empty;
+
     // 收盤價自動帶入狀態
     [ObservableProperty] private bool _isLoadingClosePrice;
     [ObservableProperty] private string _closePriceHint = string.Empty;
@@ -48,7 +59,10 @@ public partial class PortfolioViewModel
     // 代號自動完成
     [ObservableProperty] private bool _isSuggestionsOpen;
     [ObservableProperty] private StockSearchResult? _selectedSuggestion;
-    public ObservableCollection<StockSearchResult> SymbolSuggestions { get; } = [];
+
+    // IReadOnlyList instead of ObservableCollection: one PropertyChanged per update
+    // rather than Clear() + N×Add() each triggering a separate ListBox layout pass.
+    [ObservableProperty] private IReadOnlyList<StockSearchResult> _symbolSuggestions = [];
 
     partial void OnSelectedSuggestionChanged(StockSearchResult? value)
     {
@@ -66,14 +80,12 @@ public partial class PortfolioViewModel
         if (!AddTypeIsStock || string.IsNullOrWhiteSpace(value))
         {
             IsSuggestionsOpen = false;
-            SymbolSuggestions.Clear();
+            SymbolSuggestions = [];
             ClosePriceHint = string.Empty;
             return;
         }
         var results = _search.Search(value.Trim());
-        SymbolSuggestions.Clear();
-        foreach (var r in (results ?? []).Take(8))
-            SymbolSuggestions.Add(r);
+        SymbolSuggestions = results.Take(8).ToList();
         IsSuggestionsOpen = SymbolSuggestions.Count > 0;
         TriggerClosePriceFetch();
     }
@@ -108,10 +120,13 @@ public partial class PortfolioViewModel
     {
         if (_historyProvider is null)
             return;
-        IsLoadingClosePrice = true;
-        ClosePriceHint = string.Empty;
         try
         {
+            // Debounce: if the user keeps typing, the CTS cancels this before the delay
+            // completes, so no HTTP request is made and IsLoadingClosePrice stays false.
+            await Task.Delay(300, ct);
+            IsLoadingClosePrice = true;
+            ClosePriceHint = string.Empty;
             var targetDate = DateOnly.FromDateTime(buyDate);  // for history lookup (stays DateOnly)
             var exchange = _search.GetExchange(symbol) ?? InferExchange(symbol);
             var daysDiff = (DateTime.Today - buyDate).Days;
@@ -148,13 +163,22 @@ public partial class PortfolioViewModel
     }
 
     // 買入費用即時試算
-    partial void OnAddPriceChanged(string _) => UpdateBuyPreview();
-    partial void OnAddQuantityChanged(string _) => UpdateBuyPreview();
+    partial void OnAddPriceChanged(string value)
+    {
+        AddPriceError = ValidatePositiveDecimalOrEmpty(value);
+        UpdateBuyPreview();
+    }
+
+    partial void OnAddQuantityChanged(string value)
+    {
+        AddQuantityError = ValidatePositiveIntOrEmpty(value);
+        UpdateBuyPreview();
+    }
 
     private void UpdateBuyPreview()
     {
         if (!ParseHelpers.TryParseDecimal(AddPrice, out var price) || price <= 0 ||
-            !int.TryParse(AddQuantity, out var qty) || qty <= 0)
+            !ParseHelpers.TryParseInt(AddQuantity, out var qty) || qty <= 0)
         {
             AddGrossAmount = 0;
             AddCommission = 0;
@@ -190,10 +214,19 @@ public partial class PortfolioViewModel
     [ObservableProperty] private string _addName = string.Empty;
     [ObservableProperty] private string _addCost = string.Empty;
 
+    partial void OnAddCostChanged(string value) =>
+        AddCostError = ValidatePositiveDecimalOrEmpty(value);
+
     // 加密貨幣欄位
     [ObservableProperty] private string _addCryptoSymbol = string.Empty;
     [ObservableProperty] private string _addCryptoQty = string.Empty;
     [ObservableProperty] private string _addCryptoPrice = string.Empty;
+
+    partial void OnAddCryptoQtyChanged(string value) =>
+        AddCryptoQtyError = ValidatePositiveDecimalOrEmpty(value);
+
+    partial void OnAddCryptoPriceChanged(string value) =>
+        AddCryptoPriceError = ValidatePositiveDecimalOrEmpty(value);
 
     // 現金帳戶欄位
     // 現金欄位 — 極簡：只收名稱，餘額從「存入/提款」交易累積
@@ -329,8 +362,10 @@ public partial class PortfolioViewModel
     }
 
     /// <summary>
-    /// Confirms a sell — validates sell price, records the trade, removes the position.
+    /// Confirms a sell — validates sell price, records the trade, archives consumed lots.
     /// Operates on <see cref="SellingRow"/> set by <see cref="BeginSellCommand"/>.
+    /// Supports partial sells: <c>_sellQtyOverride &gt; 0</c> overrides the default full-qty sell.
+    /// Archived lots (not hard-deleted) can be restored if the sell trade is later deleted.
     /// </summary>
     [RelayCommand]
     private async Task ConfirmSell()
@@ -346,35 +381,33 @@ public partial class PortfolioViewModel
             return;
         }
 
+        var sellQty = _sellQtyOverride > 0 ? _sellQtyOverride : (int)row.Quantity;
+
         // Sell-side commission + tax: user can override via TxFee (manual). Empty falls
         // back to auto-compute via TaiwanTradeFeeCalculator (commission × discount + tax).
-        decimal sellNetAmount;    // proceeds after fees & tax
-        decimal sellCommission;   // commission + transaction tax (stored with trade for history)
-        decimal? sellDiscount;    // null = 手動覆蓋；有值 = 透過折扣計算（供編輯時還原）
+        decimal sellNetAmount;
+        decimal sellCommission;
+        decimal? sellDiscount;
         if (!string.IsNullOrWhiteSpace(TxFee) && ParseHelpers.TryParseDecimal(TxFee, out var manualFee) && manualFee >= 0)
         {
-            sellNetAmount = sellPrice * row.Quantity - manualFee;
+            sellNetAmount = sellPrice * sellQty - manualFee;
             sellCommission = manualFee;
             sellDiscount = null;
         }
         else
         {
             var discount = TxCommissionDiscountValue;
-            var feeResult = TaiwanTradeFeeCalculator.CalcSell(sellPrice, (int)row.Quantity, discount, IsSellEtf, row.IsBondEtf);
+            var feeResult = TaiwanTradeFeeCalculator.CalcSell(sellPrice, sellQty, discount, IsSellEtf, row.IsBondEtf);
             sellNetAmount  = feeResult.NetAmount;
             sellCommission = feeResult.Commission + feeResult.TransactionTax;
             sellDiscount = discount;
         }
-        // Projection-driven P&L — queries the trade log (proportional COGS) instead of
-        // relying on display-layer avg cost. Passes sellCommission (already combines
-        // commission + tax in the manual-fee branch and auto-compute branch above).
+
         var realizedPnl = await _positionQuery
-            .ComputeRealizedPnlAsync(row.Id, DateTime.UtcNow, sellPrice, row.Quantity, sellCommission)
+            .ComputeRealizedPnlAsync(row.Id, DateTime.UtcNow, sellPrice, sellQty, sellCommission)
             .ConfigureAwait(true);
-        var buyCost = row.BuyPrice * row.Quantity;
-        var realizedPnlPct = buyCost > 0
-            ? realizedPnl / buyCost * 100m
-            : 0m;
+        var buyCost = row.BuyPrice * sellQty;
+        var realizedPnlPct = buyCost > 0 ? realizedPnl / buyCost * 100m : 0m;
 
         var trade = new Trade(
             Id: Guid.NewGuid(),
@@ -384,7 +417,7 @@ public partial class PortfolioViewModel
             Type: TradeType.Sell,
             TradeDate: DateTime.UtcNow,
             Price: sellPrice,
-            Quantity: (int)row.Quantity,
+            Quantity: sellQty,
             RealizedPnl: realizedPnl,
             RealizedPnlPct: realizedPnlPct,
             CashAccountId: SellCashAccount?.Id,
@@ -396,23 +429,28 @@ public partial class PortfolioViewModel
         { await _tradeRepo.AddAsync(trade); }
         catch (Exception ex)
         {
-            // 賣出操作本身繼續執行；交易記錄寫入失敗只記錄警告
             Serilog.Log.Warning(ex, "Failed to record sell trade for {Symbol}", row.Symbol);
-            _snackbar?.Warning(Application.Current?.TryFindResource("Portfolio.Sell.TradeSaveFailed") as string
-                ?? "賣出已完成，但交易記錄儲存失敗");
+            _snackbar?.Warning(L("Portfolio.Sell.TradeSaveFailed", "賣出已完成，但交易記錄儲存失敗"));
         }
 
-        // Log removal (qty = 0) then remove all underlying lots from DB
-        await WriteLogAsync(row.Id, row.Symbol, row.Exchange, 0, row.BuyPrice);
+        // Full sell: archive all underlying portfolio entries (soft-delete) so they no longer
+        // appear in the active list, but can be restored if the sell trade is later deleted.
+        // Partial sell: just update the display row — the sell trade in the journal is the
+        // source of truth for net quantity; no entry archiving needed.
+        var isFull = sellQty >= (int)row.Quantity;
+        if (isFull)
+        {
+            foreach (var id in row.AllEntryIds)
+                await _repo.ArchiveAsync(id);
+            await WriteLogAsync(row.Id, row.Symbol, row.Exchange, 0, row.BuyPrice);
+        }
+        else
+        {
+            await WriteLogAsync(row.Id, row.Symbol, row.Exchange, (int)row.Quantity - sellQty, row.BuyPrice);
+        }
 
-        foreach (var id in row.AllEntryIds)
-            await _repo.RemoveAsync(id);
-        Positions.Remove(row);
-        HasNoPositions = Positions.Count == 0;
-
-        // Cash balance is now a pure projection over trades; recording the Sell trade
-        // above is the single source of truth. No AdjustCashAccountAsync needed.
-        CancelSell();   // close sell panel (also clears SellCashAccount)
+        CancelSell();
+        await LoadPositionsAsync();
         await LoadTradesAsync();
         await ReloadAccountBalancesAsync();
         RebuildTotals();
@@ -507,7 +545,7 @@ public partial class PortfolioViewModel
         AddError = string.Empty;
         if (string.IsNullOrWhiteSpace(AddSymbol))
         { AddError = "請輸入股票代號"; return; }
-        if (!int.TryParse(AddQuantity, out var qty) || qty <= 0)
+        if (!ParseHelpers.TryParseInt(AddQuantity, out var qty) || qty <= 0)
         { AddError = "股數無效"; return; }
         if (!ParseHelpers.TryParseDecimal(AddPrice, out var price) || price <= 0)
         { AddError = "成交價無效"; return; }
@@ -550,6 +588,9 @@ public partial class PortfolioViewModel
         var entryId = await _repo
             .FindOrCreatePortfolioEntryAsync(symbol, exchange, name, AssetType.Stock)
             .ConfigureAwait(true);
+        // Always unarchive: FindOrCreate returns archived entries when the same symbol was
+        // previously fully sold. A new buy reopens the position.
+        await _repo.UnarchiveAsync(entryId);
         var entry = new PortfolioEntry(entryId, symbol, exchange, AssetType.Stock, name);
         // (No AddAsync — FindOrCreate already persisted on the fresh-create path.)
 
@@ -560,27 +601,7 @@ public partial class PortfolioViewModel
         // Cash balance reflects the Buy trade written above via the projection service;
         // no manual AdjustCashAccountAsync needed (single-truth architecture).
 
-        var existing = Positions.FirstOrDefault(p => p.Symbol == symbol && p.AssetType == AssetType.Stock);
-        if (existing is not null)
-        {
-            // Absorb the new lot into the existing aggregated row
-            var totalCost = existing.BuyPrice * existing.Quantity + costPerShare * qty;
-            var totalQty  = existing.Quantity + qty;
-            existing.BuyPrice = totalQty > 0 ? totalCost / totalQty : existing.BuyPrice;
-            existing.Quantity = totalQty;
-            existing.AllEntryIds.Add(entry.Id);
-            existing.Refresh();
-        }
-        else
-        {
-            // Build a local snapshot for the new entry (trade not persisted yet, so
-            // project from the values we just computed).
-            var localSnap = new PositionSnapshot(
-                entry.Id, qty, costPerShare * qty, costPerShare, 0m, buyDate);
-            var row = ToRow(entry, localSnap);
-            Positions.Add(row);
-            HasNoPositions = false;
-        }
+        await LoadPositionsAsync();
         RebuildTotals();
 
         AddSymbol = string.Empty;
@@ -678,10 +699,10 @@ public partial class PortfolioViewModel
 
         // Balance is a projection over the trade journal — a fresh account starts at 0
         // and only gains value once the user records a Deposit / Income / etc. trade.
-        var account = new Core.Models.AssetItem(
+        var account = new AssetItem(
             Guid.NewGuid(),
             AddAccountName.Trim(),
-            Core.Models.FinancialType.Asset,
+            FinancialType.Asset,
             null,
             "TWD",
             DateOnly.FromDateTime(DateTime.Today));
@@ -726,7 +747,7 @@ public partial class PortfolioViewModel
         _editAssetId = row.Id;
         EditAssetName = row.Name;
         EditAssetCurrency = row.Currency;
-        EditAssetTypeLabel = Application.Current?.TryFindResource("Portfolio.Dialog.TypeCash") as string ?? "現金";
+        EditAssetTypeLabel = L("Portfolio.Dialog.TypeCash", "現金");
         EditAssetError = string.Empty;
         EditAssetIsStock = false;
         IsEditAssetDialogOpen = true;
@@ -740,8 +761,7 @@ public partial class PortfolioViewModel
         EditAssetName = row.Name;
         EditAssetSymbol = row.Symbol;
         EditAssetCurrency = row.Currency;
-        EditAssetTypeLabel = Application.Current?.TryFindResource("Portfolio.Dialog.Type" + row.AssetType) as string
-                             ?? row.AssetType.ToString();
+        EditAssetTypeLabel = L("Portfolio.Dialog.Type" + row.AssetType, row.AssetType.ToString());
         EditAssetIsStock = row.IsStock;
         EditAssetError = string.Empty;
         IsEditAssetDialogOpen = true;
@@ -770,8 +790,8 @@ public partial class PortfolioViewModel
             var row = CashAccounts.FirstOrDefault(r => r.Id == _editAssetId);
             if (row is not null)
             {
-                var updated = new Core.Models.AssetItem(
-                    row.Id, name, Core.Models.FinancialType.Asset, null, currency, row.CreatedDate);
+                var updated = new AssetItem(
+                    row.Id, name, FinancialType.Asset, null, currency, row.CreatedDate);
                 if (_assetRepo is not null)
                     await _assetRepo.UpdateItemAsync(updated);
                 row.Name = name;
@@ -793,8 +813,7 @@ public partial class PortfolioViewModel
     private void ArchiveAccount(CashAccountRowViewModel? row)
     {
         if (row is null || _assetRepo is null) return;
-        var msg = Application.Current?.TryFindResource("Portfolio.Confirm.ArchiveAccount") as string
-                  ?? "確定封存此帳戶？（餘額保留；交易紀錄保留）";
+        var msg = L("Portfolio.Confirm.ArchiveAccount", "確定封存此帳戶？（餘額保留；交易紀錄保留）");
         AskConfirm(msg, async () =>
         {
             await _assetRepo.ArchiveItemAsync(row.Id);
@@ -816,15 +835,13 @@ public partial class PortfolioViewModel
         if (row is null || _assetRepo is null) return;
 
         AskConfirm(
-            Application.Current?.TryFindResource("Portfolio.Confirm.DeleteAccount") as string
-                ?? "確定刪除此帳戶？",
+            L("Portfolio.Confirm.DeleteAccount", "確定刪除此帳戶？"),
             async () =>
             {
                 var refs = await _assetRepo.HasTradeReferencesAsync(row.Id);
                 if (refs > 0)
                 {
-                    var template = Application.Current?.TryFindResource("Portfolio.Account.HasReferencesError") as string
-                                   ?? "尚有 {0} 筆交易引用此帳戶，請先處理";
+                    var template = L("Portfolio.Account.HasReferencesError", "尚有 {0} 筆交易引用此帳戶，請先處理");
                     var formatted = string.Format(System.Globalization.CultureInfo.CurrentCulture, template, refs);
                     _snackbar?.Warning(formatted);
                     return;
@@ -914,7 +931,7 @@ public partial class PortfolioViewModel
     {
         if (_assetRepo is null)
             return;
-        var accounts = await _assetRepo.GetItemsByTypeAsync(Core.Models.FinancialType.Asset);
+        var accounts = await _assetRepo.GetItemsByTypeAsync(FinancialType.Asset);
         // Bulk-project all cash balances from the trade journal in one pass.
         var balances = await _balanceQuery.GetAllCashBalancesAsync();
         CashAccounts.Clear();
@@ -943,12 +960,45 @@ public partial class PortfolioViewModel
     private async Task LoadLiabilitiesAsync()
     {
         var snapshots = await _balanceQuery.GetAllLiabilitySnapshotsAsync();
+
+        // Build a name→AssetItem map for loans that have amortization metadata.
+        Dictionary<string, AssetItem> loanAssets = [];
+        if (_assetRepo is not null)
+        {
+            var items = await _assetRepo.GetItemsByTypeAsync(FinancialType.Liability);
+            foreach (var a in items.Where(a => a.IsLoan))
+                loanAssets[a.Name] = a;
+        }
+
         Liabilities.Clear();
         foreach (var (label, snap) in snapshots.OrderBy(kv => kv.Key))
-            Liabilities.Add(new LiabilityRowViewModel(label, snap));
+        {
+            loanAssets.TryGetValue(label, out var asset);
+            Liabilities.Add(new LiabilityRowViewModel(label, snap, asset));
+        }
+
+        // Also add AssetItem loans that have no trade history yet (principal = 0 from snapshot).
+        foreach (var (name, asset) in loanAssets)
+        {
+            if (!snapshots.ContainsKey(name))
+                Liabilities.Add(new LiabilityRowViewModel(name, LiabilitySnapshot.Empty, asset));
+        }
+
         HasNoLiabilities = Liabilities.Count == 0;
-        // Notify ComboBox in LoanTxForm to refresh its suggestion list.
         OnPropertyChanged(nameof(LoanLabelSuggestions));
+    }
+
+    /// <summary>Loads the amortization schedule for a loan liability row (called on selection).</summary>
+    private async Task LoadLoanScheduleAsync(LiabilityRowViewModel row)
+    {
+        if (!row.IsLoan || row.AssetId is null || _loanScheduleRepo is null)
+            return;
+        var entries = await _loanScheduleRepo.GetByAssetAsync(row.AssetId.Value).ConfigureAwait(true);
+        row.ScheduleEntries.Clear();
+        foreach (var e in entries)
+            row.ScheduleEntries.Add(new LoanScheduleRowViewModel(e));
+        row.IsScheduleLoaded = true;
+        row.RefreshScheduleSummary();
     }
 
     // Account detail side-panel (Cash / Liability) — AscentPortfolio pattern
@@ -1001,13 +1051,20 @@ public partial class PortfolioViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDetailOverviewTab))]
     [NotifyPropertyChangedFor(nameof(IsDetailTradesTab))]
+    [NotifyPropertyChangedFor(nameof(IsDetailScheduleTab))]
     private string _detailTab = "overview";
 
-    public bool IsDetailOverviewTab => DetailTab == "overview";
-    public bool IsDetailTradesTab => DetailTab == "trades";
+    public bool IsDetailOverviewTab  => DetailTab == "overview";
+    public bool IsDetailTradesTab    => DetailTab == "trades";
+    public bool IsDetailScheduleTab  => DetailTab == "schedule";
 
     partial void OnSelectedCashRowChanged(CashAccountRowViewModel? _) => DetailTab = "overview";
-    partial void OnSelectedLiabilityRowChanged(LiabilityRowViewModel? _) => DetailTab = "overview";
+    partial void OnSelectedLiabilityRowChanged(LiabilityRowViewModel? row)
+    {
+        DetailTab = "overview";
+        if (row is { IsLoan: true, IsScheduleLoaded: false })
+            _ = LoadLoanScheduleAsync(row);
+    }
     partial void OnSelectedPositionRowChanged(PortfolioRowViewModel? _) => DetailTab = "overview";
 
     // Cash account stats + filtered trades
@@ -1109,6 +1166,147 @@ public partial class PortfolioViewModel
     [RelayCommand]
     private void CloseCashDetail() => SelectedCashRow = null;
 
+    // ── Add Loan dialog ───────────────────────────────────────────────────
+
+    [ObservableProperty] private bool    _isAddLoanDialogOpen;
+    [ObservableProperty] private string  _addLoanName        = string.Empty;
+    [ObservableProperty] private string  _addLoanAmount      = string.Empty;
+    [ObservableProperty] private string  _addLoanRate        = string.Empty;
+    [ObservableProperty] private string  _addLoanTermMonths  = string.Empty;
+    [ObservableProperty] private DateTime _addLoanStartDate  = DateTime.Today;
+    [ObservableProperty] private string  _addLoanHandlingFee = string.Empty;
+    [ObservableProperty] private string  _addLoanError       = string.Empty;
+
+    [RelayCommand]
+    private void OpenAddLoanDialog()
+    {
+        AddLoanName        = string.Empty;
+        AddLoanAmount      = string.Empty;
+        AddLoanRate        = string.Empty;
+        AddLoanTermMonths  = string.Empty;
+        AddLoanStartDate   = DateTime.Today;
+        AddLoanHandlingFee = string.Empty;
+        AddLoanError       = string.Empty;
+        IsAddLoanDialogOpen = true;
+    }
+
+    [RelayCommand]
+    private void CloseAddLoanDialog() => IsAddLoanDialogOpen = false;
+
+    [RelayCommand]
+    private async Task ConfirmAddLoan()
+    {
+        AddLoanError = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(AddLoanName))
+        { AddLoanError = "請輸入貸款名稱"; return; }
+        if (!ParseHelpers.TryParseDecimal(AddLoanAmount, out var principal) || principal <= 0)
+        { AddLoanError = "借款金額無效"; return; }
+        if (!ParseHelpers.TryParseDecimal(AddLoanRate, out var ratePct) || ratePct < 0)
+        { AddLoanError = "年利率無效"; return; }
+        if (!ParseHelpers.TryParseInt(AddLoanTermMonths, out var termMonths) || termMonths <= 0)
+        { AddLoanError = "還款期數無效"; return; }
+        if (_assetRepo is null || _loanScheduleRepo is null)
+        { AddLoanError = "服務未就緒"; return; }
+
+        var annualRate  = ratePct / 100m;
+        var firstPayDate = DateOnly.FromDateTime(AddLoanStartDate);
+        decimal? handlingFee = null;
+        if (!string.IsNullOrWhiteSpace(AddLoanHandlingFee) &&
+            ParseHelpers.TryParseDecimal(AddLoanHandlingFee, out var fee) && fee >= 0)
+            handlingFee = fee;
+
+        var name = AddLoanName.Trim();
+
+        // 1. Create AssetItem for the loan
+        var asset = new AssetItem(
+            Guid.NewGuid(),
+            name,
+            FinancialType.Liability,
+            null,
+            "TWD",
+            DateOnly.FromDateTime(DateTime.Today),
+            IsActive:        true,
+            UpdatedAt:       null,
+            LoanAnnualRate:  annualRate,
+            LoanTermMonths:  termMonths,
+            LoanStartDate:   firstPayDate,
+            LoanHandlingFee: handlingFee);
+        await _assetRepo.AddItemAsync(asset);
+
+        // 2. Create LoanBorrow trade
+        var cashReceived = principal - (handlingFee ?? 0m);
+        var cashAccId = TxCashAccount?.Id; // reuse the global TxCashAccount if set
+        var borrowTrade = new Trade(
+            Id:           Guid.NewGuid(),
+            Symbol:       string.Empty,
+            Exchange:     string.Empty,
+            Name:         name,
+            Type:         TradeType.LoanBorrow,
+            TradeDate:    DateTime.UtcNow,
+            Price:        principal,
+            Quantity:     1,
+            RealizedPnl:    0m,
+            RealizedPnlPct: 0m,
+            CashAmount:   cashReceived,
+            CashAccountId: cashAccId,
+            LoanLabel:    name);
+        await _tradeRepo.AddAsync(borrowTrade);
+
+        // 3. Generate + store amortization schedule
+        var schedule = AmortizationService.Generate(asset.Id, principal, annualRate, termMonths, firstPayDate);
+        await _loanScheduleRepo.BulkInsertAsync(schedule);
+
+        IsAddLoanDialogOpen = false;
+        await LoadLiabilitiesAsync();
+        await LoadTradesAsync();
+        await ReloadAccountBalancesAsync();
+        RebuildTotals();
+    }
+
+    // ── Confirm loan payment ──────────────────────────────────────────────
+
+    [RelayCommand]
+    private async Task ConfirmLoanPayment(LoanScheduleRowViewModel? entry)
+    {
+        if (entry is null || SelectedLiabilityRow is null || _loanScheduleRepo is null)
+            return;
+        if (entry.IsPaid)
+            return;
+
+        var row = SelectedLiabilityRow;
+        var cashAccId = TxCashAccount?.Id;
+        var total = entry.PrincipalAmount + entry.InterestAmount;
+
+        var repayTrade = new Trade(
+            Id:           Guid.NewGuid(),
+            Symbol:       string.Empty,
+            Exchange:     string.Empty,
+            Name:         row.Label,
+            Type:         TradeType.LoanRepay,
+            TradeDate:    DateTime.UtcNow,
+            Price:        total,
+            Quantity:     1,
+            RealizedPnl:    0m,
+            RealizedPnlPct: 0m,
+            CashAmount:   total,
+            CashAccountId: cashAccId,
+            LoanLabel:    row.Label,
+            Principal:    entry.PrincipalAmount,
+            InterestPaid: entry.InterestAmount);
+        await _tradeRepo.AddAsync(repayTrade);
+
+        await _loanScheduleRepo.MarkPaidAsync(entry.Id, DateTime.UtcNow, repayTrade.Id);
+        entry.IsPaid   = true;
+        entry.PaidAt   = DateTime.UtcNow;
+        entry.TradeId  = repayTrade.Id;
+        row.RefreshScheduleSummary();
+
+        await LoadTradesAsync();
+        await ReloadAccountBalancesAsync();
+        RebuildTotals();
+    }
+
     [RelayCommand]
     private void CloseLiabilityDetail() => SelectedLiabilityRow = null;
 
@@ -1116,25 +1314,38 @@ public partial class PortfolioViewModel
     private void ClosePositionDetail() => SelectedPositionRow = null;
 
     /// <summary>
-    /// Permanently removes a position entry. Trade history rows for the symbol are
-    /// intentionally left in place — the user can clean them up from the trades tab if
-    /// desired. Mirrors the cash / liability removal flow (confirm dialog → repo → UI).
+    /// Permanently removes a position and all its associated Buy / StockDividend trade
+    /// records (plus their fee children). Mirrors the cash / liability removal flow.
     /// </summary>
     [RelayCommand]
     private void RemovePosition(PortfolioRowViewModel row)
     {
         if (row is null)
             return;
-        var msg = Application.Current?.TryFindResource("Portfolio.Detail.DeleteWarning") as string
-                  ?? "刪除後無法復原，請確認不再需要後再操作。";
+        var msg = L("Portfolio.Detail.DeleteWarning", "刪除後無法復原，請確認不再需要後再操作。");
         AskConfirm(msg, async () =>
         {
+            // Delete trade records whose portfolio_entry_id points to this position's lots,
+            // then delete their fee-child records.
+            var entryIds = row.AllEntryIds.ToHashSet();
+            var allTrades = await _tradeRepo.GetAllAsync();
+            foreach (var trade in allTrades.Where(t => t.PortfolioEntryId.HasValue && entryIds.Contains(t.PortfolioEntryId.Value)))
+            {
+                await _tradeRepo.RemoveChildrenAsync(trade.Id);
+                await _tradeRepo.RemoveAsync(trade.Id);
+            }
+
+            // Delete the portfolio entry lots themselves.
             foreach (var id in row.AllEntryIds)
                 await _repo.RemoveAsync(id);
+
             Positions.Remove(row);
             if (ReferenceEquals(SelectedPositionRow, row))
                 SelectedPositionRow = null;
             RebuildTotals();
+
+            await LoadTradesAsync();
+            await ReloadAccountBalancesAsync();
         });
     }
 

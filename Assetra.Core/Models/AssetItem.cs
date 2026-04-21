@@ -13,4 +13,12 @@ public sealed record AssetItem(
     string        Currency,
     DateOnly      CreatedDate,
     bool          IsActive = true,
-    DateTime?     UpdatedAt = null);
+    DateTime?     UpdatedAt = null,
+    // Loan amortization metadata — null for non-loan liabilities
+    decimal?      LoanAnnualRate  = null,
+    int?          LoanTermMonths  = null,
+    DateOnly?     LoanStartDate   = null,
+    decimal?      LoanHandlingFee = null)
+{
+    public bool IsLoan => LoanAnnualRate.HasValue && LoanTermMonths.HasValue && LoanStartDate.HasValue;
+};

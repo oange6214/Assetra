@@ -146,6 +146,7 @@ internal static class AppBootstrapper
         services.AddSingleton<IAlertRepository>(_ => new AlertSqliteRepository(dbPath));
         services.AddSingleton<ITradeRepository>(_ => new TradeSqliteRepository(dbPath));
         services.AddSingleton<IAssetRepository>(_ => new AssetSqliteRepository(dbPath));
+        services.AddSingleton<ILoanScheduleRepository>(_ => new LoanScheduleSqliteRepository(dbPath));
         services.AddSingleton<ITransactionService>(sp => new TransactionService(
             sp.GetRequiredService<ITradeRepository>()));
         services.AddSingleton<IBalanceQueryService>(sp =>
@@ -168,7 +169,8 @@ internal static class AppBootstrapper
                 sp.GetRequiredService<IPortfolioSnapshotRepository>(),
                 sp.GetRequiredService<IPortfolioPositionLogRepository>(),
                 sp.GetRequiredService<ITradeRepository>(),
-                sp.GetRequiredService<IAssetRepository>()),
+                sp.GetRequiredService<IAssetRepository>(),
+                sp.GetRequiredService<ILoanScheduleRepository>()),
             new PortfolioServices(
                 sp.GetRequiredService<IStockService>(),
                 sp.GetRequiredService<IStockSearchService>(),

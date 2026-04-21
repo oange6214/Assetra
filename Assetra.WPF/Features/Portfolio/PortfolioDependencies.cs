@@ -16,7 +16,8 @@ public sealed record PortfolioRepositories(
     IPortfolioSnapshotRepository Snapshot,
     IPortfolioPositionLogRepository PositionLog,
     ITradeRepository? Trade = null,
-    IAssetRepository? Asset = null);
+    IAssetRepository? Asset = null,
+    ILoanScheduleRepository? LoanSchedule = null);
 
 /// <summary>
 /// Domain services the ViewModel fans out to (quotes, snapshots, FX, crypto, transactions, balance projection).
@@ -42,10 +43,11 @@ public sealed record PortfolioServices(
     IPositionQueryService? PositionQuery = null);
 
 /// <summary>
-/// UI-adjacent services (scheduler / theming / settings / snackbar).
+/// UI-adjacent services (scheduler / theming / settings / snackbar / localization).
 /// </summary>
 public sealed record PortfolioUiServices(
     IScheduler Scheduler,
     IThemeService? Theme = null,
     IAppSettingsService? Settings = null,
-    ISnackbarService? Snackbar = null);
+    ISnackbarService? Snackbar = null,
+    ILocalizationService? Localization = null);

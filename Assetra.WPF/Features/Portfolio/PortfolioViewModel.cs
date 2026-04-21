@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Windows;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -35,11 +34,13 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private Action<ApplicationTheme>? _onThemeChanged;
     private readonly ICurrencyService? _currencyService;
     private readonly IAssetRepository? _assetRepo;
+    private readonly ILoanScheduleRepository? _loanScheduleRepo;
     private readonly ICryptoService? _cryptoService;
     private readonly IStockHistoryProvider? _historyProvider;
     private readonly ITransactionService _txService;
     private readonly IBalanceQueryService _balanceQuery;
     private readonly IPositionQueryService _positionQuery;
+    private readonly ILocalizationService? _localization;
     private readonly CompositeDisposable _disposables = new();
 
     public ObservableCollection<PortfolioRowViewModel> Positions { get; } = [];
@@ -131,6 +132,13 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _hasNoTrades = true;
     [ObservableProperty] private bool _hasAnyDividendTrades;
 
+    /// <summary>
+    /// Trade filter, pagination, and sort state. All Trades-tab bindings that
+    /// previously pointed directly to <see cref="PortfolioViewModel"/> properties
+    /// now bind through <c>TradeFilter.*</c>.
+    /// </summary>
+    public TradeFilterViewModel TradeFilter { get; }
+
     // Tab state
     [ObservableProperty] private PortfolioTab _selectedTab = PortfolioTab.Positions;
 
@@ -181,10 +189,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     }
 
     // 負債健康度（供 Liability tab 摘要卡片使用）
-    /// <summary>負債 / 總資產，0–100 範圍，供 ProgressBar 直接綁定。</summary>
-    public decimal DebtRatioValue => TotalAssets > 0
-        ? Math.Min(TotalLiabilities / TotalAssets * 100m, 100m)
-        : 0m;
+    /// <summary>負債 / 總資產，0–100 範圍，供 ProgressBar 直接綁定。Cached via RecalcFinancialSummary().</summary>
+    [ObservableProperty] private decimal _debtRatioValue;
     public string DebtRatioDisplay => TotalAssets > 0 ? $"{DebtRatioValue:F1}%" : "—";
     public string LeverageRatioDisplay => NetWorth > 0 ? $"{TotalAssets / NetWorth:F2}" : "—";
     public bool IsDebtHealthy => DebtRatioValue < 30m;
@@ -194,22 +200,11 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     /// <summary>"healthy" | "warning" | "danger" | "none" — single binding for XAML color triggers.</summary>
     public string DebtStatusTag => IsDebtDanger ? "danger" : IsDebtWarning ? "warning" : IsDebtHealthy ? "healthy" : "none";
 
-    /// <summary>所有負債的原始借款總額（OriginalAmount = 0 的條目以 Balance 補位）。</summary>
-    public decimal TotalOriginalLiabilities => Liabilities.Sum(l =>
-        l.OriginalAmount > 0 ? l.OriginalAmount : l.Balance);
+    /// <summary>所有負債的原始借款總額（OriginalAmount = 0 的條目以 Balance 補位）。Cached via RecalcFinancialSummary().</summary>
+    [ObservableProperty] private decimal _totalOriginalLiabilities;
 
-    /// <summary>已繳百分比（0–100），供 ProgressBar 直接綁定。</summary>
-    public decimal PaidPercentValue
-    {
-        get
-        {
-            var orig = TotalOriginalLiabilities;
-            if (orig <= 0)
-                return 0m;
-            var paid = orig - TotalLiabilities;
-            return Math.Clamp(paid / orig * 100m, 0m, 100m);
-        }
-    }
+    /// <summary>已繳百分比（0–100），供 ProgressBar 直接綁定。Cached via RecalcFinancialSummary().</summary>
+    [ObservableProperty] private decimal _paidPercentValue;
 
     public string PaidPercentDisplay => $"{PaidPercentValue:F1}%";
 
@@ -222,22 +217,15 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     partial void OnMonthlyExpenseChanged(decimal value)
     {
-        OnPropertyChanged(nameof(EmergencyFundMonths));
-        OnPropertyChanged(nameof(EmergencyFundMonthsDisplay));
-        OnPropertyChanged(nameof(EmergencyFundBarValue));
-        OnPropertyChanged(nameof(IsEmergencySafe));
-        OnPropertyChanged(nameof(IsEmergencyWarning));
-        OnPropertyChanged(nameof(IsEmergencyDanger));
-        OnPropertyChanged(nameof(EmergencyStatusTag));
+        RecalcFinancialSummary();
         OnPropertyChanged(nameof(IsMonthlyExpenseSet));
         _ = SaveMonthlyExpenseAsync();
     }
 
     public bool IsMonthlyExpenseSet => MonthlyExpense > 0;
 
-    /// <summary>可撐幾個月（無上限）。</summary>
-    public decimal EmergencyFundMonths =>
-        MonthlyExpense > 0 ? TotalCash / MonthlyExpense : 0m;
+    /// <summary>可撐幾個月（無上限）。Cached via RecalcFinancialSummary().</summary>
+    [ObservableProperty] private decimal _emergencyFundMonths;
 
     public string EmergencyFundMonthsDisplay =>
         MonthlyExpense > 0 ? $"{EmergencyFundMonths:F1}" : "—";
@@ -265,7 +253,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             // 儲存偏好設定失敗不影響主要功能
-            System.Diagnostics.Debug.WriteLine($"[Portfolio] SaveMonthlyExpense failed: {ex.Message}");
+            Log.Warning(ex, "Failed to save monthly expense setting");
         }
     }
 
@@ -280,71 +268,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[Portfolio] DismissWelcomeBanner failed: {ex.Message}");
+            Log.Warning(ex, "Failed to dismiss welcome banner");
         }
     }
-
-    // Trade filters
-    // Trade type filter — 改為多選 collection（取代舊的單一 string "All"/"Buy"/…）
-    // 每個項目有 IsChecked 狀態；全部未勾 = 不篩選（等同舊的 "All"）。
-    public ObservableCollection<TradeTypeFilterItem> TradeTypeFilters { get; } = [];
-
-    [ObservableProperty] private string _tradeTypeFiltersSearch = string.Empty;
-
-    partial void OnTradeTypeFiltersSearchChanged(string _) => TradeTypeFiltersView?.Refresh();
-
-    /// <summary>供 popup ListBox 綁定，跟隨 search text 過濾。</summary>
-    public ICollectionView? TradeTypeFiltersView { get; private set; }
-
-    /// <summary>摘要顯示：0 勾 → 所有類型；1 勾 → 該標籤；多勾 → "N 個類型"。</summary>
-    public string TradeTypeFiltersDisplay
-    {
-        get
-        {
-            var checkedItems = TradeTypeFilters.Where(f => f.IsChecked).ToList();
-            if (checkedItems.Count == 0)
-                return System.Windows.Application.Current?.TryFindResource("Portfolio.Filter.AllTypes") as string ?? "所有類型";
-            if (checkedItems.Count == 1)
-                return checkedItems[0].Label;
-            var unit = System.Windows.Application.Current?.TryFindResource("Portfolio.Filter.TypesCountUnit") as string ?? "個類型";
-            return $"{checkedItems.Count} {unit}";
-        }
-    }
-    [ObservableProperty] private string _tradeSearchText = string.Empty;
-    [ObservableProperty] private DateTime? _tradeDateFrom;
-    [ObservableProperty] private DateTime? _tradeDateTo;
-
-    // Trade asset filter — 多選 popup（跟 type filter 對稱）；items 依「投資/現金/負債」分組
-    public ObservableCollection<TradeAssetFilterItem> TradeAssetFilters { get; } = [];
-
-    [ObservableProperty] private string _tradeAssetFiltersSearch = string.Empty;
-
-    partial void OnTradeAssetFiltersSearchChanged(string _) => TradeAssetFiltersView?.Refresh();
-
-    public ICollectionView? TradeAssetFiltersView { get; private set; }
-
-    public string TradeAssetFiltersDisplay
-    {
-        get
-        {
-            var checkedItems = TradeAssetFilters.Where(f => f.IsChecked).ToList();
-            if (checkedItems.Count == 0)
-                return System.Windows.Application.Current?.TryFindResource("Portfolio.Filter.AllAssets") as string ?? "所有資產";
-            if (checkedItems.Count == 1)
-                return checkedItems[0].Symbol;
-            var unit = System.Windows.Application.Current?.TryFindResource("Portfolio.Filter.AssetsCountUnit") as string ?? "項資產";
-            return $"{checkedItems.Count} {unit}";
-        }
-    }
-
-    // Trade pagination
-    [ObservableProperty] private int _tradePageSize = 25;
-    [ObservableProperty] private int _tradeCurrentPage = 1;
-    [ObservableProperty] private int _tradeTotalPages = 1;
-    [ObservableProperty] private int _tradeTotalCount;
-    [ObservableProperty] private string _tradePageDisplay = string.Empty;
-
-    public static IReadOnlyList<int> PageSizeOptions { get; } = [25, 50, 100];
 
     private ICollectionView? _positionsView;
     public ICollectionView PositionsView
@@ -420,378 +346,17 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
            && (string.IsNullOrEmpty(LiabilityFilterText)
                || row.Name.Contains(LiabilityFilterText, StringComparison.OrdinalIgnoreCase));
 
-    private ICollectionView? _tradesView;
-    public ICollectionView TradesView
-    {
-        get
-        {
-            if (_tradesView is null)
-            {
-                _tradesView = CollectionViewSource.GetDefaultView(Trades);
-                _tradesView.Filter = FilterTrade;
-            }
-            return _tradesView;
-        }
-    }
-
-    /// <summary>ICollectionView filter — criteria + pagination.</summary>
-    private bool FilterTrade(object obj)
-    {
-        if (obj is not TradeRowViewModel t)
-            return false;
-        return _visibleTradeIds.Contains(t.Id);
-    }
-
-    /// <summary>Pure criteria match (no pagination).</summary>
-    private bool MatchesTradeFilter(TradeRowViewModel t)
-    {
-        // Type filter — 多選模式：勾了任意項時，只顯示被勾選的那幾類
-        var checkedKeys = TradeTypeFilters.Where(f => f.IsChecked)
-                                           .Select(f => f.Key)
-                                           .ToHashSet();
-        if (checkedKeys.Count > 0 && !TradeMatchesAnyTypeKey(t, checkedKeys))
-            return false;
-
-        // Text search (symbol, name, note)
-        if (!string.IsNullOrWhiteSpace(TradeSearchText))
-        {
-            var q = TradeSearchText;
-            if (!t.Symbol.Contains(q, StringComparison.OrdinalIgnoreCase) &&
-                !t.Name.Contains(q, StringComparison.OrdinalIgnoreCase) &&
-                !(t.Note?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false))
-                return false;
-        }
-
-        // Date range
-        if (TradeDateFrom.HasValue && t.TradeDate < TradeDateFrom.Value.Date.ToUniversalTime())
-            return false;
-        if (TradeDateTo.HasValue && t.TradeDate > TradeDateTo.Value.Date.AddDays(1).ToUniversalTime())
-            return false;
-
-        // Asset filter — 多選模式：勾了任意項時，只顯示被勾 Symbol
-        var checkedSymbols = TradeAssetFilters.Where(f => f.IsChecked)
-                                              .Select(f => f.Symbol)
-                                              .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        if (checkedSymbols.Count > 0 && !checkedSymbols.Contains(t.Symbol))
-            return false;
-
-        return true;
-    }
-
-    /// <summary>
-    /// Stores the indices of trades visible on the current page,
-    /// so FilterTrade can implement Skip/Take pagination.
-    /// </summary>
-    private HashSet<Guid> _visibleTradeIds = [];
-
-    private void RefreshTradesView()
-    {
-        // 1. Compute filtered list (ignoring pagination)
-        var filtered = Trades.Where(t => MatchesTradeFilter(t)).ToList();
-        TradeTotalCount = filtered.Count;
-        TradeTotalPages = Math.Max(1, (int)Math.Ceiling((double)TradeTotalCount / TradePageSize));
-        if (TradeCurrentPage > TradeTotalPages)
-            TradeCurrentPage = TradeTotalPages;
-        var unit = System.Windows.Application.Current?.TryFindResource("Portfolio.TradeCount.Unit") as string ?? "筆";
-        TradePageDisplay = $"{TradeTotalCount} {unit}";
-
-        // 2. Compute page slice
-        var pageItems = filtered
-            .Skip((TradeCurrentPage - 1) * TradePageSize)
-            .Take(TradePageSize)
-            .Select(t => t.Id)
-            .ToHashSet();
-        _visibleTradeIds = pageItems;
-
-        // 3. Refresh the view (FilterTrade will now check _visibleTradeIds)
-        TradesView.Refresh();
-
-        // 4. 更新頁碼按鈕清單（當前頁、總頁數變動時都要重建）
-        RebuildPageNumbers();
-    }
-
-    partial void OnTradePageSizeChanged(int _) { TradeCurrentPage = 1; RefreshTradesView(); }
-
-    /// <summary>
-    /// 根據勾選的 type keys 判斷該交易是否符合。keys 可能是 "Buy"/"Sell"/"Income"/
-    /// "CashDividend"/"StockDividend"/"Deposit"/"Withdrawal"/"Transfer"/"LoanBorrow"/"LoanRepay"。
-    /// </summary>
-    private static bool TradeMatchesAnyTypeKey(TradeRowViewModel t, HashSet<string> keys)
-    {
-        if (t.IsBuy && keys.Contains("Buy")) return true;
-        if (t.IsSell && keys.Contains("Sell")) return true;
-        if (t.IsIncome && keys.Contains("Income")) return true;
-        if (t.IsCashDividend && keys.Contains("CashDividend")) return true;
-        if (t.Type == TradeType.StockDividend && keys.Contains("StockDividend")) return true;
-        if (t.IsDeposit && keys.Contains("Deposit")) return true;
-        if (t.IsWithdrawal && keys.Contains("Withdrawal")) return true;
-        if (t.IsTransfer && keys.Contains("Transfer")) return true;
-        if (t.IsLoanBorrow && keys.Contains("LoanBorrow")) return true;
-        if (t.IsLoanRepay && keys.Contains("LoanRepay")) return true;
-        return false;
-    }
-
-    /// <summary>當任一 type filter item 的 IsChecked 變動時觸發。</summary>
-    private void OnTradeTypeFilterItemChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName != nameof(TradeTypeFilterItem.IsChecked)) return;
-        TradeCurrentPage = 1;
-        RefreshTradesView();
-        OnPropertyChanged(nameof(HasActiveTradeFilter));
-        OnPropertyChanged(nameof(TradeTypeFiltersDisplay));
-    }
-
-    /// <summary>初始化 Trade type filter 清單與 collection view（供 search 過濾）。</summary>
-    private void InitTradeTypeFilters()
-    {
-        if (TradeTypeFilters.Count > 0) return;  // 只做一次
-        string Label(string key) =>
-            System.Windows.Application.Current?.TryFindResource($"Portfolio.Filter.{key}") as string ?? key;
-        string[] keys = ["Buy", "Sell", "Income", "CashDividend", "StockDividend",
-                         "Deposit", "Withdrawal", "Transfer", "LoanBorrow", "LoanRepay"];
-        foreach (var k in keys)
-        {
-            var item = new TradeTypeFilterItem(k, Label(k));
-            item.PropertyChanged += OnTradeTypeFilterItemChanged;
-            TradeTypeFilters.Add(item);
-        }
-        TradeTypeFiltersView = CollectionViewSource.GetDefaultView(TradeTypeFilters);
-        TradeTypeFiltersView.Filter = o =>
-        {
-            if (string.IsNullOrWhiteSpace(TradeTypeFiltersSearch)) return true;
-            return o is TradeTypeFilterItem i &&
-                   i.Label.Contains(TradeTypeFiltersSearch, StringComparison.OrdinalIgnoreCase);
-        };
-        OnPropertyChanged(nameof(TradeTypeFiltersView));
-    }
-
-    /// <summary>清除所有 type filter 勾選（popup 裡的 Clear filters 按鈕）。</summary>
-    [RelayCommand]
-    private void ClearTradeTypeFilters()
-    {
-        foreach (var item in TradeTypeFilters)
-            item.IsChecked = false;
-        TradeTypeFiltersSearch = string.Empty;
-    }
-
-    /// <summary>
-    /// 從 Trades 重建資產篩選清單，依交易類型分到投資/現金/負債三個群組。
-    /// 會保留原本勾選狀態（若該 symbol 仍存在）。
-    /// </summary>
-    private void RebuildTradeAssetFilters()
-    {
-        // 記下當前勾選，重建後還原
-        var previouslyChecked = TradeAssetFilters.Where(f => f.IsChecked)
-                                                  .Select(f => f.Symbol)
-                                                  .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        // 解除舊訂閱
-        foreach (var old in TradeAssetFilters)
-            old.PropertyChanged -= OnTradeAssetFilterItemChanged;
-        TradeAssetFilters.Clear();
-
-        string LabelOf(string key) =>
-            System.Windows.Application.Current?.TryFindResource($"Portfolio.Filter.Category.{key}") as string ?? key;
-        string InvestmentLabel = LabelOf("Investment");
-        string CashLabel       = LabelOf("Cash");
-        string LiabilityLabel  = LabelOf("Liability");
-
-        // 根據第一筆出現該 symbol 的交易類型來歸類
-        var symbolCategory = new Dictionary<string, (string Key, int Order, string Label)>(StringComparer.OrdinalIgnoreCase);
-        foreach (var t in Trades)
-        {
-            var sym = t.Symbol;
-            if (string.IsNullOrWhiteSpace(sym)) continue;
-            if (symbolCategory.ContainsKey(sym)) continue;
-
-            (string, int, string) cat = t.Type switch
-            {
-                TradeType.Buy or TradeType.Sell or TradeType.CashDividend or TradeType.StockDividend
-                    => ("Investment", 0, InvestmentLabel),
-                TradeType.LoanBorrow or TradeType.LoanRepay
-                    => ("Liability",  2, LiabilityLabel),
-                _ => ("Cash", 1, CashLabel),
-            };
-            symbolCategory[sym] = cat;
-        }
-
-        // 排序：先按 category order, 再按 symbol 字母
-        foreach (var (sym, (catKey, catOrder, catLabel)) in symbolCategory
-            .OrderBy(kv => kv.Value.Order)
-            .ThenBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase))
-        {
-            var item = new TradeAssetFilterItem(sym, catKey, catOrder, catLabel)
-            {
-                IsChecked = previouslyChecked.Contains(sym),
-            };
-            item.PropertyChanged += OnTradeAssetFilterItemChanged;
-            TradeAssetFilters.Add(item);
-        }
-
-        // Setup view (once)：依 CategoryLabel 分組 + search 過濾
-        if (TradeAssetFiltersView is null)
-        {
-            TradeAssetFiltersView = CollectionViewSource.GetDefaultView(TradeAssetFilters);
-            TradeAssetFiltersView.Filter = o =>
-            {
-                if (string.IsNullOrWhiteSpace(TradeAssetFiltersSearch)) return true;
-                return o is TradeAssetFilterItem i &&
-                       i.Symbol.Contains(TradeAssetFiltersSearch, StringComparison.OrdinalIgnoreCase);
-            };
-            TradeAssetFiltersView.GroupDescriptions.Add(
-                new PropertyGroupDescription(nameof(TradeAssetFilterItem.CategoryLabel)));
-            // Items 已按 CategoryOrder/Symbol 排入，CollectionView 不另外 sort 以免覆蓋群組順序
-            OnPropertyChanged(nameof(TradeAssetFiltersView));
-        }
-        else
-        {
-            TradeAssetFiltersView.Refresh();
-        }
-        OnPropertyChanged(nameof(TradeAssetFiltersDisplay));
-    }
-    partial void OnTradeSearchTextChanged(string _) { TradeCurrentPage = 1; RefreshTradesView(); OnPropertyChanged(nameof(HasActiveTradeFilter)); }
-    partial void OnTradeDateFromChanged(DateTime? _) { TradeCurrentPage = 1; RefreshTradesView(); OnPropertyChanged(nameof(HasActiveTradeFilter)); }
-    partial void OnTradeDateToChanged(DateTime? _) { TradeCurrentPage = 1; RefreshTradesView(); OnPropertyChanged(nameof(HasActiveTradeFilter)); }
-
-    /// <summary>任一 asset filter item 的 IsChecked 變動時觸發。</summary>
-    private void OnTradeAssetFilterItemChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName != nameof(TradeAssetFilterItem.IsChecked)) return;
-        TradeCurrentPage = 1;
-        RefreshTradesView();
-        OnPropertyChanged(nameof(HasActiveTradeFilter));
-        OnPropertyChanged(nameof(TradeAssetFiltersDisplay));
-    }
-
-    /// <summary>清除所有資產勾選（popup 裡的 Clear filters 按鈕）。</summary>
-    [RelayCommand]
-    private void ClearTradeAssetFilters()
-    {
-        foreach (var item in TradeAssetFilters)
-            item.IsChecked = false;
-        TradeAssetFiltersSearch = string.Empty;
-    }
-
-    [RelayCommand]
-    private void ClearTradeFilters()
-    {
-        TradeSearchText = string.Empty;
-        TradeDateFrom = null;
-        TradeDateTo = null;
-        foreach (var item in TradeTypeFilters)
-            item.IsChecked = false;
-        foreach (var item in TradeAssetFilters)
-            item.IsChecked = false;
-        TradeCurrentPage = 1;
-        RefreshTradesView();
-    }
-
     /// <summary>Called from DividendCalendarPanel when a month cell is clicked.</summary>
     [RelayCommand]
     private void FilterByDividendMonth(int month)
     {
-        // 勾選現金股息 + 股票股利；清掉 asset 勾選
-        foreach (var item in TradeTypeFilters)
-            item.IsChecked = item.Key is "CashDividend" or "StockDividend";
-        foreach (var item in TradeAssetFilters)
-            item.IsChecked = false;
-        TradeDateFrom = new DateTime(DivCalendarYear, month, 1);
-        TradeDateTo = new DateTime(DivCalendarYear, month, DateTime.DaysInMonth(DivCalendarYear, month));
-        TradeSearchText = string.Empty;
-    }
-
-    public bool HasActiveTradeFilter =>
-        !string.IsNullOrEmpty(TradeSearchText) ||
-        TradeDateFrom.HasValue || TradeDateTo.HasValue ||
-        TradeTypeFilters.Any(f => f.IsChecked) ||
-        TradeAssetFilters.Any(f => f.IsChecked);
-
-    [RelayCommand]
-    private void TradePagePrev()
-    {
-        if (TradeCurrentPage > 1)
-        { TradeCurrentPage--; RefreshTradesView(); }
-    }
-
-    [RelayCommand]
-    private void TradePageNext()
-    {
-        if (TradeCurrentPage < TradeTotalPages)
-        { TradeCurrentPage++; RefreshTradesView(); }
-    }
-
-    /// <summary>跳到指定頁碼（供頁碼按鈕呼叫）。</summary>
-    [RelayCommand]
-    private void GoToPage(int page)
-    {
-        if (page < 1 || page > TradeTotalPages || page == TradeCurrentPage)
-            return;
-        TradeCurrentPage = page;
-        RefreshTradesView();
-    }
-
-    /// <summary>
-    /// 「頁碼」跳頁輸入框內容。始終同步當前頁碼（<see cref="TradeCurrentPage"/>）
-    /// 作為可視提示，使用者編輯後按 Enter 跳頁，跳成功則會透過 OnTradeCurrentPageChanged
-    /// 自動更新回新頁碼。
-    /// </summary>
-    [ObservableProperty] private string _tradeJumpPageInput = "1";
-
-    partial void OnTradeCurrentPageChanged(int value) => TradeJumpPageInput = value.ToString();
-
-    /// <summary>跳頁輸入按 Enter 觸發 — 解析並跳頁；若解析失敗則回復為當前頁。</summary>
-    [RelayCommand]
-    private void JumpToPage()
-    {
-        if (int.TryParse(TradeJumpPageInput, out var p))
-            GoToPage(p);
-        // 不論成功或失敗，都同步回當前頁（避免無效輸入停留在 input）
-        TradeJumpPageInput = TradeCurrentPage.ToString();
-    }
-
-    /// <summary>
-    /// 頁碼按鈕列表（含省略號）。總頁數 ≤7 時全部顯示；否則顯示首頁 + 當前附近 ±2
-    /// + 末頁，中間以 ellipsis 帶過。
-    /// </summary>
-    public IReadOnlyList<TradePageItem> TradePageNumbers { get; private set; } = [];
-
-    private void RebuildPageNumbers()
-    {
-        var total = TradeTotalPages;
-        var current = TradeCurrentPage;
-        var items = new List<TradePageItem>();
-
-        if (total <= 7)
-        {
-            for (var i = 1; i <= total; i++)
-                items.Add(new TradePageItem(i, i == current, false));
-        }
-        else
-        {
-            // 視當前位置決定 window
-            int windowStart, windowEnd;
-            if (current <= 4)           { windowStart = 2; windowEnd = 5; }
-            else if (current >= total - 3) { windowStart = total - 4; windowEnd = total - 1; }
-            else                         { windowStart = current - 1; windowEnd = current + 1; }
-
-            items.Add(new TradePageItem(1, current == 1, false));
-            if (windowStart > 2)
-                items.Add(new TradePageItem(0, false, true));
-            for (var i = windowStart; i <= windowEnd; i++)
-                items.Add(new TradePageItem(i, i == current, false));
-            if (windowEnd < total - 1)
-                items.Add(new TradePageItem(0, false, true));
-            items.Add(new TradePageItem(total, current == total, false));
-        }
-
-        TradePageNumbers = items;
-        OnPropertyChanged(nameof(TradePageNumbers));
+        TradeFilter.FilterByDividendMonth(month, DivCalendarYear);
     }
 
     [RelayCommand]
     private void RemoveTrade(TradeRowViewModel row)
     {
-        var msg = Application.Current?.TryFindResource("Portfolio.Confirm.DeleteTrade") as string ?? "確定刪除此交易紀錄？";
+        var msg = L("Portfolio.Confirm.DeleteTrade", "確定刪除此交易紀錄？");
         AskConfirm(msg, async () =>
         {
             try
@@ -805,15 +370,14 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 HasNoTrades = Trades.Count == 0;
                 HasAnyDividendTrades = Trades.Any(t => t.IsCashDividend);
                 RebuildRealizedPnl();
-                RefreshTradesView();
+                TradeFilter.RefreshTradesView();
                 await ReloadAccountBalancesAsync();
                 RebuildTotals();
             }
             catch (Exception ex)
             {
-                Serilog.Log.Warning(ex, "RemoveTrade failed");
-                _snackbar?.Error(Application.Current?.TryFindResource("Portfolio.Trade.DeleteFailed") as string
-                    ?? "刪除交易記錄失敗，請稍後再試");
+                Log.Warning(ex, "RemoveTrade failed for trade {TradeId}", row.Id);
+                _snackbar?.Error(L("Portfolio.Trade.DeleteFailed", "刪除交易記錄失敗，請稍後再試"));
             }
         });
     }
@@ -858,12 +422,19 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _settingsService = ui.Settings;
         _currencyService = services.Currency;
         _assetRepo = repositories.Asset;
+        _loanScheduleRepo = repositories.LoanSchedule;
         _cryptoService = services.Crypto;
         _historyProvider = services.History;
         _txService = services.Transaction ?? new NullTransactionService();
         _balanceQuery = services.BalanceQuery ?? new NullBalanceQueryService();
         _positionQuery = services.PositionQuery ?? new NullPositionQueryService();
-        History = new PortfolioHistoryViewModel(repositories.Snapshot);
+        _localization = ui.Localization;
+        History = new PortfolioHistoryViewModel(repositories.Snapshot, ui.Localization);
+
+        // TradeFilter must be created before LoadAsync so LoadTradesAsync can call
+        // TradeFilter.InitTradeTypeFilters() and TradeFilter.RefreshTradesView().
+        TradeFilter = new TradeFilterViewModel(() => Trades, ui.Localization ?? NullLocalizationService.Instance);
+        TradeFilter.AttachTradesCollection(Trades);
 
         // Rebuild chart colours whenever the user switches theme
         if (ui.Theme is not null)
@@ -915,16 +486,18 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         var entries = await _repo.GetEntriesAsync();
         var snapshots = await _positionQuery.GetAllPositionSnapshotsAsync();
 
-        Positions.Clear();
+        // Build the new desired set of rows keyed by (Symbol, AssetType).
+        var newRows = new Dictionary<(string Symbol, AssetType AssetType), PortfolioRowViewModel>();
+
         foreach (var g in entries.GroupBy(e => (e.Symbol, e.AssetType)))
         {
             var lots = g.ToList();
             var primary = lots[0];
 
             // Archive filter: hide when all lots are archived and ShowArchivedPositions is off.
-            // Aggregating by symbol means one "archived" lot shouldn't hide an active symbol.
             if (!ShowArchivedPositions && lots.All(l => !l.IsActive)) continue;
 
+            PortfolioRowViewModel row;
             if (lots.Count == 1)
             {
                 snapshots.TryGetValue(primary.Id, out var snap);
@@ -932,39 +505,74 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 // Hide-empty filter: projection says qty == 0 (position closed out).
                 if (HideEmptyPositions && (snap?.Quantity ?? 0m) == 0m) continue;
 
-                var row = ToRow(primary, snap);
+                row = ToRow(primary, snap);
                 row.IsActive = primary.IsActive;
-                Positions.Add(row);
-                continue;
+            }
+            else
+            {
+                // Multiple lots: aggregate into one display row.
+                var totalQty  = lots.Sum(e => snapshots.TryGetValue(e.Id, out var s) ? s.Quantity : 0m);
+                var totalCost = lots.Sum(e => snapshots.TryGetValue(e.Id, out var s) ? s.TotalCost : 0m);
+                var firstBuyDate = lots
+                    .Select(e => snapshots.TryGetValue(e.Id, out var s) ? s.FirstBuyDate : null)
+                    .Where(d => d.HasValue)
+                    .Select(d => d!.Value)
+                    .OrderBy(d => d)
+                    .FirstOrDefault();
+                var aggregatedSnap = new PositionSnapshot(
+                    primary.Id,
+                    totalQty,
+                    totalCost,
+                    totalQty > 0 ? totalCost / totalQty : 0m,
+                    lots.Sum(e => snapshots.TryGetValue(e.Id, out var s) ? s.RealizedPnl : 0m),
+                    firstBuyDate == default ? null : firstBuyDate);
+
+                if (HideEmptyPositions && totalQty == 0m) continue;
+
+                row = ToRow(primary, aggregatedSnap);
+                row.IsActive = lots.Any(l => l.IsActive);
+                foreach (var extra in lots.Skip(1))
+                    row.AllEntryIds.Add(extra.Id);
             }
 
-            // Multiple lots: aggregate into one display row (weighted average cost from projection)
-            var totalQty  = lots.Sum(e => snapshots.TryGetValue(e.Id, out var s) ? s.Quantity : 0m);
-            var totalCost = lots.Sum(e => snapshots.TryGetValue(e.Id, out var s) ? s.TotalCost : 0m);
-            var firstBuyDate = lots
-                .Select(e => snapshots.TryGetValue(e.Id, out var s) ? s.FirstBuyDate : null)
-                .Where(d => d.HasValue)
-                .Select(d => d!.Value)
-                .OrderBy(d => d)
-                .FirstOrDefault();
-            snapshots.TryGetValue(primary.Id, out var primarySnap);
-            var aggregatedSnap = new PositionSnapshot(
-                primary.Id,
-                totalQty,
-                totalCost,
-                totalQty > 0 ? totalCost / totalQty : 0m,
-                lots.Sum(e => snapshots.TryGetValue(e.Id, out var s) ? s.RealizedPnl : 0m),
-                firstBuyDate == default ? null : firstBuyDate);
-
-            if (HideEmptyPositions && totalQty == 0m) continue;
-
-            var aggRow = ToRow(primary, aggregatedSnap);
-            // Row is active if ANY lot is active (matches the archive-filter semantics above).
-            aggRow.IsActive = lots.Any(l => l.IsActive);
-            foreach (var extra in lots.Skip(1))
-                aggRow.AllEntryIds.Add(extra.Id);
-            Positions.Add(aggRow);
+            newRows[(g.Key.Symbol, g.Key.AssetType)] = row;
         }
+
+        // Diff against current Positions: remove stale rows (iterate backward to avoid index shift),
+        // then add new rows, then update in-place for rows that exist in both sets.
+        var existingIndex = new Dictionary<(string Symbol, AssetType AssetType), PortfolioRowViewModel>();
+        foreach (var r in Positions)
+            existingIndex[(r.Symbol, r.AssetType)] = r;
+
+        // Remove rows that are no longer in the new set (backward iteration).
+        for (var i = Positions.Count - 1; i >= 0; i--)
+        {
+            var key = (Positions[i].Symbol, Positions[i].AssetType);
+            if (!newRows.ContainsKey(key))
+                Positions.RemoveAt(i);
+        }
+
+        // Add new rows; update existing rows in-place.
+        foreach (var (key, newRow) in newRows)
+        {
+            if (existingIndex.TryGetValue(key, out var existing))
+            {
+                // Update mutable projection fields on the existing instance so the
+                // DataGrid preserves scroll position and selection state.
+                existing.Quantity = newRow.Quantity;
+                existing.BuyPrice = newRow.BuyPrice;
+                existing.IsActive = newRow.IsActive;
+                existing.AllEntryIds.Clear();
+                foreach (var id in newRow.AllEntryIds)
+                    existing.AllEntryIds.Add(id);
+                existing.Refresh();
+            }
+            else
+            {
+                Positions.Add(newRow);
+            }
+        }
+
         HasNoPositions = Positions.Count == 0;
 
         // Refresh Lazy-Upsert suggestion list for TX form editable ComboBox (Task 19).
@@ -996,6 +604,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     public async Task LoadAsync()
     {
+        // Bypass OnMonthlyExpenseChanged (avoids premature save); RebuildTotals() below reads MonthlyExpense.
         // Restore persisted monthly expense (set via property to avoid triggering save-back on load)
         SetProperty(ref _monthlyExpense, _settingsService?.Current?.MonthlyExpense ?? 0m, nameof(MonthlyExpense));
         ShowWelcomeBanner = !(_settingsService?.Current?.HasShownWelcomeBanner ?? false);
@@ -1031,7 +640,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private async Task LoadTradesAsync()
     {
         // 首次呼叫時建立 type filter 項目（需要 Application resources 已就緒）
-        InitTradeTypeFilters();
+        TradeFilter.InitTradeTypeFilters();
         try
         {
             var trades = await _tradeRepo.GetAllAsync();
@@ -1043,10 +652,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
             // Rebuild asset filter items — 依交易類型將 symbol 歸到
             // 投資（Buy/Sell/股利）/ 現金（Deposit/Withdrawal/Income/Interest）/ 負債（Loan*）
-            RebuildTradeAssetFilters();
+            TradeFilter.RebuildTradeAssetFilters();
 
-            RebuildRealizedPnl();   // also calls _tradesView?.Refresh()
-            RefreshTradesView();
+            RebuildRealizedPnl();   // also calls TradeFilter.TradesView?.Refresh()
+            TradeFilter.RefreshTradesView();
 
             // 以最新一筆 Buy 的折扣套到對應持倉，讓預估賣出費用反映當前券商折扣
             ApplyLatestTradeDiscounts();
@@ -1070,7 +679,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         HasIncome = TotalIncome > 0;
         HasDividends = TotalDividends > 0;
 
-        _tradesView?.Refresh();
+        TradeFilter.TradesView?.Refresh();
     }
 
 
@@ -1127,32 +736,57 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(DayPnlPercentDisplay));
         IsDayPnlPositive = DayPnl >= 0;
 
-        // Notify debt health derived properties
-        OnPropertyChanged(nameof(DebtRatioValue));
+        // Recompute cached financial summary properties and notify all dependents
+        RecalcFinancialSummary();
+
+        RebuildAllocationSlices();
+
+        // Fire-and-forget: record today's snapshot once prices are live
+        _ = RecordSnapshotAsync();
+    }
+
+    /// <summary>
+    /// Recomputes all cached financial-summary properties that depend on Liabilities,
+    /// TotalAssets, TotalLiabilities, TotalCash, NetWorth, or MonthlyExpense, then
+    /// fires PropertyChanged for every downstream display property.
+    /// Call this from RebuildTotals() and OnMonthlyExpenseChanged().
+    /// </summary>
+    private void RecalcFinancialSummary()
+    {
+        // TotalOriginalLiabilities — iterates Liabilities collection once here
+        TotalOriginalLiabilities = Liabilities.Sum(l =>
+            l.OriginalAmount > 0 ? l.OriginalAmount : l.Balance);
+
+        // DebtRatioValue
+        DebtRatioValue = TotalAssets > 0
+            ? Math.Min(TotalLiabilities / TotalAssets * 100m, 100m)
+            : 0m;
+
+        // PaidPercentValue
+        var orig = TotalOriginalLiabilities;
+        PaidPercentValue = orig > 0
+            ? Math.Clamp((orig - TotalLiabilities) / orig * 100m, 0m, 100m)
+            : 0m;
+
+        // EmergencyFundMonths
+        EmergencyFundMonths = MonthlyExpense > 0 ? TotalCash / MonthlyExpense : 0m;
+
+        // Notify derived display properties (the backing-field setters above already
+        // raise PropertyChanged for the four cached properties themselves)
         OnPropertyChanged(nameof(DebtRatioDisplay));
         OnPropertyChanged(nameof(LeverageRatioDisplay));
         OnPropertyChanged(nameof(IsDebtHealthy));
         OnPropertyChanged(nameof(IsDebtWarning));
         OnPropertyChanged(nameof(IsDebtDanger));
         OnPropertyChanged(nameof(DebtStatusTag));
-        OnPropertyChanged(nameof(TotalOriginalLiabilities));
-        OnPropertyChanged(nameof(PaidPercentValue));
         OnPropertyChanged(nameof(PaidPercentDisplay));
         OnPropertyChanged(nameof(TotalOriginalDisplay));
-
-        // Emergency fund (depends on TotalCash)
-        OnPropertyChanged(nameof(EmergencyFundMonths));
         OnPropertyChanged(nameof(EmergencyFundMonthsDisplay));
         OnPropertyChanged(nameof(EmergencyFundBarValue));
         OnPropertyChanged(nameof(IsEmergencySafe));
         OnPropertyChanged(nameof(IsEmergencyWarning));
         OnPropertyChanged(nameof(IsEmergencyDanger));
         OnPropertyChanged(nameof(EmergencyStatusTag));
-
-        RebuildAllocationSlices();
-
-        // Fire-and-forget: record today's snapshot once prices are live
-        _ = RecordSnapshotAsync();
     }
 
     private static readonly IReadOnlyDictionary<AssetType, (string LabelKey, string Color)> AssetTypeColors =
@@ -1167,8 +801,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     private void RebuildAllocationSlices()
     {
-        AllocationSlices.Clear();
-
         // Aggregate positions by AssetType (use market value if available, else cost)
         var groups = Positions
             .GroupBy(p => p.AssetType)
@@ -1178,27 +810,64 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
         var cash = TotalCash;
         var total = groups.Sum(g => g.Value) + Math.Max(0, cash) + Math.Max(0, TotalLiabilities);
-        if (total <= 0)
+
+        // Build the new slice list without touching the observable collection yet.
+        var newSlices = new List<AssetAllocationSlice>();
+
+        if (total > 0)
+        {
+            foreach (var (type, value) in groups)
+            {
+                if (!AssetTypeColors.TryGetValue(type, out var meta))
+                    continue;
+                var label = L(meta.LabelKey, type.ToString());
+                newSlices.Add(new AssetAllocationSlice(label, value, value / total * 100m, meta.Color));
+            }
+
+            if (cash > 0)
+            {
+                var cashLabel = L("Portfolio.Header.Cash", "Cash");
+                newSlices.Add(new AssetAllocationSlice(cashLabel, cash, cash / total * 100m, "#94A3B8"));
+            }
+
+            if (TotalLiabilities > 0)
+            {
+                var liabLabel = L("Portfolio.Header.Liabilities", "Liabilities");
+                newSlices.Add(new AssetAllocationSlice(liabLabel, TotalLiabilities, TotalLiabilities / total * 100m, "#EF4444"));
+            }
+        }
+
+        // Dirty-check: only rebuild AllocationPieSeries when slice data has materially changed.
+        // LiveCharts treats a new ISeries[] reference as a full chart reset (animation flicker + GC).
+        // Comparing by label + value (rounded to nearest integer) avoids churn on tiny price ticks.
+        bool slicesChanged = newSlices.Count != AllocationSlices.Count;
+        if (!slicesChanged)
+        {
+            for (var i = 0; i < newSlices.Count; i++)
+            {
+                var n = newSlices[i];
+                var o = AllocationSlices[i];
+                if (n.Label != o.Label || Math.Round(n.Value) != Math.Round(o.Value))
+                {
+                    slicesChanged = true;
+                    break;
+                }
+            }
+        }
+
+        if (!slicesChanged)
             return;
 
-        foreach (var (type, value) in groups)
-        {
-            if (!AssetTypeColors.TryGetValue(type, out var meta))
-                continue;
-            var label = System.Windows.Application.Current?.TryFindResource(meta.LabelKey) as string ?? type.ToString();
-            AllocationSlices.Add(new AssetAllocationSlice(label, value, value / total * 100m, meta.Color));
-        }
+        // Slices changed — update observable collection and rebuild PieSeries array.
+        AllocationSlices.Clear();
+        foreach (var s in newSlices)
+            AllocationSlices.Add(s);
 
-        if (cash > 0)
+        if (total <= 0)
         {
-            var cashLabel = System.Windows.Application.Current?.TryFindResource("Portfolio.Header.Cash") as string ?? "Cash";
-            AllocationSlices.Add(new AssetAllocationSlice(cashLabel, cash, cash / total * 100m, "#94A3B8"));
-        }
-
-        if (TotalLiabilities > 0)
-        {
-            var liabLabel = System.Windows.Application.Current?.TryFindResource("Portfolio.Header.Liabilities") as string ?? "Liabilities";
-            AllocationSlices.Add(new AssetAllocationSlice(liabLabel, TotalLiabilities, TotalLiabilities / total * 100m, "#EF4444"));
+            AllocationPieSeries = [];
+            OnPropertyChanged(nameof(HasAllocationData));
+            return;
         }
 
         // Build PieSeries for LiveChartsCore v2 (must use double, not decimal)
@@ -1278,6 +947,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
         // Liabilities: rebuild from projections (handles new labels appearing after a LoanBorrow)
         await LoadLiabilitiesAsync();
+        // Caller must invoke RebuildTotals() after this to keep RecalcFinancialSummary up-to-date.
     }
 
     private async Task WriteLogAsync(
@@ -1327,7 +997,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Log.Warning(ex, "[Portfolio] WriteBuyTradeAsync failed for {Symbol}", entry?.Symbol);
+            Log.Warning(ex, "[Portfolio] WriteBuyTradeAsync failed for {Symbol}", entry.Symbol);
         }
     }
 
@@ -1419,7 +1089,15 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(SellTransactionTax));
         OnPropertyChanged(nameof(SellNetAmount));
         OnPropertyChanged(nameof(SellEstimatedPnl));
+        RecalcFinancialSummary();
     }
+
+    /// <summary>
+    /// Convenience wrapper: looks up a localised string via <see cref="_localization"/> when
+    /// available, otherwise falls back to <paramref name="fallback"/>.
+    /// </summary>
+    private string L(string key, string fallback = "") =>
+        _localization?.Get(key, fallback) ?? fallback;
 
     public void Dispose()
     {
@@ -1489,56 +1167,3 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     }
 }
 
-/// <summary>
-/// 交易記錄分頁控制列的單一頁碼項目。
-///   Number     = 頁碼（若 IsEllipsis=true 則忽略）
-///   IsCurrent  = 是否為當前頁（高亮樣式）
-///   IsEllipsis = 是否為省略號「…」佔位
-/// </summary>
-public sealed record TradePageItem(int Number, bool IsCurrent, bool IsEllipsis);
-
-/// <summary>
-/// 交易類型篩選的單一勾選項目。Popup 裡的每個 checkbox 對應一個此物件。
-///   Key       = 邏輯鍵（"Buy", "Sell", "CashDividend"…），給 filter 比對用
-///   Label     = 在地化顯示名稱
-///   IsChecked = 是否勾選；變動時 PortfolioViewModel 會重新篩選 Trades
-/// </summary>
-public partial class TradeTypeFilterItem : CommunityToolkit.Mvvm.ComponentModel.ObservableObject
-{
-    public string Key { get; }
-    public string Label { get; }
-
-    [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty] private bool _isChecked;
-
-    public TradeTypeFilterItem(string key, string label)
-    {
-        Key = key;
-        Label = label;
-    }
-}
-
-/// <summary>
-/// 交易資產篩選的單一勾選項目。Popup 裡每個 checkbox 對應一個此物件。
-///   Symbol        = 代號或帳戶名稱（"00981A" / "台新活存" / "房貸"）
-///   CategoryKey   = "Investment"/"Cash"/"Liability"（供分組與比對）
-///   CategoryOrder = 0/1/2（決定群組顯示順序：投資 → 現金 → 負債）
-///   CategoryLabel = 在地化群組名稱（給 XAML 分組 header 顯示）
-///   IsChecked     = 是否勾選
-/// </summary>
-public partial class TradeAssetFilterItem : CommunityToolkit.Mvvm.ComponentModel.ObservableObject
-{
-    public string Symbol { get; }
-    public string CategoryKey { get; }
-    public int CategoryOrder { get; }
-    public string CategoryLabel { get; }
-
-    [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty] private bool _isChecked;
-
-    public TradeAssetFilterItem(string symbol, string categoryKey, int categoryOrder, string categoryLabel)
-    {
-        Symbol = symbol;
-        CategoryKey = categoryKey;
-        CategoryOrder = categoryOrder;
-        CategoryLabel = categoryLabel;
-    }
-}
