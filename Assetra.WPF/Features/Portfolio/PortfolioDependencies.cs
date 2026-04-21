@@ -55,7 +55,8 @@ public sealed record PortfolioServices(
     /// 測試中若省略，ViewModel 會回退為內建實作。
     /// </summary>
     IPortfolioSummaryService? Summary = null,
-    ITradeDeletionWorkflowService? TradeDeletionWorkflow = null);
+    ITradeDeletionWorkflowService? TradeDeletionWorkflow = null,
+    IPositionDeletionWorkflowService? PositionDeletionWorkflow = null);
 
 /// <summary>
 /// UI-adjacent services (scheduler / theming / settings / snackbar / localization).

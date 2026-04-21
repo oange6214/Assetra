@@ -1177,19 +1177,8 @@ public partial class PortfolioViewModel
         var msg = L("Portfolio.Detail.DeleteWarning", "刪除後無法復原，請確認不再需要後再操作。");
         AskConfirm(msg, async () =>
         {
-            // Delete trade records whose portfolio_entry_id points to this position's lots,
-            // then delete their fee-child records.
-            var entryIds = row.AllEntryIds.ToHashSet();
-            var allTrades = await _tradeRepo.GetAllAsync();
-            foreach (var trade in allTrades.Where(t => t.PortfolioEntryId.HasValue && entryIds.Contains(t.PortfolioEntryId.Value)))
-            {
-                await _tradeRepo.RemoveChildrenAsync(trade.Id);
-                await _tradeRepo.RemoveAsync(trade.Id);
-            }
-
-            // Delete the portfolio entry lots themselves.
-            foreach (var id in row.AllEntryIds)
-                await _repo.RemoveAsync(id);
+            await _positionDeletionWorkflowService.DeleteAsync(
+                new PositionDeletionRequest(row.AllEntryIds.ToList()));
 
             Positions.Remove(row);
             if (ReferenceEquals(SelectedPositionRow, row))
