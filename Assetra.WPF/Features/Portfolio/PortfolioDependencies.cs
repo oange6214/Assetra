@@ -31,7 +31,6 @@ public sealed record PortfolioServices(
     IStockHistoryProvider? History = null,
     ICurrencyService? Currency = null,
     ICryptoService? Crypto = null,
-    ITransactionService? Transaction = null,
     /// <summary>
     /// 餘額投影服務：由交易歷史計算現金 / 負債餘額。
     /// 測試中若省略，ViewModel 會回退為 <c>NullBalanceQueryService</c>（回傳 0）。

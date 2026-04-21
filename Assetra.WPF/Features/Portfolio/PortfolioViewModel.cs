@@ -36,7 +36,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly ILoanScheduleRepository? _loanScheduleRepo;
     private readonly ICryptoService? _cryptoService;
     private readonly IStockHistoryProvider? _historyProvider;
-    private readonly ITransactionService _txService;
     private readonly IBalanceQueryService _balanceQuery;
     private readonly IPositionQueryService _positionQuery;
     private readonly IPortfolioLoadService _loadService;
@@ -441,7 +440,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _loanScheduleRepo = repositories.LoanSchedule;
         _cryptoService = services.Crypto;
         _historyProvider = services.History;
-        _txService = services.Transaction ?? new NullTransactionService();
         _balanceQuery = services.BalanceQuery ?? new NullBalanceQueryService();
         _positionQuery = services.PositionQuery ?? new NullPositionQueryService();
         _loadService = services.Load ?? new PortfolioLoadService(
@@ -450,13 +448,15 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _tradeRepo,
             _balanceQuery,
             _assetRepo);
+        var fallbackTxService = new NullTransactionService();
         _addAssetWorkflowService = services.AddAssetWorkflow ?? new AddAssetWorkflowService(
             _search,
             _historyProvider,
             _repo,
             _logRepo,
-            _txService);
-        _transactionWorkflowService = services.TransactionWorkflow ?? new TransactionWorkflowService();
+            fallbackTxService);
+        _transactionWorkflowService = services.TransactionWorkflow
+            ?? new TransactionWorkflowService(fallbackTxService);
         _tradeDeletionWorkflowService = services.TradeDeletionWorkflow
             ?? new TradeDeletionWorkflowService(_tradeRepo, _repo, _positionQuery);
         _tradeMetadataWorkflowService = services.TradeMetadataWorkflow
@@ -482,11 +482,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _loanMutationWorkflowService = services.LoanMutationWorkflow
             ?? (_assetRepo is not null && _loanScheduleRepo is not null
                 ? new LoanMutationWorkflowService(
-                    _transactionWorkflowService,
                     _assetRepo,
                     _loanScheduleRepo,
-                    _txService)
-                : new NullLoanMutationWorkflowService(_transactionWorkflowService, _txService));
+                    fallbackTxService)
+                : new NullLoanMutationWorkflowService());
         _summaryService = services.Summary ?? new PortfolioSummaryService();
         _historyMaintenanceService = services.HistoryMaintenance
             ?? new NullPortfolioHistoryMaintenanceService();
@@ -1245,27 +1244,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     private sealed class NullLoanMutationWorkflowService : ILoanMutationWorkflowService
     {
-        private readonly ITransactionWorkflowService _transactionWorkflowService;
-        private readonly ITransactionService _transactionService;
-
-        public NullLoanMutationWorkflowService(
-            ITransactionWorkflowService transactionWorkflowService,
-            ITransactionService transactionService)
-        {
-            _transactionWorkflowService = transactionWorkflowService;
-            _transactionService = transactionService;
-        }
-
-        public async Task<TransactionWorkflowPlan> RecordAsync(LoanTransactionRequest request, CancellationToken ct = default)
-        {
-            var plan = _transactionWorkflowService.CreateLoanPlan(request);
-            foreach (var trade in plan.Trades)
-            {
-                ct.ThrowIfCancellationRequested();
-                await _transactionService.RecordAsync(trade).ConfigureAwait(false);
-            }
-            return plan;
-        }
+        public Task<LoanMutationResult> RecordAsync(LoanTransactionRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new LoanMutationResult(null, null));
     }
 
 }

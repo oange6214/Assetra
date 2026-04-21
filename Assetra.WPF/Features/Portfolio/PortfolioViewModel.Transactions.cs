@@ -1107,14 +1107,12 @@ public partial class PortfolioViewModel
 
         var cashAccId = await ResolveCashAccountIdAsync();
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
-        var plan = _transactionWorkflowService.CreateIncomePlan(new IncomeTransactionRequest(
+        await _transactionWorkflowService.RecordIncomeAsync(new IncomeTransactionRequest(
             amount,
             tradeDate,
             cashAccId,
             TxNote,
             fee));
-        foreach (var trade in plan.Trades)
-            await _txService.RecordAsync(trade);
 
         await ReloadAccountBalancesAsync();
         CloseTxDialog();
@@ -1158,7 +1156,7 @@ public partial class PortfolioViewModel
                       : TxDivPosition.Name;
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
-        var plan = _transactionWorkflowService.CreateCashDividendPlan(new CashDividendTransactionRequest(
+        await _transactionWorkflowService.RecordCashDividendAsync(new CashDividendTransactionRequest(
             TxDivPosition.Symbol,
             TxDivPosition.Exchange,
             divName,
@@ -1168,8 +1166,6 @@ public partial class PortfolioViewModel
             tradeDate,
             cashAccId,
             fee));
-        foreach (var trade in plan.Trades)
-            await _txService.RecordAsync(trade);
 
         await ReloadAccountBalancesAsync();
         CloseTxDialog();
@@ -1186,15 +1182,13 @@ public partial class PortfolioViewModel
         var divName = string.IsNullOrEmpty(TxStockDivPosition.Name)
                       ? TxStockDivPosition.Symbol
                       : TxStockDivPosition.Name;
-        var plan = _transactionWorkflowService.CreateStockDividendPlan(new StockDividendTransactionRequest(
+        await _transactionWorkflowService.RecordStockDividendAsync(new StockDividendTransactionRequest(
             TxStockDivPosition.Symbol,
             TxStockDivPosition.Exchange,
             divName,
             newShares,
             DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
             TxStockDivPosition.Id));
-        foreach (var trade in plan.Trades)
-            await _txService.RecordAsync(trade);
 
         // 更新持倉股數（數量由 trade log 投影，只更新 display row）
         var row = Positions.FirstOrDefault(p => p.AllEntryIds.Contains(TxStockDivPosition.Id));
@@ -1230,7 +1224,7 @@ public partial class PortfolioViewModel
 
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         var cleanNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
-        var plan = _transactionWorkflowService.CreateCashFlowPlan(new CashFlowTransactionRequest(
+        await _transactionWorkflowService.RecordCashFlowAsync(new CashFlowTransactionRequest(
             type,
             amount,
             tradeDate,
@@ -1238,8 +1232,6 @@ public partial class PortfolioViewModel
             accountName,
             cleanNote,
             fee));
-        foreach (var trade in plan.Trades)
-            await _txService.RecordAsync(trade);
 
         await ReloadAccountBalancesAsync();
         CloseTxDialog();
@@ -1284,29 +1276,6 @@ public partial class PortfolioViewModel
             return 0m;
         }
         return fee;
-    }
-
-    /// <summary>
-    /// 過渡期 helper：目前 CashDividend 仍直接呼叫這個方法建立 fee 子記錄。
-    /// 待股利流程也搬進 workflow service 後即可刪除。
-    /// </summary>
-    private async Task WriteFeeTradeIfAnyAsync(
-        decimal fee, Guid? cashAccountId, DateTime tradeDate,
-        string notePrefix, string? userNote, Guid parentTradeId)
-    {
-        if (fee <= 0)
-            return;
-        var feeTrade = new Trade(
-            Id: Guid.NewGuid(), Symbol: string.Empty, Exchange: string.Empty,
-            Name: "手續費", Type: TradeType.Withdrawal,
-            TradeDate: tradeDate,
-            Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
-            CashAmount: fee, CashAccountId: cashAccountId,
-            Note: string.IsNullOrWhiteSpace(userNote)
-                  ? notePrefix
-                  : $"{notePrefix} — {userNote}",
-            ParentTradeId: parentTradeId);
-        await _txService.RecordAsync(feeTrade);
     }
 
     /// <summary>
@@ -1375,7 +1344,7 @@ public partial class PortfolioViewModel
         var cleanNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
         var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
 
-        var plan = await _loanMutationWorkflowService.RecordAsync(new LoanTransactionRequest(
+        await _loanMutationWorkflowService.RecordAsync(new LoanTransactionRequest(
             type,
             cashAmount,
             tradeDate,
@@ -1439,7 +1408,7 @@ public partial class PortfolioViewModel
         var dstName = TxTransferTarget?.Name ?? TxTransferTargetName.Trim();
         var userNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
 
-        var plan = _transactionWorkflowService.CreateTransferPlan(new TransferTransactionRequest(
+        await _transactionWorkflowService.RecordTransferAsync(new TransferTransactionRequest(
             TxCashAccount.Id,
             srcName,
             destId.Value,
@@ -1449,8 +1418,6 @@ public partial class PortfolioViewModel
             tradeDate,
             userNote,
             fee));
-        foreach (var trade in plan.Trades)
-            await _txService.RecordAsync(trade);
 
         await ReloadAccountBalancesAsync();
         CloseTxDialog();
