@@ -518,7 +518,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         AddAssetDialog.GetTxBuyMetaOnly = () => TxBuyMetaOnly;
         AddAssetDialog.GetTxCashAccountId = () => TxCashAccount?.Id;
         AddAssetDialog.GetTxUseCashAccount = () => TxUseCashAccount;
-        AddAssetDialog.AssetAdded += async (_, _) => await ReloadAfterAssetAddedAsync();
+        AddAssetDialog.AssetAdded += OnAssetAdded;
 
         // Rebuild chart colours whenever the user switches theme
         if (ui.Theme is not null)
@@ -725,6 +725,11 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         // Backfill gaps in snapshot history — fire and forget
         _ = BackfillAndRefreshAsync();
     }
+
+    // Named handler so it can be unsubscribed in Dispose(); fire-and-forget with
+    // _ = to make the async exception path explicit rather than relying on async void.
+    private void OnAssetAdded(object? sender, EventArgs e)
+        => _ = ReloadAfterAssetAddedAsync();
 
     /// <summary>
     /// Called by <see cref="AddAssetDialogViewModel.AssetAdded"/> to refresh all
@@ -1162,6 +1167,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _currencyService.CurrencyChanged -= OnCurrencyChanged;
         if (_themeService is not null && _onThemeChanged is not null)
             _themeService.ThemeChanged -= _onThemeChanged;
+        AddAssetDialog.AssetAdded -= OnAssetAdded;
         AddAssetDialog.CancelPendingFetch();
         _disposables.Dispose();
     }
