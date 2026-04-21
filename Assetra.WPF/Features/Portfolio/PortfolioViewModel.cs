@@ -44,6 +44,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly IBalanceQueryService _balanceQuery;
     private readonly IPositionQueryService _positionQuery;
     private readonly IPortfolioLoadService _loadService;
+    private readonly IAddAssetWorkflowService _addAssetWorkflowService;
     private readonly ITransactionWorkflowService _transactionWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly ILocalizationService? _localization;
@@ -440,6 +441,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _tradeRepo,
             _balanceQuery,
             _assetRepo);
+        _addAssetWorkflowService = services.AddAssetWorkflow ?? new AddAssetWorkflowService(
+            _search,
+            _historyProvider);
         _transactionWorkflowService = services.TransactionWorkflow ?? new TransactionWorkflowService();
         _summaryService = services.Summary ?? new PortfolioSummaryService();
         _localization = ui.Localization;

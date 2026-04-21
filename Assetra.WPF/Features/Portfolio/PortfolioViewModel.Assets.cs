@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Assetra.AppLayer.Portfolio.Contracts;
 using Assetra.AppLayer.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
@@ -85,8 +86,7 @@ public partial class PortfolioViewModel
             ClosePriceHint = string.Empty;
             return;
         }
-        var results = _search.Search(value.Trim()) ?? [];
-        SymbolSuggestions = results.Take(8).ToList();
+        SymbolSuggestions = _addAssetWorkflowService.SearchSymbols(value.Trim());
         IsSuggestionsOpen = SymbolSuggestions.Count > 0;
         TriggerClosePriceFetch();
     }
@@ -119,43 +119,22 @@ public partial class PortfolioViewModel
 
     private async Task FetchClosePriceAsync(string symbol, DateTime buyDate, CancellationToken ct)
     {
-        if (_historyProvider is null)
-            return;
         try
         {
-            // Debounce: if the user keeps typing, the CTS cancels this before the delay
-            // completes, so no HTTP request is made and IsLoadingClosePrice stays false.
-            await Task.Delay(300, ct);
             IsLoadingClosePrice = true;
             ClosePriceHint = string.Empty;
-            var targetDate = DateOnly.FromDateTime(buyDate);  // for history lookup (stays DateOnly)
-            var exchange = _search.GetExchange(symbol) ?? InferExchange(symbol);
-            var daysDiff = (DateTime.Today - buyDate).Days;
-            var period = daysDiff <= 35 ? ChartPeriod.OneMonth
-                           : daysDiff <= 100 ? ChartPeriod.ThreeMonths
-                           : daysDiff <= 370 ? ChartPeriod.OneYear
-                           : ChartPeriod.TwoYears;
-
-            var history = await _historyProvider.GetHistoryAsync(symbol, exchange, period, ct);
+            var result = await _addAssetWorkflowService.LookupClosePriceAsync(symbol, buyDate, ct);
             if (ct.IsCancellationRequested)
                 return;
 
-            // 找對應日期；若選到非交易日則找最近一個前交易日
-            var point = history
-                .Where(h => h.Date <= targetDate)
-                .OrderByDescending(h => h.Date)
-                .FirstOrDefault();
-
-            if (point is not null)
+            if (result.HasPrice && result.Price.HasValue)
             {
-                AddPrice = point.Close.ToString("0.##");
-                ClosePriceHint = point.Date == targetDate
-                    ? $"已帶入 {targetDate:yyyy/MM/dd} 收盤價"
-                    : $"已帶入最近交易日 {point.Date:yyyy/MM/dd} 收盤價";
+                AddPrice = result.Price.Value.ToString("0.##");
+                ClosePriceHint = result.Hint;
             }
             else
             {
-                ClosePriceHint = "查無收盤資料，請手動輸入";
+                ClosePriceHint = result.Hint;
             }
         }
         catch (OperationCanceledException) { /* 正常取消 */ }
@@ -189,26 +168,20 @@ public partial class PortfolioViewModel
         }
 
         var gross = price * qty;
-        decimal commission;
+        var preview = _addAssetWorkflowService.BuildBuyPreview(new BuyPreviewRequest(
+            AddSymbol.Trim(),
+            price,
+            qty,
+            TxCommissionDiscountValue,
+            !string.IsNullOrWhiteSpace(TxFee) &&
+            ParseHelpers.TryParseDecimal(TxFee, out var manualFee) && manualFee >= 0
+                ? manualFee
+                : null));
 
-        // Manual fee override (TxFee field) — if filled, use that value verbatim.
-        // Must match the logic in AddPosition() so preview and actual write are consistent.
-        if (!string.IsNullOrWhiteSpace(TxFee) &&
-            ParseHelpers.TryParseDecimal(TxFee, out var manualFee) && manualFee >= 0)
-        {
-            commission = manualFee;
-        }
-        else
-        {
-            var discount = TxCommissionDiscountValue;
-            var isEtf = _search.IsEtf(AddSymbol.Trim());
-            commission = TaiwanTradeFeeCalculator.CalcBuy(price, qty, discount, isEtf).Commission;
-        }
-
-        AddGrossAmount = gross;
-        AddCommission = commission;
-        AddTotalCost = gross + commission;
-        AddCostPerShare = qty > 0 ? (gross + commission) / qty : 0m;
+        AddGrossAmount = preview.GrossAmount;
+        AddCommission = preview.Commission;
+        AddTotalCost = preview.TotalCost;
+        AddCostPerShare = preview.CostPerShare;
     }
 
     // 非股票投資欄位（基金 / 貴金屬 / 債券 / 加密貨幣）
@@ -525,7 +498,7 @@ public partial class PortfolioViewModel
             { AddError = "請輸入股票代號"; return; }
 
             var metaSymbol = AddSymbol.Trim().ToUpper();
-            var metaExchange = _search.GetExchange(metaSymbol) ?? InferExchange(metaSymbol);
+            var metaExchange = _search.GetExchange(metaSymbol) ?? _addAssetWorkflowService.InferExchange(metaSymbol);
             var metaName = _search.GetName(metaSymbol) ?? string.Empty;
 
             await _repo
@@ -553,7 +526,7 @@ public partial class PortfolioViewModel
         { AddError = "成交價無效"; return; }
 
         var symbol = AddSymbol.Trim().ToUpper();
-        var exchange = _search.GetExchange(symbol) ?? InferExchange(symbol);
+        var exchange = _search.GetExchange(symbol) ?? _addAssetWorkflowService.InferExchange(symbol);
         var name = _search.GetName(symbol) ?? string.Empty;
 
         // Buy-side commission: user can override via TxFee (manual). When TxFee is empty
@@ -621,16 +594,6 @@ public partial class PortfolioViewModel
     }
 
     private Task AddStockAsync() => AddPosition();
-
-    /// <summary>
-    /// Fallback when a symbol isn't in the local CSV index (e.g. newly listed securities).
-    /// ETF bond-class suffixes (00981A, 00981B …) are listed on TPEX;
-    /// everything else defaults to TWSE.
-    /// </summary>
-    private static string InferExchange(string symbol) =>
-        System.Text.RegularExpressions.Regex.IsMatch(symbol, @"^\d{5}[A-Z]$")
-            ? "TPEX"
-            : "TWSE";
 
     // 加密貨幣
 

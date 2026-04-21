@@ -163,6 +163,9 @@ internal static class AppBootstrapper
             sp.GetRequiredService<IBalanceQueryService>(),
             sp.GetService<IAssetRepository>()));
         services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
+        services.AddSingleton<IAddAssetWorkflowService>(sp => new AddAssetWorkflowService(
+            sp.GetRequiredService<IStockSearchService>(),
+            sp.GetService<IStockHistoryProvider>()));
         services.AddSingleton<ITransactionWorkflowService, TransactionWorkflowService>();
         services.AddSingleton<ICryptoService, CoinGeckoService>();
 
@@ -187,6 +190,7 @@ internal static class AppBootstrapper
                 sp.GetRequiredService<PortfolioSnapshotService>(),
                 sp.GetRequiredService<PortfolioBackfillService>(),
                 sp.GetRequiredService<IPortfolioLoadService>(),
+                sp.GetRequiredService<IAddAssetWorkflowService>(),
                 sp.GetRequiredService<IStockHistoryProvider>(),
                 sp.GetRequiredService<ICurrencyService>(),
                 sp.GetRequiredService<ICryptoService>(),
