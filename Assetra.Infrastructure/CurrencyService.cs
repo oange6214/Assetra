@@ -1,9 +1,8 @@
-using System.Net.Http;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Assetra.Infrastructure;
 
@@ -138,7 +137,8 @@ public sealed class CurrencyService : ICurrencyService
 
     private decimal Convert(decimal twdValue)
     {
-        if (Currency == "TWD") return twdValue;
+        if (Currency == "TWD")
+            return twdValue;
         return _exchangeRates.TryGetValue(Currency, out var rate) && rate > 0
             ? twdValue / rate
             : twdValue;
@@ -150,7 +150,7 @@ public sealed class CurrencyService : ICurrencyService
         "JPY" => "¥",
         "EUR" => "€",
         "HKD" => "HK$",
-        _     => "NT$",   // TWD and unknown
+        _ => "NT$",   // TWD and unknown
     };
 
     private static Dictionary<string, decimal> BuildRates(AppSettings s)
@@ -161,7 +161,8 @@ public sealed class CurrencyService : ICurrencyService
             // Filters out zero/negative entries that could cause divide-by-zero in Convert().
             var result = new Dictionary<string, decimal>(_hardcodedDefaults);
             foreach (var (key, value) in persisted)
-                if (value > 0m) result[key] = value;
+                if (value > 0m)
+                    result[key] = value;
             return result;
         }
 

@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Assetra.WPF.Features.Allocation;
 
@@ -19,7 +19,7 @@ namespace Assetra.WPF.Features.Allocation;
 /// </summary>
 public sealed partial class FinancialOverviewViewModel : ObservableObject
 {
-    private readonly IAssetRepository     _assetRepo;
+    private readonly IAssetRepository _assetRepo;
     private readonly IBalanceQueryService _balanceQuery;
     private readonly Portfolio.PortfolioViewModel _portfolio;
 
@@ -30,21 +30,21 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     [ObservableProperty] private decimal _totalInvestments;
     [ObservableProperty] private decimal _totalLiabilities;
 
-    public string TotalNetWorthDisplay    => $"NT${TotalNetWorth:N0}";
-    public string TotalAssetsDisplay      => $"NT${TotalAssets:N0}";
+    public string TotalNetWorthDisplay => $"NT${TotalNetWorth:N0}";
+    public string TotalAssetsDisplay => $"NT${TotalAssets:N0}";
     public string TotalInvestmentsDisplay => $"NT${TotalInvestments:N0}";
     public string TotalLiabilitiesDisplay => $"NT${TotalLiabilities:N0}";
 
-    partial void OnTotalNetWorthChanged(decimal _)    => OnPropertyChanged(nameof(TotalNetWorthDisplay));
-    partial void OnTotalAssetsChanged(decimal _)      => OnPropertyChanged(nameof(TotalAssetsDisplay));
+    partial void OnTotalNetWorthChanged(decimal _) => OnPropertyChanged(nameof(TotalNetWorthDisplay));
+    partial void OnTotalAssetsChanged(decimal _) => OnPropertyChanged(nameof(TotalAssetsDisplay));
     partial void OnTotalInvestmentsChanged(decimal _) => OnPropertyChanged(nameof(TotalInvestmentsDisplay));
     partial void OnTotalLiabilitiesChanged(decimal _) => OnPropertyChanged(nameof(TotalLiabilitiesDisplay));
 
     // ── Accordion collections ─────────────────────────────────────────────
 
-    public ObservableCollection<AssetGroupVm> AssetGroups  { get; } = [];
+    public ObservableCollection<AssetGroupVm> AssetGroups { get; } = [];
     public ObservableCollection<AssetGroupVm> InvestGroups { get; } = [];
-    public ObservableCollection<AssetGroupVm> LiabGroups   { get; } = [];
+    public ObservableCollection<AssetGroupVm> LiabGroups { get; } = [];
 
     [ObservableProperty] private bool _isLoading;
 
@@ -53,15 +53,16 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         IBalanceQueryService balanceQuery,
         Portfolio.PortfolioViewModel portfolio)
     {
-        _assetRepo    = assetRepo    ?? throw new ArgumentNullException(nameof(assetRepo));
+        _assetRepo = assetRepo ?? throw new ArgumentNullException(nameof(assetRepo));
         _balanceQuery = balanceQuery ?? throw new ArgumentNullException(nameof(balanceQuery));
-        _portfolio    = portfolio    ?? throw new ArgumentNullException(nameof(portfolio));
+        _portfolio = portfolio ?? throw new ArgumentNullException(nameof(portfolio));
     }
 
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsLoading) return;
+        if (IsLoading)
+            return;
         IsLoading = true;
         try
         {
@@ -75,9 +76,9 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
     private async Task LoadInternalAsync()
     {
-        var groups    = await _assetRepo.GetGroupsAsync().ConfigureAwait(false);
-        var items     = await _assetRepo.GetItemsAsync().ConfigureAwait(false);
-        var cashBals  = await _balanceQuery.GetAllCashBalancesAsync().ConfigureAwait(false);
+        var groups = await _assetRepo.GetGroupsAsync().ConfigureAwait(false);
+        var items = await _assetRepo.GetItemsAsync().ConfigureAwait(false);
+        var cashBals = await _balanceQuery.GetAllCashBalancesAsync().ConfigureAwait(false);
         var liabSnaps = await _balanceQuery.GetAllLiabilitySnapshotsAsync().ConfigureAwait(false);
 
         // ── Asset groups ──────────────────────────────────────────────────
@@ -142,21 +143,21 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
             {
                 Icon = assetType switch
                 {
-                    AssetType.Stock        => "📈",
-                    AssetType.Fund         => "📦",
-                    AssetType.Bond         => "🏛",
+                    AssetType.Stock => "📈",
+                    AssetType.Fund => "📦",
+                    AssetType.Bond => "🏛",
                     AssetType.PreciousMetal => "🥇",
-                    AssetType.Crypto       => "🪙",
-                    _                      => "📊",
+                    AssetType.Crypto => "🪙",
+                    _ => "📊",
                 },
                 Name = assetType switch
                 {
-                    AssetType.Stock        => "台股 / 個股",
-                    AssetType.Fund         => "ETF / 基金",
-                    AssetType.Bond         => "債券",
+                    AssetType.Stock => "台股 / 個股",
+                    AssetType.Fund => "ETF / 基金",
+                    AssetType.Bond => "債券",
                     AssetType.PreciousMetal => "貴金屬",
-                    AssetType.Crypto       => "加密貨幣",
-                    _                      => assetType.ToString(),
+                    AssetType.Crypto => "加密貨幣",
+                    _ => assetType.ToString(),
                 },
             };
 
@@ -190,25 +191,28 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
         // ── Update collections on UI thread ──────────────────────────────
 
-        var totalAssets      = assetGroupVms.Sum(g => g.Subtotal);
+        var totalAssets = assetGroupVms.Sum(g => g.Subtotal);
         var totalInvestments = investGroupsRaw.Sum(g => g.Subtotal);
         var totalLiabilities = liabGroupVms.Sum(g => g.Subtotal);
 
         System.Windows.Application.Current?.Dispatcher.Invoke(() =>
         {
             AssetGroups.Clear();
-            foreach (var g in assetGroupVms) AssetGroups.Add(g);
+            foreach (var g in assetGroupVms)
+                AssetGroups.Add(g);
 
             InvestGroups.Clear();
-            foreach (var g in investGroupsRaw) InvestGroups.Add(g);
+            foreach (var g in investGroupsRaw)
+                InvestGroups.Add(g);
 
             LiabGroups.Clear();
-            foreach (var g in liabGroupVms) LiabGroups.Add(g);
+            foreach (var g in liabGroupVms)
+                LiabGroups.Add(g);
 
-            TotalAssets      = totalAssets;
+            TotalAssets = totalAssets;
             TotalInvestments = totalInvestments;
             TotalLiabilities = totalLiabilities;
-            TotalNetWorth    = totalAssets + totalInvestments - totalLiabilities;
+            TotalNetWorth = totalAssets + totalInvestments - totalLiabilities;
         });
     }
 }

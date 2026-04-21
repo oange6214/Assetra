@@ -1,6 +1,6 @@
-using Microsoft.Data.Sqlite;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Microsoft.Data.Sqlite;
 
 namespace Assetra.Infrastructure.Persistence;
 
@@ -143,7 +143,8 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
             sel.Parameters.AddWithValue("$s", symbol);
             sel.Parameters.AddWithValue("$e", exchange);
             var r = await sel.ExecuteScalarAsync(ct).ConfigureAwait(false);
-            if (r is string s1) return Guid.Parse(s1);
+            if (r is string s1)
+                return Guid.Parse(s1);
         }
 
         var id = Guid.NewGuid();
@@ -167,7 +168,8 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
             sel2.Parameters.AddWithValue("$s", symbol);
             sel2.Parameters.AddWithValue("$e", exchange);
             var r2 = await sel2.ExecuteScalarAsync(ct).ConfigureAwait(false);
-            if (r2 is string s2) return Guid.Parse(s2);
+            if (r2 is string s2)
+                return Guid.Parse(s2);
             throw;
         }
     }

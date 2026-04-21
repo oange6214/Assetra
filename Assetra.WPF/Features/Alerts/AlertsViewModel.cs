@@ -1,11 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Assetra.WPF.Features.Alerts;
 

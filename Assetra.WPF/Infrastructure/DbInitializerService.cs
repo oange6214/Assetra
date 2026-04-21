@@ -1,8 +1,8 @@
 using System.IO;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Assetra.Core.Interfaces;
 using Assetra.Infrastructure.Persistence;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Assetra.WPF.Infrastructure;
 

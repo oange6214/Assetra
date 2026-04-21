@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using Assetra.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Assetra.Core.Interfaces;
 
 namespace Assetra.Infrastructure.FinMind;
 

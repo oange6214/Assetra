@@ -3,11 +3,11 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Assetra.Core.Interfaces;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Infrastructure;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Assetra.WPF.Features.Allocation;
 
@@ -129,20 +129,20 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     [ObservableProperty] private decimal _totalPnl;
     [ObservableProperty] private int _assetCount;
 
-    public string TotalValueDisplay      => $"NT${TotalValue:N0}";
+    public string TotalValueDisplay => $"NT${TotalValue:N0}";
     public string TotalInvestmentDisplay => $"NT${TotalInvestment:N0}";
-    public string TotalCashDisplay       => $"NT${TotalCash:N0}";
-    public string TotalPnlDisplay        => (TotalPnl >= 0 ? "+" : "") + $"NT${TotalPnl:N0}";
-    public bool   IsTotalPnlPositive     => TotalPnl >= 0;
+    public string TotalCashDisplay => $"NT${TotalCash:N0}";
+    public string TotalPnlDisplay => (TotalPnl >= 0 ? "+" : "") + $"NT${TotalPnl:N0}";
+    public bool IsTotalPnlPositive => TotalPnl >= 0;
 
     partial void OnTotalPnlChanged(decimal _)
     {
         OnPropertyChanged(nameof(TotalPnlDisplay));
         OnPropertyChanged(nameof(IsTotalPnlPositive));
     }
-    partial void OnTotalValueChanged(decimal _)      => OnPropertyChanged(nameof(TotalValueDisplay));
+    partial void OnTotalValueChanged(decimal _) => OnPropertyChanged(nameof(TotalValueDisplay));
     partial void OnTotalInvestmentChanged(decimal _) => OnPropertyChanged(nameof(TotalInvestmentDisplay));
-    partial void OnTotalCashChanged(decimal _)       => OnPropertyChanged(nameof(TotalCashDisplay));
+    partial void OnTotalCashChanged(decimal _) => OnPropertyChanged(nameof(TotalCashDisplay));
 
     // Ctor
     public AllocationViewModel(PortfolioViewModel portfolio, IAppSettingsService? settings = null)
@@ -277,7 +277,8 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         {
             foreach (var row in AllocationRows)
             {
-                if (row.IsCashRow) { row.SetBuySell(0m, row.ActualPercent); continue; }
+                if (row.IsCashRow)
+                { row.SetBuySell(0m, row.ActualPercent); continue; }
                 // When no target is set, treat as no-op (don't suggest selling everything)
                 var needed = row.TargetPercent > 0
                     ? (row.TargetPercent - row.ActualPercent) / 100m * TotalValue

@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Hosting;
 using Assetra.Infrastructure.Persistence;
+using Microsoft.Extensions.Hosting;
 
 namespace Assetra.WPF.Infrastructure;
 

@@ -1,5 +1,5 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using Assetra.Core.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.Portfolio;
 

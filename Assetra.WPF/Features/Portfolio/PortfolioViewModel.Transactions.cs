@@ -1,14 +1,12 @@
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
-using System.Windows;
+using Assetra.AppLayer.Portfolio.Dtos;
+using Assetra.Core.Models;
+using Assetra.Core.Trading;
+using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
-using Assetra.AppLayer.Portfolio.Dtos;
-using Assetra.Core.Models;
-using Assetra.Core.Services;
-using Assetra.Core.Trading;
-using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Portfolio;
 
@@ -77,7 +75,8 @@ public partial class PortfolioViewModel
 
     private static string ValidatePositiveIntOrEmpty(string? value)
     {
-        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
         if (!long.TryParse(value.Replace(",", ""), out var l) || l <= 0)
             return "請輸入大於 0 的整數";
         if (l > int.MaxValue)
@@ -153,7 +152,8 @@ public partial class PortfolioViewModel
     {
         if (value is not null && value.CurrentPrice > 0)
             TxAmount = value.CurrentPrice.ToString("F2");
-        if (value is null) TxSellQuantity = string.Empty;
+        if (value is null)
+            TxSellQuantity = string.Empty;
         TxSellIsEtf = value is not null && _search.IsEtf(value.Symbol);
         TxSellIsBondEtf = value is not null && _search.IsBondEtf(value.Symbol);
         UpdateSellTxPreview();
@@ -208,9 +208,9 @@ public partial class PortfolioViewModel
     public bool TxTypeIsCashDiv => TxType == "cashDiv";
     public bool TxTypeIsStockDiv => TxType == "stockDiv";
     public bool TxTypeIsCashFlow => TxType is "deposit" or "withdrawal";
-    public bool TxTypeIsLoan       => TxType is "loanBorrow" or "loanRepay";
+    public bool TxTypeIsLoan => TxType is "loanBorrow" or "loanRepay";
     public bool TxTypeIsLoanBorrow => TxType == "loanBorrow";
-    public bool TxTypeIsLoanRepay  => TxType == "loanRepay";
+    public bool TxTypeIsLoanRepay => TxType == "loanRepay";
     /// <summary>True for 轉帳 — money moves between two cash accounts.</summary>
     public bool TxTypeIsTransfer => TxType == "transfer";
     public bool TxTypeIsBuy => TxType == "buy";
@@ -575,11 +575,11 @@ public partial class PortfolioViewModel
         TxInterestPaidError = ValidateNonNegativeDecimalOrEmpty(value);
 
     // LoanBorrow 攤還欄位（選填；填寫後自動建立攤還表）
-    [ObservableProperty] private string   _txLoanRate       = string.Empty;
-    [ObservableProperty] private string   _txLoanTermMonths = string.Empty;
-    [ObservableProperty] private DateTime _txLoanStartDate  = DateTime.Today;
-    [ObservableProperty] private string   _txLoanRateError       = string.Empty;
-    [ObservableProperty] private string   _txLoanTermMonthsError = string.Empty;
+    [ObservableProperty] private string _txLoanRate = string.Empty;
+    [ObservableProperty] private string _txLoanTermMonths = string.Empty;
+    [ObservableProperty] private DateTime _txLoanStartDate = DateTime.Today;
+    [ObservableProperty] private string _txLoanRateError = string.Empty;
+    [ObservableProperty] private string _txLoanTermMonthsError = string.Empty;
 
     partial void OnTxLoanRateChanged(string value) =>
         TxLoanRateError = ValidateNonNegativeDecimalOrEmpty(value);
@@ -1282,20 +1282,23 @@ public partial class PortfolioViewModel
     /// </summary>
     private async Task AutoFillLoanRepayAsync(string label)
     {
-        if (string.IsNullOrWhiteSpace(label)) return;
+        if (string.IsNullOrWhiteSpace(label))
+            return;
 
         var row = Liabilities.FirstOrDefault(r =>
             string.Equals(r.Label, label.Trim(), StringComparison.OrdinalIgnoreCase));
-        if (row is null || !row.IsLoan) return;
+        if (row is null || !row.IsLoan)
+            return;
 
         if (!row.IsScheduleLoaded)
             await LoadLoanScheduleAsync(row);
 
         var next = row.NextUnpaidEntry;
-        if (next is null) return;
+        if (next is null)
+            return;
 
-        TxPrincipal     = next.PrincipalAmount.ToString("F0");
-        TxInterestPaid  = next.InterestAmount > 0 ? next.InterestAmount.ToString("F0") : string.Empty;
+        TxPrincipal = next.PrincipalAmount.ToString("F0");
+        TxInterestPaid = next.InterestAmount > 0 ? next.InterestAmount.ToString("F0") : string.Empty;
     }
 
     private decimal ParseOptionalFee(out string? err)
@@ -1378,7 +1381,7 @@ public partial class PortfolioViewModel
 
         // ── 攤還表欄位（選填；借款時才適用）────────────────────────────────
         decimal? amortAnnualRate = null;
-        int?     amortTermMonths  = null;
+        int? amortTermMonths = null;
         if (type == TradeType.LoanBorrow &&
             !string.IsNullOrWhiteSpace(TxLoanRate) &&
             !string.IsNullOrWhiteSpace(TxLoanTermMonths))
@@ -1388,7 +1391,7 @@ public partial class PortfolioViewModel
             if (!ParseHelpers.TryParseInt(TxLoanTermMonths, out var termMo) || termMo <= 0)
             { TxError = "還款期數無效"; return; }
             amortAnnualRate = ratePct / 100m;
-            amortTermMonths  = termMo;
+            amortTermMonths = termMo;
         }
 
         var fee = ParseOptionalFee(out var feeError);

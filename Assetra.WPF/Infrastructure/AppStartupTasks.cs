@@ -1,8 +1,8 @@
-using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure.Search;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Assetra.WPF.Infrastructure;
 

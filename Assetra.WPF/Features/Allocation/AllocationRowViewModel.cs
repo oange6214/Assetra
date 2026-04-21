@@ -1,6 +1,6 @@
 using System.Windows.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
 using Assetra.WPF.Infrastructure;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.Allocation;
 

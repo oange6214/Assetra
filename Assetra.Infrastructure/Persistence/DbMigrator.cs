@@ -1,9 +1,9 @@
 using System.Text.Json;
+using Assetra.Core.Interfaces;
+using Assetra.Core.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Assetra.Core.Interfaces;
-using Assetra.Core.Models;
 
 namespace Assetra.Infrastructure.Persistence;
 

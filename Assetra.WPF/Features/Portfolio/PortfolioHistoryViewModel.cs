@@ -1,5 +1,9 @@
 using System.Windows;
 using System.Windows.Media;
+using Assetra.AppLayer.Portfolio.Contracts;
+using Assetra.Core.Interfaces;
+using Assetra.Core.Models;
+using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
@@ -8,10 +12,6 @@ using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
-using Assetra.AppLayer.Portfolio.Contracts;
-using Assetra.Core.Interfaces;
-using Assetra.Core.Models;
-using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Portfolio;
 

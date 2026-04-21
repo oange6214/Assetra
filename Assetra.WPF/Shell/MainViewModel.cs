@@ -1,8 +1,5 @@
 using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Features.Alerts;
@@ -12,6 +9,9 @@ using Assetra.WPF.Features.Settings;
 using Assetra.WPF.Features.Snackbar;
 using Assetra.WPF.Features.StatusBar;
 using Assetra.WPF.Infrastructure;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Wpf.Ui.Appearance;
 
 namespace Assetra.WPF.Shell;

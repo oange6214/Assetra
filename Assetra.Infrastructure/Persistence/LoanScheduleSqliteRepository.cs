@@ -1,6 +1,6 @@
-using Microsoft.Data.Sqlite;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Microsoft.Data.Sqlite;
 
 namespace Assetra.Infrastructure.Persistence;
 
@@ -68,8 +68,8 @@ public sealed class LoanScheduleSqliteRepository : ILoanScheduleRepository
         await using var cmd = conn.CreateCommand();
         cmd.CommandText =
             "UPDATE loan_schedule SET is_paid=1, paid_at=$pa, trade_id=$tid WHERE id=$id;";
-        cmd.Parameters.AddWithValue("$id",  id.ToString());
-        cmd.Parameters.AddWithValue("$pa",  paidAt.ToString("o"));
+        cmd.Parameters.AddWithValue("$id", id.ToString());
+        cmd.Parameters.AddWithValue("$pa", paidAt.ToString("o"));
         cmd.Parameters.AddWithValue("$tid", tradeId.ToString());
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
     }
@@ -94,12 +94,12 @@ public sealed class LoanScheduleSqliteRepository : ILoanScheduleRepository
         (decimal)r.GetDouble(6),
         (decimal)r.GetDouble(7),
         r.GetInt32(8) != 0,
-        r.IsDBNull(9)  ? null : DateTime.Parse(r.GetString(9)),
+        r.IsDBNull(9) ? null : DateTime.Parse(r.GetString(9)),
         r.IsDBNull(10) ? null : Guid.Parse(r.GetString(10)));
 
     private static void BindEntry(SqliteCommand cmd, LoanScheduleEntry e)
     {
-        cmd.Parameters.AddWithValue("$id",  e.Id.ToString());
+        cmd.Parameters.AddWithValue("$id", e.Id.ToString());
         cmd.Parameters.AddWithValue("$aid", e.AssetId.ToString());
         cmd.Parameters.AddWithValue("$per", e.Period);
         cmd.Parameters.AddWithValue("$due", e.DueDate.ToString("yyyy-MM-dd"));
@@ -107,8 +107,8 @@ public sealed class LoanScheduleSqliteRepository : ILoanScheduleRepository
         cmd.Parameters.AddWithValue("$pri", (double)e.PrincipalAmount);
         cmd.Parameters.AddWithValue("$int", (double)e.InterestAmount);
         cmd.Parameters.AddWithValue("$rem", (double)e.Remaining);
-        cmd.Parameters.AddWithValue("$ip",  e.IsPaid ? 1 : 0);
-        cmd.Parameters.AddWithValue("$pa",  e.PaidAt.HasValue  ? (object)e.PaidAt.Value.ToString("o") : DBNull.Value);
-        cmd.Parameters.AddWithValue("$tid", e.TradeId.HasValue ? (object)e.TradeId.Value.ToString()   : DBNull.Value);
+        cmd.Parameters.AddWithValue("$ip", e.IsPaid ? 1 : 0);
+        cmd.Parameters.AddWithValue("$pa", e.PaidAt.HasValue ? (object)e.PaidAt.Value.ToString("o") : DBNull.Value);
+        cmd.Parameters.AddWithValue("$tid", e.TradeId.HasValue ? (object)e.TradeId.Value.ToString() : DBNull.Value);
     }
 }

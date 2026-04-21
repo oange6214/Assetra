@@ -1,7 +1,6 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Assetra.Core.Models;
 using Assetra.Core.Trading;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.Portfolio;
 

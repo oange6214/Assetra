@@ -1,7 +1,7 @@
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Assetra.Infrastructure.Persistence;
 
@@ -44,7 +44,8 @@ public sealed class AppSettingsService : IAppSettingsService, IDisposable
         finally { _lock.Release(); }
 
         // 在鎖之外觸發，避免訂閱者的同步邏輯拖住其他 Save 呼叫
-        try { Changed?.Invoke(); }
+        try
+        { Changed?.Invoke(); }
         catch (Exception ex)
         {
             _logger?.LogWarning(ex, "AppSettingsService.Changed subscriber threw");

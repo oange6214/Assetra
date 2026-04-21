@@ -1,6 +1,6 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure.Converters;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.Portfolio;
 
@@ -50,16 +50,16 @@ public sealed class TradeRowViewModel : ObservableObject
     // Type predicates — used by XAML DataTriggers and ViewModel filter queries.
     // Intentionally verbose (one-per-TradeType) rather than a single enum switch so that
     // binding {Binding IsBuy} / {Binding IsCashDividend} stays cheap and self-documenting.
-    public bool IsBuy           => Type == TradeType.Buy;
-    public bool IsSell          => Type == TradeType.Sell;
-    public bool IsIncome        => Type == TradeType.Income;
-    public bool IsCashDividend  => Type == TradeType.CashDividend;
-    public bool IsDividend      => Type is TradeType.CashDividend or TradeType.StockDividend;
-    public bool IsDeposit       => Type == TradeType.Deposit;
-    public bool IsWithdrawal    => Type == TradeType.Withdrawal;
-    public bool IsLoanBorrow    => Type == TradeType.LoanBorrow;
-    public bool IsLoanRepay     => Type == TradeType.LoanRepay;
-    public bool IsTransfer      => Type == TradeType.Transfer;
+    public bool IsBuy => Type == TradeType.Buy;
+    public bool IsSell => Type == TradeType.Sell;
+    public bool IsIncome => Type == TradeType.Income;
+    public bool IsCashDividend => Type == TradeType.CashDividend;
+    public bool IsDividend => Type is TradeType.CashDividend or TradeType.StockDividend;
+    public bool IsDeposit => Type == TradeType.Deposit;
+    public bool IsWithdrawal => Type == TradeType.Withdrawal;
+    public bool IsLoanBorrow => Type == TradeType.LoanBorrow;
+    public bool IsLoanRepay => Type == TradeType.LoanRepay;
+    public bool IsTransfer => Type == TradeType.Transfer;
 
     // Display helpers
     // TypeLabel removed — use TradeTypeConverter in XAML for localized display.
@@ -136,12 +136,12 @@ public sealed class TradeRowViewModel : ObservableObject
     /// </summary>
     public decimal TotalAmount => Type switch
     {
-        TradeType.Buy                                                     => -(Price * Quantity + (Commission ?? 0)),
-        TradeType.Sell                                                    => +(Price * Quantity - (Commission ?? 0)),
-        TradeType.CashDividend                                            => +(CashAmount ?? (Price * Quantity)),
-        TradeType.Income or TradeType.Deposit or TradeType.LoanBorrow     => +(CashAmount ?? 0),
+        TradeType.Buy => -(Price * Quantity + (Commission ?? 0)),
+        TradeType.Sell => +(Price * Quantity - (Commission ?? 0)),
+        TradeType.CashDividend => +(CashAmount ?? (Price * Quantity)),
+        TradeType.Income or TradeType.Deposit or TradeType.LoanBorrow => +(CashAmount ?? 0),
         TradeType.Withdrawal or TradeType.LoanRepay or TradeType.Transfer => -(CashAmount ?? 0),
-        _                                                                 => 0,   // StockDividend
+        _ => 0,   // StockDividend
     };
 
     /// <summary>
@@ -241,12 +241,12 @@ public sealed class TradeRowViewModel : ObservableObject
         CashAmount = t.CashAmount;
         Commission = t.Commission;
         CommissionDiscount = t.CommissionDiscount;
-        CashAccountId      = t.CashAccountId;
-        PortfolioEntryId   = t.PortfolioEntryId;
-        Note               = t.Note;
-        LoanLabel          = t.LoanLabel;
-        Principal          = t.Principal;
-        InterestPaid       = t.InterestPaid;
-        ToCashAccountId    = t.ToCashAccountId;
+        CashAccountId = t.CashAccountId;
+        PortfolioEntryId = t.PortfolioEntryId;
+        Note = t.Note;
+        LoanLabel = t.LoanLabel;
+        Principal = t.Principal;
+        InterestPaid = t.InterestPaid;
+        ToCashAccountId = t.ToCashAccountId;
     }
 }

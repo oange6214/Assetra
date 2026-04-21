@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.Portfolio;
 
@@ -37,15 +37,15 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
 
     // ── Loan metadata (null when no AssetItem linked) ─────────────────────
 
-    public Guid?    AssetId         { get; }
-    public bool     IsLoan          { get; }
-    public decimal? LoanAnnualRate  { get; }
-    public int?     LoanTermMonths  { get; }
-    public DateOnly? LoanStartDate  { get; }
+    public Guid? AssetId { get; }
+    public bool IsLoan { get; }
+    public decimal? LoanAnnualRate { get; }
+    public int? LoanTermMonths { get; }
+    public DateOnly? LoanStartDate { get; }
     public decimal? LoanHandlingFee { get; }
 
     public string RateDisplay => LoanAnnualRate.HasValue ? $"{LoanAnnualRate.Value * 100:F2}%" : "—";
-    public string TermDisplay  => LoanTermMonths.HasValue ? $"{LoanTermMonths.Value} 個月" : "—";
+    public string TermDisplay => LoanTermMonths.HasValue ? $"{LoanTermMonths.Value} 個月" : "—";
 
     // ── Amortization schedule (loaded lazily after selection) ─────────────
 
@@ -84,17 +84,17 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
 
     public LiabilityRowViewModel(string label, LiabilitySnapshot snapshot, AssetItem? asset = null)
     {
-        Label           = label;
-        _balance        = snapshot.Balance;
+        Label = label;
+        _balance = snapshot.Balance;
         _originalAmount = snapshot.OriginalAmount;
 
         if (asset is { IsLoan: true })
         {
-            AssetId         = asset.Id;
-            IsLoan          = true;
-            LoanAnnualRate  = asset.LoanAnnualRate;
-            LoanTermMonths  = asset.LoanTermMonths;
-            LoanStartDate   = asset.LoanStartDate;
+            AssetId = asset.Id;
+            IsLoan = true;
+            LoanAnnualRate = asset.LoanAnnualRate;
+            LoanTermMonths = asset.LoanTermMonths;
+            LoanStartDate = asset.LoanStartDate;
             LoanHandlingFee = asset.LoanHandlingFee;
         }
     }

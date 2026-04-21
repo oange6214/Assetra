@@ -1,5 +1,5 @@
-using CommunityToolkit.Mvvm.Messaging.Messages;
 using Assetra.Core.Models;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 
 namespace Assetra.WPF.Features.AddStock;
 

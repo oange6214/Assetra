@@ -1,6 +1,6 @@
+using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Assetra.Core.Models;
 
 namespace Assetra.WPF.Features.Alerts;
 

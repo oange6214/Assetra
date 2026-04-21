@@ -1,6 +1,6 @@
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using Assetra.Core.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Assetra.Infrastructure.Http;
 

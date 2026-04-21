@@ -1,9 +1,9 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using CommunityToolkit.Mvvm.ComponentModel;
 using Assetra.Core.Interfaces;
 using Assetra.WPF.Infrastructure;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.StatusBar;
 

@@ -1,6 +1,6 @@
+using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Snackbar;
 

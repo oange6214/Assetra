@@ -36,51 +36,51 @@ public sealed class TradeSqliteRepository : ITradeRepository
         "to_cash_account_id, parent_trade_id";
 
     private static Trade MapTrade(SqliteDataReader r) => new(
-        Id:                  Guid.Parse(r.GetString(0)),
-        Symbol:              r.GetString(1),
-        Exchange:            r.GetString(2),
-        Name:                r.GetString(3),
-        Type:                Enum.Parse<TradeType>(r.GetString(4)),
-        TradeDate:           DateTime.Parse(r.GetString(5), null, DateTimeStyles.RoundtripKind),
-        Price:               (decimal)r.GetDouble(6),
-        Quantity:            r.GetInt32(7),
-        RealizedPnl:         r.IsDBNull(8)  ? null : (decimal)r.GetDouble(8),
-        RealizedPnlPct:      r.IsDBNull(9)  ? null : (decimal)r.GetDouble(9),
-        CashAmount:          r.IsDBNull(10) ? null : (decimal)r.GetDouble(10),
-        CashAccountId:       r.IsDBNull(11) ? null : Guid.Parse(r.GetString(11)),
-        Note:                r.IsDBNull(12) ? null : r.GetString(12),
-        PortfolioEntryId:    r.IsDBNull(13) ? null : Guid.Parse(r.GetString(13)),
-        Commission:          r.IsDBNull(14) ? null : (decimal)r.GetDouble(14),
-        CommissionDiscount:  r.IsDBNull(15) ? null : (decimal)r.GetDouble(15),
-        LoanLabel:           r.IsDBNull(16) ? null : r.GetString(16),
-        Principal:           r.IsDBNull(17) ? null : (decimal)r.GetDouble(17),
-        InterestPaid:        r.IsDBNull(18) ? null : (decimal)r.GetDouble(18),
-        ToCashAccountId:     r.IsDBNull(19) ? null : Guid.Parse(r.GetString(19)),
-        ParentTradeId:       r.IsDBNull(20) ? null : Guid.Parse(r.GetString(20)));
+        Id: Guid.Parse(r.GetString(0)),
+        Symbol: r.GetString(1),
+        Exchange: r.GetString(2),
+        Name: r.GetString(3),
+        Type: Enum.Parse<TradeType>(r.GetString(4)),
+        TradeDate: DateTime.Parse(r.GetString(5), null, DateTimeStyles.RoundtripKind),
+        Price: (decimal)r.GetDouble(6),
+        Quantity: r.GetInt32(7),
+        RealizedPnl: r.IsDBNull(8) ? null : (decimal)r.GetDouble(8),
+        RealizedPnlPct: r.IsDBNull(9) ? null : (decimal)r.GetDouble(9),
+        CashAmount: r.IsDBNull(10) ? null : (decimal)r.GetDouble(10),
+        CashAccountId: r.IsDBNull(11) ? null : Guid.Parse(r.GetString(11)),
+        Note: r.IsDBNull(12) ? null : r.GetString(12),
+        PortfolioEntryId: r.IsDBNull(13) ? null : Guid.Parse(r.GetString(13)),
+        Commission: r.IsDBNull(14) ? null : (decimal)r.GetDouble(14),
+        CommissionDiscount: r.IsDBNull(15) ? null : (decimal)r.GetDouble(15),
+        LoanLabel: r.IsDBNull(16) ? null : r.GetString(16),
+        Principal: r.IsDBNull(17) ? null : (decimal)r.GetDouble(17),
+        InterestPaid: r.IsDBNull(18) ? null : (decimal)r.GetDouble(18),
+        ToCashAccountId: r.IsDBNull(19) ? null : Guid.Parse(r.GetString(19)),
+        ParentTradeId: r.IsDBNull(20) ? null : Guid.Parse(r.GetString(20)));
 
     private static void BindTradeParams(SqliteCommand cmd, Trade t)
     {
-        cmd.Parameters.AddWithValue("$id",      t.Id.ToString());
-        cmd.Parameters.AddWithValue("$sym",     t.Symbol);
-        cmd.Parameters.AddWithValue("$ex",      t.Exchange);
-        cmd.Parameters.AddWithValue("$name",    t.Name);
-        cmd.Parameters.AddWithValue("$type",    t.Type.ToString());
-        cmd.Parameters.AddWithValue("$date",    t.TradeDate.ToUniversalTime().ToString("o"));
-        cmd.Parameters.AddWithValue("$price",   (double)t.Price);
-        cmd.Parameters.AddWithValue("$qty",     t.Quantity);
-        cmd.Parameters.AddWithValue("$rpnl",    t.RealizedPnl.HasValue       ? (object)(double)t.RealizedPnl.Value            : DBNull.Value);
-        cmd.Parameters.AddWithValue("$rpct",    t.RealizedPnlPct.HasValue    ? (object)(double)t.RealizedPnlPct.Value         : DBNull.Value);
-        cmd.Parameters.AddWithValue("$cash",    t.CashAmount.HasValue        ? (object)(double)t.CashAmount.Value             : DBNull.Value);
-        cmd.Parameters.AddWithValue("$acct",    t.CashAccountId.HasValue     ? (object)t.CashAccountId.Value.ToString()      : DBNull.Value);
-        cmd.Parameters.AddWithValue("$note",    t.Note is not null           ? (object)t.Note                                : DBNull.Value);
-        cmd.Parameters.AddWithValue("$pentry",  t.PortfolioEntryId.HasValue  ? (object)t.PortfolioEntryId.Value.ToString()   : DBNull.Value);
-        cmd.Parameters.AddWithValue("$comm",    t.Commission.HasValue        ? (object)(double)t.Commission.Value            : DBNull.Value);
-        cmd.Parameters.AddWithValue("$comm_d",  t.CommissionDiscount.HasValue? (object)(double)t.CommissionDiscount.Value    : DBNull.Value);
-        cmd.Parameters.AddWithValue("$loan_label", t.LoanLabel is not null   ? (object)t.LoanLabel                          : DBNull.Value);
-        cmd.Parameters.AddWithValue("$princ",   t.Principal.HasValue         ? (object)(double)t.Principal.Value             : DBNull.Value);
-        cmd.Parameters.AddWithValue("$int",     t.InterestPaid.HasValue      ? (object)(double)t.InterestPaid.Value          : DBNull.Value);
-        cmd.Parameters.AddWithValue("$to_acct",    t.ToCashAccountId.HasValue  ? (object)t.ToCashAccountId.Value.ToString()  : DBNull.Value);
-        cmd.Parameters.AddWithValue("$parent_id",  t.ParentTradeId.HasValue    ? (object)t.ParentTradeId.Value.ToString()    : DBNull.Value);
+        cmd.Parameters.AddWithValue("$id", t.Id.ToString());
+        cmd.Parameters.AddWithValue("$sym", t.Symbol);
+        cmd.Parameters.AddWithValue("$ex", t.Exchange);
+        cmd.Parameters.AddWithValue("$name", t.Name);
+        cmd.Parameters.AddWithValue("$type", t.Type.ToString());
+        cmd.Parameters.AddWithValue("$date", t.TradeDate.ToUniversalTime().ToString("o"));
+        cmd.Parameters.AddWithValue("$price", (double)t.Price);
+        cmd.Parameters.AddWithValue("$qty", t.Quantity);
+        cmd.Parameters.AddWithValue("$rpnl", t.RealizedPnl.HasValue ? (object)(double)t.RealizedPnl.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$rpct", t.RealizedPnlPct.HasValue ? (object)(double)t.RealizedPnlPct.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$cash", t.CashAmount.HasValue ? (object)(double)t.CashAmount.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$acct", t.CashAccountId.HasValue ? (object)t.CashAccountId.Value.ToString() : DBNull.Value);
+        cmd.Parameters.AddWithValue("$note", t.Note is not null ? (object)t.Note : DBNull.Value);
+        cmd.Parameters.AddWithValue("$pentry", t.PortfolioEntryId.HasValue ? (object)t.PortfolioEntryId.Value.ToString() : DBNull.Value);
+        cmd.Parameters.AddWithValue("$comm", t.Commission.HasValue ? (object)(double)t.Commission.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$comm_d", t.CommissionDiscount.HasValue ? (object)(double)t.CommissionDiscount.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$loan_label", t.LoanLabel is not null ? (object)t.LoanLabel : DBNull.Value);
+        cmd.Parameters.AddWithValue("$princ", t.Principal.HasValue ? (object)(double)t.Principal.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$int", t.InterestPaid.HasValue ? (object)(double)t.InterestPaid.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$to_acct", t.ToCashAccountId.HasValue ? (object)t.ToCashAccountId.Value.ToString() : DBNull.Value);
+        cmd.Parameters.AddWithValue("$parent_id", t.ParentTradeId.HasValue ? (object)t.ParentTradeId.Value.ToString() : DBNull.Value);
     }
 
     // ─── Queries ─────────────────────────────────────────────────────────

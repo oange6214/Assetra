@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.Extensions.Logging;
 using Assetra.Core.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Assetra.Infrastructure.Http;
 

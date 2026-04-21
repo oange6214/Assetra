@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Assetra.Core.Interfaces;
 using Assetra.WPF.Infrastructure;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Wpf.Ui.Appearance;
 
 namespace Assetra.WPF.Features.Settings;
@@ -109,7 +109,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
     partial void OnLanguageChanged(string value)
     {
-        if (_isLoading) return;
+        if (_isLoading)
+            return;
         _localization.SetLanguage(value);
         _ = SaveAsync();
     }
@@ -117,27 +118,31 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     partial void OnUseTaiwanColorsChanged(bool value)
     {
         OnPropertyChanged(nameof(UseInternationalColors));
-        if (_isLoading) return;
+        if (_isLoading)
+            return;
         ColorSchemeService.Apply(value, _theme.CurrentTheme);
         _ = SaveAsync();
     }
 
     partial void OnIsDarkThemeChanged(bool value)
     {
-        if (_isLoading) return;
+        if (_isLoading)
+            return;
         _theme.Apply(value ? ApplicationTheme.Dark : ApplicationTheme.Light);
     }
 
     partial void OnPrimaryCurrencyChanged(string value)
     {
-        if (_isLoading) return;
+        if (_isLoading)
+            return;
         _ = _currencyService.ApplyAsync(value);
     }
 
     private void OnThemeChanged(ApplicationTheme theme)
     {
         _isLoading = true;
-        try { IsDarkTheme = theme == ApplicationTheme.Dark; }
+        try
+        { IsDarkTheme = theme == ApplicationTheme.Dark; }
         finally { _isLoading = false; }
 
         // Re-apply colour scheme so up/down brushes track the new theme

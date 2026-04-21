@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Assetra.WPF.Features.Portfolio;
 
@@ -185,9 +185,12 @@ public partial class TradeFilterViewModel : ObservableObject
         else
         {
             int windowStart, windowEnd;
-            if (current <= 4)                  { windowStart = 2;          windowEnd = 5; }
-            else if (current >= total - 3)     { windowStart = total - 4;  windowEnd = total - 1; }
-            else                               { windowStart = current - 1; windowEnd = current + 1; }
+            if (current <= 4)
+            { windowStart = 2; windowEnd = 5; }
+            else if (current >= total - 3)
+            { windowStart = total - 4; windowEnd = total - 1; }
+            else
+            { windowStart = current - 1; windowEnd = current + 1; }
 
             items.Add(new TradePageItem(1, current == 1, false));
             if (windowStart > 2)
@@ -270,16 +273,26 @@ public partial class TradeFilterViewModel : ObservableObject
 
     private static bool TradeMatchesAnyTypeKey(TradeRowViewModel t, HashSet<string> keys)
     {
-        if (t.IsBuy && keys.Contains("Buy")) return true;
-        if (t.IsSell && keys.Contains("Sell")) return true;
-        if (t.IsIncome && keys.Contains("Income")) return true;
-        if (t.IsCashDividend && keys.Contains("CashDividend")) return true;
-        if (t.Type == TradeType.StockDividend && keys.Contains("StockDividend")) return true;
-        if (t.IsDeposit && keys.Contains("Deposit")) return true;
-        if (t.IsWithdrawal && keys.Contains("Withdrawal")) return true;
-        if (t.IsTransfer && keys.Contains("Transfer")) return true;
-        if (t.IsLoanBorrow && keys.Contains("LoanBorrow")) return true;
-        if (t.IsLoanRepay && keys.Contains("LoanRepay")) return true;
+        if (t.IsBuy && keys.Contains("Buy"))
+            return true;
+        if (t.IsSell && keys.Contains("Sell"))
+            return true;
+        if (t.IsIncome && keys.Contains("Income"))
+            return true;
+        if (t.IsCashDividend && keys.Contains("CashDividend"))
+            return true;
+        if (t.Type == TradeType.StockDividend && keys.Contains("StockDividend"))
+            return true;
+        if (t.IsDeposit && keys.Contains("Deposit"))
+            return true;
+        if (t.IsWithdrawal && keys.Contains("Withdrawal"))
+            return true;
+        if (t.IsTransfer && keys.Contains("Transfer"))
+            return true;
+        if (t.IsLoanBorrow && keys.Contains("LoanBorrow"))
+            return true;
+        if (t.IsLoanRepay && keys.Contains("LoanRepay"))
+            return true;
         return false;
     }
 
@@ -331,7 +344,8 @@ public partial class TradeFilterViewModel : ObservableObject
     /// <summary>初始化 Trade type filter 清單與 collection view（供 search 過濾）。</summary>
     public void InitTradeTypeFilters()
     {
-        if (TradeTypeFilters.Count > 0) return;
+        if (TradeTypeFilters.Count > 0)
+            return;
         string Label(string key) =>
             _localization.Get($"Portfolio.Filter.{key}", key);
         string[] keys = ["Buy", "Sell", "Income", "CashDividend", "StockDividend",
@@ -345,7 +359,8 @@ public partial class TradeFilterViewModel : ObservableObject
         TradeTypeFiltersView = CollectionViewSource.GetDefaultView(TradeTypeFilters);
         TradeTypeFiltersView.Filter = o =>
         {
-            if (string.IsNullOrWhiteSpace(TradeTypeFiltersSearch)) return true;
+            if (string.IsNullOrWhiteSpace(TradeTypeFiltersSearch))
+                return true;
             return o is TradeTypeFilterItem i &&
                    i.Label.Contains(TradeTypeFiltersSearch, StringComparison.OrdinalIgnoreCase);
         };
@@ -361,22 +376,24 @@ public partial class TradeFilterViewModel : ObservableObject
         string LabelOf(string key) =>
             _localization.Get($"Portfolio.Filter.Category.{key}", key);
         string InvestmentLabel = LabelOf("Investment");
-        string CashLabel       = LabelOf("Cash");
-        string LiabilityLabel  = LabelOf("Liability");
+        string CashLabel = LabelOf("Cash");
+        string LiabilityLabel = LabelOf("Liability");
 
         var symbolCategory = new Dictionary<string, (string Key, int Order, string Label)>(StringComparer.OrdinalIgnoreCase);
         foreach (var t in _getTrades())
         {
             var sym = t.Symbol;
-            if (string.IsNullOrWhiteSpace(sym)) continue;
-            if (symbolCategory.ContainsKey(sym)) continue;
+            if (string.IsNullOrWhiteSpace(sym))
+                continue;
+            if (symbolCategory.ContainsKey(sym))
+                continue;
 
             (string, int, string) cat = t.Type switch
             {
                 TradeType.Buy or TradeType.Sell or TradeType.CashDividend or TradeType.StockDividend
                     => ("Investment", 0, InvestmentLabel),
                 TradeType.LoanBorrow or TradeType.LoanRepay
-                    => ("Liability",  2, LiabilityLabel),
+                    => ("Liability", 2, LiabilityLabel),
                 _ => ("Cash", 1, CashLabel),
             };
             symbolCategory[sym] = cat;
@@ -434,7 +451,8 @@ public partial class TradeFilterViewModel : ObservableObject
             TradeAssetFiltersView = CollectionViewSource.GetDefaultView(TradeAssetFilters);
             TradeAssetFiltersView.Filter = o =>
             {
-                if (string.IsNullOrWhiteSpace(TradeAssetFiltersSearch)) return true;
+                if (string.IsNullOrWhiteSpace(TradeAssetFiltersSearch))
+                    return true;
                 return o is TradeAssetFilterItem i &&
                        i.Symbol.Contains(TradeAssetFiltersSearch, StringComparison.OrdinalIgnoreCase);
             };
@@ -453,7 +471,8 @@ public partial class TradeFilterViewModel : ObservableObject
 
     private void OnTradeTypeFilterItemChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName != nameof(TradeTypeFilterItem.IsChecked)) return;
+        if (e.PropertyName != nameof(TradeTypeFilterItem.IsChecked))
+            return;
         TradeCurrentPage = 1;
         RefreshTradesView();
         OnPropertyChanged(nameof(HasActiveTradeFilter));
@@ -462,7 +481,8 @@ public partial class TradeFilterViewModel : ObservableObject
 
     private void OnTradeAssetFilterItemChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName != nameof(TradeAssetFilterItem.IsChecked)) return;
+        if (e.PropertyName != nameof(TradeAssetFilterItem.IsChecked))
+            return;
         TradeCurrentPage = 1;
         RefreshTradesView();
         OnPropertyChanged(nameof(HasActiveTradeFilter));

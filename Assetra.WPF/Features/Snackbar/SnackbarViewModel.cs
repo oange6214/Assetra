@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
 using Assetra.WPF.Infrastructure;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.Snackbar;
 
