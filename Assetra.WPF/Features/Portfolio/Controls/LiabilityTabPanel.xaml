@@ -253,23 +253,10 @@
             </StackPanel>
         </Border>
 
-        <!--  Row 1: Search + Add Loan button  -->
-        <DockPanel Grid.Row="1">
-            <Button
-                Height="32"
-                Margin="8,4,8,4"
-                Padding="12,0"
-                Command="{Binding OpenAddLoanDialogCommand}"
-                DockPanel.Dock="Right"
-                Style="{StaticResource BtnPrimary}">
-                <TextBlock
-                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                    Text="{DynamicResource Portfolio.Liability.AddLoan}" />
-            </Button>
-            <controls:SearchBox
-                Placeholder="{DynamicResource Portfolio.Filter.SearchLiabilities}"
-                Text="{Binding LiabilityFilterText}" />
-        </DockPanel>
+        <controls:SearchBox
+            Grid.Row="1"
+            Placeholder="{DynamicResource Portfolio.Filter.SearchLiabilities}"
+            Text="{Binding LiabilityFilterText}" />
 
         <!--  ═══ Liabilities DataGrid ═══  -->
         <Grid Grid.Row="2">

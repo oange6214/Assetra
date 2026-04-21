@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
 using Assetra.Core.Models;
+using Assetra.Core.Services;
 using Assetra.Core.Trading;
 using Assetra.WPF.Infrastructure;
 
@@ -552,10 +553,8 @@ public partial class PortfolioViewModel
     partial void OnTxTransferTargetAmountChanged(string value) =>
         TxTransferTargetAmountError = ValidatePositiveDecimalOrEmpty(value);
 
-    // LoanRepay 拆分欄位 — Phase 3
-    /// <summary>LoanRepay：本金部分（減少負債餘額）。</summary>
+    // LoanRepay 拆分欄位
     [ObservableProperty] private string _txPrincipal = string.Empty;
-    /// <summary>LoanRepay：利息支出部分（費用支出，不影響負債餘額）。</summary>
     [ObservableProperty] private string _txInterestPaid = string.Empty;
 
     partial void OnTxPrincipalChanged(string value) =>
@@ -563,6 +562,20 @@ public partial class PortfolioViewModel
 
     partial void OnTxInterestPaidChanged(string value) =>
         TxInterestPaidError = ValidateNonNegativeDecimalOrEmpty(value);
+
+    // LoanBorrow 攤還欄位（選填；填寫後自動建立攤還表）
+    [ObservableProperty] private string   _txLoanRate       = string.Empty;
+    [ObservableProperty] private string   _txLoanTermMonths = string.Empty;
+    [ObservableProperty] private DateTime _txLoanStartDate  = DateTime.Today;
+    [ObservableProperty] private string   _txLoanRateError       = string.Empty;
+    [ObservableProperty] private string   _txLoanTermMonthsError = string.Empty;
+
+    partial void OnTxLoanRateChanged(string value) =>
+        TxLoanRateError = ValidateNonNegativeDecimalOrEmpty(value);
+
+    partial void OnTxLoanTermMonthsChanged(string value) =>
+        TxLoanTermMonthsError = string.IsNullOrWhiteSpace(value) ? string.Empty
+            : (ParseHelpers.TryParseInt(value, out var n) && n > 0 ? string.Empty : "請輸入正整數");
 
     // 新增交易 Dialog commands
 
@@ -610,6 +623,11 @@ public partial class PortfolioViewModel
         TxSellQuantityError = string.Empty;
         TxPrincipal = string.Empty;
         TxInterestPaid = string.Empty;
+        TxLoanRate = string.Empty;
+        TxLoanTermMonths = string.Empty;
+        TxLoanStartDate = DateTime.Today;
+        TxLoanRateError = string.Empty;
+        TxLoanTermMonthsError = string.Empty;
         // Buy-specific fields shared with AddAssetDialog
         AddSymbol = string.Empty;
         AddPrice = string.Empty;
@@ -1431,6 +1449,21 @@ public partial class PortfolioViewModel
         if (string.IsNullOrWhiteSpace(TxLoanLabel))
         { TxError = "請輸入或選擇貸款名稱"; return; }
 
+        // ── 攤還表欄位（選填；借款時才適用）────────────────────────────────
+        decimal? amortAnnualRate = null;
+        int?     amortTermMonths  = null;
+        if (type == TradeType.LoanBorrow &&
+            !string.IsNullOrWhiteSpace(TxLoanRate) &&
+            !string.IsNullOrWhiteSpace(TxLoanTermMonths))
+        {
+            if (!ParseHelpers.TryParseDecimal(TxLoanRate, out var ratePct) || ratePct < 0)
+            { TxError = "年利率無效"; return; }
+            if (!ParseHelpers.TryParseInt(TxLoanTermMonths, out var termMo) || termMo <= 0)
+            { TxError = "還款期數無效"; return; }
+            amortAnnualRate = ratePct / 100m;
+            amortTermMonths  = termMo;
+        }
+
         var fee = ParseOptionalFee(out var feeError);
         if (feeError is not null)
         { TxError = feeError; return; }
@@ -1439,6 +1472,23 @@ public partial class PortfolioViewModel
         var liabName = TxLoanLabel.Trim();
         var cleanNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
         var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
+
+        // ── 建立 AssetItem + 攤還表（有填利率與期數時）────────────────────
+        if (type == TradeType.LoanBorrow && amortAnnualRate.HasValue && amortTermMonths.HasValue
+            && _assetRepo is not null && _loanScheduleRepo is not null)
+        {
+            var firstPayDate = DateOnly.FromDateTime(TxLoanStartDate);
+            decimal? loanFee = fee > 0 ? fee : null;
+            var asset = new AssetItem(
+                Guid.NewGuid(), liabName, FinancialType.Liability, null, "TWD",
+                DateOnly.FromDateTime(DateTime.Today), IsActive: true, UpdatedAt: null,
+                LoanAnnualRate: amortAnnualRate, LoanTermMonths: amortTermMonths,
+                LoanStartDate:  firstPayDate,   LoanHandlingFee: loanFee);
+            await _assetRepo.AddItemAsync(asset);
+            var schedule = AmortizationService.Generate(
+                asset.Id, cashAmount, amortAnnualRate.Value, amortTermMonths.Value, firstPayDate);
+            await _loanScheduleRepo.BulkInsertAsync(schedule);
+        }
 
         var trade = new Trade(
             Id: Guid.NewGuid(), Symbol: liabName, Exchange: string.Empty,
@@ -1451,13 +1501,18 @@ public partial class PortfolioViewModel
             InterestPaid: interestPaid);
 
         await _txService.RecordAsync(trade);
-
         await WriteFeeTradeIfAnyAsync(fee, cashAccId, tradeDate,
             $"{liabName} 手續費", cleanNote, trade.Id);
 
         await ReloadAccountBalancesAsync();
         CloseTxDialog();
         await LoadTradesAsync();
+
+        if (amortAnnualRate.HasValue)
+        {
+            await LoadLiabilitiesAsync();
+            RebuildTotals();
+        }
     }
 
     /// <summary>

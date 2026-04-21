@@ -1890,8 +1890,6 @@
         <pcontrols:AddTransactionDialog Grid.RowSpan="3" Panel.ZIndex="210" />
         <pcontrols:AddAssetDialog Grid.RowSpan="3" Panel.ZIndex="200" />
         <pcontrols:EditAssetDialog Grid.RowSpan="3" Panel.ZIndex="205" />
-        <pcontrols:AddLoanDialog Grid.RowSpan="3" Panel.ZIndex="208" />
-
         <!--  ── Confirm dialog ──  -->
         <Grid
             Grid.RowSpan="3"

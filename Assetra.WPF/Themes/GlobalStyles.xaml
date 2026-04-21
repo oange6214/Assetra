@@ -114,8 +114,8 @@
     <!--  ── Layout Sizing Tokens ──  -->
     <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="DataGridRowHeight">36</System:Double>
     <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="DataGridHeaderHeight">40</System:Double>
-    <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="DialogWidth">400</System:Double>
-    <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="DialogMaxHeight">620</System:Double>
+    <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="DialogWidth">440</System:Double>
+    <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="DialogMaxHeight">720</System:Double>
     <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="ChartHeight">220</System:Double>
     <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="FilterComboWidth">120</System:Double>
     <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="DatePickerWidth">120</System:Double>

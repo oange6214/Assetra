@@ -13,7 +13,7 @@
     <!--  ======== 借款/還款欄位 ========  -->
     <StackPanel Visibility="{Binding TxTypeIsLoan, Converter={StaticResource BooleanToVisibilityConverter}}">
 
-        <!--  借款：單一金額欄位  -->
+        <!--  借款：金額 + 選填攤還欄位  -->
         <StackPanel Visibility="{Binding TxTypeIsLoanBorrow, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
@@ -30,6 +30,56 @@
                 Style="{StaticResource FormFieldError}"
                 Text="{Binding TxAmountError}"
                 Visibility="{Binding TxAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+            <!--  年利率（選填）  -->
+            <TextBlock
+                Margin="0,0,0,4"
+                FontSize="{StaticResource FontSizeXs}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
+            <TextBox
+                Style="{StaticResource FormTextBox}"
+                Text="{Binding TxLoanRate, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock
+                Margin="0,0,0,12"
+                Style="{StaticResource FormFieldError}"
+                Text="{Binding TxLoanRateError}"
+                Visibility="{Binding TxLoanRateError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+            <!--  還款期數（選填）  -->
+            <TextBlock
+                Margin="0,0,0,4"
+                FontSize="{StaticResource FontSizeXs}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{DynamicResource Portfolio.Loan.TermMonths}" />
+            <TextBox
+                Style="{StaticResource FormTextBox}"
+                Text="{Binding TxLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock
+                Margin="0,0,0,12"
+                Style="{StaticResource FormFieldError}"
+                Text="{Binding TxLoanTermMonthsError}"
+                Visibility="{Binding TxLoanTermMonthsError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+            <!--  首期還款日（選填）  -->
+            <TextBlock
+                Margin="0,0,0,4"
+                FontSize="{StaticResource FontSizeXs}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{DynamicResource Portfolio.Loan.StartDate}" />
+            <DatePicker
+                FontSize="{StaticResource FontSizeSm}"
+                Foreground="{DynamicResource AppTextPrimary}"
+                SelectedDate="{Binding TxLoanStartDate}" />
+            <TextBlock
+                Margin="0,4,0,12"
+                FontSize="{StaticResource FontSizeXs}"
+                Foreground="{DynamicResource AppTextMuted}"
+                Text="填寫年利率與期數可自動產生攤還表"
+                TextWrapping="Wrap" />
         </StackPanel>
 
         <!--  還款：本金 + 利息拆分  -->
