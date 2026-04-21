@@ -137,12 +137,6 @@ internal static class ServiceCollectionExtensions
             new FinancialOverviewQueryService(
                 sp.GetRequiredService<IAssetRepository>(),
                 sp.GetRequiredService<IBalanceQueryService>()));
-        services.AddSingleton<IAlertQueryService>(sp =>
-            new AlertQueryService(
-                sp.GetRequiredService<IAlertRepository>()));
-        services.AddSingleton<IAlertMutationService>(sp =>
-            new AlertMutationService(
-                sp.GetRequiredService<IAlertRepository>()));
         services.AddSingleton<IPortfolioHistoryMaintenanceService>(sp =>
             new PortfolioHistoryMaintenanceService(
                 sp.GetRequiredService<PortfolioSnapshotService>(),
@@ -249,8 +243,7 @@ internal static class ServiceCollectionExtensions
             sp.GetRequiredService<IFinancialOverviewQueryService>(),
             sp.GetRequiredService<PortfolioViewModel>()));
         services.AddSingleton<AlertsViewModel>(sp => new AlertsViewModel(
-            sp.GetRequiredService<IAlertQueryService>(),
-            sp.GetRequiredService<IAlertMutationService>(),
+            sp.GetRequiredService<IAlertRepository>(),
             sp.GetRequiredService<IStockSearchService>(),
             sp.GetRequiredService<IStockService>(),
             sp.GetRequiredService<IScheduler>(),
