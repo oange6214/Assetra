@@ -412,6 +412,13 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     /// </summary>
     public AddAssetDialogViewModel AddAssetDialog { get; }
 
+    /// <summary>
+    /// Sub-VM that owns all sell-panel state (selling row, price input, fee breakdown,
+    /// cash account) and the CancelSell / ConfirmSell commands.
+    /// XAML bindings chain through <c>SellPanel.PropertyName</c>.
+    /// </summary>
+    public SellPanelViewModel SellPanel { get; }
+
     // Dividend calendar
     [ObservableProperty] private int _divCalendarYear = DateTime.Today.Year;
 
@@ -519,6 +526,18 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         AddAssetDialog.GetTxCashAccountId = () => TxCashAccount?.Id;
         AddAssetDialog.GetTxUseCashAccount = () => TxUseCashAccount;
         AddAssetDialog.AssetAdded += OnAssetAdded;
+
+        // Build the SellPanel sub-VM and wire delegates for Tx-dialog fields it needs.
+        SellPanel = services.SellPanel ?? new SellPanelViewModel(
+            _sellWorkflowService,
+            _sellPanelController,
+            ui.Snackbar,
+            ui.Localization);
+        SellPanel.GetTxCommissionDiscountValue = () => TxCommissionDiscountValue;
+        SellPanel.GetTxFee = () => TxFee;
+        SellPanel.GetSellQtyOverride = () => _sellQtyOverride;
+        SellPanel.CashAccounts = CashAccounts;
+        SellPanel.SellCompleted += OnSellCompleted;
 
         // Rebuild chart colours whenever the user switches theme
         if (ui.Theme is not null)
@@ -726,10 +745,25 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _ = BackfillAndRefreshAsync();
     }
 
-    // Named handler so it can be unsubscribed in Dispose(); fire-and-forget with
+    // Named handlers so they can be unsubscribed in Dispose(); fire-and-forget with
     // _ = to make the async exception path explicit rather than relying on async void.
     private void OnAssetAdded(object? sender, EventArgs e)
         => _ = ReloadAfterAssetAddedAsync();
+
+    private void OnSellCompleted(object? sender, EventArgs e)
+        => _ = ReloadAfterSellAsync();
+
+    /// <summary>
+    /// Called by <see cref="SellPanelViewModel.SellCompleted"/> to refresh all
+    /// position, trade, balance, and totals state after a successful sell.
+    /// </summary>
+    private async Task ReloadAfterSellAsync()
+    {
+        await LoadPositionsAsync();
+        await LoadTradesAsync();
+        await ReloadAccountBalancesAsync();
+        RebuildTotals();
+    }
 
     /// <summary>
     /// Called by <see cref="AddAssetDialogViewModel.AssetAdded"/> to refresh all
@@ -1122,11 +1156,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(TotalLiabilities));
         OnPropertyChanged(nameof(TotalAssets));
         OnPropertyChanged(nameof(NetWorth));
-        OnPropertyChanged(nameof(SellGrossAmount));
-        OnPropertyChanged(nameof(SellCommission));
-        OnPropertyChanged(nameof(SellTransactionTax));
-        OnPropertyChanged(nameof(SellNetAmount));
-        OnPropertyChanged(nameof(SellEstimatedPnl));
+        SellPanel.NotifyCurrencyChanged();
         ApplyFinancialSummary(_summaryService.Calculate(BuildSummaryInput()));
     }
 
@@ -1169,6 +1199,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _themeService.ThemeChanged -= _onThemeChanged;
         AddAssetDialog.AssetAdded -= OnAssetAdded;
         AddAssetDialog.CancelPendingFetch();
+        SellPanel.SellCompleted -= OnSellCompleted;
         _disposables.Dispose();
     }
 

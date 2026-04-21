@@ -1229,7 +1229,7 @@ public class PortfolioViewModelTests
         vm.EditTradeCommand.Execute(vm.Trades.First(t => t.Type == TradeType.Sell));
 
         Assert.Equal(cashAcc.Id, vm.TxCashAccount?.Id);
-        Assert.Equal(cashAcc.Id, vm.SellCashAccount?.Id);
+        Assert.Equal(cashAcc.Id, vm.SellPanel.SellCashAccount?.Id);
         Assert.True(vm.TxUseCashAccount);
     }
 

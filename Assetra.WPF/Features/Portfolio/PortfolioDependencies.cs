@@ -63,7 +63,14 @@ public sealed record PortfolioServices(
     /// resolved workflow services. Pass an explicit instance from DI (or a test double)
     /// to override the default construction.
     /// </summary>
-    AddAssetDialogViewModel? AddAssetDialog = null)
+    AddAssetDialogViewModel? AddAssetDialog = null,
+    /// <summary>
+    /// Optional pre-built <see cref="SubViewModels.SellPanelViewModel"/>. When null the
+    /// <see cref="PortfolioViewModel"/> constructor builds its own instance from the
+    /// resolved workflow services. Pass an explicit instance from DI (or a test double)
+    /// to override the default construction.
+    /// </summary>
+    SubViewModels.SellPanelViewModel? SellPanel = null)
 {
     /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。

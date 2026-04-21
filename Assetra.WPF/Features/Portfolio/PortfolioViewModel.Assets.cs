@@ -15,45 +15,15 @@ public sealed record CurrencyOption(string Code, string Display)
 }
 
 /// <summary>
-/// Sell panel, edit-asset dialog, cash/liability CRUD, GlobalAdd command,
-/// and account management. Add-asset dialog state and commands have been
-/// extracted to <see cref="SubViewModels.AddAssetDialogViewModel"/> (exposed as
-/// <see cref="AddAssetDialog"/>).
+/// Sell-trigger commands (BeginSell / BeginSellForSelectedPosition), edit-asset dialog,
+/// cash/liability CRUD, GlobalAdd command, and account management.
+/// Sell-panel state and CancelSell / ConfirmSell commands have been extracted to
+/// <see cref="SubViewModels.SellPanelViewModel"/> (exposed as <see cref="SellPanel"/>).
+/// Add-asset dialog state and commands have been extracted to
+/// <see cref="SubViewModels.AddAssetDialogViewModel"/> (exposed as <see cref="AddAssetDialog"/>).
 /// </summary>
 public partial class PortfolioViewModel
 {
-    // Sell Panel
-    [ObservableProperty] private PortfolioRowViewModel? _sellingRow;
-    [ObservableProperty] private bool _isSellPanelVisible;
-    [ObservableProperty] private string _sellPriceInput = string.Empty;
-    [ObservableProperty] private string _sellPanelError = string.Empty;
-    [ObservableProperty] private bool _isSellEtf;
-
-    // Fee breakdown (live-updated as user types the sell price)
-    [ObservableProperty] private decimal _sellGrossAmount;
-    [ObservableProperty] private decimal _sellCommission;
-    [ObservableProperty] private decimal _sellTransactionTax;
-    [ObservableProperty] private decimal _sellNetAmount;
-    [ObservableProperty] private decimal _sellEstimatedPnl;
-    [ObservableProperty] private bool _isSellEstimatedPositive;
-
-    partial void OnSellPriceInputChanged(string value) => UpdateSellPreview();
-
-    private void UpdateSellPreview()
-    {
-        var preview = _sellPanelController.BuildPreview(
-            SellingRow,
-            SellPriceInput,
-            TxCommissionDiscountValue,
-            IsSellEtf);
-        SellGrossAmount = preview.GrossAmount;
-        SellCommission = preview.Commission;
-        SellTransactionTax = preview.TransactionTax;
-        SellNetAmount = preview.NetAmount;
-        SellEstimatedPnl = preview.EstimatedPnl;
-        IsSellEstimatedPositive = preview.IsEstimatedPositive;
-    }
-
     // Sell Panel commands
 
     [RelayCommand]
@@ -99,66 +69,6 @@ public partial class PortfolioViewModel
         if (SelectedPositionRow is null)
             return;
         BeginSell(SelectedPositionRow);
-    }
-
-    [RelayCommand]
-    private void CancelSell()
-    {
-        SellingRow = null;
-        IsSellPanelVisible = false;
-        SellPriceInput = string.Empty;
-        SellPanelError = string.Empty;
-        IsSellEtf = false;
-        SellGrossAmount = 0;
-        SellCommission = 0;
-        SellTransactionTax = 0;
-        SellNetAmount = 0;
-        SellEstimatedPnl = 0;
-        IsSellEstimatedPositive = false;
-        SellCashAccount = null;
-    }
-
-    /// <summary>
-    /// Confirms a sell — validates sell price, records the trade, archives consumed lots.
-    /// Operates on <see cref="SellingRow"/> set by <see cref="BeginSellCommand"/>.
-    /// Supports partial sells: <c>_sellQtyOverride &gt; 0</c> overrides the default full-qty sell.
-    /// Archived lots (not hard-deleted) can be restored if the sell trade is later deleted.
-    /// </summary>
-    [RelayCommand]
-    private async Task ConfirmSell()
-    {
-        if (SellingRow is null)
-            return;
-        var row = SellingRow;
-        var submit = _sellPanelController.BuildSubmission(
-            row,
-            SellPriceInput,
-            TxFee,
-            _sellQtyOverride,
-            TxCommissionDiscountValue,
-            IsSellEtf,
-            SellCashAccount?.Id);
-        SellPanelError = submit.Error ?? string.Empty;
-        if (submit.Request is null)
-            return;
-
-        try
-        {
-            await _sellWorkflowService.RecordAsync(submit.Request)
-                .ConfigureAwait(true);
-        }
-        catch (Exception ex)
-        {
-            Serilog.Log.Warning(ex, "Failed to record sell trade for {Symbol}", row.Symbol);
-            _snackbar?.Warning(L("Portfolio.Sell.TradeSaveFailed", "賣出已完成，但交易記錄儲存失敗"));
-            return;
-        }
-
-        CancelSell();
-        await LoadPositionsAsync();
-        await LoadTradesAsync();
-        await ReloadAccountBalancesAsync();
-        RebuildTotals();
     }
 
     // 全域「新增交易」按鈕 — 一律開啟交易對話框

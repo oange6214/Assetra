@@ -479,10 +479,6 @@ public partial class PortfolioViewModel
     public bool HasDivPreview => TxDivTotal > 0;
     partial void OnTxDivTotalChanged(decimal _) => OnPropertyChanged(nameof(HasDivPreview));
 
-    // 賣出現金帳戶連動 — bridge for the dedicated SellPanel.xaml; in TX dialog Sell flow
-    // we use TxCashAccount and copy across in ConfirmSellTxAsync.
-    [ObservableProperty] private CashAccountRowViewModel? _sellCashAccount;
-
     // Buy 價格輸入模式 + 總額
     /// <summary>
     /// 買入價格輸入模式：<c>"unit"</c> = 填單價（系統算總額）；<c>"total"</c> = 填總額（系統算單價）。
@@ -651,8 +647,8 @@ public partial class PortfolioViewModel
         AddAssetDialog.AddCryptoSymbol = string.Empty;
         AddAssetDialog.AddCryptoQty = string.Empty;
         AddAssetDialog.AddCryptoPrice = string.Empty;
-        SellCashAccount = null;
-        SellPriceInput = string.Empty;
+        SellPanel.SellCashAccount = null;
+        SellPanel.SellPriceInput = string.Empty;
         AddAssetDialog.AddPriceError = string.Empty;
         AddAssetDialog.AddQuantityError = string.Empty;
         AddAssetDialog.AddCostError = string.Empty;
@@ -700,8 +696,8 @@ public partial class PortfolioViewModel
         TxSellPosition = null;
         TxSellQuantity = string.Empty;
         TxSellQuantityError = string.Empty;
-        SellCashAccount = null;
-        SellPriceInput = string.Empty;
+        SellPanel.SellCashAccount = null;
+        SellPanel.SellPriceInput = string.Empty;
         AddAssetDialog.AddSymbol = string.Empty;
         AddAssetDialog.AddPrice = string.Empty;
         AddAssetDialog.AddQuantity = string.Empty;
@@ -751,9 +747,9 @@ public partial class PortfolioViewModel
                 TxSellPosition = editState.TxSellPosition;
                 TxSellQuantity = editState.TxSellQuantity;
                 TxAmount = editState.TxAmount;
-                SellPriceInput = editState.SellPriceInput;
+                SellPanel.SellPriceInput = editState.SellPriceInput;
                 TxCashAccount = editState.TxCashAccount;
-                SellCashAccount = editState.SellCashAccount;
+                SellPanel.SellCashAccount = editState.SellCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
                 RestoreCommissionFields(row);
                 break;
@@ -1059,22 +1055,22 @@ public partial class PortfolioViewModel
         if (sellQty > (int)TxSellPosition.Quantity)
         { TxError = $"賣出數量 ({sellQty:N0}) 超過持倉 ({(int)TxSellPosition.Quantity:N0}) 股"; return; }
 
-        SellingRow = TxSellPosition;
-        IsSellEtf = _search.IsEtf(TxSellPosition.Symbol);
+        SellPanel.SellingRow = TxSellPosition;
+        SellPanel.IsSellEtf = _search.IsEtf(TxSellPosition.Symbol);
 
         if (!ParseHelpers.TryParseDecimal(TxAmount, out var sellPrice) || sellPrice <= 0)
         { TxError = "賣出價格無效"; return; }
 
-        SellPriceInput = sellPrice.ToString();
-        SellCashAccount = TxUseCashAccount ? TxCashAccount : null;
+        SellPanel.SellPriceInput = sellPrice.ToString();
+        SellPanel.SellCashAccount = TxUseCashAccount ? TxCashAccount : null;
         _sellQtyOverride = sellQty;
 
-        await ConfirmSell();
+        await SellPanel.ConfirmSell();
         _sellQtyOverride = 0;
 
-        if (!string.IsNullOrEmpty(SellPanelError))
+        if (!string.IsNullOrEmpty(SellPanel.SellPanelError))
         {
-            TxError = SellPanelError;
+            TxError = SellPanel.SellPanelError;
             return;
         }
 
