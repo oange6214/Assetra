@@ -130,9 +130,6 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<IPortfolioHistoryQueryService>(sp =>
             new PortfolioHistoryQueryService(
                 sp.GetRequiredService<IPortfolioSnapshotRepository>()));
-        services.AddSingleton<ILoanScheduleQueryService>(sp =>
-            new LoanScheduleQueryService(
-                sp.GetRequiredService<ILoanScheduleRepository>()));
         services.AddSingleton<IFinancialOverviewQueryService>(sp =>
             new FinancialOverviewQueryService(
                 sp.GetRequiredService<IAssetRepository>(),
@@ -207,7 +204,6 @@ internal static class ServiceCollectionExtensions
                 Search: sp.GetRequiredService<IStockSearchService>(),
                 HistoryMaintenance: sp.GetRequiredService<IPortfolioHistoryMaintenanceService>(),
                 HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
-                LoanScheduleQuery: sp.GetRequiredService<ILoanScheduleQueryService>(),
                 TradeDeletionWorkflow: sp.GetRequiredService<ITradeDeletionWorkflowService>(),
                 TradeMetadataWorkflow: sp.GetRequiredService<ITradeMetadataWorkflowService>(),
                 SellWorkflow: sp.GetRequiredService<ISellWorkflowService>(),

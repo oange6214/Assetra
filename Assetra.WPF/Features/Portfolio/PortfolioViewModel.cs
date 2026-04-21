@@ -34,7 +34,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly ICurrencyService? _currencyService;
     private readonly IAssetRepository? _assetRepo;
     private readonly ILoanScheduleRepository? _loanScheduleRepo;
-    private readonly ILoanScheduleQueryService _loanScheduleQueryService;
     private readonly ICryptoService? _cryptoService;
     private readonly IStockHistoryProvider? _historyProvider;
     private readonly ITransactionService _txService;
@@ -440,10 +439,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _currencyService = services.Currency;
         _assetRepo = repositories.Asset;
         _loanScheduleRepo = repositories.LoanSchedule;
-        _loanScheduleQueryService = services.LoanScheduleQuery
-            ?? (_loanScheduleRepo is not null
-                ? new LoanScheduleQueryService(_loanScheduleRepo)
-                : new NullLoanScheduleQueryService());
         _cryptoService = services.Crypto;
         _historyProvider = services.History;
         _txService = services.Transaction ?? new NullTransactionService();
@@ -1271,12 +1266,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             }
             return plan;
         }
-    }
-
-    private sealed class NullLoanScheduleQueryService : ILoanScheduleQueryService
-    {
-        public Task<IReadOnlyList<LoanScheduleEntry>> GetByAssetAsync(Guid assetId, CancellationToken ct = default) =>
-            Task.FromResult<IReadOnlyList<LoanScheduleEntry>>([]);
     }
 
 }

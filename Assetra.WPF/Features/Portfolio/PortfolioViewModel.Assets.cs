@@ -887,7 +887,7 @@ public partial class PortfolioViewModel
     {
         if (!row.IsLoan || row.AssetId is null)
             return;
-        var entries = await _loanScheduleQueryService.GetByAssetAsync(row.AssetId.Value).ConfigureAwait(true);
+        var entries = await _loanScheduleRepo!.GetByAssetAsync(row.AssetId.Value).ConfigureAwait(true);
         row.ScheduleEntries.Clear();
         foreach (var e in entries)
             row.ScheduleEntries.Add(new LoanScheduleRowViewModel(e));
