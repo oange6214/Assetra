@@ -156,6 +156,12 @@ internal static class AppBootstrapper
         services.AddSingleton<IPositionQueryService>(sp =>
             new Assetra.Infrastructure.PositionQueryService(
                 sp.GetRequiredService<ITradeRepository>()));
+        services.AddSingleton<IPortfolioLoadService>(sp => new PortfolioLoadService(
+            sp.GetRequiredService<IPortfolioRepository>(),
+            sp.GetRequiredService<IPositionQueryService>(),
+            sp.GetRequiredService<ITradeRepository>(),
+            sp.GetRequiredService<IBalanceQueryService>(),
+            sp.GetService<IAssetRepository>()));
         services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
         services.AddSingleton<ICryptoService, CoinGeckoService>();
 
@@ -179,6 +185,7 @@ internal static class AppBootstrapper
                 sp.GetRequiredService<IStockSearchService>(),
                 sp.GetRequiredService<PortfolioSnapshotService>(),
                 sp.GetRequiredService<PortfolioBackfillService>(),
+                sp.GetRequiredService<IPortfolioLoadService>(),
                 sp.GetRequiredService<IStockHistoryProvider>(),
                 sp.GetRequiredService<ICurrencyService>(),
                 sp.GetRequiredService<ICryptoService>(),

@@ -43,6 +43,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly ITransactionService _txService;
     private readonly IBalanceQueryService _balanceQuery;
     private readonly IPositionQueryService _positionQuery;
+    private readonly IPortfolioLoadService _loadService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly ILocalizationService? _localization;
     private readonly CompositeDisposable _disposables = new();
@@ -432,6 +433,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _txService = services.Transaction ?? new NullTransactionService();
         _balanceQuery = services.BalanceQuery ?? new NullBalanceQueryService();
         _positionQuery = services.PositionQuery ?? new NullPositionQueryService();
+        _loadService = services.Load ?? new PortfolioLoadService(
+            _repo,
+            _positionQuery,
+            _tradeRepo,
+            _balanceQuery,
+            _assetRepo);
         _summaryService = services.Summary ?? new PortfolioSummaryService();
         _localization = ui.Localization;
         History = new PortfolioHistoryViewModel(repositories.Snapshot, ui.Localization);
@@ -488,9 +495,14 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     private async Task LoadPositionsAsync()
     {
-        var entries = await _repo.GetEntriesAsync();
-        var snapshots = await _positionQuery.GetAllPositionSnapshotsAsync();
+        var loaded = await _loadService.LoadAsync();
+        ApplyPositions(loaded);
+    }
 
+    private void ApplyPositions(PortfolioLoadResult loaded)
+    {
+        var entries = loaded.Entries;
+        var snapshots = loaded.PositionSnapshots;
         // Build the new desired set of rows keyed by (Symbol, AssetType).
         var newRows = new Dictionary<(string Symbol, AssetType AssetType), PortfolioRowViewModel>();
 
@@ -614,10 +626,11 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         SetProperty(ref _monthlyExpense, _settingsService?.Current?.MonthlyExpense ?? 0m, nameof(MonthlyExpense));
         ShowWelcomeBanner = !(_settingsService?.Current?.HasShownWelcomeBanner ?? false);
 
-        await LoadPositionsAsync();
+        var loaded = await _loadService.LoadAsync();
 
-        await LoadCashAccountsAsync();
-        await LoadLiabilitiesAsync();
+        ApplyPositions(loaded);
+        ApplyCashAccounts(loaded);
+        ApplyLiabilities(loaded);
 
         RebuildTotals();
 
@@ -627,7 +640,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         await History.LoadAsync();
 
         // Load trade history
-        await LoadTradesAsync();
+        ApplyTrades(loaded.Trades);
 
         // Under the single-truth model, balance seeding is obsolete: CashAccount /
         // LiabilityAccount no longer store Balance/OriginalAmount, so there is nothing
@@ -644,11 +657,16 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     private async Task LoadTradesAsync()
     {
+        var loaded = await _loadService.LoadAsync();
+        ApplyTrades(loaded.Trades);
+    }
+
+    private void ApplyTrades(IReadOnlyList<Trade> trades)
+    {
         // 首次呼叫時建立 type filter 項目（需要 Application resources 已就緒）
         TradeFilter.InitTradeTypeFilters();
         try
         {
-            var trades = await _tradeRepo.GetAllAsync();
             Trades.Clear();
             foreach (var t in trades)
                 Trades.Add(new TradeRowViewModel(t));
@@ -919,15 +937,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     /// </summary>
     private async Task ReloadAccountBalancesAsync()
     {
-        if (_assetRepo is not null)
-        {
-            var cashMap = await _balanceQuery.GetAllCashBalancesAsync();
-            foreach (var row in CashAccounts)
-                row.Balance = cashMap.TryGetValue(row.Id, out var bal) ? bal : 0m;
-        }
-
-        // Liabilities: rebuild from projections (handles new labels appearing after a LoanBorrow)
-        await LoadLiabilitiesAsync();
+        var loaded = await _loadService.LoadAsync();
+        ApplyCashAccounts(loaded);
+        ApplyLiabilities(loaded);
         // Caller must invoke RebuildTotals() after this to keep RecalcFinancialSummary up-to-date.
     }
 

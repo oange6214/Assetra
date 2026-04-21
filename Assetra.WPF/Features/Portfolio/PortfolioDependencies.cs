@@ -28,6 +28,7 @@ public sealed record PortfolioServices(
     IStockSearchService Search,
     PortfolioSnapshotService Snapshot,
     PortfolioBackfillService Backfill,
+    IPortfolioLoadService? Load = null,
     IStockHistoryProvider? History = null,
     ICurrencyService? Currency = null,
     ICryptoService? Crypto = null,

@@ -38,6 +38,7 @@ Desktop.ini
 *.nupkg
 *.snupkg
 .nuget/
+.dotnet-home/
 
 # Generated
 *.g.cs

@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Assetra.AppLayer.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
@@ -930,11 +931,15 @@ public partial class PortfolioViewModel
 
     private async Task LoadCashAccountsAsync()
     {
-        if (_assetRepo is null)
-            return;
-        var accounts = await _assetRepo.GetItemsByTypeAsync(FinancialType.Asset);
-        // Bulk-project all cash balances from the trade journal in one pass.
-        var balances = await _balanceQuery.GetAllCashBalancesAsync();
+        var loaded = await _loadService.LoadAsync();
+        ApplyCashAccounts(loaded);
+    }
+
+    private void ApplyCashAccounts(PortfolioLoadResult loaded)
+    {
+        var accounts = loaded.CashAccounts;
+        var balances = loaded.CashBalances;
+
         CashAccounts.Clear();
         foreach (var a in accounts)
         {
@@ -951,8 +956,6 @@ public partial class PortfolioViewModel
         foreach (var r in CashAccounts)
             r.IsDefault = savedId.HasValue && r.Id == savedId.Value;
 
-        // Refresh Lazy-Upsert suggestion list for TX form editable ComboBox (Task 19).
-        // Only include active accounts — archived ones stay out of the dropdown.
         CashAccountSuggestions.Clear();
         foreach (var a in accounts.Where(a => a.IsActive).OrderBy(a => a.Name))
             CashAccountSuggestions.Add(a.Name);
@@ -960,16 +963,14 @@ public partial class PortfolioViewModel
 
     private async Task LoadLiabilitiesAsync()
     {
-        var snapshots = await _balanceQuery.GetAllLiabilitySnapshotsAsync();
+        var loaded = await _loadService.LoadAsync();
+        ApplyLiabilities(loaded);
+    }
 
-        // Build a name→AssetItem map for loans that have amortization metadata.
-        Dictionary<string, AssetItem> loanAssets = [];
-        if (_assetRepo is not null)
-        {
-            var items = await _assetRepo.GetItemsByTypeAsync(FinancialType.Liability);
-            foreach (var a in items.Where(a => a.IsLoan))
-                loanAssets[a.Name] = a;
-        }
+    private void ApplyLiabilities(PortfolioLoadResult loaded)
+    {
+        var snapshots = loaded.LiabilitySnapshots;
+        var loanAssets = loaded.LoanAssets;
 
         Liabilities.Clear();
         foreach (var (label, snap) in snapshots.OrderBy(kv => kv.Key))
@@ -978,7 +979,6 @@ public partial class PortfolioViewModel
             Liabilities.Add(new LiabilityRowViewModel(label, snap, asset));
         }
 
-        // Also add AssetItem loans that have no trade history yet (principal = 0 from snapshot).
         foreach (var (name, asset) in loanAssets)
         {
             if (!snapshots.ContainsKey(name))
