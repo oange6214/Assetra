@@ -13,6 +13,24 @@
     <!--  ======== 借款/還款欄位 ========  -->
     <StackPanel Visibility="{Binding TxTypeIsLoan, Converter={StaticResource BooleanToVisibilityConverter}}">
 
+        <!--  貸款名稱（共用，先填）  -->
+        <TextBlock
+            Margin="0,0,0,4"
+            FontSize="{StaticResource FontSizeXs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Portfolio.Tx.LoanLabel}" />
+        <ComboBox
+            Margin="0,0,0,12"
+            IsEditable="True"
+            ItemsSource="{Binding LoanLabelSuggestions}"
+            Style="{StaticResource FormComboBox}"
+            Text="{Binding TxLoanLabel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <ComboBox.Resources>
+                <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
+            </ComboBox.Resources>
+        </ComboBox>
+
         <!--  借款：金額 + 選填攤還欄位  -->
         <StackPanel Visibility="{Binding TxTypeIsLoanBorrow, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
@@ -122,24 +140,7 @@
                 TextWrapping="Wrap" />
         </StackPanel>
 
-        <TextBlock
-            Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.LoanLabel}" />
-        <ComboBox
-            Margin="0,0,0,12"
-            IsEditable="True"
-            ItemsSource="{Binding LoanLabelSuggestions}"
-            Style="{StaticResource FormComboBox}"
-            Text="{Binding TxLoanLabel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-            <ComboBox.Resources>
-                <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
-            </ComboBox.Resources>
-        </ComboBox>
-
-        <!--  手續費（選填）— 借款：撥款時扣繳；還款：處理費  -->
+        <!--  手續費（選填）  -->
         <TextBlock
             Margin="0,0,0,4"
             FontSize="{StaticResource FontSizeXs}"
@@ -156,7 +157,7 @@
             Text="{Binding TxFeeError}"
             Visibility="{Binding TxFeeError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-        <!--  勾選框：連動現金帳戶（預設 on）  -->
+        <!--  連動現金帳戶  -->
         <CheckBox
             Margin="0,0,0,4"
             Content="{DynamicResource Portfolio.Tx.UseLoanCashAccount}"
@@ -164,7 +165,6 @@
             Foreground="{DynamicResource AppTextSecondary}"
             IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
 
-        <!--  只在勾選時顯示現金帳戶下拉  -->
         <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
@@ -190,6 +190,7 @@
                 TextWrapping="Wrap" />
         </StackPanel>
 
+        <!--  備註  -->
         <TextBlock
             Margin="0,8,0,4"
             FontSize="{StaticResource FontSizeXs}"
