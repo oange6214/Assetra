@@ -18,7 +18,7 @@ using Wpf.Ui.Appearance;
 
 namespace Assetra.WPF;
 
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     private IHost _host = null!;
 

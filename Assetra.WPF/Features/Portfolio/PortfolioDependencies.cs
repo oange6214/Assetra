@@ -1,4 +1,5 @@
 using System.Reactive.Concurrency;
+using Assetra.AppLayer.Portfolio.Contracts;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure;
@@ -40,7 +41,12 @@ public sealed record PortfolioServices(
     /// 持倉投影服務：由交易歷史計算每個 PortfolioEntry 的持倉數量與成本。
     /// 測試中若省略，ViewModel 會回退為 <c>NullPositionQueryService</c>（回傳空快照）。
     /// </summary>
-    IPositionQueryService? PositionQuery = null);
+    IPositionQueryService? PositionQuery = null,
+    /// <summary>
+    /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。
+    /// 測試中若省略，ViewModel 會回退為內建實作。
+    /// </summary>
+    IPortfolioSummaryService? Summary = null);
 
 /// <summary>
 /// UI-adjacent services (scheduler / theming / settings / snackbar / localization).

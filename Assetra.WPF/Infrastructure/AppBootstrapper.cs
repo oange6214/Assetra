@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Assetra.AppLayer.Portfolio.Contracts;
+using Assetra.AppLayer.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Infrastructure;
 using Assetra.Infrastructure.Chart;
@@ -154,6 +156,7 @@ internal static class AppBootstrapper
         services.AddSingleton<IPositionQueryService>(sp =>
             new Assetra.Infrastructure.PositionQueryService(
                 sp.GetRequiredService<ITradeRepository>()));
+        services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
         services.AddSingleton<ICryptoService, CoinGeckoService>();
 
         // Stockra import service — target is our own assetra.db
@@ -181,7 +184,8 @@ internal static class AppBootstrapper
                 sp.GetRequiredService<ICryptoService>(),
                 sp.GetRequiredService<ITransactionService>(),
                 sp.GetRequiredService<IBalanceQueryService>(),
-                sp.GetRequiredService<IPositionQueryService>()),
+                sp.GetRequiredService<IPositionQueryService>(),
+                sp.GetRequiredService<IPortfolioSummaryService>()),
             new PortfolioUiServices(
                 System.Reactive.Concurrency.DefaultScheduler.Instance,
                 sp.GetService<IThemeService>(),

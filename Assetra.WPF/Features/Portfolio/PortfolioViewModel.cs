@@ -9,6 +9,9 @@ using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using SkiaSharp;
+using Assetra.AppLayer.Portfolio.Contracts;
+using Assetra.AppLayer.Portfolio.Dtos;
+using Assetra.AppLayer.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure.Persistence;
@@ -40,6 +43,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly ITransactionService _txService;
     private readonly IBalanceQueryService _balanceQuery;
     private readonly IPositionQueryService _positionQuery;
+    private readonly IPortfolioSummaryService _summaryService;
     private readonly ILocalizationService? _localization;
     private readonly CompositeDisposable _disposables = new();
 
@@ -217,7 +221,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     partial void OnMonthlyExpenseChanged(decimal value)
     {
-        RecalcFinancialSummary();
+        ApplyFinancialSummary(_summaryService.Calculate(BuildSummaryInput()));
         OnPropertyChanged(nameof(IsMonthlyExpenseSet));
         _ = SaveMonthlyExpenseAsync();
     }
@@ -428,6 +432,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _txService = services.Transaction ?? new NullTransactionService();
         _balanceQuery = services.BalanceQuery ?? new NullBalanceQueryService();
         _positionQuery = services.PositionQuery ?? new NullPositionQueryService();
+        _summaryService = services.Summary ?? new PortfolioSummaryService();
         _localization = ui.Localization;
         History = new PortfolioHistoryViewModel(repositories.Snapshot, ui.Localization);
 
@@ -709,37 +714,32 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     private void RebuildTotals()
     {
-        TotalCost = Positions.Sum(p => p.Cost);
-        TotalMarketValue = Positions.Sum(p => p.MarketValue);
-        // 總損益已含每筆持倉估算的賣出費用 (符合 Plan A: 顯示淨損益)
-        TotalPnl = Positions.Sum(p => p.Pnl);
-        TotalPnlPercent = TotalCost > 0 ? TotalPnl / TotalCost * 100m : 0m;
-        IsTotalPositive = TotalPnl >= 0;
+        var summary = _summaryService.Calculate(BuildSummaryInput());
 
-        // 計算每筆佔投資組合淨值的百分比，供 DataGrid 「佔比」欄使用。
-        // 以淨值（NetValue）為基準而非市值，與 DataGrid 顯示的主欄位一致。
-        var totalNetValue = Positions.Sum(p => p.NetValue);
+        TotalCost = summary.TotalCost;
+        TotalMarketValue = summary.TotalMarketValue;
+        TotalPnl = summary.TotalPnl;
+        TotalPnlPercent = summary.TotalPnlPercent;
+        IsTotalPositive = summary.IsTotalPositive;
+
+        var weights = summary.PositionWeights.ToDictionary(w => w.PositionId, w => w.Percent);
         foreach (var p in Positions)
-            p.PercentOfPortfolio = totalNetValue > 0 ? p.NetValue / totalNetValue * 100m : 0m;
+            p.PercentOfPortfolio = weights.TryGetValue(p.Id, out var percent) ? percent : 0m;
 
-        TotalCash = CashAccounts.Sum(c => c.Balance);
-        TotalLiabilities = Liabilities.Sum(l => l.Balance);
-        TotalAssets = TotalMarketValue + TotalCash;
-        NetWorth = TotalAssets - TotalLiabilities;
-
-        // 本日盈虧：只計算已載入報價（PrevClose > 0）的持倉，避免尚未報價的倉位拉偏數字
-        var priced = Positions.Where(p => !p.IsLoadingPrice && p.PrevClose > 0).ToList();
-        HasDayPnl = priced.Count > 0;
-        DayPnl = priced.Sum(p => (p.CurrentPrice - p.PrevClose) * p.Quantity);
-        var dayPnlBase = priced.Sum(p => p.PrevClose * p.Quantity);
-        _dayPnlPercent = dayPnlBase > 0 ? DayPnl / dayPnlBase * 100m : 0m;
+        TotalCash = summary.TotalCash;
+        TotalLiabilities = summary.TotalLiabilities;
+        TotalAssets = summary.TotalAssets;
+        NetWorth = summary.NetWorth;
+        HasDayPnl = summary.HasDayPnl;
+        DayPnl = summary.DayPnl;
+        _dayPnlPercent = summary.DayPnlPercent;
         OnPropertyChanged(nameof(DayPnlPercentDisplay));
-        IsDayPnlPositive = DayPnl >= 0;
+        IsDayPnlPositive = summary.IsDayPnlPositive;
 
         // Recompute cached financial summary properties and notify all dependents
-        RecalcFinancialSummary();
+        ApplyFinancialSummary(summary);
 
-        RebuildAllocationSlices();
+        RebuildAllocationSlices(summary.AllocationSlices);
 
         // Fire-and-forget: record today's snapshot once prices are live
         _ = RecordSnapshotAsync();
@@ -751,25 +751,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     /// fires PropertyChanged for every downstream display property.
     /// Call this from RebuildTotals() and OnMonthlyExpenseChanged().
     /// </summary>
-    private void RecalcFinancialSummary()
+    private void ApplyFinancialSummary(PortfolioSummaryResult summary)
     {
-        // TotalOriginalLiabilities — iterates Liabilities collection once here
-        TotalOriginalLiabilities = Liabilities.Sum(l =>
-            l.OriginalAmount > 0 ? l.OriginalAmount : l.Balance);
-
-        // DebtRatioValue
-        DebtRatioValue = TotalAssets > 0
-            ? Math.Min(TotalLiabilities / TotalAssets * 100m, 100m)
-            : 0m;
-
-        // PaidPercentValue
-        var orig = TotalOriginalLiabilities;
-        PaidPercentValue = orig > 0
-            ? Math.Clamp((orig - TotalLiabilities) / orig * 100m, 0m, 100m)
-            : 0m;
-
-        // EmergencyFundMonths
-        EmergencyFundMonths = MonthlyExpense > 0 ? TotalCash / MonthlyExpense : 0m;
+        TotalOriginalLiabilities = summary.TotalOriginalLiabilities;
+        DebtRatioValue = summary.DebtRatioValue;
+        PaidPercentValue = summary.PaidPercentValue;
+        EmergencyFundMonths = summary.EmergencyFundMonths;
 
         // Notify derived display properties (the backing-field setters above already
         // raise PropertyChanged for the four cached properties themselves)
@@ -799,41 +786,35 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             [AssetType.Crypto] = ("Portfolio.AssetType.Crypto", "#8B5CF6"),
         };
 
-    private void RebuildAllocationSlices()
+    private void RebuildAllocationSlices(IReadOnlyList<AllocationSliceResult> slices)
     {
-        // Aggregate positions by AssetType (use market value if available, else cost)
-        var groups = Positions
-            .GroupBy(p => p.AssetType)
-            .Select(g => (Type: g.Key, Value: g.Sum(p => p.MarketValue > 0 ? p.MarketValue : p.Cost)))
-            .Where(g => g.Value > 0)
-            .ToList();
-
-        var cash = TotalCash;
-        var total = groups.Sum(g => g.Value) + Math.Max(0, cash) + Math.Max(0, TotalLiabilities);
-
         // Build the new slice list without touching the observable collection yet.
         var newSlices = new List<AssetAllocationSlice>();
 
-        if (total > 0)
+        foreach (var slice in slices)
         {
-            foreach (var (type, value) in groups)
+            switch (slice.Kind)
             {
-                if (!AssetTypeColors.TryGetValue(type, out var meta))
-                    continue;
-                var label = L(meta.LabelKey, type.ToString());
-                newSlices.Add(new AssetAllocationSlice(label, value, value / total * 100m, meta.Color));
-            }
-
-            if (cash > 0)
-            {
-                var cashLabel = L("Portfolio.Header.Cash", "Cash");
-                newSlices.Add(new AssetAllocationSlice(cashLabel, cash, cash / total * 100m, "#94A3B8"));
-            }
-
-            if (TotalLiabilities > 0)
-            {
-                var liabLabel = L("Portfolio.Header.Liabilities", "Liabilities");
-                newSlices.Add(new AssetAllocationSlice(liabLabel, TotalLiabilities, TotalLiabilities / total * 100m, "#EF4444"));
+                case AllocationSliceKind.AssetType when slice.AssetType is AssetType assetType:
+                    if (!AssetTypeColors.TryGetValue(assetType, out var meta))
+                        continue;
+                    var label = L(meta.LabelKey, assetType.ToString());
+                    newSlices.Add(new AssetAllocationSlice(label, slice.Value, slice.Percent, meta.Color));
+                    break;
+                case AllocationSliceKind.Cash:
+                    newSlices.Add(new AssetAllocationSlice(
+                        L("Portfolio.Header.Cash", "Cash"),
+                        slice.Value,
+                        slice.Percent,
+                        "#94A3B8"));
+                    break;
+                case AllocationSliceKind.Liabilities:
+                    newSlices.Add(new AssetAllocationSlice(
+                        L("Portfolio.Header.Liabilities", "Liabilities"),
+                        slice.Value,
+                        slice.Percent,
+                        "#EF4444"));
+                    break;
             }
         }
 
@@ -863,7 +844,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         foreach (var s in newSlices)
             AllocationSlices.Add(s);
 
-        if (total <= 0)
+        if (newSlices.Count == 0)
         {
             AllocationPieSeries = [];
             OnPropertyChanged(nameof(HasAllocationData));
@@ -1089,7 +1070,28 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(SellTransactionTax));
         OnPropertyChanged(nameof(SellNetAmount));
         OnPropertyChanged(nameof(SellEstimatedPnl));
-        RecalcFinancialSummary();
+        ApplyFinancialSummary(_summaryService.Calculate(BuildSummaryInput()));
+    }
+
+    private PortfolioSummaryInput BuildSummaryInput()
+    {
+        return new PortfolioSummaryInput(
+            Positions.Select(p => new PositionSummaryInput(
+                p.Id,
+                p.AssetType,
+                p.Quantity,
+                p.Cost,
+                p.MarketValue,
+                p.NetValue,
+                p.CurrentPrice,
+                p.PrevClose,
+                p.IsLoadingPrice)).ToList(),
+            CashAccounts.Select(c => new CashBalanceInput(c.Id, c.Balance)).ToList(),
+            Liabilities.Select(l => new LiabilityBalanceInput(
+                l.AssetId ?? Guid.Empty,
+                l.Balance,
+                l.OriginalAmount)).ToList(),
+            MonthlyExpense);
     }
 
     /// <summary>

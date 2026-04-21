@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Assetra.Application/Assetra.Application.csproj" />
   <Project Path="Assetra.Core/Assetra.Core.csproj" />
   <Project Path="Assetra.Infrastructure/Assetra.Infrastructure.csproj" />
   <Project Path="Assetra.Tests/Assetra.Tests.csproj" />
