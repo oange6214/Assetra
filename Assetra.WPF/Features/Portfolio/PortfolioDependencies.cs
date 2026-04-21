@@ -55,6 +55,7 @@ public sealed record PortfolioServices(
     IPortfolioSummaryService? Summary = null,
     ITradeDeletionWorkflowService? TradeDeletionWorkflow = null,
     IPositionDeletionWorkflowService? PositionDeletionWorkflow = null,
+    ISellWorkflowService? SellWorkflow = null,
     IPositionMetadataWorkflowService? PositionMetadataWorkflow = null,
     IAccountMutationWorkflowService? AccountMutationWorkflow = null,
     IAccountUpsertWorkflowService? AccountUpsertWorkflow = null,

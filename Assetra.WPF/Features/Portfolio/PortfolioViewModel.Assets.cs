@@ -374,50 +374,28 @@ public partial class PortfolioViewModel
             sellDiscount = discount;
         }
 
-        var realizedPnl = await _positionQuery
-            .ComputeRealizedPnlAsync(row.Id, DateTime.UtcNow, sellPrice, sellQty, sellCommission)
-            .ConfigureAwait(true);
-        var buyCost = row.BuyPrice * sellQty;
-        var realizedPnlPct = buyCost > 0 ? realizedPnl / buyCost * 100m : 0m;
-
-        var trade = new Trade(
-            Id: Guid.NewGuid(),
-            Symbol: row.Symbol,
-            Exchange: row.Exchange,
-            Name: row.Name,
-            Type: TradeType.Sell,
-            TradeDate: DateTime.UtcNow,
-            Price: sellPrice,
-            Quantity: sellQty,
-            RealizedPnl: realizedPnl,
-            RealizedPnlPct: realizedPnlPct,
-            CashAccountId: SellCashAccount?.Id,
-            PortfolioEntryId: row.Id,
-            Commission: sellCommission,
-            CommissionDiscount: sellDiscount);
-
         try
-        { await _tradeRepo.AddAsync(trade); }
+        {
+            await _sellWorkflowService.RecordAsync(new SellWorkflowRequest(
+                    row.Id,
+                    row.Symbol,
+                    row.Exchange,
+                    row.Name,
+                    row.BuyPrice,
+                    (int)row.Quantity,
+                    sellQty,
+                    sellPrice,
+                    sellCommission,
+                    sellDiscount,
+                    SellCashAccount?.Id,
+                    row.AllEntryIds))
+                .ConfigureAwait(true);
+        }
         catch (Exception ex)
         {
             Serilog.Log.Warning(ex, "Failed to record sell trade for {Symbol}", row.Symbol);
             _snackbar?.Warning(L("Portfolio.Sell.TradeSaveFailed", "賣出已完成，但交易記錄儲存失敗"));
-        }
-
-        // Full sell: archive all underlying portfolio entries (soft-delete) so they no longer
-        // appear in the active list, but can be restored if the sell trade is later deleted.
-        // Partial sell: just update the display row — the sell trade in the journal is the
-        // source of truth for net quantity; no entry archiving needed.
-        var isFull = sellQty >= (int)row.Quantity;
-        if (isFull)
-        {
-            foreach (var id in row.AllEntryIds)
-                await _repo.ArchiveAsync(id);
-            await WriteLogAsync(row.Id, row.Symbol, row.Exchange, 0, row.BuyPrice);
-        }
-        else
-        {
-            await WriteLogAsync(row.Id, row.Symbol, row.Exchange, (int)row.Quantity - sellQty, row.BuyPrice);
+            return;
         }
 
         CancelSell();

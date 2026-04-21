@@ -43,6 +43,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly IAddAssetWorkflowService _addAssetWorkflowService;
     private readonly ITransactionWorkflowService _transactionWorkflowService;
     private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
+    private readonly ISellWorkflowService _sellWorkflowService;
     private readonly IPositionDeletionWorkflowService _positionDeletionWorkflowService;
     private readonly IPositionMetadataWorkflowService _positionMetadataWorkflowService;
     private readonly IAccountMutationWorkflowService _accountMutationWorkflowService;
@@ -455,6 +456,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _transactionWorkflowService = services.TransactionWorkflow ?? new TransactionWorkflowService();
         _tradeDeletionWorkflowService = services.TradeDeletionWorkflow
             ?? new TradeDeletionWorkflowService(_tradeRepo, _repo, _positionQuery);
+        _sellWorkflowService = services.SellWorkflow
+            ?? new SellWorkflowService(_tradeRepo, _repo, _logRepo, _positionQuery);
         _positionDeletionWorkflowService = services.PositionDeletionWorkflow
             ?? new PositionDeletionWorkflowService(_tradeRepo, _repo);
         _positionMetadataWorkflowService = services.PositionMetadataWorkflow
