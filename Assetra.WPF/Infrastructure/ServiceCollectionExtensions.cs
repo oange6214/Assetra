@@ -2,6 +2,7 @@ using System.Net.Http;
 using System.Reactive.Concurrency;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Services;
+using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
 using Assetra.Infrastructure;
 using Assetra.Infrastructure.FinMind;
@@ -115,6 +116,7 @@ internal static class ServiceCollectionExtensions
             new Assetra.Infrastructure.PositionQueryService(
                 sp.GetRequiredService<ITradeRepository>()));
         services.AddSingleton<ICryptoService, CoinGeckoService>();
+        services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
 
         return services;
     }
@@ -174,7 +176,6 @@ internal static class ServiceCollectionExtensions
                 sp.GetRequiredService<IAssetRepository>(),
                 sp.GetRequiredService<ILoanScheduleRepository>(),
                 sp.GetRequiredService<ITransactionService>()));
-        services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
         services.AddSingleton<IAddAssetWorkflowService>(sp => new AddAssetWorkflowService(
             sp.GetRequiredService<IStockSearchService>(),
             sp.GetService<IStockHistoryProvider>(),

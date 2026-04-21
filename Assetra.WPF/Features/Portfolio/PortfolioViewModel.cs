@@ -6,6 +6,8 @@ using System.Windows.Data;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Application.Portfolio.Services;
+using Assetra.Core.DomainServices;
+using Assetra.Core.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;

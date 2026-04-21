@@ -1,5 +1,6 @@
 using System.Reactive.Concurrency;
 using Assetra.Application.Portfolio.Contracts;
+using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
 using Assetra.WPF.Infrastructure;
 
