@@ -998,57 +998,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         // Caller must invoke RebuildTotals() after this to keep RecalcFinancialSummary up-to-date.
     }
 
-    private async Task WriteLogAsync(
-        Guid entryId, string symbol, string exchange, int quantity, decimal avgPrice)
-    {
-        try
-        {
-            await _logRepo.LogAsync(new PortfolioPositionLog(
-                Guid.NewGuid(),
-                DateOnly.FromDateTime(DateTime.Today),
-                entryId,
-                symbol,
-                exchange,
-                quantity,
-                avgPrice));
-        }
-        catch (Exception ex)
-        {
-            Log.Warning(ex, "[Portfolio] WriteLogAsync failed for entry {EntryId}", entryId);
-        }
-    }
-
-    private async Task WriteBuyTradeAsync(
-        PortfolioEntry entry, string name, DateOnly tradeDate,
-        decimal tradePrice, int quantity,
-        Guid? cashAccountId = null,
-        decimal? commission = null, decimal? commissionDiscount = null)
-    {
-        try
-        {
-            var trade = new Trade(
-                Id: Guid.NewGuid(),
-                Symbol: entry.Symbol,
-                Exchange: entry.Exchange,
-                Name: name,
-                Type: TradeType.Buy,
-                TradeDate: tradeDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
-                Price: tradePrice,
-                Quantity: quantity,
-                RealizedPnl: null,
-                RealizedPnlPct: null,
-                CashAccountId: cashAccountId,
-                PortfolioEntryId: entry.Id,
-                Commission: commission,
-                CommissionDiscount: commissionDiscount);
-            await _tradeRepo.AddAsync(trade);
-        }
-        catch (Exception ex)
-        {
-            Log.Warning(ex, "[Portfolio] WriteBuyTradeAsync failed for {Symbol}", entry.Symbol);
-        }
-    }
-
     private PortfolioRowViewModel ToRow(PortfolioEntry e, PositionSnapshot? snap)
     {
         var isStock = e.AssetType == AssetType.Stock;
