@@ -11,14 +11,8 @@
     <Product>Assetra</Product>
   </PropertyGroup>
 
-  <!-- MSIX packaging (Release only) -->
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <EnableMsixTooling>true</EnableMsixTooling>
-    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-    <WindowsPackageType>MSIX</WindowsPackageType>
-  </PropertyGroup>
-
   <ItemGroup>
+    <PackageReference Include="Velopack" />
     <PackageReference Include="Microsoft.Web.WebView2" />
     <PackageReference Include="WPF-UI" />
     <PackageReference Include="MahApps.Metro.IconPacks.Material" />

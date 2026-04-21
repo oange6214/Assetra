@@ -1,5 +1,7 @@
 using System.IO;
 using System.Windows;
+using Velopack;
+using Velopack.Sources;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +24,7 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        VelopackApp.Build().Run();
         base.OnStartup(e);
         try
         {
@@ -79,6 +82,28 @@ public partial class App : Application
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
         splash.Close();
+
+        _ = CheckForUpdatesAsync();
+    }
+
+    private static async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            var mgr = new UpdateManager(
+                new GithubSource("https://github.com/oange6214/Assetra", null, false));
+            var newVersion = await mgr.CheckForUpdatesAsync();
+            if (newVersion is null) return;
+            await mgr.DownloadUpdatesAsync(newVersion);
+            var result = MessageBox.Show(
+                $"發現新版本 {newVersion.TargetFullRelease.Version}，已下載完成。立即重新啟動以套用更新？",
+                "Assetra 更新",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Information);
+            if (result == MessageBoxResult.Yes)
+                mgr.ApplyUpdatesAndRestart(newVersion);
+        }
+        catch { }
     }
 
     protected override void OnExit(ExitEventArgs e)
