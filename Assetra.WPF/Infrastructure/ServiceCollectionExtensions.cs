@@ -128,6 +128,9 @@ internal static class ServiceCollectionExtensions
             sp.GetRequiredService<ITradeRepository>(),
             sp.GetRequiredService<IBalanceQueryService>(),
             sp.GetService<IAssetRepository>()));
+        services.AddSingleton<IPortfolioHistoryQueryService>(sp =>
+            new PortfolioHistoryQueryService(
+                sp.GetRequiredService<IPortfolioSnapshotRepository>()));
         services.AddSingleton<IPortfolioHistoryMaintenanceService>(sp =>
             new PortfolioHistoryMaintenanceService(
                 sp.GetRequiredService<PortfolioSnapshotService>(),
@@ -160,6 +163,7 @@ internal static class ServiceCollectionExtensions
                 Stock: sp.GetRequiredService<IStockService>(),
                 Search: sp.GetRequiredService<IStockSearchService>(),
                 HistoryMaintenance: sp.GetRequiredService<IPortfolioHistoryMaintenanceService>(),
+                HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
                 Load: sp.GetRequiredService<IPortfolioLoadService>(),
                 AddAssetWorkflow: sp.GetRequiredService<IAddAssetWorkflowService>(),
                 History: sp.GetRequiredService<IStockHistoryProvider>(),

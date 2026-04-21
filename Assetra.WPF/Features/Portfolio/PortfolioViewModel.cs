@@ -450,7 +450,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 ? new DirectPortfolioHistoryMaintenanceService(services.Snapshot, services.Backfill)
                 : new NullPortfolioHistoryMaintenanceService());
         _localization = ui.Localization;
-        History = new PortfolioHistoryViewModel(repositories.Snapshot, ui.Localization);
+        History = new PortfolioHistoryViewModel(
+            services.HistoryQuery ?? new PortfolioHistoryQueryService(repositories.Snapshot),
+            ui.Localization);
 
         // TradeFilter must be created before LoadAsync so LoadTradesAsync can call
         // TradeFilter.InitTradeTypeFilters() and TradeFilter.RefreshTradesView().

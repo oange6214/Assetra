@@ -8,6 +8,7 @@ using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
+using Assetra.AppLayer.Portfolio.Contracts;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
@@ -20,7 +21,7 @@ namespace Assetra.WPF.Features.Portfolio;
 /// </summary>
 public sealed partial class PortfolioHistoryViewModel : ObservableObject
 {
-    private readonly IPortfolioSnapshotRepository _repo;
+    private readonly IPortfolioHistoryQueryService _historyQueryService;
     private readonly ILocalizationService _localization;
 
     /// <summary>Full snapshot history (all dates), cached on each DB load.</summary>
@@ -46,10 +47,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     partial void OnIsChartVisibleChanged(bool _) => IsHistoryPanelVisible = HasHistory && IsChartVisible;
 
     public PortfolioHistoryViewModel(
-        IPortfolioSnapshotRepository repo,
+        IPortfolioHistoryQueryService historyQueryService,
         ILocalizationService? localization = null)
     {
-        _repo = repo;
+        _historyQueryService = historyQueryService;
         _localization = localization ?? NullLocalizationService.Instance;
     }
 
@@ -58,7 +59,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// <summary>Fetches snapshots from DB and rebuilds the chart.</summary>
     public async Task LoadAsync()
     {
-        _allSnapshots = await _repo.GetSnapshotsAsync();
+        _allSnapshots = await _historyQueryService.GetSnapshotsAsync();
         OnPropertyChanged(nameof(Snapshots));
         RefreshChart();
     }

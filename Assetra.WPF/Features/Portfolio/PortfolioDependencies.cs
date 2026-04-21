@@ -28,6 +28,7 @@ public sealed record PortfolioServices(
     Assetra.Infrastructure.Persistence.PortfolioSnapshotService? Snapshot = null,
     Assetra.Infrastructure.Persistence.PortfolioBackfillService? Backfill = null,
     IPortfolioHistoryMaintenanceService? HistoryMaintenance = null,
+    IPortfolioHistoryQueryService? HistoryQuery = null,
     IPortfolioLoadService? Load = null,
     IAddAssetWorkflowService? AddAssetWorkflow = null,
     IStockHistoryProvider? History = null,
