@@ -1,4 +1,4 @@
-namespace Assetra.AppLayer.Portfolio.Contracts;
+namespace Assetra.Application.Portfolio.Contracts;
 
 public interface IPortfolioHistoryMaintenanceService
 {

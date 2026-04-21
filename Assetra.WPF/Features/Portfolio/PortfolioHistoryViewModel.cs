@@ -1,6 +1,6 @@
 using System.Windows;
 using System.Windows.Media;
-using Assetra.AppLayer.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
@@ -170,7 +170,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// </summary>
     private static SKColor GetSkColor(string key, string hexFallback)
     {
-        if (Application.Current?.TryFindResource(key) is SolidColorBrush brush)
+        if (System.Windows.Application.Current?.TryFindResource(key) is SolidColorBrush brush)
         {
             var c = brush.Color;
             return new SKColor(c.R, c.G, c.B, c.A);

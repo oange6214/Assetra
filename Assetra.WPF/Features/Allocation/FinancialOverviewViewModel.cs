@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
-using Assetra.AppLayer.Portfolio.Contracts;
-using Assetra.AppLayer.Portfolio.Dtos;
+using Assetra.Application.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;

@@ -1,6 +1,6 @@
-using Assetra.AppLayer.Portfolio.Dtos;
+using Assetra.Application.Portfolio.Dtos;
 
-namespace Assetra.AppLayer.Portfolio.Contracts;
+namespace Assetra.Application.Portfolio.Contracts;
 
 public interface ITradeMetadataWorkflowService
 {

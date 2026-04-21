@@ -1,6 +1,6 @@
 using Assetra.Core.Models;
 
-namespace Assetra.AppLayer.Portfolio.Contracts;
+namespace Assetra.Application.Portfolio.Contracts;
 
 public interface ILoanScheduleQueryService
 {

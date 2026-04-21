@@ -34,7 +34,7 @@ public sealed class TradeTypeConverter : IValueConverter
         if (!Keys.TryGetValue(type, out var key))
             return type.ToString();
 
-        return Application.Current.TryFindResource(key) as string ?? type.ToString();
+        return System.Windows.Application.Current.TryFindResource(key) as string ?? type.ToString();
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>

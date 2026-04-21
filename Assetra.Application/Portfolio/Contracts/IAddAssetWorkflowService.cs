@@ -1,7 +1,7 @@
-using Assetra.AppLayer.Portfolio.Dtos;
+using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Models;
 
-namespace Assetra.AppLayer.Portfolio.Contracts;
+namespace Assetra.Application.Portfolio.Contracts;
 
 public interface IAddAssetWorkflowService
 {

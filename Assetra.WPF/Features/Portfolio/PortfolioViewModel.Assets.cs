@@ -1,5 +1,5 @@
 using System.Reactive.Linq;
-using Assetra.AppLayer.Portfolio.Dtos;
+using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Core.Trading;

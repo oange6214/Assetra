@@ -1,8 +1,8 @@
-using Assetra.AppLayer.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 
-namespace Assetra.AppLayer.Portfolio.Services;
+namespace Assetra.Application.Portfolio.Services;
 
 public sealed class AlertQueryService : IAlertQueryService
 {

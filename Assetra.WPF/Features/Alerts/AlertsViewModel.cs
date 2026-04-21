@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using Assetra.AppLayer.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;

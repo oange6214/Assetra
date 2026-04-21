@@ -1,7 +1,7 @@
 using Moq;
-using Assetra.AppLayer.Portfolio.Contracts;
-using Assetra.AppLayer.Portfolio.Dtos;
-using Assetra.AppLayer.Portfolio.Services;
+using Assetra.Application.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Dtos;
+using Assetra.Application.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Xunit;

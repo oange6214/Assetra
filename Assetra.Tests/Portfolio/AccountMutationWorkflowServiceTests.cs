@@ -1,5 +1,5 @@
 using Moq;
-using Assetra.AppLayer.Portfolio.Services;
+using Assetra.Application.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Xunit;
 

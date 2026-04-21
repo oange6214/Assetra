@@ -1,4 +1,4 @@
-using Assetra.AppLayer.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Contracts;
 using Assetra.Infrastructure.Persistence;
 
 namespace Assetra.WPF.Infrastructure;

@@ -1,7 +1,7 @@
 using System.Net.Http;
 using System.Reactive.Concurrency;
-using Assetra.AppLayer.Portfolio.Contracts;
-using Assetra.AppLayer.Portfolio.Services;
+using Assetra.Application.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Infrastructure;
 using Assetra.Infrastructure.FinMind;

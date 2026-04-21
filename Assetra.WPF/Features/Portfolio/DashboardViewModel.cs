@@ -173,7 +173,7 @@ public sealed partial class DashboardViewModel : ObservableObject
 
     private static SKColor GetSkColor(string key, string hexFallback)
     {
-        if (Application.Current?.TryFindResource(key) is SolidColorBrush brush)
+        if (System.Windows.Application.Current?.TryFindResource(key) is SolidColorBrush brush)
         {
             var c = brush.Color;
             return new SKColor(c.R, c.G, c.B, c.A);
