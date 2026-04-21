@@ -1021,18 +1021,13 @@ public partial class PortfolioViewModel
     {
         try
         {
-            // Re-fetch the full Trade record (the row VM doesn't carry every column).
-            var all = await _tradeRepo.GetAllAsync();
-            var original = all.FirstOrDefault(t => t.Id == oldRow.Id);
-            if (original is null)
+            var updated = await _tradeMetadataWorkflowService.UpdateAsync(new TradeMetadataUpdateRequest(
+                    oldRow.Id,
+                    DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
+                    string.IsNullOrWhiteSpace(TxNote) ? null : TxNote))
+                .ConfigureAwait(true);
+            if (!updated)
                 return;
-
-            var updated = original with
-            {
-                TradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
-                Note = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote,
-            };
-            await _tradeRepo.UpdateAsync(updated);
             CloseTxDialog();
             await LoadTradesAsync();
         }

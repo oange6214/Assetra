@@ -29,6 +29,7 @@ public sealed record PortfolioServices(
     IPortfolioHistoryQueryService? HistoryQuery = null,
     IPortfolioLoadService? Load = null,
     IAddAssetWorkflowService? AddAssetWorkflow = null,
+    ITradeMetadataWorkflowService? TradeMetadataWorkflow = null,
     IStockHistoryProvider? History = null,
     ICurrencyService? Currency = null,
     ICryptoService? Crypto = null,

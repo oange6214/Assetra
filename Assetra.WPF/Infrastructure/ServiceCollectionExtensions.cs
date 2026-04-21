@@ -139,6 +139,9 @@ internal static class ServiceCollectionExtensions
                 sp.GetRequiredService<ITradeRepository>(),
                 sp.GetRequiredService<IPortfolioRepository>(),
                 sp.GetRequiredService<IPositionQueryService>()));
+        services.AddSingleton<ITradeMetadataWorkflowService>(sp =>
+            new TradeMetadataWorkflowService(
+                sp.GetRequiredService<ITradeRepository>()));
         services.AddSingleton<ISellWorkflowService>(sp =>
             new SellWorkflowService(
                 sp.GetRequiredService<ITradeRepository>(),
@@ -198,6 +201,7 @@ internal static class ServiceCollectionExtensions
                 HistoryMaintenance: sp.GetRequiredService<IPortfolioHistoryMaintenanceService>(),
                 HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
                 TradeDeletionWorkflow: sp.GetRequiredService<ITradeDeletionWorkflowService>(),
+                TradeMetadataWorkflow: sp.GetRequiredService<ITradeMetadataWorkflowService>(),
                 SellWorkflow: sp.GetRequiredService<ISellWorkflowService>(),
                 PositionDeletionWorkflow: sp.GetRequiredService<IPositionDeletionWorkflowService>(),
                 PositionMetadataWorkflow: sp.GetRequiredService<IPositionMetadataWorkflowService>(),
