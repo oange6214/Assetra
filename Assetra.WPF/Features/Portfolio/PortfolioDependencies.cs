@@ -48,11 +48,6 @@ public sealed record PortfolioServices(
     /// 測試中若省略，ViewModel 會回退為內建實作。
     /// </summary>
     ITransactionWorkflowService? TransactionWorkflow = null,
-    /// <summary>
-    /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。
-    /// 測試中若省略，ViewModel 會回退為內建實作。
-    /// </summary>
-    IPortfolioSummaryService? Summary = null,
     ITradeDeletionWorkflowService? TradeDeletionWorkflow = null,
     IPositionDeletionWorkflowService? PositionDeletionWorkflow = null,
     ISellWorkflowService? SellWorkflow = null,
@@ -60,7 +55,14 @@ public sealed record PortfolioServices(
     IAccountMutationWorkflowService? AccountMutationWorkflow = null,
     IAccountUpsertWorkflowService? AccountUpsertWorkflow = null,
     ILoanPaymentWorkflowService? LoanPaymentWorkflow = null,
-    ILoanMutationWorkflowService? LoanMutationWorkflow = null);
+    ILoanMutationWorkflowService? LoanMutationWorkflow = null)
+{
+    /// <summary>
+    /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。
+    /// 預設為 <see cref="PortfolioSummaryService"/>；測試中可覆寫。
+    /// </summary>
+    public IPortfolioSummaryService Summary { get; init; } = new PortfolioSummaryService();
+}
 
 /// <summary>
 /// UI-adjacent services (scheduler / theming / settings / snackbar / localization).

@@ -488,7 +488,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                     _loanScheduleRepo,
                     fallbackTxService)
                 : new NullLoanMutationWorkflowService());
-        _summaryService = services.Summary ?? new PortfolioSummaryService();
+        _summaryService = services.Summary;
         _historyMaintenanceService = services.HistoryMaintenance
             ?? new NullPortfolioHistoryMaintenanceService();
         _localization = ui.Localization;

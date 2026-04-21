@@ -227,8 +227,10 @@ internal static class ServiceCollectionExtensions
                 Crypto: sp.GetRequiredService<ICryptoService>(),
                 BalanceQuery: sp.GetRequiredService<IBalanceQueryService>(),
                 PositionQuery: sp.GetRequiredService<IPositionQueryService>(),
-                TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>(),
-                Summary: sp.GetRequiredService<IPortfolioSummaryService>()),
+                TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>())
+            {
+                Summary = sp.GetRequiredService<IPortfolioSummaryService>(),
+            },
             new PortfolioUiServices(
                 DefaultScheduler.Instance,
                 sp.GetService<IThemeService>(),
