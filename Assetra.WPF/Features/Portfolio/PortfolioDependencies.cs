@@ -2,6 +2,7 @@ using System.Reactive.Concurrency;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
+using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Portfolio;
@@ -55,7 +56,14 @@ public sealed record PortfolioServices(
     IAccountMutationWorkflowService? AccountMutationWorkflow = null,
     IAccountUpsertWorkflowService? AccountUpsertWorkflow = null,
     ILoanPaymentWorkflowService? LoanPaymentWorkflow = null,
-    ILoanMutationWorkflowService? LoanMutationWorkflow = null)
+    ILoanMutationWorkflowService? LoanMutationWorkflow = null,
+    /// <summary>
+    /// Optional pre-built <see cref="AddAssetDialogViewModel"/>. When null the
+    /// <see cref="PortfolioViewModel"/> constructor builds its own instance from the
+    /// resolved workflow services. Pass an explicit instance from DI (or a test double)
+    /// to override the default construction.
+    /// </summary>
+    AddAssetDialogViewModel? AddAssetDialog = null)
 {
     /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。

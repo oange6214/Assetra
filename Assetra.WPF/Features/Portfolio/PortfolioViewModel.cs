@@ -10,6 +10,7 @@ using Assetra.Core.DomainServices;
 using Assetra.Core.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -405,6 +406,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     /// <summary>Child ViewModel for portfolio value history chart.</summary>
     public PortfolioHistoryViewModel History { get; }
 
+    /// <summary>
+    /// Sub-VM that owns all add-new-asset dialog state and commands.
+    /// XAML bindings chain through <c>AddAssetDialog.PropertyName</c>.
+    /// </summary>
+    public AddAssetDialogViewModel AddAssetDialog { get; }
+
     // Dividend calendar
     [ObservableProperty] private int _divCalendarYear = DateTime.Today.Year;
 
@@ -500,6 +507,18 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         // TradeFilter.InitTradeTypeFilters() and TradeFilter.RefreshTradesView().
         TradeFilter = new TradeFilterViewModel(() => Trades, ui.Localization ?? NullLocalizationService.Instance);
         TradeFilter.AttachTradesCollection(Trades);
+
+        // Build the AddAssetDialog sub-VM and wire its Tx-dialog field delegates and
+        // the AssetAdded reload callback.
+        AddAssetDialog = services.AddAssetDialog ?? new AddAssetDialogViewModel(
+            _addAssetWorkflowService,
+            _accountUpsertWorkflowService);
+        AddAssetDialog.GetTxCommissionDiscountValue = () => TxCommissionDiscountValue;
+        AddAssetDialog.GetTxFee = () => TxFee;
+        AddAssetDialog.GetTxBuyMetaOnly = () => TxBuyMetaOnly;
+        AddAssetDialog.GetTxCashAccountId = () => TxCashAccount?.Id;
+        AddAssetDialog.GetTxUseCashAccount = () => TxUseCashAccount;
+        AddAssetDialog.AssetAdded += async (_, _) => await ReloadAfterAssetAddedAsync();
 
         // Rebuild chart colours whenever the user switches theme
         if (ui.Theme is not null)
@@ -705,6 +724,22 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
         // Backfill gaps in snapshot history — fire and forget
         _ = BackfillAndRefreshAsync();
+    }
+
+    /// <summary>
+    /// Called by <see cref="AddAssetDialogViewModel.AssetAdded"/> to refresh all
+    /// position, trade, balance, and totals state after a successful add.
+    /// </summary>
+    private async Task ReloadAfterAssetAddedAsync()
+    {
+        await LoadPositionsAsync();
+        RebuildTotals();
+        await LoadTradesAsync();
+        await ReloadAccountBalancesAsync();
+        RebuildTotals();
+
+        // Fetch live price for any newly-added crypto positions.
+        await RefreshCryptoPricesAsync();
     }
 
     /// <summary>Test-only hook — lets tests re-populate the Trades collection after
@@ -1127,8 +1162,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _currencyService.CurrencyChanged -= OnCurrencyChanged;
         if (_themeService is not null && _onThemeChanged is not null)
             _themeService.ThemeChanged -= _onThemeChanged;
-        _closePriceCts?.Cancel();
-        _closePriceCts?.Dispose();
+        AddAssetDialog.CancelPendingFetch();
         _disposables.Dispose();
     }
 

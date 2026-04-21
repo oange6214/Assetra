@@ -177,13 +177,13 @@ public class PortfolioViewModelTests
     public async Task AddPosition_EmptySymbol_SetsError()
     {
         var (vm, _) = CreateVm([]);
-        vm.AddSymbol = string.Empty;
-        vm.AddPrice = "100";
-        vm.AddQuantity = "1000";
+        vm.AddAssetDialog.AddSymbol = string.Empty;
+        vm.AddAssetDialog.AddPrice = "100";
+        vm.AddAssetDialog.AddQuantity = "1000";
 
-        await vm.AddPositionCommand.ExecuteAsync(null);
+        await vm.AddAssetDialog.AddPositionCommand.ExecuteAsync(null);
 
-        Assert.NotEmpty(vm.AddError);
+        Assert.NotEmpty(vm.AddAssetDialog.AddError);
         Assert.Empty(vm.Positions);
     }
 
@@ -191,13 +191,13 @@ public class PortfolioViewModelTests
     public async Task AddPosition_InvalidTotalCost_SetsError()
     {
         var (vm, _) = CreateVm([]);
-        vm.AddSymbol = "2330";
-        vm.AddPrice = "abc";
-        vm.AddQuantity = "1000";
+        vm.AddAssetDialog.AddSymbol = "2330";
+        vm.AddAssetDialog.AddPrice = "abc";
+        vm.AddAssetDialog.AddQuantity = "1000";
 
-        await vm.AddPositionCommand.ExecuteAsync(null);
+        await vm.AddAssetDialog.AddPositionCommand.ExecuteAsync(null);
 
-        Assert.NotEmpty(vm.AddError);
+        Assert.NotEmpty(vm.AddAssetDialog.AddError);
         Assert.Empty(vm.Positions);
     }
 
@@ -205,13 +205,13 @@ public class PortfolioViewModelTests
     public async Task AddPosition_ZeroPrice_SetsError()
     {
         var (vm, _) = CreateVm([]);
-        vm.AddSymbol = "2330";
-        vm.AddPrice = "0";
-        vm.AddQuantity = "1000";
+        vm.AddAssetDialog.AddSymbol = "2330";
+        vm.AddAssetDialog.AddPrice = "0";
+        vm.AddAssetDialog.AddQuantity = "1000";
 
-        await vm.AddPositionCommand.ExecuteAsync(null);
+        await vm.AddAssetDialog.AddPositionCommand.ExecuteAsync(null);
 
-        Assert.NotEmpty(vm.AddError);
+        Assert.NotEmpty(vm.AddAssetDialog.AddError);
     }
 
     [Fact]
@@ -237,11 +237,11 @@ public class PortfolioViewModelTests
             new PortfolioServices(SilentStockService().Object, search.Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc1, backfill1)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
-        vm.AddSymbol = "XXXX";
-        vm.AddPrice = "910";
-        vm.AddQuantity = "1000";
+        vm.AddAssetDialog.AddSymbol = "XXXX";
+        vm.AddAssetDialog.AddPrice = "910";
+        vm.AddAssetDialog.AddQuantity = "1000";
 
-        await vm.AddPositionCommand.ExecuteAsync(null);
+        await vm.AddAssetDialog.AddPositionCommand.ExecuteAsync(null);
 
         // Unknown symbols are now accepted with inferred exchange
         Assert.NotEmpty(vm.Positions);
@@ -286,11 +286,11 @@ public class PortfolioViewModelTests
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc2, backfill2),
                 PositionQuery: posQuery.Object),
             new PortfolioUiServices(ImmediateScheduler.Instance));
-        vm.AddSymbol = "2330";
-        vm.AddPrice = "910";    // transaction price per share (from broker)
-        vm.AddQuantity = "1000";
+        vm.AddAssetDialog.AddSymbol = "2330";
+        vm.AddAssetDialog.AddPrice = "910";    // transaction price per share (from broker)
+        vm.AddAssetDialog.AddQuantity = "1000";
 
-        await vm.AddPositionCommand.ExecuteAsync(null);
+        await vm.AddAssetDialog.AddPositionCommand.ExecuteAsync(null);
 
         Assert.Single(vm.Positions);
         Assert.Equal("2330", vm.Positions[0].Symbol);
@@ -298,8 +298,8 @@ public class PortfolioViewModelTests
         Assert.Equal(1000, vm.Positions[0].Quantity);
         Assert.False(vm.HasNoPositions);
         // form fields should be cleared
-        Assert.Empty(vm.AddSymbol);
-        Assert.Empty(vm.AddPrice);
+        Assert.Empty(vm.AddAssetDialog.AddSymbol);
+        Assert.Empty(vm.AddAssetDialog.AddPrice);
     }
 
     // ConfirmSell
@@ -765,9 +765,9 @@ public class PortfolioViewModelTests
     {
         var (vm, cashRepo, _) = await CreateVmWithCashAsync(0m);
 
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "永豐 USD";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "永豐 USD";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         Assert.Single(cashRepo.Store);
         Assert.Equal("永豐 USD", cashRepo.Store[0].Name);
@@ -840,8 +840,8 @@ public class PortfolioViewModelTests
         vm.OpenAddAccountDialogCommand.Execute(null);
 
         Assert.True(vm.IsAccountsTab);
-        Assert.True(vm.IsAddDialogOpen);
-        Assert.Equal("cash", vm.AddAssetType);
+        Assert.True(vm.AddAssetDialog.IsAddDialogOpen);
+        Assert.Equal("cash", vm.AddAssetDialog.AddAssetType);
     }
 
     [Fact]
@@ -1149,13 +1149,13 @@ public class PortfolioViewModelTests
         vm.SelectedTab = PortfolioTab.Accounts;
         vm.GlobalAddCommand.Execute(null);
         Assert.True(vm.IsTxDialogOpen);
-        Assert.False(vm.IsAddDialogOpen);
+        Assert.False(vm.AddAssetDialog.IsAddDialogOpen);
 
         vm.CloseTxDialogCommand.Execute(null);
         vm.SelectedTab = PortfolioTab.Liability;
         vm.GlobalAddCommand.Execute(null);
         Assert.True(vm.IsTxDialogOpen);
-        Assert.False(vm.IsAddDialogOpen);
+        Assert.False(vm.AddAssetDialog.IsAddDialogOpen);
     }
 
     // Plan B: full Buy/Sell/StockDividend edit
@@ -1170,9 +1170,9 @@ public class PortfolioViewModelTests
     {
         var (vm, cashRepo, tradeRepo) = await CreateVmWithCashAsync(0m);
         // Seed a cash account for the income to attach to.
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "現金";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "現金";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         // Create an Income of 10000 linked to the account.
         vm.TxType = "income";
@@ -1330,9 +1330,9 @@ public class PortfolioViewModelTests
         Assert.False(vm.IsEditingMetaOnly);
         Assert.True(vm.AreEconomicFieldsEditable);
         // Pre-fill landed in the Add* properties used by the buy form.
-        Assert.Equal("00982A", vm.AddSymbol);
-        Assert.Equal("18.0400", vm.AddPrice);
-        Assert.Equal("5000", vm.AddQuantity);
+        Assert.Equal("00982A", vm.AddAssetDialog.AddSymbol);
+        Assert.Equal("18.0400", vm.AddAssetDialog.AddPrice);
+        Assert.Equal("5000", vm.AddAssetDialog.AddQuantity);
     }
 
     [Fact]
@@ -1587,10 +1587,10 @@ public class PortfolioViewModelTests
     {
         // 在 total mode 下輸入總額 90,200 + 數量 5,000 → AddPrice 自動回算 18.0400
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(0m, 0m);
-        vm.AddQuantity = "5000";
+        vm.AddAssetDialog.AddQuantity = "5000";
         vm.TxBuyPriceMode = "total";
         vm.TxBuyTotalCost = "90200";
-        Assert.Equal("18.0400", vm.AddPrice);
+        Assert.Equal("18.0400", vm.AddAssetDialog.AddPrice);
     }
 
     [Fact]
@@ -1598,8 +1598,8 @@ public class PortfolioViewModelTests
     {
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(0m, 0m);
         vm.TxBuyPriceMode = "unit";
-        vm.AddPrice = "18.04";
-        vm.AddQuantity = "5000";
+        vm.AddAssetDialog.AddPrice = "18.04";
+        vm.AddAssetDialog.AddQuantity = "5000";
         Assert.Equal("90,200", vm.TxBuyComputedTotalDisplay);
     }
 
@@ -1608,9 +1608,9 @@ public class PortfolioViewModelTests
     {
         // 不輸入每股股利、改填總股息 1,000 → 應該成功（per-share 自動回算）
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(0m);
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "X";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "X";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         // Need a position to attach dividend to — use simulator: bypass via direct add
         var posRepo = new Mock<IPortfolioRepository>();
@@ -1722,9 +1722,9 @@ public class PortfolioViewModelTests
     {
         // 存入 1000 + 跨行費 15 → 現金 +985 (= +1000 -15)
         var (vm, _, _) = await CreateVmWithCashAsync(0m);
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "X";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "X";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         vm.TxType = "deposit";
         vm.TxAmount = "1000";
@@ -1740,9 +1740,9 @@ public class PortfolioViewModelTests
     {
         // TWD Savings 30,000 → USD Savings 30,000 (same amount → native Transfer record)
         var (vm, cashRepo, tradeRepo) = await CreateVmWithCashAsync(50_000m);  // 1st account
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "USD Savings";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);   // 2nd account
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "USD Savings";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);   // 2nd account
 
         var src = vm.CashAccounts.First();   // 50,000 starting
         var dst = vm.CashAccounts.Last();    // 0 starting
@@ -1770,9 +1770,9 @@ public class PortfolioViewModelTests
     {
         // 30,000 TWD → 1,000 USD (跨幣別)
         var (vm, _, _) = await CreateVmWithCashAsync(50_000m);
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "USD Savings";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "USD Savings";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         var src = vm.CashAccounts.First();
         var dst = vm.CashAccounts.Last();
@@ -1796,9 +1796,9 @@ public class PortfolioViewModelTests
     {
         // 30,000 → 30,000 with 50 fee → src 50,050 less, dst 30,000 more
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(50_000m);
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "X";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "X";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         var src = vm.CashAccounts.First();
         var dst = vm.CashAccounts.Last();
@@ -1826,9 +1826,9 @@ public class PortfolioViewModelTests
     public async Task ConfirmTx_Transfer_SameAccountSrcDst_Rejected()
     {
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "X";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "X";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         var sameAcc = vm.CashAccounts.First();
 

@@ -49,7 +49,7 @@ public partial class PortfolioViewModel
     // AddPosition reads AddBuyDate when building the PortfolioEntry. Without this
     // sync, editing a Buy trade's date changes the picker's TxDate but AddPosition
     // still sees the stale AddBuyDate → the saved buy keeps the old date.
-    partial void OnTxDateChanged(DateTime value) => AddBuyDate = value;
+    partial void OnTxDateChanged(DateTime value) => AddAssetDialog.AddBuyDate = value;
     [ObservableProperty] private DateTime _txDate = DateTime.Today;
     [ObservableProperty] private string _txError = string.Empty;
 
@@ -117,7 +117,7 @@ public partial class PortfolioViewModel
     partial void OnTxCommissionDiscountChanged(string value)
     {
         TxCommissionDiscountError = ValidateCommissionDiscountOrEmpty(value);
-        UpdateBuyPreview();
+        AddAssetDialog.UpdateBuyPreview();
         UpdateSellTxPreview();
     }
 
@@ -278,7 +278,7 @@ public partial class PortfolioViewModel
     partial void OnTxFeeChanged(string value)
     {
         TxFeeError = ValidateNonNegativeDecimalOrEmpty(value);
-        UpdateBuyPreview();
+        AddAssetDialog.UpdateBuyPreview();
         UpdateSellTxPreview();
     }
 
@@ -521,8 +521,8 @@ public partial class PortfolioViewModel
             if (TxBuyIsTotalMode &&
                 ParseHelpers.TryParseDecimal(TxBuyTotalCost, out var t) && t > 0)
                 return t.ToString("N0");
-            if (ParseHelpers.TryParseDecimal(AddPrice, out var p) && p > 0 &&
-                ParseHelpers.TryParseInt(AddQuantity, out var q) && q > 0)
+            if (ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var p) && p > 0 &&
+                ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var q) && q > 0)
                 return (p * q).ToString("N0");
             return "0";
         }
@@ -534,9 +534,9 @@ public partial class PortfolioViewModel
         // 總額模式時，回算單價以維持持倉成本計算邏輯。
         if (TxBuyIsTotalMode &&
             ParseHelpers.TryParseDecimal(value, out var total) && total > 0 &&
-            ParseHelpers.TryParseInt(AddQuantity, out var qty) && qty > 0)
+            ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) && qty > 0)
         {
-            AddPrice = (total / qty).ToString("F4");
+            AddAssetDialog.AddPrice = (total / qty).ToString("F4");
         }
     }
 
@@ -640,24 +640,24 @@ public partial class PortfolioViewModel
         TxLoanStartDate = state.TxLoanStartDate;
         TxLoanRateError = string.Empty;
         TxLoanTermMonthsError = string.Empty;
-        // Buy-specific fields shared with AddAssetDialog
-        AddSymbol = string.Empty;
-        AddPrice = string.Empty;
-        AddQuantity = string.Empty;
-        AddBuyDate = state.AddBuyDate;
-        AddError = string.Empty;
-        AddName = string.Empty;
-        AddCost = string.Empty;
-        AddCryptoSymbol = string.Empty;
-        AddCryptoQty = string.Empty;
-        AddCryptoPrice = string.Empty;
+        // Buy-specific fields shared with AddAssetDialog sub-VM
+        AddAssetDialog.AddSymbol = string.Empty;
+        AddAssetDialog.AddPrice = string.Empty;
+        AddAssetDialog.AddQuantity = string.Empty;
+        AddAssetDialog.AddBuyDate = state.AddBuyDate;
+        AddAssetDialog.AddError = string.Empty;
+        AddAssetDialog.AddName = string.Empty;
+        AddAssetDialog.AddCost = string.Empty;
+        AddAssetDialog.AddCryptoSymbol = string.Empty;
+        AddAssetDialog.AddCryptoQty = string.Empty;
+        AddAssetDialog.AddCryptoPrice = string.Empty;
         SellCashAccount = null;
         SellPriceInput = string.Empty;
-        AddPriceError = string.Empty;
-        AddQuantityError = string.Empty;
-        AddCostError = string.Empty;
-        AddCryptoQtyError = string.Empty;
-        AddCryptoPriceError = string.Empty;
+        AddAssetDialog.AddPriceError = string.Empty;
+        AddAssetDialog.AddQuantityError = string.Empty;
+        AddAssetDialog.AddCostError = string.Empty;
+        AddAssetDialog.AddCryptoQtyError = string.Empty;
+        AddAssetDialog.AddCryptoPriceError = string.Empty;
         IsTxDialogOpen = true;
     }
 
@@ -702,14 +702,14 @@ public partial class PortfolioViewModel
         TxSellQuantityError = string.Empty;
         SellCashAccount = null;
         SellPriceInput = string.Empty;
-        AddSymbol = string.Empty;
-        AddPrice = string.Empty;
-        AddQuantity = string.Empty;
-        AddPriceError = string.Empty;
-        AddQuantityError = string.Empty;
-        AddCostError = string.Empty;
-        AddCryptoQtyError = string.Empty;
-        AddCryptoPriceError = string.Empty;
+        AddAssetDialog.AddSymbol = string.Empty;
+        AddAssetDialog.AddPrice = string.Empty;
+        AddAssetDialog.AddQuantity = string.Empty;
+        AddAssetDialog.AddPriceError = string.Empty;
+        AddAssetDialog.AddQuantityError = string.Empty;
+        AddAssetDialog.AddCostError = string.Empty;
+        AddAssetDialog.AddCryptoQtyError = string.Empty;
+        AddAssetDialog.AddCryptoPriceError = string.Empty;
         TxCommissionDiscount = "1.0";
         TxBuyAssetType = "stock";
         TxBuyPriceMode = "unit";
@@ -727,13 +727,13 @@ public partial class PortfolioViewModel
                 // Suppress the symbol-search suggestions popup during pre-fill — the popup
                 // exists for live search-as-you-type, not for showing what the user is
                 // already editing.
-                _suppressSuggestions = true;
-                AddSymbol = editState.AddSymbol;
-                _suppressSuggestions = false;
-                IsSuggestionsOpen = false;
-                AddPrice = editState.AddPrice;
-                AddQuantity = editState.AddQuantity;
-                AddBuyDate = editState.AddBuyDate ?? TxDate;
+                AddAssetDialog.SuppressSuggestions = true;
+                AddAssetDialog.AddSymbol = editState.AddSymbol;
+                AddAssetDialog.SuppressSuggestions = false;
+                AddAssetDialog.IsSuggestionsOpen = false;
+                AddAssetDialog.AddPrice = editState.AddPrice;
+                AddAssetDialog.AddQuantity = editState.AddQuantity;
+                AddAssetDialog.AddBuyDate = editState.AddBuyDate ?? TxDate;
                 TxCashAccount = editState.TxCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
                 // 還原使用者當初輸入的手續費來源：
@@ -1029,39 +1029,22 @@ public partial class PortfolioViewModel
     /// </summary>
     private async Task ConfirmBuyAsync()
     {
-        // Delegate to existing buy logic based on asset sub-type.
-        // The sub-methods close IsAddDialogOpen on success; we also close IsTxDialogOpen.
+        // Delegate to the AddAssetDialog sub-VM's buy logic based on asset sub-type.
+        // Sync AddAssetType so ConfirmAdd dispatches the same sub-type as TxBuyAssetType.
+        AddAssetDialog.AddAssetType = TxBuyAssetType;
+        AddAssetDialog.AddError = string.Empty;
 
-        _ = AddError;
-
-        switch (TxBuyAssetType)
-        {
-            case "stock":
-                await AddPosition();
-                break;
-            case "fund":
-                await AddNonStockAsync(AssetType.Fund);
-                break;
-            case "metal":
-                await AddNonStockAsync(AssetType.PreciousMetal);
-                break;
-            case "bond":
-                await AddNonStockAsync(AssetType.Bond);
-                break;
-            case "crypto":
-                await AddCryptoAsync();
-                break;
-        }
+        await AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         // Propagate error to TxError for display in the Tx dialog
-        if (!string.IsNullOrEmpty(AddError))
+        if (!string.IsNullOrEmpty(AddAssetDialog.AddError))
         {
-            TxError = AddError;
+            TxError = AddAssetDialog.AddError;
             return;
         }
 
         // Close Tx dialog (the sub-methods may have closed AddDialog already)
-        IsAddDialogOpen = false;
+        AddAssetDialog.IsAddDialogOpen = false;
         IsTxDialogOpen = false;
     }
 
