@@ -1016,7 +1016,7 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
                                         <!--  應繳日  -->
-                                        <DataGridTemplateColumn Width="82" SortMemberPath="DueDate">
+                                        <DataGridTemplateColumn Width="96" SortMemberPath="DueDate">
                                             <DataGridTemplateColumn.Header>
                                                 <TextBlock Text="{DynamicResource Portfolio.Loan.DueDate}" />
                                             </DataGridTemplateColumn.Header>

@@ -222,6 +222,12 @@ public partial class PortfolioViewModel
 
     [ObservableProperty] private string _txLoanLabel = string.Empty;
 
+    partial void OnTxLoanLabelChanged(string value)
+    {
+        if (TxTypeIsLoanRepay)
+            _ = AutoFillLoanRepayAsync(value);
+    }
+
     /// <summary>
     /// Suggestions for the editable loan-label ComboBox — derived from already-recorded loans.
     /// New labels can be typed freely; existing labels appear as dropdown options.
@@ -440,6 +446,10 @@ public partial class PortfolioViewModel
         OnPropertyChanged(nameof(TxBuyIsCrypto));
         TxError = string.Empty;
         UpdateSellTxPreview();
+        if (TxTypeIsLoanRepay)
+#pragma warning disable CS4014
+            AutoFillLoanRepayAsync(TxLoanLabel);
+#pragma warning restore CS4014
     }
 
     partial void OnTxBuyAssetTypeChanged(string _)
@@ -1365,6 +1375,24 @@ public partial class PortfolioViewModel
     /// 解析 <see cref="TxFee"/> 為正小數；空白/0 視為無手續費（回 0、err 為 null）。
     /// 負數或非數字回傳 null fee + err 訊息，呼叫端應 set TxError 並 return。
     /// </summary>
+    private async Task AutoFillLoanRepayAsync(string label)
+    {
+        if (string.IsNullOrWhiteSpace(label)) return;
+
+        var row = Liabilities.FirstOrDefault(r =>
+            string.Equals(r.Label, label.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (row is null || !row.IsLoan) return;
+
+        if (!row.IsScheduleLoaded)
+            await LoadLoanScheduleAsync(row);
+
+        var next = row.NextUnpaidEntry;
+        if (next is null) return;
+
+        TxPrincipal     = next.PrincipalAmount.ToString("F0");
+        TxInterestPaid  = next.InterestAmount > 0 ? next.InterestAmount.ToString("F0") : string.Empty;
+    }
+
     private decimal ParseOptionalFee(out string? err)
     {
         err = null;
