@@ -170,6 +170,32 @@ public sealed class AddAssetWorkflowService : IAddAssetWorkflowService
             preview.CostPerShare);
     }
 
+    public async Task<ManualAssetCreateResult> CreateManualAssetAsync(
+        ManualAssetCreateRequest request,
+        CancellationToken ct = default)
+    {
+        EnsurePersistenceDependencies();
+        ct.ThrowIfCancellationRequested();
+
+        var entry = new PortfolioEntry(
+            Guid.NewGuid(),
+            request.Symbol.Trim(),
+            request.Exchange.Trim(),
+            request.AssetType,
+            request.Name.Trim());
+        await _portfolioRepository!.AddAsync(entry).ConfigureAwait(false);
+
+        var snapshot = new PositionSnapshot(
+            entry.Id,
+            request.Quantity,
+            request.TotalCost,
+            request.UnitPrice,
+            0m,
+            request.AcquiredOn);
+
+        return new ManualAssetCreateResult(entry, snapshot);
+    }
+
     public string InferExchange(string symbol) =>
         Regex.IsMatch(symbol, @"^\d{5}[A-Z]$")
             ? "TPEX"

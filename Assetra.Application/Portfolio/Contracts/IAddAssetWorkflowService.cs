@@ -10,5 +10,6 @@ public interface IAddAssetWorkflowService
     BuyPreviewResult BuildBuyPreview(BuyPreviewRequest request);
     Task<PortfolioEntry> EnsureStockEntryAsync(EnsureStockEntryRequest request, CancellationToken ct = default);
     Task<StockBuyResult> ExecuteStockBuyAsync(StockBuyRequest request, CancellationToken ct = default);
+    Task<ManualAssetCreateResult> CreateManualAssetAsync(ManualAssetCreateRequest request, CancellationToken ct = default);
     string InferExchange(string symbol);
 }

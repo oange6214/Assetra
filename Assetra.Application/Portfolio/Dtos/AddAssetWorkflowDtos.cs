@@ -41,3 +41,17 @@ public sealed record StockBuyResult(
     decimal Commission,
     decimal? CommissionDiscountUsed,
     decimal CostPerShare);
+
+public sealed record ManualAssetCreateRequest(
+    string Symbol,
+    string Exchange,
+    string Name,
+    AssetType AssetType,
+    decimal Quantity,
+    decimal TotalCost,
+    decimal UnitPrice,
+    DateOnly AcquiredOn);
+
+public sealed record ManualAssetCreateResult(
+    PortfolioEntry Entry,
+    PositionSnapshot Snapshot);

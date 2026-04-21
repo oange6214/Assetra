@@ -548,12 +548,16 @@ public partial class PortfolioViewModel
         { AddError = "單價無效"; return; }
 
         var cryptoBuyDate = DateOnly.FromDateTime(DateTime.Today);
-        var entry = new PortfolioEntry(
-            Guid.NewGuid(), sym, string.Empty, AssetType.Crypto);
-        await _repo.AddAsync(entry);
-
-        var cryptoSnap = new PositionSnapshot(entry.Id, qty, price * qty, price, 0m, cryptoBuyDate);
-        var row = ToRow(entry, cryptoSnap);
+        var result = await _addAssetWorkflowService.CreateManualAssetAsync(new ManualAssetCreateRequest(
+            sym,
+            string.Empty,
+            sym,
+            AssetType.Crypto,
+            qty,
+            price * qty,
+            price,
+            cryptoBuyDate));
+        var row = ToRow(result.Entry, result.Snapshot);
         Positions.Add(row);
         HasNoPositions = false;
 
@@ -578,12 +582,16 @@ public partial class PortfolioViewModel
         { AddError = "持有成本無效"; return; }
 
         var nonStockDate = DateOnly.FromDateTime(DateTime.Today);
-        var entry = new PortfolioEntry(
-            Guid.NewGuid(), AddName.Trim(), string.Empty, assetType);
-        await _repo.AddAsync(entry);
-
-        var nonStockSnap = new PositionSnapshot(entry.Id, 1m, cost, cost, 0m, nonStockDate);
-        var row = ToRow(entry, nonStockSnap);
+        var result = await _addAssetWorkflowService.CreateManualAssetAsync(new ManualAssetCreateRequest(
+            AddName.Trim(),
+            string.Empty,
+            AddName.Trim(),
+            assetType,
+            1m,
+            cost,
+            cost,
+            nonStockDate));
+        var row = ToRow(result.Entry, result.Snapshot);
         Positions.Add(row);
         HasNoPositions = false;
         RebuildTotals();
