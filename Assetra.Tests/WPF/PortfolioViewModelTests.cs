@@ -84,11 +84,20 @@ public class PortfolioViewModelTests
         IReadOnlyList<PortfolioEntry>? entries = null,
         IPositionQueryService? positionQuery = null)
     {
+        var mutableEntries = (entries ?? [MakeEntry()]).ToList();
         var repo = new Mock<IPortfolioRepository>();
-        repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(entries ?? [MakeEntry()]);
+        repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(() => mutableEntries.ToList());
         repo.Setup(r => r.AddAsync(It.IsAny<PortfolioEntry>())).Returns(Task.CompletedTask);
         repo.Setup(r => r.UpdateAsync(It.IsAny<PortfolioEntry>())).Returns(Task.CompletedTask);
         repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
+        repo.Setup(r => r.ArchiveAsync(It.IsAny<Guid>()))
+            .Callback<Guid>(id =>
+            {
+                var idx = mutableEntries.FindIndex(e => e.Id == id);
+                if (idx >= 0)
+                    mutableEntries[idx] = mutableEntries[idx] with { IsActive = false };
+            })
+            .Returns(Task.CompletedTask);
 
         var search = new Mock<IStockSearchService>();
         var (snapshotSvc, snapshotRepo) = SnapshotStubs();
@@ -205,9 +214,16 @@ public class PortfolioViewModelTests
     [Fact]
     public async Task AddPosition_UnknownSymbol_InfersExchangeAndAdds()
     {
+        var entryId1 = Guid.NewGuid();
+        var created1 = new List<PortfolioEntry>();
         var repo = new Mock<IPortfolioRepository>();
-        repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync([]);
-        repo.Setup(r => r.AddAsync(It.IsAny<PortfolioEntry>())).Returns(Task.CompletedTask);
+        repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(() => created1.ToList());
+        repo.Setup(r => r.FindOrCreatePortfolioEntryAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<AssetType>(), It.IsAny<CancellationToken>()))
+            .Callback((string sym, string exch, string? n, AssetType at, CancellationToken _) =>
+                created1.Add(new PortfolioEntry(entryId1, sym, exch, at, n ?? string.Empty)))
+            .ReturnsAsync(entryId1);
+        repo.Setup(r => r.UnarchiveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
         var search = new Mock<IStockSearchService>();
         search.Setup(s => s.GetExchange("XXXX")).Returns((string?)null);
         var (snapshotSvc1, snapshotRepo1) = SnapshotStubs();
@@ -230,17 +246,40 @@ public class PortfolioViewModelTests
     [Fact]
     public async Task AddPosition_ValidInput_AddsToPositions()
     {
+        var entryId2 = Guid.NewGuid();
+        var created2 = new List<PortfolioEntry>();
         var repo = new Mock<IPortfolioRepository>();
-        repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync([]);
-        repo.Setup(r => r.AddAsync(It.IsAny<PortfolioEntry>())).Returns(Task.CompletedTask);
+        repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(() => created2.ToList());
+        repo.Setup(r => r.FindOrCreatePortfolioEntryAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<AssetType>(), It.IsAny<CancellationToken>()))
+            .Callback((string sym, string exch, string? n, AssetType at, CancellationToken _) =>
+                created2.Add(new PortfolioEntry(entryId2, sym, exch, at, n ?? string.Empty)))
+            .ReturnsAsync(entryId2);
+        repo.Setup(r => r.UnarchiveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
         var search = new Mock<IStockSearchService>();
         search.Setup(s => s.GetExchange("2330")).Returns("TWSE");
         var (snapshotSvc2, snapshotRepo2) = SnapshotStubs();
         var (logRepo2, backfill2) = BackfillStubs(snapshotRepo2);
 
+        // BuyPrice = cost per share including buy commission (discount = 1.0, no discount):
+        //   gross = 910 × 1000 = 910,000; commission = floor(910000 × 0.001425 × 1.0) = floor(1296.75) = 1296
+        //   costPerShare = (910000 + 1296) / 1000 = 911.296
+        var posQuery = new Mock<IPositionQueryService>();
+        posQuery.Setup(s => s.GetAllPositionSnapshotsAsync())
+            .ReturnsAsync(() => new Dictionary<Guid, PositionSnapshot>
+            {
+                [entryId2] = new PositionSnapshot(entryId2, 1000m, 911_296m, 911.296m, 0m,
+                    DateOnly.FromDateTime(DateTime.Today))
+            });
+        posQuery.Setup(s => s.ComputeRealizedPnlAsync(
+                It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<decimal>(),
+                It.IsAny<decimal>(), It.IsAny<decimal>()))
+            .ReturnsAsync(0m);
+
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(repo.Object, snapshotRepo2.Object, logRepo2.Object),
-            new PortfolioServices(SilentStockService().Object, search.Object, snapshotSvc2, backfill2),
+            new PortfolioServices(SilentStockService().Object, search.Object, snapshotSvc2, backfill2,
+                PositionQuery: posQuery.Object),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         vm.AddSymbol = "2330";
         vm.AddPrice = "910";    // transaction price per share (from broker)
@@ -250,9 +289,6 @@ public class PortfolioViewModelTests
 
         Assert.Single(vm.Positions);
         Assert.Equal("2330", vm.Positions[0].Symbol);
-        // BuyPrice = cost per share including buy commission (discount = 1.0, no discount):
-        //   gross = 910 × 1000 = 910,000; commission = floor(910000 × 0.001425 × 1.0) = floor(1296.75) = 1296
-        //   costPerShare = (910000 + 1296) / 1000 = 911.296
         Assert.Equal(911.296m, vm.Positions[0].BuyPrice);
         Assert.Equal(1000, vm.Positions[0].Quantity);
         Assert.False(vm.HasNoPositions);
@@ -267,7 +303,19 @@ public class PortfolioViewModelTests
     public async Task ConfirmSell_ViaDialog_RemovesFromCollection()
     {
         var entry = MakeEntry("2330");
-        var (vm, _) = CreateVm([entry]);
+        var posQuery = new Mock<IPositionQueryService>();
+        posQuery.Setup(s => s.GetAllPositionSnapshotsAsync())
+            .ReturnsAsync(new Dictionary<Guid, PositionSnapshot>
+            {
+                [entry.Id] = new PositionSnapshot(entry.Id, 1000m, 100_000m, 100m, 0m,
+                    DateOnly.FromDateTime(DateTime.Today))
+            });
+        posQuery.Setup(s => s.ComputeRealizedPnlAsync(
+                It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<decimal>(),
+                It.IsAny<decimal>(), It.IsAny<decimal>()))
+            .ReturnsAsync(0m);
+
+        var (vm, _) = CreateVm([entry], posQuery.Object);
         await vm.LoadAsync();
         Assert.Single(vm.Positions);
 

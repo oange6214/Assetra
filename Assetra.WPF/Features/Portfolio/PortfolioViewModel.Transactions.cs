@@ -1346,7 +1346,12 @@ public partial class PortfolioViewModel
 
         var cashAccId = await ResolveCashAccountIdAsync();
         if (cashAccId is null)
-        { TxError = "請選擇帳戶"; return; }
+        {
+            TxError = CashAccounts.Count == 0
+                ? "尚無帳戶，請先建立帳戶"
+                : "請選擇帳戶";
+            return;
+        }
         var accountName = TxCashAccount?.Name ?? TxCashAccountName.Trim();
 
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();

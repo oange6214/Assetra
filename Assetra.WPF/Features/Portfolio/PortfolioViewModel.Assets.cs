@@ -84,7 +84,7 @@ public partial class PortfolioViewModel
             ClosePriceHint = string.Empty;
             return;
         }
-        var results = _search.Search(value.Trim());
+        var results = _search.Search(value.Trim()) ?? [];
         SymbolSuggestions = results.Take(8).ToList();
         IsSuggestionsOpen = SymbolSuggestions.Count > 0;
         TriggerClosePriceFetch();
@@ -307,6 +307,7 @@ public partial class PortfolioViewModel
         OpenTxDialog();
         TxType = "sell";
         TxSellPosition = row;
+        TxSellQuantity = ((int)row.Quantity).ToString();
     }
 
     /// <summary>側面板「買入」快速動作 — 打開 Tx 對話框，預填當前股票代號。</summary>
