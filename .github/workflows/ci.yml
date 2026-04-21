@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # MinVer needs full git history for semver
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -27,4 +27,4 @@ jobs:
         run: dotnet build Assetra.slnx --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test Assetra.Tests/Assetra.Tests.csproj --no-build --configuration Release --verbosity normal
+        run: dotnet test Assetra.Tests/Assetra.Tests.csproj --no-restore --configuration Release --verbosity normal
