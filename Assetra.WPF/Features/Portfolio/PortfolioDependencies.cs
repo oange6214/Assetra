@@ -23,8 +23,6 @@ public sealed record PortfolioRepositories(
 public sealed record PortfolioServices(
     IStockService Stock,
     IStockSearchService Search,
-    Assetra.Infrastructure.Persistence.PortfolioSnapshotService? Snapshot = null,
-    Assetra.Infrastructure.Persistence.PortfolioBackfillService? Backfill = null,
     IPortfolioHistoryMaintenanceService? HistoryMaintenance = null,
     IPortfolioHistoryQueryService? HistoryQuery = null,
     IPortfolioLoadService? Load = null,

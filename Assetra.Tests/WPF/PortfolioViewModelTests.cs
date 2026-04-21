@@ -6,6 +6,7 @@ using Assetra.Core.Models;
 using Assetra.Infrastructure;
 using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Portfolio;
+using Assetra.WPF.Infrastructure;
 using Xunit;
 
 namespace Assetra.Tests.WPF;
@@ -105,7 +106,8 @@ public class PortfolioViewModelTests
 
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(repo.Object, snapshotRepo.Object, logRepo.Object),
-            new PortfolioServices(SilentStockService().Object, search.Object, snapshotSvc, backfill,
+            new PortfolioServices(SilentStockService().Object, search.Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
                 PositionQuery: positionQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         return (vm, repo);
@@ -231,7 +233,8 @@ public class PortfolioViewModelTests
 
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(repo.Object, snapshotRepo1.Object, logRepo1.Object),
-            new PortfolioServices(SilentStockService().Object, search.Object, snapshotSvc1, backfill1),
+            new PortfolioServices(SilentStockService().Object, search.Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc1, backfill1)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         vm.AddSymbol = "XXXX";
         vm.AddPrice = "910";
@@ -278,7 +281,8 @@ public class PortfolioViewModelTests
 
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(repo.Object, snapshotRepo2.Object, logRepo2.Object),
-            new PortfolioServices(SilentStockService().Object, search.Object, snapshotSvc2, backfill2,
+            new PortfolioServices(SilentStockService().Object, search.Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc2, backfill2),
                 PositionQuery: posQuery.Object),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         vm.AddSymbol = "2330";
@@ -470,7 +474,10 @@ public class PortfolioViewModelTests
 
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
-            new PortfolioServices(SilentStockService().Object, search.Object, snapshotSvc, backfill, Transaction: txService, BalanceQuery: balanceQuery),
+            new PortfolioServices(SilentStockService().Object, search.Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                Transaction: txService,
+                BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
         return (vm, assetRepo, tradeRepo, loanLabel);
@@ -648,7 +655,10 @@ public class PortfolioViewModelTests
 
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
-            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object, snapshotSvc, backfill, Transaction: txService, BalanceQuery: balanceQuery),
+            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                Transaction: txService,
+                BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
 
@@ -713,7 +723,10 @@ public class PortfolioViewModelTests
 
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
-            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object, snapshotSvc, backfill, Transaction: txService, BalanceQuery: balanceQuery),
+            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                Transaction: txService,
+                BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
         return (vm, assetRepo, tradeRepo);
@@ -770,7 +783,8 @@ public class PortfolioViewModelTests
         var (logRepo, backfill) = BackfillStubs(snapshotRepo);
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
-            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object, snapshotSvc, backfill),
+            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
 
@@ -798,7 +812,10 @@ public class PortfolioViewModelTests
         var balanceQuery = new BalanceQueryService(tradeRepo);
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
-            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object, snapshotSvc, backfill, Transaction: txService, BalanceQuery: balanceQuery),
+            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                Transaction: txService,
+                BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
 
@@ -1543,7 +1560,8 @@ public class PortfolioViewModelTests
         var (logRepo, backfill) = BackfillStubs(snapshotRepo);
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object),
-            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object, snapshotSvc, backfill),
+            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
 
         var fakeAcc = new CashAccountRowViewModel(
@@ -1636,7 +1654,8 @@ public class PortfolioViewModelTests
         var (logRepo, backfill) = BackfillStubs(snapshotRepo);
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object),
-            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object, snapshotSvc, backfill),
+            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
 
         Assert.True(vm.TxBuyIsUnitMode);
@@ -1655,7 +1674,8 @@ public class PortfolioViewModelTests
         var (logRepo, backfill) = BackfillStubs(snapshotRepo);
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object),
-            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object, snapshotSvc, backfill),
+            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
 
         Assert.True(vm.TxDivIsPerShareMode);
@@ -1845,7 +1865,8 @@ public class PortfolioViewModelTests
         var (logRepo, backfill) = BackfillStubs(snapshotRepo);
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object),
-            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object, snapshotSvc, backfill),
+            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
 
         Assert.Equal("—", vm.TxTransferImpliedRateDisplay);
@@ -1885,7 +1906,10 @@ public class PortfolioViewModelTests
         var balanceQuery = new BalanceQueryService(tradeRepo);
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
-            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object, snapshotSvc, backfill, Transaction: txService, BalanceQuery: balanceQuery),
+            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                Transaction: txService,
+                BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
         return (vm, assetRepo, tradeRepo, loanLabel);

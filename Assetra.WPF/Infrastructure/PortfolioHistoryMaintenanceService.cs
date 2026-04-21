@@ -3,7 +3,7 @@ using Assetra.Infrastructure.Persistence;
 
 namespace Assetra.WPF.Infrastructure;
 
-internal sealed class PortfolioHistoryMaintenanceService : IPortfolioHistoryMaintenanceService
+public sealed class PortfolioHistoryMaintenanceService : IPortfolioHistoryMaintenanceService
 {
     private readonly PortfolioSnapshotService _snapshotService;
     private readonly PortfolioBackfillService _backfillService;

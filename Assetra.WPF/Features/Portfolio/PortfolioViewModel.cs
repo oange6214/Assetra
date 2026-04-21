@@ -487,9 +487,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 : new NullLoanMutationWorkflowService(_transactionWorkflowService));
         _summaryService = services.Summary ?? new PortfolioSummaryService();
         _historyMaintenanceService = services.HistoryMaintenance
-            ?? (services.Snapshot is not null && services.Backfill is not null
-                ? new DirectPortfolioHistoryMaintenanceService(services.Snapshot, services.Backfill)
-                : new NullPortfolioHistoryMaintenanceService());
+            ?? new NullPortfolioHistoryMaintenanceService();
         _localization = ui.Localization;
         History = new PortfolioHistoryViewModel(
             services.HistoryQuery ?? new PortfolioHistoryQueryService(repositories.Snapshot),
@@ -1256,32 +1254,5 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             => Task.FromResult(_transactionWorkflowService.CreateLoanPlan(request));
     }
 
-    private sealed class DirectPortfolioHistoryMaintenanceService : IPortfolioHistoryMaintenanceService
-    {
-        private readonly Assetra.Infrastructure.Persistence.PortfolioSnapshotService _snapshotService;
-        private readonly Assetra.Infrastructure.Persistence.PortfolioBackfillService _backfillService;
-
-        public DirectPortfolioHistoryMaintenanceService(
-            Assetra.Infrastructure.Persistence.PortfolioSnapshotService snapshotService,
-            Assetra.Infrastructure.Persistence.PortfolioBackfillService backfillService)
-        {
-            _snapshotService = snapshotService;
-            _backfillService = backfillService;
-        }
-
-        public Task<bool> TryRecordSnapshotAsync(
-            decimal totalCost,
-            decimal marketValue,
-            decimal pnl,
-            int positionCount,
-            CancellationToken ct = default)
-        {
-            ct.ThrowIfCancellationRequested();
-            return _snapshotService.TryRecordAsync(totalCost, marketValue, pnl, positionCount);
-        }
-
-        public Task<int> BackfillAsync(CancellationToken ct = default) =>
-            _backfillService.BackfillAsync(ct);
-    }
 }
 
