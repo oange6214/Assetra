@@ -1257,26 +1257,18 @@ public partial class PortfolioViewModel
                       : TxDivPosition.Name;
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
-
-        var trade = new Trade(
-            Id: Guid.NewGuid(),
-            Symbol: TxDivPosition.Symbol,
-            Exchange: TxDivPosition.Exchange,
-            Name: divName,
-            Type: TradeType.CashDividend,
-            TradeDate: tradeDate,
-            Price: perShare,
-            Quantity: (int)TxDivPosition.Quantity,
-            RealizedPnl: null,
-            RealizedPnlPct: null,
-            CashAmount: total,
-            CashAccountId: cashAccId,
-            Note: null);
-
-        await _txService.RecordAsync(trade);
-
-        await WriteFeeTradeIfAnyAsync(fee, cashAccId, tradeDate,
-            $"{divName} 股息手續費", null, trade.Id);
+        var plan = _transactionWorkflowService.CreateCashDividendPlan(new CashDividendTransactionRequest(
+            TxDivPosition.Symbol,
+            TxDivPosition.Exchange,
+            divName,
+            perShare,
+            (int)TxDivPosition.Quantity,
+            total,
+            tradeDate,
+            cashAccId,
+            fee));
+        foreach (var trade in plan.Trades)
+            await _txService.RecordAsync(trade);
 
         await ReloadAccountBalancesAsync();
         CloseTxDialog();
@@ -1293,24 +1285,15 @@ public partial class PortfolioViewModel
         var divName = string.IsNullOrEmpty(TxStockDivPosition.Name)
                       ? TxStockDivPosition.Symbol
                       : TxStockDivPosition.Name;
-
-        var trade = new Trade(
-            Id: Guid.NewGuid(),
-            Symbol: TxStockDivPosition.Symbol,
-            Exchange: TxStockDivPosition.Exchange,
-            Name: divName,
-            Type: TradeType.StockDividend,
-            TradeDate: DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
-            Price: 0,
-            Quantity: newShares,
-            RealizedPnl: null,
-            RealizedPnlPct: null,
-            CashAmount: null,
-            CashAccountId: null,
-            Note: null,
-            PortfolioEntryId: TxStockDivPosition.Id);  // link to the lot that received the shares
-
-        await _tradeRepo.AddAsync(trade);
+        var plan = _transactionWorkflowService.CreateStockDividendPlan(new StockDividendTransactionRequest(
+            TxStockDivPosition.Symbol,
+            TxStockDivPosition.Exchange,
+            divName,
+            newShares,
+            DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
+            TxStockDivPosition.Id));
+        foreach (var trade in plan.Trades)
+            await _txService.RecordAsync(trade);
 
         // 更新持倉股數（數量由 trade log 投影，只更新 display row）
         var row = Positions.FirstOrDefault(p => p.AllEntryIds.Contains(TxStockDivPosition.Id));

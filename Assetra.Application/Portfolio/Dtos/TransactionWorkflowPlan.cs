@@ -14,6 +14,25 @@ public sealed record IncomeTransactionRequest(
     string Note,
     decimal Fee);
 
+public sealed record CashDividendTransactionRequest(
+    string Symbol,
+    string Exchange,
+    string Name,
+    decimal PerShare,
+    int Quantity,
+    decimal TotalAmount,
+    DateTime TradeDate,
+    Guid? CashAccountId,
+    decimal Fee);
+
+public sealed record StockDividendTransactionRequest(
+    string Symbol,
+    string Exchange,
+    string Name,
+    int NewShares,
+    DateTime TradeDate,
+    Guid PortfolioEntryId);
+
 public sealed record CashFlowTransactionRequest(
     TradeType Type,
     decimal Amount,

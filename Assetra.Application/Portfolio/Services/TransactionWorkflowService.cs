@@ -7,6 +7,49 @@ namespace Assetra.AppLayer.Portfolio.Services;
 
 public sealed class TransactionWorkflowService : ITransactionWorkflowService
 {
+    public TransactionWorkflowPlan CreateCashDividendPlan(CashDividendTransactionRequest request)
+    {
+        var mainTrade = new Trade(
+            Id: Guid.NewGuid(),
+            Symbol: request.Symbol,
+            Exchange: request.Exchange,
+            Name: request.Name,
+            Type: TradeType.CashDividend,
+            TradeDate: request.TradeDate,
+            Price: request.PerShare,
+            Quantity: request.Quantity,
+            RealizedPnl: null,
+            RealizedPnlPct: null,
+            CashAmount: request.TotalAmount,
+            CashAccountId: request.CashAccountId,
+            Note: null);
+
+        return new TransactionWorkflowPlan(
+            BuildTrades(mainTrade, request.Fee, request.CashAccountId, request.TradeDate,
+                $"{request.Name} 股息手續費", null));
+    }
+
+    public TransactionWorkflowPlan CreateStockDividendPlan(StockDividendTransactionRequest request)
+    {
+        var trade = new Trade(
+            Id: Guid.NewGuid(),
+            Symbol: request.Symbol,
+            Exchange: request.Exchange,
+            Name: request.Name,
+            Type: TradeType.StockDividend,
+            TradeDate: request.TradeDate,
+            Price: 0,
+            Quantity: request.NewShares,
+            RealizedPnl: null,
+            RealizedPnlPct: null,
+            CashAmount: null,
+            CashAccountId: null,
+            Note: null,
+            PortfolioEntryId: request.PortfolioEntryId);
+
+        return new TransactionWorkflowPlan([trade]);
+    }
+
     public TransactionWorkflowPlan CreateIncomePlan(IncomeTransactionRequest request)
     {
         var mainTrade = new Trade(
