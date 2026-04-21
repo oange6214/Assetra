@@ -4,8 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:subvm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
+    d:DataContext="{d:DesignInstance Type={x:Type subvm:AccountDialogViewModel},
                                      IsDesignTimeCreatable=False}"
     Visibility="{Binding IsEditAssetDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}"
     mc:Ignorable="d">

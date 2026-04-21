@@ -24,6 +24,12 @@ namespace Assetra.WPF.Features.Portfolio;
 
 public enum PortfolioTab { Dashboard, Positions, AllocationAnalysis, Accounts, Liability, Trades }
 
+/// <summary>Currency option for the edit-asset currency picker.</summary>
+public sealed record CurrencyOption(string Code, string Display)
+{
+    public override string ToString() => Display;
+}
+
 public partial class PortfolioViewModel : ObservableObject, IDisposable
 {
     private readonly IPortfolioRepository _repo;
@@ -425,6 +431,20 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     /// </summary>
     public SubViewModels.TransactionDialogViewModel Transaction { get; }
 
+    /// <summary>
+    /// Sub-VM that owns the edit-asset dialog state and account-management commands
+    /// (archive, delete, default-cash toggle, show-archived toggle).
+    /// XAML bindings chain through <c>Account.PropertyName</c>.
+    /// </summary>
+    public SubViewModels.AccountDialogViewModel Account { get; }
+
+    /// <summary>
+    /// Sub-VM that owns the loan-schedule confirm-payment command and
+    /// amortization-schedule loading.
+    /// XAML bindings chain through <c>Loan.PropertyName</c>.
+    /// </summary>
+    public SubViewModels.LoanDialogViewModel Loan { get; }
+
     // Dividend calendar
     [ObservableProperty] private int _divCalendarYear = DateTime.Today.Year;
 
@@ -559,7 +579,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 AddAssetDialog: AddAssetDialog,
                 SellPanel: SellPanel,
                 GetDefaultCashAccount: GetDefaultCashAccount,
-                LoadLoanScheduleAsync: LoadLoanScheduleAsync,
+                LoadLoanScheduleAsync: row => Loan?.LoadLoanScheduleAsync(row) ?? Task.CompletedTask,
                 LoadLiabilitiesAsync: LoadLiabilitiesAsync,
                 LoadPositionsAsync: LoadPositionsAsync,
                 LoadTradesAsync: LoadTradesAsync,
@@ -568,6 +588,36 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 Localize: L));
         Transaction.TransactionCompleted += OnTransactionCompleted;
         Transaction.TradeDeleted += OnTradeDeleted;
+
+        // Build the Account sub-VM with delegates that give it access to parent-owned
+        // state (CashAccounts, settings, confirm dialog, totals rebuild).
+        Account = services.Account ?? new SubViewModels.AccountDialogViewModel(
+            new SubViewModels.AccountDialogDependencies(
+                AccountUpsert: _accountUpsertWorkflowService,
+                AccountMutation: _accountMutationWorkflowService,
+                PositionMetadata: _positionMetadataWorkflowService,
+                AssetRepo: _assetRepo,
+                Settings: _settingsService,
+                Snackbar: _snackbar,
+                CashAccounts: CashAccounts,
+                LoadCashAccountsAsync: LoadCashAccountsAsync,
+                ApplyDefaultCashAccountAsync: ApplyDefaultCashAccountAsync,
+                AskConfirm: AskConfirm,
+                RebuildTotals: RebuildTotals,
+                Localize: L));
+        Account.AccountChanged += OnAccountChanged;
+
+        // Build the Loan sub-VM with delegates into parent state.
+        Loan = services.Loan ?? new SubViewModels.LoanDialogViewModel(
+            new SubViewModels.LoanDialogDependencies(
+                LoanPayment: _loanPaymentWorkflowService,
+                LoanScheduleRepo: _loanScheduleRepo,
+                GetSelectedLiabilityRow: () => SelectedLiabilityRow,
+                GetTxCashAccountId: () => Transaction.TxCashAccount?.Id,
+                LoadTradesAsync: LoadTradesAsync,
+                ReloadAccountBalancesAsync: ReloadAccountBalancesAsync,
+                RebuildTotals: RebuildTotals));
+        Loan.LoanChanged += OnLoanChanged;
 
         // Wire the AddAssetDialog and SellPanel delegates that reference Transaction properties
         // now that Transaction is constructed.
@@ -806,6 +856,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private void OnTradeDeleted(object? sender, EventArgs e)
         => _ = ReloadAfterTradeDeletedAsync();
 
+    private void OnAccountChanged(object? sender, EventArgs e)
+        => _ = ReloadAfterAccountChangedAsync();
+
+    private void OnLoanChanged(object? sender, EventArgs e)
+        => _ = ReloadAfterLoanChangedAsync();
+
     /// <summary>
     /// Called by <see cref="SellPanelViewModel.SellCompleted"/> to refresh all
     /// position, trade, balance, and totals state after a successful sell.
@@ -837,6 +893,27 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private async Task ReloadAfterTradeDeletedAsync()
     {
         await LoadPositionsAsync();
+        await LoadTradesAsync();
+        await ReloadAccountBalancesAsync();
+        RebuildTotals();
+    }
+
+    /// <summary>
+    /// Called by <see cref="SubViewModels.AccountDialogViewModel.AccountChanged"/> to
+    /// refresh cash accounts, balances, and totals after a successful account mutation.
+    /// </summary>
+    private async Task ReloadAfterAccountChangedAsync()
+    {
+        await LoadCashAccountsAsync();
+        RebuildTotals();
+    }
+
+    /// <summary>
+    /// Called by <see cref="SubViewModels.LoanDialogViewModel.LoanChanged"/> to refresh
+    /// trades, account balances, and totals after a successful loan payment.
+    /// </summary>
+    private async Task ReloadAfterLoanChangedAsync()
+    {
         await LoadTradesAsync();
         await ReloadAccountBalancesAsync();
         RebuildTotals();
@@ -1259,6 +1336,38 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
+    /// Writes <paramref name="id"/> to <see cref="SubViewModels.AccountDialogViewModel.DefaultCashAccountId"/>
+    /// and syncs every cash-account row's <c>IsDefault</c> badge.
+    /// Also persists to <see cref="IAppSettingsService"/>.
+    /// Exposed as a delegate passed into <see cref="SubViewModels.AccountDialogViewModel"/>
+    /// so it can call back into the parent's owned state without a circular reference.
+    /// </summary>
+    private async Task ApplyDefaultCashAccountAsync(Guid? id)
+    {
+        Account.DefaultCashAccountId = id;
+        foreach (var r in CashAccounts)
+            r.IsDefault = id.HasValue && r.Id == id.Value;
+
+        if (_settingsService is null)
+            return;
+        try
+        {
+            var updated = _settingsService.Current with { DefaultCashAccountId = id };
+            await _settingsService.SaveAsync(updated);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "[Portfolio] Failed to persist DefaultCashAccountId");
+        }
+    }
+
+    /// <summary>取得預設現金帳戶對應的 Row；無設定或帳戶已刪除時回傳 null。</summary>
+    public CashAccountRowViewModel? GetDefaultCashAccount() =>
+        Account.DefaultCashAccountId is { } id
+            ? CashAccounts.FirstOrDefault(r => r.Id == id)
+            : null;
+
+    /// <summary>
     /// Convenience wrapper: looks up a localised string via <see cref="_localization"/> when
     /// available, otherwise falls back to <paramref name="fallback"/>.
     /// </summary>
@@ -1267,6 +1376,351 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     private static TradeDeletionRequest ToTradeDeletionRequest(TradeRowViewModel row) =>
         new(row.Id, row.Type, row.Symbol, row.Quantity, row.PortfolioEntryId);
+
+    // ── Sell-trigger commands ─────────────────────────────────────────────────────────
+
+    [RelayCommand]
+    private void BeginSell(PortfolioRowViewModel row)
+    {
+        // Open Tx dialog in Sell mode with this position pre-selected
+        Transaction.OpenTxDialog();
+        Transaction.TxType = "sell";
+        Transaction.TxSellPosition = row;
+        Transaction.TxSellQuantity = ((int)row.Quantity).ToString();
+    }
+
+    /// <summary>側面板「買入」快速動作 — 打開 Tx 對話框，預填當前股票代號。</summary>
+    [RelayCommand]
+    private void BeginBuyForSelectedPosition()
+    {
+        if (SelectedPositionRow is null)
+            return;
+        var row = SelectedPositionRow;
+        Transaction.OpenTxDialog();
+        Transaction.TxType = "buy";
+        Transaction.TxBuyAssetType = "stock";
+        AddAssetDialog.AddSymbol = row.Symbol;
+        AddAssetDialog.AddPrice = string.Empty;
+        AddAssetDialog.AddQuantity = string.Empty;
+    }
+
+    /// <summary>側面板「配息入帳」快速動作 — 打開 Tx 對話框並預選此持倉。</summary>
+    [RelayCommand]
+    private void BeginDividendForSelectedPosition()
+    {
+        if (SelectedPositionRow is null)
+            return;
+        Transaction.OpenTxDialog();
+        Transaction.TxType = "cashDiv";
+        Transaction.TxDivPosition = SelectedPositionRow;
+    }
+
+    /// <summary>側面板「賣出」快速動作 — 呼叫既有 BeginSell，但以 SelectedPositionRow 為目標。</summary>
+    [RelayCommand]
+    private void BeginSellForSelectedPosition()
+    {
+        if (SelectedPositionRow is null)
+            return;
+        BeginSell(SelectedPositionRow);
+    }
+
+    // 全域「新增交易」按鈕 — 一律開啟交易對話框
+    [RelayCommand]
+    private void GlobalAdd() => Transaction.OpenTxDialog();
+
+    /// <summary>開啟新增現金帳戶對話框（由現金 tab 的「新增帳戶」按鈕呼叫）。</summary>
+    [RelayCommand]
+    private void OpenAddAccountDialog()
+    {
+        SelectedTab = PortfolioTab.Accounts;
+        AddAssetDialog.AddAssetType = "cash";
+        AddAssetDialog.AddError = string.Empty;
+        AddAssetDialog.AddAccountName = string.Empty;
+        AddAssetDialog.IsAddDialogOpen = true;
+    }
+
+    // ── Supported currencies (static list — referenced from XAML as PortfolioViewModel.SupportedCurrencies) ─
+
+    public static IReadOnlyList<CurrencyOption> SupportedCurrencies =>
+        SubViewModels.AccountDialogViewModel.SupportedCurrencies;
+
+    // ── Cash account loading ──────────────────────────────────────────────────────────
+
+    private async Task LoadCashAccountsAsync()
+    {
+        var loaded = await _loadService.LoadAsync();
+        ApplyCashAccounts(loaded);
+    }
+
+    private void ApplyCashAccounts(PortfolioLoadResult loaded)
+    {
+        var accounts = loaded.CashAccounts;
+        var balances = loaded.CashBalances;
+        var visibleAccounts = accounts
+            .Where(a => Account.ShowArchivedAccounts || a.IsActive)
+            .ToList();
+        var newRows = visibleAccounts.ToDictionary(
+            a => a.Id,
+            a => new CashAccountRowViewModel(a, balances.TryGetValue(a.Id, out var v) ? v : 0m));
+        var existingIndex = CashAccounts.ToDictionary(r => r.Id);
+
+        for (var i = CashAccounts.Count - 1; i >= 0; i--)
+        {
+            if (!newRows.ContainsKey(CashAccounts[i].Id))
+                CashAccounts.RemoveAt(i);
+        }
+
+        foreach (var account in visibleAccounts)
+        {
+            var bal = balances.TryGetValue(account.Id, out var v) ? v : 0m;
+            if (existingIndex.TryGetValue(account.Id, out var existing))
+            {
+                existing.Name = account.Name;
+                existing.Currency = account.Currency;
+                existing.Balance = bal;
+                existing.IsActive = account.IsActive;
+            }
+            else
+            {
+                CashAccounts.Add(newRows[account.Id]);
+            }
+        }
+        HasNoCashAccounts = CashAccounts.Count == 0;
+
+        var savedId = _settingsService?.Current?.DefaultCashAccountId;
+        if (savedId.HasValue && CashAccounts.All(r => r.Id != savedId.Value))
+            savedId = null;
+        Account.DefaultCashAccountId = savedId;
+        foreach (var r in CashAccounts)
+            r.IsDefault = savedId.HasValue && r.Id == savedId.Value;
+
+        // CashAccountSuggestions now lives on the Transaction sub-VM; update it here
+        // since ApplyCashAccounts is the only caller with the full account list.
+        if (Transaction is not null)
+        {
+            Transaction.CashAccountSuggestions.Clear();
+            foreach (var a in accounts.Where(a => a.IsActive).OrderBy(a => a.Name))
+                Transaction.CashAccountSuggestions.Add(a.Name);
+        }
+    }
+
+    // ── Liability loading ─────────────────────────────────────────────────────────────
+
+    private async Task LoadLiabilitiesAsync()
+    {
+        var loaded = await _loadService.LoadAsync();
+        ApplyLiabilities(loaded);
+    }
+
+    private void ApplyLiabilities(PortfolioLoadResult loaded)
+    {
+        var snapshots = loaded.LiabilitySnapshots;
+        var loanAssets = loaded.LoanAssets;
+
+        Liabilities.Clear();
+        foreach (var (label, snap) in snapshots.OrderBy(kv => kv.Key))
+        {
+            loanAssets.TryGetValue(label, out var asset);
+            Liabilities.Add(new LiabilityRowViewModel(label, snap, asset));
+        }
+
+        foreach (var (name, asset) in loanAssets)
+        {
+            if (!snapshots.ContainsKey(name))
+                Liabilities.Add(new LiabilityRowViewModel(name, LiabilitySnapshot.Empty, asset));
+        }
+
+        HasNoLiabilities = Liabilities.Count == 0;
+        Transaction?.NotifyLoanLabelSuggestionsChanged();
+    }
+
+    // ── Account detail side-panel ─────────────────────────────────────────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedCashRow))]
+    [NotifyPropertyChangedFor(nameof(SelectedCashTrades))]
+    [NotifyPropertyChangedFor(nameof(SelectedCashTotalDeposits))]
+    [NotifyPropertyChangedFor(nameof(SelectedCashTotalWithdrawals))]
+    private CashAccountRowViewModel? _selectedCashRow;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedLiabilityRow))]
+    [NotifyPropertyChangedFor(nameof(SelectedLiabilityTrades))]
+    [NotifyPropertyChangedFor(nameof(SelectedLiabilityTotalBorrows))]
+    [NotifyPropertyChangedFor(nameof(SelectedLiabilityTotalRepays))]
+    private LiabilityRowViewModel? _selectedLiabilityRow;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedPositionRow))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionTrades))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionDividendIncome))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionRealizedTotal))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionTradeAvgPrice))]
+    [NotifyPropertyChangedFor(nameof(HasSelectedPositionRealized))]
+    private PortfolioRowViewModel? _selectedPositionRow;
+
+    /// <summary>
+    /// 是否有任何已實現損益資料（賣出價差或股息收入）。
+    /// </summary>
+    public bool HasSelectedPositionRealized =>
+        SelectedPositionRealizedTotal != 0m || SelectedPositionDividendIncome > 0m;
+
+    public bool HasSelectedCashRow => SelectedCashRow is not null;
+    public bool HasSelectedLiabilityRow => SelectedLiabilityRow is not null;
+    public bool HasSelectedPositionRow => SelectedPositionRow is not null;
+
+    /// <summary>
+    /// Detail-panel active tab ("overview" or "trades"). Shared between the Cash and
+    /// Liability panels — each panel only shows at most one at a time so a single
+    /// property is sufficient; resets to "overview" whenever the selected row changes.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDetailOverviewTab))]
+    [NotifyPropertyChangedFor(nameof(IsDetailTradesTab))]
+    [NotifyPropertyChangedFor(nameof(IsDetailScheduleTab))]
+    private string _detailTab = "overview";
+
+    public bool IsDetailOverviewTab => DetailTab == "overview";
+    public bool IsDetailTradesTab => DetailTab == "trades";
+    public bool IsDetailScheduleTab => DetailTab == "schedule";
+
+    partial void OnSelectedCashRowChanged(CashAccountRowViewModel? _) => DetailTab = "overview";
+    partial void OnSelectedLiabilityRowChanged(LiabilityRowViewModel? row)
+    {
+        DetailTab = "overview";
+        if (row is { IsLoan: true, IsScheduleLoaded: false })
+            _ = Loan.LoadLoanScheduleAsync(row);
+    }
+    partial void OnSelectedPositionRowChanged(PortfolioRowViewModel? _) => DetailTab = "overview";
+
+    // Cash account stats + filtered trades
+    public IEnumerable<TradeRowViewModel> SelectedCashTrades =>
+        SelectedCashRow is { } r
+            ? Trades.Where(t => t.CashAccountId == r.Id)
+                    .OrderByDescending(t => t.TradeDate)
+            : [];
+
+    public decimal SelectedCashTotalDeposits =>
+        SelectedCashRow is { } r
+            ? Trades.Where(t => t.CashAccountId == r.Id &&
+                                (t.Type == TradeType.Deposit ||
+                                 t.Type == TradeType.Income ||
+                                 t.Type == TradeType.CashDividend ||
+                                 t.Type == TradeType.LoanBorrow ||
+                                 t.Type == TradeType.Sell))
+                    .Sum(t => Math.Abs(t.CashAmount ?? 0))
+            : 0m;
+
+    public decimal SelectedCashTotalWithdrawals =>
+        SelectedCashRow is { } r
+            ? Trades.Where(t => t.CashAccountId == r.Id &&
+                                (t.Type == TradeType.Withdrawal ||
+                                 t.Type == TradeType.Buy ||
+                                 t.Type == TradeType.LoanRepay))
+                    .Sum(t => Math.Abs(t.CashAmount ?? 0))
+            : 0m;
+
+    // Liability stats + filtered trades
+    public IEnumerable<TradeRowViewModel> SelectedLiabilityTrades =>
+        SelectedLiabilityRow is { } r
+            ? Trades.Where(t => (t.Type == TradeType.LoanBorrow || t.Type == TradeType.LoanRepay) &&
+                                t.LoanLabel == r.Label)
+                    .OrderByDescending(t => t.TradeDate)
+            : [];
+
+    public decimal SelectedLiabilityTotalBorrows =>
+        SelectedLiabilityRow is { } r
+            ? Trades.Where(t => t.Type == TradeType.LoanBorrow && t.LoanLabel == r.Label)
+                    .Sum(t => t.CashAmount ?? 0)
+            : 0m;
+
+    public decimal SelectedLiabilityTotalRepays =>
+        SelectedLiabilityRow is { } r
+            ? Trades.Where(t => t.Type == TradeType.LoanRepay && t.LoanLabel == r.Label)
+                    .Sum(t => t.CashAmount ?? 0)
+            : 0m;
+
+    // Investment position stats + filtered trades
+    public IEnumerable<TradeRowViewModel> SelectedPositionTrades =>
+        SelectedPositionRow is { } r
+            ? Trades.Where(t => string.Equals(t.Symbol, r.Symbol, StringComparison.OrdinalIgnoreCase) &&
+                                (t.Type == TradeType.Buy || t.Type == TradeType.Sell ||
+                                 t.Type == TradeType.CashDividend || t.Type == TradeType.StockDividend))
+                    .OrderByDescending(t => t.TradeDate)
+            : [];
+
+    /// <summary>
+    /// 成交均價 — 以 Buy 交易紀錄的股數加權平均，**不含買入手續費**。
+    /// </summary>
+    public decimal SelectedPositionTradeAvgPrice
+    {
+        get
+        {
+            if (SelectedPositionRow is not { } r)
+                return 0m;
+            var buys = Trades
+                .Where(t => t.IsBuy && string.Equals(t.Symbol, r.Symbol, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (buys.Count == 0)
+                return 0m;
+            var totalQty = buys.Sum(t => (decimal)t.Quantity);
+            var totalGross = buys.Sum(t => t.Price * t.Quantity);
+            return totalQty > 0 ? totalGross / totalQty : 0m;
+        }
+    }
+
+    /// <summary>Sum of all CashDividend trades for the selected position (gross dividend income).</summary>
+    public decimal SelectedPositionDividendIncome =>
+        SelectedPositionRow is { } r
+            ? Trades.Where(t => string.Equals(t.Symbol, r.Symbol, StringComparison.OrdinalIgnoreCase) &&
+                                t.Type == TradeType.CashDividend)
+                    .Sum(t => t.CashAmount ?? 0)
+            : 0m;
+
+    /// <summary>
+    /// Realized capital gain — placeholder 0 so the realized P&L card layout renders correctly.
+    /// </summary>
+    public decimal SelectedPositionCapitalGain => 0m;
+
+    public decimal SelectedPositionRealizedTotal =>
+        SelectedPositionDividendIncome + SelectedPositionCapitalGain;
+
+    [RelayCommand]
+    private void CloseCashDetail() => SelectedCashRow = null;
+
+    [RelayCommand]
+    private void CloseLiabilityDetail() => SelectedLiabilityRow = null;
+
+    [RelayCommand]
+    private void ClosePositionDetail() => SelectedPositionRow = null;
+
+    /// <summary>
+    /// Permanently removes a position and all its associated Buy / StockDividend trade
+    /// records (plus their fee children).
+    /// </summary>
+    [RelayCommand]
+    private void RemovePosition(PortfolioRowViewModel row)
+    {
+        if (row is null)
+            return;
+        var msg = L("Portfolio.Detail.DeleteWarning", "刪除後無法復原，請確認不再需要後再操作。");
+        AskConfirm(msg, async () =>
+        {
+            await _positionDeletionWorkflowService.DeleteAsync(
+                new PositionDeletionRequest(row.AllEntryIds.ToList()));
+
+            Positions.Remove(row);
+            if (ReferenceEquals(SelectedPositionRow, row))
+                SelectedPositionRow = null;
+            RebuildTotals();
+
+            await LoadTradesAsync();
+            await ReloadAccountBalancesAsync();
+        });
+    }
+
+    [RelayCommand]
+    private void SwitchDetailTab(string tab) => DetailTab = tab;
 
     public void Dispose()
     {
@@ -1279,6 +1733,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         SellPanel.SellCompleted -= OnSellCompleted;
         Transaction.TransactionCompleted -= OnTransactionCompleted;
         Transaction.TradeDeleted -= OnTradeDeleted;
+        Account.AccountChanged -= OnAccountChanged;
+        Loan.LoanChanged -= OnLoanChanged;
         _disposables.Dispose();
     }
 

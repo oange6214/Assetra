@@ -77,7 +77,21 @@ public sealed record PortfolioServices(
     /// resolved services and shared collections. Pass an explicit instance from DI (or a
     /// test double) to override the default construction.
     /// </summary>
-    SubViewModels.TransactionDialogViewModel? Transaction = null)
+    SubViewModels.TransactionDialogViewModel? Transaction = null,
+    /// <summary>
+    /// Optional pre-built <see cref="SubViewModels.AccountDialogViewModel"/>. When null the
+    /// <see cref="PortfolioViewModel"/> constructor builds its own instance from the
+    /// resolved workflow services. Pass an explicit instance from DI (or a test double)
+    /// to override the default construction.
+    /// </summary>
+    SubViewModels.AccountDialogViewModel? Account = null,
+    /// <summary>
+    /// Optional pre-built <see cref="SubViewModels.LoanDialogViewModel"/>. When null the
+    /// <see cref="PortfolioViewModel"/> constructor builds its own instance from the
+    /// resolved workflow services. Pass an explicit instance from DI (or a test double)
+    /// to override the default construction.
+    /// </summary>
+    SubViewModels.LoanDialogViewModel? Loan = null)
 {
     /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。
