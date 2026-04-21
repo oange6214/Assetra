@@ -885,9 +885,9 @@ public partial class PortfolioViewModel
     /// <summary>Loads the amortization schedule for a loan liability row (called on selection).</summary>
     private async Task LoadLoanScheduleAsync(LiabilityRowViewModel row)
     {
-        if (!row.IsLoan || row.AssetId is null || _loanScheduleRepo is null)
+        if (!row.IsLoan || row.AssetId is null)
             return;
-        var entries = await _loanScheduleRepo.GetByAssetAsync(row.AssetId.Value).ConfigureAwait(true);
+        var entries = await _loanScheduleQueryService.GetByAssetAsync(row.AssetId.Value).ConfigureAwait(true);
         row.ScheduleEntries.Clear();
         foreach (var e in entries)
             row.ScheduleEntries.Add(new LoanScheduleRowViewModel(e));

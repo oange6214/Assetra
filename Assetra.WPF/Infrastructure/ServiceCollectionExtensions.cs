@@ -130,6 +130,19 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<IPortfolioHistoryQueryService>(sp =>
             new PortfolioHistoryQueryService(
                 sp.GetRequiredService<IPortfolioSnapshotRepository>()));
+        services.AddSingleton<ILoanScheduleQueryService>(sp =>
+            new LoanScheduleQueryService(
+                sp.GetRequiredService<ILoanScheduleRepository>()));
+        services.AddSingleton<IFinancialOverviewQueryService>(sp =>
+            new FinancialOverviewQueryService(
+                sp.GetRequiredService<IAssetRepository>(),
+                sp.GetRequiredService<IBalanceQueryService>()));
+        services.AddSingleton<IAlertQueryService>(sp =>
+            new AlertQueryService(
+                sp.GetRequiredService<IAlertRepository>()));
+        services.AddSingleton<IAlertMutationService>(sp =>
+            new AlertMutationService(
+                sp.GetRequiredService<IAlertRepository>()));
         services.AddSingleton<IPortfolioHistoryMaintenanceService>(sp =>
             new PortfolioHistoryMaintenanceService(
                 sp.GetRequiredService<PortfolioSnapshotService>(),
@@ -200,6 +213,7 @@ internal static class ServiceCollectionExtensions
                 Search: sp.GetRequiredService<IStockSearchService>(),
                 HistoryMaintenance: sp.GetRequiredService<IPortfolioHistoryMaintenanceService>(),
                 HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
+                LoanScheduleQuery: sp.GetRequiredService<ILoanScheduleQueryService>(),
                 TradeDeletionWorkflow: sp.GetRequiredService<ITradeDeletionWorkflowService>(),
                 TradeMetadataWorkflow: sp.GetRequiredService<ITradeMetadataWorkflowService>(),
                 SellWorkflow: sp.GetRequiredService<ISellWorkflowService>(),
@@ -232,10 +246,17 @@ internal static class ServiceCollectionExtensions
             sp.GetRequiredService<PortfolioViewModel>(),
             sp.GetService<IThemeService>()));
         services.AddSingleton<FinancialOverviewViewModel>(sp => new FinancialOverviewViewModel(
-            sp.GetRequiredService<IAssetRepository>(),
-            sp.GetRequiredService<IBalanceQueryService>(),
+            sp.GetRequiredService<IFinancialOverviewQueryService>(),
             sp.GetRequiredService<PortfolioViewModel>()));
-        services.AddSingleton<AlertsViewModel>();
+        services.AddSingleton<AlertsViewModel>(sp => new AlertsViewModel(
+            sp.GetRequiredService<IAlertQueryService>(),
+            sp.GetRequiredService<IAlertMutationService>(),
+            sp.GetRequiredService<IStockSearchService>(),
+            sp.GetRequiredService<IStockService>(),
+            sp.GetRequiredService<IScheduler>(),
+            sp.GetRequiredService<ISnackbarService>(),
+            sp.GetRequiredService<ILocalizationService>(),
+            sp.GetService<ICurrencyService>()));
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<AddStockViewModel>();
         services.AddSingleton<MainWindow>(sp =>
