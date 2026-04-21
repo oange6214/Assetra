@@ -25,6 +25,7 @@
     <PackageReference Include="Microsoft.Data.Sqlite" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <ProjectReference Include="..\Assetra.Core\Assetra.Core.csproj" />
+    <ProjectReference Include="..\Assetra.Application\Assetra.Application.csproj" />
     <ProjectReference Include="..\Assetra.Infrastructure\Assetra.Infrastructure.csproj" />
     <ProjectReference Include="..\Assetra.WPF\Assetra.WPF.csproj" />
   </ItemGroup>
