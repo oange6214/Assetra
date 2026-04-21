@@ -11,44 +11,7 @@ public sealed class AlertSqliteRepository : IAlertRepository
     public AlertSqliteRepository(string dbPath)
     {
         _connectionString = $"Data Source={dbPath}";
-        Initialize();
-    }
-
-    private void Initialize()
-    {
-        using var conn = new SqliteConnection(_connectionString);
-        conn.Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            CREATE TABLE IF NOT EXISTS alert (
-                id           TEXT PRIMARY KEY,
-                symbol       TEXT NOT NULL,
-                exchange     TEXT NOT NULL,
-                condition    INTEGER NOT NULL,
-                target_price REAL NOT NULL,
-                is_triggered INTEGER NOT NULL DEFAULT 0,
-                trigger_time TEXT
-            );
-            """;
-        cmd.ExecuteNonQuery();
-
-        // Migrate from old table name if it exists
-        using var migrateCmd = conn.CreateCommand();
-        migrateCmd.CommandText = """
-            INSERT OR IGNORE INTO alert SELECT * FROM alerts;
-            DROP TABLE IF EXISTS alerts;
-            """;
-        try
-        { migrateCmd.ExecuteNonQuery(); }
-        catch { /* old table doesn't exist */ }
-
-        // Audit columns
-        try
-        { using var c = conn.CreateCommand(); c.CommandText = "ALTER TABLE alert ADD COLUMN created_at TEXT NOT NULL DEFAULT '';"; c.ExecuteNonQuery(); }
-        catch (SqliteException ex) when (ex.SqliteErrorCode == 1) { _ = ex; }
-        try
-        { using var c = conn.CreateCommand(); c.CommandText = "ALTER TABLE alert ADD COLUMN updated_at TEXT NOT NULL DEFAULT '';"; c.ExecuteNonQuery(); }
-        catch (SqliteException ex) when (ex.SqliteErrorCode == 1) { _ = ex; }
+        AlertSchemaMigrator.EnsureInitialized(_connectionString);
     }
 
     public async Task<IReadOnlyList<AlertRule>> GetRulesAsync()

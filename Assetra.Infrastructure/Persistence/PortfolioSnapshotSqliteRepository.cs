@@ -11,24 +11,7 @@ public sealed class PortfolioSnapshotSqliteRepository : IPortfolioSnapshotReposi
     public PortfolioSnapshotSqliteRepository(string dbPath)
     {
         _connectionString = $"Data Source={dbPath}";
-        Initialize();
-    }
-
-    private void Initialize()
-    {
-        using var conn = new SqliteConnection(_connectionString);
-        conn.Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            CREATE TABLE IF NOT EXISTS portfolio_daily_snapshot (
-                snapshot_date  TEXT NOT NULL PRIMARY KEY,
-                total_cost     REAL NOT NULL,
-                market_value   REAL NOT NULL,
-                pnl            REAL NOT NULL,
-                position_count INTEGER NOT NULL
-            );
-            """;
-        cmd.ExecuteNonQuery();
+        PortfolioSnapshotSchemaMigrator.EnsureInitialized(_connectionString);
     }
 
     public async Task<IReadOnlyList<PortfolioDailySnapshot>> GetSnapshotsAsync(
