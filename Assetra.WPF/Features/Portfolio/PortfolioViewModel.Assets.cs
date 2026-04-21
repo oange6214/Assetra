@@ -722,8 +722,10 @@ public partial class PortfolioViewModel
         }
         else if (_editAssetKind == "position" && _editPositionRow is { } posRow)
         {
-            foreach (var id in posRow.AllEntryIds)
-                await _repo.UpdateMetadataAsync(id, name, currency);
+            await _positionMetadataWorkflowService.UpdateAsync(new PositionMetadataUpdateRequest(
+                posRow.AllEntryIds.ToList(),
+                name,
+                currency));
             posRow.Name = name;
             posRow.Currency = currency;
         }
