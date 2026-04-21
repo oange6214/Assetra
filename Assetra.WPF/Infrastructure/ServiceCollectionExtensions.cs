@@ -156,6 +156,12 @@ internal static class ServiceCollectionExtensions
             new LoanPaymentWorkflowService(
                 sp.GetRequiredService<ITradeRepository>(),
                 sp.GetRequiredService<ILoanScheduleRepository>()));
+        services.AddSingleton<ILoanMutationWorkflowService>(sp =>
+            new LoanMutationWorkflowService(
+                sp.GetRequiredService<ITransactionWorkflowService>(),
+                sp.GetRequiredService<IAssetRepository>(),
+                sp.GetRequiredService<ILoanScheduleRepository>(),
+                sp.GetRequiredService<ITransactionService>()));
         services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
         services.AddSingleton<IAddAssetWorkflowService>(sp => new AddAssetWorkflowService(
             sp.GetRequiredService<IStockSearchService>(),
@@ -191,6 +197,7 @@ internal static class ServiceCollectionExtensions
                 AccountMutationWorkflow: sp.GetRequiredService<IAccountMutationWorkflowService>(),
                 AccountUpsertWorkflow: sp.GetRequiredService<IAccountUpsertWorkflowService>(),
                 LoanPaymentWorkflow: sp.GetRequiredService<ILoanPaymentWorkflowService>(),
+                LoanMutationWorkflow: sp.GetRequiredService<ILoanMutationWorkflowService>(),
                 Load: sp.GetRequiredService<IPortfolioLoadService>(),
                 AddAssetWorkflow: sp.GetRequiredService<IAddAssetWorkflowService>(),
                 History: sp.GetRequiredService<IStockHistoryProvider>(),

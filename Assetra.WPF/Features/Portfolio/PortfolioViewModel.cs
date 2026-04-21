@@ -48,6 +48,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly IAccountMutationWorkflowService _accountMutationWorkflowService;
     private readonly IAccountUpsertWorkflowService _accountUpsertWorkflowService;
     private readonly ILoanPaymentWorkflowService _loanPaymentWorkflowService;
+    private readonly ILoanMutationWorkflowService _loanMutationWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly IPortfolioHistoryMaintenanceService _historyMaintenanceService;
     private readonly ILocalizationService? _localization;
@@ -470,6 +471,14 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             ?? (_loanScheduleRepo is not null
                 ? new LoanPaymentWorkflowService(_tradeRepo, _loanScheduleRepo)
                 : new NullLoanPaymentWorkflowService());
+        _loanMutationWorkflowService = services.LoanMutationWorkflow
+            ?? (_assetRepo is not null && _loanScheduleRepo is not null
+                ? new LoanMutationWorkflowService(
+                    _transactionWorkflowService,
+                    _assetRepo,
+                    _loanScheduleRepo,
+                    _txService)
+                : new NullLoanMutationWorkflowService(_transactionWorkflowService));
         _summaryService = services.Summary ?? new PortfolioSummaryService();
         _historyMaintenanceService = services.HistoryMaintenance
             ?? (services.Snapshot is not null && services.Backfill is not null
@@ -1277,6 +1286,19 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                     Principal: request.Entry.PrincipalAmount,
                     InterestPaid: request.Entry.InterestAmount),
                 DateTime.UtcNow));
+    }
+
+    private sealed class NullLoanMutationWorkflowService : ILoanMutationWorkflowService
+    {
+        private readonly ITransactionWorkflowService _transactionWorkflowService;
+
+        public NullLoanMutationWorkflowService(ITransactionWorkflowService transactionWorkflowService)
+        {
+            _transactionWorkflowService = transactionWorkflowService;
+        }
+
+        public Task<TransactionWorkflowPlan> RecordAsync(LoanTransactionRequest request, CancellationToken ct = default)
+            => Task.FromResult(_transactionWorkflowService.CreateLoanPlan(request));
     }
 
     private sealed class DirectPortfolioHistoryMaintenanceService : IPortfolioHistoryMaintenanceService

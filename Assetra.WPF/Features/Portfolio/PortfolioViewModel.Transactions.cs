@@ -1403,7 +1403,7 @@ public partial class PortfolioViewModel
         var cleanNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
         var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
 
-        var plan = _transactionWorkflowService.CreateLoanPlan(new LoanTransactionRequest(
+        var plan = await _loanMutationWorkflowService.RecordAsync(new LoanTransactionRequest(
             type,
             cashAmount,
             tradeDate,
@@ -1416,13 +1416,6 @@ public partial class PortfolioViewModel
             amortAnnualRate,
             amortTermMonths,
             amortAnnualRate.HasValue && amortTermMonths.HasValue ? DateOnly.FromDateTime(TxLoanStartDate) : null));
-
-        if (plan.LiabilityAsset is not null && _assetRepo is not null)
-            await _assetRepo.AddItemAsync(plan.LiabilityAsset);
-        if (plan.LoanScheduleEntries is not null && _loanScheduleRepo is not null)
-            await _loanScheduleRepo.BulkInsertAsync(plan.LoanScheduleEntries);
-        foreach (var trade in plan.Trades)
-            await _txService.RecordAsync(trade);
 
         await ReloadAccountBalancesAsync();
         CloseTxDialog();
