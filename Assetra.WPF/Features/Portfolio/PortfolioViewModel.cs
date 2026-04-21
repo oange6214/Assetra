@@ -45,6 +45,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
     private readonly ITradeMetadataWorkflowService _tradeMetadataWorkflowService;
     private readonly ISellWorkflowService _sellWorkflowService;
+    private readonly PortfolioSellPanelController _sellPanelController = new();
+    private readonly PortfolioTradeDialogController _tradeDialogController = new();
     private readonly IPositionDeletionWorkflowService _positionDeletionWorkflowService;
     private readonly IPositionMetadataWorkflowService _positionMetadataWorkflowService;
     private readonly IAccountMutationWorkflowService _accountMutationWorkflowService;

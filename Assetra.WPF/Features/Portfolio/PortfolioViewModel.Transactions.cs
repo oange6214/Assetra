@@ -592,9 +592,10 @@ public partial class PortfolioViewModel
 
     private void OpenTxDialog()
     {
+        var state = _tradeDialogController.CreateOpenState(GetDefaultCashAccount());
         EditingTradeId = null;
         TxType = "buy";
-        TxDate = DateTime.Today;
+        TxDate = state.TxDate;
         TxError = string.Empty;
         TxAmountError = string.Empty;
         TxFeeError = string.Empty;
@@ -609,7 +610,7 @@ public partial class PortfolioViewModel
         TxAmount = string.Empty;
         TxNote = string.Empty;
         // 新增（非編輯）時帶入使用者在現金頁設定的預設帳戶
-        TxCashAccount = GetDefaultCashAccount();
+        TxCashAccount = state.TxCashAccount;
         TxDivPosition = null;
         TxDivPerShare = string.Empty;
         TxDivTotal = 0;
@@ -617,18 +618,18 @@ public partial class PortfolioViewModel
         TxStockDivNewShares = string.Empty;
         TxLoanLabel = string.Empty;
         TxFee = string.Empty;
-        TxUseCashAccount = true;
+        TxUseCashAccount = state.TxUseCashAccount;
         TxCashAccountName = string.Empty;
         TxTransferTarget = null;
         TxTransferTargetName = string.Empty;
         TxTransferTargetAmount = string.Empty;
-        TxBuyAssetType = "stock";
-        TxBuyPriceMode = "unit";
+        TxBuyAssetType = state.TxBuyAssetType;
+        TxBuyPriceMode = state.TxBuyPriceMode;
         TxBuyTotalCost = string.Empty;
         TxBuyMetaOnly = false;
-        TxDivInputMode = "perShare";
+        TxDivInputMode = state.TxDivInputMode;
         TxDivTotalInput = string.Empty;
-        TxCommissionDiscount = "1.0";
+        TxCommissionDiscount = state.TxCommissionDiscount;
         TxSellPosition = null;
         TxSellQuantity = string.Empty;
         TxSellQuantityError = string.Empty;
@@ -636,14 +637,14 @@ public partial class PortfolioViewModel
         TxInterestPaid = string.Empty;
         TxLoanRate = string.Empty;
         TxLoanTermMonths = string.Empty;
-        TxLoanStartDate = DateTime.Today;
+        TxLoanStartDate = state.TxLoanStartDate;
         TxLoanRateError = string.Empty;
         TxLoanTermMonthsError = string.Empty;
         // Buy-specific fields shared with AddAssetDialog
         AddSymbol = string.Empty;
         AddPrice = string.Empty;
         AddQuantity = string.Empty;
-        AddBuyDate = DateTime.Today;
+        AddBuyDate = state.AddBuyDate;
         AddError = string.Empty;
         AddName = string.Empty;
         AddCost = string.Empty;
@@ -663,8 +664,9 @@ public partial class PortfolioViewModel
     [RelayCommand]
     private void EditTrade(TradeRowViewModel row)
     {
-        EditingTradeId = row.Id;
-        TxDate = row.TradeDate.ToLocalTime();
+        var editState = _tradeDialogController.CreateEditState(row, Positions, CashAccounts);
+        EditingTradeId = editState.EditingTradeId;
+        TxDate = editState.TxDate;
         TxError = string.Empty;
         TxAmountError = string.Empty;
         TxFeeError = string.Empty;
@@ -676,7 +678,7 @@ public partial class PortfolioViewModel
         TxInterestPaidError = string.Empty;
         TxBuyTotalCostError = string.Empty;
         TxCommissionDiscountError = string.Empty;
-        TxNote = row.Note ?? string.Empty;
+        TxNote = editState.TxNote;
 
         // Reset every type-specific field first so state from a previous open doesn't bleed
         // through (e.g. editing Income after editing Buy would otherwise leave AddSymbol set).
@@ -716,21 +718,7 @@ public partial class PortfolioViewModel
         TxDivInputMode = "perShare";
         TxDivTotalInput = string.Empty;
 
-        // Map TradeType → TxType string (Buy / Sell now explicitly handled)
-        TxType = row.Type switch
-        {
-            TradeType.Buy => "buy",
-            TradeType.Sell => "sell",
-            TradeType.Income => "income",
-            TradeType.CashDividend => "cashDiv",
-            TradeType.StockDividend => "stockDiv",
-            TradeType.Deposit => "deposit",
-            TradeType.Withdrawal => "withdrawal",
-            TradeType.Transfer => "transfer",
-            TradeType.LoanBorrow => "loanBorrow",
-            TradeType.LoanRepay => "loanRepay",
-            _ => "income",
-        };
+        TxType = editState.TxType;
 
         switch (row.Type)
         {
@@ -740,15 +728,14 @@ public partial class PortfolioViewModel
                 // exists for live search-as-you-type, not for showing what the user is
                 // already editing.
                 _suppressSuggestions = true;
-                AddSymbol = row.Symbol;
+                AddSymbol = editState.AddSymbol;
                 _suppressSuggestions = false;
                 IsSuggestionsOpen = false;
-                AddPrice = row.Price.ToString("F4");
-                AddQuantity = row.Quantity.ToString();
-                AddBuyDate = TxDate;
-                TxCashAccount = row.CashAccountId is { } buyAcc
-                    ? CashAccounts.FirstOrDefault(c => c.Id == buyAcc) : null;
-                TxUseCashAccount = TxCashAccount is not null;
+                AddPrice = editState.AddPrice;
+                AddQuantity = editState.AddQuantity;
+                AddBuyDate = editState.AddBuyDate ?? TxDate;
+                TxCashAccount = editState.TxCashAccount;
+                TxUseCashAccount = editState.TxUseCashAccount;
                 // 還原使用者當初輸入的手續費來源：
                 //   CommissionDiscount 有值  → 走折扣路徑 → 帶回折扣，TxFee 留空
                 //   CommissionDiscount null 但 Commission 有值 → 走手動覆蓋 → 帶回 TxFee
@@ -761,60 +748,50 @@ public partial class PortfolioViewModel
                 // editable fields. The position itself was closed at sell time.
                 // Populate BOTH TxCashAccount (dialog XAML binds to this) AND SellCashAccount
                 // (ConfirmSell uses this). Without the former, the dialog dropdown was empty.
-                TxSellPosition = Positions.FirstOrDefault(p => p.Symbol == row.Symbol);
-                TxSellQuantity = row.Quantity.ToString();
-                TxAmount = row.Price.ToString("F4");
-                SellPriceInput = row.Price.ToString("F4");
-                var sellAccLookup = row.CashAccountId is { } sellAcc
-                    ? CashAccounts.FirstOrDefault(c => c.Id == sellAcc) : null;
-                TxCashAccount = sellAccLookup;
-                SellCashAccount = sellAccLookup;
-                TxUseCashAccount = sellAccLookup is not null;
+                TxSellPosition = editState.TxSellPosition;
+                TxSellQuantity = editState.TxSellQuantity;
+                TxAmount = editState.TxAmount;
+                SellPriceInput = editState.SellPriceInput;
+                TxCashAccount = editState.TxCashAccount;
+                SellCashAccount = editState.SellCashAccount;
+                TxUseCashAccount = editState.TxUseCashAccount;
                 RestoreCommissionFields(row);
                 break;
 
             case TradeType.CashDividend:
-                TxDivPosition = Positions.FirstOrDefault(p => p.Symbol == row.Symbol);
-                TxDivPerShare = row.Price > 0 ? row.Price.ToString("F4") : string.Empty;
-                TxCashAccount = row.CashAccountId is { } divAcc
-                    ? CashAccounts.FirstOrDefault(c => c.Id == divAcc) : null;
-                TxUseCashAccount = TxCashAccount is not null;
+                TxDivPosition = editState.TxDivPosition;
+                TxDivPerShare = editState.TxDivPerShare;
+                TxCashAccount = editState.TxCashAccount;
+                TxUseCashAccount = editState.TxUseCashAccount;
                 break;
 
             case TradeType.StockDividend:
-                TxStockDivPosition = Positions.FirstOrDefault(p => p.Symbol == row.Symbol);
-                TxStockDivNewShares = row.Quantity.ToString();
+                TxStockDivPosition = editState.TxStockDivPosition;
+                TxStockDivNewShares = editState.TxStockDivNewShares;
                 break;
 
             case TradeType.Income:
             case TradeType.Deposit:
             case TradeType.Withdrawal:
-                TxAmount = row.CashAmount?.ToString("F0") ?? string.Empty;
-                TxCashAccount = row.CashAccountId is { } cashAcc
-                    ? CashAccounts.FirstOrDefault(c => c.Id == cashAcc) : null;
+                TxAmount = editState.TxAmount;
+                TxCashAccount = editState.TxCashAccount;
                 break;
 
             case TradeType.LoanBorrow:
-                TxAmount = row.CashAmount?.ToString("F0") ?? string.Empty;
-                TxLoanLabel = row.LoanLabel ?? row.Name;
-                TxCashAccount = row.CashAccountId is { } borrowCashAcc
-                    ? CashAccounts.FirstOrDefault(c => c.Id == borrowCashAcc) : null;
-                TxUseCashAccount = TxCashAccount is not null;
+                TxAmount = editState.TxAmount;
+                TxLoanLabel = editState.TxLoanLabel;
+                TxCashAccount = editState.TxCashAccount;
+                TxUseCashAccount = editState.TxUseCashAccount;
                 TxFee = string.Empty;
                 break;
 
             case TradeType.LoanRepay:
                 // CashAmount = Principal + InterestPaid（向後相容：Principal null 代表全額為本金）
-                TxPrincipal = row.Principal.HasValue
-                    ? Math.Round(row.Principal.Value, 0).ToString("F0")
-                    : row.CashAmount?.ToString("F0") ?? string.Empty;
-                TxInterestPaid = row.InterestPaid.HasValue
-                    ? Math.Round(row.InterestPaid.Value, 0).ToString("F0")
-                    : "0";
-                TxLoanLabel = row.LoanLabel ?? row.Name;
-                TxCashAccount = row.CashAccountId is { } repayCashAcc
-                    ? CashAccounts.FirstOrDefault(c => c.Id == repayCashAcc) : null;
-                TxUseCashAccount = TxCashAccount is not null;
+                TxPrincipal = editState.TxPrincipal;
+                TxInterestPaid = editState.TxInterestPaid;
+                TxLoanLabel = editState.TxLoanLabel;
+                TxCashAccount = editState.TxCashAccount;
+                TxUseCashAccount = editState.TxUseCashAccount;
                 // Fee can't be inferred from trade record alone; leave blank.
                 TxFee = string.Empty;
                 break;

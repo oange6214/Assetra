@@ -248,24 +248,17 @@ public partial class PortfolioViewModel
 
     private void UpdateSellPreview()
     {
-        if (SellingRow is null || !ParseHelpers.TryParseDecimal(SellPriceInput, out var price) || price <= 0)
-        {
-            SellGrossAmount = 0;
-            SellCommission = 0;
-            SellTransactionTax = 0;
-            SellNetAmount = 0;
-            SellEstimatedPnl = 0;
-            IsSellEstimatedPositive = false;
-            return;
-        }
-        var discount = TxCommissionDiscountValue;
-        var fee = TaiwanTradeFeeCalculator.CalcSell(price, (int)SellingRow.Quantity, discount, IsSellEtf, SellingRow.IsBondEtf);
-        SellGrossAmount = fee.GrossAmount;
-        SellCommission = fee.Commission;
-        SellTransactionTax = fee.TransactionTax;
-        SellNetAmount = fee.NetAmount;
-        SellEstimatedPnl = fee.NetAmount - SellingRow.BuyPrice * SellingRow.Quantity;
-        IsSellEstimatedPositive = SellEstimatedPnl >= 0;
+        var preview = _sellPanelController.BuildPreview(
+            SellingRow,
+            SellPriceInput,
+            TxCommissionDiscountValue,
+            IsSellEtf);
+        SellGrossAmount = preview.GrossAmount;
+        SellCommission = preview.Commission;
+        SellTransactionTax = preview.TransactionTax;
+        SellNetAmount = preview.NetAmount;
+        SellEstimatedPnl = preview.EstimatedPnl;
+        IsSellEstimatedPositive = preview.IsEstimatedPositive;
     }
 
     // Sell Panel commands
@@ -344,51 +337,21 @@ public partial class PortfolioViewModel
         if (SellingRow is null)
             return;
         var row = SellingRow;
-        SellPanelError = string.Empty;
-
-        if (!ParseHelpers.TryParseDecimal(SellPriceInput, out var sellPrice) || sellPrice <= 0)
-        {
-            SellPanelError = "賣出價格無效";
+        var submit = _sellPanelController.BuildSubmission(
+            row,
+            SellPriceInput,
+            TxFee,
+            _sellQtyOverride,
+            TxCommissionDiscountValue,
+            IsSellEtf,
+            SellCashAccount?.Id);
+        SellPanelError = submit.Error ?? string.Empty;
+        if (submit.Request is null)
             return;
-        }
-
-        var sellQty = _sellQtyOverride > 0 ? _sellQtyOverride : (int)row.Quantity;
-
-        // Sell-side commission + tax: user can override via TxFee (manual). Empty falls
-        // back to auto-compute via TaiwanTradeFeeCalculator (commission × discount + tax).
-        decimal sellNetAmount;
-        decimal sellCommission;
-        decimal? sellDiscount;
-        if (!string.IsNullOrWhiteSpace(TxFee) && ParseHelpers.TryParseDecimal(TxFee, out var manualFee) && manualFee >= 0)
-        {
-            sellNetAmount = sellPrice * sellQty - manualFee;
-            sellCommission = manualFee;
-            sellDiscount = null;
-        }
-        else
-        {
-            var discount = TxCommissionDiscountValue;
-            var feeResult = TaiwanTradeFeeCalculator.CalcSell(sellPrice, sellQty, discount, IsSellEtf, row.IsBondEtf);
-            sellNetAmount = feeResult.NetAmount;
-            sellCommission = feeResult.Commission + feeResult.TransactionTax;
-            sellDiscount = discount;
-        }
 
         try
         {
-            await _sellWorkflowService.RecordAsync(new SellWorkflowRequest(
-                    row.Id,
-                    row.Symbol,
-                    row.Exchange,
-                    row.Name,
-                    row.BuyPrice,
-                    (int)row.Quantity,
-                    sellQty,
-                    sellPrice,
-                    sellCommission,
-                    sellDiscount,
-                    SellCashAccount?.Id,
-                    row.AllEntryIds))
+            await _sellWorkflowService.RecordAsync(submit.Request)
                 .ConfigureAwait(true);
         }
         catch (Exception ex)
