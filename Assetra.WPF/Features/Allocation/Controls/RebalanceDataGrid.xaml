@@ -99,7 +99,10 @@
                 </DataGridTemplateColumn.Header>
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                        <StackPanel Margin="0,0,8,0" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <StackPanel
+                            Margin="0,0,8,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
                             <TextBlock
                                 HorizontalAlignment="Right"
                                 FontFamily="{StaticResource FontTabular}"
@@ -126,8 +129,10 @@
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
 
-            <!--  配置：cash-flow → before/after；full → actual%
-                  DataGrid 不支援 header 動態切換，兩欄都放，用 Visibility 控制  -->
+            <!--
+                配置：cash-flow → before/after；full → actual%
+                DataGrid 不支援 header 動態切換，兩欄都放，用 Visibility 控制
+            -->
             <DataGridTemplateColumn
                 Width="120"
                 CanUserSort="False"
@@ -242,9 +247,7 @@
                             </TextBlock>
                             <Grid Height="3" Margin="0,3,0,0">
                                 <Border Background="{DynamicResource AppBorder}" CornerRadius="1.5" />
-                                <Border
-                                    HorizontalAlignment="Left"
-                                    CornerRadius="1.5">
+                                <Border HorizontalAlignment="Left" CornerRadius="1.5">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="Background" Value="{DynamicResource AppUp}" />

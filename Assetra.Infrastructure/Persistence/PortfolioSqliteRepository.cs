@@ -365,8 +365,25 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
 
     public async Task<IReadOnlyList<PortfolioEntry>> GetActiveAsync()
     {
-        var all = await GetEntriesAsync().ConfigureAwait(false);
-        return all.Where(e => e.IsActive).ToList();
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync().ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT id, symbol, exchange, asset_type, display_name, currency, is_active FROM portfolio WHERE is_active = 1 ORDER BY rowid;";
+        var results = new List<PortfolioEntry>();
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var assetType = Enum.TryParse<AssetType>(reader.GetString(3), out var t) ? t : AssetType.Stock;
+            results.Add(new PortfolioEntry(
+                Guid.Parse(reader.GetString(0)),
+                reader.GetString(1),
+                reader.GetString(2),
+                assetType,
+                reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                reader.IsDBNull(5) ? "TWD" : reader.GetString(5),
+                IsActive: true));
+        }
+        return results;
     }
 
     public async Task<Guid> FindOrCreatePortfolioEntryAsync(
@@ -421,6 +438,16 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
         await conn.OpenAsync().ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = "UPDATE portfolio SET is_active = 0, updated_at = datetime('now') WHERE id = $id";
+        cmd.Parameters.AddWithValue("$id", id.ToString());
+        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+    }
+
+    public async Task UnarchiveAsync(Guid id)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync().ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = "UPDATE portfolio SET is_active = 1, updated_at = datetime('now') WHERE id = $id";
         cmd.Parameters.AddWithValue("$id", id.ToString());
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
     }

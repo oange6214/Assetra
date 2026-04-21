@@ -53,6 +53,40 @@ public partial class PortfolioViewModel
     [ObservableProperty] private DateTime _txDate = DateTime.Today;
     [ObservableProperty] private string _txError = string.Empty;
 
+    // ── 欄位驗證訊息（空字串 = 無錯誤；綁定到 XAML FormFieldError TextBlock）──
+    [ObservableProperty] private string _txAmountError = string.Empty;
+    [ObservableProperty] private string _txFeeError = string.Empty;
+    [ObservableProperty] private string _txDivPerShareError = string.Empty;
+    [ObservableProperty] private string _txDivTotalInputError = string.Empty;
+    [ObservableProperty] private string _txStockDivNewSharesError = string.Empty;
+    [ObservableProperty] private string _txTransferTargetAmountError = string.Empty;
+    [ObservableProperty] private string _txPrincipalError = string.Empty;
+    [ObservableProperty] private string _txInterestPaidError = string.Empty;
+    [ObservableProperty] private string _txBuyTotalCostError = string.Empty;
+    [ObservableProperty] private string _txCommissionDiscountError = string.Empty;
+
+    private static string ValidatePositiveDecimalOrEmpty(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? string.Empty :
+        !ParseHelpers.TryParseDecimal(value, out var v) || v <= 0 ? "請輸入大於 0 的數字" : string.Empty;
+
+    private static string ValidateNonNegativeDecimalOrEmpty(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? string.Empty :
+        !ParseHelpers.TryParseDecimal(value, out var v) || v < 0 ? "請輸入 0 或以上的數字" : string.Empty;
+
+    private static string ValidatePositiveIntOrEmpty(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+        if (!long.TryParse(value.Replace(",", ""), out var l) || l <= 0)
+            return "請輸入大於 0 的整數";
+        if (l > int.MaxValue)
+            return $"數量超過上限（最大 {int.MaxValue:N0}）";
+        return string.Empty;
+    }
+
+    private static string ValidateCommissionDiscountOrEmpty(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? string.Empty :
+        !ParseHelpers.TryParseDecimal(value, out var v) || v <= 0 || v > 1 ? "折扣需介於 0.01 到 1.0" : string.Empty;
+
     // 收入欄位
     [ObservableProperty] private string _txAmount = string.Empty;
     [ObservableProperty] private string _txNote = string.Empty;
@@ -79,8 +113,9 @@ public partial class PortfolioViewModel
     public decimal TxCommissionDiscountValue =>
         ParseHelpers.TryParseDecimal(TxCommissionDiscount, out var v) && v is > 0 and <= 1 ? v : 1m;
 
-    partial void OnTxCommissionDiscountChanged(string _)
+    partial void OnTxCommissionDiscountChanged(string value)
     {
+        TxCommissionDiscountError = ValidateCommissionDiscountOrEmpty(value);
         UpdateBuyPreview();
         UpdateSellTxPreview();
     }
@@ -90,6 +125,9 @@ public partial class PortfolioViewModel
 
     // 賣出欄位
     [ObservableProperty] private PortfolioRowViewModel? _txSellPosition;
+    [ObservableProperty] private string _txSellQuantity = string.Empty;
+    [ObservableProperty] private string _txSellQuantityError = string.Empty;
+    private int _sellQtyOverride;
 
     // Sell-tx preview — parallel to buy's AddGrossAmount / AddCommission / AddTotalCost,
     // but also shows TransactionTax and NetAmount since sell has two deductions.
@@ -103,10 +141,17 @@ public partial class PortfolioViewModel
     public bool HasTxSellPreview => TxSellGrossAmount > 0;
     partial void OnTxSellGrossAmountChanged(decimal _) => OnPropertyChanged(nameof(HasTxSellPreview));
 
+    partial void OnTxSellQuantityChanged(string value)
+    {
+        TxSellQuantityError = ValidatePositiveIntOrEmpty(value);
+        UpdateSellTxPreview();
+    }
+
     partial void OnTxSellPositionChanged(PortfolioRowViewModel? value)
     {
         if (value is not null && value.CurrentPrice > 0)
             TxAmount = value.CurrentPrice.ToString("F2");
+        if (value is null) TxSellQuantity = string.Empty;
         TxSellIsEtf = value is not null && _search.IsEtf(value.Symbol);
         TxSellIsBondEtf = value is not null && _search.IsBondEtf(value.Symbol);
         UpdateSellTxPreview();
@@ -130,7 +175,9 @@ public partial class PortfolioViewModel
             return;
         }
 
-        var qty = (int)TxSellPosition.Quantity;
+        var qty = ParseHelpers.TryParseInt(TxSellQuantity, out var parsedQty) && parsedQty > 0
+            ? parsedQty
+            : (int)TxSellPosition.Quantity;
         var gross = price * qty;
 
         // Manual fee override: user has typed a value in the 手續費 field → treat that as
@@ -215,12 +262,14 @@ public partial class PortfolioViewModel
 
     partial void OnTxAmountChanged(string value)
     {
+        TxAmountError = ValidatePositiveDecimalOrEmpty(value);
         OnPropertyChanged(nameof(TxTransferImpliedRateDisplay));
         UpdateSellTxPreview();
     }
 
-    partial void OnTxFeeChanged(string _)
+    partial void OnTxFeeChanged(string value)
     {
+        TxFeeError = ValidateNonNegativeDecimalOrEmpty(value);
         UpdateBuyPreview();
         UpdateSellTxPreview();
     }
@@ -400,7 +449,12 @@ public partial class PortfolioViewModel
     }
 
     partial void OnTxDivPositionChanged(PortfolioRowViewModel? _) => UpdateDivTotal();
-    partial void OnTxDivPerShareChanged(string _) => UpdateDivTotal();
+
+    partial void OnTxDivPerShareChanged(string value)
+    {
+        TxDivPerShareError = ValidatePositiveDecimalOrEmpty(value);
+        UpdateDivTotal();
+    }
 
     private void UpdateDivTotal()
     {
@@ -456,7 +510,7 @@ public partial class PortfolioViewModel
                 ParseHelpers.TryParseDecimal(TxBuyTotalCost, out var t) && t > 0)
                 return t.ToString("N0");
             if (ParseHelpers.TryParseDecimal(AddPrice, out var p) && p > 0 &&
-                int.TryParse(AddQuantity, out var q) && q > 0)
+                ParseHelpers.TryParseInt(AddQuantity, out var q) && q > 0)
                 return (p * q).ToString("N0");
             return "0";
         }
@@ -464,10 +518,11 @@ public partial class PortfolioViewModel
 
     partial void OnTxBuyTotalCostChanged(string value)
     {
+        TxBuyTotalCostError = ValidatePositiveDecimalOrEmpty(value);
         // 總額模式時，回算單價以維持持倉成本計算邏輯。
         if (TxBuyIsTotalMode &&
             ParseHelpers.TryParseDecimal(value, out var total) && total > 0 &&
-            int.TryParse(AddQuantity, out var qty) && qty > 0)
+            ParseHelpers.TryParseInt(AddQuantity, out var qty) && qty > 0)
         {
             AddPrice = (total / qty).ToString("F4");
         }
@@ -488,11 +543,26 @@ public partial class PortfolioViewModel
     /// <summary>總額模式下使用者直接輸入的總股息。</summary>
     [ObservableProperty] private string _txDivTotalInput = string.Empty;
 
+    partial void OnTxDivTotalInputChanged(string value) =>
+        TxDivTotalInputError = ValidatePositiveDecimalOrEmpty(value);
+
+    partial void OnTxStockDivNewSharesChanged(string value) =>
+        TxStockDivNewSharesError = ValidatePositiveIntOrEmpty(value);
+
+    partial void OnTxTransferTargetAmountChanged(string value) =>
+        TxTransferTargetAmountError = ValidatePositiveDecimalOrEmpty(value);
+
     // LoanRepay 拆分欄位 — Phase 3
     /// <summary>LoanRepay：本金部分（減少負債餘額）。</summary>
     [ObservableProperty] private string _txPrincipal = string.Empty;
     /// <summary>LoanRepay：利息支出部分（費用支出，不影響負債餘額）。</summary>
     [ObservableProperty] private string _txInterestPaid = string.Empty;
+
+    partial void OnTxPrincipalChanged(string value) =>
+        TxPrincipalError = ValidatePositiveDecimalOrEmpty(value);
+
+    partial void OnTxInterestPaidChanged(string value) =>
+        TxInterestPaidError = ValidateNonNegativeDecimalOrEmpty(value);
 
     // 新增交易 Dialog commands
 
@@ -502,6 +572,16 @@ public partial class PortfolioViewModel
         TxType = "buy";
         TxDate = DateTime.Today;
         TxError = string.Empty;
+        TxAmountError = string.Empty;
+        TxFeeError = string.Empty;
+        TxDivPerShareError = string.Empty;
+        TxDivTotalInputError = string.Empty;
+        TxStockDivNewSharesError = string.Empty;
+        TxTransferTargetAmountError = string.Empty;
+        TxPrincipalError = string.Empty;
+        TxInterestPaidError = string.Empty;
+        TxBuyTotalCostError = string.Empty;
+        TxCommissionDiscountError = string.Empty;
         TxAmount = string.Empty;
         TxNote = string.Empty;
         // 新增（非編輯）時帶入使用者在現金頁設定的預設帳戶
@@ -526,8 +606,28 @@ public partial class PortfolioViewModel
         TxDivTotalInput = string.Empty;
         TxCommissionDiscount = "1.0";
         TxSellPosition = null;
+        TxSellQuantity = string.Empty;
+        TxSellQuantityError = string.Empty;
         TxPrincipal = string.Empty;
         TxInterestPaid = string.Empty;
+        // Buy-specific fields shared with AddAssetDialog
+        AddSymbol = string.Empty;
+        AddPrice = string.Empty;
+        AddQuantity = string.Empty;
+        AddBuyDate = DateTime.Today;
+        AddError = string.Empty;
+        AddName = string.Empty;
+        AddCost = string.Empty;
+        AddCryptoSymbol = string.Empty;
+        AddCryptoQty = string.Empty;
+        AddCryptoPrice = string.Empty;
+        SellCashAccount = null;
+        SellPriceInput = string.Empty;
+        AddPriceError = string.Empty;
+        AddQuantityError = string.Empty;
+        AddCostError = string.Empty;
+        AddCryptoQtyError = string.Empty;
+        AddCryptoPriceError = string.Empty;
         IsTxDialogOpen = true;
     }
 
@@ -537,6 +637,16 @@ public partial class PortfolioViewModel
         EditingTradeId = row.Id;
         TxDate = row.TradeDate.ToLocalTime();
         TxError = string.Empty;
+        TxAmountError = string.Empty;
+        TxFeeError = string.Empty;
+        TxDivPerShareError = string.Empty;
+        TxDivTotalInputError = string.Empty;
+        TxStockDivNewSharesError = string.Empty;
+        TxTransferTargetAmountError = string.Empty;
+        TxPrincipalError = string.Empty;
+        TxInterestPaidError = string.Empty;
+        TxBuyTotalCostError = string.Empty;
+        TxCommissionDiscountError = string.Empty;
         TxNote = row.Note ?? string.Empty;
 
         // Reset every type-specific field first so state from a previous open doesn't bleed
@@ -557,11 +667,18 @@ public partial class PortfolioViewModel
         TxStockDivPosition = null;
         TxStockDivNewShares = string.Empty;
         TxSellPosition = null;
+        TxSellQuantity = string.Empty;
+        TxSellQuantityError = string.Empty;
         SellCashAccount = null;
         SellPriceInput = string.Empty;
         AddSymbol = string.Empty;
         AddPrice = string.Empty;
         AddQuantity = string.Empty;
+        AddPriceError = string.Empty;
+        AddQuantityError = string.Empty;
+        AddCostError = string.Empty;
+        AddCryptoQtyError = string.Empty;
+        AddCryptoPriceError = string.Empty;
         TxCommissionDiscount = "1.0";
         TxBuyAssetType = "stock";
         TxBuyPriceMode = "unit";
@@ -616,6 +733,7 @@ public partial class PortfolioViewModel
                 // Populate BOTH TxCashAccount (dialog XAML binds to this) AND SellCashAccount
                 // (ConfirmSell uses this). Without the former, the dialog dropdown was empty.
                 TxSellPosition = Positions.FirstOrDefault(p => p.Symbol == row.Symbol);
+                TxSellQuantity = row.Quantity.ToString();
                 TxAmount = row.Price.ToString("F4");
                 SellPriceInput = row.Price.ToString("F4");
                 var sellAccLookup = row.CashAccountId is { } sellAcc
@@ -729,6 +847,15 @@ public partial class PortfolioViewModel
         if (row is null)
             return;
 
+        // Guard: deleting a Buy or StockDividend that is "covered" by a Sell trade would
+        // produce a negative net position — block and require the user to delete the Sell first.
+        if (await WouldRemovalCauseNegativeQtyAsync(row))
+        {
+            TxError = L("Portfolio.Trade.DeleteBlockedBySell",
+                "請先刪除此股票的賣出記錄，再刪除此買入記錄。");
+            return;
+        }
+
         // 同步 stock-lot（Buy/Sell/StockDividend 需要更新或移除 PortfolioEntry）
         await ApplyOldTradeRemovalOnPositionAsync(row);
 
@@ -741,12 +868,12 @@ public partial class PortfolioViewModel
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to delete trade {TradeId}", id);
-            _snackbar?.Error(Application.Current?.TryFindResource("Portfolio.Trade.OldDeleteFailed") as string
-                ?? "交易刪除失敗");
+            _snackbar?.Error(L("Portfolio.Trade.OldDeleteFailed", "交易刪除失敗"));
             return;
         }
 
         CloseTxDialog();
+        await LoadPositionsAsync();
         await LoadTradesAsync();
         await ReloadAccountBalancesAsync();
         RebuildTotals();
@@ -830,6 +957,17 @@ public partial class PortfolioViewModel
         // data fields are still valid for the stock-lot cleanup below.
         if (oldRow is not null)
         {
+            // Guard: editing a Buy/StockDividend that covers an existing Sell would leave
+            // a negative position if the old (larger) lot is removed. Reject and restore
+            // the edit context so the user can fix the issue first.
+            if (await WouldRemovalCauseNegativeQtyAsync(oldRow))
+            {
+                TxError = L("Portfolio.Trade.DeleteBlockedBySell",
+                    "請先刪除此股票的賣出記錄，再修改此買入記錄。");
+                EditingTradeId = pendingEditId;
+                return;
+            }
+
             // Stock-position trades also need the owning lot updated — see
             // ApplyOldTradeRemovalOnPositionAsync for the Buy/Sell/StockDividend logic.
             await ApplyOldTradeRemovalOnPositionAsync(oldRow);
@@ -844,9 +982,9 @@ public partial class PortfolioViewModel
                 // The new trade was already written; failing to delete the old one would
                 // leave both records in the ledger and show a duplicate entry to the user.
                 Log.Error(ex, "Failed to remove old trade {TradeId} during edit — possible duplicate entry", oldRow.Id);
-                _snackbar?.Error(Application.Current?.TryFindResource("Portfolio.Trade.OldDeleteFailed") as string
-                    ?? "舊交易記錄刪除失敗，資料庫可能存在重複筆數，建議重新整理或重啟應用程式");
+                _snackbar?.Error(L("Portfolio.Trade.OldDeleteFailed", "舊交易記錄刪除失敗，資料庫可能存在重複筆數，建議重新整理或重啟應用程式"));
             }
+            await LoadPositionsAsync();
             await LoadTradesAsync();
             await ReloadAccountBalancesAsync();
             RebuildTotals();
@@ -905,6 +1043,21 @@ public partial class PortfolioViewModel
     /// the new StockDividend's add lands on a clean baseline.</description></item>
     /// </list>
     /// </summary>
+    /// <summary>
+    /// Returns true if removing <paramref name="row"/> from the ledger would cause
+    /// the net position quantity to drop below zero — meaning a Sell trade has already
+    /// consumed shares this Buy/StockDividend was accounting for.
+    /// </summary>
+    private async Task<bool> WouldRemovalCauseNegativeQtyAsync(TradeRowViewModel row)
+    {
+        if (row.Type is not (TradeType.Buy or TradeType.StockDividend))
+            return false;
+        if (row.PortfolioEntryId is not { } entryId)
+            return false;
+        var snap = await _positionQuery.GetPositionAsync(entryId);
+        return snap is not null && snap.Quantity - (decimal)row.Quantity < 0;
+    }
+
     private async Task ApplyOldTradeRemovalOnPositionAsync(TradeRowViewModel oldRow)
     {
         if (_repo is null)
@@ -915,56 +1068,32 @@ public partial class PortfolioViewModel
         switch (oldRow.Type)
         {
             case TradeType.Buy:
-                await _repo.RemoveAsync(entryId);
-                var oldLot = Positions.FirstOrDefault(p => p.AllEntryIds.Contains(entryId));
-                if (oldLot is null)
-                    break;
-
-                oldLot.AllEntryIds.Remove(entryId);
-
-                if (oldLot.AllEntryIds.Count == 0)
-                {
-                    // Non-stock assets (Fund/Metal/Bond/Crypto): AddNonStock already created a
-                    // fresh row; remove this stale one.
-                    Positions.Remove(oldLot);
-                }
-                else
-                {
-                    // Aggregated stock row: AddPosition already absorbed the new entry's ID into
-                    // AllEntryIds but double-counted the old lot's cost. Recalculate from the
-                    // position projection to get the correct weighted-average cost and total quantity.
-                    var allSnapshots = await _positionQuery.GetAllPositionSnapshotsAsync();
-                    var totalQty  = oldLot.AllEntryIds.Sum(id => allSnapshots.TryGetValue(id, out var s) ? s.Quantity : 0m);
-                    var totalCost = oldLot.AllEntryIds.Sum(id => allSnapshots.TryGetValue(id, out var s) ? s.TotalCost : 0m);
-                    oldLot.Quantity  = totalQty;
-                    oldLot.BuyPrice  = totalQty > 0 ? totalCost / totalQty : 0m;
-                    oldLot.Refresh();
-                }
-                RebuildTotals();
+                // Only hard-delete the portfolio entry if this is the last trade referencing it.
+                // Stocks share one entry across all buy lots (FindOrCreatePortfolioEntryAsync),
+                // so deleting the entry when other buys still reference it would silently
+                // destroy those positions after the next app restart.
+                // Display is refreshed by the LoadPositionsAsync() call in DeleteTradeAsync.
+                var refs = await _repo.HasTradeReferencesAsync(entryId);
+                if (refs <= 1)
+                    await _repo.RemoveAsync(entryId);
                 break;
 
             case TradeType.StockDividend:
-                // Subtract the old bonus-share count so the new StockDiv's +newShares
-                // brings the display row to the correct final quantity.
-                // The trade log is source of truth — no DB update needed on portfolio table.
-                var sdRow2 = Positions.FirstOrDefault(p => p.AllEntryIds.Contains(entryId));
-                if (sdRow2 is not null)
-                {
-                    var newQty = sdRow2.Quantity - oldRow.Quantity;
-                    if (newQty <= 0)
-                    {
-                        Positions.Remove(sdRow2);
-                    }
-                    else
-                    {
-                        sdRow2.Quantity = newQty;
-                        sdRow2.Refresh();
-                    }
-                }
-                RebuildTotals();
+                // No DB entry manipulation needed — trade log is the source of truth.
+                // LoadPositionsAsync() recomputes quantity from trades after deletion.
                 break;
 
-                // Sell: the entry was removed at sell time, nothing to do.
+            case TradeType.Sell:
+                // ConfirmSell now archives lots (soft-delete) rather than removing them,
+                // so deleting a sell trade should restore all archived lots for this symbol.
+                var allEntries = await _repo.GetEntriesAsync();
+                foreach (var entry in allEntries)
+                {
+                    if (string.Equals(entry.Symbol, oldRow.Symbol, StringComparison.OrdinalIgnoreCase)
+                        && !entry.IsActive)
+                        await _repo.UnarchiveAsync(entry.Id);
+                }
+                break;
         }
     }
 
@@ -1011,19 +1140,23 @@ public partial class PortfolioViewModel
         if (TxSellPosition is null)
         { TxError = "請選擇持倉"; return; }
 
-        // Reuse SellPanel logic
+        if (!ParseHelpers.TryParseInt(TxSellQuantity, out var sellQty) || sellQty <= 0)
+        { TxError = "賣出數量無效"; return; }
+        if (sellQty > (int)TxSellPosition.Quantity)
+        { TxError = $"賣出數量 ({sellQty:N0}) 超過持倉 ({(int)TxSellPosition.Quantity:N0}) 股"; return; }
+
         SellingRow = TxSellPosition;
         IsSellEtf = _search.IsEtf(TxSellPosition.Symbol);
 
-        // Parse sell price from TxAmount
         if (!ParseHelpers.TryParseDecimal(TxAmount, out var sellPrice) || sellPrice <= 0)
         { TxError = "賣出價格無效"; return; }
 
         SellPriceInput = sellPrice.ToString();
-        // Honour the cash-account checkbox: only bridge over when the user wants linkage.
         SellCashAccount = TxUseCashAccount ? TxCashAccount : null;
+        _sellQtyOverride = sellQty;
 
         await ConfirmSell();
+        _sellQtyOverride = 0;
 
         if (!string.IsNullOrEmpty(SellPanelError))
         {
@@ -1042,6 +1175,7 @@ public partial class PortfolioViewModel
         if (feeError is not null)
         { TxError = feeError; return; }
 
+        var cashAccId = await ResolveCashAccountIdAsync();
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         var trade = new Trade(
             Id: Guid.NewGuid(),
@@ -1055,12 +1189,12 @@ public partial class PortfolioViewModel
             RealizedPnl: null,
             RealizedPnlPct: null,
             CashAmount: amount,
-            CashAccountId: TxCashAccount?.Id,
+            CashAccountId: cashAccId,
             Note: TxNote);
 
         await _txService.RecordAsync(trade);
 
-        await WriteFeeTradeIfAnyAsync(fee, TxCashAccount?.Id, tradeDate,
+        await WriteFeeTradeIfAnyAsync(fee, cashAccId, tradeDate,
             $"{TxNote} 手續費", null, trade.Id);
 
         await ReloadAccountBalancesAsync();
@@ -1085,13 +1219,13 @@ public partial class PortfolioViewModel
         decimal total;
         if (TxDivIsTotalMode)
         {
-            if (!decimal.TryParse(TxDivTotalInput, out total) || total <= 0)
+            if (!ParseHelpers.TryParseDecimal(TxDivTotalInput, out total) || total <= 0)
             { TxError = "總股息金額無效"; return; }
             perShare = TxDivPosition.Quantity > 0 ? total / TxDivPosition.Quantity : 0;
         }
         else
         {
-            if (!decimal.TryParse(TxDivPerShare, out perShare) || perShare <= 0)
+            if (!ParseHelpers.TryParseDecimal(TxDivPerShare, out perShare) || perShare <= 0)
             { TxError = "每股股利無效"; return; }
             total = perShare * TxDivPosition.Quantity;
         }
@@ -1104,7 +1238,7 @@ public partial class PortfolioViewModel
                       ? TxDivPosition.Symbol
                       : TxDivPosition.Name;
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
-        var cashAccId = TxUseCashAccount ? TxCashAccount?.Id : null;
+        var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
 
         var trade = new Trade(
             Id: Guid.NewGuid(),
@@ -1135,7 +1269,7 @@ public partial class PortfolioViewModel
     {
         if (TxStockDivPosition is null)
         { TxError = "請選擇股票"; return; }
-        if (!int.TryParse(TxStockDivNewShares, out var newShares) || newShares <= 0)
+        if (!ParseHelpers.TryParseInt(TxStockDivNewShares, out var newShares) || newShares <= 0)
         { TxError = "配股數無效"; return; }
 
         var divName = string.IsNullOrEmpty(TxStockDivPosition.Name)
@@ -1178,28 +1312,29 @@ public partial class PortfolioViewModel
     {
         if (!ParseHelpers.TryParseDecimal(TxAmount, out var amount) || amount <= 0)
         { TxError = "金額無效"; return; }
-        if (CashAccounts.Count == 0)
-        { TxError = "尚未建立帳戶，請先至「帳戶」分頁新增"; return; }
-        if (TxCashAccount is null)
-        { TxError = "請選擇帳戶"; return; }
         var fee = ParseOptionalFee(out var feeError);
         if (feeError is not null)
         { TxError = feeError; return; }
+
+        var cashAccId = await ResolveCashAccountIdAsync();
+        if (cashAccId is null)
+        { TxError = "請選擇帳戶"; return; }
+        var accountName = TxCashAccount?.Name ?? TxCashAccountName.Trim();
 
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         var cleanNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
 
         var trade = new Trade(
-            Id: Guid.NewGuid(), Symbol: TxCashAccount.Name, Exchange: "",
-            Name: TxCashAccount.Name, Type: type,
+            Id: Guid.NewGuid(), Symbol: accountName, Exchange: "",
+            Name: accountName, Type: type,
             TradeDate: tradeDate,
             Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
-            CashAmount: amount, CashAccountId: TxCashAccount.Id,
+            CashAmount: amount, CashAccountId: cashAccId,
             Note: cleanNote);
         await _txService.RecordAsync(trade);
 
-        await WriteFeeTradeIfAnyAsync(fee, TxCashAccount.Id, tradeDate,
-            $"{TxCashAccount.Name} 手續費", cleanNote, trade.Id);
+        await WriteFeeTradeIfAnyAsync(fee, cashAccId, tradeDate,
+            $"{accountName} 手續費", cleanNote, trade.Id);
 
         await ReloadAccountBalancesAsync();
         CloseTxDialog();
@@ -1303,7 +1438,7 @@ public partial class PortfolioViewModel
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         var liabName = TxLoanLabel.Trim();
         var cleanNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
-        var cashAccId = TxUseCashAccount ? TxCashAccount?.Id : null;
+        var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
 
         var trade = new Trade(
             Id: Guid.NewGuid(), Symbol: liabName, Exchange: string.Empty,

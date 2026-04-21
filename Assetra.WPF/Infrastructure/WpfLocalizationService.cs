@@ -1,7 +1,21 @@
 using System.Windows;
 using Assetra.Core.Interfaces;
+using Serilog;
 
 namespace Assetra.WPF.Infrastructure;
+
+/// <summary>
+/// Null-object implementation of <see cref="ILocalizationService"/> that always returns
+/// the supplied fallback value. Used in tests and ViewModels constructed without DI.
+/// </summary>
+internal sealed class NullLocalizationService : ILocalizationService
+{
+    public static readonly NullLocalizationService Instance = new();
+    public string CurrentLanguage => "zh-TW";
+    public event EventHandler? LanguageChanged { add { } remove { } }
+    public string Get(string key, string fallback = "") => fallback;
+    public void SetLanguage(string languageCode) { }
+}
 
 /// <summary>
 /// Swaps a WPF <see cref="ResourceDictionary"/> named after the language code
@@ -41,7 +55,7 @@ public sealed class WpfLocalizationService : ILocalizationService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[WpfLocalizationService] language switch failed: {ex.Message}");
+            Log.Warning(ex, "Failed to switch language to {LanguageCode}", languageCode);
         }
     }
 }

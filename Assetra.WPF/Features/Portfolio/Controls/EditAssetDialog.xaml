@@ -168,9 +168,7 @@
                             Padding="14,0"
                             Command="{Binding SaveEditAssetCommand}"
                             Style="{StaticResource BtnPrimary}">
-                            <TextBlock
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Text="{DynamicResource Portfolio.EditAsset.Update}" />
+                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.EditAsset.Update}" />
                         </Button>
                     </StackPanel>
                 </Border>

@@ -1,5 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Assetra.Core.Interfaces;
 using Assetra.WPF.Infrastructure;
 using Wpf.Ui.Appearance;
@@ -151,6 +154,20 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         };
         await _settings.SaveAsync(updated);
     }
+
+    [RelayCommand]
+    private void OpenDataFolder()
+    {
+        var folder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "Assetra");
+        if (Directory.Exists(folder))
+            Process.Start(new ProcessStartInfo("explorer.exe", folder) { UseShellExecute = true });
+    }
+
+    public string DataFolderPath => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "Assetra");
 
     public void Dispose()
     {

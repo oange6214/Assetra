@@ -1,7 +1,6 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Assetra.Core.Interfaces;
 using Assetra.WPF.Infrastructure;
@@ -50,16 +49,13 @@ public partial class StatusBarViewModel : ObservableObject, IDisposable
             .DisposeWith(_disposables);
     }
 
-    private static string GetString(string key, string fallback) =>
-        Application.Current?.TryFindResource(key) as string ?? fallback;
-
     private void UpdateStatus(DateTime now)
     {
         ClockText = now.ToString("HH:mm:ss");
         IsMarketOpen = IsTwseOpen(now);
         MarketStatusText = IsMarketOpen
-            ? GetString("StatusBar.MarketOpen", "開盤中")
-            : GetString("StatusBar.MarketClosed", "休市");
+            ? _localization.Get("StatusBar.MarketOpen", "開盤中")
+            : _localization.Get("StatusBar.MarketClosed", "休市");
     }
 
     private static bool IsTwseOpen(DateTime now)

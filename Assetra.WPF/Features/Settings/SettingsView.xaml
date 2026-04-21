@@ -155,6 +155,54 @@
                 </Grid>
             </Border>
 
+            <!--  ── 資料 ──  -->
+            <TextBlock
+                Margin="0,0,0,8"
+                FontSize="{StaticResource FontSizeMd}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource Settings.Section.Data}" />
+
+            <Border
+                Margin="0,0,0,24"
+                Padding="16,12"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource RadiusSm}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelCol" Width="Auto" MinWidth="130" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" MinHeight="40" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0" Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Settings.DataDir}" />
+                    <StackPanel
+                        Grid.Row="0" Grid.Column="1"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                        <TextBlock
+                            Margin="0,0,12,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{Binding DataFolderPath}"
+                            TextTrimming="CharacterEllipsis" />
+                        <Button
+                            Command="{Binding OpenDataFolderCommand}"
+                            Content="{DynamicResource Settings.OpenDir}"
+                            Style="{StaticResource BtnGhost}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
         </StackPanel>
     </ScrollViewer>
 </UserControl>

@@ -5,8 +5,16 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AnalysisLevel>latest</AnalysisLevel>
+    <!--
+      CS8826  : Partial method signature differences — MVVM Toolkit source-gen uses '_' discard names
+                while the handwritten partial uses named parameters. Purely cosmetic, safe to suppress.
+      MVVMTK0034 : Intentional direct field access to bypass OnPropertyChanged in PortfolioViewModel.
+      CS0618  : LiveCharts HasGlobalSKTypeface is obsolete; replacement (HasTextSettings) requires
+                separate testing. Suppress until migration is done.
+    -->
+    <NoWarn>$(NoWarn);CS8826;MVVMTK0034;CS0618</NoWarn>
   </PropertyGroup>
 
   <!-- 自動從 git tag 推算版本（MinVer）
@@ -18,7 +26,7 @@
     <MinVerTagPrefix>v</MinVerTagPrefix>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MinVer" Version="6.0.0">
+    <PackageReference Include="MinVer">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>

@@ -10,6 +10,7 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Portfolio;
 
@@ -20,6 +21,7 @@ namespace Assetra.WPF.Features.Portfolio;
 public sealed partial class PortfolioHistoryViewModel : ObservableObject
 {
     private readonly IPortfolioSnapshotRepository _repo;
+    private readonly ILocalizationService _localization;
 
     /// <summary>Full snapshot history (all dates), cached on each DB load.</summary>
     private IReadOnlyList<PortfolioDailySnapshot> _allSnapshots = [];
@@ -43,9 +45,12 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     partial void OnHasHistoryChanged(bool _) => IsHistoryPanelVisible = HasHistory && IsChartVisible;
     partial void OnIsChartVisibleChanged(bool _) => IsHistoryPanelVisible = HasHistory && IsChartVisible;
 
-    public PortfolioHistoryViewModel(IPortfolioSnapshotRepository repo)
+    public PortfolioHistoryViewModel(
+        IPortfolioSnapshotRepository repo,
+        ILocalizationService? localization = null)
     {
         _repo = repo;
+        _localization = localization ?? NullLocalizationService.Instance;
     }
 
     // Public API
@@ -172,6 +177,6 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         return SKColor.Parse(hexFallback);
     }
 
-    private static string GetString(string key, string fallback) =>
-        Application.Current?.TryFindResource(key) as string ?? fallback;
+    private string GetString(string key, string fallback) =>
+        _localization.Get(key, fallback);
 }

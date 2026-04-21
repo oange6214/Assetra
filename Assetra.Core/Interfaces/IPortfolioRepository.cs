@@ -15,6 +15,7 @@ public interface IPortfolioRepository
         string? displayName, AssetType assetType,
         CancellationToken ct = default);
     Task ArchiveAsync(Guid id);
+    Task UnarchiveAsync(Guid id);
     /// <summary>Count of Trade rows referencing <paramref name="id"/> via <c>portfolio_entry_id</c>.</summary>
     Task<int> HasTradeReferencesAsync(Guid id, CancellationToken ct = default);
 }

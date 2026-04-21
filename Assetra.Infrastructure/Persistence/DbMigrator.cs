@@ -1,5 +1,7 @@
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 
@@ -12,6 +14,15 @@ namespace Assetra.Infrastructure.Persistence;
 /// </summary>
 public static class DbMigrator
 {
+    private static ILogger _log = NullLogger.Instance;
+
+    /// <summary>
+    /// Optionally supply a logger so migration warnings are visible in the application log.
+    /// Call before <see cref="MigrateAsync"/>.
+    /// </summary>
+    public static void Configure(ILogger logger) =>
+        _log = logger ?? NullLogger.Instance;
+
     private static readonly JsonSerializerOptions JsonOpts =
         new() { PropertyNameCaseInsensitive = true };
 
@@ -56,7 +67,10 @@ public static class DbMigrator
             foreach (var e in data.Entries)
                 await repo.AddAsync(e).ConfigureAwait(false);
         }
-        catch { /* ignore — migration is best-effort */ }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "Portfolio JSON migration failed — skipping import from {Path}", path);
+        }
     }
 
     private static async Task MigrateAlertsAsync(string dataDir, IAlertRepository repo)
@@ -75,7 +89,10 @@ public static class DbMigrator
             foreach (var r in data.Rules)
                 await repo.AddAsync(r).ConfigureAwait(false);
         }
-        catch { /* ignore — migration is best-effort */ }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "Alerts JSON migration failed — skipping import from {Path}", path);
+        }
     }
 
     // DTOs matching the JSON file structure from *JsonRepository classes

@@ -16,6 +16,7 @@
             <converters:CurrencyConverter x:Key="CurrencyConverter" />
             <converters:TradeTypeConverter x:Key="TradeTypeConverter" />
             <converters:ResourceKeyToStringConverter x:Key="ResourceKeyToStringConverter" />
+            <converters:ZeroToVisibleConverter x:Key="ZeroToVisibleConverter" />
 
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemesDictionary Theme="Dark" />

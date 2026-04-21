@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Assetra.Core.Interfaces;
@@ -15,6 +14,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
     private readonly IAlertRepository _repo;
     private readonly IStockSearchService _search;
     private readonly ISnackbarService _snackbar;
+    private readonly ILocalizationService _localization;
     private readonly ICurrencyService? _currencyService;
     private IDisposable? _subscription;
 
@@ -44,11 +44,13 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         IStockService stockService,
         IScheduler uiScheduler,
         ISnackbarService snackbar,
+        ILocalizationService localization,
         ICurrencyService? currencyService = null)
     {
         _repo = repo;
         _search = search;
         _snackbar = snackbar;
+        _localization = localization;
         _currencyService = currencyService;
 
         _subscription = stockService.QuoteStream
@@ -198,6 +200,6 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         _subscription?.Dispose();
     }
 
-    private static string GetString(string key, string fallback) =>
-        Application.Current?.TryFindResource(key) as string ?? fallback;
+    private string GetString(string key, string fallback) =>
+        _localization.Get(key, fallback);
 }

@@ -206,7 +206,7 @@
             Placeholder="{DynamicResource Portfolio.Filter.SearchPositions}"
             Text="{Binding FilterText}">
             <controls:SearchBox.RightContent>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                     <CheckBox
                         Margin="0,0,8,0"
                         VerticalAlignment="Center"
@@ -261,9 +261,7 @@
                         HorizontalAlignment="Center"
                         Command="{Binding GlobalAddCommand}"
                         Style="{StaticResource BtnPrimary}">
-                        <TextBlock
-                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                            Text="{DynamicResource Portfolio.Empty.Cta}" />
+                        <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Empty.Cta}" />
                     </Button>
                 </StackPanel>
             </Border>
@@ -705,7 +703,7 @@
                                         FontSize="{StaticResource FontSizeSm}"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="{Binding PercentOfPortfolio, StringFormat={}{0:F1}%}" />
-                                    <Grid Margin="0,3,0,0" Height="3">
+                                    <Grid Height="3" Margin="0,3,0,0">
                                         <Border Background="{DynamicResource AppBorder}" CornerRadius="1.5" />
                                         <Border
                                             HorizontalAlignment="Left"
@@ -728,9 +726,7 @@
             </DataGrid>
 
             <!--  Empty state  -->
-            <Border
-                Padding="32"
-                Visibility="{Binding HasNoPositions, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Padding="32" Visibility="{Binding HasNoPositions, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock
                         Margin="0,0,0,12"
@@ -756,9 +752,7 @@
                         HorizontalAlignment="Center"
                         Command="{Binding GlobalAddCommand}"
                         Style="{StaticResource BtnPrimary}">
-                        <TextBlock
-                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                            Text="{DynamicResource Portfolio.Empty.Cta}" />
+                        <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Empty.Cta}" />
                     </Button>
                 </StackPanel>
             </Border>

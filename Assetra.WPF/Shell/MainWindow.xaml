@@ -23,217 +23,191 @@
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 
-    <!--  Keyboard shortcuts  -->
-    <ui:FluentWindow.InputBindings>
-        <KeyBinding
+  <!--  Keyboard shortcuts  -->
+  <ui:FluentWindow.InputBindings>
+    <KeyBinding
             Key="K"
             Command="{Binding ToggleSearchCommand}"
             Modifiers="Ctrl" />
-        <KeyBinding
+    <KeyBinding
             Key="Left"
             Command="{Binding NavRail.GoBackCommand}"
             Modifiers="Alt" />
-        <KeyBinding
+    <KeyBinding
             Key="Right"
             Command="{Binding NavRail.GoForwardCommand}"
             Modifiers="Alt" />
-    </ui:FluentWindow.InputBindings>
+  </ui:FluentWindow.InputBindings>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <!--  TitleBar  -->
-            <RowDefinition Height="*" />
-            <!--  NavRail + Content  -->
-            <RowDefinition Height="Auto" />
-            <!--  Status bar  -->
-        </Grid.RowDefinitions>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <!--  TitleBar  -->
+      <RowDefinition Height="*" />
+      <!--  NavRail + Content  -->
+      <RowDefinition Height="Auto" />
+      <!--  Status bar  -->
+    </Grid.RowDefinitions>
 
-        <!--  ── Title Bar ──  -->
-
-        <Border
+    <!--  ── Title Bar ──  -->
+    <Border
             Grid.Row="0"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorderLight}"
             BorderThickness="0,0,0,1">
-            <ui:TitleBar
+      <ui:TitleBar
                 x:Name="AppTitleBar"
                 Title="{DynamicResource App.Title}"
                 Background="Transparent"
                 Foreground="{DynamicResource AppTextPrimary}">
-                <ui:TitleBar.Icon>
-                    <!--  Vector icon — scales without blur at any DPI  -->
-                    <Viewbox Width="20" Height="20" RenderOptions.EdgeMode="Unspecified">
-                        <Canvas Width="100" Height="100">
-                            <!--  Green rounded-square background  -->
-                            <Rectangle Width="100" Height="100" RadiusX="17" RadiusY="17" Fill="#16A34A" />
-                            <!--  Bar 1 (short)  -->
-                            <Rectangle Canvas.Left="14" Canvas.Top="58" Width="19" Height="27" RadiusX="3" RadiusY="3" Fill="#FFFFFFBF" />
-                            <!--  Bar 2 (medium)  -->
-                            <Rectangle Canvas.Left="41" Canvas.Top="42" Width="19" Height="43" RadiusX="3" RadiusY="3" Fill="#FFFFFFDF" />
-                            <!--  Bar 3 (tall)  -->
-                            <Rectangle Canvas.Left="68" Canvas.Top="23" Width="19" Height="62" RadiusX="3" RadiusY="3" Fill="White" />
-                            <!--  Trend line  -->
-                            <Polyline
-                                Points="23,58 50,42 77,23"
-                                Opacity="0.9"
-                                Stroke="White"
-                                StrokeEndLineCap="Round"
-                                StrokeLineJoin="Round"
-                                StrokeStartLineCap="Round"
-                                StrokeThickness="5" />
-                            <!--  Dots at bar tops  -->
-                            <Ellipse Canvas.Left="18" Canvas.Top="53" Width="10" Height="10" Fill="White" />
-                            <Ellipse Canvas.Left="45" Canvas.Top="37" Width="10" Height="10" Fill="White" />
-                            <Ellipse Canvas.Left="72" Canvas.Top="18" Width="10" Height="10" Fill="White" />
-                        </Canvas>
-                    </Viewbox>
-                </ui:TitleBar.Icon>
-                <ui:TitleBar.Header>
-                    <!--
+
+        <ui:TitleBar.Icon>
+          <ui:ImageIcon Source="{StaticResource AssetraLogo}" />
+        </ui:TitleBar.Icon>
+
+        <ui:TitleBar.Header>
+          <!--
                         Grid (Auto | * | Auto) prevents DockPanel clipping when the
                         WPF-UI header region is narrower than expected.  The centre
                         column absorbs all slack; neither side ever gets clipped.
                     -->
-                    <Grid VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+          <Grid VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-                        <!--  Left: Back / Forward / Search  -->
-                        <StackPanel Grid.Column="0" Orientation="Horizontal">
-                            <Button
+            <!--  Left: Back / Forward / Search  -->
+            <StackPanel
+                            Grid.Column="0"
+                            Margin="-4,0,0,0"
+                            Orientation="Horizontal">
+              <Button
                                 Margin="4,0,0,0"
                                 Command="{Binding NavRail.GoBackCommand}"
-                                FocusVisualStyle="{x:Null}"
                                 Style="{StaticResource BtnIcon}"
                                 ToolTip="{DynamicResource Nav.GoBack}">
-                                <TextBlock
+                <TextBlock
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="{StaticResource FontSizeBase}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="&#xE112;" />
-                            </Button>
-                            <Button
+              </Button>
+              <Button
                                 Margin="2,0,0,0"
                                 Command="{Binding NavRail.GoForwardCommand}"
-                                FocusVisualStyle="{x:Null}"
                                 Style="{StaticResource BtnIcon}"
                                 ToolTip="{DynamicResource Nav.GoForward}">
-                                <TextBlock
+                <TextBlock
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="{StaticResource FontSizeBase}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="&#xE111;" />
-                            </Button>
-                            <Button
+              </Button>
+              <Button
                                 x:Name="SearchIconBtn"
                                 Margin="8,0,0,0"
                                 Command="{Binding ToggleSearchCommand}"
-                                FocusVisualStyle="{x:Null}"
                                 Style="{StaticResource BtnIcon}"
                                 ToolTip="Ctrl+K">
-                                <TextBlock
+                <TextBlock
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="{StaticResource FontSizeMd}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="&#xE721;" />
-                            </Button>
-                        </StackPanel>
+              </Button>
+            </StackPanel>
 
-                        <!--
+            <!--
                             Right: Theme / Settings
                             Margin right 8 keeps a small gap before the DWM chrome area.
                         -->
-                        <StackPanel
+            <StackPanel
                             Grid.Column="2"
                             Margin="0,0,8,0"
                             Orientation="Horizontal">
-                            <Button
+              <Button
                                 Margin="0,0,4,0"
                                 Command="{Binding ToggleThemeCommand}"
-                                FocusVisualStyle="{x:Null}"
                                 Style="{StaticResource BtnIcon}"
                                 ToolTip="{Binding ThemeToggleLabel}">
-                                <TextBlock
+                <TextBlock
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="{StaticResource FontSizeMd}"
                                     Foreground="{DynamicResource AppTextMuted}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="&#xE706;" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding CurrentTheme}" Value="Dark">
-                                                    <Setter Property="Text" Value="&#xE793;" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Button>
-                            <Button
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Text" Value="&#xE706;" />
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding CurrentTheme}" Value="Dark">
+                          <Setter Property="Text" Value="&#xE793;" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+              </Button>
+              <Button
                                 Command="{Binding GoToSettingsCommand}"
-                                FocusVisualStyle="{x:Null}"
                                 Style="{StaticResource BtnIcon}"
                                 ToolTip="{DynamicResource Nav.Settings}">
-                                <TextBlock
+                <TextBlock
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="{StaticResource FontSizeMd}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="&#xE713;" />
-                            </Button>
-                        </StackPanel>
+              </Button>
+            </StackPanel>
 
-                    </Grid>
-                </ui:TitleBar.Header>
-            </ui:TitleBar>
-        </Border>
+          </Grid>
+        </ui:TitleBar.Header>
+      </ui:TitleBar>
+    </Border>
 
-        <!--  ── Row 1: Left NavRail | Content area ──  -->
-        <Grid Grid.Row="1">
-            <Grid.LayoutTransform>
-                <ScaleTransform ScaleX="{Binding Settings.UiScale}" ScaleY="{Binding Settings.UiScale}" />
-            </Grid.LayoutTransform>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <!--  NavRail — width driven by Border inside  -->
-                <ColumnDefinition Width="*" />
-                <!--  Content  -->
-            </Grid.ColumnDefinitions>
+    <!--  ── Row 1: Left NavRail | Content area ──  -->
+    <Grid Grid.Row="1">
+      <Grid.LayoutTransform>
+        <ScaleTransform ScaleX="{Binding Settings.UiScale}" ScaleY="{Binding Settings.UiScale}" />
+      </Grid.LayoutTransform>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <!--  NavRail — width driven by Border inside  -->
+        <ColumnDefinition Width="*" />
+        <!--  Content  -->
+      </Grid.ColumnDefinitions>
 
-            <!--  ── Left NavRail ──  -->
-            <shell:NavRailView Grid.Column="0" />
+      <!--  ── Left NavRail ──  -->
+      <shell:NavRailView Grid.Column="0" />
 
-            <!--  ── Content area (each feature view takes full width) ──  -->
-            <Grid Grid.Column="1">
+      <!--  ── Content area (each feature view takes full width) ──  -->
+      <Grid Grid.Column="1">
 
-                <!--  投資組合 (Portfolio)  -->
-                <Grid>
-                    <portfolio:PortfolioView DataContext="{Binding Portfolio}" Visibility="{Binding DataContext.NavRail.IsPortfolioActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-                <!--  財務總覽 / 配置  -->
-                <Grid d:Visibility="Collapsed">
-                    <allocation:FinancialOverviewView DataContext="{Binding FinancialOverview}" Visibility="{Binding DataContext.NavRail.IsFinancialOverviewActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-                <!--  警示  -->
-                <Grid d:Visibility="Collapsed">
-                    <alerts:AlertsView DataContext="{Binding Alerts}" Visibility="{Binding DataContext.NavRail.IsAlertsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-                <!--  設定  -->
-                <Grid d:Visibility="Collapsed">
-                    <settings:SettingsView DataContext="{Binding Settings}" Visibility="{Binding DataContext.NavRail.IsSettingsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-            </Grid>
+        <!--  投資組合 (Portfolio)  -->
+        <Grid>
+          <portfolio:PortfolioView DataContext="{Binding Portfolio}" Visibility="{Binding DataContext.NavRail.IsPortfolioActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
         </Grid>
 
-        <!--  Search backdrop — sits above content, behind the popup HWnd  -->
-        <Border
+        <!--  財務總覽 / 配置  -->
+        <Grid d:Visibility="Collapsed">
+          <allocation:FinancialOverviewView DataContext="{Binding FinancialOverview}" Visibility="{Binding DataContext.NavRail.IsFinancialOverviewActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        </Grid>
+
+        <!--  警示  -->
+        <Grid d:Visibility="Collapsed">
+          <alerts:AlertsView DataContext="{Binding Alerts}" Visibility="{Binding DataContext.NavRail.IsAlertsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        </Grid>
+
+        <!--  設定  -->
+        <Grid d:Visibility="Collapsed">
+          <settings:SettingsView DataContext="{Binding Settings}" Visibility="{Binding DataContext.NavRail.IsSettingsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        </Grid>
+
+      </Grid>
+    </Grid>
+
+    <!--  Search backdrop — sits above content, behind the popup HWnd  -->
+    <Border
             x:Name="SearchBackdrop"
             Grid.Row="0"
             Grid.RowSpan="3"
@@ -243,8 +217,8 @@
             Opacity="0.35"
             Visibility="{Binding IsSearchOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-        <!--  ── Search / Command Palette Popup (centered at top; dismiss on outside click) ──  -->
-        <Popup
+    <!--  ── Search / Command Palette Popup (centered at top; dismiss on outside click) ──  -->
+    <Popup
             x:Name="SearchPopup"
             AllowsTransparency="True"
             IsOpen="{Binding IsSearchOpen, Mode=TwoWay}"
@@ -252,7 +226,7 @@
             PlacementTarget="{Binding ElementName=MainShell}"
             PopupAnimation="Fade"
             StaysOpen="False">
-            <Border
+      <Border
                 Width="560"
                 MaxHeight="440"
                 Margin="12"
@@ -260,20 +234,20 @@
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
                 CornerRadius="{StaticResource RadiusLg}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
 
-                    <!--  Search input row  -->
-                    <Border
+          <!--  Search input row  -->
+          <Border
                         Grid.Row="0"
                         Padding="16,12"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,0,0,1">
-                        <DockPanel>
-                            <TextBlock
+            <DockPanel>
+              <TextBlock
                                 Margin="0,0,10,0"
                                 VerticalAlignment="Center"
                                 DockPanel.Dock="Left"
@@ -282,7 +256,7 @@
                                 Foreground="{DynamicResource AppTextMuted}"
                                 IsHitTestVisible="False"
                                 Text="&#xE721;" />
-                            <TextBox
+              <TextBox
                                 x:Name="SearchPaletteInput"
                                 VerticalContentAlignment="Center"
                                 Background="Transparent"
@@ -292,48 +266,100 @@
                                 FontSize="{StaticResource FontSizeMd}"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
-                                <TextBox.Style>
-                                    <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
-                                        <Style.Triggers>
-                                            <Trigger Property="Text" Value="">
-                                                <Setter Property="Background">
-                                                    <Setter.Value>
-                                                        <VisualBrush
+                <TextBox.Style>
+                  <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
+                    <Style.Triggers>
+                      <Trigger Property="Text" Value="">
+                        <Setter Property="Background">
+                          <Setter.Value>
+                            <VisualBrush
                                                             AlignmentX="Left"
                                                             AlignmentY="Center"
                                                             Stretch="None">
-                                                            <VisualBrush.Visual>
-                                                                <TextBlock
+                              <VisualBrush.Visual>
+                                <TextBlock
                                                                     FontFamily="{StaticResource FontBase}"
                                                                     FontSize="{StaticResource FontSizeMd}"
                                                                     Foreground="{DynamicResource AppTextMuted}"
                                                                     Text="{DynamicResource TitleBar.Search.Placeholder}" />
-                                                            </VisualBrush.Visual>
-                                                        </VisualBrush>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBox.Style>
-                            </TextBox>
-                        </DockPanel>
+                              </VisualBrush.Visual>
+                            </VisualBrush>
+                          </Setter.Value>
+                        </Setter>
+                      </Trigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBox.Style>
+              </TextBox>
+            </DockPanel>
+          </Border>
+
+          <!--  Results / hint  -->
+          <Grid Grid.Row="1">
+            <!--  Empty hint — shown when no results  -->
+            <TextBlock
+                            Margin="16,16"
+                            FontFamily="{StaticResource FontBase}"
+                            FontSize="{StaticResource FontSizeSm}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource TitleBar.Search.Hint}"
+                            Visibility="{Binding SearchResults.Count, Converter={StaticResource ZeroToVisibleConverter}}" />
+
+            <!--  Results list  -->
+            <ScrollViewer MaxHeight="360" VerticalScrollBarVisibility="Auto">
+              <ItemsControl Focusable="False" ItemsSource="{Binding SearchResults}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border
+                                            Padding="16,10"
+                                            Background="Transparent"
+                                            BorderBrush="{DynamicResource AppBorderLight}"
+                                            BorderThickness="0,0,0,1"
+                                            Cursor="Hand">
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="Auto" />
+                          <ColumnDefinition Width="*" />
+                          <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                                                    Grid.Column="0"
+                                                    MinWidth="60"
+                                                    FontFamily="{StaticResource FontBase}"
+                                                    FontSize="{StaticResource FontSizeBase}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding Symbol}" />
+                        <TextBlock
+                                                    Grid.Column="1"
+                                                    Margin="12,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    FontFamily="{StaticResource FontBase}"
+                                                    FontSize="{StaticResource FontSizeSm}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{Binding Name}"
+                                                    TextTrimming="CharacterEllipsis" />
+                        <TextBlock
+                                                    Grid.Column="2"
+                                                    Margin="8,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    FontFamily="{StaticResource FontBase}"
+                                                    FontSize="{StaticResource FontSizeXs}"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Text="{Binding Exchange}" />
+                      </Grid>
                     </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </Grid>
+        </Grid>
+      </Border>
+    </Popup>
 
-                    <!--  Recent / results area  -->
-                    <TextBlock
-                        Grid.Row="1"
-                        Margin="16,16"
-                        FontFamily="{StaticResource FontBase}"
-                        FontSize="{StaticResource FontSizeSm}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource TitleBar.Search.Hint}" />
-                </Grid>
-            </Border>
-        </Popup>
-
-        <!--  ── In-App Snackbar (ZIndex=15, bottom-center) ──  -->
-        <snackbar:SnackbarView
+    <!--  ── In-App Snackbar (ZIndex=15, bottom-center) ──  -->
+    <snackbar:SnackbarView
             Grid.Row="1"
             Margin="0,0,0,16"
             HorizontalAlignment="Center"
@@ -341,8 +367,8 @@
             Panel.ZIndex="15"
             DataContext="{Binding Snackbar}" />
 
-        <!--  ── Status Bar ──  -->
-        <statusbar:StatusBarView Grid.Row="2" DataContext="{Binding StatusBar}" />
+    <!--  ── Status Bar ──  -->
+    <statusbar:StatusBarView Grid.Row="2" DataContext="{Binding StatusBar}" />
 
-    </Grid>
+  </Grid>
 </ui:FluentWindow>

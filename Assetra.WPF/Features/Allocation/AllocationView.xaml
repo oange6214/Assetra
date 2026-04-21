@@ -51,7 +51,10 @@
         </Border>
 
         <!--  ── 配置概覽 tab ───────────────────────────────────────────────  -->
-        <Grid Grid.Row="1" d:Visibility="Visible" Visibility="{Binding IsOverviewTab, Converter={StaticResource BoolToVis}}">
+        <Grid
+            Grid.Row="1"
+            d:Visibility="Visible"
+            Visibility="{Binding IsOverviewTab, Converter={StaticResource BoolToVis}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" MinWidth="320" />
                 <ColumnDefinition Width="*" MinWidth="360" />
@@ -81,9 +84,11 @@
                         Text="{DynamicResource Allocation.Overview.Title}" />
 
                     <!--  Treemap  -->
-                    <!--  UseLayoutRounding forces WPF to snap all layout coordinates to whole
-                          device pixels before compositing, so no sub-pixel hairlines appear
-                          between tiles regardless of DPI scaling.  -->
+                    <!--
+                        UseLayoutRounding forces WPF to snap all layout coordinates to whole
+                        device pixels before compositing, so no sub-pixel hairlines appear
+                        between tiles regardless of DPI scaling.
+                    -->
                     <ItemsControl
                         Grid.Row="1"
                         ItemsSource="{Binding AllocationRows}"
@@ -107,17 +112,19 @@
                         </ItemsControl.ItemContainerStyle>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                                <!--  Flat tile — no CornerRadius, no Border.
-                                      CornerRadius creates larger apparent gaps at 4-tile corners
-                                      (each arc bites into the gutter) vs. straight edges, giving
-                                      the illusion of uneven spacing even when gaps are pixel-exact.
-                                      BorderThickness adds asymmetry: interior edges get +2 px (one
-                                      per side) while panel edges only get +1 px.
-                                      Gap is handled solely by TreemapPanel's halfGap inset.  -->
+                                <!--
+                                    Flat tile — no CornerRadius, no Border.
+                                    CornerRadius creates larger apparent gaps at 4-tile corners
+                                    (each arc bites into the gutter) vs. straight edges, giving
+                                    the illusion of uneven spacing even when gaps are pixel-exact.
+                                    BorderThickness adds asymmetry: interior edges get +2 px (one
+                                    per side) while panel edges only get +1 px.
+                                    Gap is handled solely by TreemapPanel's halfGap inset.
+                                -->
                                 <Border
+                                    controls:ToolTipBehavior.FollowMouse="True"
                                     Background="{Binding PnlColorBrush}"
-                                    ClipToBounds="True"
-                                    controls:ToolTipBehavior.FollowMouse="True">
+                                    ClipToBounds="True">
                                     <Border.ToolTip>
                                         <ToolTip>
                                             <StackPanel MinWidth="160">
@@ -377,7 +384,10 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                                <StackPanel Margin="0,0,8,0" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <StackPanel
+                                    Margin="0,0,8,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center">
                                     <TextBlock
                                         HorizontalAlignment="Right"
                                         FontFamily="{StaticResource FontTabular}"
@@ -410,7 +420,10 @@
         </Grid>
 
         <!--  ── 再平衡 tab ──────────────────────────────────────────────────  -->
-        <Grid Grid.Row="1" d:Visibility="Collapsed" Visibility="{Binding IsRebalanceTab, Converter={StaticResource BoolToVis}}">
+        <Grid
+            Grid.Row="1"
+            d:Visibility="Collapsed"
+            Visibility="{Binding IsRebalanceTab, Converter={StaticResource BoolToVis}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <!--  header card  -->

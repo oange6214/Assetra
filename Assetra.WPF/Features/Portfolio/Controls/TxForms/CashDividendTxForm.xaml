@@ -2,6 +2,7 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.TxForms.CashDividendTxForm"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
@@ -67,9 +68,14 @@
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.DivPerShare}" />
             <TextBox
-                Margin="0,0,0,12"
+                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                 Style="{StaticResource FormTextBox}"
                 Text="{Binding TxDivPerShare, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock
+                Margin="0,0,0,12"
+                Style="{StaticResource FormFieldError}"
+                Text="{Binding TxDivPerShareError}"
+                Visibility="{Binding TxDivPerShareError, Converter={StaticResource StringToVisibilityConverter}}" />
         </StackPanel>
 
         <!--  總額模式  -->
@@ -81,9 +87,14 @@
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.DivTotalAmount}" />
             <TextBox
-                Margin="0,0,0,12"
+                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                 Style="{StaticResource FormTextBox}"
                 Text="{Binding TxDivTotalInput, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock
+                Margin="0,0,0,12"
+                Style="{StaticResource FormFieldError}"
+                Text="{Binding TxDivTotalInputError}"
+                Visibility="{Binding TxDivTotalInputError, Converter={StaticResource StringToVisibilityConverter}}" />
         </StackPanel>
 
         <!--  持有股數 + 合計（auto-calculated）  -->
@@ -150,9 +161,14 @@
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Fee}" />
         <TextBox
-            Margin="0,0,0,12"
+            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
             Style="{StaticResource FormTextBox}"
             Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock
+            Margin="0,0,0,12"
+            Style="{StaticResource FormFieldError}"
+            Text="{Binding TxFeeError}"
+            Visibility="{Binding TxFeeError, Converter={StaticResource StringToVisibilityConverter}}" />
 
         <!--  存入現金帳戶 — checkbox + dropdown  -->
         <CheckBox

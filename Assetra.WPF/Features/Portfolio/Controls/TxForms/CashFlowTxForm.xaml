@@ -2,6 +2,7 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.TxForms.CashFlowTxForm"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
@@ -18,9 +19,14 @@
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Amount}" />
         <TextBox
-            Margin="0,0,0,12"
+            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
             Style="{StaticResource FormTextBox}"
             Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock
+            Margin="0,0,0,12"
+            Style="{StaticResource FormFieldError}"
+            Text="{Binding TxAmountError}"
+            Visibility="{Binding TxAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
 
         <TextBlock
             Margin="0,0,0,4"
@@ -55,9 +61,14 @@
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Fee}" />
         <TextBox
-            Margin="0,0,0,12"
+            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
             Style="{StaticResource FormTextBox}"
             Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock
+            Margin="0,0,0,12"
+            Style="{StaticResource FormFieldError}"
+            Text="{Binding TxFeeError}"
+            Visibility="{Binding TxFeeError, Converter={StaticResource StringToVisibilityConverter}}" />
 
         <TextBlock
             Margin="0,0,0,4"

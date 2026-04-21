@@ -155,7 +155,7 @@
             Placeholder="{DynamicResource Portfolio.Filter.SearchAccounts}"
             Text="{Binding CashFilterText}">
             <controls:SearchBox.RightContent>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                     <CheckBox
                         Margin="0,0,8,0"
                         VerticalAlignment="Center"
@@ -177,9 +177,7 @@
                                 FontFamily="Segoe MDL2 Assets"
                                 FontSize="10"
                                 Text="&#xE710;" />
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Text="{DynamicResource Portfolio.AddCash}" />
+                            <TextBlock VerticalAlignment="Center" Text="{DynamicResource Portfolio.AddCash}" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -247,12 +245,13 @@
                 </DataGrid.CellStyle>
                 <DataGrid.RowStyle>
                     <Style BasedOn="{StaticResource AppDataGridRowSelectable}" TargetType="DataGridRow">
-                        <!--  Tag carries the parent ViewModel so the ContextMenu (which lives
-                              outside the visual tree) can reach it via PlacementTarget.Tag.
-                              Using x:Reference CashGrid here would create a cyclical dependency
-                              because the RowStyle is defined on CashGrid itself.  -->
-                        <Setter Property="Tag"
-                                Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                        <!--
+                            Tag carries the parent ViewModel so the ContextMenu (which lives
+                            outside the visual tree) can reach it via PlacementTarget.Tag.
+                            Using x:Reference CashGrid here would create a cyclical dependency
+                            because the RowStyle is defined on CashGrid itself.
+                        -->
+                        <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
                         <Setter Property="ContextMenu">
                             <Setter.Value>
                                 <ContextMenu>
@@ -274,7 +273,7 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                                     <!--  預設徽章 — 僅預設帳戶顯示  -->
                                     <TextBlock
                                         Margin="0,0,6,0"

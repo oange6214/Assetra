@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -201,6 +202,12 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
 
     private void Rebuild()
     {
+        if (Application.Current?.Dispatcher.CheckAccess() == false)
+        {
+            Application.Current.Dispatcher.InvokeAsync(Rebuild);
+            return;
+        }
+
         if (IsEditingTargets)
             return;  // don't overwrite user's in-flight edits
 

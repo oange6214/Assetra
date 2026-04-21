@@ -78,6 +78,7 @@
 
                 <!--  Scrollable content  -->
                 <ScrollViewer
+                    x:Name="ContentScrollViewer"
                     Grid.Row="1"
                     Padding="20,16"
                     VerticalScrollBarVisibility="Auto">

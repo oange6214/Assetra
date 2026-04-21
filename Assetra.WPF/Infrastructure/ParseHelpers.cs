@@ -28,4 +28,15 @@ internal static class ParseHelpers
     /// </summary>
     public static decimal? ParseDecimalOrNull(string? s) =>
         TryParseDecimal(s, out var v) ? v : null;
+
+    /// <summary>
+    /// Parses <paramref name="s"/> as an integer, accepting thousand separators (commas).
+    /// Returns <c>false</c> on null / whitespace / invalid input.
+    /// </summary>
+    public static bool TryParseInt(string? s, out int value)
+    {
+        if (string.IsNullOrWhiteSpace(s)) { value = 0; return false; }
+        return int.TryParse(s, NumberStyles.Integer | NumberStyles.AllowThousands,
+                            CultureInfo.InvariantCulture, out value);
+    }
 }

@@ -4,8 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:Assetra.WPF.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
@@ -91,7 +91,7 @@
                     FontFamily="{StaticResource FontTabular}"
                     FontSize="{StaticResource FontSizeXs}"
                     Foreground="{DynamicResource AppTextMuted}"
-                    Text="{Binding TradePageDisplay}" />
+                    Text="{Binding TradeFilter.TradePageDisplay}" />
 
                 <!--  清除篩選（有啟用中篩選時才顯示）  -->
                 <Button
@@ -100,11 +100,11 @@
                     Padding="8,0"
                     VerticalAlignment="Center"
                     VerticalContentAlignment="Center"
-                    Command="{Binding ClearTradeFiltersCommand}"
+                    Command="{Binding TradeFilter.ClearTradeFiltersCommand}"
                     DockPanel.Dock="Right"
                     Style="{StaticResource BtnGhost}"
-                    Visibility="{Binding HasActiveTradeFilter, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    Visibility="{Binding TradeFilter.HasActiveTradeFilter, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                         <TextBlock
                             Margin="0,0,4,0"
                             VerticalAlignment="Center"
@@ -138,7 +138,7 @@
                         Background="{DynamicResource AppBackground}"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="1"
-                        Content="{Binding TradeAssetFiltersDisplay}"
+                        Content="{Binding TradeFilter.TradeAssetFiltersDisplay}"
                         Cursor="Hand"
                         FontSize="{StaticResource FontSizeSm}"
                         Foreground="{DynamicResource AppTextPrimary}" />
@@ -201,7 +201,7 @@
                                             BorderThickness="0"
                                             FontSize="{StaticResource FontSizeSm}"
                                             Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding TradeAssetFiltersSearch, UpdateSourceTrigger=PropertyChanged}" />
+                                            Text="{Binding TradeFilter.TradeAssetFiltersSearch, UpdateSourceTrigger=PropertyChanged}" />
                                     </Grid>
                                 </Border>
 
@@ -210,7 +210,7 @@
                                     Height="30"
                                     Margin="0,0,0,8"
                                     HorizontalContentAlignment="Center"
-                                    Command="{Binding ClearTradeAssetFiltersCommand}"
+                                    Command="{Binding TradeFilter.ClearTradeAssetFiltersCommand}"
                                     Content="{DynamicResource Portfolio.Filter.ClearInPopup}"
                                     FontSize="{StaticResource FontSizeSm}"
                                     Style="{StaticResource BtnGhost}" />
@@ -220,7 +220,7 @@
                                     Grid.Row="2"
                                     MaxHeight="320"
                                     VerticalScrollBarVisibility="Auto">
-                                    <ItemsControl ItemsSource="{Binding TradeAssetFiltersView}">
+                                    <ItemsControl ItemsSource="{Binding TradeFilter.TradeAssetFiltersView}">
                                         <ItemsControl.Template>
                                             <ControlTemplate TargetType="ItemsControl">
                                                 <ItemsPresenter />
@@ -275,7 +275,7 @@
                         Background="{DynamicResource AppBackground}"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="1"
-                        Content="{Binding TradeTypeFiltersDisplay}"
+                        Content="{Binding TradeFilter.TradeTypeFiltersDisplay}"
                         Cursor="Hand"
                         FontSize="{StaticResource FontSizeSm}"
                         Foreground="{DynamicResource AppTextPrimary}" />
@@ -343,7 +343,7 @@
                                             BorderThickness="0"
                                             FontSize="{StaticResource FontSizeSm}"
                                             Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding TradeTypeFiltersSearch, UpdateSourceTrigger=PropertyChanged}" />
+                                            Text="{Binding TradeFilter.TradeTypeFiltersSearch, UpdateSourceTrigger=PropertyChanged}" />
                                     </Grid>
                                 </Border>
 
@@ -353,7 +353,7 @@
                                     Height="30"
                                     Margin="0,0,0,8"
                                     HorizontalContentAlignment="Center"
-                                    Command="{Binding ClearTradeTypeFiltersCommand}"
+                                    Command="{Binding TradeFilter.ClearTradeTypeFiltersCommand}"
                                     Content="{DynamicResource Portfolio.Filter.ClearInPopup}"
                                     FontSize="{StaticResource FontSizeSm}"
                                     Style="{StaticResource BtnGhost}" />
@@ -363,7 +363,7 @@
                                     Grid.Row="2"
                                     MaxHeight="260"
                                     VerticalScrollBarVisibility="Auto">
-                                    <ItemsControl ItemsSource="{Binding TradeTypeFiltersView}">
+                                    <ItemsControl ItemsSource="{Binding TradeFilter.TradeTypeFiltersView}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <CheckBox
@@ -387,16 +387,16 @@
                     Margin="8,0,0,0"
                     VerticalAlignment="Center"
                     DockPanel.Dock="Right"
-                    EndDate="{Binding TradeDateTo, Mode=TwoWay}"
+                    EndDate="{Binding TradeFilter.TradeDateTo, Mode=TwoWay}"
                     Placeholder="{DynamicResource Portfolio.Filter.DateRangePlaceholder}"
-                    StartDate="{Binding TradeDateFrom, Mode=TwoWay}" />
+                    StartDate="{Binding TradeFilter.TradeDateFrom, Mode=TwoWay}" />
 
                 <!--  搜尋框（最後 = 吃剩餘空間，響應式填滿）  -->
                 <controls:SearchBox
                     VerticalAlignment="Center"
                     IsInline="True"
                     Placeholder="{DynamicResource Portfolio.Filter.SearchTrades}"
-                    Text="{Binding TradeSearchText}" />
+                    Text="{Binding TradeFilter.TradeSearchText}" />
             </DockPanel>
         </Border>
 
@@ -421,7 +421,7 @@
                 HeadersVisibility="Column"
                 HorizontalScrollBarVisibility="Disabled"
                 IsReadOnly="True"
-                ItemsSource="{Binding TradesView}"
+                ItemsSource="{Binding TradeFilter.TradesView}"
                 RowHeight="{StaticResource DataGridRowHeight}"
                 SelectionMode="Single"
                 VirtualizingPanel.IsVirtualizing="True"
@@ -433,8 +433,10 @@
                     <Style BasedOn="{StaticResource AppDataGridCell}" TargetType="DataGridCell" />
                 </DataGrid.CellStyle>
                 <DataGrid.RowStyle>
-                    <!--  EventSetter on DataGridRow is more reliable than DataGrid.MouseDoubleClick:
-                          sender IS the row, so DataContext is always the trade item directly.  -->
+                    <!--
+                        EventSetter on DataGridRow is more reliable than DataGrid.MouseDoubleClick:
+                        sender IS the row, so DataContext is always the trade item directly.
+                    -->
                     <Style BasedOn="{StaticResource AppDataGridRowSelectable}" TargetType="DataGridRow">
                         <EventSetter Event="MouseLeftButtonUp" Handler="OnRowClick" />
                     </Style>
@@ -664,8 +666,8 @@
                     <ComboBox
                         Width="56"
                         Margin="0,0,8,0"
-                        ItemsSource="{Binding PageSizeOptions}"
-                        SelectedItem="{Binding TradePageSize, Mode=TwoWay}"
+                        ItemsSource="{Binding TradeFilter.PageSizeOptions}"
+                        SelectedItem="{Binding TradeFilter.TradePageSize, Mode=TwoWay}"
                         Style="{StaticResource FormComboBox}">
                         <ComboBox.Resources>
                             <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
@@ -675,7 +677,7 @@
                         VerticalAlignment="Center"
                         FontSize="{StaticResource FontSizeXs}"
                         Foreground="{DynamicResource AppTextMuted}"
-                        Text="{Binding TradePageDisplay}" />
+                        Text="{Binding TradeFilter.TradePageDisplay}" />
                 </StackPanel>
 
                 <!--  Page navigation — 頁碼按鈕清單 + 跳頁輸入  -->
@@ -689,7 +691,7 @@
                         Height="30"
                         Margin="0,0,4,0"
                         Padding="0"
-                        Command="{Binding TradePagePrevCommand}"
+                        Command="{Binding TradeFilter.TradePagePrevCommand}"
                         Style="{StaticResource BtnGhost}">
                         <iconPacks:PackIconMaterial
                             Width="14"
@@ -699,7 +701,7 @@
                     </Button>
 
                     <!--  頁碼按鈕（動態生成，當前頁高亮；省略號為純顯示）  -->
-                    <ItemsControl ItemsSource="{Binding TradePageNumbers}" VerticalAlignment="Center">
+                    <ItemsControl VerticalAlignment="Center" ItemsSource="{Binding TradeFilter.TradePageNumbers}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal" />
@@ -720,10 +722,10 @@
                                         Visibility="{Binding IsEllipsis, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                     <!--  頁碼按鈕 — 當前頁高亮；Padding=0 避免窄按鈕內容被切  -->
                                     <Button
-                                        MinWidth="30"
                                         Height="30"
+                                        MinWidth="30"
                                         Padding="4,0"
-                                        Command="{Binding DataContext.GoToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Command="{Binding DataContext.TradeFilter.GoToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         CommandParameter="{Binding Number}"
                                         Content="{Binding Number}"
                                         FontFamily="{StaticResource FontTabular}"
@@ -755,7 +757,7 @@
                         Height="30"
                         Margin="4,0,0,0"
                         Padding="0"
-                        Command="{Binding TradePageNextCommand}"
+                        Command="{Binding TradeFilter.TradePageNextCommand}"
                         Style="{StaticResource BtnGhost}">
                         <iconPacks:PackIconMaterial
                             Width="14"
@@ -779,10 +781,10 @@
                         FontFamily="{StaticResource FontTabular}"
                         FontSize="{StaticResource FontSizeSm}"
                         Style="{StaticResource FormTextBox}"
-                        Text="{Binding TradeJumpPageInput, UpdateSourceTrigger=PropertyChanged}"
+                        Text="{Binding TradeFilter.TradeJumpPageInput, UpdateSourceTrigger=PropertyChanged}"
                         TextAlignment="Center">
                         <TextBox.InputBindings>
-                            <KeyBinding Key="Enter" Command="{Binding JumpToPageCommand}" />
+                            <KeyBinding Key="Enter" Command="{Binding TradeFilter.JumpToPageCommand}" />
                         </TextBox.InputBindings>
                     </TextBox>
                     <TextBlock
@@ -792,7 +794,7 @@
                         FontSize="{StaticResource FontSizeXs}"
                         Foreground="{DynamicResource AppTextMuted}">
                         <Run Text="/" />
-                        <Run Text="{Binding TradeTotalPages, Mode=OneWay}" />
+                        <Run Text="{Binding TradeFilter.TradeTotalPages, Mode=OneWay}" />
                     </TextBlock>
                 </StackPanel>
             </DockPanel>

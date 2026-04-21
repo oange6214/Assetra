@@ -24,6 +24,7 @@ internal static class SqliteSchemaHelper
         "asset_group",
         "asset",
         "asset_event",
+        "loan_schedule",
     };
 
     /// <summary>
