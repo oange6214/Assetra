@@ -544,7 +544,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                             ?? (CashAccounts.Count > 0 ? CashAccounts[0] : null);
     }
 
-    partial void OnTxTypeChanged(string _)
+    partial void OnTxTypeChanged(string value)
     {
         OnPropertyChanged(nameof(TxTypeIsIncome));
         OnPropertyChanged(nameof(TxTypeIsCashDiv));
@@ -562,9 +562,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxError = string.Empty;
         UpdateSellTxPreview();
         if (TxTypeIsLoanRepay)
-#pragma warning disable CS4014
-            AutoFillLoanRepayAsync(TxLoanLabel);
-#pragma warning restore CS4014
+            _ = AutoFillLoanRepayAsync(TxLoanLabel);
     }
 
     partial void OnTxBuyAssetTypeChanged(string _)
@@ -1271,15 +1269,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             newShares,
             DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
             TxStockDivPosition.Id));
-
-        // 更新持倉股數（數量由 trade log 投影，只更新 display row）
-        var row = Positions.FirstOrDefault(p => p.AllEntryIds.Contains(TxStockDivPosition.Id));
-        if (row is not null)
-        {
-            row.Quantity += newShares;
-            row.Refresh();
-            _rebuildTotals();
-        }
 
         CloseTxDialog();
         await _loadTradesAsync();
