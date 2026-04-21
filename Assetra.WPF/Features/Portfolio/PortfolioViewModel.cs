@@ -561,7 +561,25 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         };
         SellPanel.SellCompleted += OnSellCompleted;
 
+        // Build the Account sub-VM before Transaction so that GetDefaultCashAccount
+        // (passed as a delegate to Transaction) can safely read Account.DefaultCashAccountId.
+        Account = services.Account ?? new SubViewModels.AccountDialogViewModel(
+            new SubViewModels.AccountDialogDependencies(
+                AccountUpsert: _accountUpsertWorkflowService,
+                AccountMutation: _accountMutationWorkflowService,
+                PositionMetadata: _positionMetadataWorkflowService,
+                AssetRepo: _assetRepo,
+                Snackbar: _snackbar,
+                CashAccounts: CashAccounts,
+                LoadCashAccountsAsync: LoadCashAccountsAsync,
+                ApplyDefaultCashAccountAsync: ApplyDefaultCashAccountAsync,
+                AskConfirm: AskConfirm,
+                RebuildTotals: RebuildTotals,
+                Localize: L));
+        Account.AccountChanged += OnAccountChanged;
+
         // Build the TransactionDialog sub-VM and wire its reload-callback events.
+        // Account must be initialized before Transaction (GetDefaultCashAccount delegate reads Account.DefaultCashAccountId)
         Transaction = services.Transaction ?? new SubViewModels.TransactionDialogViewModel(
             new SubViewModels.TransactionDialogDependencies(
                 TransactionWorkflow: _transactionWorkflowService,
@@ -588,24 +606,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 Localize: L));
         Transaction.TransactionCompleted += OnTransactionCompleted;
         Transaction.TradeDeleted += OnTradeDeleted;
-
-        // Build the Account sub-VM with delegates that give it access to parent-owned
-        // state (CashAccounts, settings, confirm dialog, totals rebuild).
-        Account = services.Account ?? new SubViewModels.AccountDialogViewModel(
-            new SubViewModels.AccountDialogDependencies(
-                AccountUpsert: _accountUpsertWorkflowService,
-                AccountMutation: _accountMutationWorkflowService,
-                PositionMetadata: _positionMetadataWorkflowService,
-                AssetRepo: _assetRepo,
-                Settings: _settingsService,
-                Snackbar: _snackbar,
-                CashAccounts: CashAccounts,
-                LoadCashAccountsAsync: LoadCashAccountsAsync,
-                ApplyDefaultCashAccountAsync: ApplyDefaultCashAccountAsync,
-                AskConfirm: AskConfirm,
-                RebuildTotals: RebuildTotals,
-                Localize: L));
-        Account.AccountChanged += OnAccountChanged;
 
         // Build the Loan sub-VM with delegates into parent state.
         Loan = services.Loan ?? new SubViewModels.LoanDialogViewModel(

@@ -117,6 +117,7 @@
     <sys:String x:Key="Portfolio.Confirm.DeleteTrade">Delete this trade? This cannot be undone.</sys:String>
     <sys:String x:Key="Portfolio.Confirm.DeleteAccount">Delete this account? This cannot be undone.</sys:String>
     <sys:String x:Key="Portfolio.Confirm.ArchiveAccount">Archive this account? (Balance and trade history are preserved)</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.NameCannotBeEmpty">Name cannot be empty</sys:String>
     <sys:String x:Key="Portfolio.Account.HasReferencesError">Cannot delete: {0} trade(s) reference this account</sys:String>
     <sys:String x:Key="Portfolio.Account.ViewReferences">View referenced trades</sys:String>
     <sys:String x:Key="Portfolio.TradeCount.Unit">items</sys:String>

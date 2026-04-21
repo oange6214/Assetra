@@ -19,7 +19,6 @@ internal sealed record AccountDialogDependencies(
     IAccountMutationWorkflowService AccountMutation,
     IPositionMetadataWorkflowService PositionMetadata,
     IAssetRepository? AssetRepo,
-    IAppSettingsService? Settings,
     ISnackbarService? Snackbar,
     ObservableCollection<CashAccountRowViewModel> CashAccounts,
     Func<Task> LoadCashAccountsAsync,
@@ -40,7 +39,6 @@ public partial class AccountDialogViewModel : ObservableObject
     private readonly IAccountMutationWorkflowService _accountMutation;
     private readonly IPositionMetadataWorkflowService _positionMetadata;
     private readonly IAssetRepository? _assetRepo;
-    private readonly IAppSettingsService? _settings;
     private readonly ISnackbarService? _snackbar;
     private readonly ObservableCollection<CashAccountRowViewModel> _cashAccounts;
     private readonly Func<Task> _loadCashAccountsAsync;
@@ -55,8 +53,9 @@ public partial class AccountDialogViewModel : ObservableObject
     private PortfolioRowViewModel? _editPositionRow;
 
     /// <summary>
-    /// Raised after every successful account mutation (archive, delete, default toggle)
-    /// or asset rename so the parent ViewModel can reload accounts and rebuild totals.
+    /// Raised after every successful account mutation (archive, delete) or asset rename
+    /// so the parent ViewModel can reload accounts and rebuild totals via
+    /// <c>ReloadAfterAccountChangedAsync</c>.
     /// </summary>
     public event EventHandler? AccountChanged;
 
@@ -67,7 +66,6 @@ public partial class AccountDialogViewModel : ObservableObject
         _accountMutation = deps.AccountMutation;
         _positionMetadata = deps.PositionMetadata;
         _assetRepo = deps.AssetRepo;
-        _settings = deps.Settings;
         _snackbar = deps.Snackbar;
         _cashAccounts = deps.CashAccounts;
         _loadCashAccountsAsync = deps.LoadCashAccountsAsync;
@@ -137,7 +135,7 @@ public partial class AccountDialogViewModel : ObservableObject
     {
         EditAssetError = string.Empty;
         if (string.IsNullOrWhiteSpace(EditAssetName))
-        { EditAssetError = "名稱不得空白"; return; }
+        { EditAssetError = L("Portfolio.Dialog.NameCannotBeEmpty", "名稱不得空白"); return; }
 
         var name = EditAssetName.Trim();
         var currency = EditAssetCurrency;
@@ -167,6 +165,7 @@ public partial class AccountDialogViewModel : ObservableObject
         }
 
         IsEditAssetDialogOpen = false;
+        AccountChanged?.Invoke(this, EventArgs.Empty);
     }
 
     // ── Account management commands ───────────────────────────────────────────────────
@@ -174,16 +173,15 @@ public partial class AccountDialogViewModel : ObservableObject
     [RelayCommand]
     private void ArchiveAccount(CashAccountRowViewModel? row)
     {
-        if (row is null || _assetRepo is null)
+        if (row is null || _accountMutation is null)
             return;
         var msg = L("Portfolio.Confirm.ArchiveAccount", "確定封存此帳戶？（餘額保留；交易紀錄保留）");
         _askConfirm(msg, async () =>
         {
             await _accountMutation.ArchiveAsync(row.Id);
-            await _loadCashAccountsAsync();
             if (DefaultCashAccountId == row.Id)
                 await _applyDefaultCashAccountAsync(null);
-            _rebuildTotals();
+            AccountChanged?.Invoke(this, EventArgs.Empty);
         });
     }
 
@@ -193,7 +191,7 @@ public partial class AccountDialogViewModel : ObservableObject
     [RelayCommand]
     private void RemoveCashAccount(CashAccountRowViewModel? row)
     {
-        if (row is null || _assetRepo is null)
+        if (row is null || _accountMutation is null)
             return;
 
         _askConfirm(
