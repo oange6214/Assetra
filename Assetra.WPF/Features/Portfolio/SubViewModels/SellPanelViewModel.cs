@@ -43,7 +43,7 @@ public partial class SellPanelViewModel : ObservableObject
     /// Cash account list for the sell-panel cash-account picker.
     /// Wired by the parent VM to its own <c>CashAccounts</c> collection.
     /// </summary>
-    public ObservableCollection<CashAccountRowViewModel> CashAccounts { get; set; } = [];
+    public ObservableCollection<CashAccountRowViewModel> CashAccounts { get; init; } = [];
 
     // ── Sell Panel state ──────────────────────────────────────────────────────────────
 
@@ -115,13 +115,47 @@ public partial class SellPanelViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Entry point called by <c>PortfolioViewModel.ConfirmSellTxAsync</c>.
+    /// Stages all sell-panel state from the Tx dialog in one place, executes the sell,
+    /// and returns the error string (or <c>null</c> on success).
+    /// </summary>
+    internal async Task<string?> ExecuteSellFromTxDialogAsync(
+        PortfolioRowViewModel row,
+        string sellPrice,
+        CashAccountRowViewModel? cashAccount,
+        bool isSellEtf,
+        int qtyOverride)
+    {
+        SellingRow = row;
+        IsSellEtf = isSellEtf;
+        SellPriceInput = sellPrice;
+        SellCashAccount = cashAccount;
+        SellPanelError = string.Empty;
+
+        // Temporarily override the qty delegate for this call so ConfirmSell uses the
+        // caller-supplied override instead of whatever the field holds between calls.
+        var previousDelegate = GetSellQtyOverride;
+        GetSellQtyOverride = () => qtyOverride;
+        try
+        {
+            await ConfirmSell();
+        }
+        finally
+        {
+            GetSellQtyOverride = previousDelegate;
+        }
+
+        return string.IsNullOrEmpty(SellPanelError) ? null : SellPanelError;
+    }
+
+    /// <summary>
     /// Confirms a sell — validates sell price, records the trade, archives consumed lots.
     /// Operates on <see cref="SellingRow"/> set externally before calling this command.
     /// Supports partial sells: <see cref="GetSellQtyOverride"/> &gt; 0 overrides the default full-qty sell.
     /// Archived lots (not hard-deleted) can be restored if the sell trade is later deleted.
     /// </summary>
     [RelayCommand]
-    internal async Task ConfirmSell()
+    private async Task ConfirmSell()
     {
         if (SellingRow is null)
             return;

@@ -128,7 +128,6 @@ public partial class PortfolioViewModel
     [ObservableProperty] private PortfolioRowViewModel? _txSellPosition;
     [ObservableProperty] private string _txSellQuantity = string.Empty;
     [ObservableProperty] private string _txSellQuantityError = string.Empty;
-    private int _sellQtyOverride;
 
     // Sell-tx preview — parallel to buy's AddGrossAmount / AddCommission / AddTotalCost,
     // but also shows TransactionTax and NetAmount since sell has two deductions.
@@ -1055,22 +1054,19 @@ public partial class PortfolioViewModel
         if (sellQty > (int)TxSellPosition.Quantity)
         { TxError = $"賣出數量 ({sellQty:N0}) 超過持倉 ({(int)TxSellPosition.Quantity:N0}) 股"; return; }
 
-        SellPanel.SellingRow = TxSellPosition;
-        SellPanel.IsSellEtf = _search.IsEtf(TxSellPosition.Symbol);
-
         if (!ParseHelpers.TryParseDecimal(TxAmount, out var sellPrice) || sellPrice <= 0)
         { TxError = "賣出價格無效"; return; }
 
-        SellPanel.SellPriceInput = sellPrice.ToString();
-        SellPanel.SellCashAccount = TxUseCashAccount ? TxCashAccount : null;
-        _sellQtyOverride = sellQty;
+        var error = await SellPanel.ExecuteSellFromTxDialogAsync(
+            row: TxSellPosition,
+            sellPrice: sellPrice.ToString(),
+            cashAccount: TxUseCashAccount ? TxCashAccount : null,
+            isSellEtf: _search.IsEtf(TxSellPosition.Symbol),
+            qtyOverride: sellQty);
 
-        await SellPanel.ConfirmSell();
-        _sellQtyOverride = 0;
-
-        if (!string.IsNullOrEmpty(SellPanel.SellPanelError))
+        if (error is not null)
         {
-            TxError = SellPanel.SellPanelError;
+            TxError = error;
             return;
         }
 

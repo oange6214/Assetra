@@ -532,11 +532,14 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _sellWorkflowService,
             _sellPanelController,
             ui.Snackbar,
-            ui.Localization);
+            ui.Localization)
+        {
+            // CashAccounts is init-only: set once here to share the parent's collection
+            // reference so both VMs see the same live list without a back-reference.
+            CashAccounts = CashAccounts,
+        };
         SellPanel.GetTxCommissionDiscountValue = () => TxCommissionDiscountValue;
         SellPanel.GetTxFee = () => TxFee;
-        SellPanel.GetSellQtyOverride = () => _sellQtyOverride;
-        SellPanel.CashAccounts = CashAccounts;
         SellPanel.SellCompleted += OnSellCompleted;
 
         // Rebuild chart colours whenever the user switches theme
