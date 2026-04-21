@@ -3,7 +3,6 @@ using Assetra.AppLayer.Portfolio.Contracts;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure;
-using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Portfolio;
@@ -26,8 +25,9 @@ public sealed record PortfolioRepositories(
 public sealed record PortfolioServices(
     IStockService Stock,
     IStockSearchService Search,
-    PortfolioSnapshotService Snapshot,
-    PortfolioBackfillService Backfill,
+    Assetra.Infrastructure.Persistence.PortfolioSnapshotService? Snapshot = null,
+    Assetra.Infrastructure.Persistence.PortfolioBackfillService? Backfill = null,
+    IPortfolioHistoryMaintenanceService? HistoryMaintenance = null,
     IPortfolioLoadService? Load = null,
     IAddAssetWorkflowService? AddAssetWorkflow = null,
     IStockHistoryProvider? History = null,

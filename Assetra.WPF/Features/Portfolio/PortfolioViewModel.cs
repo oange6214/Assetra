@@ -14,7 +14,6 @@ using Assetra.AppLayer.Portfolio.Dtos;
 using Assetra.AppLayer.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
-using Assetra.Infrastructure.Persistence;
 using Serilog;
 using Assetra.WPF.Infrastructure;
 using Wpf.Ui.Appearance;
@@ -27,9 +26,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 {
     private readonly IPortfolioRepository _repo;
     private readonly IStockSearchService _search;
-    private readonly PortfolioSnapshotService _snapshotService;
     private readonly IPortfolioPositionLogRepository _logRepo;
-    private readonly PortfolioBackfillService _backfill;
     private readonly ITradeRepository _tradeRepo;
     private readonly IAppSettingsService? _settingsService;
     private readonly ISnackbarService? _snackbar;
@@ -47,6 +44,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly IAddAssetWorkflowService _addAssetWorkflowService;
     private readonly ITransactionWorkflowService _transactionWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
+    private readonly IPortfolioHistoryMaintenanceService _historyMaintenanceService;
     private readonly ILocalizationService? _localization;
     private readonly CompositeDisposable _disposables = new();
 
@@ -422,9 +420,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _repo = repositories.Portfolio;
         _search = services.Search;
         _snackbar = ui.Snackbar;
-        _snapshotService = services.Snapshot;
         _logRepo = repositories.PositionLog;
-        _backfill = services.Backfill;
         _tradeRepo = repositories.Trade ?? new NullTradeRepository();
         _settingsService = ui.Settings;
         _currencyService = services.Currency;
@@ -449,6 +445,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _txService);
         _transactionWorkflowService = services.TransactionWorkflow ?? new TransactionWorkflowService();
         _summaryService = services.Summary ?? new PortfolioSummaryService();
+        _historyMaintenanceService = services.HistoryMaintenance
+            ?? (services.Snapshot is not null && services.Backfill is not null
+                ? new DirectPortfolioHistoryMaintenanceService(services.Snapshot, services.Backfill)
+                : new NullPortfolioHistoryMaintenanceService());
         _localization = ui.Localization;
         History = new PortfolioHistoryViewModel(repositories.Snapshot, ui.Localization);
 
@@ -906,10 +906,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     {
         try
         {
-            await _snapshotService.TryRecordAsync(
+            var written = await _historyMaintenanceService.TryRecordSnapshotAsync(
                 TotalCost, TotalMarketValue, TotalPnl, Positions.Count);
-            // Refresh chart if a new snapshot was just written
-            await History.LoadAsync();
+            if (written)
+                await History.LoadAsync();
         }
         catch (Exception ex)
         {
@@ -924,7 +924,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     {
         try
         {
-            var written = await _backfill.BackfillAsync();
+            var written = await _historyMaintenanceService.BackfillAsync();
             if (written > 0)
                 await History.LoadAsync();
         }
@@ -1187,6 +1187,48 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             Guid portfolioEntryId, DateTime sellDate, decimal sellPrice,
             decimal sellQty, decimal sellFees) =>
             Task.FromResult(0m);
+    }
+
+    private sealed class NullPortfolioHistoryMaintenanceService : IPortfolioHistoryMaintenanceService
+    {
+        public Task<bool> TryRecordSnapshotAsync(
+            decimal totalCost,
+            decimal marketValue,
+            decimal pnl,
+            int positionCount,
+            CancellationToken ct = default) =>
+            Task.FromResult(false);
+
+        public Task<int> BackfillAsync(CancellationToken ct = default) =>
+            Task.FromResult(0);
+    }
+
+    private sealed class DirectPortfolioHistoryMaintenanceService : IPortfolioHistoryMaintenanceService
+    {
+        private readonly Assetra.Infrastructure.Persistence.PortfolioSnapshotService _snapshotService;
+        private readonly Assetra.Infrastructure.Persistence.PortfolioBackfillService _backfillService;
+
+        public DirectPortfolioHistoryMaintenanceService(
+            Assetra.Infrastructure.Persistence.PortfolioSnapshotService snapshotService,
+            Assetra.Infrastructure.Persistence.PortfolioBackfillService backfillService)
+        {
+            _snapshotService = snapshotService;
+            _backfillService = backfillService;
+        }
+
+        public Task<bool> TryRecordSnapshotAsync(
+            decimal totalCost,
+            decimal marketValue,
+            decimal pnl,
+            int positionCount,
+            CancellationToken ct = default)
+        {
+            ct.ThrowIfCancellationRequested();
+            return _snapshotService.TryRecordAsync(totalCost, marketValue, pnl, positionCount);
+        }
+
+        public Task<int> BackfillAsync(CancellationToken ct = default) =>
+            _backfillService.BackfillAsync(ct);
     }
 }
 

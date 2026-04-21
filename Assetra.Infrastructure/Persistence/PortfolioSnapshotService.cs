@@ -23,20 +23,21 @@ public sealed class PortfolioSnapshotService
     /// Persist today's snapshot if it hasn't been recorded yet this session.
     /// Skips when <paramref name="marketValue"/> is zero (prices not yet loaded).
     /// </summary>
-    public async Task TryRecordAsync(
+    public async Task<bool> TryRecordAsync(
         decimal totalCost, decimal marketValue, decimal pnl, int positionCount)
     {
         if (marketValue <= 0)
-            return;
+            return false;
         if (positionCount == 0)
-            return;
+            return false;
 
         var today = DateOnly.FromDateTime(DateTime.Today);
         if (_lastSnapshotDate == today)
-            return;
+            return false;
 
         var snapshot = new PortfolioDailySnapshot(today, totalCost, marketValue, pnl, positionCount);
         await _repo.UpsertAsync(snapshot).ConfigureAwait(false);
         _lastSnapshotDate = today;
+        return true;
     }
 }

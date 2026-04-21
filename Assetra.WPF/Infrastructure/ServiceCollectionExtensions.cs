@@ -128,6 +128,10 @@ internal static class ServiceCollectionExtensions
             sp.GetRequiredService<ITradeRepository>(),
             sp.GetRequiredService<IBalanceQueryService>(),
             sp.GetService<IAssetRepository>()));
+        services.AddSingleton<IPortfolioHistoryMaintenanceService>(sp =>
+            new PortfolioHistoryMaintenanceService(
+                sp.GetRequiredService<PortfolioSnapshotService>(),
+                sp.GetRequiredService<PortfolioBackfillService>()));
         services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
         services.AddSingleton<IAddAssetWorkflowService>(sp => new AddAssetWorkflowService(
             sp.GetRequiredService<IStockSearchService>(),
@@ -153,20 +157,19 @@ internal static class ServiceCollectionExtensions
                 sp.GetRequiredService<IAssetRepository>(),
                 sp.GetRequiredService<ILoanScheduleRepository>()),
             new PortfolioServices(
-                sp.GetRequiredService<IStockService>(),
-                sp.GetRequiredService<IStockSearchService>(),
-                sp.GetRequiredService<PortfolioSnapshotService>(),
-                sp.GetRequiredService<PortfolioBackfillService>(),
-                sp.GetRequiredService<IPortfolioLoadService>(),
-                sp.GetRequiredService<IAddAssetWorkflowService>(),
-                sp.GetRequiredService<IStockHistoryProvider>(),
-                sp.GetRequiredService<ICurrencyService>(),
-                sp.GetRequiredService<ICryptoService>(),
-                sp.GetRequiredService<ITransactionService>(),
-                sp.GetRequiredService<IBalanceQueryService>(),
-                sp.GetRequiredService<IPositionQueryService>(),
-                sp.GetRequiredService<ITransactionWorkflowService>(),
-                sp.GetRequiredService<IPortfolioSummaryService>()),
+                Stock: sp.GetRequiredService<IStockService>(),
+                Search: sp.GetRequiredService<IStockSearchService>(),
+                HistoryMaintenance: sp.GetRequiredService<IPortfolioHistoryMaintenanceService>(),
+                Load: sp.GetRequiredService<IPortfolioLoadService>(),
+                AddAssetWorkflow: sp.GetRequiredService<IAddAssetWorkflowService>(),
+                History: sp.GetRequiredService<IStockHistoryProvider>(),
+                Currency: sp.GetRequiredService<ICurrencyService>(),
+                Crypto: sp.GetRequiredService<ICryptoService>(),
+                Transaction: sp.GetRequiredService<ITransactionService>(),
+                BalanceQuery: sp.GetRequiredService<IBalanceQueryService>(),
+                PositionQuery: sp.GetRequiredService<IPositionQueryService>(),
+                TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>(),
+                Summary: sp.GetRequiredService<IPortfolioSummaryService>()),
             new PortfolioUiServices(
                 DefaultScheduler.Instance,
                 sp.GetService<IThemeService>(),
