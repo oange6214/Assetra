@@ -44,6 +44,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly IBalanceQueryService _balanceQuery;
     private readonly IPositionQueryService _positionQuery;
     private readonly IPortfolioLoadService _loadService;
+    private readonly ITransactionWorkflowService _transactionWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly ILocalizationService? _localization;
     private readonly CompositeDisposable _disposables = new();
@@ -439,6 +440,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _tradeRepo,
             _balanceQuery,
             _assetRepo);
+        _transactionWorkflowService = services.TransactionWorkflow ?? new TransactionWorkflowService();
         _summaryService = services.Summary ?? new PortfolioSummaryService();
         _localization = ui.Localization;
         History = new PortfolioHistoryViewModel(repositories.Snapshot, ui.Localization);

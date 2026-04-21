@@ -4,6 +4,7 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
+using Assetra.AppLayer.Portfolio.Dtos;
 using Assetra.Core.Models;
 using Assetra.Core.Services;
 using Assetra.Core.Trading;
@@ -1205,25 +1206,14 @@ public partial class PortfolioViewModel
 
         var cashAccId = await ResolveCashAccountIdAsync();
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
-        var trade = new Trade(
-            Id: Guid.NewGuid(),
-            Symbol: string.Empty,
-            Exchange: string.Empty,
-            Name: TxNote,
-            Type: TradeType.Income,
-            TradeDate: tradeDate,
-            Price: 0,
-            Quantity: 1,
-            RealizedPnl: null,
-            RealizedPnlPct: null,
-            CashAmount: amount,
-            CashAccountId: cashAccId,
-            Note: TxNote);
-
-        await _txService.RecordAsync(trade);
-
-        await WriteFeeTradeIfAnyAsync(fee, cashAccId, tradeDate,
-            $"{TxNote} 手續費", null, trade.Id);
+        var plan = _transactionWorkflowService.CreateIncomePlan(new IncomeTransactionRequest(
+            amount,
+            tradeDate,
+            cashAccId,
+            TxNote,
+            fee));
+        foreach (var trade in plan.Trades)
+            await _txService.RecordAsync(trade);
 
         await ReloadAccountBalancesAsync();
         CloseTxDialog();
@@ -1356,18 +1346,16 @@ public partial class PortfolioViewModel
 
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         var cleanNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
-
-        var trade = new Trade(
-            Id: Guid.NewGuid(), Symbol: accountName, Exchange: "",
-            Name: accountName, Type: type,
-            TradeDate: tradeDate,
-            Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
-            CashAmount: amount, CashAccountId: cashAccId,
-            Note: cleanNote);
-        await _txService.RecordAsync(trade);
-
-        await WriteFeeTradeIfAnyAsync(fee, cashAccId, tradeDate,
-            $"{accountName} 手續費", cleanNote, trade.Id);
+        var plan = _transactionWorkflowService.CreateCashFlowPlan(new CashFlowTransactionRequest(
+            type,
+            amount,
+            tradeDate,
+            cashAccId.Value,
+            accountName,
+            cleanNote,
+            fee));
+        foreach (var trade in plan.Trades)
+            await _txService.RecordAsync(trade);
 
         await ReloadAccountBalancesAsync();
         CloseTxDialog();
@@ -1412,14 +1400,8 @@ public partial class PortfolioViewModel
     }
 
     /// <summary>
-    /// 若 fee &gt; 0，建一筆 <see cref="TradeType.Withdrawal"/>（CashAmount=fee，
-    /// 透過 projection 使該現金帳戶扣除對應金額）。
-    /// <para>
-    /// <paramref name="parentTradeId"/> 設為主交易的 Id，使此費用記錄成為
-    /// 主交易的子記錄（<see cref="Trade.ParentTradeId"/>）。
-    /// 主交易刪除時，<see cref="ITradeRepository.RemoveChildrenAsync"/> 會一起清掉此筆。
-    /// </para>
-    /// No-op 當 fee &lt;= 0。
+    /// 過渡期 helper：目前 CashDividend 仍直接呼叫這個方法建立 fee 子記錄。
+    /// 待股利流程也搬進 workflow service 後即可刪除。
     /// </summary>
     private async Task WriteFeeTradeIfAnyAsync(
         decimal fee, Guid? cashAccountId, DateTime tradeDate,
@@ -1506,36 +1488,26 @@ public partial class PortfolioViewModel
         var cleanNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
         var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
 
-        // ── 建立 AssetItem + 攤還表（有填利率與期數時）────────────────────
-        if (type == TradeType.LoanBorrow && amortAnnualRate.HasValue && amortTermMonths.HasValue
-            && _assetRepo is not null && _loanScheduleRepo is not null)
-        {
-            var firstPayDate = DateOnly.FromDateTime(TxLoanStartDate);
-            decimal? loanFee = fee > 0 ? fee : null;
-            var asset = new AssetItem(
-                Guid.NewGuid(), liabName, FinancialType.Liability, null, "TWD",
-                DateOnly.FromDateTime(DateTime.Today), IsActive: true, UpdatedAt: null,
-                LoanAnnualRate: amortAnnualRate, LoanTermMonths: amortTermMonths,
-                LoanStartDate:  firstPayDate,   LoanHandlingFee: loanFee);
-            await _assetRepo.AddItemAsync(asset);
-            var schedule = AmortizationService.Generate(
-                asset.Id, cashAmount, amortAnnualRate.Value, amortTermMonths.Value, firstPayDate);
-            await _loanScheduleRepo.BulkInsertAsync(schedule);
-        }
+        var plan = _transactionWorkflowService.CreateLoanPlan(new LoanTransactionRequest(
+            type,
+            cashAmount,
+            tradeDate,
+            liabName,
+            cashAccId,
+            cleanNote,
+            fee,
+            principal,
+            interestPaid,
+            amortAnnualRate,
+            amortTermMonths,
+            amortAnnualRate.HasValue && amortTermMonths.HasValue ? DateOnly.FromDateTime(TxLoanStartDate) : null));
 
-        var trade = new Trade(
-            Id: Guid.NewGuid(), Symbol: liabName, Exchange: string.Empty,
-            Name: liabName, Type: type,
-            TradeDate: tradeDate,
-            Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
-            CashAmount: cashAmount, CashAccountId: cashAccId, Note: cleanNote,
-            LoanLabel: liabName,
-            Principal: principal,
-            InterestPaid: interestPaid);
-
-        await _txService.RecordAsync(trade);
-        await WriteFeeTradeIfAnyAsync(fee, cashAccId, tradeDate,
-            $"{liabName} 手續費", cleanNote, trade.Id);
+        if (plan.LiabilityAsset is not null && _assetRepo is not null)
+            await _assetRepo.AddItemAsync(plan.LiabilityAsset);
+        if (plan.LoanScheduleEntries is not null && _loanScheduleRepo is not null)
+            await _loanScheduleRepo.BulkInsertAsync(plan.LoanScheduleEntries);
+        foreach (var trade in plan.Trades)
+            await _txService.RecordAsync(trade);
 
         await ReloadAccountBalancesAsync();
         CloseTxDialog();
@@ -1587,63 +1559,18 @@ public partial class PortfolioViewModel
         var dstName = TxTransferTarget?.Name ?? TxTransferTargetName.Trim();
         var userNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
 
-        // feeParentId: 費用子記錄掛在來源交易下（同幣別 = Transfer 主記錄；跨幣別 = Withdrawal）
-        Guid feeParentId;
-
-        if (srcAmount == dstAmount)
-        {
-            // ── 同幣別：單筆原生 Transfer ────────────────────────────────────
-            // TransactionService.ApplySideEffectsAsync 會同時：
-            //   來源帳戶 − CashAmount（PrimaryCashDelta）
-            //   目標帳戶 + CashAmount（ToCashAccountId 分支）
-            var transfer = new Trade(
-                Id:              Guid.NewGuid(),
-                Symbol:          srcName,
-                Exchange:        string.Empty,
-                Name:            $"{srcName} → {dstName}",
-                Type:            TradeType.Transfer,
-                TradeDate:       tradeDate,
-                Price:           0,
-                Quantity:        1,
-                RealizedPnl:     null,
-                RealizedPnlPct:  null,
-                CashAmount:      srcAmount,
-                CashAccountId:   TxCashAccount.Id,
-                ToCashAccountId: destId.Value,
-                Note:            userNote);
-            await _txService.RecordAsync(transfer);
-            feeParentId = transfer.Id;
-        }
-        else
-        {
-            // ── 跨幣別：保留 Withdrawal + Deposit pair ──────────────────────
-            var withdrawNote = string.IsNullOrWhiteSpace(userNote)
-                ? $"轉帳 → {dstName}"
-                : $"轉帳 → {dstName} — {userNote}";
-            var withdraw = new Trade(
-                Id: Guid.NewGuid(), Symbol: srcName, Exchange: string.Empty,
-                Name: srcName, Type: TradeType.Withdrawal,
-                TradeDate: tradeDate,
-                Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
-                CashAmount: srcAmount, CashAccountId: TxCashAccount.Id, Note: withdrawNote);
-            await _txService.RecordAsync(withdraw);
-            feeParentId = withdraw.Id;
-
-            var depositNote = string.IsNullOrWhiteSpace(userNote)
-                ? $"轉帳 ← {srcName}"
-                : $"轉帳 ← {srcName} — {userNote}";
-            var deposit = new Trade(
-                Id: Guid.NewGuid(), Symbol: dstName, Exchange: string.Empty,
-                Name: dstName, Type: TradeType.Deposit,
-                TradeDate: tradeDate,
-                Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
-                CashAmount: dstAmount, CashAccountId: destId.Value, Note: depositNote);
-            await _txService.RecordAsync(deposit);
-        }
-
-        // 手續費（從來源帳戶扣，無論哪條路徑）
-        await WriteFeeTradeIfAnyAsync(fee, TxCashAccount.Id, tradeDate,
-            $"轉帳手續費 ({srcName} → {dstName})", userNote, feeParentId);
+        var plan = _transactionWorkflowService.CreateTransferPlan(new TransferTransactionRequest(
+            TxCashAccount.Id,
+            srcName,
+            destId.Value,
+            dstName,
+            srcAmount,
+            dstAmount,
+            tradeDate,
+            userNote,
+            fee));
+        foreach (var trade in plan.Trades)
+            await _txService.RecordAsync(trade);
 
         await ReloadAccountBalancesAsync();
         CloseTxDialog();

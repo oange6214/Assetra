@@ -44,6 +44,11 @@ public sealed record PortfolioServices(
     /// </summary>
     IPositionQueryService? PositionQuery = null,
     /// <summary>
+    /// 交易流程服務：建立 income / cash-flow / loan / transfer 的交易計畫。
+    /// 測試中若省略，ViewModel 會回退為內建實作。
+    /// </summary>
+    ITransactionWorkflowService? TransactionWorkflow = null,
+    /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。
     /// 測試中若省略，ViewModel 會回退為內建實作。
     /// </summary>

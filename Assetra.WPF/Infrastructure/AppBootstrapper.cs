@@ -163,6 +163,7 @@ internal static class AppBootstrapper
             sp.GetRequiredService<IBalanceQueryService>(),
             sp.GetService<IAssetRepository>()));
         services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
+        services.AddSingleton<ITransactionWorkflowService, TransactionWorkflowService>();
         services.AddSingleton<ICryptoService, CoinGeckoService>();
 
         // Stockra import service — target is our own assetra.db
@@ -192,6 +193,7 @@ internal static class AppBootstrapper
                 sp.GetRequiredService<ITransactionService>(),
                 sp.GetRequiredService<IBalanceQueryService>(),
                 sp.GetRequiredService<IPositionQueryService>(),
+                sp.GetRequiredService<ITransactionWorkflowService>(),
                 sp.GetRequiredService<IPortfolioSummaryService>()),
             new PortfolioUiServices(
                 System.Reactive.Concurrency.DefaultScheduler.Instance,

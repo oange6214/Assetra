@@ -939,13 +939,34 @@ public partial class PortfolioViewModel
     {
         var accounts = loaded.CashAccounts;
         var balances = loaded.CashBalances;
+        var visibleAccounts = accounts
+            .Where(a => ShowArchivedAccounts || a.IsActive)
+            .ToList();
+        var newRows = visibleAccounts.ToDictionary(
+            a => a.Id,
+            a => new CashAccountRowViewModel(a, balances.TryGetValue(a.Id, out var v) ? v : 0m));
+        var existingIndex = CashAccounts.ToDictionary(r => r.Id);
 
-        CashAccounts.Clear();
-        foreach (var a in accounts)
+        for (var i = CashAccounts.Count - 1; i >= 0; i--)
         {
-            if (!ShowArchivedAccounts && !a.IsActive) continue;
-            var bal = balances.TryGetValue(a.Id, out var v) ? v : 0m;
-            CashAccounts.Add(new CashAccountRowViewModel(a, bal));
+            if (!newRows.ContainsKey(CashAccounts[i].Id))
+                CashAccounts.RemoveAt(i);
+        }
+
+        foreach (var account in visibleAccounts)
+        {
+            var bal = balances.TryGetValue(account.Id, out var v) ? v : 0m;
+            if (existingIndex.TryGetValue(account.Id, out var existing))
+            {
+                existing.Name = account.Name;
+                existing.Currency = account.Currency;
+                existing.Balance = bal;
+                existing.IsActive = account.IsActive;
+            }
+            else
+            {
+                CashAccounts.Add(newRows[account.Id]);
+            }
         }
         HasNoCashAccounts = CashAccounts.Count == 0;
 
