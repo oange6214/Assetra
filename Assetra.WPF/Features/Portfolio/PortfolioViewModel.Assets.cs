@@ -625,16 +625,11 @@ public partial class PortfolioViewModel
 
         // Balance is a projection over the trade journal — a fresh account starts at 0
         // and only gains value once the user records a Deposit / Income / etc. trade.
-        var account = new AssetItem(
-            Guid.NewGuid(),
+        var result = await _accountUpsertWorkflowService.CreateAsync(new CreateAccountRequest(
             AddAccountName.Trim(),
-            FinancialType.Asset,
-            null,
             "TWD",
-            DateOnly.FromDateTime(DateTime.Today));
-
-        if (_assetRepo is not null)
-            await _assetRepo.AddItemAsync(account);
+            DateOnly.FromDateTime(DateTime.Today)));
+        var account = result.Account;
 
         CashAccounts.Add(new CashAccountRowViewModel(account, projectedBalance: 0m));
         HasNoCashAccounts = false;
@@ -716,12 +711,13 @@ public partial class PortfolioViewModel
             var row = CashAccounts.FirstOrDefault(r => r.Id == _editAssetId);
             if (row is not null)
             {
-                var updated = new AssetItem(
-                    row.Id, name, FinancialType.Asset, null, currency, row.CreatedDate);
-                if (_assetRepo is not null)
-                    await _assetRepo.UpdateItemAsync(updated);
-                row.Name = name;
-                row.Currency = currency;
+                var result = await _accountUpsertWorkflowService.UpdateAsync(new UpdateAccountRequest(
+                    row.Id,
+                    name,
+                    currency,
+                    row.CreatedDate));
+                row.Name = result.Account.Name;
+                row.Currency = result.Account.Currency;
             }
         }
         else if (_editAssetKind == "position" && _editPositionRow is { } posRow)

@@ -45,6 +45,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
     private readonly IPositionDeletionWorkflowService _positionDeletionWorkflowService;
     private readonly IAccountMutationWorkflowService _accountMutationWorkflowService;
+    private readonly IAccountUpsertWorkflowService _accountUpsertWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly IPortfolioHistoryMaintenanceService _historyMaintenanceService;
     private readonly ILocalizationService? _localization;
@@ -457,6 +458,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             ?? (_assetRepo is not null
                 ? new AccountMutationWorkflowService(_assetRepo)
                 : new NullAccountMutationWorkflowService());
+        _accountUpsertWorkflowService = services.AccountUpsertWorkflow
+            ?? (_assetRepo is not null
+                ? new AccountUpsertWorkflowService(_assetRepo)
+                : new NullAccountUpsertWorkflowService());
         _summaryService = services.Summary ?? new PortfolioSummaryService();
         _historyMaintenanceService = services.HistoryMaintenance
             ?? (services.Snapshot is not null && services.Backfill is not null
@@ -1230,6 +1235,17 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
         public Task<AccountDeletionResult> DeleteAsync(Guid accountId, CancellationToken ct = default) =>
             Task.FromResult(new AccountDeletionResult(false));
+    }
+
+    private sealed class NullAccountUpsertWorkflowService : IAccountUpsertWorkflowService
+    {
+        public Task<AccountUpsertResult> CreateAsync(CreateAccountRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new AccountUpsertResult(
+                new AssetItem(Guid.NewGuid(), request.Name, FinancialType.Asset, null, request.Currency, request.CreatedDate)));
+
+        public Task<AccountUpsertResult> UpdateAsync(UpdateAccountRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new AccountUpsertResult(
+                new AssetItem(request.AccountId, request.Name, FinancialType.Asset, null, request.Currency, request.CreatedDate)));
     }
 
     private sealed class DirectPortfolioHistoryMaintenanceService : IPortfolioHistoryMaintenanceService
