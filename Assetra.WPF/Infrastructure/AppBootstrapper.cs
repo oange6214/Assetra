@@ -21,6 +21,7 @@ internal static class AppBootstrapper
         builder.Services
             .AddAssetraPlatformServices(paths.AssetsDir, paths.DbPath)
             .AddAssetraDataServices(paths.DbPath)
+            .AddAssetraCoreServices()
             .AddAssetraApplicationServices()
             .AddAssetraViewModels()
             .AddAssetraHostedServices();

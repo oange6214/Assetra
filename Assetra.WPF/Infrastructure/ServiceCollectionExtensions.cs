@@ -116,8 +116,13 @@ internal static class ServiceCollectionExtensions
             new Assetra.Infrastructure.PositionQueryService(
                 sp.GetRequiredService<ITradeRepository>()));
         services.AddSingleton<ICryptoService, CoinGeckoService>();
-        services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
 
+        return services;
+    }
+
+    public static IServiceCollection AddAssetraCoreServices(this IServiceCollection services)
+    {
+        services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
         return services;
     }
 
