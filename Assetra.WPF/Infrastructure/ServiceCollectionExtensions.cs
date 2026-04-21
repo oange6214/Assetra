@@ -214,8 +214,6 @@ internal static class ServiceCollectionExtensions
                 HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
                 TradeDeletionWorkflow: sp.GetRequiredService<ITradeDeletionWorkflowService>(),
                 PositionDeletionWorkflow: sp.GetRequiredService<IPositionDeletionWorkflowService>(),
-                PositionMetadataWorkflow: sp.GetRequiredService<IPositionMetadataWorkflowService>(),
-                LoanMutationWorkflow: sp.GetRequiredService<ILoanMutationWorkflowService>(),
                 Load: sp.GetRequiredService<IPortfolioLoadService>(),
                 History: sp.GetRequiredService<IStockHistoryProvider>(),
                 Currency: sp.GetRequiredService<ICurrencyService>(),

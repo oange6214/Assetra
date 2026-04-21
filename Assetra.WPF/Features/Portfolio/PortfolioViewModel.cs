@@ -10,6 +10,7 @@ using Assetra.Core.DomainServices;
 using Assetra.Core.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Assetra.Infrastructure;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -53,8 +54,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly PortfolioSellPanelController _sellPanelController = new();
     private readonly PortfolioTradeDialogController _tradeDialogController = new();
     private readonly IPositionDeletionWorkflowService _positionDeletionWorkflowService;
-    private readonly IPositionMetadataWorkflowService _positionMetadataWorkflowService;
-    private readonly ILoanMutationWorkflowService _loanMutationWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly IPortfolioHistoryMaintenanceService _historyMaintenanceService;
     private readonly ILocalizationService? _localization;
@@ -484,22 +483,22 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _tradeRepo,
             _balanceQuery,
             _assetRepo);
-        var fallbackTxService = new NullTransactionService();
+        // The inline txService backs both the TransactionWorkflow fallback and the LoanMutation
+        // fallback so that trade writes are always routed to the same ITradeRepository.
+        var inlineTxService = (ITransactionService)new TransactionService(_tradeRepo);
         _transactionWorkflowService = services.TransactionWorkflow
-            ?? new TransactionWorkflowService(fallbackTxService);
+            ?? new TransactionWorkflowService(inlineTxService);
         _tradeDeletionWorkflowService = services.TradeDeletionWorkflow
             ?? new TradeDeletionWorkflowService(_tradeRepo, _repo, _positionQuery);
         _positionDeletionWorkflowService = services.PositionDeletionWorkflow
             ?? new PositionDeletionWorkflowService(_tradeRepo, _repo);
-        _positionMetadataWorkflowService = services.PositionMetadataWorkflow
-            ?? new PositionMetadataWorkflowService(_repo);
-        _loanMutationWorkflowService = services.LoanMutationWorkflow
-            ?? (_assetRepo is not null && _loanScheduleRepo is not null
-                ? new LoanMutationWorkflowService(
-                    _assetRepo,
-                    _loanScheduleRepo,
-                    fallbackTxService)
-                : new NullLoanMutationWorkflowService());
+        var positionMetadataWorkflowService = (IPositionMetadataWorkflowService)new PositionMetadataWorkflowService(_repo);
+        var loanMutationWorkflowService = _assetRepo is not null && _loanScheduleRepo is not null
+            ? (ILoanMutationWorkflowService)new LoanMutationWorkflowService(
+                _assetRepo,
+                _loanScheduleRepo,
+                inlineTxService)
+            : new NullLoanMutationWorkflowService();
         _summaryService = services.Summary;
         _historyMaintenanceService = services.HistoryMaintenance
             ?? new NullPortfolioHistoryMaintenanceService();
@@ -515,7 +514,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
         // Build inline workflow services needed only for Sub-VM construction (not held as fields).
         var addAssetWorkflow = new AddAssetWorkflowService(
-            _search, _historyProvider, _repo, _logRepo, fallbackTxService);
+            _search, _historyProvider, _repo, _logRepo, inlineTxService);
         var accountUpsertWorkflow = _assetRepo is not null
             ? (IAccountUpsertWorkflowService)new AccountUpsertWorkflowService(_assetRepo)
             : new NullAccountUpsertWorkflowService();
@@ -554,7 +553,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             new SubViewModels.AccountDialogDependencies(
                 AccountUpsert: accountUpsertWorkflow,
                 AccountMutation: accountMutationWorkflow,
-                PositionMetadata: _positionMetadataWorkflowService,
+                PositionMetadata: positionMetadataWorkflowService,
                 AssetRepo: _assetRepo,
                 Snackbar: _snackbar,
                 CashAccounts: CashAccounts,
@@ -572,7 +571,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 TransactionWorkflow: _transactionWorkflowService,
                 TradeDeletion: _tradeDeletionWorkflowService,
                 TradeMetadata: tradeMetadataWorkflow,
-                LoanMutation: _loanMutationWorkflowService,
+                LoanMutation: loanMutationWorkflowService,
                 Search: _search,
                 TradeDialogController: _tradeDialogController,
                 AssetRepo: _assetRepo,
@@ -1739,15 +1738,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         public Task UpdateAsync(Trade trade) => Task.CompletedTask;
         public Task RemoveAsync(Guid id) => Task.CompletedTask;
         public Task RemoveChildrenAsync(Guid parentId) => Task.CompletedTask;
-    }
-
-    // No-op fallback used when DI doesn't wire ITransactionService (tests / legacy).
-    // Keeps the ViewModel compilable without the Infrastructure layer being present.
-    private sealed class NullTransactionService : ITransactionService
-    {
-        public Task RecordAsync(Trade trade) => Task.CompletedTask;
-        public Task DeleteAsync(Trade trade) => Task.CompletedTask;
-        public Task ReplaceAsync(Trade original, Trade replacement) => Task.CompletedTask;
     }
 
     // Fallback when DI doesn't wire IBalanceQueryService (tests that only populate

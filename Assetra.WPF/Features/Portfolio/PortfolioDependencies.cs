@@ -43,14 +43,11 @@ public sealed record PortfolioServices(
     IPositionQueryService? PositionQuery = null,
     /// <summary>
     /// 交易流程服務：直接執行 income / cash-flow / dividend / transfer 的交易寫入。
-    /// 貸款相關操作由 <see cref="ILoanMutationWorkflowService"/> 負責。
     /// 測試中若省略，ViewModel 會回退為內建實作。
     /// </summary>
     ITransactionWorkflowService? TransactionWorkflow = null,
     ITradeDeletionWorkflowService? TradeDeletionWorkflow = null,
     IPositionDeletionWorkflowService? PositionDeletionWorkflow = null,
-    IPositionMetadataWorkflowService? PositionMetadataWorkflow = null,
-    ILoanMutationWorkflowService? LoanMutationWorkflow = null,
     /// <summary>
     /// Optional pre-built <see cref="AddAssetDialogViewModel"/>. When null the
     /// <see cref="PortfolioViewModel"/> constructor builds its own instance from the

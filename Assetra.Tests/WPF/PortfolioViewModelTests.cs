@@ -473,13 +473,11 @@ public class PortfolioViewModelTests
         var txService = new TransactionService(tradeRepo);
         var balanceQuery = new BalanceQueryService(tradeRepo);
 
-        var loanMutationService = new LoanMutationWorkflowService(assetRepo, new Mock<ILoanScheduleRepository>().Object, txService);
         var vm = new PortfolioViewModel(
-            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo, LoanSchedule: new Mock<ILoanScheduleRepository>().Object),
             new PortfolioServices(SilentStockService().Object, search.Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
                 TransactionWorkflow: new TransactionWorkflowService(txService),
-                LoanMutationWorkflow: loanMutationService,
                 BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
@@ -656,13 +654,11 @@ public class PortfolioViewModelTests
         var txService = new TransactionService(tradeRepo);
         var balanceQuery = new BalanceQueryService(tradeRepo);
 
-        var loanMutationService = new LoanMutationWorkflowService(assetRepo, new Mock<ILoanScheduleRepository>().Object, txService);
         var vm = new PortfolioViewModel(
-            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo, LoanSchedule: new Mock<ILoanScheduleRepository>().Object),
             new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
                 TransactionWorkflow: new TransactionWorkflowService(txService),
-                LoanMutationWorkflow: loanMutationService,
                 BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
@@ -1909,13 +1905,11 @@ public class PortfolioViewModelTests
         var (logRepo, backfill) = BackfillStubs(snapshotRepo);
         var txService = new TransactionService(tradeRepo);
         var balanceQuery = new BalanceQueryService(tradeRepo);
-        var loanMutationService = new LoanMutationWorkflowService(assetRepo, new Mock<ILoanScheduleRepository>().Object, txService);
         var vm = new PortfolioViewModel(
-            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo, LoanSchedule: new Mock<ILoanScheduleRepository>().Object),
             new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
                 TransactionWorkflow: new TransactionWorkflowService(txService),
-                LoanMutationWorkflow: loanMutationService,
                 BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
