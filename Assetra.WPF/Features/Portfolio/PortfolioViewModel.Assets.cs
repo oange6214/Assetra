@@ -1121,30 +1121,25 @@ public partial class PortfolioViewModel
 
         var row = SelectedLiabilityRow;
         var cashAccId = TxCashAccount?.Id;
-        var total = entry.PrincipalAmount + entry.InterestAmount;
-
-        var repayTrade = new Trade(
-            Id: Guid.NewGuid(),
-            Symbol: string.Empty,
-            Exchange: string.Empty,
-            Name: row.Label,
-            Type: TradeType.LoanRepay,
-            TradeDate: DateTime.UtcNow,
-            Price: total,
-            Quantity: 1,
-            RealizedPnl: 0m,
-            RealizedPnlPct: 0m,
-            CashAmount: total,
-            CashAccountId: cashAccId,
-            LoanLabel: row.Label,
-            Principal: entry.PrincipalAmount,
-            InterestPaid: entry.InterestAmount);
-        await _tradeRepo.AddAsync(repayTrade);
-
-        await _loanScheduleRepo.MarkPaidAsync(entry.Id, DateTime.UtcNow, repayTrade.Id);
+        var result = await _loanPaymentWorkflowService.RecordAsync(new LoanPaymentRequest(
+            new LoanScheduleEntry(
+                entry.Id,
+                row.AssetId ?? Guid.Empty,
+                entry.Period,
+                entry.DueDate,
+                entry.TotalAmount,
+                entry.PrincipalAmount,
+                entry.InterestAmount,
+                entry.Remaining,
+                entry.IsPaid,
+                entry.PaidAt,
+                entry.TradeId),
+            row.Label,
+            cashAccId,
+            DateTime.UtcNow));
         entry.IsPaid = true;
-        entry.PaidAt = DateTime.UtcNow;
-        entry.TradeId = repayTrade.Id;
+        entry.PaidAt = result.PaidAt;
+        entry.TradeId = result.RepayTrade.Id;
         row.RefreshScheduleSummary();
 
         await LoadTradesAsync();

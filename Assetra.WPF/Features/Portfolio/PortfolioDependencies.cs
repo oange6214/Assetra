@@ -56,7 +56,8 @@ public sealed record PortfolioServices(
     ITradeDeletionWorkflowService? TradeDeletionWorkflow = null,
     IPositionDeletionWorkflowService? PositionDeletionWorkflow = null,
     IAccountMutationWorkflowService? AccountMutationWorkflow = null,
-    IAccountUpsertWorkflowService? AccountUpsertWorkflow = null);
+    IAccountUpsertWorkflowService? AccountUpsertWorkflow = null,
+    ILoanPaymentWorkflowService? LoanPaymentWorkflow = null);
 
 /// <summary>
 /// UI-adjacent services (scheduler / theming / settings / snackbar / localization).

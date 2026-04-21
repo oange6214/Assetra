@@ -46,6 +46,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly IPositionDeletionWorkflowService _positionDeletionWorkflowService;
     private readonly IAccountMutationWorkflowService _accountMutationWorkflowService;
     private readonly IAccountUpsertWorkflowService _accountUpsertWorkflowService;
+    private readonly ILoanPaymentWorkflowService _loanPaymentWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly IPortfolioHistoryMaintenanceService _historyMaintenanceService;
     private readonly ILocalizationService? _localization;
@@ -462,6 +463,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             ?? (_assetRepo is not null
                 ? new AccountUpsertWorkflowService(_assetRepo)
                 : new NullAccountUpsertWorkflowService());
+        _loanPaymentWorkflowService = services.LoanPaymentWorkflow
+            ?? (_loanScheduleRepo is not null
+                ? new LoanPaymentWorkflowService(_tradeRepo, _loanScheduleRepo)
+                : new NullLoanPaymentWorkflowService());
         _summaryService = services.Summary ?? new PortfolioSummaryService();
         _historyMaintenanceService = services.HistoryMaintenance
             ?? (services.Snapshot is not null && services.Backfill is not null
@@ -1246,6 +1251,29 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         public Task<AccountUpsertResult> UpdateAsync(UpdateAccountRequest request, CancellationToken ct = default) =>
             Task.FromResult(new AccountUpsertResult(
                 new AssetItem(request.AccountId, request.Name, FinancialType.Asset, null, request.Currency, request.CreatedDate)));
+    }
+
+    private sealed class NullLoanPaymentWorkflowService : ILoanPaymentWorkflowService
+    {
+        public Task<LoanPaymentResult> RecordAsync(LoanPaymentRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new LoanPaymentResult(
+                new Trade(
+                    Guid.NewGuid(),
+                    string.Empty,
+                    string.Empty,
+                    request.LoanLabel,
+                    TradeType.LoanRepay,
+                    request.TradeDate,
+                    request.Entry.PrincipalAmount + request.Entry.InterestAmount,
+                    1,
+                    0m,
+                    0m,
+                    request.Entry.PrincipalAmount + request.Entry.InterestAmount,
+                    request.CashAccountId,
+                    LoanLabel: request.LoanLabel,
+                    Principal: request.Entry.PrincipalAmount,
+                    InterestPaid: request.Entry.InterestAmount),
+                DateTime.UtcNow));
     }
 
     private sealed class DirectPortfolioHistoryMaintenanceService : IPortfolioHistoryMaintenanceService
