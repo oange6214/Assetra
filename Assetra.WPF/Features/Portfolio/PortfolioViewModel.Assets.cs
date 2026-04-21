@@ -498,11 +498,8 @@ public partial class PortfolioViewModel
             { AddError = "請輸入股票代號"; return; }
 
             var metaSymbol = AddSymbol.Trim().ToUpper();
-            var metaExchange = _search.GetExchange(metaSymbol) ?? _addAssetWorkflowService.InferExchange(metaSymbol);
-            var metaName = _search.GetName(metaSymbol) ?? string.Empty;
-
-            await _repo
-                .FindOrCreatePortfolioEntryAsync(metaSymbol, metaExchange, metaName, AssetType.Stock)
+            await _addAssetWorkflowService
+                .EnsureStockEntryAsync(new EnsureStockEntryRequest(metaSymbol))
                 .ConfigureAwait(true);
 
             // No trade written. Clear input + refresh the Positions list via projection
@@ -526,52 +523,20 @@ public partial class PortfolioViewModel
         { AddError = "成交價無效"; return; }
 
         var symbol = AddSymbol.Trim().ToUpper();
-        var exchange = _search.GetExchange(symbol) ?? _addAssetWorkflowService.InferExchange(symbol);
-        var name = _search.GetName(symbol) ?? string.Empty;
-
-        // Buy-side commission: user can override via TxFee (manual). When TxFee is empty
-        // we fall back to the auto-computed value × commission discount, matching the
-        // Taiwan brokerage formula. Either way, the fee is folded into cost basis so P&L
-        // accounts for both buy and sell sides.
-        var isEtf = _search.IsEtf(symbol);
-        decimal commission;
-        // discountForRecord：走折扣路徑時存實際折扣值，走手動覆蓋時存 null；
-        // 供編輯對話框還原 UI 狀態（看得出使用者當初是設定折扣或手動填費用）。
-        decimal? discountForRecord;
-        if (!string.IsNullOrWhiteSpace(TxFee) && ParseHelpers.TryParseDecimal(TxFee, out var manualFee) && manualFee >= 0)
-        {
-            commission = manualFee;
-            discountForRecord = null;
-        }
-        else
-        {
-            var discount = TxCommissionDiscountValue;
-            commission = TaiwanTradeFeeCalculator.CalcBuy(price, qty, discount, isEtf).NetAmount - price * qty;
-            discountForRecord = discount;
-        }
-        var grossCost = price * qty + commission;
-        var costPerShare = grossCost / qty;
-
-        // Cash account linkage: respect the checkbox; even if TxCashAccount has a value,
-        // ignore it when the checkbox is off (no cash effect).
+        var manualFee = !string.IsNullOrWhiteSpace(TxFee) &&
+                        ParseHelpers.TryParseDecimal(TxFee, out var parsedManualFee) &&
+                        parsedManualFee >= 0
+            ? parsedManualFee
+            : (decimal?)null;
         var cashAccId = TxUseCashAccount ? TxCashAccount?.Id : null;
-
-        var buyDate = DateOnly.FromDateTime(AddBuyDate);
-        // Lazy Upsert: reuse an existing PortfolioEntry for (symbol, exchange) if present,
-        // else create a fresh one. Eliminates duplicate rows when the same symbol is bought
-        // multiple times. `name` comes from the stock-search catalogue (may be "").
-        var entryId = await _repo
-            .FindOrCreatePortfolioEntryAsync(symbol, exchange, name, AssetType.Stock)
-            .ConfigureAwait(true);
-        // Always unarchive: FindOrCreate returns archived entries when the same symbol was
-        // previously fully sold. A new buy reopens the position.
-        await _repo.UnarchiveAsync(entryId);
-        var entry = new PortfolioEntry(entryId, symbol, exchange, AssetType.Stock, name);
-        // (No AddAsync — FindOrCreate already persisted on the fresh-create path.)
-
-        // Log the new position; trade price = actual stock price (without commission)
-        await WriteLogAsync(entry.Id, symbol, exchange, qty, costPerShare);
-        await WriteBuyTradeAsync(entry, name, buyDate, price, qty, cashAccId, commission, discountForRecord);
+        await _addAssetWorkflowService.ExecuteStockBuyAsync(new StockBuyRequest(
+            symbol,
+            price,
+            qty,
+            DateOnly.FromDateTime(AddBuyDate),
+            cashAccId,
+            TxCommissionDiscountValue,
+            manualFee));
 
         // Cash balance reflects the Buy trade written above via the projection service;
         // no manual AdjustCashAccountAsync needed (single-truth architecture).

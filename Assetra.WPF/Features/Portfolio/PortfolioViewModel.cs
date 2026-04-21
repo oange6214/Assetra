@@ -443,7 +443,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _assetRepo);
         _addAssetWorkflowService = services.AddAssetWorkflow ?? new AddAssetWorkflowService(
             _search,
-            _historyProvider);
+            _historyProvider,
+            _repo,
+            _logRepo,
+            _txService);
         _transactionWorkflowService = services.TransactionWorkflow ?? new TransactionWorkflowService();
         _summaryService = services.Summary ?? new PortfolioSummaryService();
         _localization = ui.Localization;

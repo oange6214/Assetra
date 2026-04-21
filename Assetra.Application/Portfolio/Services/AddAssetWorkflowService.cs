@@ -11,13 +11,22 @@ public sealed class AddAssetWorkflowService : IAddAssetWorkflowService
 {
     private readonly IStockSearchService _searchService;
     private readonly IStockHistoryProvider? _historyProvider;
+    private readonly IPortfolioRepository? _portfolioRepository;
+    private readonly IPortfolioPositionLogRepository? _positionLogRepository;
+    private readonly ITransactionService? _transactionService;
 
     public AddAssetWorkflowService(
         IStockSearchService searchService,
-        IStockHistoryProvider? historyProvider = null)
+        IStockHistoryProvider? historyProvider = null,
+        IPortfolioRepository? portfolioRepository = null,
+        IPortfolioPositionLogRepository? positionLogRepository = null,
+        ITransactionService? transactionService = null)
     {
         _searchService = searchService;
         _historyProvider = historyProvider;
+        _portfolioRepository = portfolioRepository;
+        _positionLogRepository = positionLogRepository;
+        _transactionService = transactionService;
     }
 
     public IReadOnlyList<StockSearchResult> SearchSymbols(string query, int maxResults = 8)
@@ -88,8 +97,87 @@ public sealed class AddAssetWorkflowService : IAddAssetWorkflowService
             request.Quantity > 0 ? totalCost / request.Quantity : 0m);
     }
 
+    public async Task<PortfolioEntry> EnsureStockEntryAsync(
+        EnsureStockEntryRequest request,
+        CancellationToken ct = default)
+    {
+        EnsurePersistenceDependencies();
+
+        var symbol = request.Symbol.Trim().ToUpperInvariant();
+        var exchange = request.Exchange ?? _searchService.GetExchange(symbol) ?? InferExchange(symbol);
+        var name = request.Name ?? _searchService.GetName(symbol) ?? string.Empty;
+
+        var entryId = await _portfolioRepository!
+            .FindOrCreatePortfolioEntryAsync(symbol, exchange, name, AssetType.Stock, ct)
+            .ConfigureAwait(false);
+        await _portfolioRepository.UnarchiveAsync(entryId).ConfigureAwait(false);
+        return new PortfolioEntry(entryId, symbol, exchange, AssetType.Stock, name);
+    }
+
+    public async Task<StockBuyResult> ExecuteStockBuyAsync(
+        StockBuyRequest request,
+        CancellationToken ct = default)
+    {
+        EnsurePersistenceDependencies();
+
+        var symbol = request.Symbol.Trim().ToUpperInvariant();
+        var exchange = request.Exchange ?? _searchService.GetExchange(symbol) ?? InferExchange(symbol);
+        var name = request.Name ?? _searchService.GetName(symbol) ?? string.Empty;
+        var preview = BuildBuyPreview(new BuyPreviewRequest(
+            symbol,
+            request.Price,
+            request.Quantity,
+            request.CommissionDiscount,
+            request.ManualFee));
+        decimal? discountForRecord = request.ManualFee is >= 0 ? null : request.CommissionDiscount;
+
+        var entry = await EnsureStockEntryAsync(
+            new EnsureStockEntryRequest(symbol, exchange, name),
+            ct).ConfigureAwait(false);
+
+        await _positionLogRepository!.LogAsync(new PortfolioPositionLog(
+            Guid.NewGuid(),
+            DateOnly.FromDateTime(DateTime.Today),
+            entry.Id,
+            symbol,
+            exchange,
+            request.Quantity,
+            preview.CostPerShare)).ConfigureAwait(false);
+
+        var trade = new Trade(
+            Id: Guid.NewGuid(),
+            Symbol: symbol,
+            Exchange: exchange,
+            Name: name,
+            Type: TradeType.Buy,
+            TradeDate: request.BuyDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
+            Price: request.Price,
+            Quantity: request.Quantity,
+            RealizedPnl: null,
+            RealizedPnlPct: null,
+            CashAmount: null,
+            CashAccountId: request.CashAccountId,
+            Note: null,
+            PortfolioEntryId: entry.Id,
+            Commission: preview.Commission,
+            CommissionDiscount: discountForRecord);
+        await _transactionService!.RecordAsync(trade).ConfigureAwait(false);
+
+        return new StockBuyResult(
+            entry,
+            preview.Commission,
+            discountForRecord,
+            preview.CostPerShare);
+    }
+
     public string InferExchange(string symbol) =>
         Regex.IsMatch(symbol, @"^\d{5}[A-Z]$")
             ? "TPEX"
             : "TWSE";
+
+    private void EnsurePersistenceDependencies()
+    {
+        if (_portfolioRepository is null || _positionLogRepository is null || _transactionService is null)
+            throw new InvalidOperationException("Add-asset persistence dependencies are not configured.");
+    }
 }
