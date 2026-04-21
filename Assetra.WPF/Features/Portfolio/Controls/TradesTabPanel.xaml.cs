@@ -13,8 +13,8 @@ public partial class TradesTabPanel : UserControl
         if (DataContext is not PortfolioViewModel vm) return;
         if (sender is not DataGridRow { DataContext: { } item }) return;
 
-        if (vm.EditTradeCommand.CanExecute(item))
-            vm.EditTradeCommand.Execute(item);
+        if (vm.Transaction.EditTradeCommand.CanExecute(item))
+            vm.Transaction.EditTradeCommand.Execute(item);
 
         e.Handled = true;
     }

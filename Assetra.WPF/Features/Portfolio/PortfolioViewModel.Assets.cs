@@ -30,10 +30,10 @@ public partial class PortfolioViewModel
     private void BeginSell(PortfolioRowViewModel row)
     {
         // Open Tx dialog in Sell mode with this position pre-selected
-        OpenTxDialog();
-        TxType = "sell";
-        TxSellPosition = row;
-        TxSellQuantity = ((int)row.Quantity).ToString();
+        Transaction.OpenTxDialog();
+        Transaction.TxType = "sell";
+        Transaction.TxSellPosition = row;
+        Transaction.TxSellQuantity = ((int)row.Quantity).ToString();
     }
 
     /// <summary>側面板「買入」快速動作 — 打開 Tx 對話框，預填當前股票代號。</summary>
@@ -43,9 +43,9 @@ public partial class PortfolioViewModel
         if (SelectedPositionRow is null)
             return;
         var row = SelectedPositionRow;
-        OpenTxDialog();
-        TxType = "buy";
-        TxBuyAssetType = "stock";
+        Transaction.OpenTxDialog();
+        Transaction.TxType = "buy";
+        Transaction.TxBuyAssetType = "stock";
         AddAssetDialog.AddSymbol = row.Symbol;
         AddAssetDialog.AddPrice = string.Empty;
         AddAssetDialog.AddQuantity = string.Empty;
@@ -57,9 +57,9 @@ public partial class PortfolioViewModel
     {
         if (SelectedPositionRow is null)
             return;
-        OpenTxDialog();
-        TxType = "cashDiv";
-        TxDivPosition = SelectedPositionRow;
+        Transaction.OpenTxDialog();
+        Transaction.TxType = "cashDiv";
+        Transaction.TxDivPosition = SelectedPositionRow;
     }
 
     /// <summary>側面板「賣出」快速動作 — 呼叫既有 BeginSell，但以 SelectedPositionRow 為目標。</summary>
@@ -76,7 +76,7 @@ public partial class PortfolioViewModel
     // （買/賣/存/提/借/還/股利…）統一從一個入口進入。
 
     [RelayCommand]
-    private void GlobalAdd() => OpenTxDialog();
+    private void GlobalAdd() => Transaction.OpenTxDialog();
 
     /// <summary>開啟新增現金帳戶對話框（由現金 tab 的「新增帳戶」按鈕呼叫）。</summary>
     [RelayCommand]
@@ -352,9 +352,14 @@ public partial class PortfolioViewModel
         foreach (var r in CashAccounts)
             r.IsDefault = savedId.HasValue && r.Id == savedId.Value;
 
-        CashAccountSuggestions.Clear();
-        foreach (var a in accounts.Where(a => a.IsActive).OrderBy(a => a.Name))
-            CashAccountSuggestions.Add(a.Name);
+        // CashAccountSuggestions now lives on the Transaction sub-VM; update it here
+        // since ApplyCashAccounts is the only caller with the full account list.
+        if (Transaction is not null)
+        {
+            Transaction.CashAccountSuggestions.Clear();
+            foreach (var a in accounts.Where(a => a.IsActive).OrderBy(a => a.Name))
+                Transaction.CashAccountSuggestions.Add(a.Name);
+        }
     }
 
     private async Task LoadLiabilitiesAsync()
@@ -382,7 +387,7 @@ public partial class PortfolioViewModel
         }
 
         HasNoLiabilities = Liabilities.Count == 0;
-        OnPropertyChanged(nameof(LoanLabelSuggestions));
+        Transaction?.NotifyLoanLabelSuggestionsChanged();
     }
 
     /// <summary>Loads the amortization schedule for a loan liability row (called on selection).</summary>
@@ -574,7 +579,7 @@ public partial class PortfolioViewModel
             return;
 
         var row = SelectedLiabilityRow;
-        var cashAccId = TxCashAccount?.Id;
+        var cashAccId = Transaction.TxCashAccount?.Id;
         var result = await _loanPaymentWorkflowService.RecordAsync(new LoanPaymentRequest(
             new LoanScheduleEntry(
                 entry.Id,

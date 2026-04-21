@@ -483,7 +483,7 @@
                                                         Padding="0"
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center"
-                                                        Command="{Binding DataContext.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource BtnIcon}">
                                                         <TextBlock
@@ -839,7 +839,7 @@
                                                         Padding="0"
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center"
-                                                        Command="{Binding DataContext.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource BtnIcon}">
                                                         <TextBlock
@@ -1813,7 +1813,7 @@
                                                         Padding="0"
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center"
-                                                        Command="{Binding DataContext.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource BtnIcon}">
                                                         <TextBlock
@@ -1887,7 +1887,7 @@
         </Grid>
 
         <!--  ── Dialog overlays ──  -->
-        <pcontrols:AddTransactionDialog Grid.RowSpan="3" Panel.ZIndex="210" />
+        <pcontrols:AddTransactionDialog Grid.RowSpan="3" Panel.ZIndex="210" DataContext="{Binding Transaction}" />
         <pcontrols:AddAssetDialog Grid.RowSpan="3" Panel.ZIndex="200" />
         <pcontrols:EditAssetDialog Grid.RowSpan="3" Panel.ZIndex="205" />
         <!--  ── Confirm dialog ──  -->

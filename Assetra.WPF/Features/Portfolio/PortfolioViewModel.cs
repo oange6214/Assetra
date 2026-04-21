@@ -419,6 +419,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     /// </summary>
     public SellPanelViewModel SellPanel { get; }
 
+    /// <summary>
+    /// Sub-VM that owns all transaction-dialog state and commands.
+    /// XAML bindings chain through <c>Transaction.PropertyName</c>.
+    /// </summary>
+    public SubViewModels.TransactionDialogViewModel Transaction { get; }
+
     // Dividend calendar
     [ObservableProperty] private int _divCalendarYear = DateTime.Today.Year;
 
@@ -515,16 +521,11 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         TradeFilter = new TradeFilterViewModel(() => Trades, ui.Localization ?? NullLocalizationService.Instance);
         TradeFilter.AttachTradesCollection(Trades);
 
-        // Build the AddAssetDialog sub-VM and wire its Tx-dialog field delegates and
-        // the AssetAdded reload callback.
+        // Build the AddAssetDialog sub-VM. Tx-dialog field delegates are wired below after
+        // the Transaction sub-VM is constructed (delegates reference Transaction properties).
         AddAssetDialog = services.AddAssetDialog ?? new AddAssetDialogViewModel(
             _addAssetWorkflowService,
             _accountUpsertWorkflowService);
-        AddAssetDialog.GetTxCommissionDiscountValue = () => TxCommissionDiscountValue;
-        AddAssetDialog.GetTxFee = () => TxFee;
-        AddAssetDialog.GetTxBuyMetaOnly = () => TxBuyMetaOnly;
-        AddAssetDialog.GetTxCashAccountId = () => TxCashAccount?.Id;
-        AddAssetDialog.GetTxUseCashAccount = () => TxUseCashAccount;
         AddAssetDialog.AssetAdded += OnAssetAdded;
 
         // Build the SellPanel sub-VM and wire delegates for Tx-dialog fields it needs.
@@ -538,9 +539,45 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             // reference so both VMs see the same live list without a back-reference.
             CashAccounts = CashAccounts,
         };
-        SellPanel.GetTxCommissionDiscountValue = () => TxCommissionDiscountValue;
-        SellPanel.GetTxFee = () => TxFee;
         SellPanel.SellCompleted += OnSellCompleted;
+
+        // Build the TransactionDialog sub-VM and wire its reload-callback events.
+        Transaction = services.Transaction ?? new SubViewModels.TransactionDialogViewModel(
+            new SubViewModels.TransactionDialogDependencies(
+                TransactionWorkflow: _transactionWorkflowService,
+                TradeDeletion: _tradeDeletionWorkflowService,
+                TradeMetadata: _tradeMetadataWorkflowService,
+                LoanMutation: _loanMutationWorkflowService,
+                Search: _search,
+                TradeDialogController: _tradeDialogController,
+                AssetRepo: _assetRepo,
+                Snackbar: _snackbar,
+                Trades: Trades,
+                Positions: Positions,
+                CashAccounts: CashAccounts,
+                Liabilities: Liabilities,
+                AddAssetDialog: AddAssetDialog,
+                SellPanel: SellPanel,
+                GetDefaultCashAccount: GetDefaultCashAccount,
+                LoadLoanScheduleAsync: LoadLoanScheduleAsync,
+                LoadLiabilitiesAsync: LoadLiabilitiesAsync,
+                LoadPositionsAsync: LoadPositionsAsync,
+                LoadTradesAsync: LoadTradesAsync,
+                ReloadAccountBalancesAsync: ReloadAccountBalancesAsync,
+                RebuildTotals: RebuildTotals,
+                Localize: L));
+        Transaction.TransactionCompleted += OnTransactionCompleted;
+        Transaction.TradeDeleted += OnTradeDeleted;
+
+        // Wire the AddAssetDialog and SellPanel delegates that reference Transaction properties
+        // now that Transaction is constructed.
+        AddAssetDialog.GetTxCommissionDiscountValue = () => Transaction.TxCommissionDiscountValue;
+        AddAssetDialog.GetTxFee = () => Transaction.TxFee;
+        AddAssetDialog.GetTxBuyMetaOnly = () => Transaction.TxBuyMetaOnly;
+        AddAssetDialog.GetTxCashAccountId = () => Transaction.TxCashAccount?.Id;
+        AddAssetDialog.GetTxUseCashAccount = () => Transaction.TxUseCashAccount;
+        SellPanel.GetTxCommissionDiscountValue = () => Transaction.TxCommissionDiscountValue;
+        SellPanel.GetTxFee = () => Transaction.TxFee;
 
         // Rebuild chart colours whenever the user switches theme
         if (ui.Theme is not null)
@@ -691,13 +728,20 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
         // Refresh Lazy-Upsert suggestion list for TX form editable ComboBox (Task 19).
         // Only active entries — one row per (Symbol, Exchange).
-        PositionSuggestions.Clear();
-        foreach (var e in entries.Where(x => x.IsActive)
-                                  .GroupBy(x => (x.Symbol, x.Exchange))
-                                  .Select(g => g.First())
-                                  .OrderBy(x => x.Symbol))
+        // Transaction sub-VM owns PositionSuggestions — update it here since ApplyPositions
+        // is the only caller that has the full entries list.
+        if (Transaction is not null)
         {
-            PositionSuggestions.Add(new PositionSuggestion(e.Id, e.Symbol, e.Exchange, e.DisplayName));
+            Transaction.PositionSuggestions.Clear();
+            foreach (var e in entries.Where(x => x.IsActive)
+                                      .GroupBy(x => (x.Symbol, x.Exchange))
+                                      .Select(g => g.First())
+                                      .OrderBy(x => x.Symbol))
+            {
+                Transaction.PositionSuggestions.Add(
+                    new SubViewModels.TransactionDialogViewModel.PositionSuggestion(
+                        e.Id, e.Symbol, e.Exchange, e.DisplayName));
+            }
         }
     }
 
@@ -756,11 +800,41 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private void OnSellCompleted(object? sender, EventArgs e)
         => _ = ReloadAfterSellAsync();
 
+    private void OnTransactionCompleted(object? sender, EventArgs e)
+        => _ = ReloadAfterTransactionAsync();
+
+    private void OnTradeDeleted(object? sender, EventArgs e)
+        => _ = ReloadAfterTradeDeletedAsync();
+
     /// <summary>
     /// Called by <see cref="SellPanelViewModel.SellCompleted"/> to refresh all
     /// position, trade, balance, and totals state after a successful sell.
     /// </summary>
     private async Task ReloadAfterSellAsync()
+    {
+        await LoadPositionsAsync();
+        await LoadTradesAsync();
+        await ReloadAccountBalancesAsync();
+        RebuildTotals();
+    }
+
+    /// <summary>
+    /// Called by <see cref="SubViewModels.TransactionDialogViewModel.TransactionCompleted"/> to refresh
+    /// all position, trade, balance, and totals state after a successful transaction.
+    /// </summary>
+    private async Task ReloadAfterTransactionAsync()
+    {
+        await LoadPositionsAsync();
+        await LoadTradesAsync();
+        await ReloadAccountBalancesAsync();
+        RebuildTotals();
+    }
+
+    /// <summary>
+    /// Called by <see cref="SubViewModels.TransactionDialogViewModel.TradeDeleted"/> to refresh all
+    /// position, trade, balance, and totals state after a successful trade deletion.
+    /// </summary>
+    private async Task ReloadAfterTradeDeletedAsync()
     {
         await LoadPositionsAsync();
         await LoadTradesAsync();
@@ -1203,6 +1277,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         AddAssetDialog.AssetAdded -= OnAssetAdded;
         AddAssetDialog.CancelPendingFetch();
         SellPanel.SellCompleted -= OnSellCompleted;
+        Transaction.TransactionCompleted -= OnTransactionCompleted;
+        Transaction.TradeDeleted -= OnTradeDeleted;
         _disposables.Dispose();
     }
 
