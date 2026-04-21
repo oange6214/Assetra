@@ -135,6 +135,11 @@ internal static class ServiceCollectionExtensions
             new PortfolioHistoryMaintenanceService(
                 sp.GetRequiredService<PortfolioSnapshotService>(),
                 sp.GetRequiredService<PortfolioBackfillService>()));
+        services.AddSingleton<ITradeDeletionWorkflowService>(sp =>
+            new TradeDeletionWorkflowService(
+                sp.GetRequiredService<ITradeRepository>(),
+                sp.GetRequiredService<IPortfolioRepository>(),
+                sp.GetRequiredService<IPositionQueryService>()));
         services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
         services.AddSingleton<IAddAssetWorkflowService>(sp => new AddAssetWorkflowService(
             sp.GetRequiredService<IStockSearchService>(),
@@ -164,6 +169,7 @@ internal static class ServiceCollectionExtensions
                 Search: sp.GetRequiredService<IStockSearchService>(),
                 HistoryMaintenance: sp.GetRequiredService<IPortfolioHistoryMaintenanceService>(),
                 HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
+                TradeDeletionWorkflow: sp.GetRequiredService<ITradeDeletionWorkflowService>(),
                 Load: sp.GetRequiredService<IPortfolioLoadService>(),
                 AddAssetWorkflow: sp.GetRequiredService<IAddAssetWorkflowService>(),
                 History: sp.GetRequiredService<IStockHistoryProvider>(),

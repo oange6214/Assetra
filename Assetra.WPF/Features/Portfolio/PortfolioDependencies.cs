@@ -54,7 +54,8 @@ public sealed record PortfolioServices(
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。
     /// 測試中若省略，ViewModel 會回退為內建實作。
     /// </summary>
-    IPortfolioSummaryService? Summary = null);
+    IPortfolioSummaryService? Summary = null,
+    ITradeDeletionWorkflowService? TradeDeletionWorkflow = null);
 
 /// <summary>
 /// UI-adjacent services (scheduler / theming / settings / snackbar / localization).

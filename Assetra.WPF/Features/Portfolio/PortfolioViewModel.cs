@@ -43,6 +43,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly IPortfolioLoadService _loadService;
     private readonly IAddAssetWorkflowService _addAssetWorkflowService;
     private readonly ITransactionWorkflowService _transactionWorkflowService;
+    private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly IPortfolioHistoryMaintenanceService _historyMaintenanceService;
     private readonly ILocalizationService? _localization;
@@ -366,11 +367,13 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         {
             try
             {
-                // Under the single-truth model the balance is a pure projection over
-                // remaining trades — no reversal bookkeeping needed. Just drop the row
-                // and re-project. Remove fee sub-records first, then the parent.
-                await _tradeRepo.RemoveChildrenAsync(row.Id);
-                await _tradeRepo.RemoveAsync(row.Id);
+                var result = await _tradeDeletionWorkflowService.DeleteAsync(ToTradeDeletionRequest(row));
+                if (!result.Success && result.BlockedBySell)
+                {
+                    _snackbar?.Warning(L("Portfolio.Trade.DeleteBlockedBySell",
+                        "請先刪除此股票的賣出記錄，再刪除此買入記錄。"));
+                    return;
+                }
                 Trades.Remove(row);
                 HasNoTrades = Trades.Count == 0;
                 HasAnyDividendTrades = Trades.Any(t => t.IsCashDividend);
@@ -444,6 +447,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _logRepo,
             _txService);
         _transactionWorkflowService = services.TransactionWorkflow ?? new TransactionWorkflowService();
+        _tradeDeletionWorkflowService = services.TradeDeletionWorkflow
+            ?? new TradeDeletionWorkflowService(_tradeRepo, _repo, _positionQuery);
         _summaryService = services.Summary ?? new PortfolioSummaryService();
         _historyMaintenanceService = services.HistoryMaintenance
             ?? (services.Snapshot is not null && services.Backfill is not null
@@ -1123,6 +1128,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     /// </summary>
     private string L(string key, string fallback = "") =>
         _localization?.Get(key, fallback) ?? fallback;
+
+    private static TradeDeletionRequest ToTradeDeletionRequest(TradeRowViewModel row) =>
+        new(row.Id, row.Type, row.Symbol, row.Quantity, row.PortfolioEntryId);
 
     public void Dispose()
     {

@@ -876,23 +876,15 @@ public partial class PortfolioViewModel
         if (row is null)
             return;
 
-        // Guard: deleting a Buy or StockDividend that is "covered" by a Sell trade would
-        // produce a negative net position — block and require the user to delete the Sell first.
-        if (await WouldRemovalCauseNegativeQtyAsync(row))
-        {
-            TxError = L("Portfolio.Trade.DeleteBlockedBySell",
-                "請先刪除此股票的賣出記錄，再刪除此買入記錄。");
-            return;
-        }
-
-        // 同步 stock-lot（Buy/Sell/StockDividend 需要更新或移除 PortfolioEntry）
-        await ApplyOldTradeRemovalOnPositionAsync(row);
-
         try
         {
-            // 先刪子記錄（手續費等附屬 Withdrawal），再刪主記錄
-            await _tradeRepo.RemoveChildrenAsync(id);
-            await _tradeRepo.RemoveAsync(id);
+            var result = await _tradeDeletionWorkflowService.DeleteAsync(ToTradeDeletionRequest(row));
+            if (!result.Success && result.BlockedBySell)
+            {
+                TxError = L("Portfolio.Trade.DeleteBlockedBySell",
+                    "請先刪除此股票的賣出記錄，再刪除此買入記錄。");
+                return;
+            }
         }
         catch (Exception ex)
         {
@@ -986,25 +978,16 @@ public partial class PortfolioViewModel
         // data fields are still valid for the stock-lot cleanup below.
         if (oldRow is not null)
         {
-            // Guard: editing a Buy/StockDividend that covers an existing Sell would leave
-            // a negative position if the old (larger) lot is removed. Reject and restore
-            // the edit context so the user can fix the issue first.
-            if (await WouldRemovalCauseNegativeQtyAsync(oldRow))
-            {
-                TxError = L("Portfolio.Trade.DeleteBlockedBySell",
-                    "請先刪除此股票的賣出記錄，再修改此買入記錄。");
-                EditingTradeId = pendingEditId;
-                return;
-            }
-
-            // Stock-position trades also need the owning lot updated — see
-            // ApplyOldTradeRemovalOnPositionAsync for the Buy/Sell/StockDividend logic.
-            await ApplyOldTradeRemovalOnPositionAsync(oldRow);
             try
             {
-                // 先刪子記錄（手續費等附屬 Withdrawal），再刪主記錄
-                await _tradeRepo.RemoveChildrenAsync(oldRow.Id);
-                await _tradeRepo.RemoveAsync(oldRow.Id);
+                var result = await _tradeDeletionWorkflowService.DeleteAsync(ToTradeDeletionRequest(oldRow));
+                if (!result.Success && result.BlockedBySell)
+                {
+                    TxError = L("Portfolio.Trade.DeleteBlockedBySell",
+                        "請先刪除此股票的賣出記錄，再修改此買入記錄。");
+                    EditingTradeId = pendingEditId;
+                    return;
+                }
             }
             catch (Exception ex)
             {
@@ -1072,60 +1055,6 @@ public partial class PortfolioViewModel
     /// the new StockDividend's add lands on a clean baseline.</description></item>
     /// </list>
     /// </summary>
-    /// <summary>
-    /// Returns true if removing <paramref name="row"/> from the ledger would cause
-    /// the net position quantity to drop below zero — meaning a Sell trade has already
-    /// consumed shares this Buy/StockDividend was accounting for.
-    /// </summary>
-    private async Task<bool> WouldRemovalCauseNegativeQtyAsync(TradeRowViewModel row)
-    {
-        if (row.Type is not (TradeType.Buy or TradeType.StockDividend))
-            return false;
-        if (row.PortfolioEntryId is not { } entryId)
-            return false;
-        var snap = await _positionQuery.GetPositionAsync(entryId);
-        return snap is not null && snap.Quantity - (decimal)row.Quantity < 0;
-    }
-
-    private async Task ApplyOldTradeRemovalOnPositionAsync(TradeRowViewModel oldRow)
-    {
-        if (_repo is null)
-            return;
-        if (oldRow.PortfolioEntryId is not { } entryId)
-            return;
-
-        switch (oldRow.Type)
-        {
-            case TradeType.Buy:
-                // Only hard-delete the portfolio entry if this is the last trade referencing it.
-                // Stocks share one entry across all buy lots (FindOrCreatePortfolioEntryAsync),
-                // so deleting the entry when other buys still reference it would silently
-                // destroy those positions after the next app restart.
-                // Display is refreshed by the LoadPositionsAsync() call in DeleteTradeAsync.
-                var refs = await _repo.HasTradeReferencesAsync(entryId);
-                if (refs <= 1)
-                    await _repo.RemoveAsync(entryId);
-                break;
-
-            case TradeType.StockDividend:
-                // No DB entry manipulation needed — trade log is the source of truth.
-                // LoadPositionsAsync() recomputes quantity from trades after deletion.
-                break;
-
-            case TradeType.Sell:
-                // ConfirmSell now archives lots (soft-delete) rather than removing them,
-                // so deleting a sell trade should restore all archived lots for this symbol.
-                var allEntries = await _repo.GetEntriesAsync();
-                foreach (var entry in allEntries)
-                {
-                    if (string.Equals(entry.Symbol, oldRow.Symbol, StringComparison.OrdinalIgnoreCase)
-                        && !entry.IsActive)
-                        await _repo.UnarchiveAsync(entry.Id);
-                }
-                break;
-        }
-    }
-
     private async Task ConfirmBuyAsync()
     {
         // Delegate to existing buy logic based on asset sub-type.
