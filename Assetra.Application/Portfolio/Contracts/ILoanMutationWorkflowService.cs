@@ -1,5 +1,4 @@
 using Assetra.Application.Portfolio.Dtos;
-using Assetra.Application.Portfolio.Services;
 
 namespace Assetra.Application.Portfolio.Contracts;
 

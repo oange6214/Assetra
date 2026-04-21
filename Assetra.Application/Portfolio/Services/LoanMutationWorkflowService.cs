@@ -75,12 +75,6 @@ public sealed class LoanMutationWorkflowService : ILoanMutationWorkflowService
             Principal: request.Principal,
             InterestPaid: request.InterestPaid);
 
-        if (liabilityAsset is not null)
-            await _assetRepository.AddItemAsync(liabilityAsset).ConfigureAwait(false);
-
-        if (scheduleEntries is not null)
-            await _loanScheduleRepository.BulkInsertAsync(scheduleEntries).ConfigureAwait(false);
-
         ct.ThrowIfCancellationRequested();
         await _transactionService.RecordAsync(mainTrade).ConfigureAwait(false);
 
@@ -106,8 +100,12 @@ public sealed class LoanMutationWorkflowService : ILoanMutationWorkflowService
                 ParentTradeId: mainTrade.Id)).ConfigureAwait(false);
         }
 
+        if (liabilityAsset is not null)
+            await _assetRepository.AddItemAsync(liabilityAsset).ConfigureAwait(false);
+
+        if (scheduleEntries is not null)
+            await _loanScheduleRepository.BulkInsertAsync(scheduleEntries).ConfigureAwait(false);
+
         return new LoanMutationResult(liabilityAsset?.Id, scheduleEntries);
     }
 }
-
-public sealed record LoanMutationResult(Guid? LiabilityAssetId, IReadOnlyList<LoanScheduleEntry>? ScheduleEntries);

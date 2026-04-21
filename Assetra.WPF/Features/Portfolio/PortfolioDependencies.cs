@@ -42,7 +42,8 @@ public sealed record PortfolioServices(
     /// </summary>
     IPositionQueryService? PositionQuery = null,
     /// <summary>
-    /// 交易流程服務：建立 income / cash-flow / loan / transfer 的交易計畫。
+    /// 交易流程服務：直接執行 income / cash-flow / dividend / transfer 的交易寫入。
+    /// 貸款相關操作由 <see cref="ILoanMutationWorkflowService"/> 負責。
     /// 測試中若省略，ViewModel 會回退為內建實作。
     /// </summary>
     ITransactionWorkflowService? TransactionWorkflow = null,
