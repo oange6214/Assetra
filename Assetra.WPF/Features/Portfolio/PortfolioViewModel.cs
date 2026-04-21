@@ -1,21 +1,20 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Data;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using LiveChartsCore;
-using LiveChartsCore.SkiaSharpView;
-using SkiaSharp;
 using Assetra.AppLayer.Portfolio.Contracts;
 using Assetra.AppLayer.Portfolio.Dtos;
 using Assetra.AppLayer.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
-using Serilog;
 using Assetra.WPF.Infrastructure;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using Serilog;
+using SkiaSharp;
 using Wpf.Ui.Appearance;
 
 namespace Assetra.WPF.Features.Portfolio;
@@ -45,6 +44,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly ITransactionWorkflowService _transactionWorkflowService;
     private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
     private readonly IPositionDeletionWorkflowService _positionDeletionWorkflowService;
+    private readonly IAccountMutationWorkflowService _accountMutationWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly IPortfolioHistoryMaintenanceService _historyMaintenanceService;
     private readonly ILocalizationService? _localization;
@@ -268,7 +268,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private async Task DismissWelcomeBannerAsync()
     {
         ShowWelcomeBanner = false;
-        if (_settingsService is null) return;
+        if (_settingsService is null)
+            return;
         try
         {
             await _settingsService.SaveAsync(_settingsService.Current with { HasShownWelcomeBanner = true });
@@ -452,6 +453,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             ?? new TradeDeletionWorkflowService(_tradeRepo, _repo, _positionQuery);
         _positionDeletionWorkflowService = services.PositionDeletionWorkflow
             ?? new PositionDeletionWorkflowService(_tradeRepo, _repo);
+        _accountMutationWorkflowService = services.AccountMutationWorkflow
+            ?? (_assetRepo is not null
+                ? new AccountMutationWorkflowService(_assetRepo)
+                : new NullAccountMutationWorkflowService());
         _summaryService = services.Summary ?? new PortfolioSummaryService();
         _historyMaintenanceService = services.HistoryMaintenance
             ?? (services.Snapshot is not null && services.Backfill is not null
@@ -531,7 +536,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             var primary = lots[0];
 
             // Archive filter: hide when all lots are archived and ShowArchivedPositions is off.
-            if (!ShowArchivedPositions && lots.All(l => !l.IsActive)) continue;
+            if (!ShowArchivedPositions && lots.All(l => !l.IsActive))
+                continue;
 
             PortfolioRowViewModel row;
             if (lots.Count == 1)
@@ -539,7 +545,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 snapshots.TryGetValue(primary.Id, out var snap);
 
                 // Hide-empty filter: projection says qty == 0 (position closed out).
-                if (HideEmptyPositions && (snap?.Quantity ?? 0m) == 0m) continue;
+                if (HideEmptyPositions && (snap?.Quantity ?? 0m) == 0m)
+                    continue;
 
                 row = ToRow(primary, snap);
                 row.IsActive = primary.IsActive;
@@ -547,7 +554,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             else
             {
                 // Multiple lots: aggregate into one display row.
-                var totalQty  = lots.Sum(e => snapshots.TryGetValue(e.Id, out var s) ? s.Quantity : 0m);
+                var totalQty = lots.Sum(e => snapshots.TryGetValue(e.Id, out var s) ? s.Quantity : 0m);
                 var totalCost = lots.Sum(e => snapshots.TryGetValue(e.Id, out var s) ? s.TotalCost : 0m);
                 var firstBuyDate = lots
                     .Select(e => snapshots.TryGetValue(e.Id, out var s) ? s.FirstBuyDate : null)
@@ -563,7 +570,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                     lots.Sum(e => snapshots.TryGetValue(e.Id, out var s) ? s.RealizedPnl : 0m),
                     firstBuyDate == default ? null : firstBuyDate);
 
-                if (HideEmptyPositions && totalQty == 0m) continue;
+                if (HideEmptyPositions && totalQty == 0m)
+                    continue;
 
                 row = ToRow(primary, aggregatedSnap);
                 row.IsActive = lots.Any(l => l.IsActive);
@@ -1214,6 +1222,14 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
         public Task<int> BackfillAsync(CancellationToken ct = default) =>
             Task.FromResult(0);
+    }
+
+    private sealed class NullAccountMutationWorkflowService : IAccountMutationWorkflowService
+    {
+        public Task ArchiveAsync(Guid accountId, CancellationToken ct = default) => Task.CompletedTask;
+
+        public Task<AccountDeletionResult> DeleteAsync(Guid accountId, CancellationToken ct = default) =>
+            Task.FromResult(new AccountDeletionResult(false));
     }
 
     private sealed class DirectPortfolioHistoryMaintenanceService : IPortfolioHistoryMaintenanceService

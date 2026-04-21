@@ -1,12 +1,9 @@
 using System.Net.Http;
 using System.Reactive.Concurrency;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Assetra.AppLayer.Portfolio.Contracts;
 using Assetra.AppLayer.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Infrastructure;
-using Assetra.Infrastructure.Chart;
 using Assetra.Infrastructure.FinMind;
 using Assetra.Infrastructure.History;
 using Assetra.Infrastructure.Http;
@@ -21,6 +18,8 @@ using Assetra.WPF.Features.Settings;
 using Assetra.WPF.Features.Snackbar;
 using Assetra.WPF.Features.StatusBar;
 using Assetra.WPF.Shell;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace Assetra.WPF.Infrastructure;
@@ -144,6 +143,9 @@ internal static class ServiceCollectionExtensions
             new PositionDeletionWorkflowService(
                 sp.GetRequiredService<ITradeRepository>(),
                 sp.GetRequiredService<IPortfolioRepository>()));
+        services.AddSingleton<IAccountMutationWorkflowService>(sp =>
+            new AccountMutationWorkflowService(
+                sp.GetRequiredService<IAssetRepository>()));
         services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
         services.AddSingleton<IAddAssetWorkflowService>(sp => new AddAssetWorkflowService(
             sp.GetRequiredService<IStockSearchService>(),
@@ -175,6 +177,7 @@ internal static class ServiceCollectionExtensions
                 HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
                 TradeDeletionWorkflow: sp.GetRequiredService<ITradeDeletionWorkflowService>(),
                 PositionDeletionWorkflow: sp.GetRequiredService<IPositionDeletionWorkflowService>(),
+                AccountMutationWorkflow: sp.GetRequiredService<IAccountMutationWorkflowService>(),
                 Load: sp.GetRequiredService<IPortfolioLoadService>(),
                 AddAssetWorkflow: sp.GetRequiredService<IAddAssetWorkflowService>(),
                 History: sp.GetRequiredService<IStockHistoryProvider>(),

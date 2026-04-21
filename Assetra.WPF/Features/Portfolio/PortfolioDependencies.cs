@@ -1,8 +1,6 @@
 using System.Reactive.Concurrency;
 using Assetra.AppLayer.Portfolio.Contracts;
 using Assetra.Core.Interfaces;
-using Assetra.Core.Models;
-using Assetra.Infrastructure;
 using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Portfolio;
@@ -56,7 +54,8 @@ public sealed record PortfolioServices(
     /// </summary>
     IPortfolioSummaryService? Summary = null,
     ITradeDeletionWorkflowService? TradeDeletionWorkflow = null,
-    IPositionDeletionWorkflowService? PositionDeletionWorkflow = null);
+    IPositionDeletionWorkflowService? PositionDeletionWorkflow = null,
+    IAccountMutationWorkflowService? AccountMutationWorkflow = null);
 
 /// <summary>
 /// UI-adjacent services (scheduler / theming / settings / snackbar / localization).

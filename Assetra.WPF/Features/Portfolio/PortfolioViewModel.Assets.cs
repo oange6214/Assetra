@@ -1,15 +1,11 @@
-using System.Collections.ObjectModel;
 using System.Reactive.Linq;
-using System.Windows;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Assetra.AppLayer.Portfolio.Contracts;
 using Assetra.AppLayer.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
-using Assetra.WPF.Infrastructure;
-using Assetra.Core.Services;
 using Assetra.Core.Trading;
+using Assetra.WPF.Infrastructure;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Assetra.WPF.Features.Portfolio;
 
@@ -373,7 +369,7 @@ public partial class PortfolioViewModel
         {
             var discount = TxCommissionDiscountValue;
             var feeResult = TaiwanTradeFeeCalculator.CalcSell(sellPrice, sellQty, discount, IsSellEtf, row.IsBondEtf);
-            sellNetAmount  = feeResult.NetAmount;
+            sellNetAmount = feeResult.NetAmount;
             sellCommission = feeResult.Commission + feeResult.TransactionTax;
             sellDiscount = discount;
         }
@@ -742,11 +738,12 @@ public partial class PortfolioViewModel
     [RelayCommand]
     private void ArchiveAccount(CashAccountRowViewModel? row)
     {
-        if (row is null || _assetRepo is null) return;
+        if (row is null || _assetRepo is null)
+            return;
         var msg = L("Portfolio.Confirm.ArchiveAccount", "確定封存此帳戶？（餘額保留；交易紀錄保留）");
         AskConfirm(msg, async () =>
         {
-            await _assetRepo.ArchiveItemAsync(row.Id);
+            await _accountMutationWorkflowService.ArchiveAsync(row.Id);
             await LoadCashAccountsAsync();
             if (DefaultCashAccountId == row.Id)
                 await ApplyDefaultCashAccountAsync(null);
@@ -762,22 +759,22 @@ public partial class PortfolioViewModel
     [RelayCommand]
     private void RemoveCashAccount(CashAccountRowViewModel? row)
     {
-        if (row is null || _assetRepo is null) return;
+        if (row is null || _assetRepo is null)
+            return;
 
         AskConfirm(
             L("Portfolio.Confirm.DeleteAccount", "確定刪除此帳戶？"),
             async () =>
             {
-                var refs = await _assetRepo.HasTradeReferencesAsync(row.Id);
-                if (refs > 0)
+                var result = await _accountMutationWorkflowService.DeleteAsync(row.Id);
+                if (!result.Success)
                 {
                     var template = L("Portfolio.Account.HasReferencesError", "尚有 {0} 筆交易引用此帳戶，請先處理");
-                    var formatted = string.Format(System.Globalization.CultureInfo.CurrentCulture, template, refs);
+                    var formatted = string.Format(System.Globalization.CultureInfo.CurrentCulture, template, result.ReferenceCount);
                     _snackbar?.Warning(formatted);
                     return;
                 }
 
-                await _assetRepo.DeleteItemAsync(row.Id);
                 CashAccounts.Remove(row);
                 HasNoCashAccounts = CashAccounts.Count == 0;
 
@@ -1004,9 +1001,9 @@ public partial class PortfolioViewModel
     [NotifyPropertyChangedFor(nameof(IsDetailScheduleTab))]
     private string _detailTab = "overview";
 
-    public bool IsDetailOverviewTab  => DetailTab == "overview";
-    public bool IsDetailTradesTab    => DetailTab == "trades";
-    public bool IsDetailScheduleTab  => DetailTab == "schedule";
+    public bool IsDetailOverviewTab => DetailTab == "overview";
+    public bool IsDetailTradesTab => DetailTab == "trades";
+    public bool IsDetailScheduleTab => DetailTab == "schedule";
 
     partial void OnSelectedCashRowChanged(CashAccountRowViewModel? _) => DetailTab = "overview";
     partial void OnSelectedLiabilityRowChanged(LiabilityRowViewModel? row)
@@ -1089,7 +1086,7 @@ public partial class PortfolioViewModel
                 .ToList();
             if (buys.Count == 0)
                 return 0m;
-            var totalQty  = buys.Sum(t => (decimal)t.Quantity);
+            var totalQty = buys.Sum(t => (decimal)t.Quantity);
             var totalGross = buys.Sum(t => t.Price * t.Quantity);
             return totalQty > 0 ? totalGross / totalQty : 0m;
         }
@@ -1131,27 +1128,27 @@ public partial class PortfolioViewModel
         var total = entry.PrincipalAmount + entry.InterestAmount;
 
         var repayTrade = new Trade(
-            Id:           Guid.NewGuid(),
-            Symbol:       string.Empty,
-            Exchange:     string.Empty,
-            Name:         row.Label,
-            Type:         TradeType.LoanRepay,
-            TradeDate:    DateTime.UtcNow,
-            Price:        total,
-            Quantity:     1,
-            RealizedPnl:    0m,
+            Id: Guid.NewGuid(),
+            Symbol: string.Empty,
+            Exchange: string.Empty,
+            Name: row.Label,
+            Type: TradeType.LoanRepay,
+            TradeDate: DateTime.UtcNow,
+            Price: total,
+            Quantity: 1,
+            RealizedPnl: 0m,
             RealizedPnlPct: 0m,
-            CashAmount:   total,
+            CashAmount: total,
             CashAccountId: cashAccId,
-            LoanLabel:    row.Label,
-            Principal:    entry.PrincipalAmount,
+            LoanLabel: row.Label,
+            Principal: entry.PrincipalAmount,
             InterestPaid: entry.InterestAmount);
         await _tradeRepo.AddAsync(repayTrade);
 
         await _loanScheduleRepo.MarkPaidAsync(entry.Id, DateTime.UtcNow, repayTrade.Id);
-        entry.IsPaid   = true;
-        entry.PaidAt   = DateTime.UtcNow;
-        entry.TradeId  = repayTrade.Id;
+        entry.IsPaid = true;
+        entry.PaidAt = DateTime.UtcNow;
+        entry.TradeId = repayTrade.Id;
         row.RefreshScheduleSummary();
 
         await LoadTradesAsync();
