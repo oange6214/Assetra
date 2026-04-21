@@ -1168,26 +1168,30 @@ public partial class PortfolioViewModel
 
     // ── Add Loan dialog ───────────────────────────────────────────────────
 
-    [ObservableProperty] private bool    _isAddLoanDialogOpen;
-    [ObservableProperty] private string  _addLoanName        = string.Empty;
-    [ObservableProperty] private string  _addLoanAmount      = string.Empty;
-    [ObservableProperty] private string  _addLoanRate        = string.Empty;
-    [ObservableProperty] private string  _addLoanTermMonths  = string.Empty;
-    [ObservableProperty] private DateTime _addLoanStartDate  = DateTime.Today;
-    [ObservableProperty] private string  _addLoanHandlingFee = string.Empty;
-    [ObservableProperty] private string  _addLoanError       = string.Empty;
+    [ObservableProperty] private bool                    _isAddLoanDialogOpen;
+    [ObservableProperty] private string                  _addLoanName           = string.Empty;
+    [ObservableProperty] private string                  _addLoanAmount         = string.Empty;
+    [ObservableProperty] private string                  _addLoanRate           = string.Empty;
+    [ObservableProperty] private string                  _addLoanTermMonths     = string.Empty;
+    [ObservableProperty] private DateTime                _addLoanStartDate      = DateTime.Today;
+    [ObservableProperty] private string                  _addLoanHandlingFee    = string.Empty;
+    [ObservableProperty] private bool                    _addLoanUseCashAccount = true;
+    [ObservableProperty] private CashAccountRowViewModel? _addLoanCashAccount;
+    [ObservableProperty] private string                  _addLoanError          = string.Empty;
 
     [RelayCommand]
     private void OpenAddLoanDialog()
     {
-        AddLoanName        = string.Empty;
-        AddLoanAmount      = string.Empty;
-        AddLoanRate        = string.Empty;
-        AddLoanTermMonths  = string.Empty;
-        AddLoanStartDate   = DateTime.Today;
-        AddLoanHandlingFee = string.Empty;
-        AddLoanError       = string.Empty;
-        IsAddLoanDialogOpen = true;
+        AddLoanName           = string.Empty;
+        AddLoanAmount         = string.Empty;
+        AddLoanRate           = string.Empty;
+        AddLoanTermMonths     = string.Empty;
+        AddLoanStartDate      = DateTime.Today;
+        AddLoanHandlingFee    = string.Empty;
+        AddLoanUseCashAccount = true;
+        AddLoanCashAccount    = CashAccounts.FirstOrDefault();
+        AddLoanError          = string.Empty;
+        IsAddLoanDialogOpen   = true;
     }
 
     [RelayCommand]
@@ -1236,7 +1240,7 @@ public partial class PortfolioViewModel
 
         // 2. Create LoanBorrow trade
         var cashReceived = principal - (handlingFee ?? 0m);
-        var cashAccId = TxCashAccount?.Id; // reuse the global TxCashAccount if set
+        var cashAccId = AddLoanUseCashAccount ? AddLoanCashAccount?.Id : null;
         var borrowTrade = new Trade(
             Id:           Guid.NewGuid(),
             Symbol:       string.Empty,

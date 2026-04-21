@@ -132,6 +132,38 @@
                             Text="手續費將從撥入金額中扣除（不影響還款計算）"
                             TextWrapping="Wrap" />
 
+                        <!--  Cash account linkage  -->
+                        <CheckBox
+                            Margin="0,14,0,0"
+                            Content="{DynamicResource Portfolio.Tx.UseLoanCashAccount}"
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            IsChecked="{Binding AddLoanUseCashAccount, Mode=TwoWay}" />
+
+                        <StackPanel Visibility="{Binding AddLoanUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock
+                                Margin="0,8,0,6"
+                                FontSize="{StaticResource FontSizeXs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Portfolio.Loan.CashAccount}" />
+                            <ComboBox
+                                DisplayMemberPath="Name"
+                                ItemsSource="{Binding CashAccounts}"
+                                SelectedItem="{Binding AddLoanCashAccount, Mode=TwoWay}"
+                                Style="{StaticResource FormComboBox}">
+                                <ComboBox.Resources>
+                                    <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
+                                </ComboBox.Resources>
+                            </ComboBox>
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Portfolio.Tx.LoanCashAccountHint}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+
                         <Rectangle Height="16" />
                     </StackPanel>
                 </ScrollViewer>

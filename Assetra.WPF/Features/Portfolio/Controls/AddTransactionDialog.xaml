@@ -143,11 +143,6 @@
                                 IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=transfer, Mode=TwoWay}"
                                 Style="{StaticResource SegmentBtn}" />
                             <RadioButton
-                                Content="{DynamicResource Portfolio.TradeType.LoanBorrow}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=loanBorrow, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-                            <RadioButton
                                 Content="{DynamicResource Portfolio.TradeType.LoanRepay}"
                                 GroupName="TxType"
                                 IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=loanRepay, Mode=TwoWay}"
