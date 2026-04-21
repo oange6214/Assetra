@@ -866,11 +866,11 @@
                                         Foreground="{DynamicResource AppTextMuted}">
                                         <Run Text="{DynamicResource Portfolio.Loan.Rate}" />
                                         <Run Text=":" />
-                                        <Run FontFamily="{StaticResource FontTabular}" Text="{Binding SelectedLiabilityRow.RateDisplay, FallbackValue='—'}" />
+                                        <Run FontFamily="{StaticResource FontTabular}" Text="{Binding SelectedLiabilityRow.RateDisplay, FallbackValue='—', Mode=OneWay}" />
                                         <Run Text="  " />
                                         <Run Text="{DynamicResource Portfolio.Loan.Term}" />
                                         <Run Text=":" />
-                                        <Run FontFamily="{StaticResource FontTabular}" Text="{Binding SelectedLiabilityRow.TermDisplay, FallbackValue='—'}" />
+                                        <Run FontFamily="{StaticResource FontTabular}" Text="{Binding SelectedLiabilityRow.TermDisplay, FallbackValue='—', Mode=OneWay}" />
                                     </TextBlock>
                                 </DockPanel>
 
