@@ -303,7 +303,6 @@
                 HorizontalScrollBarVisibility="Disabled"
                 IsReadOnly="True"
                 ItemsSource="{Binding LiabilitiesView}"
-                PreviewKeyDown="OnGridPreviewKeyDown"
                 PreviewMouseDown="OnGridPreviewMouseDown"
                 RowHeight="{StaticResource DataGridRowHeight}"
                 SelectedItem="{Binding SelectedLiabilityRow, Mode=TwoWay}"

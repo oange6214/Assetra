@@ -144,7 +144,7 @@
     <sys:String x:Key="Portfolio.AddRecord">Add Record</sys:String>
     <sys:String x:Key="Portfolio.AddCash">Account</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">Liability</sys:String>
-    <sys:String x:Key="Portfolio.Cash.AddHint">Once created, add a "Deposit" entry in Trade History to record the amount. Deposits and withdrawals accumulate automatically.</sys:String>
+    <sys:String x:Key="Portfolio.Cash.AddHint">Once created, click "Add Record" and choose "Deposit" to record the amount. Deposits and withdrawals accumulate automatically.</sys:String>
     <sys:String x:Key="Portfolio.TotalAssets">Total Assets</sys:String>
     <sys:String x:Key="Portfolio.Header.NetWorth">Net Worth</sys:String>
     <sys:String x:Key="Portfolio.Header.DailyPnL">Daily P&amp;L</sys:String>
@@ -178,7 +178,7 @@
     <sys:String x:Key="Portfolio.Liability.Name">Liability name</sys:String>
     <sys:String x:Key="Portfolio.Liability.Amount">Remaining balance</sys:String>
     <sys:String x:Key="Portfolio.Liability.OriginalAmount">Total loan amount</sys:String>
-    <sys:String x:Key="Portfolio.Liability.AddHint">Once created, add a "Borrow" entry in Trade History to record the amount. Repayment progress accumulates automatically.</sys:String>
+    <sys:String x:Key="Portfolio.Liability.AddHint">Once created, click "Add Record" and choose "Borrow" to record the amount. Repayment progress accumulates automatically.</sys:String>
     <sys:String x:Key="Portfolio.Liability.AddLoan">Add Loan</sys:String>
     <sys:String x:Key="Portfolio.Loan.DialogTitle">Add Loan</sys:String>
     <sys:String x:Key="Portfolio.Loan.Name">Loan Name</sys:String>
@@ -328,7 +328,7 @@
     <sys:String x:Key="Portfolio.Tx.DivModeTotal">Total dividend</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivTotalAmount">Total dividend amount</sys:String>
     <sys:String x:Key="Portfolio.Tx.UseLoanCashAccount">Deduct from / deposit to account</sys:String>
-    <sys:String x:Key="Portfolio.Tx.EditTitle">Edit Transaction</sys:String>
+    <sys:String x:Key="Portfolio.Tx.EditTitle">Edit Record</sys:String>
     <sys:String x:Key="Portfolio.Tx.MetaOnlyHint">Only date and note can be changed for this trade. To correct amount or quantity, delete and re-create; stock positions can also be edited directly on the Investment tab.</sys:String>
     <sys:String x:Key="Portfolio.Tx.Buy">Buy</sys:String>
     <sys:String x:Key="Portfolio.Tx.Sell">Sell</sys:String>

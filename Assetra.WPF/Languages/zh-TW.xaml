@@ -145,7 +145,7 @@
     <sys:String x:Key="Portfolio.AddRecord">新增紀錄</sys:String>
     <sys:String x:Key="Portfolio.AddCash">帳戶</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">負債</sys:String>
-    <sys:String x:Key="Portfolio.Cash.AddHint">建立後，請在「交易記錄」新增「存入」以記錄金額；存提款會自動累計。</sys:String>
+    <sys:String x:Key="Portfolio.Cash.AddHint">建立後，請點選「新增紀錄」並選擇「存入」以記錄金額；存提款會自動累計。</sys:String>
     <sys:String x:Key="Portfolio.TotalAssets">總資產</sys:String>
     <sys:String x:Key="Portfolio.Header.NetWorth">淨資產</sys:String>
     <sys:String x:Key="Portfolio.Header.DailyPnL">本日盈虧</sys:String>
@@ -179,7 +179,7 @@
     <sys:String x:Key="Portfolio.Liability.Name">負債名稱</sys:String>
     <sys:String x:Key="Portfolio.Liability.Amount">剩餘金額</sys:String>
     <sys:String x:Key="Portfolio.Liability.OriginalAmount">總借款金額</sys:String>
-    <sys:String x:Key="Portfolio.Liability.AddHint">建立後，請在「交易記錄」新增「借款」以記錄金額；還款進度會自動累計。</sys:String>
+    <sys:String x:Key="Portfolio.Liability.AddHint">建立後，請點選「新增紀錄」並選擇「借款」以記錄金額；還款進度會自動累計。</sys:String>
     <sys:String x:Key="Portfolio.Liability.AddLoan">新增貸款</sys:String>
     <sys:String x:Key="Portfolio.Loan.DialogTitle">新增貸款</sys:String>
     <sys:String x:Key="Portfolio.Loan.Name">貸款名稱</sys:String>
@@ -329,7 +329,7 @@
     <sys:String x:Key="Portfolio.Tx.DivModeTotal">總股息金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivTotalAmount">總股息金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.UseLoanCashAccount">從帳戶扣款 / 存入帳戶</sys:String>
-    <sys:String x:Key="Portfolio.Tx.EditTitle">編輯交易</sys:String>
+    <sys:String x:Key="Portfolio.Tx.EditTitle">編輯紀錄</sys:String>
     <sys:String x:Key="Portfolio.Tx.MetaOnlyHint">此交易僅能修改日期與備註。若要更正金額或股數，請刪除後重新建立；股票部位也可在「投資」分頁直接編輯。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Buy">買入</sys:String>
     <sys:String x:Key="Portfolio.Tx.Sell">賣出</sys:String>

@@ -287,7 +287,6 @@
                 HorizontalScrollBarVisibility="Auto"
                 IsReadOnly="True"
                 ItemsSource="{Binding PositionsView}"
-                PreviewKeyDown="OnGridPreviewKeyDown"
                 PreviewMouseDown="OnGridPreviewMouseDown"
                 RowHeight="{StaticResource DataGridRowHeight}"
                 SelectedItem="{Binding SelectedPositionRow, Mode=TwoWay}"

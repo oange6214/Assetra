@@ -229,7 +229,6 @@
                 HorizontalScrollBarVisibility="Disabled"
                 IsReadOnly="True"
                 ItemsSource="{Binding CashAccountsView}"
-                PreviewKeyDown="OnGridPreviewKeyDown"
                 PreviewMouseDown="OnGridPreviewMouseDown"
                 RowHeight="{StaticResource DataGridRowHeight}"
                 SelectedItem="{Binding SelectedCashRow, Mode=TwoWay}"

@@ -12,7 +12,7 @@ namespace Assetra.WPF.Features.Alerts;
 
 public partial class AlertsViewModel : ObservableObject, IDisposable
 {
-    private readonly IAlertService _alertRepo;
+    private readonly IAlertService _alertService;
     private readonly IStockSearchService _search;
     private readonly ISnackbarService _snackbar;
     private readonly ILocalizationService _localization;
@@ -48,7 +48,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         ILocalizationService localization,
         ICurrencyService? currencyService = null)
     {
-        _alertRepo = alertRepo;
+        _alertService = alertRepo;
         _search = search;
         _snackbar = snackbar;
         _localization = localization;
@@ -64,7 +64,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
 
     public async Task LoadAsync()
     {
-        var rules = await _alertRepo.GetRulesAsync();
+        var rules = await _alertService.GetRulesAsync();
         Rules.Clear();
         foreach (var r in rules)
             Rules.Add(ToRow(r));
@@ -88,7 +88,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
 
         var condition = AddCondition == "突破" ? AlertCondition.Above : AlertCondition.Below;
         var rule = new AlertRule(Guid.NewGuid(), symbol, exchange, condition, price);
-        await _alertRepo.AddAsync(rule);
+        await _alertService.AddAsync(rule);
 
         Rules.Add(ToRow(rule));
         HasNoRules = false;
@@ -124,14 +124,14 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         row.TriggeredAt = string.Empty;
         row.IsEditing = false;
 
-        await _alertRepo.UpdateAsync(row.ToRule());
+        await _alertService.UpdateAsync(row.ToRule());
         _snackbar.Success(string.Format(GetString("Alerts.Updated", "已更新 {0} 警示規則"), row.Symbol));
     }
 
     [RelayCommand]
     private async Task RemoveRule(Guid id)
     {
-        await _alertRepo.RemoveAsync(id);
+        await _alertService.RemoveAsync(id);
         var row = Rules.FirstOrDefault(r => r.Id == id);
         if (row is not null)
         {
@@ -158,7 +158,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
                 {
                     row.IsTriggered = true;
                     row.TriggeredAt = DateTimeOffset.Now.ToLocalTime().ToString("HH:mm:ss");
-                    _ = _alertRepo.UpdateAsync(row.ToRule());
+                    _ = _alertService.UpdateAsync(row.ToRule());
 
                     TriggeredCount++;
 

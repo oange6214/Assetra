@@ -23,6 +23,4 @@ public partial class PositionsTabPanel : UserControl
         if (e.ChangedButton == MouseButton.Left && clickedRow is not null && !clickedRow.IsSelected)
             clickedRow.IsSelected = true;
     }
-
-    private void OnGridPreviewKeyDown(object sender, KeyEventArgs e) { }
 }
