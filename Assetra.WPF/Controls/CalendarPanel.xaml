@@ -231,6 +231,32 @@
             </Setter>
         </Style>
 
+        <!--  Header click-to-year-view button  -->
+        <Style x:Key="HeaderNavBtn" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Bd"
+                            Padding="8,4"
+                            Background="Transparent"
+                            CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHover}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!--  Today pill button  -->
         <Style x:Key="TodayBtn" TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
@@ -336,15 +362,16 @@
                     StrokeThickness="1.6" />
             </Button>
 
-            <TextBlock
-                x:Name="HeaderText"
-                Grid.Column="1"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                FontFamily="{DynamicResource FontBase}"
-                FontSize="{StaticResource FontSizeBase}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextPrimary}" />
+            <Button Grid.Column="1" Click="Header_Click" Style="{StaticResource HeaderNavBtn}">
+                <TextBlock
+                    x:Name="HeaderText"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource FontBase}"
+                    FontSize="{StaticResource FontSizeBase}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}" />
+            </Button>
 
             <Button Grid.Column="2" Click="NextMonth_Click" Style="{StaticResource NavBtn}">
                 <Path
@@ -367,6 +394,14 @@
             Columns="7"
             Rows="7"
             Margin="4,0,4,4" />
+
+        <!--  Year grid (3 cols × 4 rows = 12 years; shown when header clicked)  -->
+        <UniformGrid
+            x:Name="YearGrid"
+            Grid.Row="1"
+            Columns="3"
+            Margin="4,4,4,4"
+            Visibility="Collapsed" />
 
         <!--  Today quick-jump  -->
         <Button

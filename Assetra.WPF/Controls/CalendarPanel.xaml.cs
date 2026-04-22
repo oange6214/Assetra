@@ -52,6 +52,8 @@ public partial class CalendarPanel : UserControl
 
     private int _viewYear;
     private int _viewMonth;
+    private bool _inYearView;
+    private int _yearPageStart;
 
     private static readonly string[] DayHeaders = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -70,19 +72,36 @@ public partial class CalendarPanel : UserControl
 
     // Navigation
 
+    private void Header_Click(object sender, RoutedEventArgs e)
+    {
+        _yearPageStart = _viewYear - 5;
+        _inYearView = true;
+        RebuildYearView();
+    }
+
     private void PrevMonth_Click(object sender, RoutedEventArgs e)
     {
+        if (_inYearView)
+        {
+            _yearPageStart -= 12;
+            RebuildYearView();
+            return;
+        }
         _viewMonth--;
-        if (_viewMonth < 1)
-        { _viewMonth = 12; _viewYear--; }
+        if (_viewMonth < 1) { _viewMonth = 12; _viewYear--; }
         Rebuild();
     }
 
     private void NextMonth_Click(object sender, RoutedEventArgs e)
     {
+        if (_inYearView)
+        {
+            _yearPageStart += 12;
+            RebuildYearView();
+            return;
+        }
         _viewMonth++;
-        if (_viewMonth > 12)
-        { _viewMonth = 1; _viewYear++; }
+        if (_viewMonth > 12) { _viewMonth = 1; _viewYear++; }
         Rebuild();
     }
 
@@ -108,11 +127,72 @@ public partial class CalendarPanel : UserControl
         panel.Rebuild();
     }
 
+    private void RebuildYearView()
+    {
+        DayGrid.Visibility = Visibility.Collapsed;
+        YearGrid.Visibility = Visibility.Visible;
+
+        HeaderText.Text = $"{_yearPageStart} – {_yearPageStart + 11}";
+
+        YearGrid.Children.Clear();
+
+        var maxYear = DisplayDateEnd?.Year;
+
+        for (var i = 0; i < 12; i++)
+        {
+            var year = _yearPageStart + i;
+            var isSelected = year == _viewYear;
+            var isDisabled = maxYear.HasValue && year > maxYear.Value;
+
+            var btn = BuildYearCell(year, isSelected, isDisabled);
+            if (!isDisabled)
+            {
+                var captured = year;
+                btn.Click += (_, _) =>
+                {
+                    _viewYear = captured;
+                    _inYearView = false;
+                    Rebuild();
+                };
+            }
+            YearGrid.Children.Add(btn);
+        }
+    }
+
+    private Button BuildYearCell(int year, bool isSelected, bool isDisabled)
+    {
+        var btn = new Button
+        {
+            Style = (Style)FindResource("DayCellBtn"),
+            IsEnabled = !isDisabled,
+            Height = 44,
+        };
+
+        if (isSelected)
+            btn.Background = FindBrush("AppAccent");
+
+        var text = new TextBlock
+        {
+            Text = year.ToString(),
+            FontSize = 12,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Foreground = isSelected ? Brushes.White
+                : isDisabled ? FindBrush("AppTextMuted")
+                : FindBrush("AppTextPrimary"),
+        };
+
+        btn.Content = text;
+        return btn;
+    }
+
     private void Rebuild()
     {
         if (!IsLoaded)
             return;
 
+        _inYearView = false;
+        DayGrid.Visibility = Visibility.Visible;
+        YearGrid.Visibility = Visibility.Collapsed;
         DayGrid.Opacity = 0;
         DayGrid.Children.Clear();
 
