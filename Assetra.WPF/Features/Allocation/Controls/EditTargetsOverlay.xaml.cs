@@ -1,6 +1,5 @@
 using System.Windows.Controls;
 using System.Windows.Input;
-using Assetra.WPF.Features.Allocation;
 
 namespace Assetra.WPF.Features.Allocation.Controls;
 
