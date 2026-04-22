@@ -44,25 +44,55 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="0,0,0,1">
           <DockPanel>
-            <TextBlock
-                            VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeSm}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextPrimary}">
-              <TextBlock.Style>
-                <Style TargetType="TextBlock">
-                  <Setter Property="Text" Value="{DynamicResource Portfolio.Record.Title}" />
-                  <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsRevisionMode}" Value="True">
-                      <Setter Property="Text" Value="{DynamicResource Portfolio.Record.ReviseTitle}" />
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsEditMode}" Value="True">
-                      <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.EditTitle}" />
-                    </DataTrigger>
-                  </Style.Triggers>
-                </Style>
-              </TextBlock.Style>
-            </TextBlock>
+            <StackPanel>
+              <TextBlock
+                              VerticalAlignment="Center"
+                              FontSize="{StaticResource FontSizeSm}"
+                              FontWeight="SemiBold"
+                              Foreground="{DynamicResource AppTextPrimary}">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Text" Value="{DynamicResource Portfolio.Record.Title}" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding IsRevisionReplacePromptOpen}" Value="True">
+                        <Setter Property="Text" Value="{DynamicResource Portfolio.Record.ReplacePromptTitle}" />
+                      </DataTrigger>
+                      <DataTrigger Binding="{Binding IsRevisionMode}" Value="True">
+                        <Setter Property="Text" Value="{DynamicResource Portfolio.Record.ReviseTitle}" />
+                      </DataTrigger>
+                      <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                        <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.EditTitle}" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+              <TextBlock
+                              Margin="0,2,0,0"
+                              FontSize="{StaticResource FontSizeXs}"
+                              Foreground="{DynamicResource AppTextMuted}"
+                              TextWrapping="Wrap">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Setter Property="Text" Value="{DynamicResource Portfolio.Record.EditSubtitle}" />
+                      </DataTrigger>
+                      <DataTrigger Binding="{Binding IsRevisionMode}" Value="True">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Setter Property="Text" Value="{DynamicResource Portfolio.Record.RevisionSubtitle}" />
+                      </DataTrigger>
+                      <DataTrigger Binding="{Binding IsRevisionReplacePromptOpen}" Value="True">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Setter Property="Text" Value="{DynamicResource Portfolio.Record.ReplaceSubtitle}" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+            </StackPanel>
             <Button
                             Width="28"
                             Height="28"

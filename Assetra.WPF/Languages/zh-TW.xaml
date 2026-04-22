@@ -264,6 +264,9 @@
     <sys:String x:Key="Portfolio.Record.ReviseTitle">建立修正版</sys:String>
     <sys:String x:Key="Portfolio.Record.CreateRevision">建立修正版</sys:String>
     <sys:String x:Key="Portfolio.Record.RevisionModeHint">已根據原紀錄帶入內容。請確認後儲存，原紀錄目前仍保留。</sys:String>
+    <sys:String x:Key="Portfolio.Record.EditSubtitle">只允許修改日期與備註；核心內容會保留原樣。</sys:String>
+    <sys:String x:Key="Portfolio.Record.RevisionSubtitle">這是一筆新的修正版，儲存後可選擇是否取代原紀錄。</sys:String>
+    <sys:String x:Key="Portfolio.Record.ReplaceSubtitle">請選擇保留兩筆，或刪除原紀錄只保留修正版。</sys:String>
     <sys:String x:Key="Portfolio.Record.ReplacePromptTitle">修正版已建立</sys:String>
     <sys:String x:Key="Portfolio.Record.ReplacePrompt">修正版已建立成功。要刪除原紀錄，改用這筆修正版取代嗎？</sys:String>
     <sys:String x:Key="Portfolio.Record.ReplaceAndDelete">建立並刪除原紀錄</sys:String>

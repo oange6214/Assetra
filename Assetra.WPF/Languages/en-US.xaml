@@ -263,6 +263,9 @@
     <sys:String x:Key="Portfolio.Record.ReviseTitle">Create Revision</sys:String>
     <sys:String x:Key="Portfolio.Record.CreateRevision">Create Revision</sys:String>
     <sys:String x:Key="Portfolio.Record.RevisionModeHint">This form is prefilled from the original record. Save it as a new record; the original remains unchanged for now.</sys:String>
+    <sys:String x:Key="Portfolio.Record.EditSubtitle">Only the date and note can be changed here; the core details remain intact.</sys:String>
+    <sys:String x:Key="Portfolio.Record.RevisionSubtitle">This is a new revised record. After saving, you can decide whether to replace the original.</sys:String>
+    <sys:String x:Key="Portfolio.Record.ReplaceSubtitle">Choose whether to keep both records or delete the original and keep only the revision.</sys:String>
     <sys:String x:Key="Portfolio.Record.ReplacePromptTitle">Revision Created</sys:String>
     <sys:String x:Key="Portfolio.Record.ReplacePrompt">The revised record was created successfully. Do you want to delete the original and keep only the revision?</sys:String>
     <sys:String x:Key="Portfolio.Record.ReplaceAndDelete">Replace Original</sys:String>
