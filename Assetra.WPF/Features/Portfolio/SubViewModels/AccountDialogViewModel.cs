@@ -18,7 +18,6 @@ internal sealed record AccountDialogDependencies(
     IAccountUpsertWorkflowService AccountUpsert,
     IAccountMutationWorkflowService AccountMutation,
     IPositionMetadataWorkflowService PositionMetadata,
-    IAssetRepository? AssetRepo,
     ISnackbarService? Snackbar,
     ObservableCollection<CashAccountRowViewModel> CashAccounts,
     Func<Task> LoadCashAccountsAsync,
@@ -38,7 +37,6 @@ public partial class AccountDialogViewModel : ObservableObject
     private readonly IAccountUpsertWorkflowService _accountUpsert;
     private readonly IAccountMutationWorkflowService _accountMutation;
     private readonly IPositionMetadataWorkflowService _positionMetadata;
-    private readonly IAssetRepository? _assetRepo;
     private readonly ISnackbarService? _snackbar;
     private readonly ObservableCollection<CashAccountRowViewModel> _cashAccounts;
     private readonly Func<Task> _loadCashAccountsAsync;
@@ -65,7 +63,6 @@ public partial class AccountDialogViewModel : ObservableObject
         _accountUpsert = deps.AccountUpsert;
         _accountMutation = deps.AccountMutation;
         _positionMetadata = deps.PositionMetadata;
-        _assetRepo = deps.AssetRepo;
         _snackbar = deps.Snackbar;
         _cashAccounts = deps.CashAccounts;
         _loadCashAccountsAsync = deps.LoadCashAccountsAsync;

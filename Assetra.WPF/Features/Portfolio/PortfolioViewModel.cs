@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Data;
+using Assetra.Application.Loans.Contracts;
+using Assetra.Application.Loans.Services;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Application.Portfolio.Services;
@@ -526,6 +528,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         var loanPaymentWorkflow = _loanScheduleRepo is not null
             ? (ILoanPaymentWorkflowService)new LoanPaymentWorkflowService(_tradeRepo, _loanScheduleRepo)
             : new NullLoanPaymentWorkflowService();
+        var loanScheduleService = services.LoanSchedule
+            ?? (_loanScheduleRepo is not null ? new LoanScheduleService(_loanScheduleRepo) : null);
 
         // Build the AddAssetDialog sub-VM. Tx-dialog field delegates are wired below after
         // the Transaction sub-VM is constructed (delegates reference Transaction properties).
@@ -554,7 +558,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 AccountUpsert: accountUpsertWorkflow,
                 AccountMutation: accountMutationWorkflow,
                 PositionMetadata: positionMetadataWorkflowService,
-                AssetRepo: _assetRepo,
                 Snackbar: _snackbar,
                 CashAccounts: CashAccounts,
                 LoadCashAccountsAsync: LoadCashAccountsAsync,
@@ -574,7 +577,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 LoanMutation: loanMutationWorkflowService,
                 Search: _search,
                 TradeDialogController: _tradeDialogController,
-                AssetRepo: _assetRepo,
+                AccountUpsert: accountUpsertWorkflow,
                 Snackbar: _snackbar,
                 Trades: Trades,
                 Positions: Positions,
@@ -597,7 +600,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         Loan = services.Loan ?? new SubViewModels.LoanDialogViewModel(
             new SubViewModels.LoanDialogDependencies(
                 LoanPayment: loanPaymentWorkflow,
-                LoanScheduleRepo: _loanScheduleRepo,
+                LoanSchedule: loanScheduleService,
                 GetSelectedLiabilityRow: () => SelectedLiabilityRow,
                 GetTxCashAccountId: () => Transaction.TxCashAccount?.Id,
                 LoadTradesAsync: LoadTradesAsync,
@@ -1802,6 +1805,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         public Task<AccountUpsertResult> UpdateAsync(UpdateAccountRequest request, CancellationToken ct = default) =>
             Task.FromResult(new AccountUpsertResult(
                 new AssetItem(request.AccountId, request.Name, FinancialType.Asset, null, request.Currency, request.CreatedDate)));
+
+        public Task<Guid> FindOrCreateAccountAsync(string name, string currency, CancellationToken ct = default) =>
+            Task.FromResult(Guid.NewGuid());
     }
 
     private sealed class NullLoanPaymentWorkflowService : ILoanPaymentWorkflowService

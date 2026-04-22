@@ -1,4 +1,5 @@
 using System.Reactive.Concurrency;
+using Assetra.Application.Loans.Contracts;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
@@ -48,6 +49,11 @@ public sealed record PortfolioServices(
     ITransactionWorkflowService? TransactionWorkflow = null,
     ITradeDeletionWorkflowService? TradeDeletionWorkflow = null,
     IPositionDeletionWorkflowService? PositionDeletionWorkflow = null,
+    /// <summary>
+    /// 貸款攤還表查詢服務：讀取貸款 asset 的每期明細。
+    /// 若省略，<see cref="PortfolioViewModel"/> 會以現有 <see cref="ILoanScheduleRepository"/> 自建預設實作。
+    /// </summary>
+    ILoanScheduleService? LoanSchedule = null,
     /// <summary>
     /// Optional pre-built <see cref="AddAssetDialogViewModel"/>. When null the
     /// <see cref="PortfolioViewModel"/> constructor builds its own instance from the

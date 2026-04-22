@@ -26,7 +26,7 @@ internal sealed record TransactionDialogDependencies(
     ILoanMutationWorkflowService LoanMutation,
     IStockSearchService Search,
     PortfolioTradeDialogController TradeDialogController,
-    IAssetRepository? AssetRepo,
+    IAccountUpsertWorkflowService? AccountUpsert,
     ISnackbarService? Snackbar,
     // Shared parent collections (read-only references, kept in sync by parent)
     ObservableCollection<TradeRowViewModel> Trades,
@@ -60,7 +60,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private readonly ILoanMutationWorkflowService _loanMutationWorkflowService;
     private readonly IStockSearchService _search;
     private readonly PortfolioTradeDialogController _tradeDialogController;
-    private readonly IAssetRepository? _assetRepo;
+    private readonly IAccountUpsertWorkflowService? _accountUpsert;
     private readonly ISnackbarService? _snackbar;
 
     // Shared parent collections exposed as forwarding properties so TxForm XAML
@@ -107,7 +107,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _loanMutationWorkflowService = deps.LoanMutation;
         _search = deps.Search;
         _tradeDialogController = deps.TradeDialogController;
-        _assetRepo = deps.AssetRepo;
+        _accountUpsert = deps.AccountUpsert;
         _snackbar = deps.Snackbar;
 
         Trades = deps.Trades;
@@ -428,7 +428,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     // ── Lazy Upsert scaffolding — bound by Task 19 XAML (editable ComboBox) ─────────
     // When the user types a cash-account name that doesn't match any existing row,
-    // the Confirm commands call IAssetRepository.FindOrCreateAccountAsync on submit.
+    // the Confirm commands call IAccountUpsertWorkflowService.FindOrCreateAccountAsync on submit.
     // The ComboBox's SelectedItem (TxCashAccount) remains authoritative when set;
     // TxCashAccountName only wins when TxCashAccount is null AND the name is non-empty.
     [ObservableProperty]
@@ -503,11 +503,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         if (TxCashAccount is not null)
             return TxCashAccount.Id;
 
-        if (!string.IsNullOrWhiteSpace(TxCashAccountName) && _assetRepo is not null)
+        if (!string.IsNullOrWhiteSpace(TxCashAccountName) && _accountUpsert is not null)
         {
             // Currency defaults to TWD — matches AddAccountAsync default. Task 19 may
             // thread an explicit currency when the TX form adds a currency picker.
-            var id = await _assetRepo
+            var id = await _accountUpsert
                 .FindOrCreateAccountAsync(TxCashAccountName.Trim(), "TWD")
                 .ConfigureAwait(true);
             return id;
@@ -530,9 +530,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         if (TxTransferTarget is not null)
             return TxTransferTarget.Id;
 
-        if (!string.IsNullOrWhiteSpace(TxTransferTargetName) && _assetRepo is not null)
+        if (!string.IsNullOrWhiteSpace(TxTransferTargetName) && _accountUpsert is not null)
         {
-            return await _assetRepo
+            return await _accountUpsert
                 .FindOrCreateAccountAsync(TxTransferTargetName.Trim(), "TWD")
                 .ConfigureAwait(true);
         }

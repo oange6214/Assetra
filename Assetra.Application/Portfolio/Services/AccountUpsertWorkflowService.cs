@@ -45,4 +45,7 @@ public sealed class AccountUpsertWorkflowService : IAccountUpsertWorkflowService
         await _assetRepository.UpdateItemAsync(account).ConfigureAwait(false);
         return new AccountUpsertResult(account);
     }
+
+    public Task<Guid> FindOrCreateAccountAsync(string name, string currency, CancellationToken ct = default) =>
+        _assetRepository.FindOrCreateAccountAsync(name, currency, ct);
 }

@@ -2,6 +2,8 @@ using System.Net.Http;
 using System.Reactive.Concurrency;
 using Assetra.Application.Alerts.Contracts;
 using Assetra.Application.Alerts.Services;
+using Assetra.Application.Loans.Contracts;
+using Assetra.Application.Loans.Services;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Services;
 using Assetra.Core.DomainServices;
@@ -109,6 +111,7 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<PortfolioBackfillService>();
         services.AddSingleton<IAlertRepository>(_ => new AlertSqliteRepository(dbPath));
         services.AddSingleton<IAlertService, AlertService>();
+        services.AddSingleton<ILoanScheduleService, LoanScheduleService>();
         services.AddSingleton<ITradeRepository>(_ => new TradeSqliteRepository(dbPath));
         services.AddSingleton<IAssetRepository>(_ => new AssetSqliteRepository(dbPath));
         services.AddSingleton<ILoanScheduleRepository>(_ => new LoanScheduleSqliteRepository(dbPath));
@@ -217,6 +220,7 @@ internal static class ServiceCollectionExtensions
                 HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
                 TradeDeletionWorkflow: sp.GetRequiredService<ITradeDeletionWorkflowService>(),
                 PositionDeletionWorkflow: sp.GetRequiredService<IPositionDeletionWorkflowService>(),
+                LoanSchedule: sp.GetRequiredService<ILoanScheduleService>(),
                 Load: sp.GetRequiredService<IPortfolioLoadService>(),
                 History: sp.GetRequiredService<IStockHistoryProvider>(),
                 Currency: sp.GetRequiredService<ICurrencyService>(),

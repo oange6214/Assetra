@@ -1,6 +1,6 @@
+using Assetra.Application.Loans.Contracts;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
-using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,7 +12,7 @@ namespace Assetra.WPF.Features.Portfolio.SubViewModels;
 /// </summary>
 internal sealed record LoanDialogDependencies(
     ILoanPaymentWorkflowService LoanPayment,
-    ILoanScheduleRepository? LoanScheduleRepo,
+    ILoanScheduleService? LoanSchedule,
     Func<LiabilityRowViewModel?> GetSelectedLiabilityRow,
     Func<Guid?> GetTxCashAccountId,
     Func<Task> LoadTradesAsync,
@@ -27,7 +27,7 @@ internal sealed record LoanDialogDependencies(
 public partial class LoanDialogViewModel : ObservableObject
 {
     private readonly ILoanPaymentWorkflowService _loanPayment;
-    private readonly ILoanScheduleRepository? _loanScheduleRepo;
+    private readonly ILoanScheduleService? _loanScheduleService;
     private readonly Func<LiabilityRowViewModel?> _getSelectedLiabilityRow;
     private readonly Func<Guid?> _getTxCashAccountId;
     private readonly Func<Task> _loadTradesAsync;
@@ -44,7 +44,7 @@ public partial class LoanDialogViewModel : ObservableObject
     {
         ArgumentNullException.ThrowIfNull(deps);
         _loanPayment = deps.LoanPayment;
-        _loanScheduleRepo = deps.LoanScheduleRepo;
+        _loanScheduleService = deps.LoanSchedule;
         _getSelectedLiabilityRow = deps.GetSelectedLiabilityRow;
         _getTxCashAccountId = deps.GetTxCashAccountId;
         _loadTradesAsync = deps.LoadTradesAsync;
@@ -57,7 +57,7 @@ public partial class LoanDialogViewModel : ObservableObject
     [RelayCommand]
     private async Task ConfirmLoanPayment(LoanScheduleRowViewModel? entry)
     {
-        if (entry is null || _getSelectedLiabilityRow() is not { } row || _loanScheduleRepo is null)
+        if (entry is null || _getSelectedLiabilityRow() is not { } row || _loanScheduleService is null)
             return;
         if (entry.IsPaid)
             return;
@@ -92,9 +92,9 @@ public partial class LoanDialogViewModel : ObservableObject
     /// <summary>Loads the amortization schedule for a loan liability row.</summary>
     public async Task LoadLoanScheduleAsync(LiabilityRowViewModel row)
     {
-        if (!row.IsLoan || row.AssetId is null || _loanScheduleRepo is null)
+        if (!row.IsLoan || row.AssetId is null || _loanScheduleService is null)
             return;
-        var entries = await _loanScheduleRepo.GetByAssetAsync(row.AssetId.Value).ConfigureAwait(true);
+        var entries = await _loanScheduleService.GetScheduleByAssetAsync(row.AssetId.Value).ConfigureAwait(true);
         row.ScheduleEntries.Clear();
         foreach (var e in entries)
             row.ScheduleEntries.Add(new LoanScheduleRowViewModel(e));
