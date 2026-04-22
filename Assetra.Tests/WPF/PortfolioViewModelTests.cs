@@ -1439,6 +1439,66 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task CreateRevision_SaveThenKeepBoth_PreservesOriginalAndRevision()
+    {
+        var (vm, _, tradeRepo) = await CreateVmWithCashAsync(0m);
+        var entryId = Guid.NewGuid();
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: "00982A", Exchange: "TWSE", Name: "主動群益台灣強棒",
+            Type: TradeType.Buy, TradeDate: DateTime.UtcNow,
+            Price: 18.04m, Quantity: 5000,
+            RealizedPnl: null, RealizedPnlPct: null,
+            PortfolioEntryId: entryId));
+        await vm.LoadTradesAsyncForTest();
+
+        var original = vm.Trades.First(t => t.Type == TradeType.Buy);
+        vm.Transaction.EditTradeCommand.Execute(original);
+        vm.Transaction.CreateRevisionCommand.Execute(null);
+        vm.AddAssetDialog.AddPrice = "19.5000";
+
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
+
+        Assert.True(vm.Transaction.IsRevisionReplacePromptOpen);
+        Assert.True(vm.Transaction.IsTxDialogOpen);
+
+        vm.Transaction.KeepBothRecordsCommand.Execute(null);
+        await vm.LoadTradesAsyncForTest();
+
+        var buys = vm.Trades.Where(t => t.Type == TradeType.Buy && t.Symbol == "00982A").ToList();
+        Assert.Equal(2, buys.Count);
+        Assert.Contains(buys, t => t.Id == original.Id);
+        Assert.Contains(buys, t => t.Price == 19.5m);
+    }
+
+    [Fact]
+    public async Task CreateRevision_SaveThenReplaceOriginal_RemovesSourceTrade()
+    {
+        var (vm, _, tradeRepo) = await CreateVmWithCashAsync(0m);
+        var entryId = Guid.NewGuid();
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: "00982A", Exchange: "TWSE", Name: "主動群益台灣強棒",
+            Type: TradeType.Buy, TradeDate: DateTime.UtcNow,
+            Price: 18.04m, Quantity: 5000,
+            RealizedPnl: null, RealizedPnlPct: null,
+            PortfolioEntryId: entryId));
+        await vm.LoadTradesAsyncForTest();
+
+        var original = vm.Trades.First(t => t.Type == TradeType.Buy);
+        vm.Transaction.EditTradeCommand.Execute(original);
+        vm.Transaction.CreateRevisionCommand.Execute(null);
+        vm.AddAssetDialog.AddPrice = "19.5000";
+
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
+        await vm.Transaction.ReplaceOriginalRecordCommand.ExecuteAsync(null);
+        await vm.LoadTradesAsyncForTest();
+
+        var buys = vm.Trades.Where(t => t.Type == TradeType.Buy && t.Symbol == "00982A").ToList();
+        Assert.Single(buys);
+        Assert.DoesNotContain(buys, t => t.Id == original.Id);
+        Assert.Equal(19.5m, buys[0].Price);
+    }
+
+    [Fact]
     public async Task EditTrade_BuyWithLink_DoesNotReplaceStoredPriceWithHistoricalLookup()
     {
         // Regression: edit prefill used to trigger async close-price lookup via AddBuyDate,

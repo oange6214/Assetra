@@ -137,6 +137,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// <summary>Non-null when editing an existing trade (vs. creating new).</summary>
     [ObservableProperty] private Guid? _editingTradeId;
     [ObservableProperty] private bool _isRevisionMode;
+    [ObservableProperty] private bool _isRevisionReplacePromptOpen;
+    [ObservableProperty] private string _revisionReplacePromptError = string.Empty;
+    private Guid? _revisionSourceTradeId;
+    private bool _preserveRevisionSourceOnClose;
 
     public bool IsEditMode => EditingTradeId.HasValue;
 
@@ -969,6 +973,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         IsRevisionMode = false;
         EditingTradeId = null;
+        if (!_preserveRevisionSourceOnClose)
+        {
+            _revisionSourceTradeId = null;
+            IsRevisionReplacePromptOpen = false;
+            RevisionReplacePromptError = string.Empty;
+        }
         EditSummaryType = string.Empty;
         EditSummaryTarget = string.Empty;
         EditSummaryAmount = string.Empty;
@@ -987,6 +997,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             return;
 
         IsRevisionMode = true;
+        _revisionSourceTradeId = row.Id;
+        IsRevisionReplacePromptOpen = false;
+        RevisionReplacePromptError = string.Empty;
         EditingTradeId = null;
         TxError = string.Empty;
         EditSummaryType = string.Empty;
@@ -1062,6 +1075,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             return;
         }
 
+        var revisionSourceTradeId = _revisionSourceTradeId;
+        _preserveRevisionSourceOnClose = revisionSourceTradeId.HasValue;
+
         switch (TxType)
         {
             case "income":
@@ -1096,10 +1112,21 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 break;
         }
 
+        _preserveRevisionSourceOnClose = false;
+
         // Validation / creation failed → restore edit mode and leave the old trade alone.
         if (!string.IsNullOrEmpty(TxError))
         {
             EditingTradeId = pendingEditId;
+            return;
+        }
+
+        if (revisionSourceTradeId.HasValue)
+        {
+            IsRevisionMode = false;
+            IsRevisionReplacePromptOpen = true;
+            RevisionReplacePromptError = string.Empty;
+            IsTxDialogOpen = true;
             return;
         }
 
@@ -1134,6 +1161,53 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             _rebuildTotals();
         }
 
+        TransactionCompleted?.Invoke(this, EventArgs.Empty);
+    }
+
+    [RelayCommand]
+    private void KeepBothRecords()
+    {
+        _revisionSourceTradeId = null;
+        IsRevisionReplacePromptOpen = false;
+        RevisionReplacePromptError = string.Empty;
+        CloseTxDialog();
+        TransactionCompleted?.Invoke(this, EventArgs.Empty);
+    }
+
+    [RelayCommand]
+    private async Task ReplaceOriginalRecordAsync()
+    {
+        if (_revisionSourceTradeId is not { } sourceId)
+            return;
+
+        var row = Trades.FirstOrDefault(t => t.Id == sourceId);
+        if (row is null)
+        {
+            RevisionReplacePromptError = L("Portfolio.Record.ReplaceMissing", "找不到原紀錄，請重新整理後再試。");
+            return;
+        }
+
+        try
+        {
+            var result = await _tradeDeletionWorkflowService.DeleteAsync(ToTradeDeletionRequest(row));
+            if (!result.Success && result.BlockedBySell)
+            {
+                RevisionReplacePromptError = L("Portfolio.Trade.DeleteBlockedBySell",
+                    "請先刪除此股票的賣出記錄，再刪除此買入記錄。");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to replace original trade {TradeId} after revision", sourceId);
+            RevisionReplacePromptError = L("Portfolio.Record.ReplaceFailed", "刪除原紀錄失敗，修正版已保留。");
+            return;
+        }
+
+        _revisionSourceTradeId = null;
+        IsRevisionReplacePromptOpen = false;
+        RevisionReplacePromptError = string.Empty;
+        CloseTxDialog();
         TransactionCompleted?.Invoke(this, EventArgs.Empty);
     }
 

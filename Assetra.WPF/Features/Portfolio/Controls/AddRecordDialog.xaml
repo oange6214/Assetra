@@ -230,6 +230,7 @@
                                 Style="{StaticResource SegmentBtn}" />
             </WrapPanel>
 
+            <StackPanel Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
             <!--  日期（共用）  -->
             <TextBlock
                             Margin="0,0,0,4"
@@ -286,6 +287,37 @@
                             Foreground="{DynamicResource AppDown}"
                             Text="{Binding TxError}"
                             Visibility="{Binding TxError, Converter={StaticResource StringToVisibilityConverter}}" />
+            </StackPanel>
+
+            <StackPanel Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+              <Border
+                              Margin="0,0,0,12"
+                              Padding="12"
+                              Background="{DynamicResource AppBackground}"
+                              BorderBrush="{DynamicResource AppBorder}"
+                              BorderThickness="1"
+                              CornerRadius="{StaticResource RadiusSm}">
+                <StackPanel>
+                  <TextBlock
+                                  Margin="0,0,0,8"
+                                  FontSize="{StaticResource FontSizeSm}"
+                                  FontWeight="SemiBold"
+                                  Foreground="{DynamicResource AppTextPrimary}"
+                                  Text="{DynamicResource Portfolio.Record.ReplacePromptTitle}" />
+                  <TextBlock
+                                  FontSize="{StaticResource FontSizeXs}"
+                                  Foreground="{DynamicResource AppTextSecondary}"
+                                  Text="{DynamicResource Portfolio.Record.ReplacePrompt}"
+                                  TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <TextBlock
+                              Margin="0,0,0,12"
+                              FontSize="{StaticResource FontSizeXs}"
+                              Foreground="{DynamicResource AppDown}"
+                              Text="{Binding RevisionReplacePromptError}"
+                              Visibility="{Binding RevisionReplacePromptError, Converter={StaticResource StringToVisibilityConverter}}" />
+            </StackPanel>
           </StackPanel>
         </ScrollViewer>
 
@@ -318,6 +350,24 @@
             </Button>
             <!--  取消 / 儲存（靠右）  -->
             <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+              <StackPanel Orientation="Horizontal" Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Button
+                                  Height="30"
+                                  Margin="0,0,8,0"
+                                  Padding="14,0"
+                                  Command="{Binding KeepBothRecordsCommand}"
+                                  Style="{StaticResource BtnGhost}">
+                  <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.KeepBoth}" />
+                </Button>
+                <Button
+                                  Height="30"
+                                  Padding="14,0"
+                                  Command="{Binding ReplaceOriginalRecordCommand}"
+                                  Style="{StaticResource BtnPrimary}">
+                  <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.ReplaceAndDelete}" />
+                </Button>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
               <Button
                                 Height="30"
                                 Margin="0,0,8,0"
@@ -344,6 +394,7 @@
                   </TextBlock.Style>
                 </TextBlock>
               </Button>
+              </StackPanel>
             </StackPanel>
           </DockPanel>
         </Border>
