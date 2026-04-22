@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using Assetra.Application.Alerts.Contracts;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
@@ -11,7 +12,7 @@ namespace Assetra.WPF.Features.Alerts;
 
 public partial class AlertsViewModel : ObservableObject, IDisposable
 {
-    private readonly IAlertRepository _alertRepo;
+    private readonly IAlertService _alertRepo;
     private readonly IStockSearchService _search;
     private readonly ISnackbarService _snackbar;
     private readonly ILocalizationService _localization;
@@ -39,7 +40,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
     public IReadOnlyList<string> Conditions { get; } = ["突破", "跌破"];
 
     public AlertsViewModel(
-        IAlertRepository alertRepo,
+        IAlertService alertRepo,
         IStockSearchService search,
         IStockService stockService,
         IScheduler uiScheduler,

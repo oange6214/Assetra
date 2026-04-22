@@ -1,5 +1,7 @@
 using System.Net.Http;
 using System.Reactive.Concurrency;
+using Assetra.Application.Alerts.Contracts;
+using Assetra.Application.Alerts.Services;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Services;
 using Assetra.Core.DomainServices;
@@ -106,6 +108,7 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<PortfolioSnapshotService>();
         services.AddSingleton<PortfolioBackfillService>();
         services.AddSingleton<IAlertRepository>(_ => new AlertSqliteRepository(dbPath));
+        services.AddSingleton<IAlertService, AlertService>();
         services.AddSingleton<ITradeRepository>(_ => new TradeSqliteRepository(dbPath));
         services.AddSingleton<IAssetRepository>(_ => new AssetSqliteRepository(dbPath));
         services.AddSingleton<ILoanScheduleRepository>(_ => new LoanScheduleSqliteRepository(dbPath));
@@ -250,7 +253,7 @@ internal static class ServiceCollectionExtensions
             sp.GetRequiredService<IFinancialOverviewQueryService>(),
             sp.GetRequiredService<PortfolioViewModel>()));
         services.AddSingleton<AlertsViewModel>(sp => new AlertsViewModel(
-            sp.GetRequiredService<IAlertRepository>(),
+            sp.GetRequiredService<IAlertService>(),
             sp.GetRequiredService<IStockSearchService>(),
             sp.GetRequiredService<IStockService>(),
             sp.GetRequiredService<IScheduler>(),

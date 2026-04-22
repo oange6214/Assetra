@@ -49,3 +49,6 @@ node_modules/
 
 # Git worktrees
 .worktrees/
+
+# Superpowers tool artifacts (brainstorm HTML, server state)
+.superpowers/
