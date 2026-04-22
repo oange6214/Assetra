@@ -5,8 +5,8 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel},
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
@@ -68,11 +68,11 @@
                     x:Name="TxSymbolBox"
                     IsEnabled="{Binding AreEconomicFieldsEditable}"
                     Style="{StaticResource FormTextBox}"
-                    Text="{Binding AddSymbol, UpdateSourceTrigger=PropertyChanged}" />
+                    Text="{Binding AddAssetDialog.AddSymbol, UpdateSourceTrigger=PropertyChanged}" />
                 <Popup
                     Width="{Binding ActualWidth, ElementName=TxSymbolBox}"
                     AllowsTransparency="True"
-                    IsOpen="{Binding IsSuggestionsOpen}"
+                    IsOpen="{Binding AddAssetDialog.IsSuggestionsOpen}"
                     Placement="Bottom"
                     PlacementTarget="{Binding ElementName=TxSymbolBox}"
                     StaysOpen="True">
@@ -85,9 +85,9 @@
                             MaxHeight="240"
                             Background="Transparent"
                             BorderThickness="0"
-                            ItemsSource="{Binding SymbolSuggestions}"
+                            ItemsSource="{Binding AddAssetDialog.SymbolSuggestions}"
                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                            SelectedItem="{Binding SelectedSuggestion, Mode=TwoWay}">
+                            SelectedItem="{Binding AddAssetDialog.SelectedSuggestion, Mode=TwoWay}">
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
                                     <Setter Property="Padding" Value="10,6" />
@@ -192,17 +192,17 @@
                         behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
                         Style="{StaticResource FormTextBox}"
-                        Text="{Binding AddPrice, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding AddAssetDialog.AddPrice, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Style="{StaticResource FormFieldError}"
-                        Text="{Binding AddPriceError}"
-                        Visibility="{Binding AddPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
+                        Text="{Binding AddAssetDialog.AddPriceError}"
+                        Visibility="{Binding AddAssetDialog.AddPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
                     <TextBlock
                         Margin="0,2,0,8"
                         FontSize="{StaticResource FontSizeXs}"
                         Foreground="{DynamicResource AppTextMuted}"
-                        Text="{Binding ClosePriceHint}"
-                        Visibility="{Binding ClosePriceHint, Converter={StaticResource StringToVisibilityConverter}}" />
+                        Text="{Binding AddAssetDialog.ClosePriceHint}"
+                        Visibility="{Binding AddAssetDialog.ClosePriceHint, Converter={StaticResource StringToVisibilityConverter}}" />
                 </StackPanel>
 
                 <!--  總額輸入 (在 total mode 顯示)  -->
@@ -235,12 +235,12 @@
                     behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                     IsEnabled="{Binding AreEconomicFieldsEditable}"
                     Style="{StaticResource FormTextBox}"
-                    Text="{Binding AddQuantity, UpdateSourceTrigger=PropertyChanged}" />
+                    Text="{Binding AddAssetDialog.AddQuantity, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Margin="0,0,0,4"
                     Style="{StaticResource FormFieldError}"
-                    Text="{Binding AddQuantityError}"
-                    Visibility="{Binding AddQuantityError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    Text="{Binding AddAssetDialog.AddQuantityError}"
+                    Visibility="{Binding AddAssetDialog.AddQuantityError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <TextBlock
                     Margin="0,0,0,4"
@@ -279,7 +279,7 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource RadiusSm}"
-                    Visibility="{Binding HasAddPreview, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    Visibility="{Binding AddAssetDialog.HasAddPreview, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -304,7 +304,7 @@
                             FontFamily="{StaticResource FontTabular}"
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextSecondary}"
-                            Text="{Binding AddGrossAmount, StringFormat={}{0:N0}}" />
+                            Text="{Binding AddAssetDialog.AddGrossAmount, StringFormat={}{0:N0}}" />
                         <TextBlock
                             Grid.Row="1"
                             Grid.Column="0"
@@ -317,7 +317,7 @@
                             FontFamily="{StaticResource FontTabular}"
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppDown}"
-                            Text="{Binding AddCommission, StringFormat=+{0:N0}}" />
+                            Text="{Binding AddAssetDialog.AddCommission, StringFormat=+{0:N0}}" />
                         <Rectangle
                             Grid.Row="2"
                             Grid.Column="0"
@@ -338,7 +338,7 @@
                             FontSize="{StaticResource FontSizeXs}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{Binding AddTotalCost, StringFormat={}{0:N0}}" />
+                            Text="{Binding AddAssetDialog.AddTotalCost, StringFormat={}{0:N0}}" />
                         <TextBlock
                             Grid.Row="4"
                             Grid.Column="0"
@@ -353,7 +353,7 @@
                             FontFamily="{StaticResource FontTabular}"
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextMuted}"
-                            Text="{Binding AddCostPerShare, StringFormat={}{0:F4}}" />
+                            Text="{Binding AddAssetDialog.AddCostPerShare, StringFormat={}{0:F4}}" />
                     </Grid>
                 </Border>
             </StackPanel>
@@ -370,7 +370,7 @@
             <TextBox
                 Margin="0,0,0,12"
                 Style="{StaticResource FormTextBox}"
-                Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding AddAssetDialog.AddName, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,4"
                 FontSize="{StaticResource FontSizeXs}"
@@ -380,11 +380,11 @@
             <TextBox
                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                 Style="{StaticResource FormTextBox}"
-                Text="{Binding AddCost, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding AddAssetDialog.AddCost, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Style="{StaticResource FormFieldError}"
-                Text="{Binding AddCostError}"
-                Visibility="{Binding AddCostError, Converter={StaticResource StringToVisibilityConverter}}" />
+                Text="{Binding AddAssetDialog.AddCostError}"
+                Visibility="{Binding AddAssetDialog.AddCostError, Converter={StaticResource StringToVisibilityConverter}}" />
         </StackPanel>
 
         <!--  Crypto: Symbol + Qty + Price  -->
@@ -398,7 +398,7 @@
             <TextBox
                 Margin="0,0,0,12"
                 Style="{StaticResource FormTextBox}"
-                Text="{Binding AddCryptoSymbol, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding AddAssetDialog.AddCryptoSymbol, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,4"
                 FontSize="{StaticResource FontSizeXs}"
@@ -408,11 +408,11 @@
             <TextBox
                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                 Style="{StaticResource FormTextBox}"
-                Text="{Binding AddCryptoQty, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding AddAssetDialog.AddCryptoQty, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Style="{StaticResource FormFieldError}"
-                Text="{Binding AddCryptoQtyError}"
-                Visibility="{Binding AddCryptoQtyError, Converter={StaticResource StringToVisibilityConverter}}" />
+                Text="{Binding AddAssetDialog.AddCryptoQtyError}"
+                Visibility="{Binding AddAssetDialog.AddCryptoQtyError, Converter={StaticResource StringToVisibilityConverter}}" />
             <TextBlock
                 Margin="0,12,0,4"
                 FontSize="{StaticResource FontSizeXs}"
@@ -422,11 +422,11 @@
             <TextBox
                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                 Style="{StaticResource FormTextBox}"
-                Text="{Binding AddCryptoPrice, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding AddAssetDialog.AddCryptoPrice, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Style="{StaticResource FormFieldError}"
-                Text="{Binding AddCryptoPriceError}"
-                Visibility="{Binding AddCryptoPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
+                Text="{Binding AddAssetDialog.AddCryptoPriceError}"
+                Visibility="{Binding AddAssetDialog.AddCryptoPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
         </StackPanel>
 
         <!--  Fee + cash-account — hidden in meta-only mode  -->

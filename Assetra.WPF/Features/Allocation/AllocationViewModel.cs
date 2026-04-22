@@ -202,9 +202,9 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
 
     private void Rebuild()
     {
-        if (Application.Current?.Dispatcher.CheckAccess() == false)
+        if (System.Windows.Application.Current?.Dispatcher.CheckAccess() == false)
         {
-            Application.Current.Dispatcher.InvokeAsync(Rebuild);
+            System.Windows.Application.Current.Dispatcher.InvokeAsync(Rebuild);
             return;
         }
 

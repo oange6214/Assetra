@@ -206,7 +206,7 @@
                                 Width="30"
                                 Height="30"
                                 VerticalAlignment="Center"
-                                Command="{Binding OpenEditCashCommand}"
+                                Command="{Binding Account.OpenEditCashCommand}"
                                 CommandParameter="{Binding SelectedCashRow}"
                                 DockPanel.Dock="Right"
                                 Style="{StaticResource BtnIcon}">
@@ -222,7 +222,7 @@
                                 Height="30"
                                 Margin="0,0,4,0"
                                 VerticalAlignment="Center"
-                                Command="{Binding ToggleDefaultCashAccountCommand}"
+                                Command="{Binding Account.ToggleDefaultCashAccountCommand}"
                                 CommandParameter="{Binding SelectedCashRow}"
                                 DockPanel.Dock="Right">
                                 <Button.Style>
@@ -483,7 +483,7 @@
                                                         Padding="0"
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center"
-                                                        Command="{Binding DataContext.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource BtnIcon}">
                                                         <TextBlock
@@ -542,7 +542,7 @@
                                 Margin="12,0,0,0"
                                 Padding="14,0"
                                 VerticalAlignment="Center"
-                                Command="{Binding RemoveCashAccountCommand}"
+                                Command="{Binding Account.RemoveCashAccountCommand}"
                                 CommandParameter="{Binding SelectedCashRow}"
                                 Style="{StaticResource BtnDanger}">
                                 <TextBlock
@@ -839,7 +839,7 @@
                                                         Padding="0"
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center"
-                                                        Command="{Binding DataContext.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource BtnIcon}">
                                                         <TextBlock
@@ -1080,7 +1080,7 @@
                                                         Margin="2,2"
                                                         Padding="8,0"
                                                         HorizontalAlignment="Right"
-                                                        Command="{Binding DataContext.ConfirmLoanPaymentCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        Command="{Binding DataContext.Loan.ConfirmLoanPaymentCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}">
                                                         <Button.Style>
                                                             <Style BasedOn="{StaticResource BtnPrimary}" TargetType="Button">
@@ -1162,7 +1162,7 @@
                                     Width="30"
                                     Height="30"
                                     VerticalAlignment="Center"
-                                    Command="{Binding OpenEditPositionCommand}"
+                                    Command="{Binding Account.OpenEditPositionCommand}"
                                     CommandParameter="{Binding SelectedPositionRow}"
                                     DockPanel.Dock="Right"
                                     Style="{StaticResource BtnIcon}">
@@ -1813,7 +1813,7 @@
                                                         Padding="0"
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center"
-                                                        Command="{Binding DataContext.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource BtnIcon}">
                                                         <TextBlock
@@ -1887,9 +1887,9 @@
         </Grid>
 
         <!--  ── Dialog overlays ──  -->
-        <pcontrols:AddTransactionDialog Grid.RowSpan="3" Panel.ZIndex="210" />
+        <pcontrols:AddTransactionDialog Grid.RowSpan="3" Panel.ZIndex="210" DataContext="{Binding Transaction}" />
         <pcontrols:AddAssetDialog Grid.RowSpan="3" Panel.ZIndex="200" />
-        <pcontrols:EditAssetDialog Grid.RowSpan="3" Panel.ZIndex="205" />
+        <pcontrols:EditAssetDialog Grid.RowSpan="3" Panel.ZIndex="205" DataContext="{Binding Account}" />
         <!--  ── Confirm dialog ──  -->
         <Grid
             Grid.RowSpan="3"

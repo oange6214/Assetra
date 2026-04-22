@@ -1,11 +1,6 @@
 using Assetra.Core.Models;
 
-namespace Assetra.AppLayer.Portfolio.Dtos;
-
-public sealed record TransactionWorkflowPlan(
-    IReadOnlyList<Trade> Trades,
-    AssetItem? LiabilityAsset = null,
-    IReadOnlyList<LoanScheduleEntry>? LoanScheduleEntries = null);
+namespace Assetra.Application.Portfolio.Dtos;
 
 public sealed record IncomeTransactionRequest(
     decimal Amount,

@@ -1,7 +1,8 @@
 using System.Net.Http;
 using System.Reactive.Concurrency;
-using Assetra.AppLayer.Portfolio.Contracts;
-using Assetra.AppLayer.Portfolio.Services;
+using Assetra.Application.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Services;
+using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
 using Assetra.Infrastructure;
 using Assetra.Infrastructure.FinMind;
@@ -14,6 +15,7 @@ using Assetra.WPF.Features.AddStock;
 using Assetra.WPF.Features.Alerts;
 using Assetra.WPF.Features.Allocation;
 using Assetra.WPF.Features.Portfolio;
+using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Features.Settings;
 using Assetra.WPF.Features.Snackbar;
 using Assetra.WPF.Features.StatusBar;
@@ -119,6 +121,12 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddAssetraCoreServices(this IServiceCollection services)
+    {
+        services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
+        return services;
+    }
+
     public static IServiceCollection AddAssetraApplicationServices(this IServiceCollection services)
     {
         services.AddSingleton<IPortfolioLoadService>(sp => new PortfolioLoadService(
@@ -130,9 +138,6 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<IPortfolioHistoryQueryService>(sp =>
             new PortfolioHistoryQueryService(
                 sp.GetRequiredService<IPortfolioSnapshotRepository>()));
-        services.AddSingleton<ILoanScheduleQueryService>(sp =>
-            new LoanScheduleQueryService(
-                sp.GetRequiredService<ILoanScheduleRepository>()));
         services.AddSingleton<IFinancialOverviewQueryService>(sp =>
             new FinancialOverviewQueryService(
                 sp.GetRequiredService<IAssetRepository>(),
@@ -174,18 +179,18 @@ internal static class ServiceCollectionExtensions
                 sp.GetRequiredService<ILoanScheduleRepository>()));
         services.AddSingleton<ILoanMutationWorkflowService>(sp =>
             new LoanMutationWorkflowService(
-                sp.GetRequiredService<ITransactionWorkflowService>(),
                 sp.GetRequiredService<IAssetRepository>(),
                 sp.GetRequiredService<ILoanScheduleRepository>(),
                 sp.GetRequiredService<ITransactionService>()));
-        services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
         services.AddSingleton<IAddAssetWorkflowService>(sp => new AddAssetWorkflowService(
             sp.GetRequiredService<IStockSearchService>(),
             sp.GetService<IStockHistoryProvider>(),
             sp.GetRequiredService<IPortfolioRepository>(),
             sp.GetRequiredService<IPortfolioPositionLogRepository>(),
             sp.GetRequiredService<ITransactionService>()));
-        services.AddSingleton<ITransactionWorkflowService, TransactionWorkflowService>();
+        services.AddSingleton<ITransactionWorkflowService>(sp =>
+            new TransactionWorkflowService(
+                sp.GetRequiredService<ITransactionService>()));
         return services;
     }
 
@@ -207,26 +212,28 @@ internal static class ServiceCollectionExtensions
                 Search: sp.GetRequiredService<IStockSearchService>(),
                 HistoryMaintenance: sp.GetRequiredService<IPortfolioHistoryMaintenanceService>(),
                 HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
-                LoanScheduleQuery: sp.GetRequiredService<ILoanScheduleQueryService>(),
                 TradeDeletionWorkflow: sp.GetRequiredService<ITradeDeletionWorkflowService>(),
-                TradeMetadataWorkflow: sp.GetRequiredService<ITradeMetadataWorkflowService>(),
-                SellWorkflow: sp.GetRequiredService<ISellWorkflowService>(),
                 PositionDeletionWorkflow: sp.GetRequiredService<IPositionDeletionWorkflowService>(),
-                PositionMetadataWorkflow: sp.GetRequiredService<IPositionMetadataWorkflowService>(),
-                AccountMutationWorkflow: sp.GetRequiredService<IAccountMutationWorkflowService>(),
-                AccountUpsertWorkflow: sp.GetRequiredService<IAccountUpsertWorkflowService>(),
-                LoanPaymentWorkflow: sp.GetRequiredService<ILoanPaymentWorkflowService>(),
-                LoanMutationWorkflow: sp.GetRequiredService<ILoanMutationWorkflowService>(),
                 Load: sp.GetRequiredService<IPortfolioLoadService>(),
-                AddAssetWorkflow: sp.GetRequiredService<IAddAssetWorkflowService>(),
                 History: sp.GetRequiredService<IStockHistoryProvider>(),
                 Currency: sp.GetRequiredService<ICurrencyService>(),
                 Crypto: sp.GetRequiredService<ICryptoService>(),
-                Transaction: sp.GetRequiredService<ITransactionService>(),
                 BalanceQuery: sp.GetRequiredService<IBalanceQueryService>(),
                 PositionQuery: sp.GetRequiredService<IPositionQueryService>(),
                 TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>(),
-                Summary: sp.GetRequiredService<IPortfolioSummaryService>()),
+                // Pre-built Sub-VMs that don't require parent-VM callbacks at construction
+                // time. The parent PortfolioViewModel wires the delegate properties afterward.
+                AddAssetDialog: new AddAssetDialogViewModel(
+                    sp.GetRequiredService<IAddAssetWorkflowService>(),
+                    sp.GetRequiredService<IAccountUpsertWorkflowService>()),
+                SellPanel: new SellPanelViewModel(
+                    sp.GetRequiredService<ISellWorkflowService>(),
+                    new PortfolioSellPanelController(),
+                    sp.GetRequiredService<ISnackbarService>(),
+                    sp.GetRequiredService<ILocalizationService>()))
+            {
+                Summary = sp.GetRequiredService<IPortfolioSummaryService>(),
+            },
             new PortfolioUiServices(
                 DefaultScheduler.Instance,
                 sp.GetService<IThemeService>(),

@@ -159,7 +159,7 @@
                     <CheckBox
                         Margin="0,0,8,0"
                         VerticalAlignment="Center"
-                        IsChecked="{Binding ShowArchivedAccounts}">
+                        IsChecked="{Binding Account.ShowArchivedAccounts}">
                         <TextBlock
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextSecondary}"
@@ -256,7 +256,7 @@
                             <Setter.Value>
                                 <ContextMenu>
                                     <MenuItem
-                                        Command="{Binding PlacementTarget.Tag.RemoveCashAccountCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                        Command="{Binding PlacementTarget.Tag.Account.RemoveCashAccountCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                         CommandParameter="{Binding}"
                                         Header="{DynamicResource Portfolio.Account.PermanentDelete}" />
                                 </ContextMenu>
@@ -349,7 +349,7 @@
                                     VerticalAlignment="Center"
                                     Background="Transparent"
                                     BorderThickness="0"
-                                    Command="{Binding DataContext.ArchiveAccountCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    Command="{Binding DataContext.Account.ArchiveAccountCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     CommandParameter="{Binding}"
                                     Style="{StaticResource BtnGhost}"
                                     ToolTip="{DynamicResource Portfolio.Account.Archive}">

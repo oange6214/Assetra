@@ -1,11 +1,11 @@
 using System.Text.RegularExpressions;
-using Assetra.AppLayer.Portfolio.Contracts;
-using Assetra.AppLayer.Portfolio.Dtos;
+using Assetra.Application.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Core.Trading;
 
-namespace Assetra.AppLayer.Portfolio.Services;
+namespace Assetra.Application.Portfolio.Services;
 
 public sealed class AddAssetWorkflowService : IAddAssetWorkflowService
 {

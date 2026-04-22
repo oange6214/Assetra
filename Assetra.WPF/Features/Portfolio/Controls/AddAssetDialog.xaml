@@ -7,7 +7,7 @@
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
                                      IsDesignTimeCreatable=False}"
-    Visibility="{Binding IsAddDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}"
+    Visibility="{Binding AddAssetDialog.IsAddDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}"
     mc:Ignorable="d">
 
     <Grid>
@@ -55,7 +55,7 @@
                             Width="28"
                             Height="28"
                             HorizontalAlignment="Right"
-                            Command="{Binding CloseAddDialogCommand}"
+                            Command="{Binding AddAssetDialog.CloseAddDialogCommand}"
                             DockPanel.Dock="Right"
                             Style="{StaticResource BtnIcon}">
                             <TextBlock
@@ -75,7 +75,7 @@
                     <RadioButton
                         Content="{DynamicResource Portfolio.Dialog.TypeCash}"
                         GroupName="AddType"
-                        IsChecked="{Binding AddTypeIsAccount, Mode=TwoWay}"
+                        IsChecked="{Binding AddAssetDialog.AddTypeIsAccount, Mode=TwoWay}"
                         Style="{StaticResource NavTabBtn}" />
                 </StackPanel>
 
@@ -87,7 +87,7 @@
                     <Grid>
 
                         <!--  Cash fields — 極簡：只收名稱，餘額由「存入/提款」交易累積  -->
-                        <StackPanel Visibility="{Binding AddTypeIsAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Visibility="{Binding AddAssetDialog.AddTypeIsAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock
                                 Margin="0,0,0,4"
                                 FontSize="{StaticResource FontSizeXs}"
@@ -97,7 +97,7 @@
                             <TextBox
                                 Margin="0,0,0,8"
                                 Style="{StaticResource FormTextBox}"
-                                Text="{Binding AddAccountName, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding AddAssetDialog.AddAccountName, UpdateSourceTrigger=PropertyChanged}" />
 
                             <TextBlock
                                 FontSize="{StaticResource FontSizeXs}"
@@ -115,8 +115,8 @@
                     Margin="20,8,20,0"
                     FontSize="{StaticResource FontSizeXs}"
                     Foreground="{DynamicResource AppDown}"
-                    Text="{Binding AddError}"
-                    Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    Text="{Binding AddAssetDialog.AddError}"
+                    Visibility="{Binding AddAssetDialog.AddError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <!--  Footer  -->
                 <Border
@@ -129,14 +129,14 @@
                             Height="30"
                             Margin="0,0,8,0"
                             Padding="14,0"
-                            Command="{Binding CloseAddDialogCommand}"
+                            Command="{Binding AddAssetDialog.CloseAddDialogCommand}"
                             Style="{StaticResource BtnGhost}">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Common.Cancel}" />
                         </Button>
                         <Button
                             Height="30"
                             Padding="14,0"
-                            Command="{Binding ConfirmAddCommand}"
+                            Command="{Binding AddAssetDialog.ConfirmAddCommand}"
                             Style="{StaticResource BtnPrimary}">
                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Common.Confirm}" />
                         </Button>

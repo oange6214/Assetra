@@ -1,7 +1,7 @@
 using Moq;
-using Assetra.AppLayer.Portfolio.Contracts;
-using Assetra.AppLayer.Portfolio.Dtos;
-using Assetra.AppLayer.Portfolio.Services;
+using Assetra.Application.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Dtos;
+using Assetra.Application.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Xunit;
@@ -13,22 +13,11 @@ public sealed class LoanMutationWorkflowServiceTests
     [Fact]
     public async Task RecordAsync_PersistsPlanArtifactsAndTrades()
     {
-        var workflow = new Mock<ITransactionWorkflowService>();
         var assetRepo = new Mock<IAssetRepository>();
         var loanRepo = new Mock<ILoanScheduleRepository>();
         var txService = new Mock<ITransactionService>();
 
-        var liability = new AssetItem(Guid.NewGuid(), "房貸", FinancialType.Liability, null, "TWD", new DateOnly(2026, 4, 21));
-        var schedule = new[]
-        {
-            new LoanScheduleEntry(Guid.NewGuid(), liability.Id, 1, new DateOnly(2026, 5, 1), 1100m, 1000m, 100m, 9000m, false, null, null)
-        };
-        var trade = new Trade(Guid.NewGuid(), "", "", "房貸", TradeType.LoanBorrow, DateTime.UtcNow, 0m, 1, null, null, 10000m);
-        workflow.Setup(w => w.CreateLoanPlan(It.IsAny<LoanTransactionRequest>()))
-            .Returns(new TransactionWorkflowPlan([trade], liability, schedule));
-
         var service = new LoanMutationWorkflowService(
-            workflow.Object,
             assetRepo.Object,
             loanRepo.Object,
             txService.Object);
@@ -42,9 +31,41 @@ public sealed class LoanMutationWorkflowServiceTests
             "note",
             0m));
 
-        Assert.Same(liability, result.LiabilityAsset);
-        assetRepo.Verify(r => r.AddItemAsync(liability), Times.Once);
-        loanRepo.Verify(r => r.BulkInsertAsync(schedule), Times.Once);
-        txService.Verify(r => r.RecordAsync(trade), Times.Once);
+        txService.Verify(r => r.RecordAsync(
+            It.Is<Trade>(t => t.Type == TradeType.LoanBorrow && t.CashAmount == 10000m)),
+            Times.Once);
+        Assert.Null(result.LiabilityAssetId);
+        Assert.Null(result.ScheduleEntries);
+    }
+
+    [Fact]
+    public async Task RecordAsync_WithAmortization_CreatesAssetAndSchedule()
+    {
+        var assetRepo = new Mock<IAssetRepository>();
+        var loanRepo = new Mock<ILoanScheduleRepository>();
+        var txService = new Mock<ITransactionService>();
+
+        var service = new LoanMutationWorkflowService(
+            assetRepo.Object,
+            loanRepo.Object,
+            txService.Object);
+
+        var result = await service.RecordAsync(new LoanTransactionRequest(
+            TradeType.LoanBorrow,
+            120000m,
+            DateTime.UtcNow,
+            "房貸",
+            Guid.NewGuid(),
+            null,
+            0m,
+            AmortAnnualRate: 0.02m,
+            AmortTermMonths: 12,
+            FirstPaymentDate: new DateOnly(2026, 5, 1)));
+
+        assetRepo.Verify(r => r.AddItemAsync(It.IsAny<AssetItem>()), Times.Once);
+        loanRepo.Verify(r => r.BulkInsertAsync(It.IsAny<IReadOnlyList<LoanScheduleEntry>>()), Times.Once);
+        Assert.NotNull(result.LiabilityAssetId);
+        Assert.NotNull(result.ScheduleEntries);
+        Assert.True(result.ScheduleEntries!.Count > 0);
     }
 }

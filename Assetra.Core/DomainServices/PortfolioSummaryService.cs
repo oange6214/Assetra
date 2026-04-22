@@ -1,7 +1,6 @@
-using Assetra.AppLayer.Portfolio.Contracts;
-using Assetra.AppLayer.Portfolio.Dtos;
+using Assetra.Core.Dtos;
 
-namespace Assetra.AppLayer.Portfolio.Services;
+namespace Assetra.Core.DomainServices;
 
 public sealed class PortfolioSummaryService : IPortfolioSummaryService
 {

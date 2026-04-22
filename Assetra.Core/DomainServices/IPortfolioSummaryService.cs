@@ -1,6 +1,6 @@
-using Assetra.AppLayer.Portfolio.Dtos;
+using Assetra.Core.Dtos;
 
-namespace Assetra.AppLayer.Portfolio.Contracts;
+namespace Assetra.Core.DomainServices;
 
 public interface IPortfolioSummaryService
 {

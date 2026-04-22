@@ -65,7 +65,7 @@ public sealed class AppThemeService : IThemeService
     {
         var themeName = theme == ApplicationTheme.Light ? "Light" : "Dark";
         var newUri = new Uri(WpfUiThemePath + themeName + ".xaml", UriKind.Absolute);
-        var dicts = Application.Current.Resources.MergedDictionaries;
+        var dicts = System.Windows.Application.Current.Resources.MergedDictionaries;
 
         for (var i = 0; i < dicts.Count; i++)
         {
@@ -97,7 +97,7 @@ public sealed class AppThemeService : IThemeService
 
     private static void SwapCustomDictionary(ApplicationTheme theme)
     {
-        var dicts = Application.Current.Resources.MergedDictionaries;
+        var dicts = System.Windows.Application.Current.Resources.MergedDictionaries;
         var paletteName = theme == ApplicationTheme.Light ? "Light" : "Dark";
         var newDict = new ResourceDictionary
         {

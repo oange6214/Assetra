@@ -7,8 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:system="clr-namespace:System;assembly=mscorlib"
     xmlns:txforms="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms"
-    xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel},
                                      IsDesignTimeCreatable=False}"
     Visibility="{Binding IsTxDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}"
     mc:Ignorable="d">

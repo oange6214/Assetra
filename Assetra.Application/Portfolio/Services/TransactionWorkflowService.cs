@@ -1,14 +1,23 @@
-using Assetra.AppLayer.Portfolio.Contracts;
-using Assetra.AppLayer.Portfolio.Dtos;
+using Assetra.Application.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Dtos;
+using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
-using Assetra.Core.Services;
 
-namespace Assetra.AppLayer.Portfolio.Services;
+namespace Assetra.Application.Portfolio.Services;
 
 public sealed class TransactionWorkflowService : ITransactionWorkflowService
 {
-    public TransactionWorkflowPlan CreateCashDividendPlan(CashDividendTransactionRequest request)
+    private readonly ITransactionService _txService;
+
+    public TransactionWorkflowService(ITransactionService txService)
     {
+        _txService = txService;
+    }
+
+    public async Task RecordCashDividendAsync(CashDividendTransactionRequest request, CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+
         var mainTrade = new Trade(
             Id: Guid.NewGuid(),
             Symbol: request.Symbol,
@@ -24,13 +33,24 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
             CashAccountId: request.CashAccountId,
             Note: null);
 
-        return new TransactionWorkflowPlan(
-            BuildTrades(mainTrade, request.Fee, request.CashAccountId, request.TradeDate,
-                $"{request.Name} 股息手續費", null));
+        await _txService.RecordAsync(mainTrade).ConfigureAwait(false);
+
+        if (request.Fee > 0)
+        {
+            await _txService.RecordAsync(CreateFeeTrade(
+                request.Fee,
+                request.CashAccountId,
+                request.TradeDate,
+                $"{request.Name} 股息手續費",
+                null,
+                mainTrade.Id)).ConfigureAwait(false);
+        }
     }
 
-    public TransactionWorkflowPlan CreateStockDividendPlan(StockDividendTransactionRequest request)
+    public async Task RecordStockDividendAsync(StockDividendTransactionRequest request, CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         var trade = new Trade(
             Id: Guid.NewGuid(),
             Symbol: request.Symbol,
@@ -47,11 +67,13 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
             Note: null,
             PortfolioEntryId: request.PortfolioEntryId);
 
-        return new TransactionWorkflowPlan([trade]);
+        await _txService.RecordAsync(trade).ConfigureAwait(false);
     }
 
-    public TransactionWorkflowPlan CreateIncomePlan(IncomeTransactionRequest request)
+    public async Task RecordIncomeAsync(IncomeTransactionRequest request, CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         var mainTrade = new Trade(
             Id: Guid.NewGuid(),
             Symbol: string.Empty,
@@ -67,13 +89,24 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
             CashAccountId: request.CashAccountId,
             Note: request.Note);
 
-        return new TransactionWorkflowPlan(
-            BuildTrades(mainTrade, request.Fee, request.CashAccountId, request.TradeDate,
-                $"{request.Note} 手續費", null));
+        await _txService.RecordAsync(mainTrade).ConfigureAwait(false);
+
+        if (request.Fee > 0)
+        {
+            await _txService.RecordAsync(CreateFeeTrade(
+                request.Fee,
+                request.CashAccountId,
+                request.TradeDate,
+                $"{request.Note} 手續費",
+                null,
+                mainTrade.Id)).ConfigureAwait(false);
+        }
     }
 
-    public TransactionWorkflowPlan CreateCashFlowPlan(CashFlowTransactionRequest request)
+    public async Task RecordCashFlowAsync(CashFlowTransactionRequest request, CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         var mainTrade = new Trade(
             Id: Guid.NewGuid(),
             Symbol: request.AccountName,
@@ -89,70 +122,24 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
             CashAccountId: request.CashAccountId,
             Note: request.Note);
 
-        return new TransactionWorkflowPlan(
-            BuildTrades(mainTrade, request.Fee, request.CashAccountId, request.TradeDate,
-                $"{request.AccountName} 手續費", request.Note));
-    }
+        await _txService.RecordAsync(mainTrade).ConfigureAwait(false);
 
-    public TransactionWorkflowPlan CreateLoanPlan(LoanTransactionRequest request)
-    {
-        AssetItem? liabilityAsset = null;
-        IReadOnlyList<LoanScheduleEntry>? scheduleEntries = null;
-
-        if (request.Type == TradeType.LoanBorrow &&
-            request.AmortAnnualRate.HasValue &&
-            request.AmortTermMonths.HasValue &&
-            request.FirstPaymentDate.HasValue)
+        if (request.Fee > 0)
         {
-            liabilityAsset = new AssetItem(
-                Guid.NewGuid(),
-                request.LoanLabel,
-                FinancialType.Liability,
-                null,
-                "TWD",
-                DateOnly.FromDateTime(DateTime.Today),
-                IsActive: true,
-                UpdatedAt: null,
-                LoanAnnualRate: request.AmortAnnualRate,
-                LoanTermMonths: request.AmortTermMonths,
-                LoanStartDate: request.FirstPaymentDate,
-                LoanHandlingFee: request.Fee > 0 ? request.Fee : null);
-            scheduleEntries = AmortizationService.Generate(
-                liabilityAsset.Id,
-                request.CashAmount,
-                request.AmortAnnualRate.Value,
-                request.AmortTermMonths.Value,
-                request.FirstPaymentDate.Value);
+            await _txService.RecordAsync(CreateFeeTrade(
+                request.Fee,
+                request.CashAccountId,
+                request.TradeDate,
+                $"{request.AccountName} 手續費",
+                request.Note,
+                mainTrade.Id)).ConfigureAwait(false);
         }
-
-        var mainTrade = new Trade(
-            Id: Guid.NewGuid(),
-            Symbol: request.LoanLabel,
-            Exchange: string.Empty,
-            Name: request.LoanLabel,
-            Type: request.Type,
-            TradeDate: request.TradeDate,
-            Price: 0,
-            Quantity: 1,
-            RealizedPnl: null,
-            RealizedPnlPct: null,
-            CashAmount: request.CashAmount,
-            CashAccountId: request.CashAccountId,
-            Note: request.Note,
-            LoanLabel: request.LoanLabel,
-            Principal: request.Principal,
-            InterestPaid: request.InterestPaid);
-
-        return new TransactionWorkflowPlan(
-            BuildTrades(mainTrade, request.Fee, request.CashAccountId, request.TradeDate,
-                $"{request.LoanLabel} 手續費", request.Note),
-            liabilityAsset,
-            scheduleEntries);
     }
 
-    public TransactionWorkflowPlan CreateTransferPlan(TransferTransactionRequest request)
+    public async Task RecordTransferAsync(TransferTransactionRequest request, CancellationToken ct = default)
     {
-        var trades = new List<Trade>();
+        ct.ThrowIfCancellationRequested();
+
         Guid feeParentId;
 
         if (request.SourceAmount == request.DestinationAmount)
@@ -172,7 +159,7 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
                 CashAccountId: request.SourceCashAccountId,
                 Note: request.Note,
                 ToCashAccountId: request.DestinationCashAccountId);
-            trades.Add(transfer);
+            await _txService.RecordAsync(transfer).ConfigureAwait(false);
             feeParentId = transfer.Id;
         }
         else
@@ -194,13 +181,13 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
                 CashAmount: request.SourceAmount,
                 CashAccountId: request.SourceCashAccountId,
                 Note: withdrawNote);
-            trades.Add(withdraw);
+            await _txService.RecordAsync(withdraw).ConfigureAwait(false);
             feeParentId = withdraw.Id;
 
             var depositNote = string.IsNullOrWhiteSpace(request.Note)
                 ? $"轉帳 ← {request.SourceName}"
                 : $"轉帳 ← {request.SourceName} — {request.Note}";
-            trades.Add(new Trade(
+            await _txService.RecordAsync(new Trade(
                 Id: Guid.NewGuid(),
                 Symbol: request.DestinationName,
                 Exchange: string.Empty,
@@ -213,35 +200,19 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
                 RealizedPnlPct: null,
                 CashAmount: request.DestinationAmount,
                 CashAccountId: request.DestinationCashAccountId,
-                Note: depositNote));
+                Note: depositNote)).ConfigureAwait(false);
         }
 
         if (request.Fee > 0)
         {
-            trades.Add(CreateFeeTrade(
+            await _txService.RecordAsync(CreateFeeTrade(
                 request.Fee,
                 request.SourceCashAccountId,
                 request.TradeDate,
                 $"轉帳手續費 ({request.SourceName} → {request.DestinationName})",
                 request.Note,
-                feeParentId));
+                feeParentId)).ConfigureAwait(false);
         }
-
-        return new TransactionWorkflowPlan(trades);
-    }
-
-    private static IReadOnlyList<Trade> BuildTrades(
-        Trade mainTrade,
-        decimal fee,
-        Guid? cashAccountId,
-        DateTime tradeDate,
-        string notePrefix,
-        string? userNote)
-    {
-        var trades = new List<Trade> { mainTrade };
-        if (fee > 0)
-            trades.Add(CreateFeeTrade(fee, cashAccountId, tradeDate, notePrefix, userNote, mainTrade.Id));
-        return trades;
     }
 
     private static Trade CreateFeeTrade(

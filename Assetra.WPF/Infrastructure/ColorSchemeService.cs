@@ -46,7 +46,7 @@ public static class ColorSchemeService
     /// </summary>
     public static void ReapplyCurrentScheme(ApplicationTheme theme)
     {
-        var resources = Application.Current?.Resources;
+        var resources = System.Windows.Application.Current?.Resources;
         if (resources is null)
             return;
 

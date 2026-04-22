@@ -1,4 +1,4 @@
-namespace Assetra.AppLayer.Portfolio.Dtos;
+namespace Assetra.Application.Portfolio.Dtos;
 
 public sealed record AccountDeletionResult(
     bool Success,

@@ -3,11 +3,15 @@ using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Data;
-using Assetra.AppLayer.Portfolio.Contracts;
-using Assetra.AppLayer.Portfolio.Dtos;
-using Assetra.AppLayer.Portfolio.Services;
+using Assetra.Application.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Dtos;
+using Assetra.Application.Portfolio.Services;
+using Assetra.Core.DomainServices;
+using Assetra.Core.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Assetra.Infrastructure;
+using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -20,6 +24,12 @@ using Wpf.Ui.Appearance;
 namespace Assetra.WPF.Features.Portfolio;
 
 public enum PortfolioTab { Dashboard, Positions, AllocationAnalysis, Accounts, Liability, Trades }
+
+/// <summary>Currency option for the edit-asset currency picker.</summary>
+public sealed record CurrencyOption(string Code, string Display)
+{
+    public override string ToString() => Display;
+}
 
 public partial class PortfolioViewModel : ObservableObject, IDisposable
 {
@@ -34,26 +44,16 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly ICurrencyService? _currencyService;
     private readonly IAssetRepository? _assetRepo;
     private readonly ILoanScheduleRepository? _loanScheduleRepo;
-    private readonly ILoanScheduleQueryService _loanScheduleQueryService;
     private readonly ICryptoService? _cryptoService;
     private readonly IStockHistoryProvider? _historyProvider;
-    private readonly ITransactionService _txService;
     private readonly IBalanceQueryService _balanceQuery;
     private readonly IPositionQueryService _positionQuery;
     private readonly IPortfolioLoadService _loadService;
-    private readonly IAddAssetWorkflowService _addAssetWorkflowService;
     private readonly ITransactionWorkflowService _transactionWorkflowService;
     private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
-    private readonly ITradeMetadataWorkflowService _tradeMetadataWorkflowService;
-    private readonly ISellWorkflowService _sellWorkflowService;
     private readonly PortfolioSellPanelController _sellPanelController = new();
     private readonly PortfolioTradeDialogController _tradeDialogController = new();
     private readonly IPositionDeletionWorkflowService _positionDeletionWorkflowService;
-    private readonly IPositionMetadataWorkflowService _positionMetadataWorkflowService;
-    private readonly IAccountMutationWorkflowService _accountMutationWorkflowService;
-    private readonly IAccountUpsertWorkflowService _accountUpsertWorkflowService;
-    private readonly ILoanPaymentWorkflowService _loanPaymentWorkflowService;
-    private readonly ILoanMutationWorkflowService _loanMutationWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly IPortfolioHistoryMaintenanceService _historyMaintenanceService;
     private readonly ILocalizationService? _localization;
@@ -405,6 +405,39 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     /// <summary>Child ViewModel for portfolio value history chart.</summary>
     public PortfolioHistoryViewModel History { get; }
 
+    /// <summary>
+    /// Sub-VM that owns all add-new-asset dialog state and commands.
+    /// XAML bindings chain through <c>AddAssetDialog.PropertyName</c>.
+    /// </summary>
+    public AddAssetDialogViewModel AddAssetDialog { get; }
+
+    /// <summary>
+    /// Sub-VM that owns all sell-panel state (selling row, price input, fee breakdown,
+    /// cash account) and the CancelSell / ConfirmSell commands.
+    /// XAML bindings chain through <c>SellPanel.PropertyName</c>.
+    /// </summary>
+    public SellPanelViewModel SellPanel { get; }
+
+    /// <summary>
+    /// Sub-VM that owns all transaction-dialog state and commands.
+    /// XAML bindings chain through <c>Transaction.PropertyName</c>.
+    /// </summary>
+    public SubViewModels.TransactionDialogViewModel Transaction { get; }
+
+    /// <summary>
+    /// Sub-VM that owns the edit-asset dialog state and account-management commands
+    /// (archive, delete, default-cash toggle, show-archived toggle).
+    /// XAML bindings chain through <c>Account.PropertyName</c>.
+    /// </summary>
+    public SubViewModels.AccountDialogViewModel Account { get; }
+
+    /// <summary>
+    /// Sub-VM that owns the loan-schedule confirm-payment command and
+    /// amortization-schedule loading.
+    /// XAML bindings chain through <c>Loan.PropertyName</c>.
+    /// </summary>
+    public SubViewModels.LoanDialogViewModel Loan { get; }
+
     // Dividend calendar
     [ObservableProperty] private int _divCalendarYear = DateTime.Today.Year;
 
@@ -440,13 +473,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _currencyService = services.Currency;
         _assetRepo = repositories.Asset;
         _loanScheduleRepo = repositories.LoanSchedule;
-        _loanScheduleQueryService = services.LoanScheduleQuery
-            ?? (_loanScheduleRepo is not null
-                ? new LoanScheduleQueryService(_loanScheduleRepo)
-                : new NullLoanScheduleQueryService());
         _cryptoService = services.Crypto;
         _historyProvider = services.History;
-        _txService = services.Transaction ?? new NullTransactionService();
         _balanceQuery = services.BalanceQuery ?? new NullBalanceQueryService();
         _positionQuery = services.PositionQuery ?? new NullPositionQueryService();
         _loadService = services.Load ?? new PortfolioLoadService(
@@ -455,44 +483,23 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             _tradeRepo,
             _balanceQuery,
             _assetRepo);
-        _addAssetWorkflowService = services.AddAssetWorkflow ?? new AddAssetWorkflowService(
-            _search,
-            _historyProvider,
-            _repo,
-            _logRepo,
-            _txService);
-        _transactionWorkflowService = services.TransactionWorkflow ?? new TransactionWorkflowService();
+        // The inline txService backs both the TransactionWorkflow fallback and the LoanMutation
+        // fallback so that trade writes are always routed to the same ITradeRepository.
+        var inlineTxService = (ITransactionService)new TransactionService(_tradeRepo);
+        _transactionWorkflowService = services.TransactionWorkflow
+            ?? new TransactionWorkflowService(inlineTxService);
         _tradeDeletionWorkflowService = services.TradeDeletionWorkflow
             ?? new TradeDeletionWorkflowService(_tradeRepo, _repo, _positionQuery);
-        _tradeMetadataWorkflowService = services.TradeMetadataWorkflow
-            ?? new TradeMetadataWorkflowService(_tradeRepo);
-        _sellWorkflowService = services.SellWorkflow
-            ?? new SellWorkflowService(_tradeRepo, _repo, _logRepo, _positionQuery);
         _positionDeletionWorkflowService = services.PositionDeletionWorkflow
             ?? new PositionDeletionWorkflowService(_tradeRepo, _repo);
-        _positionMetadataWorkflowService = services.PositionMetadataWorkflow
-            ?? new PositionMetadataWorkflowService(_repo);
-        _accountMutationWorkflowService = services.AccountMutationWorkflow
-            ?? (_assetRepo is not null
-                ? new AccountMutationWorkflowService(_assetRepo)
-                : new NullAccountMutationWorkflowService());
-        _accountUpsertWorkflowService = services.AccountUpsertWorkflow
-            ?? (_assetRepo is not null
-                ? new AccountUpsertWorkflowService(_assetRepo)
-                : new NullAccountUpsertWorkflowService());
-        _loanPaymentWorkflowService = services.LoanPaymentWorkflow
-            ?? (_loanScheduleRepo is not null
-                ? new LoanPaymentWorkflowService(_tradeRepo, _loanScheduleRepo)
-                : new NullLoanPaymentWorkflowService());
-        _loanMutationWorkflowService = services.LoanMutationWorkflow
-            ?? (_assetRepo is not null && _loanScheduleRepo is not null
-                ? new LoanMutationWorkflowService(
-                    _transactionWorkflowService,
-                    _assetRepo,
-                    _loanScheduleRepo,
-                    _txService)
-                : new NullLoanMutationWorkflowService(_transactionWorkflowService));
-        _summaryService = services.Summary ?? new PortfolioSummaryService();
+        var positionMetadataWorkflowService = (IPositionMetadataWorkflowService)new PositionMetadataWorkflowService(_repo);
+        var loanMutationWorkflowService = _assetRepo is not null && _loanScheduleRepo is not null
+            ? (ILoanMutationWorkflowService)new LoanMutationWorkflowService(
+                _assetRepo,
+                _loanScheduleRepo,
+                inlineTxService)
+            : new NullLoanMutationWorkflowService();
+        _summaryService = services.Summary;
         _historyMaintenanceService = services.HistoryMaintenance
             ?? new NullPortfolioHistoryMaintenanceService();
         _localization = ui.Localization;
@@ -504,6 +511,109 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         // TradeFilter.InitTradeTypeFilters() and TradeFilter.RefreshTradesView().
         TradeFilter = new TradeFilterViewModel(() => Trades, ui.Localization ?? NullLocalizationService.Instance);
         TradeFilter.AttachTradesCollection(Trades);
+
+        // Build inline workflow services needed only for Sub-VM construction (not held as fields).
+        var addAssetWorkflow = new AddAssetWorkflowService(
+            _search, _historyProvider, _repo, _logRepo, inlineTxService);
+        var accountUpsertWorkflow = _assetRepo is not null
+            ? (IAccountUpsertWorkflowService)new AccountUpsertWorkflowService(_assetRepo)
+            : new NullAccountUpsertWorkflowService();
+        var accountMutationWorkflow = _assetRepo is not null
+            ? (IAccountMutationWorkflowService)new AccountMutationWorkflowService(_assetRepo)
+            : new NullAccountMutationWorkflowService();
+        var sellWorkflow = (ISellWorkflowService)new SellWorkflowService(_tradeRepo, _repo, _logRepo, _positionQuery);
+        var tradeMetadataWorkflow = (ITradeMetadataWorkflowService)new TradeMetadataWorkflowService(_tradeRepo);
+        var loanPaymentWorkflow = _loanScheduleRepo is not null
+            ? (ILoanPaymentWorkflowService)new LoanPaymentWorkflowService(_tradeRepo, _loanScheduleRepo)
+            : new NullLoanPaymentWorkflowService();
+
+        // Build the AddAssetDialog sub-VM. Tx-dialog field delegates are wired below after
+        // the Transaction sub-VM is constructed (delegates reference Transaction properties).
+        AddAssetDialog = services.AddAssetDialog ?? new AddAssetDialogViewModel(
+            addAssetWorkflow,
+            accountUpsertWorkflow);
+        AddAssetDialog.AssetAdded += OnAssetAdded;
+
+        // Build the SellPanel sub-VM and wire delegates for Tx-dialog fields it needs.
+        SellPanel = services.SellPanel ?? new SellPanelViewModel(
+            sellWorkflow,
+            _sellPanelController,
+            ui.Snackbar,
+            ui.Localization)
+        {
+            // CashAccounts is init-only: set once here to share the parent's collection
+            // reference so both VMs see the same live list without a back-reference.
+            CashAccounts = CashAccounts,
+        };
+        SellPanel.SellCompleted += OnSellCompleted;
+
+        // Build the Account sub-VM before Transaction so that GetDefaultCashAccount
+        // (passed as a delegate to Transaction) can safely read Account.DefaultCashAccountId.
+        Account = services.Account ?? new SubViewModels.AccountDialogViewModel(
+            new SubViewModels.AccountDialogDependencies(
+                AccountUpsert: accountUpsertWorkflow,
+                AccountMutation: accountMutationWorkflow,
+                PositionMetadata: positionMetadataWorkflowService,
+                AssetRepo: _assetRepo,
+                Snackbar: _snackbar,
+                CashAccounts: CashAccounts,
+                LoadCashAccountsAsync: LoadCashAccountsAsync,
+                ApplyDefaultCashAccountAsync: ApplyDefaultCashAccountAsync,
+                AskConfirm: AskConfirm,
+                RebuildTotals: RebuildTotals,
+                Localize: L));
+        Account.AccountChanged += OnAccountChanged;
+
+        // Build the TransactionDialog sub-VM and wire its reload-callback events.
+        // Account must be initialized before Transaction (GetDefaultCashAccount delegate reads Account.DefaultCashAccountId)
+        Transaction = services.Transaction ?? new SubViewModels.TransactionDialogViewModel(
+            new SubViewModels.TransactionDialogDependencies(
+                TransactionWorkflow: _transactionWorkflowService,
+                TradeDeletion: _tradeDeletionWorkflowService,
+                TradeMetadata: tradeMetadataWorkflow,
+                LoanMutation: loanMutationWorkflowService,
+                Search: _search,
+                TradeDialogController: _tradeDialogController,
+                AssetRepo: _assetRepo,
+                Snackbar: _snackbar,
+                Trades: Trades,
+                Positions: Positions,
+                CashAccounts: CashAccounts,
+                Liabilities: Liabilities,
+                AddAssetDialog: AddAssetDialog,
+                SellPanel: SellPanel,
+                GetDefaultCashAccount: GetDefaultCashAccount,
+                LoadLoanScheduleAsync: row => Loan?.LoadLoanScheduleAsync(row) ?? Task.CompletedTask,
+                LoadLiabilitiesAsync: LoadLiabilitiesAsync,
+                LoadPositionsAsync: LoadPositionsAsync,
+                LoadTradesAsync: LoadTradesAsync,
+                ReloadAccountBalancesAsync: ReloadAccountBalancesAsync,
+                RebuildTotals: RebuildTotals,
+                Localize: L));
+        Transaction.TransactionCompleted += OnTransactionCompleted;
+        Transaction.TradeDeleted += OnTradeDeleted;
+
+        // Build the Loan sub-VM with delegates into parent state.
+        Loan = services.Loan ?? new SubViewModels.LoanDialogViewModel(
+            new SubViewModels.LoanDialogDependencies(
+                LoanPayment: loanPaymentWorkflow,
+                LoanScheduleRepo: _loanScheduleRepo,
+                GetSelectedLiabilityRow: () => SelectedLiabilityRow,
+                GetTxCashAccountId: () => Transaction.TxCashAccount?.Id,
+                LoadTradesAsync: LoadTradesAsync,
+                ReloadAccountBalancesAsync: ReloadAccountBalancesAsync,
+                RebuildTotals: RebuildTotals));
+        Loan.LoanChanged += OnLoanChanged;
+
+        // Wire the AddAssetDialog and SellPanel delegates that reference Transaction properties
+        // now that Transaction is constructed.
+        AddAssetDialog.GetTxCommissionDiscountValue = () => Transaction.TxCommissionDiscountValue;
+        AddAssetDialog.GetTxFee = () => Transaction.TxFee;
+        AddAssetDialog.GetTxBuyMetaOnly = () => Transaction.TxBuyMetaOnly;
+        AddAssetDialog.GetTxCashAccountId = () => Transaction.TxCashAccount?.Id;
+        AddAssetDialog.GetTxUseCashAccount = () => Transaction.TxUseCashAccount;
+        SellPanel.GetTxCommissionDiscountValue = () => Transaction.TxCommissionDiscountValue;
+        SellPanel.GetTxFee = () => Transaction.TxFee;
 
         // Rebuild chart colours whenever the user switches theme
         if (ui.Theme is not null)
@@ -654,13 +764,20 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
         // Refresh Lazy-Upsert suggestion list for TX form editable ComboBox (Task 19).
         // Only active entries — one row per (Symbol, Exchange).
-        PositionSuggestions.Clear();
-        foreach (var e in entries.Where(x => x.IsActive)
-                                  .GroupBy(x => (x.Symbol, x.Exchange))
-                                  .Select(g => g.First())
-                                  .OrderBy(x => x.Symbol))
+        // Transaction sub-VM owns PositionSuggestions — update it here since ApplyPositions
+        // is the only caller that has the full entries list.
+        if (Transaction is not null)
         {
-            PositionSuggestions.Add(new PositionSuggestion(e.Id, e.Symbol, e.Exchange, e.DisplayName));
+            Transaction.PositionSuggestions.Clear();
+            foreach (var e in entries.Where(x => x.IsActive)
+                                      .GroupBy(x => (x.Symbol, x.Exchange))
+                                      .Select(g => g.First())
+                                      .OrderBy(x => x.Symbol))
+            {
+                Transaction.PositionSuggestions.Add(
+                    new SubViewModels.TransactionDialogViewModel.PositionSuggestion(
+                        e.Id, e.Symbol, e.Exchange, e.DisplayName));
+            }
         }
     }
 
@@ -709,6 +826,99 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
         // Backfill gaps in snapshot history — fire and forget
         _ = BackfillAndRefreshAsync();
+    }
+
+    // Named handlers so they can be unsubscribed in Dispose(); fire-and-forget with
+    // _ = to make the async exception path explicit rather than relying on async void.
+    private void OnAssetAdded(object? sender, EventArgs e)
+        => _ = ReloadAfterAssetAddedAsync();
+
+    private void OnSellCompleted(object? sender, EventArgs e)
+        => _ = ReloadAfterSellAsync();
+
+    private void OnTransactionCompleted(object? sender, EventArgs e)
+        => _ = ReloadAfterTransactionAsync();
+
+    private void OnTradeDeleted(object? sender, EventArgs e)
+        => _ = ReloadAfterTradeDeletedAsync();
+
+    private void OnAccountChanged(object? sender, EventArgs e)
+        => _ = ReloadAfterAccountChangedAsync();
+
+    private void OnLoanChanged(object? sender, EventArgs e)
+        => _ = ReloadAfterLoanChangedAsync();
+
+    /// <summary>
+    /// Called by <see cref="SellPanelViewModel.SellCompleted"/> to refresh all
+    /// position, trade, balance, and totals state after a successful sell.
+    /// </summary>
+    private async Task ReloadAfterSellAsync()
+    {
+        await LoadPositionsAsync();
+        await LoadTradesAsync();
+        await ReloadAccountBalancesAsync();
+        RebuildTotals();
+    }
+
+    /// <summary>
+    /// Called by <see cref="SubViewModels.TransactionDialogViewModel.TransactionCompleted"/> to refresh
+    /// all position, trade, balance, and totals state after a successful transaction.
+    /// </summary>
+    private async Task ReloadAfterTransactionAsync()
+    {
+        await LoadPositionsAsync();
+        await LoadTradesAsync();
+        await ReloadAccountBalancesAsync();
+        RebuildTotals();
+    }
+
+    /// <summary>
+    /// Called by <see cref="SubViewModels.TransactionDialogViewModel.TradeDeleted"/> to refresh all
+    /// position, trade, balance, and totals state after a successful trade deletion.
+    /// </summary>
+    private async Task ReloadAfterTradeDeletedAsync()
+    {
+        await LoadPositionsAsync();
+        await LoadTradesAsync();
+        await ReloadAccountBalancesAsync();
+        RebuildTotals();
+    }
+
+    /// <summary>
+    /// Called by <see cref="SubViewModels.AccountDialogViewModel.AccountChanged"/> to
+    /// refresh cash accounts, balances, and totals after a successful account mutation.
+    /// </summary>
+    private async Task ReloadAfterAccountChangedAsync()
+    {
+        await LoadCashAccountsAsync();
+        RebuildTotals();
+    }
+
+    /// <summary>
+    /// Called by <see cref="SubViewModels.LoanDialogViewModel.LoanChanged"/> to refresh
+    /// trades, account balances, and totals after a successful loan payment.
+    /// </summary>
+    private async Task ReloadAfterLoanChangedAsync()
+    {
+        await LoadTradesAsync();
+        await ReloadAccountBalancesAsync();
+        RebuildTotals();
+    }
+
+    /// <summary>
+    /// Called by <see cref="AddAssetDialogViewModel.AssetAdded"/> to refresh all
+    /// position, trade, balance, and totals state after a successful add.
+    /// </summary>
+    private async Task ReloadAfterAssetAddedAsync()
+    {
+        await LoadPositionsAsync();
+        RebuildTotals();
+        await LoadTradesAsync();
+        await ReloadAccountBalancesAsync();
+        RebuildTotals();
+
+        // Fetch live price for any newly-added crypto positions.
+        await RefreshCryptoPricesAsync();
     }
 
     /// <summary>Test-only hook — lets tests re-populate the Trades collection after
@@ -1086,11 +1296,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(TotalLiabilities));
         OnPropertyChanged(nameof(TotalAssets));
         OnPropertyChanged(nameof(NetWorth));
-        OnPropertyChanged(nameof(SellGrossAmount));
-        OnPropertyChanged(nameof(SellCommission));
-        OnPropertyChanged(nameof(SellTransactionTax));
-        OnPropertyChanged(nameof(SellNetAmount));
-        OnPropertyChanged(nameof(SellEstimatedPnl));
+        SellPanel.NotifyCurrencyChanged();
         ApplyFinancialSummary(_summaryService.Calculate(BuildSummaryInput()));
     }
 
@@ -1116,6 +1322,38 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
+    /// Writes <paramref name="id"/> to <see cref="SubViewModels.AccountDialogViewModel.DefaultCashAccountId"/>
+    /// and syncs every cash-account row's <c>IsDefault</c> badge.
+    /// Also persists to <see cref="IAppSettingsService"/>.
+    /// Exposed as a delegate passed into <see cref="SubViewModels.AccountDialogViewModel"/>
+    /// so it can call back into the parent's owned state without a circular reference.
+    /// </summary>
+    private async Task ApplyDefaultCashAccountAsync(Guid? id)
+    {
+        Account.DefaultCashAccountId = id;
+        foreach (var r in CashAccounts)
+            r.IsDefault = id.HasValue && r.Id == id.Value;
+
+        if (_settingsService is null)
+            return;
+        try
+        {
+            var updated = _settingsService.Current with { DefaultCashAccountId = id };
+            await _settingsService.SaveAsync(updated);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "[Portfolio] Failed to persist DefaultCashAccountId");
+        }
+    }
+
+    /// <summary>取得預設現金帳戶對應的 Row；無設定或帳戶已刪除時回傳 null。</summary>
+    public CashAccountRowViewModel? GetDefaultCashAccount() =>
+        Account.DefaultCashAccountId is { } id
+            ? CashAccounts.FirstOrDefault(r => r.Id == id)
+            : null;
+
+    /// <summary>
     /// Convenience wrapper: looks up a localised string via <see cref="_localization"/> when
     /// available, otherwise falls back to <paramref name="fallback"/>.
     /// </summary>
@@ -1125,14 +1363,364 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private static TradeDeletionRequest ToTradeDeletionRequest(TradeRowViewModel row) =>
         new(row.Id, row.Type, row.Symbol, row.Quantity, row.PortfolioEntryId);
 
+    // ── Sell-trigger commands ─────────────────────────────────────────────────────────
+
+    [RelayCommand]
+    private void BeginSell(PortfolioRowViewModel row)
+    {
+        // Open Tx dialog in Sell mode with this position pre-selected
+        Transaction.OpenTxDialog();
+        Transaction.TxType = "sell";
+        Transaction.TxSellPosition = row;
+        Transaction.TxSellQuantity = ((int)row.Quantity).ToString();
+    }
+
+    /// <summary>側面板「買入」快速動作 — 打開 Tx 對話框，預填當前股票代號。</summary>
+    [RelayCommand]
+    private void BeginBuyForSelectedPosition()
+    {
+        if (SelectedPositionRow is null)
+            return;
+        var row = SelectedPositionRow;
+        Transaction.OpenTxDialog();
+        Transaction.TxType = "buy";
+        Transaction.TxBuyAssetType = "stock";
+        AddAssetDialog.AddSymbol = row.Symbol;
+        AddAssetDialog.AddPrice = string.Empty;
+        AddAssetDialog.AddQuantity = string.Empty;
+    }
+
+    /// <summary>側面板「配息入帳」快速動作 — 打開 Tx 對話框並預選此持倉。</summary>
+    [RelayCommand]
+    private void BeginDividendForSelectedPosition()
+    {
+        if (SelectedPositionRow is null)
+            return;
+        Transaction.OpenTxDialog();
+        Transaction.TxType = "cashDiv";
+        Transaction.TxDivPosition = SelectedPositionRow;
+    }
+
+    /// <summary>側面板「賣出」快速動作 — 呼叫既有 BeginSell，但以 SelectedPositionRow 為目標。</summary>
+    [RelayCommand]
+    private void BeginSellForSelectedPosition()
+    {
+        if (SelectedPositionRow is null)
+            return;
+        BeginSell(SelectedPositionRow);
+    }
+
+    // 全域「新增交易」按鈕 — 一律開啟交易對話框
+    [RelayCommand]
+    private void GlobalAdd() => Transaction.OpenTxDialog();
+
+    /// <summary>開啟新增現金帳戶對話框（由現金 tab 的「新增帳戶」按鈕呼叫）。</summary>
+    [RelayCommand]
+    private void OpenAddAccountDialog()
+    {
+        SelectedTab = PortfolioTab.Accounts;
+        AddAssetDialog.AddAssetType = "cash";
+        AddAssetDialog.AddError = string.Empty;
+        AddAssetDialog.AddAccountName = string.Empty;
+        AddAssetDialog.IsAddDialogOpen = true;
+    }
+
+    // ── Supported currencies (static list — referenced from XAML as PortfolioViewModel.SupportedCurrencies) ─
+
+    public static IReadOnlyList<CurrencyOption> SupportedCurrencies =>
+        SubViewModels.AccountDialogViewModel.SupportedCurrencies;
+
+    // ── Cash account loading ──────────────────────────────────────────────────────────
+
+    private async Task LoadCashAccountsAsync()
+    {
+        var loaded = await _loadService.LoadAsync();
+        ApplyCashAccounts(loaded);
+    }
+
+    private void ApplyCashAccounts(PortfolioLoadResult loaded)
+    {
+        var accounts = loaded.CashAccounts;
+        var balances = loaded.CashBalances;
+        var visibleAccounts = accounts
+            .Where(a => Account.ShowArchivedAccounts || a.IsActive)
+            .ToList();
+        var newRows = visibleAccounts.ToDictionary(
+            a => a.Id,
+            a => new CashAccountRowViewModel(a, balances.TryGetValue(a.Id, out var v) ? v : 0m));
+        var existingIndex = CashAccounts.ToDictionary(r => r.Id);
+
+        for (var i = CashAccounts.Count - 1; i >= 0; i--)
+        {
+            if (!newRows.ContainsKey(CashAccounts[i].Id))
+                CashAccounts.RemoveAt(i);
+        }
+
+        foreach (var account in visibleAccounts)
+        {
+            var bal = balances.TryGetValue(account.Id, out var v) ? v : 0m;
+            if (existingIndex.TryGetValue(account.Id, out var existing))
+            {
+                existing.Name = account.Name;
+                existing.Currency = account.Currency;
+                existing.Balance = bal;
+                existing.IsActive = account.IsActive;
+            }
+            else
+            {
+                CashAccounts.Add(newRows[account.Id]);
+            }
+        }
+        HasNoCashAccounts = CashAccounts.Count == 0;
+
+        var savedId = _settingsService?.Current?.DefaultCashAccountId;
+        if (savedId.HasValue && CashAccounts.All(r => r.Id != savedId.Value))
+            savedId = null;
+        Account.DefaultCashAccountId = savedId;
+        foreach (var r in CashAccounts)
+            r.IsDefault = savedId.HasValue && r.Id == savedId.Value;
+
+        // CashAccountSuggestions now lives on the Transaction sub-VM; update it here
+        // since ApplyCashAccounts is the only caller with the full account list.
+        if (Transaction is not null)
+        {
+            Transaction.CashAccountSuggestions.Clear();
+            foreach (var a in accounts.Where(a => a.IsActive).OrderBy(a => a.Name))
+                Transaction.CashAccountSuggestions.Add(a.Name);
+        }
+    }
+
+    // ── Liability loading ─────────────────────────────────────────────────────────────
+
+    private async Task LoadLiabilitiesAsync()
+    {
+        var loaded = await _loadService.LoadAsync();
+        ApplyLiabilities(loaded);
+    }
+
+    private void ApplyLiabilities(PortfolioLoadResult loaded)
+    {
+        var snapshots = loaded.LiabilitySnapshots;
+        var loanAssets = loaded.LoanAssets;
+
+        Liabilities.Clear();
+        foreach (var (label, snap) in snapshots.OrderBy(kv => kv.Key))
+        {
+            loanAssets.TryGetValue(label, out var asset);
+            Liabilities.Add(new LiabilityRowViewModel(label, snap, asset));
+        }
+
+        foreach (var (name, asset) in loanAssets)
+        {
+            if (!snapshots.ContainsKey(name))
+                Liabilities.Add(new LiabilityRowViewModel(name, LiabilitySnapshot.Empty, asset));
+        }
+
+        HasNoLiabilities = Liabilities.Count == 0;
+        Transaction?.NotifyLoanLabelSuggestionsChanged();
+    }
+
+    // ── Account detail side-panel ─────────────────────────────────────────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedCashRow))]
+    [NotifyPropertyChangedFor(nameof(SelectedCashTrades))]
+    [NotifyPropertyChangedFor(nameof(SelectedCashTotalDeposits))]
+    [NotifyPropertyChangedFor(nameof(SelectedCashTotalWithdrawals))]
+    private CashAccountRowViewModel? _selectedCashRow;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedLiabilityRow))]
+    [NotifyPropertyChangedFor(nameof(SelectedLiabilityTrades))]
+    [NotifyPropertyChangedFor(nameof(SelectedLiabilityTotalBorrows))]
+    [NotifyPropertyChangedFor(nameof(SelectedLiabilityTotalRepays))]
+    private LiabilityRowViewModel? _selectedLiabilityRow;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedPositionRow))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionTrades))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionDividendIncome))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionRealizedTotal))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionTradeAvgPrice))]
+    [NotifyPropertyChangedFor(nameof(HasSelectedPositionRealized))]
+    private PortfolioRowViewModel? _selectedPositionRow;
+
+    /// <summary>
+    /// 是否有任何已實現損益資料（賣出價差或股息收入）。
+    /// </summary>
+    public bool HasSelectedPositionRealized =>
+        SelectedPositionRealizedTotal != 0m || SelectedPositionDividendIncome > 0m;
+
+    public bool HasSelectedCashRow => SelectedCashRow is not null;
+    public bool HasSelectedLiabilityRow => SelectedLiabilityRow is not null;
+    public bool HasSelectedPositionRow => SelectedPositionRow is not null;
+
+    /// <summary>
+    /// Detail-panel active tab ("overview" or "trades"). Shared between the Cash and
+    /// Liability panels — each panel only shows at most one at a time so a single
+    /// property is sufficient; resets to "overview" whenever the selected row changes.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDetailOverviewTab))]
+    [NotifyPropertyChangedFor(nameof(IsDetailTradesTab))]
+    [NotifyPropertyChangedFor(nameof(IsDetailScheduleTab))]
+    private string _detailTab = "overview";
+
+    public bool IsDetailOverviewTab => DetailTab == "overview";
+    public bool IsDetailTradesTab => DetailTab == "trades";
+    public bool IsDetailScheduleTab => DetailTab == "schedule";
+
+    partial void OnSelectedCashRowChanged(CashAccountRowViewModel? _) => DetailTab = "overview";
+    partial void OnSelectedLiabilityRowChanged(LiabilityRowViewModel? row)
+    {
+        DetailTab = "overview";
+        if (row is { IsLoan: true, IsScheduleLoaded: false })
+            _ = Loan.LoadLoanScheduleAsync(row);
+    }
+    partial void OnSelectedPositionRowChanged(PortfolioRowViewModel? _) => DetailTab = "overview";
+
+    // Cash account stats + filtered trades
+    public IEnumerable<TradeRowViewModel> SelectedCashTrades =>
+        SelectedCashRow is { } r
+            ? Trades.Where(t => t.CashAccountId == r.Id)
+                    .OrderByDescending(t => t.TradeDate)
+            : [];
+
+    public decimal SelectedCashTotalDeposits =>
+        SelectedCashRow is { } r
+            ? Trades.Where(t => t.CashAccountId == r.Id &&
+                                (t.Type == TradeType.Deposit ||
+                                 t.Type == TradeType.Income ||
+                                 t.Type == TradeType.CashDividend ||
+                                 t.Type == TradeType.LoanBorrow ||
+                                 t.Type == TradeType.Sell))
+                    .Sum(t => Math.Abs(t.CashAmount ?? 0))
+            : 0m;
+
+    public decimal SelectedCashTotalWithdrawals =>
+        SelectedCashRow is { } r
+            ? Trades.Where(t => t.CashAccountId == r.Id &&
+                                (t.Type == TradeType.Withdrawal ||
+                                 t.Type == TradeType.Buy ||
+                                 t.Type == TradeType.LoanRepay))
+                    .Sum(t => Math.Abs(t.CashAmount ?? 0))
+            : 0m;
+
+    // Liability stats + filtered trades
+    public IEnumerable<TradeRowViewModel> SelectedLiabilityTrades =>
+        SelectedLiabilityRow is { } r
+            ? Trades.Where(t => (t.Type == TradeType.LoanBorrow || t.Type == TradeType.LoanRepay) &&
+                                t.LoanLabel == r.Label)
+                    .OrderByDescending(t => t.TradeDate)
+            : [];
+
+    public decimal SelectedLiabilityTotalBorrows =>
+        SelectedLiabilityRow is { } r
+            ? Trades.Where(t => t.Type == TradeType.LoanBorrow && t.LoanLabel == r.Label)
+                    .Sum(t => t.CashAmount ?? 0)
+            : 0m;
+
+    public decimal SelectedLiabilityTotalRepays =>
+        SelectedLiabilityRow is { } r
+            ? Trades.Where(t => t.Type == TradeType.LoanRepay && t.LoanLabel == r.Label)
+                    .Sum(t => t.CashAmount ?? 0)
+            : 0m;
+
+    // Investment position stats + filtered trades
+    public IEnumerable<TradeRowViewModel> SelectedPositionTrades =>
+        SelectedPositionRow is { } r
+            ? Trades.Where(t => string.Equals(t.Symbol, r.Symbol, StringComparison.OrdinalIgnoreCase) &&
+                                (t.Type == TradeType.Buy || t.Type == TradeType.Sell ||
+                                 t.Type == TradeType.CashDividend || t.Type == TradeType.StockDividend))
+                    .OrderByDescending(t => t.TradeDate)
+            : [];
+
+    /// <summary>
+    /// 成交均價 — 以 Buy 交易紀錄的股數加權平均，**不含買入手續費**。
+    /// </summary>
+    public decimal SelectedPositionTradeAvgPrice
+    {
+        get
+        {
+            if (SelectedPositionRow is not { } r)
+                return 0m;
+            var buys = Trades
+                .Where(t => t.IsBuy && string.Equals(t.Symbol, r.Symbol, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (buys.Count == 0)
+                return 0m;
+            var totalQty = buys.Sum(t => (decimal)t.Quantity);
+            var totalGross = buys.Sum(t => t.Price * t.Quantity);
+            return totalQty > 0 ? totalGross / totalQty : 0m;
+        }
+    }
+
+    /// <summary>Sum of all CashDividend trades for the selected position (gross dividend income).</summary>
+    public decimal SelectedPositionDividendIncome =>
+        SelectedPositionRow is { } r
+            ? Trades.Where(t => string.Equals(t.Symbol, r.Symbol, StringComparison.OrdinalIgnoreCase) &&
+                                t.Type == TradeType.CashDividend)
+                    .Sum(t => t.CashAmount ?? 0)
+            : 0m;
+
+    /// <summary>
+    /// Realized capital gain — placeholder 0 so the realized P&L card layout renders correctly.
+    /// </summary>
+    public decimal SelectedPositionCapitalGain => 0m;
+
+    public decimal SelectedPositionRealizedTotal =>
+        SelectedPositionDividendIncome + SelectedPositionCapitalGain;
+
+    [RelayCommand]
+    private void CloseCashDetail() => SelectedCashRow = null;
+
+    [RelayCommand]
+    private void CloseLiabilityDetail() => SelectedLiabilityRow = null;
+
+    [RelayCommand]
+    private void ClosePositionDetail() => SelectedPositionRow = null;
+
+    /// <summary>
+    /// Permanently removes a position and all its associated Buy / StockDividend trade
+    /// records (plus their fee children).
+    /// </summary>
+    [RelayCommand]
+    private void RemovePosition(PortfolioRowViewModel row)
+    {
+        if (row is null)
+            return;
+        var msg = L("Portfolio.Detail.DeleteWarning", "刪除後無法復原，請確認不再需要後再操作。");
+        AskConfirm(msg, async () =>
+        {
+            await _positionDeletionWorkflowService.DeleteAsync(
+                new PositionDeletionRequest(row.AllEntryIds.ToList()));
+
+            Positions.Remove(row);
+            if (ReferenceEquals(SelectedPositionRow, row))
+                SelectedPositionRow = null;
+            RebuildTotals();
+
+            await LoadTradesAsync();
+            await ReloadAccountBalancesAsync();
+        });
+    }
+
+    [RelayCommand]
+    private void SwitchDetailTab(string tab) => DetailTab = tab;
+
     public void Dispose()
     {
         if (_currencyService is not null)
             _currencyService.CurrencyChanged -= OnCurrencyChanged;
         if (_themeService is not null && _onThemeChanged is not null)
             _themeService.ThemeChanged -= _onThemeChanged;
-        _closePriceCts?.Cancel();
-        _closePriceCts?.Dispose();
+        AddAssetDialog.AssetAdded -= OnAssetAdded;
+        AddAssetDialog.CancelPendingFetch();
+        SellPanel.SellCompleted -= OnSellCompleted;
+        Transaction.TransactionCompleted -= OnTransactionCompleted;
+        Transaction.TradeDeleted -= OnTradeDeleted;
+        Account.AccountChanged -= OnAccountChanged;
+        Loan.LoanChanged -= OnLoanChanged;
         _disposables.Dispose();
     }
 
@@ -1150,15 +1738,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         public Task UpdateAsync(Trade trade) => Task.CompletedTask;
         public Task RemoveAsync(Guid id) => Task.CompletedTask;
         public Task RemoveChildrenAsync(Guid parentId) => Task.CompletedTask;
-    }
-
-    // No-op fallback used when DI doesn't wire ITransactionService (tests / legacy).
-    // Keeps the ViewModel compilable without the Infrastructure layer being present.
-    private sealed class NullTransactionService : ITransactionService
-    {
-        public Task RecordAsync(Trade trade) => Task.CompletedTask;
-        public Task DeleteAsync(Trade trade) => Task.CompletedTask;
-        public Task ReplaceAsync(Trade original, Trade replacement) => Task.CompletedTask;
     }
 
     // Fallback when DI doesn't wire IBalanceQueryService (tests that only populate
@@ -1250,21 +1829,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     private sealed class NullLoanMutationWorkflowService : ILoanMutationWorkflowService
     {
-        private readonly ITransactionWorkflowService _transactionWorkflowService;
-
-        public NullLoanMutationWorkflowService(ITransactionWorkflowService transactionWorkflowService)
-        {
-            _transactionWorkflowService = transactionWorkflowService;
-        }
-
-        public Task<TransactionWorkflowPlan> RecordAsync(LoanTransactionRequest request, CancellationToken ct = default)
-            => Task.FromResult(_transactionWorkflowService.CreateLoanPlan(request));
-    }
-
-    private sealed class NullLoanScheduleQueryService : ILoanScheduleQueryService
-    {
-        public Task<IReadOnlyList<LoanScheduleEntry>> GetByAssetAsync(Guid assetId, CancellationToken ct = default) =>
-            Task.FromResult<IReadOnlyList<LoanScheduleEntry>>([]);
+        public Task<LoanMutationResult> RecordAsync(LoanTransactionRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new LoanMutationResult(null, null));
     }
 
 }

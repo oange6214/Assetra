@@ -1,7 +1,7 @@
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 
-namespace Assetra.AppLayer.Portfolio.Dtos;
+namespace Assetra.Application.Portfolio.Dtos;
 
 public sealed record PortfolioLoadResult(
     IReadOnlyList<PortfolioEntry> Entries,

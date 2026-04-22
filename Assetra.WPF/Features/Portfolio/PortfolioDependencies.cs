@@ -1,6 +1,8 @@
 using System.Reactive.Concurrency;
-using Assetra.AppLayer.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Contracts;
+using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
+using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Portfolio;
@@ -26,13 +28,9 @@ public sealed record PortfolioServices(
     IPortfolioHistoryMaintenanceService? HistoryMaintenance = null,
     IPortfolioHistoryQueryService? HistoryQuery = null,
     IPortfolioLoadService? Load = null,
-    IAddAssetWorkflowService? AddAssetWorkflow = null,
-    ITradeMetadataWorkflowService? TradeMetadataWorkflow = null,
-    ILoanScheduleQueryService? LoanScheduleQuery = null,
     IStockHistoryProvider? History = null,
     ICurrencyService? Currency = null,
     ICryptoService? Crypto = null,
-    ITransactionService? Transaction = null,
     /// <summary>
     /// 餘額投影服務：由交易歷史計算現金 / 負債餘額。
     /// 測試中若省略，ViewModel 會回退為 <c>NullBalanceQueryService</c>（回傳 0）。
@@ -44,23 +42,54 @@ public sealed record PortfolioServices(
     /// </summary>
     IPositionQueryService? PositionQuery = null,
     /// <summary>
-    /// 交易流程服務：建立 income / cash-flow / loan / transfer 的交易計畫。
+    /// 交易流程服務：直接執行 income / cash-flow / dividend / transfer 的交易寫入。
     /// 測試中若省略，ViewModel 會回退為內建實作。
     /// </summary>
     ITransactionWorkflowService? TransactionWorkflow = null,
-    /// <summary>
-    /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。
-    /// 測試中若省略，ViewModel 會回退為內建實作。
-    /// </summary>
-    IPortfolioSummaryService? Summary = null,
     ITradeDeletionWorkflowService? TradeDeletionWorkflow = null,
     IPositionDeletionWorkflowService? PositionDeletionWorkflow = null,
-    ISellWorkflowService? SellWorkflow = null,
-    IPositionMetadataWorkflowService? PositionMetadataWorkflow = null,
-    IAccountMutationWorkflowService? AccountMutationWorkflow = null,
-    IAccountUpsertWorkflowService? AccountUpsertWorkflow = null,
-    ILoanPaymentWorkflowService? LoanPaymentWorkflow = null,
-    ILoanMutationWorkflowService? LoanMutationWorkflow = null);
+    /// <summary>
+    /// Optional pre-built <see cref="AddAssetDialogViewModel"/>. When null the
+    /// <see cref="PortfolioViewModel"/> constructor builds its own instance from the
+    /// resolved workflow services. Pass an explicit instance from DI (or a test double)
+    /// to override the default construction.
+    /// </summary>
+    AddAssetDialogViewModel? AddAssetDialog = null,
+    /// <summary>
+    /// Optional pre-built <see cref="SubViewModels.SellPanelViewModel"/>. When null the
+    /// <see cref="PortfolioViewModel"/> constructor builds its own instance from the
+    /// resolved workflow services. Pass an explicit instance from DI (or a test double)
+    /// to override the default construction.
+    /// </summary>
+    SubViewModels.SellPanelViewModel? SellPanel = null,
+    /// <summary>
+    /// Optional pre-built <see cref="SubViewModels.TransactionDialogViewModel"/>. When null the
+    /// <see cref="PortfolioViewModel"/> constructor builds its own instance from the
+    /// resolved services and shared collections. Pass an explicit instance from DI (or a
+    /// test double) to override the default construction.
+    /// </summary>
+    SubViewModels.TransactionDialogViewModel? Transaction = null,
+    /// <summary>
+    /// Optional pre-built <see cref="SubViewModels.AccountDialogViewModel"/>. When null the
+    /// <see cref="PortfolioViewModel"/> constructor builds its own instance from the
+    /// resolved workflow services. Pass an explicit instance from DI (or a test double)
+    /// to override the default construction.
+    /// </summary>
+    SubViewModels.AccountDialogViewModel? Account = null,
+    /// <summary>
+    /// Optional pre-built <see cref="SubViewModels.LoanDialogViewModel"/>. When null the
+    /// <see cref="PortfolioViewModel"/> constructor builds its own instance from the
+    /// resolved workflow services. Pass an explicit instance from DI (or a test double)
+    /// to override the default construction.
+    /// </summary>
+    SubViewModels.LoanDialogViewModel? Loan = null)
+{
+    /// <summary>
+    /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。
+    /// 預設為 <see cref="PortfolioSummaryService"/>；測試中可覆寫。
+    /// </summary>
+    public IPortfolioSummaryService Summary { get; init; } = new PortfolioSummaryService();
+}
 
 /// <summary>
 /// UI-adjacent services (scheduler / theming / settings / snackbar / localization).

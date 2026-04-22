@@ -32,7 +32,7 @@ public sealed class WpfLocalizationService : ILocalizationService
     public event EventHandler? LanguageChanged;
 
     public string Get(string key, string fallback = "")
-        => Application.Current?.Resources[key] as string ?? fallback;
+        => System.Windows.Application.Current?.Resources[key] as string ?? fallback;
 
     public void SetLanguage(string languageCode)
     {
@@ -43,7 +43,7 @@ public sealed class WpfLocalizationService : ILocalizationService
             var uri = new Uri(string.Format(DictUriFormat, languageCode));
             var dict = new ResourceDictionary { Source = uri };
 
-            var merged = Application.Current.Resources.MergedDictionaries;
+            var merged = System.Windows.Application.Current.Resources.MergedDictionaries;
             var old = merged.FirstOrDefault(d =>
                 d.Source?.OriginalString.Contains("/Languages/") == true);
             if (old is not null)

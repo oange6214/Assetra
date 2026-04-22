@@ -1,14 +1,12 @@
-using Assetra.AppLayer.Portfolio.Dtos;
-using Assetra.Core.Models;
+using Assetra.Application.Portfolio.Dtos;
 
-namespace Assetra.AppLayer.Portfolio.Contracts;
+namespace Assetra.Application.Portfolio.Contracts;
 
 public interface ITransactionWorkflowService
 {
-    TransactionWorkflowPlan CreateCashDividendPlan(CashDividendTransactionRequest request);
-    TransactionWorkflowPlan CreateStockDividendPlan(StockDividendTransactionRequest request);
-    TransactionWorkflowPlan CreateIncomePlan(IncomeTransactionRequest request);
-    TransactionWorkflowPlan CreateCashFlowPlan(CashFlowTransactionRequest request);
-    TransactionWorkflowPlan CreateLoanPlan(LoanTransactionRequest request);
-    TransactionWorkflowPlan CreateTransferPlan(TransferTransactionRequest request);
+    Task RecordCashDividendAsync(CashDividendTransactionRequest request, CancellationToken ct = default);
+    Task RecordStockDividendAsync(StockDividendTransactionRequest request, CancellationToken ct = default);
+    Task RecordIncomeAsync(IncomeTransactionRequest request, CancellationToken ct = default);
+    Task RecordCashFlowAsync(CashFlowTransactionRequest request, CancellationToken ct = default);
+    Task RecordTransferAsync(TransferTransactionRequest request, CancellationToken ct = default);
 }

@@ -1,4 +1,4 @@
-using Assetra.AppLayer.Portfolio.Dtos;
+using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Models;
 using Assetra.Core.Trading;
 using Assetra.WPF.Infrastructure;

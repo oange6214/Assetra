@@ -1,6 +1,7 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using Moq;
+using Assetra.Application.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure;
@@ -176,13 +177,13 @@ public class PortfolioViewModelTests
     public async Task AddPosition_EmptySymbol_SetsError()
     {
         var (vm, _) = CreateVm([]);
-        vm.AddSymbol = string.Empty;
-        vm.AddPrice = "100";
-        vm.AddQuantity = "1000";
+        vm.AddAssetDialog.AddSymbol = string.Empty;
+        vm.AddAssetDialog.AddPrice = "100";
+        vm.AddAssetDialog.AddQuantity = "1000";
 
-        await vm.AddPositionCommand.ExecuteAsync(null);
+        await vm.AddAssetDialog.AddPositionCommand.ExecuteAsync(null);
 
-        Assert.NotEmpty(vm.AddError);
+        Assert.NotEmpty(vm.AddAssetDialog.AddError);
         Assert.Empty(vm.Positions);
     }
 
@@ -190,13 +191,13 @@ public class PortfolioViewModelTests
     public async Task AddPosition_InvalidTotalCost_SetsError()
     {
         var (vm, _) = CreateVm([]);
-        vm.AddSymbol = "2330";
-        vm.AddPrice = "abc";
-        vm.AddQuantity = "1000";
+        vm.AddAssetDialog.AddSymbol = "2330";
+        vm.AddAssetDialog.AddPrice = "abc";
+        vm.AddAssetDialog.AddQuantity = "1000";
 
-        await vm.AddPositionCommand.ExecuteAsync(null);
+        await vm.AddAssetDialog.AddPositionCommand.ExecuteAsync(null);
 
-        Assert.NotEmpty(vm.AddError);
+        Assert.NotEmpty(vm.AddAssetDialog.AddError);
         Assert.Empty(vm.Positions);
     }
 
@@ -204,13 +205,13 @@ public class PortfolioViewModelTests
     public async Task AddPosition_ZeroPrice_SetsError()
     {
         var (vm, _) = CreateVm([]);
-        vm.AddSymbol = "2330";
-        vm.AddPrice = "0";
-        vm.AddQuantity = "1000";
+        vm.AddAssetDialog.AddSymbol = "2330";
+        vm.AddAssetDialog.AddPrice = "0";
+        vm.AddAssetDialog.AddQuantity = "1000";
 
-        await vm.AddPositionCommand.ExecuteAsync(null);
+        await vm.AddAssetDialog.AddPositionCommand.ExecuteAsync(null);
 
-        Assert.NotEmpty(vm.AddError);
+        Assert.NotEmpty(vm.AddAssetDialog.AddError);
     }
 
     [Fact]
@@ -236,11 +237,11 @@ public class PortfolioViewModelTests
             new PortfolioServices(SilentStockService().Object, search.Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc1, backfill1)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
-        vm.AddSymbol = "XXXX";
-        vm.AddPrice = "910";
-        vm.AddQuantity = "1000";
+        vm.AddAssetDialog.AddSymbol = "XXXX";
+        vm.AddAssetDialog.AddPrice = "910";
+        vm.AddAssetDialog.AddQuantity = "1000";
 
-        await vm.AddPositionCommand.ExecuteAsync(null);
+        await vm.AddAssetDialog.AddPositionCommand.ExecuteAsync(null);
 
         // Unknown symbols are now accepted with inferred exchange
         Assert.NotEmpty(vm.Positions);
@@ -285,11 +286,11 @@ public class PortfolioViewModelTests
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc2, backfill2),
                 PositionQuery: posQuery.Object),
             new PortfolioUiServices(ImmediateScheduler.Instance));
-        vm.AddSymbol = "2330";
-        vm.AddPrice = "910";    // transaction price per share (from broker)
-        vm.AddQuantity = "1000";
+        vm.AddAssetDialog.AddSymbol = "2330";
+        vm.AddAssetDialog.AddPrice = "910";    // transaction price per share (from broker)
+        vm.AddAssetDialog.AddQuantity = "1000";
 
-        await vm.AddPositionCommand.ExecuteAsync(null);
+        await vm.AddAssetDialog.AddPositionCommand.ExecuteAsync(null);
 
         Assert.Single(vm.Positions);
         Assert.Equal("2330", vm.Positions[0].Symbol);
@@ -297,8 +298,8 @@ public class PortfolioViewModelTests
         Assert.Equal(1000, vm.Positions[0].Quantity);
         Assert.False(vm.HasNoPositions);
         // form fields should be cleared
-        Assert.Empty(vm.AddSymbol);
-        Assert.Empty(vm.AddPrice);
+        Assert.Empty(vm.AddAssetDialog.AddSymbol);
+        Assert.Empty(vm.AddAssetDialog.AddPrice);
     }
 
     // ConfirmSell
@@ -326,12 +327,12 @@ public class PortfolioViewModelTests
         var row = vm.Positions[0];
         // BeginSell opens TxDialog in Sell mode with position pre-selected
         vm.BeginSellCommand.Execute(row);
-        Assert.True(vm.IsTxDialogOpen);
-        Assert.Equal("sell", vm.TxType);
+        Assert.True(vm.Transaction.IsTxDialogOpen);
+        Assert.Equal("sell", vm.Transaction.TxType);
 
         // Set sell price via TxAmount (the Sell form binds to TxAmount)
-        vm.TxAmount = "1000";
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxAmount = "1000";
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Empty(vm.Positions);
         Assert.True(vm.HasNoPositions);
@@ -473,10 +474,10 @@ public class PortfolioViewModelTests
         var balanceQuery = new BalanceQueryService(tradeRepo);
 
         var vm = new PortfolioViewModel(
-            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo, LoanSchedule: new Mock<ILoanScheduleRepository>().Object),
             new PortfolioServices(SilentStockService().Object, search.Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
-                Transaction: txService,
+                TransactionWorkflow: new TransactionWorkflowService(txService),
                 BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
@@ -515,10 +516,10 @@ public class PortfolioViewModelTests
         var (vm, liabRepo, _, _) = await CreateVmWithLiabilityAsync(
             initialBalance: 2_000_000m, original: 2_000_000m);
 
-        vm.TxType = "loanBorrow";
-        vm.TxAmount = "50000";
-        vm.TxLoanLabel = vm.Liabilities.First().Label;
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanBorrow";
+        vm.Transaction.TxAmount = "50000";
+        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(2_050_000m, vm.Liabilities[0].Balance);
     }
@@ -529,10 +530,10 @@ public class PortfolioViewModelTests
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(
             initialBalance: 2_000_000m, original: 2_000_000m);
 
-        vm.TxType = "loanRepay";
-        vm.TxPrincipal = "25979";   // Phase 3: LoanRepay uses Principal/InterestPaid split
-        vm.TxLoanLabel = vm.Liabilities.First().Label;
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanRepay";
+        vm.Transaction.TxPrincipal = "25979";   // Phase 3: LoanRepay uses Principal/InterestPaid split
+        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(1_974_021m, vm.Liabilities[0].Balance);
     }
@@ -546,10 +547,10 @@ public class PortfolioViewModelTests
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(
             initialBalance: 2_000_000m, original: 2_000_000m);
 
-        vm.TxType = "loanRepay";
-        vm.TxPrincipal = "25979";
-        vm.TxLoanLabel = vm.Liabilities.First().Label;
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanRepay";
+        vm.Transaction.TxPrincipal = "25979";
+        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(2_000_000m, vm.Liabilities[0].OriginalAmount);
     }
@@ -562,10 +563,10 @@ public class PortfolioViewModelTests
         var (vm, liabRepo, _, _) = await CreateVmWithLiabilityAsync(
             initialBalance: 2_000_000m, original: 2_000_000m);
 
-        vm.TxType = "loanRepay";
-        vm.TxPrincipal = "25979";
-        vm.TxLoanLabel = vm.Liabilities.First().Label;
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanRepay";
+        vm.Transaction.TxPrincipal = "25979";
+        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
         Assert.Equal(1_974_021m, vm.Liabilities[0].Balance);
 
         // Delete the trade — RemoveTrade opens a confirm dialog; trigger "Yes" to proceed
@@ -585,10 +586,10 @@ public class PortfolioViewModelTests
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(
             initialBalance: 0m, original: 0m);
 
-        vm.TxType = "loanBorrow";
-        vm.TxAmount = "1994000";
-        vm.TxLoanLabel = "台新 7y";
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanBorrow";
+        vm.Transaction.TxAmount = "1994000";
+        vm.Transaction.TxLoanLabel = "台新 7y";
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         var row = vm.Liabilities[0];
         Assert.Equal(1_994_000m, row.Balance);
@@ -603,10 +604,10 @@ public class PortfolioViewModelTests
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(
             initialBalance: 2_000_000m, original: 2_000_000m);
 
-        vm.TxType = "loanRepay";
-        vm.TxPrincipal = "500000";
-        vm.TxLoanLabel = vm.Liabilities.First().Label;
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanRepay";
+        vm.Transaction.TxPrincipal = "500000";
+        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(1_500_000m, vm.Liabilities[0].Balance);
         Assert.Equal(2_000_000m, vm.Liabilities[0].OriginalAmount);
@@ -621,18 +622,18 @@ public class PortfolioViewModelTests
         var (vm, liabRepo, _, _) = await CreateVmWithLiabilityAsync(
             initialBalance: 2_000_000m, original: 2_000_000m);
 
-        vm.TxType = "loanRepay";
-        vm.TxPrincipal = "25979";
-        vm.TxLoanLabel = vm.Liabilities.First().Label;
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanRepay";
+        vm.Transaction.TxPrincipal = "25979";
+        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
         Assert.Equal(1_974_021m, vm.Liabilities[0].Balance);
 
         // Edit the trade to 50,000 principal
         var trade = vm.Trades.First(t => t.IsLoanRepay);
-        vm.EditTradeCommand.Execute(trade);
-        vm.TxPrincipal = "50000";   // Phase 3: LoanRepay edit uses TxPrincipal
-        vm.TxLoanLabel = vm.Liabilities.First().Label;
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.EditTradeCommand.Execute(trade);
+        vm.Transaction.TxPrincipal = "50000";   // Phase 3: LoanRepay edit uses TxPrincipal
+        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(1_950_000m, vm.Liabilities[0].Balance);
     }
@@ -654,10 +655,10 @@ public class PortfolioViewModelTests
         var balanceQuery = new BalanceQueryService(tradeRepo);
 
         var vm = new PortfolioViewModel(
-            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo, LoanSchedule: new Mock<ILoanScheduleRepository>().Object),
             new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
-                Transaction: txService,
+                TransactionWorkflow: new TransactionWorkflowService(txService),
                 BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
@@ -666,10 +667,10 @@ public class PortfolioViewModelTests
         Assert.Empty(vm.Liabilities);
 
         // Record a LoanBorrow — this implicitly creates the liability row
-        vm.TxType = "loanBorrow";
-        vm.TxAmount = "1000000";
-        vm.TxLoanLabel = "台新 7y";
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanBorrow";
+        vm.Transaction.TxAmount = "1000000";
+        vm.Transaction.TxLoanLabel = "台新 7y";
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Single(vm.Liabilities);
         Assert.Equal("台新 7y", vm.Liabilities[0].Label);
@@ -681,13 +682,13 @@ public class PortfolioViewModelTests
     public async Task ConfirmTx_LoanBorrow_EmptyLabel_SetsError()
     {
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(0m, 0m);
-        vm.TxType = "loanBorrow";
-        vm.TxAmount = "1000000";
-        vm.TxLoanLabel = "   ";
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanBorrow";
+        vm.Transaction.TxAmount = "1000000";
+        vm.Transaction.TxLoanLabel = "   ";
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.NotEmpty(vm.TxError);
-        Assert.Contains("貸款名稱", vm.TxError);
+        Assert.NotEmpty(vm.Transaction.TxError);
+        Assert.Contains("貸款名稱", vm.Transaction.TxError);
     }
 
     // Cash account: simplified add + tx-dialog empty-state
@@ -725,7 +726,7 @@ public class PortfolioViewModelTests
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
             new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
-                Transaction: txService,
+                TransactionWorkflow: new TransactionWorkflowService(txService),
                 BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
@@ -760,9 +761,9 @@ public class PortfolioViewModelTests
     {
         var (vm, cashRepo, _) = await CreateVmWithCashAsync(0m);
 
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "永豐 USD";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "永豐 USD";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         Assert.Single(cashRepo.Store);
         Assert.Equal("永豐 USD", cashRepo.Store[0].Name);
@@ -788,12 +789,12 @@ public class PortfolioViewModelTests
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
 
-        vm.TxType = "deposit";
-        vm.TxAmount = "5000";
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "deposit";
+        vm.Transaction.TxAmount = "5000";
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.Contains("帳戶", vm.TxError);
-        Assert.Contains("建立", vm.TxError);
+        Assert.Contains("帳戶", vm.Transaction.TxError);
+        Assert.Contains("建立", vm.Transaction.TxError);
         Assert.Empty(tradeRepo.Store); // nothing was written
     }
 
@@ -814,17 +815,17 @@ public class PortfolioViewModelTests
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
             new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
-                Transaction: txService,
+                TransactionWorkflow: new TransactionWorkflowService(txService),
                 BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
 
-        vm.TxType = "loanBorrow";
-        vm.TxAmount = "1000000";
+        vm.Transaction.TxType = "loanBorrow";
+        vm.Transaction.TxAmount = "1000000";
         // TxLoanLabel is empty — should show an error
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.Contains("貸款名稱", vm.TxError);
+        Assert.Contains("貸款名稱", vm.Transaction.TxError);
         Assert.Empty(tradeRepo.Store);
     }
 
@@ -835,8 +836,8 @@ public class PortfolioViewModelTests
         vm.OpenAddAccountDialogCommand.Execute(null);
 
         Assert.True(vm.IsAccountsTab);
-        Assert.True(vm.IsAddDialogOpen);
-        Assert.Equal("cash", vm.AddAssetType);
+        Assert.True(vm.AddAssetDialog.IsAddDialogOpen);
+        Assert.Equal("cash", vm.AddAssetDialog.AddAssetType);
     }
 
     [Fact]
@@ -1143,14 +1144,14 @@ public class PortfolioViewModelTests
 
         vm.SelectedTab = PortfolioTab.Accounts;
         vm.GlobalAddCommand.Execute(null);
-        Assert.True(vm.IsTxDialogOpen);
-        Assert.False(vm.IsAddDialogOpen);
+        Assert.True(vm.Transaction.IsTxDialogOpen);
+        Assert.False(vm.AddAssetDialog.IsAddDialogOpen);
 
-        vm.CloseTxDialogCommand.Execute(null);
+        vm.Transaction.CloseTxDialogCommand.Execute(null);
         vm.SelectedTab = PortfolioTab.Liability;
         vm.GlobalAddCommand.Execute(null);
-        Assert.True(vm.IsTxDialogOpen);
-        Assert.False(vm.IsAddDialogOpen);
+        Assert.True(vm.Transaction.IsTxDialogOpen);
+        Assert.False(vm.AddAssetDialog.IsAddDialogOpen);
     }
 
     // Plan B: full Buy/Sell/StockDividend edit
@@ -1165,25 +1166,25 @@ public class PortfolioViewModelTests
     {
         var (vm, cashRepo, tradeRepo) = await CreateVmWithCashAsync(0m);
         // Seed a cash account for the income to attach to.
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "現金";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "現金";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         // Create an Income of 10000 linked to the account.
-        vm.TxType = "income";
-        vm.TxAmount = "10000";
-        vm.TxCashAccount = vm.CashAccounts.First();
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "income";
+        vm.Transaction.TxAmount = "10000";
+        vm.Transaction.TxCashAccount = vm.CashAccounts.First();
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
         Assert.Equal(10_000m, vm.CashAccounts[0].Balance);
         var originalTrade = vm.Trades.Single(t => t.IsIncome);
 
         // Try to edit with an invalid amount.
-        vm.EditTradeCommand.Execute(originalTrade);
-        vm.TxAmount = "not-a-number";
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.EditTradeCommand.Execute(originalTrade);
+        vm.Transaction.TxAmount = "not-a-number";
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         // The error lands on the dialog, but the ledger and balance are untouched.
-        Assert.NotEmpty(vm.TxError);
+        Assert.NotEmpty(vm.Transaction.TxError);
         Assert.Equal(10_000m, vm.CashAccounts[0].Balance);
         Assert.Contains(vm.Trades, t => t.Id == originalTrade.Id);
     }
@@ -1221,11 +1222,11 @@ public class PortfolioViewModelTests
             PortfolioEntryId: Guid.NewGuid()));
         await vm.LoadTradesAsyncForTest();
 
-        vm.EditTradeCommand.Execute(vm.Trades.First(t => t.Type == TradeType.Sell));
+        vm.Transaction.EditTradeCommand.Execute(vm.Trades.First(t => t.Type == TradeType.Sell));
 
-        Assert.Equal(cashAcc.Id, vm.TxCashAccount?.Id);
-        Assert.Equal(cashAcc.Id, vm.SellCashAccount?.Id);
-        Assert.True(vm.TxUseCashAccount);
+        Assert.Equal(cashAcc.Id, vm.Transaction.TxCashAccount?.Id);
+        Assert.Equal(cashAcc.Id, vm.SellPanel.SellCashAccount?.Id);
+        Assert.True(vm.Transaction.TxUseCashAccount);
     }
 
     [Fact]
@@ -1250,10 +1251,10 @@ public class PortfolioViewModelTests
             CashAccountId: cashAcc.Id));
         await vm.LoadTradesAsyncForTest();
 
-        vm.EditTradeCommand.Execute(vm.Trades.First(t => t.Type == TradeType.CashDividend));
+        vm.Transaction.EditTradeCommand.Execute(vm.Trades.First(t => t.Type == TradeType.CashDividend));
 
-        Assert.Equal(cashAcc.Id, vm.TxCashAccount?.Id);
-        Assert.True(vm.TxUseCashAccount);
+        Assert.Equal(cashAcc.Id, vm.Transaction.TxCashAccount?.Id);
+        Assert.True(vm.Transaction.TxUseCashAccount);
     }
 
     [Fact]
@@ -1274,10 +1275,10 @@ public class PortfolioViewModelTests
         await vm.LoadTradesAsyncForTest();
 
         var leg = vm.Trades.First(t => t.IsTransferLeg);
-        vm.EditTradeCommand.Execute(leg);
+        vm.Transaction.EditTradeCommand.Execute(leg);
 
-        Assert.True(vm.IsEditingMetaOnly);
-        Assert.False(vm.AreEconomicFieldsEditable);
+        Assert.True(vm.Transaction.IsEditingMetaOnly);
+        Assert.False(vm.Transaction.AreEconomicFieldsEditable);
     }
 
     [Fact]
@@ -1295,13 +1296,13 @@ public class PortfolioViewModelTests
         await vm.LoadTradesAsyncForTest();
 
         var sellInCollection = vm.Trades.First(t => t.Type == TradeType.Sell);
-        vm.EditTradeCommand.Execute(sellInCollection);
+        vm.Transaction.EditTradeCommand.Execute(sellInCollection);
 
-        Assert.True(vm.IsTxDialogOpen);
-        Assert.True(vm.IsEditMode);
-        Assert.True(vm.IsEditingMetaOnly, "Sell edit should be meta-only");
-        Assert.False(vm.AreEconomicFieldsEditable);
-        Assert.Equal("sell", vm.TxType);
+        Assert.True(vm.Transaction.IsTxDialogOpen);
+        Assert.True(vm.Transaction.IsEditMode);
+        Assert.True(vm.Transaction.IsEditingMetaOnly, "Sell edit should be meta-only");
+        Assert.False(vm.Transaction.AreEconomicFieldsEditable);
+        Assert.Equal("sell", vm.Transaction.TxType);
     }
 
     [Fact]
@@ -1319,15 +1320,15 @@ public class PortfolioViewModelTests
         await vm.LoadTradesAsyncForTest();
 
         var buyRow = vm.Trades.First(t => t.Type == TradeType.Buy);
-        vm.EditTradeCommand.Execute(buyRow);
+        vm.Transaction.EditTradeCommand.Execute(buyRow);
 
-        Assert.Equal("buy", vm.TxType);
-        Assert.False(vm.IsEditingMetaOnly);
-        Assert.True(vm.AreEconomicFieldsEditable);
+        Assert.Equal("buy", vm.Transaction.TxType);
+        Assert.False(vm.Transaction.IsEditingMetaOnly);
+        Assert.True(vm.Transaction.AreEconomicFieldsEditable);
         // Pre-fill landed in the Add* properties used by the buy form.
-        Assert.Equal("00982A", vm.AddSymbol);
-        Assert.Equal("18.0400", vm.AddPrice);
-        Assert.Equal("5000", vm.AddQuantity);
+        Assert.Equal("00982A", vm.AddAssetDialog.AddSymbol);
+        Assert.Equal("18.0400", vm.AddAssetDialog.AddPrice);
+        Assert.Equal("5000", vm.AddAssetDialog.AddQuantity);
     }
 
     [Fact]
@@ -1345,10 +1346,10 @@ public class PortfolioViewModelTests
         await vm.LoadTradesAsyncForTest();
 
         var buyRow = vm.Trades.First(t => t.Type == TradeType.Buy);
-        vm.EditTradeCommand.Execute(buyRow);
+        vm.Transaction.EditTradeCommand.Execute(buyRow);
 
-        Assert.True(vm.IsEditingMetaOnly);
-        Assert.False(vm.AreEconomicFieldsEditable);
+        Assert.True(vm.Transaction.IsEditingMetaOnly);
+        Assert.False(vm.Transaction.AreEconomicFieldsEditable);
     }
 
     // Simplified loan UX: full amount to Balance + cash account
@@ -1361,13 +1362,13 @@ public class PortfolioViewModelTests
         var (vm, cashRepo, tradeRepo, _) = await CreateVmWithLiabilityAndCashAsync(
             initialBalance: 2_000_000m, initialCash: 100_000m);
 
-        vm.TxType = "loanRepay";
-        vm.TxPrincipal = "25978";   // Phase 3: full amount as principal (no interest)
-        vm.TxLoanLabel = vm.Liabilities.First().Label;
-        vm.TxCashAccount = vm.CashAccounts.First();
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanRepay";
+        vm.Transaction.TxPrincipal = "25978";   // Phase 3: full amount as principal (no interest)
+        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.TxCashAccount = vm.CashAccounts.First();
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.Empty(vm.TxError);
+        Assert.Empty(vm.Transaction.TxError);
         Assert.Equal(2_000_000m - 25_978m, vm.Liabilities[0].Balance);
         Assert.Equal(100_000m - 25_978m, vm.CashAccounts[0].Balance);
 
@@ -1388,14 +1389,14 @@ public class PortfolioViewModelTests
         var (vm, _, tradeRepo, _) = await CreateVmWithLiabilityAndCashAsync(
             initialBalance: 2_000_000m, initialCash: 100_000m);
 
-        vm.TxType = "loanRepay";
-        vm.TxPrincipal = "25000";
-        vm.TxInterestPaid = "978";
-        vm.TxLoanLabel = vm.Liabilities.First().Label;
-        vm.TxCashAccount = vm.CashAccounts.First();
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanRepay";
+        vm.Transaction.TxPrincipal = "25000";
+        vm.Transaction.TxInterestPaid = "978";
+        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.TxCashAccount = vm.CashAccounts.First();
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.Empty(vm.TxError);
+        Assert.Empty(vm.Transaction.TxError);
         // 負債只扣本金（projection-based）
         Assert.Equal(2_000_000m - 25_000m, vm.Liabilities[0].Balance);
         // 現金扣合計（本金 + 利息）
@@ -1414,11 +1415,11 @@ public class PortfolioViewModelTests
         var (vm, _, tradeRepo, _) = await CreateVmWithLiabilityAsync(
             initialBalance: 2_000_000m, original: 2_000_000m);
 
-        vm.TxType = "loanRepay";
-        vm.TxPrincipal = "25978";
-        vm.TxLoanLabel = vm.Liabilities.First().Label;
-        vm.TxCashAccount = null;
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanRepay";
+        vm.Transaction.TxPrincipal = "25978";
+        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.TxCashAccount = null;
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(2_000_000m - 25_978m, vm.Liabilities[0].Balance);
         var trade = tradeRepo.Store.Single(t => t.Type == TradeType.LoanRepay);
@@ -1431,11 +1432,11 @@ public class PortfolioViewModelTests
         var (vm, _, _, _) = await CreateVmWithLiabilityAndCashAsync(
             initialBalance: 0m, initialCash: 0m);
 
-        vm.TxType = "loanBorrow";
-        vm.TxAmount = "1000000";
-        vm.TxLoanLabel = "台新A 7y";
-        vm.TxCashAccount = vm.CashAccounts.First();
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanBorrow";
+        vm.Transaction.TxAmount = "1000000";
+        vm.Transaction.TxLoanLabel = "台新A 7y";
+        vm.Transaction.TxCashAccount = vm.CashAccounts.First();
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(1_000_000m, vm.Liabilities[0].Balance);
         Assert.Equal(1_000_000m, vm.CashAccounts[0].Balance);
@@ -1452,15 +1453,15 @@ public class PortfolioViewModelTests
         // Net cash change: +1,994,000 (等於實際撥款).
         var (vm, _, tradeRepo, _) = await CreateVmWithLiabilityAndCashAsync(0m, 0m);
 
-        vm.TxType = "loanBorrow";
-        vm.TxAmount = "2000000";
-        vm.TxFee = "6000";
-        vm.TxLoanLabel = "台新A 7y";
-        vm.TxUseCashAccount = true;
-        vm.TxCashAccount = vm.CashAccounts.First();
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanBorrow";
+        vm.Transaction.TxAmount = "2000000";
+        vm.Transaction.TxFee = "6000";
+        vm.Transaction.TxLoanLabel = "台新A 7y";
+        vm.Transaction.TxUseCashAccount = true;
+        vm.Transaction.TxCashAccount = vm.CashAccounts.First();
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.Empty(vm.TxError);
+        Assert.Empty(vm.Transaction.TxError);
         Assert.Equal(2_000_000m, vm.Liabilities[0].Balance);
         Assert.Equal(1_994_000m, vm.CashAccounts[0].Balance);
 
@@ -1484,13 +1485,13 @@ public class PortfolioViewModelTests
         var (vm, _, _, _) = await CreateVmWithLiabilityAndCashAsync(
             initialBalance: 2_000_000m, initialCash: 100_000m);
 
-        vm.TxType = "loanRepay";
-        vm.TxPrincipal = "25978";   // Phase 3: full principal, no interest split
-        vm.TxFee = "100";
-        vm.TxLoanLabel = vm.Liabilities.First().Label;
-        vm.TxUseCashAccount = true;
-        vm.TxCashAccount = vm.CashAccounts.First();
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanRepay";
+        vm.Transaction.TxPrincipal = "25978";   // Phase 3: full principal, no interest split
+        vm.Transaction.TxFee = "100";
+        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.TxUseCashAccount = true;
+        vm.Transaction.TxCashAccount = vm.CashAccounts.First();
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(2_000_000m - 25_978m, vm.Liabilities[0].Balance);
         Assert.Equal(100_000m - 26_078m, vm.CashAccounts[0].Balance);
@@ -1502,13 +1503,13 @@ public class PortfolioViewModelTests
         // 手續費空白 → 只建主 trade，不產生多餘的 Withdrawal fee。
         var (vm, _, tradeRepo, _) = await CreateVmWithLiabilityAndCashAsync(0m, 0m);
 
-        vm.TxType = "loanBorrow";
-        vm.TxAmount = "500000";
-        vm.TxFee = "";
-        vm.TxLoanLabel = "台新A 7y";
-        vm.TxUseCashAccount = true;
-        vm.TxCashAccount = vm.CashAccounts.First();
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanBorrow";
+        vm.Transaction.TxAmount = "500000";
+        vm.Transaction.TxFee = "";
+        vm.Transaction.TxLoanLabel = "台新A 7y";
+        vm.Transaction.TxUseCashAccount = true;
+        vm.Transaction.TxCashAccount = vm.CashAccounts.First();
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Single(tradeRepo.Store.Where(t => t.Type == TradeType.LoanBorrow));
         Assert.Empty(tradeRepo.Store.Where(t => t.Type == TradeType.Withdrawal));
@@ -1520,12 +1521,12 @@ public class PortfolioViewModelTests
         // 勾選框關掉 → 即使 TxCashAccount 有值，也不碰現金；Balance 仍然 +amount。
         var (vm, _, tradeRepo, _) = await CreateVmWithLiabilityAndCashAsync(0m, 50_000m);
 
-        vm.TxType = "loanBorrow";
-        vm.TxAmount = "1000000";
-        vm.TxFee = "3000";
-        vm.TxLoanLabel = "台新A 7y";
-        vm.TxUseCashAccount = false;   // 關掉
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanBorrow";
+        vm.Transaction.TxAmount = "1000000";
+        vm.Transaction.TxFee = "3000";
+        vm.Transaction.TxLoanLabel = "台新A 7y";
+        vm.Transaction.TxUseCashAccount = false;   // 關掉
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(1_000_000m, vm.Liabilities[0].Balance);
         Assert.Equal(50_000m, vm.CashAccounts[0].Balance);  // 沒動
@@ -1539,13 +1540,13 @@ public class PortfolioViewModelTests
     {
         var (vm, _, tradeRepo, _) = await CreateVmWithLiabilityAndCashAsync(0m, 0m);
 
-        vm.TxType = "loanBorrow";
-        vm.TxAmount = "1000000";
-        vm.TxFee = "-500";
-        vm.TxLoanLabel = "台新A 7y";
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "loanBorrow";
+        vm.Transaction.TxAmount = "1000000";
+        vm.Transaction.TxFee = "-500";
+        vm.Transaction.TxLoanLabel = "台新A 7y";
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.Contains("手續費", vm.TxError);
+        Assert.Contains("手續費", vm.Transaction.TxError);
         Assert.Empty(tradeRepo.Store);  // nothing written
     }
 
@@ -1568,11 +1569,11 @@ public class PortfolioViewModelTests
             new AssetItem(Guid.NewGuid(), "X", FinancialType.Asset, null, "TWD", DateOnly.FromDateTime(DateTime.Today)),
             projectedBalance: 0m);
         vm.CashAccounts.Add(fakeAcc);
-        vm.TxCashAccount = fakeAcc;
-        Assert.NotNull(vm.TxCashAccount);
+        vm.Transaction.TxCashAccount = fakeAcc;
+        Assert.NotNull(vm.Transaction.TxCashAccount);
 
-        vm.TxUseCashAccount = false;
-        Assert.Null(vm.TxCashAccount);
+        vm.Transaction.TxUseCashAccount = false;
+        Assert.Null(vm.Transaction.TxCashAccount);
     }
 
     // Stock dialog: 單價/總額 toggle, manual fee, CashDiv total mode
@@ -1582,20 +1583,20 @@ public class PortfolioViewModelTests
     {
         // 在 total mode 下輸入總額 90,200 + 數量 5,000 → AddPrice 自動回算 18.0400
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(0m, 0m);
-        vm.AddQuantity = "5000";
-        vm.TxBuyPriceMode = "total";
-        vm.TxBuyTotalCost = "90200";
-        Assert.Equal("18.0400", vm.AddPrice);
+        vm.AddAssetDialog.AddQuantity = "5000";
+        vm.Transaction.TxBuyPriceMode = "total";
+        vm.Transaction.TxBuyTotalCost = "90200";
+        Assert.Equal("18.0400", vm.AddAssetDialog.AddPrice);
     }
 
     [Fact]
     public async Task TxBuyComputedTotalDisplay_UnitMode_ShowsPriceTimesQty()
     {
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(0m, 0m);
-        vm.TxBuyPriceMode = "unit";
-        vm.AddPrice = "18.04";
-        vm.AddQuantity = "5000";
-        Assert.Equal("90,200", vm.TxBuyComputedTotalDisplay);
+        vm.Transaction.TxBuyPriceMode = "unit";
+        vm.AddAssetDialog.AddPrice = "18.04";
+        vm.AddAssetDialog.AddQuantity = "5000";
+        Assert.Equal("90,200", vm.Transaction.TxBuyComputedTotalDisplay);
     }
 
     [Fact]
@@ -1603,9 +1604,9 @@ public class PortfolioViewModelTests
     {
         // 不輸入每股股利、改填總股息 1,000 → 應該成功（per-share 自動回算）
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(0m);
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "X";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "X";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         // Need a position to attach dividend to — use simulator: bypass via direct add
         var posRepo = new Mock<IPortfolioRepository>();
@@ -1613,22 +1614,22 @@ public class PortfolioViewModelTests
             [new PortfolioEntry(Guid.NewGuid(), "0050", "TWSE")]);
         // For this test simplicity, just verify the validation path: total mode with valid
         // total should not produce "每股股利無效" error.
-        vm.TxType = "cashDiv";
-        vm.TxDivInputMode = "total";
-        vm.TxDivTotalInput = "1000";
+        vm.Transaction.TxType = "cashDiv";
+        vm.Transaction.TxDivInputMode = "total";
+        vm.Transaction.TxDivTotalInput = "1000";
         // No TxDivPosition set → expect "請選擇股票" not "每股股利無效"
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
-        Assert.Contains("股票", vm.TxError);
-        Assert.DoesNotContain("每股股利", vm.TxError);
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
+        Assert.Contains("股票", vm.Transaction.TxError);
+        Assert.DoesNotContain("每股股利", vm.Transaction.TxError);
     }
 
     [Fact]
     public async Task ConfirmCashDiv_TotalMode_InvalidTotal_Rejected()
     {
         var (vm, _, _) = await CreateVmWithCashAsync(0m);
-        vm.TxType = "cashDiv";
-        vm.TxDivInputMode = "total";
-        vm.TxDivTotalInput = "abc";
+        vm.Transaction.TxType = "cashDiv";
+        vm.Transaction.TxDivInputMode = "total";
+        vm.Transaction.TxDivTotalInput = "abc";
 
         // Need position fake to bypass first guard
         var fakePos = new PortfolioRowViewModel
@@ -1639,10 +1640,10 @@ public class PortfolioViewModelTests
             BuyPrice = 100,
         };
         vm.Positions.Add(fakePos);
-        vm.TxDivPosition = fakePos;
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxDivPosition = fakePos;
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.Contains("總股息金額無效", vm.TxError);
+        Assert.Contains("總股息金額無效", vm.Transaction.TxError);
     }
 
     [Fact]
@@ -1658,11 +1659,11 @@ public class PortfolioViewModelTests
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
 
-        Assert.True(vm.TxBuyIsUnitMode);
-        Assert.False(vm.TxBuyIsTotalMode);
-        vm.TxBuyPriceMode = "total";
-        Assert.False(vm.TxBuyIsUnitMode);
-        Assert.True(vm.TxBuyIsTotalMode);
+        Assert.True(vm.Transaction.TxBuyIsUnitMode);
+        Assert.False(vm.Transaction.TxBuyIsTotalMode);
+        vm.Transaction.TxBuyPriceMode = "total";
+        Assert.False(vm.Transaction.TxBuyIsUnitMode);
+        Assert.True(vm.Transaction.TxBuyIsTotalMode);
     }
 
     [Fact]
@@ -1678,11 +1679,11 @@ public class PortfolioViewModelTests
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
 
-        Assert.True(vm.TxDivIsPerShareMode);
-        Assert.False(vm.TxDivIsTotalMode);
-        vm.TxDivInputMode = "total";
-        Assert.False(vm.TxDivIsPerShareMode);
-        Assert.True(vm.TxDivIsTotalMode);
+        Assert.True(vm.Transaction.TxDivIsPerShareMode);
+        Assert.False(vm.Transaction.TxDivIsTotalMode);
+        vm.Transaction.TxDivInputMode = "total";
+        Assert.False(vm.Transaction.TxDivIsPerShareMode);
+        Assert.True(vm.Transaction.TxDivIsTotalMode);
     }
 
     // Cash-flow fee + Transfer
@@ -1695,13 +1696,13 @@ public class PortfolioViewModelTests
         //   (2) 手續費 Withdrawal：CashAmount=15、Name/Note 標示手續費
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);
 
-        vm.TxType = "withdrawal";
-        vm.TxAmount = "5000";
-        vm.TxFee = "15";
-        vm.TxCashAccount = vm.CashAccounts.First();
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "withdrawal";
+        vm.Transaction.TxAmount = "5000";
+        vm.Transaction.TxFee = "15";
+        vm.Transaction.TxCashAccount = vm.CashAccounts.First();
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.Empty(vm.TxError);
+        Assert.Empty(vm.Transaction.TxError);
         Assert.Equal(10_000m - 5_015m, vm.CashAccounts[0].Balance);
 
         var withdrawals = tradeRepo.Store
@@ -1717,15 +1718,15 @@ public class PortfolioViewModelTests
     {
         // 存入 1000 + 跨行費 15 → 現金 +985 (= +1000 -15)
         var (vm, _, _) = await CreateVmWithCashAsync(0m);
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "X";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "X";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
-        vm.TxType = "deposit";
-        vm.TxAmount = "1000";
-        vm.TxFee = "15";
-        vm.TxCashAccount = vm.CashAccounts.First();
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "deposit";
+        vm.Transaction.TxAmount = "1000";
+        vm.Transaction.TxFee = "15";
+        vm.Transaction.TxCashAccount = vm.CashAccounts.First();
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(985m, vm.CashAccounts[0].Balance);
     }
@@ -1735,21 +1736,21 @@ public class PortfolioViewModelTests
     {
         // TWD Savings 30,000 → USD Savings 30,000 (same amount → native Transfer record)
         var (vm, cashRepo, tradeRepo) = await CreateVmWithCashAsync(50_000m);  // 1st account
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "USD Savings";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);   // 2nd account
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "USD Savings";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);   // 2nd account
 
         var src = vm.CashAccounts.First();   // 50,000 starting
         var dst = vm.CashAccounts.Last();    // 0 starting
 
-        vm.TxType = "transfer";
-        vm.TxAmount = "30000";
-        vm.TxTransferTargetAmount = "30000";
-        vm.TxCashAccount = src;
-        vm.TxTransferTarget = dst;
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "transfer";
+        vm.Transaction.TxAmount = "30000";
+        vm.Transaction.TxTransferTargetAmount = "30000";
+        vm.Transaction.TxCashAccount = src;
+        vm.Transaction.TxTransferTarget = dst;
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.Empty(vm.TxError);
+        Assert.Empty(vm.Transaction.TxError);
         Assert.Equal(20_000m, src.Balance);
         Assert.Equal(30_000m, dst.Balance);
 
@@ -1765,22 +1766,22 @@ public class PortfolioViewModelTests
     {
         // 30,000 TWD → 1,000 USD (跨幣別)
         var (vm, _, _) = await CreateVmWithCashAsync(50_000m);
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "USD Savings";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "USD Savings";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         var src = vm.CashAccounts.First();
         var dst = vm.CashAccounts.Last();
 
-        vm.TxType = "transfer";
-        vm.TxAmount = "30000";
-        vm.TxTransferTargetAmount = "1000";
-        vm.TxCashAccount = src;
-        vm.TxTransferTarget = dst;
+        vm.Transaction.TxType = "transfer";
+        vm.Transaction.TxAmount = "30000";
+        vm.Transaction.TxTransferTargetAmount = "1000";
+        vm.Transaction.TxCashAccount = src;
+        vm.Transaction.TxTransferTarget = dst;
         // Implied rate auto-computed: 30000 / 1000 = 30
-        Assert.Equal("30.0000", vm.TxTransferImpliedRateDisplay);
+        Assert.Equal("30.0000", vm.Transaction.TxTransferImpliedRateDisplay);
 
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(20_000m, src.Balance);
         Assert.Equal(1_000m, dst.Balance);
@@ -1791,20 +1792,20 @@ public class PortfolioViewModelTests
     {
         // 30,000 → 30,000 with 50 fee → src 50,050 less, dst 30,000 more
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(50_000m);
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "X";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "X";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         var src = vm.CashAccounts.First();
         var dst = vm.CashAccounts.Last();
 
-        vm.TxType = "transfer";
-        vm.TxAmount = "30000";
-        vm.TxTransferTargetAmount = "30000";
-        vm.TxFee = "50";
-        vm.TxCashAccount = src;
-        vm.TxTransferTarget = dst;
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "transfer";
+        vm.Transaction.TxAmount = "30000";
+        vm.Transaction.TxTransferTargetAmount = "30000";
+        vm.Transaction.TxFee = "50";
+        vm.Transaction.TxCashAccount = src;
+        vm.Transaction.TxTransferTarget = dst;
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(50_000m - 30_050m, src.Balance);
         Assert.Equal(30_000m, dst.Balance);
@@ -1821,20 +1822,20 @@ public class PortfolioViewModelTests
     public async Task ConfirmTx_Transfer_SameAccountSrcDst_Rejected()
     {
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);
-        vm.AddAssetType = "cash";
-        vm.AddAccountName = "X";
-        await vm.ConfirmAddCommand.ExecuteAsync(null);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "X";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         var sameAcc = vm.CashAccounts.First();
 
-        vm.TxType = "transfer";
-        vm.TxAmount = "1000";
-        vm.TxTransferTargetAmount = "1000";
-        vm.TxCashAccount = sameAcc;
-        vm.TxTransferTarget = sameAcc;
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "transfer";
+        vm.Transaction.TxAmount = "1000";
+        vm.Transaction.TxTransferTargetAmount = "1000";
+        vm.Transaction.TxCashAccount = sameAcc;
+        vm.Transaction.TxTransferTarget = sameAcc;
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.Contains("同一個", vm.TxError);
+        Assert.Contains("同一個", vm.Transaction.TxError);
         // Migration seed Deposit might exist; verify only transfer-tagged trades weren't written.
         Assert.Empty(tradeRepo.Store.Where(t =>
             (t.Type == TradeType.Withdrawal || t.Type == TradeType.Deposit) &&
@@ -1847,13 +1848,13 @@ public class PortfolioViewModelTests
         // Only one cash account → reject.
         var (vm, _, _) = await CreateVmWithCashAsync(10_000m);
 
-        vm.TxType = "transfer";
-        vm.TxAmount = "1000";
-        vm.TxTransferTargetAmount = "1000";
-        vm.TxCashAccount = vm.CashAccounts.First();
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.TxType = "transfer";
+        vm.Transaction.TxAmount = "1000";
+        vm.Transaction.TxTransferTargetAmount = "1000";
+        vm.Transaction.TxCashAccount = vm.CashAccounts.First();
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.NotEmpty(vm.TxError);
+        Assert.NotEmpty(vm.Transaction.TxError);
     }
 
     [Fact]
@@ -1869,13 +1870,13 @@ public class PortfolioViewModelTests
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
 
-        Assert.Equal("—", vm.TxTransferImpliedRateDisplay);
-        vm.TxAmount = "100";
-        Assert.Equal("—", vm.TxTransferImpliedRateDisplay);  // target still empty
-        vm.TxTransferTargetAmount = "abc";
-        Assert.Equal("—", vm.TxTransferImpliedRateDisplay);
-        vm.TxTransferTargetAmount = "25";
-        Assert.Equal("4.0000", vm.TxTransferImpliedRateDisplay);  // 100 / 25
+        Assert.Equal("—", vm.Transaction.TxTransferImpliedRateDisplay);
+        vm.Transaction.TxAmount = "100";
+        Assert.Equal("—", vm.Transaction.TxTransferImpliedRateDisplay);  // target still empty
+        vm.Transaction.TxTransferTargetAmount = "abc";
+        Assert.Equal("—", vm.Transaction.TxTransferImpliedRateDisplay);
+        vm.Transaction.TxTransferTargetAmount = "25";
+        Assert.Equal("4.0000", vm.Transaction.TxTransferImpliedRateDisplay);  // 100 / 25
     }
 
     // Helper: VM seeded with both a cash account and a liability.
@@ -1905,10 +1906,10 @@ public class PortfolioViewModelTests
         var txService = new TransactionService(tradeRepo);
         var balanceQuery = new BalanceQueryService(tradeRepo);
         var vm = new PortfolioViewModel(
-            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo, LoanSchedule: new Mock<ILoanScheduleRepository>().Object),
             new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
-                Transaction: txService,
+                TransactionWorkflow: new TransactionWorkflowService(txService),
                 BalanceQuery: balanceQuery),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
@@ -1932,10 +1933,10 @@ public class PortfolioViewModelTests
             Note: "原備註"));
         await vm.LoadTradesAsyncForTest();
 
-        vm.EditTradeCommand.Execute(vm.Trades.First(t => t.Id == sellId));
-        vm.TxDate = DateTime.Today.AddDays(-1);  // new date
-        vm.TxNote = "改過備註";
-        await vm.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.EditTradeCommand.Execute(vm.Trades.First(t => t.Id == sellId));
+        vm.Transaction.TxDate = DateTime.Today.AddDays(-1);  // new date
+        vm.Transaction.TxNote = "改過備註";
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         var updated = (await tradeRepo.GetAllAsync()).Single(t => t.Id == sellId);
         Assert.Equal("改過備註", updated.Note);

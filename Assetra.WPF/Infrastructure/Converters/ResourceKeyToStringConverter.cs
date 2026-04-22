@@ -16,7 +16,7 @@ public sealed class ResourceKeyToStringConverter : IValueConverter
     {
         if (value is not string key || string.IsNullOrWhiteSpace(key))
             return string.Empty;
-        return Application.Current?.TryFindResource(key) as string ?? key;
+        return System.Windows.Application.Current?.TryFindResource(key) as string ?? key;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>

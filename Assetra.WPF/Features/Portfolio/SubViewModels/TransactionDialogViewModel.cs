@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
-using Assetra.AppLayer.Portfolio.Dtos;
+using Assetra.Application.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Dtos;
+using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Core.Trading;
 using Assetra.WPF.Infrastructure;
@@ -8,13 +10,126 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
 
-namespace Assetra.WPF.Features.Portfolio;
+namespace Assetra.WPF.Features.Portfolio.SubViewModels;
 
 /// <summary>
-/// Transaction dialog state, commands, and all Confirm*Async methods.
+/// Dependencies passed to <see cref="TransactionDialogViewModel"/> at construction.
+/// Bundles services, shared collections, and Func callbacks so the sub-VM can reload
+/// parent state after a successful transaction without holding a back-reference to
+/// <see cref="Portfolio.PortfolioViewModel"/>.
 /// </summary>
-public partial class PortfolioViewModel
+internal sealed record TransactionDialogDependencies(
+    // Services
+    ITransactionWorkflowService TransactionWorkflow,
+    ITradeDeletionWorkflowService TradeDeletion,
+    ITradeMetadataWorkflowService TradeMetadata,
+    ILoanMutationWorkflowService LoanMutation,
+    IStockSearchService Search,
+    PortfolioTradeDialogController TradeDialogController,
+    IAssetRepository? AssetRepo,
+    ISnackbarService? Snackbar,
+    // Shared parent collections (read-only references, kept in sync by parent)
+    ObservableCollection<TradeRowViewModel> Trades,
+    ObservableCollection<PortfolioRowViewModel> Positions,
+    ObservableCollection<CashAccountRowViewModel> CashAccounts,
+    ObservableCollection<LiabilityRowViewModel> Liabilities,
+    // Sub-VM references for cross-dialog coordination
+    AddAssetDialogViewModel AddAssetDialog,
+    SellPanelViewModel SellPanel,
+    // Callbacks for parent-side side-effects after TX operations
+    Func<CashAccountRowViewModel?> GetDefaultCashAccount,
+    Func<LiabilityRowViewModel, Task> LoadLoanScheduleAsync,
+    Func<Task> LoadLiabilitiesAsync,
+    Func<Task> LoadPositionsAsync,
+    Func<Task> LoadTradesAsync,
+    Func<Task> ReloadAccountBalancesAsync,
+    Action RebuildTotals,
+    Func<string, string, string> Localize);
+
+/// <summary>
+/// Owns all transaction-dialog observable state, validation, and commands.
+/// After a successful record/delete, raises <see cref="TransactionCompleted"/> or
+/// <see cref="TradeDeleted"/> so <see cref="Portfolio.PortfolioViewModel"/> can
+/// reload positions, trades, balances, and totals.
+/// </summary>
+public partial class TransactionDialogViewModel : ObservableObject  // public so PortfolioDependencies (public record) can reference it
 {
+    private readonly ITransactionWorkflowService _transactionWorkflowService;
+    private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
+    private readonly ITradeMetadataWorkflowService _tradeMetadataWorkflowService;
+    private readonly ILoanMutationWorkflowService _loanMutationWorkflowService;
+    private readonly IStockSearchService _search;
+    private readonly PortfolioTradeDialogController _tradeDialogController;
+    private readonly IAssetRepository? _assetRepo;
+    private readonly ISnackbarService? _snackbar;
+
+    // Shared parent collections exposed as forwarding properties so TxForm XAML
+    // (whose DataContext becomes this VM) can still bind to CashAccounts, Positions, etc.
+    public ObservableCollection<TradeRowViewModel> Trades { get; }
+    public ObservableCollection<PortfolioRowViewModel> Positions { get; }
+    public ObservableCollection<CashAccountRowViewModel> CashAccounts { get; }
+    public ObservableCollection<LiabilityRowViewModel> Liabilities { get; }
+
+    // Sub-VM references forwarded so BuyTxForm can bind to AddAssetDialog.*
+    // and SellTxForm can bind to SellPanel.*
+    public AddAssetDialogViewModel AddAssetDialog { get; }
+    public SellPanelViewModel SellPanel { get; }
+
+    // Callbacks for parent-side reload operations
+    private readonly Func<CashAccountRowViewModel?> _getDefaultCashAccount;
+    private readonly Func<LiabilityRowViewModel, Task> _loadLoanScheduleAsync;
+    private readonly Func<Task> _loadLiabilitiesAsync;
+    private readonly Func<Task> _loadPositionsAsync;
+    private readonly Func<Task> _loadTradesAsync;
+    private readonly Func<Task> _reloadAccountBalancesAsync;
+    private readonly Action _rebuildTotals;
+    private readonly Func<string, string, string> _localize;
+
+    /// <summary>
+    /// Raised after a successful transaction (income, dividend, cash-flow, loan, transfer, buy, sell).
+    /// The parent VM reloads positions, trades, balances, and totals in response.
+    /// </summary>
+    public event EventHandler? TransactionCompleted;
+
+    /// <summary>
+    /// Raised after a successful trade deletion (from the edit dialog's Delete button).
+    /// The parent VM reloads positions, trades, balances, and totals in response.
+    /// </summary>
+    public event EventHandler? TradeDeleted;
+
+    internal TransactionDialogViewModel(TransactionDialogDependencies deps)
+    {
+        ArgumentNullException.ThrowIfNull(deps);
+
+        _transactionWorkflowService = deps.TransactionWorkflow;
+        _tradeDeletionWorkflowService = deps.TradeDeletion;
+        _tradeMetadataWorkflowService = deps.TradeMetadata;
+        _loanMutationWorkflowService = deps.LoanMutation;
+        _search = deps.Search;
+        _tradeDialogController = deps.TradeDialogController;
+        _assetRepo = deps.AssetRepo;
+        _snackbar = deps.Snackbar;
+
+        Trades = deps.Trades;
+        Positions = deps.Positions;
+        CashAccounts = deps.CashAccounts;
+        Liabilities = deps.Liabilities;
+
+        AddAssetDialog = deps.AddAssetDialog;
+        SellPanel = deps.SellPanel;
+
+        _getDefaultCashAccount = deps.GetDefaultCashAccount;
+        _loadLoanScheduleAsync = deps.LoadLoanScheduleAsync;
+        _loadLiabilitiesAsync = deps.LoadLiabilitiesAsync;
+        _loadPositionsAsync = deps.LoadPositionsAsync;
+        _loadTradesAsync = deps.LoadTradesAsync;
+        _reloadAccountBalancesAsync = deps.ReloadAccountBalancesAsync;
+        _rebuildTotals = deps.RebuildTotals;
+        _localize = deps.Localize;
+    }
+
+    // ── Transaction Dialog state ──────────────────────────────────────────────────────
+
     // 新增交易 Dialog
     [ObservableProperty] private bool _isTxDialogOpen;
     [ObservableProperty] private string _txType = "income";
@@ -49,7 +164,7 @@ public partial class PortfolioViewModel
     // AddPosition reads AddBuyDate when building the PortfolioEntry. Without this
     // sync, editing a Buy trade's date changes the picker's TxDate but AddPosition
     // still sees the stale AddBuyDate → the saved buy keeps the old date.
-    partial void OnTxDateChanged(DateTime value) => AddBuyDate = value;
+    partial void OnTxDateChanged(DateTime value) => AddAssetDialog.AddBuyDate = value;
     [ObservableProperty] private DateTime _txDate = DateTime.Today;
     [ObservableProperty] private string _txError = string.Empty;
 
@@ -117,7 +232,7 @@ public partial class PortfolioViewModel
     partial void OnTxCommissionDiscountChanged(string value)
     {
         TxCommissionDiscountError = ValidateCommissionDiscountOrEmpty(value);
-        UpdateBuyPreview();
+        AddAssetDialog.UpdateBuyPreview();
         UpdateSellTxPreview();
     }
 
@@ -128,7 +243,6 @@ public partial class PortfolioViewModel
     [ObservableProperty] private PortfolioRowViewModel? _txSellPosition;
     [ObservableProperty] private string _txSellQuantity = string.Empty;
     [ObservableProperty] private string _txSellQuantityError = string.Empty;
-    private int _sellQtyOverride;
 
     // Sell-tx preview — parallel to buy's AddGrossAmount / AddCommission / AddTotalCost,
     // but also shows TransactionTax and NetAmount since sell has two deductions.
@@ -278,7 +392,7 @@ public partial class PortfolioViewModel
     partial void OnTxFeeChanged(string value)
     {
         TxFeeError = ValidateNonNegativeDecimalOrEmpty(value);
-        UpdateBuyPreview();
+        AddAssetDialog.UpdateBuyPreview();
         UpdateSellTxPreview();
     }
 
@@ -426,11 +540,11 @@ public partial class PortfolioViewModel
             TxCashAccount = null;
         else if (TxCashAccount is null)
             // 優先使用使用者設定的預設帳戶，其次才是列表第一筆
-            TxCashAccount = GetDefaultCashAccount()
+            TxCashAccount = _getDefaultCashAccount()
                             ?? (CashAccounts.Count > 0 ? CashAccounts[0] : null);
     }
 
-    partial void OnTxTypeChanged(string _)
+    partial void OnTxTypeChanged(string value)
     {
         OnPropertyChanged(nameof(TxTypeIsIncome));
         OnPropertyChanged(nameof(TxTypeIsCashDiv));
@@ -448,9 +562,7 @@ public partial class PortfolioViewModel
         TxError = string.Empty;
         UpdateSellTxPreview();
         if (TxTypeIsLoanRepay)
-#pragma warning disable CS4014
-            AutoFillLoanRepayAsync(TxLoanLabel);
-#pragma warning restore CS4014
+            _ = AutoFillLoanRepayAsync(TxLoanLabel);
     }
 
     partial void OnTxBuyAssetTypeChanged(string _)
@@ -478,10 +590,6 @@ public partial class PortfolioViewModel
 
     public bool HasDivPreview => TxDivTotal > 0;
     partial void OnTxDivTotalChanged(decimal _) => OnPropertyChanged(nameof(HasDivPreview));
-
-    // 賣出現金帳戶連動 — bridge for the dedicated SellPanel.xaml; in TX dialog Sell flow
-    // we use TxCashAccount and copy across in ConfirmSellTxAsync.
-    [ObservableProperty] private CashAccountRowViewModel? _sellCashAccount;
 
     // Buy 價格輸入模式 + 總額
     /// <summary>
@@ -521,8 +629,8 @@ public partial class PortfolioViewModel
             if (TxBuyIsTotalMode &&
                 ParseHelpers.TryParseDecimal(TxBuyTotalCost, out var t) && t > 0)
                 return t.ToString("N0");
-            if (ParseHelpers.TryParseDecimal(AddPrice, out var p) && p > 0 &&
-                ParseHelpers.TryParseInt(AddQuantity, out var q) && q > 0)
+            if (ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var p) && p > 0 &&
+                ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var q) && q > 0)
                 return (p * q).ToString("N0");
             return "0";
         }
@@ -534,9 +642,9 @@ public partial class PortfolioViewModel
         // 總額模式時，回算單價以維持持倉成本計算邏輯。
         if (TxBuyIsTotalMode &&
             ParseHelpers.TryParseDecimal(value, out var total) && total > 0 &&
-            ParseHelpers.TryParseInt(AddQuantity, out var qty) && qty > 0)
+            ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) && qty > 0)
         {
-            AddPrice = (total / qty).ToString("F4");
+            AddAssetDialog.AddPrice = (total / qty).ToString("F4");
         }
     }
 
@@ -588,11 +696,11 @@ public partial class PortfolioViewModel
         TxLoanTermMonthsError = string.IsNullOrWhiteSpace(value) ? string.Empty
             : (ParseHelpers.TryParseInt(value, out var n) && n > 0 ? string.Empty : "請輸入正整數");
 
-    // 新增交易 Dialog commands
+    // ── 新增交易 Dialog commands ──────────────────────────────────────────────────────
 
-    private void OpenTxDialog()
+    internal void OpenTxDialog()
     {
-        var state = _tradeDialogController.CreateOpenState(GetDefaultCashAccount());
+        var state = _tradeDialogController.CreateOpenState(_getDefaultCashAccount());
         EditingTradeId = null;
         TxType = "buy";
         TxDate = state.TxDate;
@@ -640,24 +748,24 @@ public partial class PortfolioViewModel
         TxLoanStartDate = state.TxLoanStartDate;
         TxLoanRateError = string.Empty;
         TxLoanTermMonthsError = string.Empty;
-        // Buy-specific fields shared with AddAssetDialog
-        AddSymbol = string.Empty;
-        AddPrice = string.Empty;
-        AddQuantity = string.Empty;
-        AddBuyDate = state.AddBuyDate;
-        AddError = string.Empty;
-        AddName = string.Empty;
-        AddCost = string.Empty;
-        AddCryptoSymbol = string.Empty;
-        AddCryptoQty = string.Empty;
-        AddCryptoPrice = string.Empty;
-        SellCashAccount = null;
-        SellPriceInput = string.Empty;
-        AddPriceError = string.Empty;
-        AddQuantityError = string.Empty;
-        AddCostError = string.Empty;
-        AddCryptoQtyError = string.Empty;
-        AddCryptoPriceError = string.Empty;
+        // Buy-specific fields shared with AddAssetDialog sub-VM
+        AddAssetDialog.AddSymbol = string.Empty;
+        AddAssetDialog.AddPrice = string.Empty;
+        AddAssetDialog.AddQuantity = string.Empty;
+        AddAssetDialog.AddBuyDate = state.AddBuyDate;
+        AddAssetDialog.AddError = string.Empty;
+        AddAssetDialog.AddName = string.Empty;
+        AddAssetDialog.AddCost = string.Empty;
+        AddAssetDialog.AddCryptoSymbol = string.Empty;
+        AddAssetDialog.AddCryptoQty = string.Empty;
+        AddAssetDialog.AddCryptoPrice = string.Empty;
+        SellPanel.SellCashAccount = null;
+        SellPanel.SellPriceInput = string.Empty;
+        AddAssetDialog.AddPriceError = string.Empty;
+        AddAssetDialog.AddQuantityError = string.Empty;
+        AddAssetDialog.AddCostError = string.Empty;
+        AddAssetDialog.AddCryptoQtyError = string.Empty;
+        AddAssetDialog.AddCryptoPriceError = string.Empty;
         IsTxDialogOpen = true;
     }
 
@@ -700,16 +808,16 @@ public partial class PortfolioViewModel
         TxSellPosition = null;
         TxSellQuantity = string.Empty;
         TxSellQuantityError = string.Empty;
-        SellCashAccount = null;
-        SellPriceInput = string.Empty;
-        AddSymbol = string.Empty;
-        AddPrice = string.Empty;
-        AddQuantity = string.Empty;
-        AddPriceError = string.Empty;
-        AddQuantityError = string.Empty;
-        AddCostError = string.Empty;
-        AddCryptoQtyError = string.Empty;
-        AddCryptoPriceError = string.Empty;
+        SellPanel.SellCashAccount = null;
+        SellPanel.SellPriceInput = string.Empty;
+        AddAssetDialog.AddSymbol = string.Empty;
+        AddAssetDialog.AddPrice = string.Empty;
+        AddAssetDialog.AddQuantity = string.Empty;
+        AddAssetDialog.AddPriceError = string.Empty;
+        AddAssetDialog.AddQuantityError = string.Empty;
+        AddAssetDialog.AddCostError = string.Empty;
+        AddAssetDialog.AddCryptoQtyError = string.Empty;
+        AddAssetDialog.AddCryptoPriceError = string.Empty;
         TxCommissionDiscount = "1.0";
         TxBuyAssetType = "stock";
         TxBuyPriceMode = "unit";
@@ -727,13 +835,13 @@ public partial class PortfolioViewModel
                 // Suppress the symbol-search suggestions popup during pre-fill — the popup
                 // exists for live search-as-you-type, not for showing what the user is
                 // already editing.
-                _suppressSuggestions = true;
-                AddSymbol = editState.AddSymbol;
-                _suppressSuggestions = false;
-                IsSuggestionsOpen = false;
-                AddPrice = editState.AddPrice;
-                AddQuantity = editState.AddQuantity;
-                AddBuyDate = editState.AddBuyDate ?? TxDate;
+                AddAssetDialog.SuppressSuggestions = true;
+                AddAssetDialog.AddSymbol = editState.AddSymbol;
+                AddAssetDialog.SuppressSuggestions = false;
+                AddAssetDialog.IsSuggestionsOpen = false;
+                AddAssetDialog.AddPrice = editState.AddPrice;
+                AddAssetDialog.AddQuantity = editState.AddQuantity;
+                AddAssetDialog.AddBuyDate = editState.AddBuyDate ?? TxDate;
                 TxCashAccount = editState.TxCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
                 // 還原使用者當初輸入的手續費來源：
@@ -751,9 +859,9 @@ public partial class PortfolioViewModel
                 TxSellPosition = editState.TxSellPosition;
                 TxSellQuantity = editState.TxSellQuantity;
                 TxAmount = editState.TxAmount;
-                SellPriceInput = editState.SellPriceInput;
+                SellPanel.SellPriceInput = editState.SellPriceInput;
                 TxCashAccount = editState.TxCashAccount;
-                SellCashAccount = editState.SellCashAccount;
+                SellPanel.SellCashAccount = editState.SellCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
                 RestoreCommissionFields(row);
                 break;
@@ -871,10 +979,7 @@ public partial class PortfolioViewModel
         }
 
         CloseTxDialog();
-        await LoadPositionsAsync();
-        await LoadTradesAsync();
-        await ReloadAccountBalancesAsync();
-        RebuildTotals();
+        TradeDeleted?.Invoke(this, EventArgs.Empty);
     }
 
     [RelayCommand]
@@ -973,11 +1078,13 @@ public partial class PortfolioViewModel
                 Log.Error(ex, "Failed to remove old trade {TradeId} during edit — possible duplicate entry", oldRow.Id);
                 _snackbar?.Error(L("Portfolio.Trade.OldDeleteFailed", "舊交易記錄刪除失敗，資料庫可能存在重複筆數，建議重新整理或重啟應用程式"));
             }
-            await LoadPositionsAsync();
-            await LoadTradesAsync();
-            await ReloadAccountBalancesAsync();
-            RebuildTotals();
+            await _loadPositionsAsync();
+            await _loadTradesAsync();
+            await _reloadAccountBalancesAsync();
+            _rebuildTotals();
         }
+
+        TransactionCompleted?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -1006,7 +1113,8 @@ public partial class PortfolioViewModel
             if (!updated)
                 return;
             CloseTxDialog();
-            await LoadTradesAsync();
+            await _loadTradesAsync();
+            TransactionCompleted?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)
         {
@@ -1014,55 +1122,27 @@ public partial class PortfolioViewModel
         }
     }
 
-    /// <summary>
-    /// When a Buy / Sell / StockDividend trade is removed as part of an edit, update the
-    /// linked <see cref="PortfolioEntry"/> accordingly:
-    /// <list type="bullet">
-    /// <item><description><b>Buy</b>: the new trade's <see cref="AddPosition"/> already created
-    /// a fresh entry with the new values. The OLD lot's entry is now stale and gets removed
-    /// (or kept if the Buy was for an existing multi-buy lot — harder case, see notes).</description></item>
-    /// <item><description><b>Sell</b>: the entry was already removed at sell time; nothing to do
-    /// here. Historic Sell edits are meta-only.</description></item>
-    /// <item><description><b>StockDividend</b>: subtract the old share count from the entry so
-    /// the new StockDividend's add lands on a clean baseline.</description></item>
-    /// </list>
-    /// </summary>
     private async Task ConfirmBuyAsync()
     {
-        // Delegate to existing buy logic based on asset sub-type.
-        // The sub-methods close IsAddDialogOpen on success; we also close IsTxDialogOpen.
+        // Delegate to the AddAssetDialog sub-VM's buy logic based on asset sub-type.
+        // AddAssetType must match TxBuyAssetType so ConfirmAdd routes to the correct add path.
+        // The two dialogs are mutually exclusive in practice; this is an acceptable coupling.
+        AddAssetDialog.AddAssetType = TxBuyAssetType;
+        AddAssetDialog.AddError = string.Empty;
 
-        _ = AddError;
-
-        switch (TxBuyAssetType)
-        {
-            case "stock":
-                await AddPosition();
-                break;
-            case "fund":
-                await AddNonStockAsync(AssetType.Fund);
-                break;
-            case "metal":
-                await AddNonStockAsync(AssetType.PreciousMetal);
-                break;
-            case "bond":
-                await AddNonStockAsync(AssetType.Bond);
-                break;
-            case "crypto":
-                await AddCryptoAsync();
-                break;
-        }
+        await AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
         // Propagate error to TxError for display in the Tx dialog
-        if (!string.IsNullOrEmpty(AddError))
+        if (!string.IsNullOrEmpty(AddAssetDialog.AddError))
         {
-            TxError = AddError;
+            TxError = AddAssetDialog.AddError;
             return;
         }
 
         // Close Tx dialog (the sub-methods may have closed AddDialog already)
-        IsAddDialogOpen = false;
+        AddAssetDialog.IsAddDialogOpen = false;
         IsTxDialogOpen = false;
+        // TransactionCompleted will be raised by ConfirmTx after this returns (no error)
     }
 
     private async Task ConfirmSellTxAsync()
@@ -1075,26 +1155,24 @@ public partial class PortfolioViewModel
         if (sellQty > (int)TxSellPosition.Quantity)
         { TxError = $"賣出數量 ({sellQty:N0}) 超過持倉 ({(int)TxSellPosition.Quantity:N0}) 股"; return; }
 
-        SellingRow = TxSellPosition;
-        IsSellEtf = _search.IsEtf(TxSellPosition.Symbol);
-
         if (!ParseHelpers.TryParseDecimal(TxAmount, out var sellPrice) || sellPrice <= 0)
         { TxError = "賣出價格無效"; return; }
 
-        SellPriceInput = sellPrice.ToString();
-        SellCashAccount = TxUseCashAccount ? TxCashAccount : null;
-        _sellQtyOverride = sellQty;
+        var error = await SellPanel.ExecuteSellFromTxDialogAsync(
+            row: TxSellPosition,
+            sellPrice: sellPrice.ToString(),
+            cashAccount: TxUseCashAccount ? TxCashAccount : null,
+            isSellEtf: _search.IsEtf(TxSellPosition.Symbol),
+            qtyOverride: sellQty);
 
-        await ConfirmSell();
-        _sellQtyOverride = 0;
-
-        if (!string.IsNullOrEmpty(SellPanelError))
+        if (error is not null)
         {
-            TxError = SellPanelError;
+            TxError = error;
             return;
         }
 
         IsTxDialogOpen = false;
+        // TransactionCompleted will be raised by ConfirmTx after this returns (no error)
     }
 
     private async Task ConfirmIncomeAsync()
@@ -1107,18 +1185,17 @@ public partial class PortfolioViewModel
 
         var cashAccId = await ResolveCashAccountIdAsync();
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
-        var plan = _transactionWorkflowService.CreateIncomePlan(new IncomeTransactionRequest(
+        await _transactionWorkflowService.RecordIncomeAsync(new IncomeTransactionRequest(
             amount,
             tradeDate,
             cashAccId,
             TxNote,
             fee));
-        foreach (var trade in plan.Trades)
-            await _txService.RecordAsync(trade);
 
-        await ReloadAccountBalancesAsync();
+        await _reloadAccountBalancesAsync();
         CloseTxDialog();
-        await LoadTradesAsync();
+        await _loadTradesAsync();
+        // TransactionCompleted raised by ConfirmTx
     }
 
     /// <summary>
@@ -1158,7 +1235,7 @@ public partial class PortfolioViewModel
                       : TxDivPosition.Name;
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
-        var plan = _transactionWorkflowService.CreateCashDividendPlan(new CashDividendTransactionRequest(
+        await _transactionWorkflowService.RecordCashDividendAsync(new CashDividendTransactionRequest(
             TxDivPosition.Symbol,
             TxDivPosition.Exchange,
             divName,
@@ -1168,12 +1245,11 @@ public partial class PortfolioViewModel
             tradeDate,
             cashAccId,
             fee));
-        foreach (var trade in plan.Trades)
-            await _txService.RecordAsync(trade);
 
-        await ReloadAccountBalancesAsync();
+        await _reloadAccountBalancesAsync();
         CloseTxDialog();
-        await LoadTradesAsync();
+        await _loadTradesAsync();
+        // TransactionCompleted raised by ConfirmTx
     }
 
     private async Task ConfirmStockDivAsync()
@@ -1186,27 +1262,17 @@ public partial class PortfolioViewModel
         var divName = string.IsNullOrEmpty(TxStockDivPosition.Name)
                       ? TxStockDivPosition.Symbol
                       : TxStockDivPosition.Name;
-        var plan = _transactionWorkflowService.CreateStockDividendPlan(new StockDividendTransactionRequest(
+        await _transactionWorkflowService.RecordStockDividendAsync(new StockDividendTransactionRequest(
             TxStockDivPosition.Symbol,
             TxStockDivPosition.Exchange,
             divName,
             newShares,
             DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
             TxStockDivPosition.Id));
-        foreach (var trade in plan.Trades)
-            await _txService.RecordAsync(trade);
-
-        // 更新持倉股數（數量由 trade log 投影，只更新 display row）
-        var row = Positions.FirstOrDefault(p => p.AllEntryIds.Contains(TxStockDivPosition.Id));
-        if (row is not null)
-        {
-            row.Quantity += newShares;
-            row.Refresh();
-            RebuildTotals();
-        }
 
         CloseTxDialog();
-        await LoadTradesAsync();
+        await _loadTradesAsync();
+        // TransactionCompleted raised by ConfirmTx
     }
 
     /// <summary>存入/提款 → 現金帳戶餘額增減。可選填手續費（跨行匯款費、ATM 費等）。</summary>
@@ -1230,7 +1296,7 @@ public partial class PortfolioViewModel
 
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         var cleanNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
-        var plan = _transactionWorkflowService.CreateCashFlowPlan(new CashFlowTransactionRequest(
+        await _transactionWorkflowService.RecordCashFlowAsync(new CashFlowTransactionRequest(
             type,
             amount,
             tradeDate,
@@ -1238,12 +1304,11 @@ public partial class PortfolioViewModel
             accountName,
             cleanNote,
             fee));
-        foreach (var trade in plan.Trades)
-            await _txService.RecordAsync(trade);
 
-        await ReloadAccountBalancesAsync();
+        await _reloadAccountBalancesAsync();
         CloseTxDialog();
-        await LoadTradesAsync();
+        await _loadTradesAsync();
+        // TransactionCompleted raised by ConfirmTx
     }
 
     // Shared fee helpers
@@ -1263,7 +1328,7 @@ public partial class PortfolioViewModel
             return;
 
         if (!row.IsScheduleLoaded)
-            await LoadLoanScheduleAsync(row);
+            await _loadLoanScheduleAsync(row);
 
         var next = row.NextUnpaidEntry;
         if (next is null)
@@ -1287,39 +1352,7 @@ public partial class PortfolioViewModel
     }
 
     /// <summary>
-    /// 過渡期 helper：目前 CashDividend 仍直接呼叫這個方法建立 fee 子記錄。
-    /// 待股利流程也搬進 workflow service 後即可刪除。
-    /// </summary>
-    private async Task WriteFeeTradeIfAnyAsync(
-        decimal fee, Guid? cashAccountId, DateTime tradeDate,
-        string notePrefix, string? userNote, Guid parentTradeId)
-    {
-        if (fee <= 0)
-            return;
-        var feeTrade = new Trade(
-            Id: Guid.NewGuid(), Symbol: string.Empty, Exchange: string.Empty,
-            Name: "手續費", Type: TradeType.Withdrawal,
-            TradeDate: tradeDate,
-            Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
-            CashAmount: fee, CashAccountId: cashAccountId,
-            Note: string.IsNullOrWhiteSpace(userNote)
-                  ? notePrefix
-                  : $"{notePrefix} — {userNote}",
-            ParentTradeId: parentTradeId);
-        await _txService.RecordAsync(feeTrade);
-    }
-
-    /// <summary>
     /// 借款/還款 → 負債帳戶與現金帳戶同步調整；可選填手續費（AscentPortfolio pattern）。
-    /// <list type="bullet">
-    /// <item><description><b>借款</b>：Balance +amount、OriginalAmount +amount；若指定現金帳戶則
-    /// 現金 +amount（入帳）。若手續費 &gt; 0，另建一筆 Withdrawal，現金再扣 fee
-    /// → 淨入帳 = amount − fee，對上銀行實際撥款</description></item>
-    /// <item><description><b>還款</b>：Balance −amount；若指定現金帳戶則現金 −amount（扣款）。
-    /// 若手續費 &gt; 0，另建 Withdrawal，現金再扣 fee → 總扣款 = amount + fee</description></item>
-    /// </list>
-    /// 注意：還款不自動拆本息。Balance 長期會反映「累積還的金額」而非「本金餘額」；若要
-    /// 精準追蹤本金，使用 LoanRepay 的 Principal / InterestPaid 拆分欄位（不影響 Balance）。
     /// </summary>
     private async Task ConfirmLoanAsync(TradeType type)
     {
@@ -1375,7 +1408,7 @@ public partial class PortfolioViewModel
         var cleanNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
         var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
 
-        var plan = await _loanMutationWorkflowService.RecordAsync(new LoanTransactionRequest(
+        await _loanMutationWorkflowService.RecordAsync(new LoanTransactionRequest(
             type,
             cashAmount,
             tradeDate,
@@ -1389,31 +1422,20 @@ public partial class PortfolioViewModel
             amortTermMonths,
             amortAnnualRate.HasValue && amortTermMonths.HasValue ? DateOnly.FromDateTime(TxLoanStartDate) : null));
 
-        await ReloadAccountBalancesAsync();
+        await _reloadAccountBalancesAsync();
         CloseTxDialog();
-        await LoadTradesAsync();
+        await _loadTradesAsync();
 
         if (amortAnnualRate.HasValue)
         {
-            await LoadLiabilitiesAsync();
-            RebuildTotals();
+            await _loadLiabilitiesAsync();
+            _rebuildTotals();
         }
+        // TransactionCompleted raised by ConfirmTx
     }
 
     /// <summary>
     /// 轉帳 → 在兩個現金帳戶之間搬錢。
-    /// <list type="bullet">
-    /// <item><description>
-    ///   同幣別（srcAmount == dstAmount）→ 建立單筆 <see cref="TradeType.Transfer"/> 記錄，
-    ///   由 <see cref="ITransactionService"/> 同時調整兩端帳戶餘額。
-    /// </description></item>
-    /// <item><description>
-    ///   跨幣別（srcAmount ≠ dstAmount，例如 30,000 TWD → 1,000 USD）→ 維持舊的
-    ///   Withdrawal + Deposit pair 格式（Note 互相標記 "轉帳 →/←"），因為原生 Transfer
-    ///   記錄只能持有一個 CashAmount，無法表達不同幣別的兩端金額。
-    /// </description></item>
-    /// </list>
-    /// 若有手續費 → 從來源帳戶額外扣（同 ConfirmCashFlow / ConfirmLoan 模式）。
     /// </summary>
     private async Task ConfirmTransferAsync()
     {
@@ -1439,7 +1461,7 @@ public partial class PortfolioViewModel
         var dstName = TxTransferTarget?.Name ?? TxTransferTargetName.Trim();
         var userNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
 
-        var plan = _transactionWorkflowService.CreateTransferPlan(new TransferTransactionRequest(
+        await _transactionWorkflowService.RecordTransferAsync(new TransferTransactionRequest(
             TxCashAccount.Id,
             srcName,
             destId.Value,
@@ -1449,12 +1471,22 @@ public partial class PortfolioViewModel
             tradeDate,
             userNote,
             fee));
-        foreach (var trade in plan.Trades)
-            await _txService.RecordAsync(trade);
 
-        await ReloadAccountBalancesAsync();
+        await _reloadAccountBalancesAsync();
         CloseTxDialog();
-        await LoadTradesAsync();
+        await _loadTradesAsync();
+        // TransactionCompleted raised by ConfirmTx
     }
 
+    private string L(string key, string fallback = "") => _localize(key, fallback);
+
+    private static TradeDeletionRequest ToTradeDeletionRequest(TradeRowViewModel row) =>
+        new(row.Id, row.Type, row.Symbol, row.Quantity, row.PortfolioEntryId);
+
+    /// <summary>
+    /// Called by the parent VM's ApplyLiabilities to refresh the ComboBox binding
+    /// for the loan label autocomplete, since LoanLabelSuggestions derives from Liabilities.
+    /// </summary>
+    internal void NotifyLoanLabelSuggestionsChanged() =>
+        OnPropertyChanged(nameof(LoanLabelSuggestions));
 }
