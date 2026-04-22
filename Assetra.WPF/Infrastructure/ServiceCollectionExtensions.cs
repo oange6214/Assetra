@@ -51,6 +51,7 @@ internal static class ServiceCollectionExtensions
         });
         services.AddSingleton<ITwseClient, TwseClient>();
         services.AddSingleton<ITpexClient, TpexClient>();
+        services.AddSingleton<FugleClient>();
         services.AddSingleton<IStockSearchService>(_ => new StockSearchService(assetsDir));
         services.AddSingleton<IScheduler>(_ =>
             new DispatcherScheduler(System.Windows.Application.Current.Dispatcher));
@@ -58,6 +59,8 @@ internal static class ServiceCollectionExtensions
             sp.GetRequiredService<ITwseClient>(),
             sp.GetRequiredService<ITpexClient>(),
             sp.GetRequiredService<IPortfolioRepository>(),
+            sp.GetRequiredService<IAppSettingsService>(),
+            sp.GetRequiredService<FugleClient>(),
             sp.GetRequiredService<IScheduler>()));
 
         services.AddSingleton<IAppSettingsService>(sp =>
@@ -89,7 +92,12 @@ internal static class ServiceCollectionExtensions
                 _ = settingsSvc.SaveAsync(settingsSvc.Current with { HistoryProvider = envOverride });
             }
 
-            return new DynamicHistoryProvider(http, settingsSvc, finMindService, finMindStatus);
+            return new DynamicHistoryProvider(
+                http,
+                settingsSvc,
+                finMindService,
+                finMindStatus,
+                sp.GetRequiredService<FugleClient>());
         });
 
         services.AddSingleton<SnackbarViewModel>();
@@ -206,13 +214,6 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<StatusBarViewModel>();
         services.AddSingleton<PortfolioViewModel>(sp => new PortfolioViewModel(
-            new PortfolioRepositories(
-                sp.GetRequiredService<IPortfolioRepository>(),
-                sp.GetRequiredService<IPortfolioSnapshotRepository>(),
-                sp.GetRequiredService<IPortfolioPositionLogRepository>(),
-                sp.GetRequiredService<ITradeRepository>(),
-                sp.GetRequiredService<IAssetRepository>(),
-                sp.GetRequiredService<ILoanScheduleRepository>()),
             new PortfolioServices(
                 Stock: sp.GetRequiredService<IStockService>(),
                 Search: sp.GetRequiredService<IStockSearchService>(),

@@ -56,9 +56,7 @@
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
-            <TextBox
-                Style="{StaticResource FormTextBox}"
-                Text="{Binding TxLoanRate, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxLoanRate, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,12"
                 Style="{StaticResource FormFieldError}"
@@ -72,9 +70,7 @@
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Loan.TermMonths}" />
-            <TextBox
-                Style="{StaticResource FormTextBox}"
-                Text="{Binding TxLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,12"
                 Style="{StaticResource FormFieldError}"

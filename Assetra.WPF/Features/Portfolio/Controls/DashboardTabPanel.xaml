@@ -235,10 +235,10 @@
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{DynamicResource Dashboard.TopHoldings}" />
                             <Button
-                                DockPanel.Dock="Right"
                                 HorizontalAlignment="Right"
                                 Command="{Binding NavigateToPositionsCommand}"
                                 Content="{DynamicResource Dashboard.ViewDetail}"
+                                DockPanel.Dock="Right"
                                 Style="{StaticResource BtnLink}" />
                         </DockPanel>
 
@@ -327,10 +327,10 @@
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{DynamicResource Dashboard.RecentTrades}" />
                             <Button
-                                DockPanel.Dock="Right"
                                 HorizontalAlignment="Right"
                                 Command="{Binding NavigateToTradesCommand}"
                                 Content="{DynamicResource Dashboard.ViewDetail}"
+                                DockPanel.Dock="Right"
                                 Style="{StaticResource BtnLink}" />
                         </DockPanel>
 

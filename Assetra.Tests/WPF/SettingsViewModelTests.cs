@@ -82,4 +82,20 @@ public class SettingsViewModelTests
         Assert.Contains("TWD", vm.SupportedCurrencies);
         Assert.Contains("USD", vm.SupportedCurrencies);
     }
+
+    [Fact]
+    public async Task SaveDataSourceSettingsCommand_PersistsQuoteProviderHistoryProviderAndFugleKey()
+    {
+        var vm = CreateVm();
+
+        vm.QuoteProvider = "fugle";
+        vm.HistoryProvider = "fugle";
+        vm.FugleApiKey = "demo-key";
+        await vm.SaveDataSourceSettingsCommand.ExecuteAsync(null);
+
+        _mockSettings.Verify(s => s.SaveAsync(It.Is<AppSettings>(settings =>
+            settings.QuoteProvider == "fugle"
+            && settings.HistoryProvider == "fugle"
+            && settings.FugleApiKey == "demo-key")), Times.AtLeastOnce);
+    }
 }

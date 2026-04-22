@@ -3,6 +3,8 @@ namespace Assetra.Core.Models;
 public sealed record AppSettings(
     // 歷史資料來源
     string HistoryProvider = "twse",
+    string QuoteProvider = "official",
+    string FugleApiKey = "",
     int RefreshIntervalSeconds = 10,
     bool TaiwanColorScheme = true,   // true = 漲紅跌綠（台灣慣例，預設）
     // 貨幣

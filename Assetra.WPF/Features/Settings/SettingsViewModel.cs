@@ -11,6 +11,7 @@ using Wpf.Ui.Appearance;
 namespace Assetra.WPF.Features.Settings;
 
 public sealed record LanguageOption(string Code, string Display);
+public sealed record ProviderOption(string Code, string Display);
 
 /// <summary>
 /// Minimal settings surface for Assetra.
@@ -43,6 +44,20 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         ApplicationTheme.Dark,
     ];
 
+    public static IReadOnlyList<ProviderOption> SupportedQuoteProviders { get; } =
+    [
+        new("official", "TWSE / TPEX"),
+        new("fugle", "Fugle"),
+    ];
+
+    public static IReadOnlyList<ProviderOption> SupportedHistoryProviders { get; } =
+    [
+        new("twse", "TWSE / TPEX"),
+        new("fugle", "Fugle"),
+        new("yahoo", "Yahoo Finance"),
+        new("finmind", "FinMind"),
+    ];
+
     private readonly IAppSettingsService _settings;
     private readonly IThemeService _theme;
     private readonly ILocalizationService _localization;
@@ -62,10 +77,15 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] private bool _isDarkTheme;
     [ObservableProperty] private string _primaryCurrency = "TWD";
+    [ObservableProperty] private string _quoteProvider = "official";
+    [ObservableProperty] private string _historyProvider = "twse";
+    [ObservableProperty] private string _fugleApiKey = string.Empty;
+    [ObservableProperty] private string _dataSourceSaveStatus = string.Empty;
 
     public ObservableCollection<string> SupportedCurrencies { get; } = [];
 
     public string AppVersion { get; } = ResolveAppVersion();
+    public bool IsFugleConfigured => !string.IsNullOrWhiteSpace(FugleApiKey);
 
     public SettingsViewModel(
         IAppSettingsService settings,
@@ -103,6 +123,10 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             PrimaryCurrency = string.IsNullOrWhiteSpace(s.PreferredCurrency)
                 ? "TWD"
                 : s.PreferredCurrency;
+            QuoteProvider = string.IsNullOrWhiteSpace(s.QuoteProvider) ? "official" : s.QuoteProvider;
+            HistoryProvider = string.IsNullOrWhiteSpace(s.HistoryProvider) ? "twse" : s.HistoryProvider;
+            FugleApiKey = s.FugleApiKey ?? string.Empty;
+            DataSourceSaveStatus = string.Empty;
         }
         finally
         {
@@ -141,6 +165,30 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         _ = _currencyService.ApplyAsync(value);
     }
 
+    partial void OnQuoteProviderChanged(string value)
+    {
+        if (_isLoading)
+            return;
+        DataSourceSaveStatus = string.Empty;
+        _ = SaveAsync();
+    }
+
+    partial void OnHistoryProviderChanged(string value)
+    {
+        if (_isLoading)
+            return;
+        DataSourceSaveStatus = string.Empty;
+        _ = SaveAsync();
+    }
+
+    partial void OnFugleApiKeyChanged(string value)
+    {
+        OnPropertyChanged(nameof(IsFugleConfigured));
+        if (_isLoading)
+            return;
+        DataSourceSaveStatus = string.Empty;
+    }
+
     private void OnThemeChanged(ApplicationTheme theme)
     {
         _isLoading = true;
@@ -159,8 +207,18 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             Language = Language,
             TaiwanColorScheme = UseTaiwanColors,
             PreferredCurrency = PrimaryCurrency,
+            QuoteProvider = QuoteProvider,
+            HistoryProvider = HistoryProvider,
+            FugleApiKey = FugleApiKey.Trim(),
         };
         await _settings.SaveAsync(updated);
+    }
+
+    [RelayCommand]
+    private async Task SaveDataSourceSettingsAsync()
+    {
+        await SaveAsync();
+        DataSourceSaveStatus = _localization.Get("Settings.DataSource.Saved");
     }
 
     [RelayCommand]

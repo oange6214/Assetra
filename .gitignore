@@ -22,6 +22,9 @@ logs/
 # User-specific settings (may contain API keys)
 appsettings.*.json
 !appsettings.Development.json
+*.local.json
+.env.local
+local-secrets.json
 
 # JetBrains Rider
 .idea/

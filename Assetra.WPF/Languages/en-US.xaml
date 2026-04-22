@@ -160,6 +160,12 @@
     <sys:String x:Key="Portfolio.Filter.Category.Cash">Cash</sys:String>
     <sys:String x:Key="Portfolio.Filter.Category.Liability">Liability</sys:String>
     <sys:String x:Key="Portfolio.Cash.Empty">No accounts — click "+ New" to add one</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoAccounts.Title">Set up an account first</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoAccounts.Message">Once you have an account, new records can point to a cash source or destination and your balances will make more sense.</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoAccounts.Action">Add Account</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoTrades.Title">Add your first record</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoTrades.Message">Start with a record to build your investment, cash, and liability timeline. Charts and analysis will appear after that.</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoTrades.Action">Add Record</sys:String>
     <sys:String x:Key="Portfolio.Cash.Name">Account name</sys:String>
     <sys:String x:Key="Portfolio.Cash.Amount">Balance</sys:String>
     <sys:String x:Key="Portfolio.Cash.Default">Default</sys:String>
@@ -454,6 +460,9 @@
     <sys:String x:Key="Settings.UiScaleDesc">Drag to adjust scale (0.75× – 1.50×)</sys:String>
     <sys:String x:Key="Settings.DataSource">Historical data source</sys:String>
     <sys:String x:Key="Settings.DataSourceDesc">Takes effect immediately, no restart needed</sys:String>
+    <sys:String x:Key="Settings.QuoteSource">Live quote source</sys:String>
+    <sys:String x:Key="Settings.FugleApiKeyHint">Stored only in local %APPDATA%\Assetra\settings.json and never committed to GitHub. Click Save after editing.</sys:String>
+    <sys:String x:Key="Settings.DataSource.Saved">Data source settings saved</sys:String>
     <sys:String x:Key="Settings.About">About</sys:String>
     <sys:String x:Key="Settings.DataDir">Data directory</sys:String>
     <sys:String x:Key="Settings.OpenDir">Open</sys:String>
@@ -526,6 +535,7 @@
     <sys:String x:Key="Settings.PrimaryCurrency">Primary currency</sys:String>
     <sys:String x:Key="Settings.Section.Data">Data</sys:String>
     <sys:String x:Key="Settings.Version">Version</sys:String>
+    <sys:String x:Key="Settings.FugleApiKey">Fugle API Key</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">Market open</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">Market closed</sys:String>
 </ResourceDictionary>

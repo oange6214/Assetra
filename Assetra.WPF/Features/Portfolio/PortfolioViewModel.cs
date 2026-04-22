@@ -3,8 +3,6 @@ using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Data;
-using Assetra.Application.Loans.Contracts;
-using Assetra.Application.Loans.Services;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Application.Portfolio.Services;
@@ -35,21 +33,14 @@ public sealed record CurrencyOption(string Code, string Display)
 
 public partial class PortfolioViewModel : ObservableObject, IDisposable
 {
-    private readonly IPortfolioRepository _repo;
     private readonly IStockSearchService _search;
-    private readonly IPortfolioPositionLogRepository _logRepo;
-    private readonly ITradeRepository _tradeRepo;
     private readonly IAppSettingsService? _settingsService;
     private readonly ISnackbarService? _snackbar;
     private readonly IThemeService? _themeService;
     private Action<ApplicationTheme>? _onThemeChanged;
     private readonly ICurrencyService? _currencyService;
-    private readonly IAssetRepository? _assetRepo;
-    private readonly ILoanScheduleRepository? _loanScheduleRepo;
     private readonly ICryptoService? _cryptoService;
     private readonly IStockHistoryProvider? _historyProvider;
-    private readonly IBalanceQueryService _balanceQuery;
-    private readonly IPositionQueryService _positionQuery;
     private readonly IPortfolioLoadService _loadService;
     private readonly ITransactionWorkflowService _transactionWorkflowService;
     private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
@@ -85,7 +76,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     [ObservableProperty] private decimal _totalPnlPercent;
     [ObservableProperty] private bool _isTotalPositive;
     [ObservableProperty] private bool _hasNoPositions = true;
-    [ObservableProperty] private bool _showWelcomeBanner;
 
     // 現金 / 負債 / 總資產 / 淨資產
     [ObservableProperty] private decimal _totalCash;
@@ -149,6 +139,26 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _filterText = string.Empty;
     [ObservableProperty] private bool _hasNoTrades = true;
     [ObservableProperty] private bool _hasAnyDividendTrades;
+
+    public bool HasSetupNotice => HasNoCashAccounts || HasNoTrades;
+    public string SetupNoticeTitle =>
+        HasNoCashAccounts
+            ? L("Portfolio.Setup.NoAccounts.Title")
+            : HasNoTrades
+                ? L("Portfolio.Setup.NoTrades.Title")
+                : string.Empty;
+    public string SetupNoticeMessage =>
+        HasNoCashAccounts
+            ? L("Portfolio.Setup.NoAccounts.Message")
+            : HasNoTrades
+                ? L("Portfolio.Setup.NoTrades.Message")
+                : string.Empty;
+    public string SetupNoticeActionText =>
+        HasNoCashAccounts
+            ? L("Portfolio.Setup.NoAccounts.Action")
+            : HasNoTrades
+                ? L("Portfolio.Setup.NoTrades.Action")
+                : string.Empty;
 
     /// <summary>
     /// Trade filter, pagination, and sort state. All Trades-tab bindings that
@@ -272,22 +282,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         {
             // 儲存偏好設定失敗不影響主要功能
             Log.Warning(ex, "Failed to save monthly expense setting");
-        }
-    }
-
-    [RelayCommand]
-    private async Task DismissWelcomeBannerAsync()
-    {
-        ShowWelcomeBanner = false;
-        if (_settingsService is null)
-            return;
-        try
-        {
-            await _settingsService.SaveAsync(_settingsService.Current with { HasShownWelcomeBanner = true });
-        }
-        catch (Exception ex)
-        {
-            Log.Warning(ex, "Failed to dismiss welcome banner");
         }
     }
 
@@ -458,55 +452,30 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     }
 
     public PortfolioViewModel(
-        PortfolioRepositories repositories,
         PortfolioServices services,
         PortfolioUiServices ui)
     {
-        ArgumentNullException.ThrowIfNull(repositories);
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(ui);
 
-        _repo = repositories.Portfolio;
         _search = services.Search;
         _snackbar = ui.Snackbar;
-        _logRepo = repositories.PositionLog;
-        _tradeRepo = repositories.Trade ?? new NullTradeRepository();
         _settingsService = ui.Settings;
         _currencyService = services.Currency;
-        _assetRepo = repositories.Asset;
-        _loanScheduleRepo = repositories.LoanSchedule;
         _cryptoService = services.Crypto;
         _historyProvider = services.History;
-        _balanceQuery = services.BalanceQuery ?? new NullBalanceQueryService();
-        _positionQuery = services.PositionQuery ?? new NullPositionQueryService();
-        _loadService = services.Load ?? new PortfolioLoadService(
-            _repo,
-            _positionQuery,
-            _tradeRepo,
-            _balanceQuery,
-            _assetRepo);
-        // The inline txService backs both the TransactionWorkflow fallback and the LoanMutation
-        // fallback so that trade writes are always routed to the same ITradeRepository.
-        var inlineTxService = (ITransactionService)new TransactionService(_tradeRepo);
-        _transactionWorkflowService = services.TransactionWorkflow
-            ?? new TransactionWorkflowService(inlineTxService);
-        _tradeDeletionWorkflowService = services.TradeDeletionWorkflow
-            ?? new TradeDeletionWorkflowService(_tradeRepo, _repo, _positionQuery);
-        _positionDeletionWorkflowService = services.PositionDeletionWorkflow
-            ?? new PositionDeletionWorkflowService(_tradeRepo, _repo);
-        var positionMetadataWorkflowService = (IPositionMetadataWorkflowService)new PositionMetadataWorkflowService(_repo);
-        var loanMutationWorkflowService = _assetRepo is not null && _loanScheduleRepo is not null
-            ? (ILoanMutationWorkflowService)new LoanMutationWorkflowService(
-                _assetRepo,
-                _loanScheduleRepo,
-                inlineTxService)
-            : new NullLoanMutationWorkflowService();
+        _loadService = services.Load ?? new NullPortfolioLoadService();
+        _transactionWorkflowService = services.TransactionWorkflow ?? new NullTransactionWorkflowService();
+        _tradeDeletionWorkflowService = services.TradeDeletionWorkflow ?? new NullTradeDeletionWorkflowService();
+        _positionDeletionWorkflowService = services.PositionDeletionWorkflow ?? new NullPositionDeletionWorkflowService();
+        var positionMetadataWorkflowService = services.PositionMetadata ?? new NullPositionMetadataWorkflowService();
+        var loanMutationWorkflowService = services.LoanMutation ?? new NullLoanMutationWorkflowService();
         _summaryService = services.Summary;
         _historyMaintenanceService = services.HistoryMaintenance
             ?? new NullPortfolioHistoryMaintenanceService();
         _localization = ui.Localization;
         History = new PortfolioHistoryViewModel(
-            services.HistoryQuery ?? new PortfolioHistoryQueryService(repositories.Snapshot),
+            services.HistoryQuery ?? new NullPortfolioHistoryQueryService(),
             ui.Localization);
 
         // TradeFilter must be created before LoadAsync so LoadTradesAsync can call
@@ -514,22 +483,14 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         TradeFilter = new TradeFilterViewModel(() => Trades, ui.Localization ?? NullLocalizationService.Instance);
         TradeFilter.AttachTradesCollection(Trades);
 
-        // Build inline workflow services needed only for Sub-VM construction (not held as fields).
-        var addAssetWorkflow = new AddAssetWorkflowService(
-            _search, _historyProvider, _repo, _logRepo, inlineTxService);
-        var accountUpsertWorkflow = _assetRepo is not null
-            ? (IAccountUpsertWorkflowService)new AccountUpsertWorkflowService(_assetRepo)
-            : new NullAccountUpsertWorkflowService();
-        var accountMutationWorkflow = _assetRepo is not null
-            ? (IAccountMutationWorkflowService)new AccountMutationWorkflowService(_assetRepo)
-            : new NullAccountMutationWorkflowService();
-        var sellWorkflow = (ISellWorkflowService)new SellWorkflowService(_tradeRepo, _repo, _logRepo, _positionQuery);
-        var tradeMetadataWorkflow = (ITradeMetadataWorkflowService)new TradeMetadataWorkflowService(_tradeRepo);
-        var loanPaymentWorkflow = _loanScheduleRepo is not null
-            ? (ILoanPaymentWorkflowService)new LoanPaymentWorkflowService(_tradeRepo, _loanScheduleRepo)
-            : new NullLoanPaymentWorkflowService();
-        var loanScheduleService = services.LoanSchedule
-            ?? (_loanScheduleRepo is not null ? new LoanScheduleService(_loanScheduleRepo) : null);
+        // Resolve workflow services for Sub-VM construction (not held as VM fields).
+        var addAssetWorkflow = services.AddAsset ?? new NullAddAssetWorkflowService();
+        var accountUpsertWorkflow = services.AccountUpsert ?? new NullAccountUpsertWorkflowService();
+        var accountMutationWorkflow = services.AccountMutation ?? new NullAccountMutationWorkflowService();
+        var sellWorkflow = services.Sell ?? new NullSellWorkflowService();
+        var tradeMetadataWorkflow = services.TradeMetadata ?? new NullTradeMetadataWorkflowService();
+        var loanPaymentWorkflow = services.LoanPayment ?? new NullLoanPaymentWorkflowService();
+        var loanScheduleService = services.LoanSchedule;
 
         // Build the AddAssetDialog sub-VM. Tx-dialog field delegates are wired below after
         // the Transaction sub-VM is constructed (delegates reference Transaction properties).
@@ -634,6 +595,70 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             .ObserveOn(ui.Scheduler)
             .Subscribe(UpdatePrices)
             .DisposeWith(_disposables);
+    }
+
+    public PortfolioViewModel(
+        PortfolioRepositories repositories,
+        PortfolioServices services,
+        PortfolioUiServices ui)
+        : this(BuildCompatServices(repositories, services), ui)
+    {
+    }
+
+    private static PortfolioServices BuildCompatServices(
+        PortfolioRepositories repositories,
+        PortfolioServices services)
+    {
+        var balanceQuery = services.BalanceQuery
+            ?? (repositories.Trade is not null ? new BalanceQueryService(repositories.Trade) : null);
+        var positionQuery = services.PositionQuery
+            ?? (repositories.Trade is not null ? new PositionQueryService(repositories.Trade) : null);
+        var transactionService = repositories.Trade is not null
+            ? new TransactionService(repositories.Trade)
+            : null;
+
+        return services with
+        {
+            Load = services.Load ?? (repositories.Trade is not null && balanceQuery is not null
+                ? new PortfolioLoadService(
+                    repositories.Portfolio,
+                    positionQuery ?? new NullPositionQueryService(),
+                    repositories.Trade,
+                    balanceQuery,
+                    repositories.Asset)
+                : null),
+            HistoryQuery = services.HistoryQuery ?? new PortfolioHistoryQueryService(repositories.Snapshot),
+            TradeDeletionWorkflow = services.TradeDeletionWorkflow ?? (repositories.Trade is not null && positionQuery is not null
+                ? new TradeDeletionWorkflowService(repositories.Trade, repositories.Portfolio, positionQuery)
+                : null),
+            PositionDeletionWorkflow = services.PositionDeletionWorkflow ?? (repositories.Trade is not null
+                ? new PositionDeletionWorkflowService(repositories.Trade, repositories.Portfolio)
+                : null),
+            AddAsset = services.AddAsset ?? (repositories.Trade is not null && transactionService is not null
+                ? new AddAssetWorkflowService(
+                    services.Search,
+                    services.History,
+                    repositories.Portfolio,
+                    repositories.Log,
+                    transactionService)
+                : null),
+            AccountUpsert = services.AccountUpsert ?? (repositories.Asset is not null
+                ? new AccountUpsertWorkflowService(repositories.Asset)
+                : null),
+            AccountMutation = services.AccountMutation ?? (repositories.Asset is not null
+                ? new AccountMutationWorkflowService(repositories.Asset)
+                : null),
+            LoanPayment = services.LoanPayment ?? (repositories.Trade is not null && repositories.LoanSchedule is not null
+                ? new LoanPaymentWorkflowService(repositories.Trade, repositories.LoanSchedule)
+                : null),
+            LoanMutation = services.LoanMutation ?? (repositories.Asset is not null && repositories.LoanSchedule is not null && transactionService is not null
+                ? new LoanMutationWorkflowService(repositories.Asset, repositories.LoanSchedule, transactionService)
+                : null),
+            PositionMetadata = services.PositionMetadata ?? new PositionMetadataWorkflowService(repositories.Portfolio),
+            TradeMetadata = services.TradeMetadata ?? (repositories.Trade is not null
+                ? new TradeMetadataWorkflowService(repositories.Trade)
+                : null),
+        };
     }
 
     /// <summary>
@@ -799,12 +824,32 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     partial void OnShowArchivedPositionsChanged(bool value) => _ = LoadPositionsAsync();
     partial void OnHideEmptyPositionsChanged(bool value) => _ = LoadPositionsAsync();
 
+    [RelayCommand]
+    private void ExecuteSetupNoticeAction()
+    {
+        if (HasNoCashAccounts)
+        {
+            OpenAddAccountDialog();
+            return;
+        }
+
+        if (HasNoTrades)
+            AddRecord();
+    }
+
+    private void RaiseSetupNoticeChanged()
+    {
+        OnPropertyChanged(nameof(HasSetupNotice));
+        OnPropertyChanged(nameof(SetupNoticeTitle));
+        OnPropertyChanged(nameof(SetupNoticeMessage));
+        OnPropertyChanged(nameof(SetupNoticeActionText));
+    }
+
     public async Task LoadAsync()
     {
         // Bypass OnMonthlyExpenseChanged (avoids premature save); RebuildTotals() below reads MonthlyExpense.
         // Restore persisted monthly expense (set via property to avoid triggering save-back on load)
         SetProperty(ref _monthlyExpense, _settingsService?.Current?.MonthlyExpense ?? 0m, nameof(MonthlyExpense));
-        ShowWelcomeBanner = !(_settingsService?.Current?.HasShownWelcomeBanner ?? false);
 
         var loaded = await _loadService.LoadAsync();
 
@@ -944,6 +989,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             foreach (var t in trades)
                 Trades.Add(new TradeRowViewModel(t));
             HasNoTrades = Trades.Count == 0;
+            RaiseSetupNoticeChanged();
             HasAnyDividendTrades = Trades.Any(t => t.IsCashDividend);
 
             // Rebuild asset filter items — 依交易類型將 symbol 歸到
@@ -1475,6 +1521,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             }
         }
         HasNoCashAccounts = CashAccounts.Count == 0;
+        RaiseSetupNoticeChanged();
 
         var savedId = _settingsService?.Current?.DefaultCashAccountId;
         if (savedId.HasValue && CashAccounts.All(r => r.Id != savedId.Value))
@@ -1727,22 +1774,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _disposables.Dispose();
     }
 
-    // Null-object fallback when DI doesn't wire trade repo (tests / legacy)
-
-    private sealed class NullTradeRepository : ITradeRepository
-    {
-        public Task<IReadOnlyList<Trade>> GetAllAsync() =>
-            Task.FromResult<IReadOnlyList<Trade>>([]);
-        public Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId) =>
-            Task.FromResult<IReadOnlyList<Trade>>([]);
-        public Task<IReadOnlyList<Trade>> GetByLoanLabelAsync(string loanLabel) =>
-            Task.FromResult<IReadOnlyList<Trade>>([]);
-        public Task AddAsync(Trade trade) => Task.CompletedTask;
-        public Task UpdateAsync(Trade trade) => Task.CompletedTask;
-        public Task RemoveAsync(Guid id) => Task.CompletedTask;
-        public Task RemoveChildrenAsync(Guid parentId) => Task.CompletedTask;
-    }
-
     // Fallback when DI doesn't wire IBalanceQueryService (tests that only populate
     // stored account rows without a trade history). All balances return 0 / empty.
     private sealed class NullBalanceQueryService : IBalanceQueryService
@@ -1837,6 +1868,89 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     {
         public Task<LoanMutationResult> RecordAsync(LoanTransactionRequest request, CancellationToken ct = default) =>
             Task.FromResult(new LoanMutationResult(null, null));
+    }
+
+    private sealed class NullPortfolioLoadService : IPortfolioLoadService
+    {
+        public Task<PortfolioLoadResult> LoadAsync(CancellationToken ct = default) =>
+            Task.FromResult(new PortfolioLoadResult(
+                [],
+                new Dictionary<Guid, PositionSnapshot>(),
+                [],
+                [],
+                new Dictionary<Guid, decimal>(),
+                new Dictionary<string, LiabilitySnapshot>(),
+                new Dictionary<string, AssetItem>()));
+    }
+
+    private sealed class NullPortfolioHistoryQueryService : IPortfolioHistoryQueryService
+    {
+        public Task<IReadOnlyList<PortfolioDailySnapshot>> GetSnapshotsAsync(
+            DateOnly? from = null, DateOnly? to = null, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<PortfolioDailySnapshot>>([]);
+    }
+
+    private sealed class NullTransactionWorkflowService : ITransactionWorkflowService
+    {
+        public Task RecordCashDividendAsync(CashDividendTransactionRequest request, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RecordStockDividendAsync(StockDividendTransactionRequest request, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RecordIncomeAsync(IncomeTransactionRequest request, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RecordCashFlowAsync(CashFlowTransactionRequest request, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RecordTransferAsync(TransferTransactionRequest request, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    private sealed class NullTradeDeletionWorkflowService : ITradeDeletionWorkflowService
+    {
+        public Task<TradeDeletionResult> DeleteAsync(TradeDeletionRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new TradeDeletionResult(Success: false));
+    }
+
+    private sealed class NullPositionDeletionWorkflowService : IPositionDeletionWorkflowService
+    {
+        public Task DeleteAsync(PositionDeletionRequest request, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    private sealed class NullAddAssetWorkflowService : IAddAssetWorkflowService
+    {
+        public IReadOnlyList<StockSearchResult> SearchSymbols(string query, int maxResults = 8) => [];
+        public Task<ClosePriceLookupResult> LookupClosePriceAsync(string symbol, DateTime buyDate, CancellationToken ct = default) =>
+            Task.FromResult(new ClosePriceLookupResult(false, null, string.Empty));
+        public BuyPreviewResult BuildBuyPreview(BuyPreviewRequest request) =>
+            new(request.Price * request.Quantity, 0m, request.Price * request.Quantity, request.Price);
+        public Task<PortfolioEntry> EnsureStockEntryAsync(EnsureStockEntryRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new PortfolioEntry(Guid.NewGuid(), request.Symbol, request.Exchange ?? string.Empty));
+        public Task<StockBuyResult> ExecuteStockBuyAsync(StockBuyRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new StockBuyResult(
+                new PortfolioEntry(Guid.NewGuid(), request.Symbol, request.Exchange ?? string.Empty),
+                Commission: 0m,
+                CommissionDiscountUsed: request.CommissionDiscount,
+                CostPerShare: request.Price));
+        public Task<ManualAssetCreateResult> CreateManualAssetAsync(ManualAssetCreateRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new ManualAssetCreateResult(
+                new PortfolioEntry(Guid.NewGuid(), request.Symbol, request.Exchange),
+                new PositionSnapshot(Guid.NewGuid(), request.Quantity, request.TotalCost, request.UnitPrice, 0m, request.AcquiredOn)));
+        public string InferExchange(string symbol) => string.Empty;
+    }
+
+    private sealed class NullSellWorkflowService : ISellWorkflowService
+    {
+        public Task<SellWorkflowResult> RecordAsync(SellWorkflowRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new SellWorkflowResult(
+                new Trade(Guid.NewGuid(), request.Symbol, request.Exchange, request.Name,
+                    TradeType.Sell, DateTime.UtcNow, request.SellPrice, request.SellQuantity,
+                    0m, 0m),
+                RemainingQuantity: 0));
+    }
+
+    private sealed class NullTradeMetadataWorkflowService : ITradeMetadataWorkflowService
+    {
+        public Task<bool> UpdateAsync(TradeMetadataUpdateRequest request, CancellationToken ct = default) =>
+            Task.FromResult(false);
+    }
+
+    private sealed class NullPositionMetadataWorkflowService : IPositionMetadataWorkflowService
+    {
+        public Task UpdateAsync(PositionMetadataUpdateRequest request, CancellationToken ct = default) => Task.CompletedTask;
     }
 
 }

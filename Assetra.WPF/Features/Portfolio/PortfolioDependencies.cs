@@ -8,14 +8,10 @@ using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Portfolio;
 
-/// <summary>
-/// Data-access dependencies for <see cref="PortfolioViewModel"/>.
-/// Optional repos stay nullable so tests can omit them without fabricating doubles.
-/// </summary>
 public sealed record PortfolioRepositories(
     IPortfolioRepository Portfolio,
     IPortfolioSnapshotRepository Snapshot,
-    IPortfolioPositionLogRepository PositionLog,
+    IPortfolioPositionLogRepository Log,
     ITradeRepository? Trade = null,
     IAssetRepository? Asset = null,
     ILoanScheduleRepository? LoanSchedule = null);
@@ -44,14 +40,22 @@ public sealed record PortfolioServices(
     IPositionQueryService? PositionQuery = null,
     /// <summary>
     /// 交易流程服務：直接執行 income / cash-flow / dividend / transfer 的交易寫入。
-    /// 測試中若省略，ViewModel 會回退為內建實作。
+    /// 測試中若省略，ViewModel 會回退為 <c>NullTransactionWorkflowService</c>。
     /// </summary>
     ITransactionWorkflowService? TransactionWorkflow = null,
     ITradeDeletionWorkflowService? TradeDeletionWorkflow = null,
     IPositionDeletionWorkflowService? PositionDeletionWorkflow = null,
+    IAddAssetWorkflowService? AddAsset = null,
+    IAccountUpsertWorkflowService? AccountUpsert = null,
+    IAccountMutationWorkflowService? AccountMutation = null,
+    ISellWorkflowService? Sell = null,
+    ITradeMetadataWorkflowService? TradeMetadata = null,
+    ILoanPaymentWorkflowService? LoanPayment = null,
+    ILoanMutationWorkflowService? LoanMutation = null,
+    IPositionMetadataWorkflowService? PositionMetadata = null,
     /// <summary>
     /// 貸款攤還表查詢服務：讀取貸款 asset 的每期明細。
-    /// 若省略，<see cref="PortfolioViewModel"/> 會以現有 <see cref="ILoanScheduleRepository"/> 自建預設實作。
+    /// 若省略，<see cref="PortfolioViewModel"/> 會以 <c>NullLoanScheduleService</c> 取代。
     /// </summary>
     ILoanScheduleService? LoanSchedule = null,
     /// <summary>

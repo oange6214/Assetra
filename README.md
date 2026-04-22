@@ -8,7 +8,7 @@
 - 交易記錄 + 配息追蹤
 - 價格警示
 
-目前里程碑版本：`v0.3.0`
+目前里程碑版本：`v0.4.0`
 
 ## 架構
 
@@ -26,6 +26,7 @@
 - [Architecture](docs/Architecture.md)
 - [Portfolio Module Map](docs/Portfolio-Module-Map.md)
 - [Changelog](docs/CHANGELOG.md)
+- [Fugle API Key Setup](docs/Fugle-API-Key-Setup.md)
 
 ## 建置
 

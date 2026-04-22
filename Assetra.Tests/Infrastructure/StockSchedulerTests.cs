@@ -1,9 +1,11 @@
+using System.Net.Http;
 using Microsoft.Reactive.Testing;
 using Moq;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure.Http;
 using Assetra.Infrastructure.Scheduling;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace Assetra.Tests.Infrastructure;
@@ -35,9 +37,12 @@ public class StockSchedulerTests
         mockTpex.Setup(c => c.FetchQuotesAsync(It.IsAny<IEnumerable<string>>()))
                 .ReturnsAsync([]);
 
-        // Assetra ctor: (ITwseClient, ITpexClient, IPortfolioRepository, IScheduler, TimeSpan?)
+        var settings = new Mock<IAppSettingsService>();
+        settings.Setup(s => s.Current).Returns(new AppSettings());
+        var fugle = new FugleClient(new HttpClient(), settings.Object, NullLogger<FugleClient>.Instance);
+
         var svc = new StockScheduler(mockTwse.Object, mockTpex.Object,
-            EmptyPortfolio().Object, scheduler, TimeSpan.FromSeconds(10));
+            EmptyPortfolio().Object, settings.Object, fugle, scheduler, TimeSpan.FromSeconds(10));
 
         IReadOnlyList<StockQuote>? received = null;
         svc.QuoteStream.Subscribe(q => received = q);
@@ -59,9 +64,12 @@ public class StockSchedulerTests
                 .ReturnsAsync([]);
         mockTpex.Setup(c => c.FetchQuotesAsync(It.IsAny<IEnumerable<string>>()))
                 .ReturnsAsync([]);
+        var settings = new Mock<IAppSettingsService>();
+        settings.Setup(s => s.Current).Returns(new AppSettings());
+        var fugle = new FugleClient(new HttpClient(), settings.Object, NullLogger<FugleClient>.Instance);
 
         var svc = new StockScheduler(mockTwse.Object, mockTpex.Object,
-            EmptyPortfolio().Object, scheduler, TimeSpan.FromSeconds(10));
+            EmptyPortfolio().Object, settings.Object, fugle, scheduler, TimeSpan.FromSeconds(10));
 
         svc.Start();
         scheduler.AdvanceBy(1);

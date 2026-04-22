@@ -161,6 +161,12 @@
     <sys:String x:Key="Portfolio.Filter.Category.Cash">現金</sys:String>
     <sys:String x:Key="Portfolio.Filter.Category.Liability">負債</sys:String>
     <sys:String x:Key="Portfolio.Cash.Empty">尚無帳戶，點擊「＋ 新增」</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoAccounts.Title">先建立一個帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoAccounts.Message">建立帳戶後，新增紀錄時就能直接選擇資金流向，也更容易追蹤現金變化。</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoAccounts.Action">新增帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoTrades.Title">先新增第一筆紀錄</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoTrades.Message">從新增紀錄開始，建立你的投資、現金與負債歷程；之後圖表與分析才會有內容。</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoTrades.Action">新增紀錄</sys:String>
     <sys:String x:Key="Portfolio.Cash.Name">帳戶名稱</sys:String>
     <sys:String x:Key="Portfolio.Cash.Amount">餘額</sys:String>
     <sys:String x:Key="Portfolio.Cash.Default">預設</sys:String>
@@ -456,6 +462,9 @@
     <sys:String x:Key="Settings.UiScaleDesc">0.75× ～ 1.5×，拖曳調整介面縮放</sys:String>
     <sys:String x:Key="Settings.DataSource">歷史資料來源</sys:String>
     <sys:String x:Key="Settings.DataSourceDesc">切換後立即生效，無需重新啟動</sys:String>
+    <sys:String x:Key="Settings.QuoteSource">即時報價來源</sys:String>
+    <sys:String x:Key="Settings.FugleApiKeyHint">僅儲存在本機 %APPDATA%\Assetra\settings.json，不會寫入 GitHub。修改後請按儲存。</sys:String>
+    <sys:String x:Key="Settings.DataSource.Saved">資料來源設定已儲存</sys:String>
     <sys:String x:Key="Settings.About">關於</sys:String>
     <sys:String x:Key="Settings.DataDir">資料目錄</sys:String>
     <sys:String x:Key="Settings.OpenDir">開啟</sys:String>
@@ -528,6 +537,7 @@
     <sys:String x:Key="Settings.PrimaryCurrency">主要貨幣</sys:String>
     <sys:String x:Key="Settings.Section.Data">資料</sys:String>
     <sys:String x:Key="Settings.Version">版本</sys:String>
+    <sys:String x:Key="Settings.FugleApiKey">Fugle API Key</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">盤中</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">休市</sys:String>
 </ResourceDictionary>

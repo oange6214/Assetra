@@ -10,6 +10,7 @@
     d:DesignHeight="600"
     d:DesignWidth="800"
     Background="{DynamicResource AppBackground}"
+    Loaded="UserControl_Loaded"
     mc:Ignorable="d">
 
     <ScrollViewer
@@ -178,6 +179,9 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" MinHeight="40" />
                         <RowDefinition Height="Auto" MinHeight="40" />
+                        <RowDefinition Height="Auto" MinHeight="40" />
+                        <RowDefinition Height="Auto" MinHeight="40" />
+                        <RowDefinition Height="Auto" MinHeight="40" />
                     </Grid.RowDefinitions>
 
                     <TextBlock
@@ -212,6 +216,70 @@
                         VerticalAlignment="Center"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{Binding AppVersion}" />
+
+                    <TextBlock
+                        Grid.Row="2" Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Settings.QuoteSource}" />
+                    <ComboBox
+                        Grid.Row="2" Grid.Column="1"
+                        Width="220"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left"
+                        DisplayMemberPath="Display"
+                        ItemsSource="{x:Static vm:SettingsViewModel.SupportedQuoteProviders}"
+                        SelectedValue="{Binding QuoteProvider}"
+                        SelectedValuePath="Code" />
+
+                    <TextBlock
+                        Grid.Row="3" Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Settings.DataSource}" />
+                    <ComboBox
+                        Grid.Row="3" Grid.Column="1"
+                        Width="220"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left"
+                        DisplayMemberPath="Display"
+                        ItemsSource="{x:Static vm:SettingsViewModel.SupportedHistoryProviders}"
+                        SelectedValue="{Binding HistoryProvider}"
+                        SelectedValuePath="Code" />
+
+                    <TextBlock
+                        Grid.Row="4" Grid.Column="0"
+                        VerticalAlignment="Top"
+                        Margin="0,8,0,0"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Settings.FugleApiKey}" />
+                    <StackPanel
+                        Grid.Row="4" Grid.Column="1"
+                        VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <PasswordBox
+                                x:Name="FugleApiKeyBox"
+                                Width="300"
+                                PasswordChanged="FugleApiKeyBox_OnPasswordChanged" />
+                            <Button
+                                Margin="12,0,0,0"
+                                Command="{Binding SaveDataSourceSettingsCommand}"
+                                Content="{DynamicResource Common.Save}"
+                                Style="{StaticResource BtnGhost}" />
+                        </StackPanel>
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Settings.FugleApiKeyHint}"
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{Binding DataSourceSaveStatus}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
                 </Grid>
             </Border>
 

@@ -1,6 +1,7 @@
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure.FinMind;
+using Assetra.Infrastructure.Http;
 
 namespace Assetra.Infrastructure.History;
 
@@ -13,14 +14,16 @@ internal sealed class DynamicHistoryProvider : IStockHistoryProvider
     private readonly TwseHistoryProvider _twse;
     private readonly YahooFinanceHistoryProvider _yahoo;
     private readonly FinMindHistoryProvider _finMind;
+    private readonly FugleHistoryProvider _fugle;
     private readonly IAppSettingsService _settings;
 
     public DynamicHistoryProvider(HttpClient http, IAppSettingsService settings,
-        FinMindService finMindService, FinMindApiStatus finMindStatus)
+        FinMindService finMindService, FinMindApiStatus finMindStatus, FugleClient fugleClient)
     {
         _twse = new TwseHistoryProvider(http);
         _yahoo = new YahooFinanceHistoryProvider(http);
         _finMind = new FinMindHistoryProvider(http, finMindService, finMindStatus);
+        _fugle = new FugleHistoryProvider(fugleClient);
         _settings = settings;
     }
 
@@ -29,6 +32,7 @@ internal sealed class DynamicHistoryProvider : IStockHistoryProvider
     {
         IStockHistoryProvider active = _settings.Current.HistoryProvider switch
         {
+            "fugle" => _fugle,
             "yahoo" => _yahoo,
             "finmind" => _finMind,
             _ => _twse,

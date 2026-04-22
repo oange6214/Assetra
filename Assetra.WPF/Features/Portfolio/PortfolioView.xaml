@@ -24,7 +24,7 @@
       <RowDefinition Height="Auto" />
       <!--  Row 0: Tab bar  -->
       <RowDefinition Height="Auto" />
-      <!--  Row 1: Welcome banner  -->
+      <!--  Row 1: Setup notice  -->
       <RowDefinition Height="*" />
       <!--  Row 2: Tab content  -->
     </Grid.RowDefinitions>
@@ -99,14 +99,14 @@
       </DockPanel>
     </Border>
 
-    <!--  ── Row 1: Welcome banner ──  -->
+    <!--  ── Row 1: Setup notice ──  -->
     <Border
             Grid.Row="1"
             Padding="20,14"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="0,0,0,1"
-            Visibility="{Binding ShowWelcomeBanner, Converter={StaticResource BooleanToVisibilityConverter}}">
+            Visibility="{Binding HasSetupNotice, Converter={StaticResource BooleanToVisibilityConverter}}">
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*" />
@@ -117,28 +117,21 @@
                         FontSize="{StaticResource FontSizeMd}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{DynamicResource Onboarding.Banner.Title}" />
+                        Text="{Binding SetupNoticeTitle}" />
           <TextBlock
                         Margin="0,4,0,0"
                         FontSize="{StaticResource FontSizeBase}"
                         Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Onboarding.Banner.Steps}" />
+                        Text="{Binding SetupNoticeMessage}"
+                        TextWrapping="Wrap" />
         </StackPanel>
         <Button
                     Grid.Column="1"
-                    Width="30"
-                    Height="30"
-                    Margin="8,0,0,0"
+                    Margin="12,0,0,0"
                     VerticalAlignment="Center"
-                    Command="{Binding DismissWelcomeBannerCommand}"
-                    Style="{StaticResource BtnIcon}"
-                    ToolTip="{DynamicResource Common.Close}">
-          <TextBlock
-                        FontFamily="Segoe MDL2 Assets"
-                        FontSize="10"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="&#xE711;" />
-        </Button>
+                    Command="{Binding ExecuteSetupNoticeActionCommand}"
+                    Content="{Binding SetupNoticeActionText}"
+                    Style="{StaticResource BtnGhost}" />
       </Grid>
     </Border>
 
