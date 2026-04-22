@@ -5,6 +5,7 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel},
                                      IsDesignTimeCreatable=False}"
@@ -88,7 +89,7 @@
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Loan.StartDate}" />
-            <DatePicker
+            <ui:CalendarDatePicker
                 FontSize="{StaticResource FontSizeSm}"
                 Foreground="{DynamicResource AppTextPrimary}"
                 SelectedDate="{Binding TxLoanStartDate}" />
