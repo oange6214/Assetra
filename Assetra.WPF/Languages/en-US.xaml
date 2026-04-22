@@ -258,6 +258,15 @@
 
 
     <sys:String x:Key="Portfolio.Record.Title">Add Record</sys:String>
+    <sys:String x:Key="Portfolio.Record.CoreLocked">Core details are locked to avoid changing holdings, account balances, or liabilities by accident.</sys:String>
+    <sys:String x:Key="Portfolio.Record.ReviseHint">If you need to change the type, asset, account, or amount, create a revised record instead.</sys:String>
+    <sys:String x:Key="Portfolio.Record.ReviseTitle">Create Revision</sys:String>
+    <sys:String x:Key="Portfolio.Record.CreateRevision">Create Revision</sys:String>
+    <sys:String x:Key="Portfolio.Record.RevisionModeHint">This form is prefilled from the original record. Save it as a new record; the original remains unchanged for now.</sys:String>
+    <sys:String x:Key="Portfolio.Record.Summary.Type">Type</sys:String>
+    <sys:String x:Key="Portfolio.Record.Summary.Target">Target</sys:String>
+    <sys:String x:Key="Portfolio.Record.Summary.Amount">Amount / Price</sys:String>
+    <sys:String x:Key="Portfolio.Record.Summary.Quantity">Quantity</sys:String>
     <sys:String x:Key="Portfolio.Tx.Income">Income</sys:String>
     <sys:String x:Key="Portfolio.Tx.CashDiv">Cash Dividend</sys:String>
     <sys:String x:Key="Portfolio.Tx.StockDiv">Stock Dividend</sys:String>

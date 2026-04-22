@@ -1384,9 +1384,10 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
-    public async Task EditTrade_BuyWithLink_DialogAllowsFullEdit()
+    public async Task EditTrade_BuyWithLink_DialogOpensInSafeEditMode()
     {
-        // Fresh Buy trades carry PortfolioEntryId and support full edit.
+        // Fresh Buy trades now open in safe edit mode: core fields are summarized
+        // and locked, while users can branch into Create Revision for full changes.
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(0m);
         var entryId = Guid.NewGuid();
         await tradeRepo.AddAsync(new Trade(
@@ -1401,9 +1402,37 @@ public class PortfolioViewModelTests
         vm.Transaction.EditTradeCommand.Execute(buyRow);
 
         Assert.Equal("buy", vm.Transaction.TxType);
-        Assert.False(vm.Transaction.IsEditingMetaOnly);
+        Assert.True(vm.Transaction.IsEditMode);
+        Assert.False(vm.Transaction.AreEconomicFieldsEditable);
+        Assert.True(vm.Transaction.ShowEditLockedSummary);
+        // Pre-fill still lands in the Add* properties so Create Revision can reuse them.
+        Assert.Equal("00982A", vm.AddAssetDialog.AddSymbol);
+        Assert.Equal("18.0400", vm.AddAssetDialog.AddPrice);
+        Assert.Equal("5000", vm.AddAssetDialog.AddQuantity);
+    }
+
+    [Fact]
+    public async Task CreateRevision_FromEditedTrade_PreservesPrefillAndUnlocksCoreFields()
+    {
+        var (vm, _, tradeRepo) = await CreateVmWithCashAsync(0m);
+        var entryId = Guid.NewGuid();
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: "00982A", Exchange: "TWSE", Name: "主動群益台灣強棒",
+            Type: TradeType.Buy, TradeDate: DateTime.UtcNow,
+            Price: 18.04m, Quantity: 5000,
+            RealizedPnl: null, RealizedPnlPct: null,
+            PortfolioEntryId: entryId));
+        await vm.LoadTradesAsyncForTest();
+
+        var buyRow = vm.Trades.First(t => t.Type == TradeType.Buy);
+        vm.Transaction.EditTradeCommand.Execute(buyRow);
+        vm.Transaction.CreateRevisionCommand.Execute(null);
+
+        Assert.True(vm.Transaction.IsTxDialogOpen);
+        Assert.True(vm.Transaction.IsRevisionMode);
+        Assert.False(vm.Transaction.IsEditMode);
         Assert.True(vm.Transaction.AreEconomicFieldsEditable);
-        // Pre-fill landed in the Add* properties used by the buy form.
+        Assert.Equal("buy", vm.Transaction.TxType);
         Assert.Equal("00982A", vm.AddAssetDialog.AddSymbol);
         Assert.Equal("18.0400", vm.AddAssetDialog.AddPrice);
         Assert.Equal("5000", vm.AddAssetDialog.AddQuantity);

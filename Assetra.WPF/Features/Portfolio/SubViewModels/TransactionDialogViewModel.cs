@@ -136,6 +136,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     /// <summary>Non-null when editing an existing trade (vs. creating new).</summary>
     [ObservableProperty] private Guid? _editingTradeId;
+    [ObservableProperty] private bool _isRevisionMode;
 
     public bool IsEditMode => EditingTradeId.HasValue;
 
@@ -150,15 +151,23 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Trades.FirstOrDefault(t => t.Id == EditingTradeId.Value) is { IsMetaOnlyEditType: true };
 
     /// <summary>Inverse of <see cref="IsEditingMetaOnly"/>; bindable from XAML without a converter.</summary>
-    public bool AreEconomicFieldsEditable => !IsEditingMetaOnly;
+    public bool AreEconomicFieldsEditable => !IsEditMode;
+    public bool ShowEditLockedSummary => IsEditMode;
 
     partial void OnEditingTradeIdChanged(Guid? _)
     {
         OnPropertyChanged(nameof(IsEditMode));
         OnPropertyChanged(nameof(IsEditingMetaOnly));
         OnPropertyChanged(nameof(AreEconomicFieldsEditable));
+        OnPropertyChanged(nameof(ShowEditLockedSummary));
+        CreateRevisionCommand.NotifyCanExecuteChanged();
         DeleteTradeCommand.NotifyCanExecuteChanged();
     }
+
+    [ObservableProperty] private string _editSummaryType = string.Empty;
+    [ObservableProperty] private string _editSummaryTarget = string.Empty;
+    [ObservableProperty] private string _editSummaryAmount = string.Empty;
+    [ObservableProperty] private string _editSummaryQuantity = string.Empty;
 
     // The Tx dialog's shared date picker is bound to TxDate, but ConfirmBuyAsync →
     // AddPosition reads AddBuyDate when building the PortfolioEntry. Without this
@@ -703,6 +712,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     internal void OpenTxDialog()
     {
+        IsRevisionMode = false;
         var state = _tradeDialogController.CreateOpenState(_getDefaultCashAccount());
         EditingTradeId = null;
         TxType = "buy";
@@ -744,6 +754,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxSellPosition = null;
         TxSellQuantity = string.Empty;
         TxSellQuantityError = string.Empty;
+        EditSummaryType = string.Empty;
+        EditSummaryTarget = string.Empty;
+        EditSummaryAmount = string.Empty;
+        EditSummaryQuantity = string.Empty;
         TxPrincipal = string.Empty;
         TxInterestPaid = string.Empty;
         TxLoanRate = string.Empty;
@@ -775,8 +789,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     [RelayCommand]
     private void EditTrade(TradeRowViewModel row)
     {
+        IsRevisionMode = false;
         var editState = _tradeDialogController.CreateEditState(row, Positions, CashAccounts);
         EditingTradeId = editState.EditingTradeId;
+        PopulateEditSummary(row);
         TxDate = editState.TxDate;
         TxError = string.Empty;
         TxAmountError = string.Empty;
@@ -951,8 +967,38 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     [RelayCommand]
     private void CloseTxDialog()
     {
+        IsRevisionMode = false;
         EditingTradeId = null;
+        EditSummaryType = string.Empty;
+        EditSummaryTarget = string.Empty;
+        EditSummaryAmount = string.Empty;
+        EditSummaryQuantity = string.Empty;
         IsTxDialogOpen = false;
+    }
+
+    [RelayCommand(CanExecute = nameof(IsEditMode))]
+    private void CreateRevision()
+    {
+        if (EditingTradeId is not { } id)
+            return;
+
+        var row = Trades.FirstOrDefault(t => t.Id == id);
+        if (row is null)
+            return;
+
+        IsRevisionMode = true;
+        EditingTradeId = null;
+        TxError = string.Empty;
+        EditSummaryType = string.Empty;
+        EditSummaryTarget = string.Empty;
+        EditSummaryAmount = string.Empty;
+        EditSummaryQuantity = string.Empty;
+        OnPropertyChanged(nameof(IsEditMode));
+        OnPropertyChanged(nameof(IsEditingMetaOnly));
+        OnPropertyChanged(nameof(AreEconomicFieldsEditable));
+        OnPropertyChanged(nameof(ShowEditLockedSummary));
+        CreateRevisionCommand.NotifyCanExecuteChanged();
+        DeleteTradeCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>
@@ -1007,14 +1053,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         // buy for" logic) don't mistake this for an in-progress edit loop.
         EditingTradeId = null;
 
-        // Meta-only edit path: Sell trades and Buy trades without a PortfolioEntryId link
-        // (legacy data whose lot couldn't be identified). Update the existing row in place
-        // with new date/note instead of the full delete+create flow, because:
-        //   - Sells can't re-run ConfirmSell (the lot is already gone)
-        //   - Unlinked Buys can't safely replace their lot (no way to find which lot)
-        // Price/Quantity/Symbol changes are not supported in these cases — the edit dialog
-        // locks those fields.
-        if (oldRow is not null && IsMetaOnlyEdit(oldRow))
+        // Edit mode is intentionally limited to metadata-only updates. Core trade fields are
+        // shown as a read-only summary in the dialog; users should create a revision instead
+        // of mutating the economic shape of an existing record in place.
+        if (oldRow is not null)
         {
             await UpdateTradeMetaOnlyAsync(oldRow);
             return;
@@ -1487,6 +1529,43 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     }
 
     private string L(string key, string fallback = "") => _localize(key, fallback);
+
+    private void PopulateEditSummary(TradeRowViewModel row)
+    {
+        EditSummaryType = row.Type switch
+        {
+            TradeType.Buy => L("Portfolio.TradeType.Buy", "買入"),
+            TradeType.Sell => L("Portfolio.TradeType.Sell", "賣出"),
+            TradeType.Income => L("Portfolio.TradeType.Income", "收入"),
+            TradeType.CashDividend => L("Portfolio.TradeType.CashDividend", "現金股利"),
+            TradeType.StockDividend => L("Portfolio.TradeType.StockDividend", "股票股利"),
+            TradeType.Deposit => L("Portfolio.TradeType.Deposit", "存入"),
+            TradeType.Withdrawal => L("Portfolio.TradeType.Withdrawal", "提款"),
+            TradeType.Transfer => L("Portfolio.TradeType.Transfer", "轉帳"),
+            TradeType.LoanBorrow => L("Portfolio.TradeType.LoanBorrow", "借款"),
+            TradeType.LoanRepay => L("Portfolio.TradeType.LoanRepay", "還款"),
+            _ => row.Type.ToString()
+        };
+
+        var target = !string.IsNullOrWhiteSpace(row.Symbol)
+            ? string.IsNullOrWhiteSpace(row.Name) ? row.Symbol : $"{row.Symbol} {row.Name}"
+            : !string.IsNullOrWhiteSpace(row.Name) ? row.Name
+            : row.Type switch
+            {
+                TradeType.Transfer => $"{L("Portfolio.Tx.TransferSourceAccount", "來源帳戶")} / {L("Portfolio.Tx.TransferTargetAccount", "目標帳戶")}",
+                _ => "—"
+            };
+
+        EditSummaryTarget = target;
+        EditSummaryAmount = row.CashAmount is { } cash && cash != 0
+            ? cash.ToString("N2")
+            : row.Price is { } price && price != 0
+                ? price.ToString("N4")
+                : "—";
+        EditSummaryQuantity = row.Quantity is { } qty && qty != 0
+            ? qty.ToString("N4")
+            : "—";
+    }
 
     private static TradeDeletionRequest ToTradeDeletionRequest(TradeRowViewModel row) =>
         new(row.Id, row.Type, row.Symbol, row.Quantity, row.PortfolioEntryId);
