@@ -1499,6 +1499,134 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task CreateRevision_ForTransfer_PreservesOriginalAndCreatesNewRecord()
+    {
+        var (vm, assetRepo, tradeRepo) = await CreateVmWithCashAsync(50_000m);
+        var secondAccount = new AssetItem(
+            Guid.NewGuid(), "Richart USD", FinancialType.Asset, null, "USD",
+            DateOnly.FromDateTime(DateTime.Today));
+        assetRepo.Store.Add(secondAccount);
+        await SeedCashBaselineAsync(tradeRepo, secondAccount.Id, secondAccount.Name, 30_000m);
+        await vm.LoadAsync();
+
+        var src = vm.CashAccounts.First(c => c.Name == "永豐 USD");
+        var dst = vm.CashAccounts.First(c => c.Name == "Richart USD");
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: src.Name, Exchange: string.Empty,
+            Name: src.Name, Type: TradeType.Transfer,
+            TradeDate: DateTime.UtcNow,
+            Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
+            CashAmount: 30_000m, CashAccountId: src.Id, ToCashAccountId: dst.Id, Note: "seed transfer"));
+        await vm.LoadTradesAsyncForTest();
+
+        var original = vm.Trades.First(t => t.Type == TradeType.Transfer);
+        vm.Transaction.EditTradeCommand.Execute(original);
+        vm.Transaction.CreateRevisionCommand.Execute(null);
+        vm.Transaction.TxTransferTargetAmount = "30000";
+
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.KeepBothRecordsCommand.Execute(null);
+        await vm.LoadTradesAsyncForTest();
+
+        var transfers = vm.Trades.Where(t => t.Type == TradeType.Transfer).ToList();
+        Assert.Equal(2, transfers.Count);
+        Assert.Contains(transfers, t => t.Id == original.Id);
+        Assert.Contains(transfers, t => t.CashAmount == 30_000m && t.Note == "seed transfer");
+        Assert.Contains(tradeRepo.Store, t => t.Type == TradeType.Transfer && t.CashAmount == 30_000m && t.ToCashAccountId == dst.Id && t.Note == "seed transfer");
+    }
+
+    [Fact]
+    public async Task CreateRevision_ForCashDividend_PreservesOriginalAndCreatesNewRecord()
+    {
+        var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);
+        var cashAcc = vm.CashAccounts.First();
+        vm.Positions.Add(new PortfolioRowViewModel
+        {
+            Id = Guid.NewGuid(),
+            Symbol = "0050",
+            Name = "元大台灣50",
+            Exchange = "TWSE",
+            Quantity = 1000,
+            BuyPrice = 140
+        });
+
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: "0050", Exchange: "TWSE", Name: "元大台灣50",
+            Type: TradeType.CashDividend, TradeDate: DateTime.UtcNow,
+            Price: 2.5m, Quantity: 1000,
+            RealizedPnl: null, RealizedPnlPct: null,
+            CashAmount: 2500m,
+            CashAccountId: cashAcc.Id));
+        await vm.LoadTradesAsyncForTest();
+
+        var original = vm.Trades.First(t => t.Type == TradeType.CashDividend);
+        vm.Transaction.EditTradeCommand.Execute(original);
+        vm.Transaction.CreateRevisionCommand.Execute(null);
+        vm.Transaction.TxDivPerShare = "3.0";
+
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
+        vm.Transaction.KeepBothRecordsCommand.Execute(null);
+        await vm.LoadTradesAsyncForTest();
+
+        var dividends = vm.Trades.Where(t => t.Type == TradeType.CashDividend && t.Symbol == "0050").ToList();
+        Assert.Equal(2, dividends.Count);
+        Assert.Contains(dividends, t => t.Id == original.Id);
+        Assert.Contains(dividends, t => t.Price == 3.0m && t.CashAmount == 3000m);
+    }
+
+    [Fact]
+    public async Task ReplaceOriginalRecord_WhenSourceMissing_ShowsPromptError()
+    {
+        var (vm, _, tradeRepo) = await CreateVmWithCashAsync(0m);
+        var entryId = Guid.NewGuid();
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: "00982A", Exchange: "TWSE", Name: "主動群益台灣強棒",
+            Type: TradeType.Buy, TradeDate: DateTime.UtcNow,
+            Price: 18.04m, Quantity: 5000,
+            RealizedPnl: null, RealizedPnlPct: null,
+            PortfolioEntryId: entryId));
+        await vm.LoadTradesAsyncForTest();
+
+        var original = vm.Trades.First(t => t.Type == TradeType.Buy);
+        vm.Transaction.EditTradeCommand.Execute(original);
+        vm.Transaction.CreateRevisionCommand.Execute(null);
+        vm.AddAssetDialog.AddPrice = "19.5000";
+
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
+        tradeRepo.Store.RemoveAll(t => t.Id == original.Id);
+        await vm.LoadTradesAsyncForTest();
+        await vm.Transaction.ReplaceOriginalRecordCommand.ExecuteAsync(null);
+
+        Assert.True(vm.Transaction.IsRevisionReplacePromptOpen);
+        Assert.NotEmpty(vm.Transaction.RevisionReplacePromptError);
+    }
+
+    [Fact]
+    public async Task EditTrade_CloseDialog_ClearsRevisionState()
+    {
+        var (vm, _, tradeRepo) = await CreateVmWithCashAsync(0m);
+        var entryId = Guid.NewGuid();
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: "00982A", Exchange: "TWSE", Name: "主動群益台灣強棒",
+            Type: TradeType.Buy, TradeDate: DateTime.UtcNow,
+            Price: 18.04m, Quantity: 5000,
+            RealizedPnl: null, RealizedPnlPct: null,
+            PortfolioEntryId: entryId));
+        await vm.LoadTradesAsyncForTest();
+
+        var original = vm.Trades.First(t => t.Type == TradeType.Buy);
+        vm.Transaction.EditTradeCommand.Execute(original);
+        vm.Transaction.CreateRevisionCommand.Execute(null);
+        vm.Transaction.CloseTxDialogCommand.Execute(null);
+
+        Assert.False(vm.Transaction.IsTxDialogOpen);
+        Assert.False(vm.Transaction.IsRevisionMode);
+        Assert.False(vm.Transaction.IsRevisionReplacePromptOpen);
+        Assert.False(vm.Transaction.IsEditMode);
+        Assert.True(string.IsNullOrEmpty(vm.Transaction.RevisionReplacePromptError));
+    }
+
+    [Fact]
     public async Task EditTrade_BuyWithLink_DoesNotReplaceStoredPriceWithHistoricalLookup()
     {
         // Regression: edit prefill used to trigger async close-price lookup via AddBuyDate,
