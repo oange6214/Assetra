@@ -259,7 +259,7 @@
                         Height="34"
                         Padding="20,0"
                         HorizontalAlignment="Center"
-                        Command="{Binding GlobalAddCommand}"
+                        Command="{Binding AddRecordCommand}"
                         Style="{StaticResource BtnPrimary}">
                         <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Empty.Cta}" />
                     </Button>
@@ -750,7 +750,7 @@
                         Height="34"
                         Padding="20,0"
                         HorizontalAlignment="Center"
-                        Command="{Binding GlobalAddCommand}"
+                        Command="{Binding AddRecordCommand}"
                         Style="{StaticResource BtnPrimary}">
                         <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Empty.Cta}" />
                     </Button>

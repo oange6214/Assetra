@@ -5,7 +5,11 @@ namespace Assetra.WPF.Features.Portfolio;
 
 public partial class PortfolioView : UserControl
 {
-    public PortfolioView() => InitializeComponent();
+    public PortfolioView()
+    {
+        InitializeComponent();
+        PreviewKeyDown += OnPreviewKeyDown;
+    }
 
     /// <summary>
     /// Closes the cash detail overlay when the user clicks the dark backdrop.
@@ -44,6 +48,20 @@ public partial class PortfolioView : UserControl
         if (!ReferenceEquals(e.OriginalSource, sender))
             return;
         vm.ClosePositionDetailCommand.Execute(null);
+        e.Handled = true;
+    }
+
+    private void OnPreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Escape)
+            return;
+        if (DataContext is not PortfolioViewModel vm)
+            return;
+        if (!vm.IsConfirmDialogOpen)
+            return;
+
+        if (vm.ConfirmDialogNoCommand.CanExecute(null))
+            vm.ConfirmDialogNoCommand.Execute(null);
         e.Handled = true;
     }
 }

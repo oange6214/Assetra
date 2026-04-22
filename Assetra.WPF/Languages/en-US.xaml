@@ -141,7 +141,7 @@
     <sys:String x:Key="Portfolio.Liability.Health.Danger">Danger</sys:String>
     <sys:String x:Key="Portfolio.Liability.Health.Tooltip">Debt ratio thresholds:&#x0a;　• Healthy &lt; 30%&#x0a;　• Caution 30% ~ 50%&#x0a;　• Danger ≥ 50%</sys:String>
     <sys:String x:Key="Portfolio.DayChange">Day P&amp;L</sys:String>
-    <sys:String x:Key="Portfolio.AddNew">Transaction</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord">Add Record</sys:String>
     <sys:String x:Key="Portfolio.AddCash">Account</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">Liability</sys:String>
     <sys:String x:Key="Portfolio.Cash.AddHint">Once created, add a "Deposit" entry in Trade History to record the amount. Deposits and withdrawals accumulate automatically.</sys:String>
@@ -165,7 +165,7 @@
     <sys:String x:Key="Portfolio.Cash.Default">Default</sys:String>
     <sys:String x:Key="Portfolio.Cash.SetDefault">Set as Default</sys:String>
     <sys:String x:Key="Portfolio.Cash.UnsetDefault">Remove Default</sys:String>
-    <sys:String x:Key="Portfolio.Cash.DefaultHint">Auto-selected in new transactions</sys:String>
+    <sys:String x:Key="Portfolio.Cash.DefaultHint">Auto-selected when adding a new record</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Title">Emergency Fund</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Months">months</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.MonthlyExpense">Monthly expenses</sys:String>
@@ -174,7 +174,7 @@
     <sys:String x:Key="Portfolio.Cash.Emergency.Warning">Caution</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Danger">Danger</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.NotSet">Set monthly expenses to calculate emergency runway</sys:String>
-    <sys:String x:Key="Portfolio.Liability.Empty">No loans yet. Add one via New Transaction → Borrow.</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Empty">No loans yet. Add one via Add Record → Borrow.</sys:String>
     <sys:String x:Key="Portfolio.Liability.Name">Liability name</sys:String>
     <sys:String x:Key="Portfolio.Liability.Amount">Remaining balance</sys:String>
     <sys:String x:Key="Portfolio.Liability.OriginalAmount">Total loan amount</sys:String>
@@ -257,7 +257,7 @@
     <sys:String x:Key="Portfolio.Filter.Dividend">Dividend</sys:String>
 
 
-    <sys:String x:Key="Portfolio.Tx.Title">Add Transaction</sys:String>
+    <sys:String x:Key="Portfolio.Record.Title">Add Record</sys:String>
     <sys:String x:Key="Portfolio.Tx.Income">Income</sys:String>
     <sys:String x:Key="Portfolio.Tx.CashDiv">Cash Dividend</sys:String>
     <sys:String x:Key="Portfolio.Tx.StockDiv">Stock Dividend</sys:String>

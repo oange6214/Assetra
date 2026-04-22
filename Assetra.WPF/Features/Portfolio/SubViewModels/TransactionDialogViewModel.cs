@@ -130,7 +130,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     // ── Transaction Dialog state ──────────────────────────────────────────────────────
 
-    // 新增交易 Dialog
+    // 新增紀錄 Dialog
     [ObservableProperty] private bool _isTxDialogOpen;
     [ObservableProperty] private string _txType = "income";
 
@@ -252,6 +252,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     [ObservableProperty] private decimal _txSellNetAmount;
     [ObservableProperty] private bool _txSellIsEtf;
     [ObservableProperty] private bool _txSellIsBondEtf;
+    private bool _suppressSellPositionPriceAutoFill;
 
     public bool HasTxSellPreview => TxSellGrossAmount > 0;
     partial void OnTxSellGrossAmountChanged(decimal _) => OnPropertyChanged(nameof(HasTxSellPreview));
@@ -264,7 +265,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     partial void OnTxSellPositionChanged(PortfolioRowViewModel? value)
     {
-        if (value is not null && value.CurrentPrice > 0)
+        if (!_suppressSellPositionPriceAutoFill &&
+            value is not null &&
+            value.CurrentPrice > 0)
             TxAmount = value.CurrentPrice.ToString("F2");
         if (value is null)
             TxSellQuantity = string.Empty;
@@ -696,7 +699,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxLoanTermMonthsError = string.IsNullOrWhiteSpace(value) ? string.Empty
             : (ParseHelpers.TryParseInt(value, out var n) && n > 0 ? string.Empty : "請輸入正整數");
 
-    // ── 新增交易 Dialog commands ──────────────────────────────────────────────────────
+    // ── 新增紀錄 Dialog commands ──────────────────────────────────────────────────────
 
     internal void OpenTxDialog()
     {
@@ -836,12 +839,14 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 // exists for live search-as-you-type, not for showing what the user is
                 // already editing.
                 AddAssetDialog.SuppressSuggestions = true;
+                AddAssetDialog.SuppressClosePriceAutoFill = true;
                 AddAssetDialog.AddSymbol = editState.AddSymbol;
-                AddAssetDialog.SuppressSuggestions = false;
-                AddAssetDialog.IsSuggestionsOpen = false;
                 AddAssetDialog.AddPrice = editState.AddPrice;
                 AddAssetDialog.AddQuantity = editState.AddQuantity;
                 AddAssetDialog.AddBuyDate = editState.AddBuyDate ?? TxDate;
+                AddAssetDialog.SuppressSuggestions = false;
+                AddAssetDialog.SuppressClosePriceAutoFill = false;
+                AddAssetDialog.IsSuggestionsOpen = false;
                 TxCashAccount = editState.TxCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
                 // 還原使用者當初輸入的手續費來源：
@@ -856,7 +861,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 // editable fields. The position itself was closed at sell time.
                 // Populate BOTH TxCashAccount (dialog XAML binds to this) AND SellCashAccount
                 // (ConfirmSell uses this). Without the former, the dialog dropdown was empty.
+                _suppressSellPositionPriceAutoFill = true;
                 TxSellPosition = editState.TxSellPosition;
+                _suppressSellPositionPriceAutoFill = false;
                 TxSellQuantity = editState.TxSellQuantity;
                 TxAmount = editState.TxAmount;
                 SellPanel.SellPriceInput = editState.SellPriceInput;
@@ -864,6 +871,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 SellPanel.SellCashAccount = editState.SellCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
                 RestoreCommissionFields(row);
+                UpdateSellTxPreview();
                 break;
 
             case TradeType.CashDividend:

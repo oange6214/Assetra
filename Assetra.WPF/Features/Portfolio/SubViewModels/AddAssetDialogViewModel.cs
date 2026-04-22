@@ -110,12 +110,30 @@ public partial class AddAssetDialogViewModel : ObservableObject
     }
 
     private bool _suppressSuggestions;
+    private bool _suppressClosePriceAutoFill;
     // Exposed so that PortfolioViewModel.Transactions.cs can suppress the popup
     // when pre-filling AddSymbol for the Tx dialog's Buy flow (edit path).
     public bool SuppressSuggestions
     {
         get => _suppressSuggestions;
         set => _suppressSuggestions = value;
+    }
+
+    // Exposed so edit-mode prefill can keep the persisted trade price stable instead
+    // of asynchronously replacing it with a looked-up historical close after the dialog opens.
+    public bool SuppressClosePriceAutoFill
+    {
+        get => _suppressClosePriceAutoFill;
+        set
+        {
+            _suppressClosePriceAutoFill = value;
+            if (!value)
+                return;
+
+            _closePriceCts?.Cancel();
+            IsLoadingClosePrice = false;
+            ClosePriceHint = string.Empty;
+        }
     }
 
     partial void OnAddSymbolChanged(string value)
@@ -134,7 +152,12 @@ public partial class AddAssetDialogViewModel : ObservableObject
         TriggerClosePriceFetch();
     }
 
-    partial void OnAddBuyDateChanged(DateTime _) => TriggerClosePriceFetch();
+    partial void OnAddBuyDateChanged(DateTime _)
+    {
+        if (SuppressClosePriceAutoFill)
+            return;
+        TriggerClosePriceFetch();
+    }
 
     private void SelectSuggestion(StockSearchResult suggestion)
     {
@@ -151,6 +174,8 @@ public partial class AddAssetDialogViewModel : ObservableObject
 
     private void TriggerClosePriceFetch()
     {
+        if (SuppressClosePriceAutoFill)
+            return;
         if (!AddTypeIsStock || string.IsNullOrWhiteSpace(AddSymbol))
         {
             ClosePriceHint = string.Empty;
@@ -165,10 +190,12 @@ public partial class AddAssetDialogViewModel : ObservableObject
     {
         try
         {
+            if (SuppressClosePriceAutoFill)
+                return;
             IsLoadingClosePrice = true;
             ClosePriceHint = string.Empty;
             var result = await _addAssetWorkflow.LookupClosePriceAsync(symbol, buyDate, ct);
-            if (ct.IsCancellationRequested)
+            if (ct.IsCancellationRequested || SuppressClosePriceAutoFill)
                 return;
 
             if (result.HasPrice && result.Price.HasValue)

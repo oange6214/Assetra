@@ -1,12 +1,16 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using Moq;
+using Assetra.Application.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Dtos;
 using Assetra.Application.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure;
 using Assetra.Infrastructure.Persistence;
+using Assetra.WPF.Features.Portfolio.Controls;
 using Assetra.WPF.Features.Portfolio;
+using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Infrastructure;
 using Xunit;
 
@@ -1136,20 +1140,20 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
-    public async Task GlobalAdd_AlwaysOpensTxDialog_RegardlessOfTab()
+    public async Task AddRecord_AlwaysOpensTxDialog_RegardlessOfTab()
     {
-        // New behaviour: the header "新增交易" button always routes to the transaction
+        // New behaviour: the header "新增紀錄" button always routes to the record
         // dialog; account creation lives in the per-tab ghost buttons.
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(0m, 0m);
 
         vm.SelectedTab = PortfolioTab.Accounts;
-        vm.GlobalAddCommand.Execute(null);
+        vm.AddRecordCommand.Execute(null);
         Assert.True(vm.Transaction.IsTxDialogOpen);
         Assert.False(vm.AddAssetDialog.IsAddDialogOpen);
 
         vm.Transaction.CloseTxDialogCommand.Execute(null);
         vm.SelectedTab = PortfolioTab.Liability;
-        vm.GlobalAddCommand.Execute(null);
+        vm.AddRecordCommand.Execute(null);
         Assert.True(vm.Transaction.IsTxDialogOpen);
         Assert.False(vm.AddAssetDialog.IsAddDialogOpen);
     }
@@ -1230,6 +1234,49 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task TradesTabPanel_ClickTradeRow_UsesClickedRowForEditPrefill()
+    {
+        // Regression guard: the trades tab should edit the row that was actually clicked,
+        // not a previously selected row or the first matching item in the collection.
+        var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);
+        var cashAcc = vm.CashAccounts.First();
+        var firstId = Guid.NewGuid();
+        var secondId = Guid.NewGuid();
+
+        await tradeRepo.AddAsync(new Trade(
+            Id: firstId, Symbol: "2330", Exchange: "TWSE", Name: "TSMC",
+            Type: TradeType.Sell, TradeDate: new DateTime(2026, 4, 20, 0, 0, 0, DateTimeKind.Utc),
+            Price: 650, Quantity: 1000,
+            RealizedPnl: 50_000m, RealizedPnlPct: 8.3m,
+            CashAccountId: cashAcc.Id,
+            PortfolioEntryId: Guid.NewGuid(),
+            Note: "first sell"));
+
+        await tradeRepo.AddAsync(new Trade(
+            Id: secondId, Symbol: "0050", Exchange: "TWSE", Name: "元大台灣50",
+            Type: TradeType.Sell, TradeDate: new DateTime(2026, 4, 21, 0, 0, 0, DateTimeKind.Utc),
+            Price: 188.5m, Quantity: 2000,
+            RealizedPnl: 12_345m, RealizedPnlPct: 3.2m,
+            CashAccountId: cashAcc.Id,
+            PortfolioEntryId: Guid.NewGuid(),
+            Note: "second sell"));
+        await vm.LoadTradesAsyncForTest();
+
+        var clickedRow = vm.Trades.Single(t => t.Id == secondId);
+        var opened = TradesTabPanel.TryOpenTradeEditor(vm, clickedRow);
+
+        Assert.True(opened);
+        Assert.True(vm.Transaction.IsTxDialogOpen);
+        Assert.Equal(secondId, vm.Transaction.EditingTradeId);
+        Assert.Equal("sell", vm.Transaction.TxType);
+        Assert.Equal("second sell", vm.Transaction.TxNote);
+        Assert.Equal("188.5000", vm.Transaction.TxAmount);
+        Assert.Equal("2000", vm.Transaction.TxSellQuantity);
+        Assert.Equal("188.5000", vm.SellPanel.SellPriceInput);
+        Assert.Equal(cashAcc.Id, vm.Transaction.TxCashAccount?.Id);
+    }
+
+    [Fact]
     public async Task EditTrade_CashDividendRow_SetsTxUseCashAccountFromLink()
     {
         // Regression: CashDividend edit didn't flip TxUseCashAccount, so the checkbox
@@ -1306,6 +1353,37 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task EditTrade_SellRow_KeepsStoredPriceEvenWhenMatchingPositionHasCurrentPrice()
+    {
+        // Regression: when a same-symbol holding still exists, selecting TxSellPosition
+        // used to auto-fill TxAmount from CurrentPrice and could briefly or permanently
+        // replace the stored sell price during edit prefill.
+        var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);
+        vm.Positions.Add(new PortfolioRowViewModel
+        {
+            Id = Guid.NewGuid(),
+            Symbol = "2330",
+            Quantity = 1000,
+            BuyPrice = 500m,
+            CurrentPrice = 777m
+        });
+
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: "2330", Exchange: "TWSE", Name: "TSMC",
+            Type: TradeType.Sell, TradeDate: DateTime.UtcNow,
+            Price: 650, Quantity: 1000,
+            RealizedPnl: 50_000m, RealizedPnlPct: 8.3m,
+            PortfolioEntryId: Guid.NewGuid()));
+        await vm.LoadTradesAsyncForTest();
+
+        var sellInCollection = vm.Trades.First(t => t.Type == TradeType.Sell);
+        vm.Transaction.EditTradeCommand.Execute(sellInCollection);
+
+        Assert.Equal("650.0000", vm.Transaction.TxAmount);
+        Assert.Equal("650.0000", vm.SellPanel.SellPriceInput);
+    }
+
+    [Fact]
     public async Task EditTrade_BuyWithLink_DialogAllowsFullEdit()
     {
         // Fresh Buy trades carry PortfolioEntryId and support full edit.
@@ -1329,6 +1407,49 @@ public class PortfolioViewModelTests
         Assert.Equal("00982A", vm.AddAssetDialog.AddSymbol);
         Assert.Equal("18.0400", vm.AddAssetDialog.AddPrice);
         Assert.Equal("5000", vm.AddAssetDialog.AddQuantity);
+    }
+
+    [Fact]
+    public async Task EditTrade_BuyWithLink_DoesNotReplaceStoredPriceWithHistoricalLookup()
+    {
+        // Regression: edit prefill used to trigger async close-price lookup via AddBuyDate,
+        // which could overwrite the persisted trade price a moment after the dialog opened.
+        var portfolioRepo = new Mock<IPortfolioRepository>();
+        portfolioRepo.Setup(r => r.GetEntriesAsync()).ReturnsAsync([]);
+
+        var assetRepo = new FakeAssetRepo();
+        var tradeRepo = new FakeTradeRepo();
+        var search = new Mock<IStockSearchService>();
+        search.Setup(s => s.GetExchange("00982A")).Returns("TWSE");
+        var delayedWorkflow = new DelayedClosePriceWorkflow(delayMs: 50, lookupPrice: 99.99m);
+        var addAssetDialog = new AddAssetDialogViewModel(delayedWorkflow, new NoopAccountUpsertWorkflow());
+        var (snapshotSvc, snapshotRepo) = SnapshotStubs();
+        var (logRepo, backfill) = BackfillStubs(snapshotRepo);
+
+        var vm = new PortfolioViewModel(
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
+            new PortfolioServices(
+                SilentStockService().Object,
+                search.Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                AddAssetDialog: addAssetDialog),
+            new PortfolioUiServices(ImmediateScheduler.Instance));
+        await vm.LoadAsync();
+
+        var entryId = Guid.NewGuid();
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: "00982A", Exchange: "TWSE", Name: "主動群益台灣強棒",
+            Type: TradeType.Buy, TradeDate: DateTime.UtcNow,
+            Price: 18.04m, Quantity: 5000,
+            RealizedPnl: null, RealizedPnlPct: null,
+            PortfolioEntryId: entryId));
+        await vm.LoadTradesAsyncForTest();
+
+        var buyRow = vm.Trades.First(t => t.Type == TradeType.Buy);
+        vm.Transaction.EditTradeCommand.Execute(buyRow);
+        await Task.Delay(120);
+
+        Assert.Equal("18.0400", vm.AddAssetDialog.AddPrice);
     }
 
     [Fact]
@@ -1945,5 +2066,54 @@ public class PortfolioViewModelTests
         Assert.Equal(650m, updated.Price);
         Assert.Equal(1000, updated.Quantity);
         Assert.Equal(50_000m, updated.RealizedPnl);
+    }
+
+    private sealed class DelayedClosePriceWorkflow(int delayMs, decimal lookupPrice) : IAddAssetWorkflowService
+    {
+        public IReadOnlyList<StockSearchResult> SearchSymbols(string query, int maxResults = 8) => [];
+
+        public async Task<ClosePriceLookupResult> LookupClosePriceAsync(
+            string symbol,
+            DateTime buyDate,
+            CancellationToken ct = default)
+        {
+            await Task.Delay(delayMs, ct);
+            return new ClosePriceLookupResult(true, lookupPrice, "test");
+        }
+
+        public BuyPreviewResult BuildBuyPreview(BuyPreviewRequest request) =>
+            new(
+                request.Price * request.Quantity,
+                0m,
+                request.Price * request.Quantity,
+                request.Price);
+
+        public Task<PortfolioEntry> EnsureStockEntryAsync(EnsureStockEntryRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new PortfolioEntry(Guid.NewGuid(), request.Symbol, request.Exchange ?? "TWSE"));
+
+        public Task<StockBuyResult> ExecuteStockBuyAsync(StockBuyRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new StockBuyResult(
+                new PortfolioEntry(Guid.NewGuid(), request.Symbol, request.Exchange ?? "TWSE"),
+                0m,
+                request.CommissionDiscount,
+                request.Price));
+
+        public Task<ManualAssetCreateResult> CreateManualAssetAsync(ManualAssetCreateRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new ManualAssetCreateResult(
+                new PortfolioEntry(Guid.NewGuid(), request.Symbol, request.Exchange, request.AssetType, request.Name),
+                new PositionSnapshot(Guid.NewGuid(), request.Quantity, request.TotalCost, request.UnitPrice, 0m, DateOnly.FromDateTime(DateTime.Today))));
+
+        public string InferExchange(string symbol) => "TWSE";
+    }
+
+    private sealed class NoopAccountUpsertWorkflow : IAccountUpsertWorkflowService
+    {
+        public Task<AccountUpsertResult> CreateAsync(CreateAccountRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new AccountUpsertResult(
+                new AssetItem(Guid.NewGuid(), request.Name, FinancialType.Asset, null, request.Currency, request.CreatedDate)));
+
+        public Task<AccountUpsertResult> UpdateAsync(UpdateAccountRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new AccountUpsertResult(
+                new AssetItem(request.AccountId, request.Name, FinancialType.Asset, null, request.Currency, request.CreatedDate)));
     }
 }

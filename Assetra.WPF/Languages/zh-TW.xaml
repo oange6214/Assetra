@@ -142,7 +142,7 @@
     <sys:String x:Key="Portfolio.Liability.Health.Danger">危險</sys:String>
     <sys:String x:Key="Portfolio.Liability.Health.Tooltip">負債比率閾值：&#x0a;　• 健康 &lt; 30%&#x0a;　• 警告 30% ~ 50%&#x0a;　• 危險 ≥ 50%</sys:String>
     <sys:String x:Key="Portfolio.DayChange">今日漲跌</sys:String>
-    <sys:String x:Key="Portfolio.AddNew">交易</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord">新增紀錄</sys:String>
     <sys:String x:Key="Portfolio.AddCash">帳戶</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">負債</sys:String>
     <sys:String x:Key="Portfolio.Cash.AddHint">建立後，請在「交易記錄」新增「存入」以記錄金額；存提款會自動累計。</sys:String>
@@ -166,7 +166,7 @@
     <sys:String x:Key="Portfolio.Cash.Default">預設</sys:String>
     <sys:String x:Key="Portfolio.Cash.SetDefault">設為預設</sys:String>
     <sys:String x:Key="Portfolio.Cash.UnsetDefault">取消預設</sys:String>
-    <sys:String x:Key="Portfolio.Cash.DefaultHint">新增交易時自動帶入此帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Cash.DefaultHint">新增紀錄時自動帶入此帳戶</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Title">緊急預備金</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Months">個月</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.MonthlyExpense">每月預估開銷</sys:String>
@@ -175,7 +175,7 @@
     <sys:String x:Key="Portfolio.Cash.Emergency.Warning">注意</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Danger">危險</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.NotSet">請設定每月開銷以計算緊急預備金</sys:String>
-    <sys:String x:Key="Portfolio.Liability.Empty">尚未有借款記錄，請透過新增交易→借款建立</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Empty">尚未有借款記錄，請透過新增紀錄→借款建立</sys:String>
     <sys:String x:Key="Portfolio.Liability.Name">負債名稱</sys:String>
     <sys:String x:Key="Portfolio.Liability.Amount">剩餘金額</sys:String>
     <sys:String x:Key="Portfolio.Liability.OriginalAmount">總借款金額</sys:String>
@@ -258,7 +258,7 @@
     <sys:String x:Key="Portfolio.Filter.Dividend">股利</sys:String>
 
 
-    <sys:String x:Key="Portfolio.Tx.Title">新增交易</sys:String>
+    <sys:String x:Key="Portfolio.Record.Title">新增紀錄</sys:String>
     <sys:String x:Key="Portfolio.Tx.Income">收入</sys:String>
     <sys:String x:Key="Portfolio.Tx.CashDiv">現金股利</sys:String>
     <sys:String x:Key="Portfolio.Tx.StockDiv">股票股利</sys:String>

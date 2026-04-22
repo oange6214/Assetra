@@ -79,7 +79,7 @@
                     Margin="0,0,12,0"
                     Padding="10,0"
                     VerticalAlignment="Center"
-                    Command="{Binding GlobalAddCommand}"
+                    Command="{Binding AddRecordCommand}"
                     DockPanel.Dock="Right"
                     Style="{StaticResource BtnPrimary}">
                     <StackPanel Orientation="Horizontal">
@@ -93,7 +93,7 @@
                         <TextBlock
                             VerticalAlignment="Center"
                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                            Text="{DynamicResource Portfolio.AddNew}" />
+                            Text="{DynamicResource Portfolio.AddRecord}" />
                     </StackPanel>
                 </Button>
             </DockPanel>
@@ -1887,7 +1887,7 @@
         </Grid>
 
         <!--  ── Dialog overlays ──  -->
-        <pcontrols:AddTransactionDialog Grid.RowSpan="3" Panel.ZIndex="210" DataContext="{Binding Transaction}" />
+        <pcontrols:AddRecordDialog Grid.RowSpan="3" Panel.ZIndex="210" DataContext="{Binding Transaction}" />
         <pcontrols:AddAssetDialog Grid.RowSpan="3" Panel.ZIndex="200" />
         <pcontrols:EditAssetDialog Grid.RowSpan="3" Panel.ZIndex="205" DataContext="{Binding Account}" />
         <!--  ── Confirm dialog ──  -->

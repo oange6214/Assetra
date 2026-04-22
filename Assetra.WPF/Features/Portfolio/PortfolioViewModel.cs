@@ -1410,9 +1410,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         BeginSell(SelectedPositionRow);
     }
 
-    // 全域「新增交易」按鈕 — 一律開啟交易對話框
+    // 全域「新增紀錄」按鈕 — 一律開啟紀錄對話框
     [RelayCommand]
-    private void GlobalAdd() => Transaction.OpenTxDialog();
+    private void AddRecord() => Transaction.OpenTxDialog();
 
     /// <summary>開啟新增現金帳戶對話框（由現金 tab 的「新增帳戶」按鈕呼叫）。</summary>
     [RelayCommand]
