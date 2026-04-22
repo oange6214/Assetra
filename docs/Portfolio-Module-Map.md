@@ -8,6 +8,12 @@
   - Sell panel preview and submission shaping.
 - `PortfolioTradeDialogController`
   - Trade dialog open/edit state composition.
+- `SubViewModels/AddAssetDialogViewModel`
+  - Add/edit asset dialog state and orchestration.
+- `SubViewModels/SellPanelViewModel`
+  - Sell side-panel state and submission callbacks.
+- `SubViewModels/TransactionDialogViewModel`
+  - Shared transaction dialog state and routing.
 
 ## Application Services
 

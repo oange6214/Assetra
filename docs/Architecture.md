@@ -5,11 +5,11 @@
 - `Assetra.Core`
   - Domain models and repository/service contracts.
 - `Assetra.Application`
-  - Query services, workflow services, and summary/load orchestration.
+  - Alert services, query services, workflow services, and summary/load orchestration.
 - `Assetra.Infrastructure`
   - SQLite repositories, external market-data clients, schedulers, migration helpers.
 - `Assetra.WPF`
-  - Views, ViewModels, controllers, startup wiring, and UI-only services.
+  - Views, ViewModels, controllers, sub-viewmodels, startup wiring, and UI-only services.
 
 ## Dependency Rules
 
@@ -33,7 +33,12 @@
 
 - Main WPF shell depends on `PortfolioViewModel`.
 - `PortfolioViewModel` now delegates most mutation flow to app-layer workflow services.
-- UI-specific orchestration is being moved into WPF-side controllers to keep the ViewModel thinner.
+- UI-specific orchestration is being moved into WPF-side controllers and sub-viewmodels to keep the ViewModel thinner.
+
+## Other Modules
+
+- `AlertsViewModel` now depends on an application-layer alert service rather than a repository.
+- `FinancialOverviewViewModel` reads through an application query service instead of composing repository calls directly in the ViewModel.
 
 ## Guardrails
 
