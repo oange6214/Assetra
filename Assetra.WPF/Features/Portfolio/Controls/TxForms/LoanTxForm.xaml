@@ -92,7 +92,7 @@
             <ui:CalendarDatePicker
                 FontSize="{StaticResource FontSizeSm}"
                 Foreground="{DynamicResource AppTextPrimary}"
-                SelectedDate="{Binding TxLoanStartDate}" />
+                Date="{Binding TxLoanStartDate}" />
             <TextBlock
                 Margin="0,4,0,12"
                 FontSize="{StaticResource FontSizeXs}"
