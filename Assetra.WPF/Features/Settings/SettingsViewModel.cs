@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using Assetra.Core.Interfaces;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -63,6 +64,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _primaryCurrency = "TWD";
 
     public ObservableCollection<string> SupportedCurrencies { get; } = [];
+
+    public string AppVersion { get; } = ResolveAppVersion();
 
     public SettingsViewModel(
         IAppSettingsService settings,
@@ -173,6 +176,21 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     public string DataFolderPath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "Assetra");
+
+    private static string ResolveAppVersion()
+    {
+        var assembly = Assembly.GetEntryAssembly() ?? typeof(SettingsViewModel).Assembly;
+
+        var informational = assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion?
+            .Trim();
+        if (!string.IsNullOrWhiteSpace(informational))
+            return informational.StartsWith('v') ? informational : $"v{informational}";
+
+        var version = assembly.GetName().Version?.ToString();
+        return string.IsNullOrWhiteSpace(version) ? "v0.0.0" : $"v{version}";
+    }
 
     public void Dispose()
     {

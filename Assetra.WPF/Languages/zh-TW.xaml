@@ -509,6 +509,7 @@
     <sys:String x:Key="Settings.Section.Language">語言</sys:String>
     <sys:String x:Key="Settings.PrimaryCurrency">主要貨幣</sys:String>
     <sys:String x:Key="Settings.Section.Data">資料</sys:String>
+    <sys:String x:Key="Settings.Version">版本</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">盤中</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">休市</sys:String>
 </ResourceDictionary>

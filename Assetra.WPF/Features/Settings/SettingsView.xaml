@@ -177,6 +177,7 @@
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" MinHeight="40" />
+                        <RowDefinition Height="Auto" MinHeight="40" />
                     </Grid.RowDefinitions>
 
                     <TextBlock
@@ -200,6 +201,17 @@
                             Content="{DynamicResource Settings.OpenDir}"
                             Style="{StaticResource BtnGhost}" />
                     </StackPanel>
+
+                    <TextBlock
+                        Grid.Row="1" Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Settings.Version}" />
+                    <TextBlock
+                        Grid.Row="1" Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{Binding AppVersion}" />
                 </Grid>
             </Border>
 
