@@ -335,6 +335,8 @@
     <sys:String x:Key="Portfolio.Filter.Loan">Loans</sys:String>
     <sys:String x:Key="Portfolio.Filter.LoanBorrow">Borrow</sys:String>
     <sys:String x:Key="Portfolio.Filter.LoanRepay">Repay</sys:String>
+    <sys:String x:Key="Portfolio.Filter.CreditCardCharge">Card Charge</sys:String>
+    <sys:String x:Key="Portfolio.Filter.CreditCardPayment">Card Payment</sys:String>
     <sys:String x:Key="Portfolio.Filter.CashDividend">Cash Div</sys:String>
     <sys:String x:Key="Portfolio.Filter.StockDividend">Stock Div</sys:String>
     <sys:String x:Key="Portfolio.Filter.TypesCountUnit">types</sys:String>

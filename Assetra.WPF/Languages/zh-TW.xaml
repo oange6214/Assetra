@@ -336,6 +336,8 @@
     <sys:String x:Key="Portfolio.Filter.Loan">借還款</sys:String>
     <sys:String x:Key="Portfolio.Filter.LoanBorrow">借款</sys:String>
     <sys:String x:Key="Portfolio.Filter.LoanRepay">還款</sys:String>
+    <sys:String x:Key="Portfolio.Filter.CreditCardCharge">信用卡消費</sys:String>
+    <sys:String x:Key="Portfolio.Filter.CreditCardPayment">信用卡繳款</sys:String>
     <sys:String x:Key="Portfolio.Filter.CashDividend">現金股息</sys:String>
     <sys:String x:Key="Portfolio.Filter.StockDividend">股票股利</sys:String>
     <sys:String x:Key="Portfolio.Filter.TypesCountUnit">個類型</sys:String>

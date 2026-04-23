@@ -293,6 +293,10 @@ public partial class TradeFilterViewModel : ObservableObject
             return true;
         if (t.IsLoanRepay && keys.Contains("LoanRepay"))
             return true;
+        if (t.IsCreditCardCharge && keys.Contains("CreditCardCharge"))
+            return true;
+        if (t.IsCreditCardPayment && keys.Contains("CreditCardPayment"))
+            return true;
         return false;
     }
 
@@ -349,7 +353,8 @@ public partial class TradeFilterViewModel : ObservableObject
         string Label(string key) =>
             _localization.Get($"Portfolio.Filter.{key}", key);
         string[] keys = ["Buy", "Sell", "Income", "CashDividend", "StockDividend",
-                         "Deposit", "Withdrawal", "Transfer", "LoanBorrow", "LoanRepay"];
+                         "Deposit", "Withdrawal", "Transfer", "LoanBorrow", "LoanRepay",
+                         "CreditCardCharge", "CreditCardPayment"];
         foreach (var k in keys)
         {
             var item = new TradeTypeFilterItem(k, Label(k));
@@ -392,7 +397,7 @@ public partial class TradeFilterViewModel : ObservableObject
             {
                 TradeType.Buy or TradeType.Sell or TradeType.CashDividend or TradeType.StockDividend
                     => ("Investment", 0, InvestmentLabel),
-                TradeType.LoanBorrow or TradeType.LoanRepay
+                TradeType.LoanBorrow or TradeType.LoanRepay or TradeType.CreditCardCharge or TradeType.CreditCardPayment
                     => ("Liability", 2, LiabilityLabel),
                 _ => ("Cash", 1, CashLabel),
             };

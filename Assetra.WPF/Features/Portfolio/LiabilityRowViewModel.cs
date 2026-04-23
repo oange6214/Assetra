@@ -6,9 +6,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace Assetra.WPF.Features.Portfolio;
 
 /// <summary>
-/// 貸款列（負債）。Balance / OriginalAmount 皆為 Trade 歷史投影結果，
+/// 負債列（貸款 / 信用卡）。Balance / OriginalAmount 皆為 Trade 歷史投影結果，
 /// 透過 <see cref="LiabilityRowViewModel(string, LiabilitySnapshot, AssetItem?)"/> 於載入時注入。
-/// 若存在對應的 <see cref="AssetItem"/>（IsLoan=true），則同時包含攤還表資料。
+/// 若存在對應的 <see cref="AssetItem"/>，則同時包含貸款或信用卡附加資訊。
 /// </summary>
 public sealed partial class LiabilityRowViewModel : ObservableObject
 {
@@ -35,14 +35,19 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
         ? $"{PaidPercent:F0}%"
         : "—";
 
-    // ── Loan metadata (null when no AssetItem linked) ─────────────────────
+    // ── Liability metadata (null when no AssetItem linked) ────────────────
 
     public Guid? AssetId { get; }
     public bool IsLoan { get; }
+    public bool IsCreditCard { get; }
     public decimal? LoanAnnualRate { get; }
     public int? LoanTermMonths { get; }
     public DateOnly? LoanStartDate { get; }
     public decimal? LoanHandlingFee { get; }
+    public int? BillingDay { get; }
+    public int? DueDay { get; }
+    public decimal? CreditLimit { get; }
+    public string? IssuerName { get; }
 
     public string RateDisplay => LoanAnnualRate.HasValue ? $"{LoanAnnualRate.Value * 100:F2}%" : "—";
     public string TermDisplay => LoanTermMonths.HasValue ? $"{LoanTermMonths.Value} 個月" : "—";
@@ -88,14 +93,19 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
         _balance = snapshot.Balance;
         _originalAmount = snapshot.OriginalAmount;
 
-        if (asset is { IsLoan: true })
+        if (asset is not null)
         {
             AssetId = asset.Id;
-            IsLoan = true;
+            IsLoan = asset.IsLoan;
+            IsCreditCard = asset.IsCreditCard;
             LoanAnnualRate = asset.LoanAnnualRate;
             LoanTermMonths = asset.LoanTermMonths;
             LoanStartDate = asset.LoanStartDate;
             LoanHandlingFee = asset.LoanHandlingFee;
+            BillingDay = asset.BillingDay;
+            DueDay = asset.DueDay;
+            CreditLimit = asset.CreditLimit;
+            IssuerName = asset.IssuerName;
         }
     }
 

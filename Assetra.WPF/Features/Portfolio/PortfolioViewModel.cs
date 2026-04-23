@@ -1569,16 +1569,16 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private void ApplyLiabilities(PortfolioLoadResult loaded)
     {
         var snapshots = loaded.LiabilitySnapshots;
-        var loanAssets = loaded.LoanAssets;
+        var liabilityAssets = loaded.LiabilityAssets;
 
         Liabilities.Clear();
         foreach (var (label, snap) in snapshots.OrderBy(kv => kv.Key))
         {
-            loanAssets.TryGetValue(label, out var asset);
+            liabilityAssets.TryGetValue(label, out var asset);
             Liabilities.Add(new LiabilityRowViewModel(label, snap, asset));
         }
 
-        foreach (var (name, asset) in loanAssets)
+        foreach (var (name, asset) in liabilityAssets)
         {
             if (!snapshots.ContainsKey(name))
                 Liabilities.Add(new LiabilityRowViewModel(name, LiabilitySnapshot.Empty, asset));
@@ -1670,29 +1670,44 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             ? Trades.Where(t => t.CashAccountId == r.Id &&
                                 (t.Type == TradeType.Withdrawal ||
                                  t.Type == TradeType.Buy ||
-                                 t.Type == TradeType.LoanRepay))
+                                 t.Type == TradeType.LoanRepay ||
+                                 t.Type == TradeType.CreditCardPayment))
                     .Sum(t => Math.Abs(t.CashAmount ?? 0))
             : 0m;
 
     // Liability stats + filtered trades
     public IEnumerable<TradeRowViewModel> SelectedLiabilityTrades =>
         SelectedLiabilityRow is { } r
-            ? Trades.Where(t => (t.Type == TradeType.LoanBorrow || t.Type == TradeType.LoanRepay) &&
-                                t.LoanLabel == r.Label)
+            ? Trades.Where(t => IsTradeForLiability(t, r))
                     .OrderByDescending(t => t.TradeDate)
             : [];
 
     public decimal SelectedLiabilityTotalBorrows =>
         SelectedLiabilityRow is { } r
-            ? Trades.Where(t => t.Type == TradeType.LoanBorrow && t.LoanLabel == r.Label)
+            ? Trades.Where(t =>
+                    (t.Type == TradeType.LoanBorrow && t.LoanLabel == r.Label) ||
+                    (t.Type == TradeType.CreditCardCharge && LiabilityMatches(t, r)))
                     .Sum(t => t.CashAmount ?? 0)
             : 0m;
 
     public decimal SelectedLiabilityTotalRepays =>
         SelectedLiabilityRow is { } r
-            ? Trades.Where(t => t.Type == TradeType.LoanRepay && t.LoanLabel == r.Label)
+            ? Trades.Where(t =>
+                    (t.Type == TradeType.LoanRepay && t.LoanLabel == r.Label) ||
+                    (t.Type == TradeType.CreditCardPayment && LiabilityMatches(t, r)))
                     .Sum(t => t.CashAmount ?? 0)
             : 0m;
+
+    private static bool IsTradeForLiability(TradeRowViewModel trade, LiabilityRowViewModel liability) =>
+        trade.Type switch
+        {
+            TradeType.LoanBorrow or TradeType.LoanRepay => trade.LoanLabel == liability.Label,
+            TradeType.CreditCardCharge or TradeType.CreditCardPayment => LiabilityMatches(trade, liability),
+            _ => false,
+        };
+
+    private static bool LiabilityMatches(TradeRowViewModel trade, LiabilityRowViewModel liability) =>
+        liability.AssetId.HasValue && trade.LiabilityAssetId == liability.AssetId;
 
     // Investment position stats + filtered trades
     public IEnumerable<TradeRowViewModel> SelectedPositionTrades =>

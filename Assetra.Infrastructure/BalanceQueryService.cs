@@ -58,8 +58,8 @@ public sealed class BalanceQueryService : IBalanceQueryService
         var result = new Dictionary<string, LiabilitySnapshot>(StringComparer.Ordinal);
         foreach (var t in trades)
         {
-            if (string.IsNullOrWhiteSpace(t.LoanLabel)) continue;
-            var label = t.LoanLabel;
+            var label = GetLiabilityLabel(t);
+            if (string.IsNullOrWhiteSpace(label)) continue;
             var current = result.TryGetValue(label, out var snap) ? snap : LiabilitySnapshot.Empty;
             result[label] = t.Type switch
             {
@@ -68,6 +68,12 @@ public sealed class BalanceQueryService : IBalanceQueryService
                     current.OriginalAmount + (t.CashAmount ?? 0m)),
                 TradeType.LoanRepay => new LiabilitySnapshot(
                     current.Balance - (t.Principal ?? t.CashAmount ?? 0m),
+                    current.OriginalAmount),
+                TradeType.CreditCardCharge => new LiabilitySnapshot(
+                    current.Balance + (t.CashAmount ?? 0m),
+                    current.OriginalAmount + (t.CashAmount ?? 0m)),
+                TradeType.CreditCardPayment => new LiabilitySnapshot(
+                    current.Balance - (t.CashAmount ?? 0m),
                     current.OriginalAmount),
                 _ => current,
             };
@@ -103,7 +109,7 @@ public sealed class BalanceQueryService : IBalanceQueryService
         decimal balance = 0m, original = 0m;
         foreach (var t in trades)
         {
-            if (!string.Equals(t.LoanLabel, loanLabel, StringComparison.Ordinal)) continue;
+            if (!string.Equals(GetLiabilityLabel(t), loanLabel, StringComparison.Ordinal)) continue;
             switch (t.Type)
             {
                 case TradeType.LoanBorrow:
@@ -115,6 +121,16 @@ public sealed class BalanceQueryService : IBalanceQueryService
                 }
                 case TradeType.LoanRepay:
                     balance -= t.Principal ?? t.CashAmount ?? 0m;
+                    break;
+                case TradeType.CreditCardCharge:
+                {
+                    var amt = t.CashAmount ?? 0m;
+                    balance += amt;
+                    original += amt;
+                    break;
+                }
+                case TradeType.CreditCardPayment:
+                    balance -= t.CashAmount ?? 0m;
                     break;
             }
         }
@@ -133,10 +149,18 @@ public sealed class BalanceQueryService : IBalanceQueryService
         TradeType.Withdrawal   => -(t.CashAmount ?? 0m),
         TradeType.LoanBorrow   => +(t.CashAmount ?? 0m) - (t.Commission ?? 0m),
         TradeType.LoanRepay    => -(t.CashAmount ?? 0m),   // 全部付款從現金扣
+        TradeType.CreditCardPayment => -(t.CashAmount ?? 0m),
         TradeType.Transfer     => -(t.CashAmount ?? 0m),   // 來源帳戶減少
         TradeType.Buy          => -(t.Price * t.Quantity + (t.Commission ?? 0m)),
         TradeType.Sell         => +(t.Price * t.Quantity - (t.Commission ?? 0m)),
         _                      => 0m,
+    };
+
+    private static string? GetLiabilityLabel(Trade t) => t.Type switch
+    {
+        TradeType.LoanBorrow or TradeType.LoanRepay => t.LoanLabel,
+        TradeType.CreditCardCharge or TradeType.CreditCardPayment => t.Name,
+        _ => null,
     };
 
     private static void Accumulate(Dictionary<Guid, decimal> map, Guid key, decimal delta)
