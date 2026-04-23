@@ -543,6 +543,80 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task AddCreditCard_ValidInput_AddsLiabilityRow()
+    {
+        var portfolioRepo = new Mock<IPortfolioRepository>();
+        portfolioRepo.Setup(r => r.GetEntriesAsync()).ReturnsAsync([]);
+        var assetRepo = new FakeAssetRepo();
+        var tradeRepo = new FakeTradeRepo();
+        var (snapshotSvc, snapshotRepo) = SnapshotStubs();
+        var (logRepo, backfill) = BackfillStubs(snapshotRepo);
+        var txService = new TransactionService(tradeRepo);
+        var balanceQuery = new BalanceQueryService(tradeRepo);
+
+        var vm = new PortfolioViewModel(
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
+            new PortfolioServices(
+                SilentStockService().Object,
+                new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                TransactionWorkflow: new TransactionWorkflowService(txService),
+                CreditCardMutation: new CreditCardMutationWorkflowService(assetRepo),
+                BalanceQuery: balanceQuery),
+            new PortfolioUiServices(ImmediateScheduler.Instance));
+        await vm.LoadAsync();
+
+        vm.OpenAddCreditCardDialogCommand.Execute(null);
+        vm.AddAssetDialog.AddCreditCardName = "富邦 J 卡";
+        vm.AddAssetDialog.AddCreditCardIssuer = "Fubon";
+        vm.AddAssetDialog.AddCreditCardBillingDay = "5";
+        vm.AddAssetDialog.AddCreditCardDueDay = "20";
+        vm.AddAssetDialog.AddCreditCardLimit = "80000";
+
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
+
+        Assert.Single(vm.Liabilities);
+        Assert.Equal("富邦 J 卡", vm.Liabilities[0].Label);
+        Assert.True(vm.Liabilities[0].IsCreditCard);
+        Assert.Equal(0m, vm.Liabilities[0].Balance);
+    }
+
+    [Fact]
+    public async Task ConfirmTx_CreditCardCharge_IncreasesCardBalance()
+    {
+        var (vm, _, _, card) = await CreateVmWithCreditCardAndCashAsync(initialCardBalance: 0m, initialCash: 30_000m);
+
+        vm.Transaction.TxType = "creditCardCharge";
+        vm.Transaction.TxCreditCard = vm.Liabilities.Single(l => l.AssetId == card.Id);
+        vm.Transaction.TxAmount = "3500";
+        vm.Transaction.TxNote = "超商";
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
+
+        var row = vm.Liabilities.Single(l => l.AssetId == card.Id);
+        Assert.Equal(3_500m, row.Balance);
+        Assert.Equal(3_500m, row.OriginalAmount);
+        Assert.Contains(vm.Trades, t => t.Type == TradeType.CreditCardCharge && t.LiabilityAssetId == card.Id);
+    }
+
+    [Fact]
+    public async Task ConfirmTx_CreditCardPayment_DecreasesCardBalanceAndCash()
+    {
+        var (vm, assetRepo, _, card) = await CreateVmWithCreditCardAndCashAsync(initialCardBalance: 12_000m, initialCash: 50_000m);
+        var cashId = assetRepo.Store.First(a => a.Type == FinancialType.Asset).Id;
+
+        vm.Transaction.TxType = "creditCardPayment";
+        vm.Transaction.TxCreditCard = vm.Liabilities.Single(l => l.AssetId == card.Id);
+        vm.Transaction.TxCashAccount = vm.CashAccounts.Single(a => a.Id == cashId);
+        vm.Transaction.TxAmount = "4000";
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
+
+        var cardRow = vm.Liabilities.Single(l => l.AssetId == card.Id);
+        Assert.Equal(8_000m, cardRow.Balance);
+        Assert.Equal(12_000m, cardRow.OriginalAmount);
+        Assert.Equal(46_000m, vm.CashAccounts.Single(a => a.Id == cashId).Balance);
+    }
+
+    [Fact]
     public async Task ConfirmTx_LoanRepay_PreservesOriginalAmount()
     {
         // Regression: LoanRepay must not shrink the original-borrow total, otherwise the
@@ -758,6 +832,20 @@ public class PortfolioViewModelTests
                 Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
                 CashAmount: -initialBalance, CashAccountId: cashId, Note: "seed"));
         }
+    }
+
+    private static async Task SeedCreditCardBaselineAsync(
+        FakeTradeRepo tradeRepo, AssetItem card, decimal initialBalance)
+    {
+        if (initialBalance <= 0m)
+            return;
+
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: string.Empty, Exchange: string.Empty,
+            Name: card.Name, Type: TradeType.CreditCardCharge,
+            TradeDate: DateTime.UtcNow.AddDays(-1),
+            Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
+            CashAmount: initialBalance, LiabilityAssetId: card.Id, Note: "seed"));
     }
 
     [Fact]
@@ -2252,6 +2340,51 @@ public class PortfolioViewModelTests
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
         return (vm, assetRepo, tradeRepo, loanLabel);
+    }
+
+    private static async Task<(PortfolioViewModel vm, FakeAssetRepo assetRepo, FakeTradeRepo tradeRepo, AssetItem card)>
+        CreateVmWithCreditCardAndCashAsync(decimal initialCardBalance, decimal initialCash)
+    {
+        var portfolioRepo = new Mock<IPortfolioRepository>();
+        portfolioRepo.Setup(r => r.GetEntriesAsync()).ReturnsAsync([]);
+
+        var assetRepo = new FakeAssetRepo();
+        var tradeRepo = new FakeTradeRepo();
+
+        var cashAccount = new AssetItem(
+            Guid.NewGuid(), "永豐 Richart", FinancialType.Asset, null, "TWD",
+            DateOnly.FromDateTime(DateTime.Today));
+        var card = new AssetItem(
+            Guid.NewGuid(), "玉山 Pi 卡", FinancialType.Liability, null, "TWD",
+            DateOnly.FromDateTime(DateTime.Today),
+            LiabilitySubtype: LiabilitySubtype.CreditCard,
+            BillingDay: 5,
+            DueDay: 20,
+            CreditLimit: 80_000m,
+            IssuerName: "E.SUN");
+        assetRepo.Store.Add(cashAccount);
+        assetRepo.Store.Add(card);
+
+        await SeedCashBaselineAsync(tradeRepo, cashAccount.Id, cashAccount.Name, initialCash);
+        await SeedCreditCardBaselineAsync(tradeRepo, card, initialCardBalance);
+
+        var (snapshotSvc, snapshotRepo) = SnapshotStubs();
+        var (logRepo, backfill) = BackfillStubs(snapshotRepo);
+        var txService = new TransactionService(tradeRepo);
+        var balanceQuery = new BalanceQueryService(tradeRepo);
+        var vm = new PortfolioViewModel(
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: tradeRepo, Asset: assetRepo),
+            new PortfolioServices(
+                SilentStockService().Object,
+                new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                TransactionWorkflow: new TransactionWorkflowService(txService),
+                CreditCardTransaction: new CreditCardTransactionWorkflowService(assetRepo, txService),
+                CreditCardMutation: new CreditCardMutationWorkflowService(assetRepo),
+                BalanceQuery: balanceQuery),
+            new PortfolioUiServices(ImmediateScheduler.Instance));
+        await vm.LoadAsync();
+        return (vm, assetRepo, tradeRepo, card);
     }
 
     [Fact]

@@ -58,6 +58,16 @@ public class BalanceQueryServiceTests
                LoanLabel: loanLabel,
                Principal: principal, InterestPaid: interest);
 
+    private static Trade CreditCardCharge(Guid cardId, string cardName, decimal amount)
+        => new(Guid.NewGuid(), "", "", cardName, TradeType.CreditCardCharge,
+               DateTime.Today, 0m, 1, null, null,
+               CashAmount: amount, LiabilityAssetId: cardId);
+
+    private static Trade CreditCardPayment(Guid cardId, string cardName, Guid cashId, decimal amount)
+        => new(Guid.NewGuid(), "", "", cardName, TradeType.CreditCardPayment,
+               DateTime.Today, 0m, 1, null, null,
+               CashAmount: amount, CashAccountId: cashId, LiabilityAssetId: cardId);
+
     private static BalanceQueryService Create(params Trade[] trades)
     {
         var repo = new FakeTradeRepo();
@@ -213,6 +223,18 @@ public class BalanceQueryServiceTests
         Assert.Equal(1_945_000m, await svc.GetCashBalanceAsync(cash));
     }
 
+    [Fact]
+    public async Task Cash_CreditCardPayment_DebitsCashAccount()
+    {
+        var cash = Guid.NewGuid();
+        var card = Guid.NewGuid();
+        var svc = Create(
+            Deposit(cash, 80_000m),
+            CreditCardPayment(card, "玉山 Pi 卡", cash, 12_345m));
+
+        Assert.Equal(67_655m, await svc.GetCashBalanceAsync(cash));
+    }
+
     // ─── Bulk queries ────────────────────────────────────────────────────
 
     [Fact]
@@ -242,6 +264,36 @@ public class BalanceQueryServiceTests
         var all = await svc.GetAllLiabilitySnapshotsAsync();
         Assert.Equal(new LiabilitySnapshot(950_000m, 1_000_000m), all["台新信貸"]);
         Assert.Equal(new LiabilitySnapshot(300_000m,   300_000m), all["玉山信貸"]);
+    }
+
+    [Fact]
+    public async Task Liability_CreditCardChargeAndPayment_ProjectOutstandingBalance()
+    {
+        var cash = Guid.NewGuid();
+        var card = Guid.NewGuid();
+        var svc = Create(
+            CreditCardCharge(card, "玉山 Pi 卡", 8_000m),
+            CreditCardCharge(card, "玉山 Pi 卡", 2_000m),
+            CreditCardPayment(card, "玉山 Pi 卡", cash, 3_500m));
+
+        var snap = await svc.GetLiabilitySnapshotAsync("玉山 Pi 卡");
+        Assert.Equal(6_500m, snap.Balance);
+        Assert.Equal(10_000m, snap.OriginalAmount);
+    }
+
+    [Fact]
+    public async Task GetAllLiabilitySnapshots_IncludesCreditCards()
+    {
+        var cash = Guid.NewGuid();
+        var card = Guid.NewGuid();
+        var svc = Create(
+            LoanBorrow(cash, "台新信貸", 500_000m),
+            CreditCardCharge(card, "富邦 J 卡", 20_000m),
+            CreditCardPayment(card, "富邦 J 卡", cash, 4_000m));
+
+        var all = await svc.GetAllLiabilitySnapshotsAsync();
+        Assert.Equal(new LiabilitySnapshot(500_000m, 500_000m), all["台新信貸"]);
+        Assert.Equal(new LiabilitySnapshot(16_000m, 20_000m), all["富邦 J 卡"]);
     }
 
     // ─── Fake repo ───────────────────────────────────────────────────────
