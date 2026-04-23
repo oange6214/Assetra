@@ -46,6 +46,8 @@ public sealed class TradeRowViewModel : ObservableObject
     // ── 轉帳欄位（Transfer）──────────────────────────────────────────────
     /// <summary>Transfer：目標現金帳戶。</summary>
     public Guid? ToCashAccountId { get; }
+    /// <summary>信用卡等負債資產 Id。</summary>
+    public Guid? LiabilityAssetId { get; }
 
     // Type predicates — used by XAML DataTriggers and ViewModel filter queries.
     // Intentionally verbose (one-per-TradeType) rather than a single enum switch so that
@@ -59,6 +61,8 @@ public sealed class TradeRowViewModel : ObservableObject
     public bool IsWithdrawal => Type == TradeType.Withdrawal;
     public bool IsLoanBorrow => Type == TradeType.LoanBorrow;
     public bool IsLoanRepay => Type == TradeType.LoanRepay;
+    public bool IsCreditCardCharge => Type == TradeType.CreditCardCharge;
+    public bool IsCreditCardPayment => Type == TradeType.CreditCardPayment;
     public bool IsTransfer => Type == TradeType.Transfer;
 
     // Display helpers
@@ -140,7 +144,9 @@ public sealed class TradeRowViewModel : ObservableObject
         TradeType.Sell => +(Price * Quantity - (Commission ?? 0)),
         TradeType.CashDividend => +(CashAmount ?? (Price * Quantity)),
         TradeType.Income or TradeType.Deposit or TradeType.LoanBorrow => +(CashAmount ?? 0),
-        TradeType.Withdrawal or TradeType.LoanRepay or TradeType.Transfer => -(CashAmount ?? 0),
+        TradeType.Withdrawal or TradeType.LoanRepay or TradeType.Transfer
+            or TradeType.CreditCardPayment => -(CashAmount ?? 0),
+        TradeType.CreditCardCharge => +(CashAmount ?? 0),
         _ => 0,   // StockDividend
     };
 
@@ -248,5 +254,6 @@ public sealed class TradeRowViewModel : ObservableObject
         Principal = t.Principal;
         InterestPaid = t.InterestPaid;
         ToCashAccountId = t.ToCashAccountId;
+        LiabilityAssetId = t.LiabilityAssetId;
     }
 }

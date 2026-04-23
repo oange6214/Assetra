@@ -50,7 +50,18 @@
                             FontSize="{StaticResource FontSizeSm}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{DynamicResource Portfolio.Account.Title}" />
+                            Text="{DynamicResource Portfolio.Account.Title}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Account.Title}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding AddAssetDialog.AddTypeIsCreditCard}" Value="True">
+                                            <Setter Property="Text" Value="{DynamicResource Portfolio.CreditCard.Title}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                         <Button
                             Width="28"
                             Height="28"
@@ -76,6 +87,12 @@
                         Content="{DynamicResource Portfolio.Dialog.TypeCash}"
                         GroupName="AddType"
                         IsChecked="{Binding AddAssetDialog.AddTypeIsAccount, Mode=TwoWay}"
+                        Style="{StaticResource NavTabBtn}" />
+                    <RadioButton
+                        Margin="8,0,0,0"
+                        Content="{DynamicResource Portfolio.Dialog.TypeCreditCard}"
+                        GroupName="AddType"
+                        IsChecked="{Binding AddAssetDialog.AddTypeIsCreditCard, Mode=TwoWay}"
                         Style="{StaticResource NavTabBtn}" />
                 </StackPanel>
 
@@ -103,6 +120,73 @@
                                 FontSize="{StaticResource FontSizeXs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Portfolio.Cash.AddHint}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Visibility="{Binding AddAssetDialog.AddTypeIsCreditCard, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock
+                                Margin="0,0,0,4"
+                                FontSize="{StaticResource FontSizeXs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Portfolio.CreditCard.Name}" />
+                            <TextBox
+                                Margin="0,0,0,10"
+                                Style="{StaticResource FormTextBox}"
+                                Text="{Binding AddAssetDialog.AddCreditCardName, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <TextBlock
+                                Margin="0,0,0,4"
+                                FontSize="{StaticResource FontSizeXs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Portfolio.CreditCard.Issuer}" />
+                            <TextBox
+                                Margin="0,0,0,10"
+                                Style="{StaticResource FormTextBox}"
+                                Text="{Binding AddAssetDialog.AddCreditCardIssuer, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{DynamicResource Portfolio.CreditCard.BillingDay}" />
+                                    <TextBox Style="{StaticResource FormTextBox}" Text="{Binding AddAssetDialog.AddCreditCardBillingDay, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{DynamicResource Portfolio.CreditCard.DueDay}" />
+                                    <TextBox Style="{StaticResource FormTextBox}" Text="{Binding AddAssetDialog.AddCreditCardDueDay, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock
+                                Margin="0,0,0,4"
+                                FontSize="{StaticResource FontSizeXs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Portfolio.CreditCard.CreditLimit}" />
+                            <TextBox
+                                Margin="0,0,0,8"
+                                Style="{StaticResource FormTextBox}"
+                                Text="{Binding AddAssetDialog.AddCreditCardLimit, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <TextBlock
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Portfolio.CreditCard.AddHint}"
                                 TextWrapping="Wrap" />
                         </StackPanel>
 

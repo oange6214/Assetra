@@ -236,11 +236,14 @@ internal static class ServiceCollectionExtensions
                 BalanceQuery: sp.GetRequiredService<IBalanceQueryService>(),
                 PositionQuery: sp.GetRequiredService<IPositionQueryService>(),
                 TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>(),
+                CreditCardMutation: sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
+                CreditCardTransaction: sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
                 // Pre-built Sub-VMs that don't require parent-VM callbacks at construction
                 // time. The parent PortfolioViewModel wires the delegate properties afterward.
                 AddAssetDialog: new AddAssetDialogViewModel(
                     sp.GetRequiredService<IAddAssetWorkflowService>(),
-                    sp.GetRequiredService<IAccountUpsertWorkflowService>()),
+                    sp.GetRequiredService<IAccountUpsertWorkflowService>(),
+                    sp.GetRequiredService<ICreditCardMutationWorkflowService>()),
                 SellPanel: new SellPanelViewModel(
                     sp.GetRequiredService<ISellWorkflowService>(),
                     new PortfolioSellPanelController(),

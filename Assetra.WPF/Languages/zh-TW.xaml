@@ -145,7 +145,15 @@
     <sys:String x:Key="Portfolio.AddRecord">新增紀錄</sys:String>
     <sys:String x:Key="Portfolio.AddCash">帳戶</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">負債</sys:String>
+    <sys:String x:Key="Portfolio.AddCreditCard">新增信用卡</sys:String>
     <sys:String x:Key="Portfolio.Cash.AddHint">建立後，請點選「新增紀錄」並選擇「存入」以記錄金額；存提款會自動累計。</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.Title">新增信用卡</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.Name">信用卡名稱</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.Issuer">發卡銀行</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.BillingDay">帳單日</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.DueDay">繳款截止日</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.CreditLimit">信用額度（選填）</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.AddHint">建立後，可透過「新增紀錄」記錄信用卡消費與繳款，未繳餘額會自動累計。</sys:String>
     <sys:String x:Key="Portfolio.TotalAssets">總資產</sys:String>
     <sys:String x:Key="Portfolio.Header.NetWorth">淨資產</sys:String>
     <sys:String x:Key="Portfolio.Header.DailyPnL">本日盈虧</sys:String>
@@ -181,7 +189,7 @@
     <sys:String x:Key="Portfolio.Cash.Emergency.Warning">注意</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Danger">危險</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.NotSet">請設定每月開銷以計算緊急預備金</sys:String>
-    <sys:String x:Key="Portfolio.Liability.Empty">尚未有借款記錄，請透過新增紀錄→借款建立</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Empty">尚未有負債或信用卡，請先新增信用卡，或透過新增紀錄→借款建立。</sys:String>
     <sys:String x:Key="Portfolio.Liability.Name">負債名稱</sys:String>
     <sys:String x:Key="Portfolio.Liability.Amount">剩餘金額</sys:String>
     <sys:String x:Key="Portfolio.Liability.OriginalAmount">總借款金額</sys:String>
@@ -247,6 +255,7 @@
     <sys:String x:Key="Portfolio.Dialog.TypeCrypto">加密貨幣</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeCash">帳戶</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeLiability">負債</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.TypeCreditCard">信用卡</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddName">名稱</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddCost">持有成本</sys:String>
     <sys:String x:Key="Portfolio.Dialog.CryptoSymbol">幣種代號（如 BTC、ETH）</sys:String>
@@ -313,6 +322,8 @@
     <sys:String x:Key="Portfolio.TradeType.Withdrawal">提款</sys:String>
     <sys:String x:Key="Portfolio.TradeType.LoanBorrow">借款</sys:String>
     <sys:String x:Key="Portfolio.TradeType.LoanRepay">還款</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.CreditCardCharge">信用卡消費</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.CreditCardPayment">信用卡繳款</sys:String>
     <sys:String x:Key="Portfolio.TradeType.Transfer">轉帳</sys:String>
     <sys:String x:Key="Portfolio.Tx.TransferSourceAccount">來源帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tx.TransferSourceAmount">轉出金額</sys:String>
@@ -353,6 +364,8 @@
     <sys:String x:Key="Portfolio.Tx.DivModeTotal">總股息金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivTotalAmount">總股息金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.UseLoanCashAccount">從帳戶扣款 / 存入帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCard">信用卡</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardPaymentAccount">扣款帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tx.EditTitle">編輯紀錄</sys:String>
     <sys:String x:Key="Portfolio.Tx.MetaOnlyHint">此交易僅能修改日期與備註。若要更正金額或股數，請刪除後重新建立；股票部位也可在「投資」分頁直接編輯。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Buy">買入</sys:String>

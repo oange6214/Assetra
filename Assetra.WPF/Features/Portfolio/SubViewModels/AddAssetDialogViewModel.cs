@@ -17,6 +17,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
 {
     private readonly IAddAssetWorkflowService _addAssetWorkflow;
     private readonly IAccountUpsertWorkflowService _accountUpsertWorkflow;
+    private readonly ICreditCardMutationWorkflowService _creditCardMutationWorkflow;
 
     /// <summary>
     /// Raised after every successful add (stock buy, crypto, non-stock, cash account).
@@ -45,10 +46,12 @@ public partial class AddAssetDialogViewModel : ObservableObject
 
     public AddAssetDialogViewModel(
         IAddAssetWorkflowService addAssetWorkflow,
-        IAccountUpsertWorkflowService accountUpsertWorkflow)
+        IAccountUpsertWorkflowService accountUpsertWorkflow,
+        ICreditCardMutationWorkflowService creditCardMutationWorkflow)
     {
         _addAssetWorkflow = addAssetWorkflow;
         _accountUpsertWorkflow = accountUpsertWorkflow;
+        _creditCardMutationWorkflow = creditCardMutationWorkflow;
     }
 
     // ── Dialog visibility ────────────────────────────────────────────────────────────
@@ -280,6 +283,14 @@ public partial class AddAssetDialogViewModel : ObservableObject
 
     [ObservableProperty] private string _addAccountName = string.Empty;
 
+    // ── Credit card fields ───────────────────────────────────────────────────────────
+
+    [ObservableProperty] private string _addCreditCardName = string.Empty;
+    [ObservableProperty] private string _addCreditCardIssuer = string.Empty;
+    [ObservableProperty] private string _addCreditCardBillingDay = string.Empty;
+    [ObservableProperty] private string _addCreditCardDueDay = string.Empty;
+    [ObservableProperty] private string _addCreditCardLimit = string.Empty;
+
     // ── Asset type toggle helpers (for RadioButton IsChecked TwoWay) ─────────────────
 
     public bool AddTypeIsStock { get => AddAssetType == "stock"; set { if (value) AddAssetType = "stock"; } }
@@ -288,6 +299,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
     public bool AddTypeIsBond { get => AddAssetType == "bond"; set { if (value) AddAssetType = "bond"; } }
     public bool AddTypeIsCrypto { get => AddAssetType == "crypto"; set { if (value) AddAssetType = "crypto"; } }
     public bool AddTypeIsAccount { get => AddAssetType == "cash"; set { if (value) AddAssetType = "cash"; } }
+    public bool AddTypeIsCreditCard { get => AddAssetType == "creditCard"; set { if (value) AddAssetType = "creditCard"; } }
 
     // Fund / precious-metal / bond share "name + total cost" form
     public bool AddTypeIsNonStockInvestment => AddAssetType is "fund" or "metal" or "bond";
@@ -303,6 +315,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
         OnPropertyChanged(nameof(AddTypeIsBond));
         OnPropertyChanged(nameof(AddTypeIsCrypto));
         OnPropertyChanged(nameof(AddTypeIsAccount));
+        OnPropertyChanged(nameof(AddTypeIsCreditCard));
         OnPropertyChanged(nameof(AddTypeIsNonStockInvestment));
         OnPropertyChanged(nameof(AddTypeIsCryptoForm));
         AddError = string.Empty;
@@ -339,6 +352,9 @@ public partial class AddAssetDialogViewModel : ObservableObject
                 break;
             case "cash":
                 await AddAccountAsync();
+                break;
+            case "creditCard":
+                await AddCreditCardAsync();
                 break;
         }
     }
@@ -490,6 +506,55 @@ public partial class AddAssetDialogViewModel : ObservableObject
             "TWD",
             DateOnly.FromDateTime(DateTime.Today)));
 
+        IsAddDialogOpen = false;
+
+        AssetAdded?.Invoke(this, EventArgs.Empty);
+    }
+
+    private async Task AddCreditCardAsync()
+    {
+        AddError = string.Empty;
+        if (string.IsNullOrWhiteSpace(AddCreditCardName))
+        { AddError = "請輸入信用卡名稱"; return; }
+
+        int? billingDay = null;
+        if (!string.IsNullOrWhiteSpace(AddCreditCardBillingDay))
+        {
+            if (!ParseHelpers.TryParseInt(AddCreditCardBillingDay, out var parsedBillingDay) || parsedBillingDay is < 1 or > 31)
+            { AddError = "帳單日需介於 1 到 31"; return; }
+            billingDay = parsedBillingDay;
+        }
+
+        int? dueDay = null;
+        if (!string.IsNullOrWhiteSpace(AddCreditCardDueDay))
+        {
+            if (!ParseHelpers.TryParseInt(AddCreditCardDueDay, out var parsedDueDay) || parsedDueDay is < 1 or > 31)
+            { AddError = "繳款截止日需介於 1 到 31"; return; }
+            dueDay = parsedDueDay;
+        }
+
+        decimal? creditLimit = null;
+        if (!string.IsNullOrWhiteSpace(AddCreditCardLimit))
+        {
+            if (!ParseHelpers.TryParseDecimal(AddCreditCardLimit, out var parsedLimit) || parsedLimit <= 0)
+            { AddError = "信用額度無效"; return; }
+            creditLimit = parsedLimit;
+        }
+
+        await _creditCardMutationWorkflow.CreateAsync(new CreateCreditCardRequest(
+            AddCreditCardName.Trim(),
+            "TWD",
+            DateOnly.FromDateTime(DateTime.Today),
+            billingDay,
+            dueDay,
+            creditLimit,
+            string.IsNullOrWhiteSpace(AddCreditCardIssuer) ? null : AddCreditCardIssuer.Trim()));
+
+        AddCreditCardName = string.Empty;
+        AddCreditCardIssuer = string.Empty;
+        AddCreditCardBillingDay = string.Empty;
+        AddCreditCardDueDay = string.Empty;
+        AddCreditCardLimit = string.Empty;
         IsAddDialogOpen = false;
 
         AssetAdded?.Invoke(this, EventArgs.Empty);

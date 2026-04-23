@@ -310,6 +310,16 @@
                                 GroupName="TxType"
                                 IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=loanRepay, Mode=TwoWay}"
                                 Style="{StaticResource SegmentBtn}" />
+                            <RadioButton
+                                Content="{DynamicResource Portfolio.TradeType.CreditCardCharge}"
+                                GroupName="TxType"
+                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=creditCardCharge, Mode=TwoWay}"
+                                Style="{StaticResource SegmentBtn}" />
+                            <RadioButton
+                                Content="{DynamicResource Portfolio.TradeType.CreditCardPayment}"
+                                GroupName="TxType"
+                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=creditCardPayment, Mode=TwoWay}"
+                                Style="{StaticResource SegmentBtn}" />
                         </WrapPanel>
 
                         <StackPanel Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
@@ -347,6 +357,9 @@
 
                                 <!--  ======== 借款/還款欄位 ========  -->
                                 <txforms:LoanTxForm />
+
+                                <!--  ======== 信用卡欄位 ========  -->
+                                <txforms:CreditCardTxForm />
 
                                 <!--  ======== 轉帳欄位 ========  -->
                                 <txforms:TransferTxForm />

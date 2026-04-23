@@ -1639,7 +1639,7 @@ public class PortfolioViewModelTests
         var search = new Mock<IStockSearchService>();
         search.Setup(s => s.GetExchange("00982A")).Returns("TWSE");
         var delayedWorkflow = new DelayedClosePriceWorkflow(delayMs: 50, lookupPrice: 99.99m);
-        var addAssetDialog = new AddAssetDialogViewModel(delayedWorkflow, new NoopAccountUpsertWorkflow());
+        var addAssetDialog = new AddAssetDialogViewModel(delayedWorkflow, new NoopAccountUpsertWorkflow(), new NoopCreditCardMutationWorkflow());
         var (snapshotSvc, snapshotRepo) = SnapshotStubs();
         var (logRepo, backfill) = BackfillStubs(snapshotRepo);
 
@@ -2335,5 +2335,38 @@ public class PortfolioViewModelTests
 
         public Task<Guid> FindOrCreateAccountAsync(string name, string currency, CancellationToken ct = default) =>
             Task.FromResult(Guid.NewGuid());
+    }
+
+    private sealed class NoopCreditCardMutationWorkflow : ICreditCardMutationWorkflowService
+    {
+        public Task<CreditCardUpsertResult> CreateAsync(CreateCreditCardRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new CreditCardUpsertResult(
+                new AssetItem(
+                    Guid.NewGuid(),
+                    request.Name,
+                    FinancialType.Liability,
+                    null,
+                    request.Currency,
+                    request.CreatedDate,
+                    LiabilitySubtype: LiabilitySubtype.CreditCard,
+                    BillingDay: request.BillingDay,
+                    DueDay: request.DueDay,
+                    CreditLimit: request.CreditLimit,
+                    IssuerName: request.IssuerName)));
+
+        public Task<CreditCardUpsertResult> UpdateAsync(UpdateCreditCardRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new CreditCardUpsertResult(
+                new AssetItem(
+                    request.CardId,
+                    request.Name,
+                    FinancialType.Liability,
+                    null,
+                    request.Currency,
+                    request.CreatedDate,
+                    LiabilitySubtype: LiabilitySubtype.CreditCard,
+                    BillingDay: request.BillingDay,
+                    DueDay: request.DueDay,
+                    CreditLimit: request.CreditLimit,
+                    IssuerName: request.IssuerName)));
     }
 }

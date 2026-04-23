@@ -256,7 +256,25 @@
         <controls:SearchBox
             Grid.Row="1"
             Placeholder="{DynamicResource Portfolio.Filter.SearchLiabilities}"
-            Text="{Binding LiabilityFilterText}" />
+            Text="{Binding LiabilityFilterText}">
+            <controls:SearchBox.RightContent>
+                <Button
+                    Height="28"
+                    Padding="10,0"
+                    Command="{Binding OpenAddCreditCardDialogCommand}"
+                    Style="{StaticResource BtnGhost}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            FontFamily="Segoe MDL2 Assets"
+                            FontSize="10"
+                            Text="&#xE710;" />
+                        <TextBlock VerticalAlignment="Center" Text="{DynamicResource Portfolio.AddCreditCard}" />
+                    </StackPanel>
+                </Button>
+            </controls:SearchBox.RightContent>
+        </controls:SearchBox>
 
         <!--  ═══ Liabilities DataGrid ═══  -->
         <Grid Grid.Row="2">
@@ -279,6 +297,15 @@
                         FontSize="{StaticResource FontSizeSm}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Liability.Empty}" />
+                    <Button
+                        Height="34"
+                        Margin="0,16,0,0"
+                        Padding="20,0"
+                        HorizontalAlignment="Center"
+                        Command="{Binding OpenAddCreditCardDialogCommand}"
+                        Style="{StaticResource BtnPrimary}">
+                        <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.AddCreditCard}" />
+                    </Button>
                 </StackPanel>
             </Border>
 

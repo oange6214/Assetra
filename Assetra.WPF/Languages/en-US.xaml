@@ -144,7 +144,15 @@
     <sys:String x:Key="Portfolio.AddRecord">Add Record</sys:String>
     <sys:String x:Key="Portfolio.AddCash">Account</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">Liability</sys:String>
+    <sys:String x:Key="Portfolio.AddCreditCard">Add Card</sys:String>
     <sys:String x:Key="Portfolio.Cash.AddHint">Once created, click "Add Record" and choose "Deposit" to record the amount. Deposits and withdrawals accumulate automatically.</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.Title">New Credit Card</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.Name">Card name</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.Issuer">Issuer</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.BillingDay">Billing day</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.DueDay">Due day</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.CreditLimit">Credit limit (optional)</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.AddHint">After creating it, use Add Record to log card charges and payments. Outstanding balance updates automatically.</sys:String>
     <sys:String x:Key="Portfolio.TotalAssets">Total Assets</sys:String>
     <sys:String x:Key="Portfolio.Header.NetWorth">Net Worth</sys:String>
     <sys:String x:Key="Portfolio.Header.DailyPnL">Daily P&amp;L</sys:String>
@@ -180,7 +188,7 @@
     <sys:String x:Key="Portfolio.Cash.Emergency.Warning">Caution</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Danger">Danger</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.NotSet">Set monthly expenses to calculate emergency runway</sys:String>
-    <sys:String x:Key="Portfolio.Liability.Empty">No loans yet. Add one via Add Record → Borrow.</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Empty">No liabilities or cards yet. Add a credit card or use Add Record → Borrow.</sys:String>
     <sys:String x:Key="Portfolio.Liability.Name">Liability name</sys:String>
     <sys:String x:Key="Portfolio.Liability.Amount">Remaining balance</sys:String>
     <sys:String x:Key="Portfolio.Liability.OriginalAmount">Total loan amount</sys:String>
@@ -246,6 +254,7 @@
     <sys:String x:Key="Portfolio.Dialog.TypeCrypto">Crypto</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeCash">Account</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeLiability">Liability</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.TypeCreditCard">Credit Card</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddName">Name</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddCost">Purchase Cost</sys:String>
     <sys:String x:Key="Portfolio.Dialog.CryptoSymbol">Symbol (e.g. BTC, ETH)</sys:String>
@@ -312,6 +321,8 @@
     <sys:String x:Key="Portfolio.TradeType.Withdrawal">Withdrawal</sys:String>
     <sys:String x:Key="Portfolio.TradeType.LoanBorrow">Borrow</sys:String>
     <sys:String x:Key="Portfolio.TradeType.LoanRepay">Repay</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.CreditCardCharge">Card Charge</sys:String>
+    <sys:String x:Key="Portfolio.TradeType.CreditCardPayment">Card Payment</sys:String>
     <sys:String x:Key="Portfolio.TradeType.Transfer">Transfer</sys:String>
     <sys:String x:Key="Portfolio.Tx.TransferSourceAccount">Source account</sys:String>
     <sys:String x:Key="Portfolio.Tx.TransferSourceAmount">Send amount</sys:String>
@@ -352,6 +363,8 @@
     <sys:String x:Key="Portfolio.Tx.DivModeTotal">Total dividend</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivTotalAmount">Total dividend amount</sys:String>
     <sys:String x:Key="Portfolio.Tx.UseLoanCashAccount">Deduct from / deposit to account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCard">Credit card</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardPaymentAccount">Payment account</sys:String>
     <sys:String x:Key="Portfolio.Tx.EditTitle">Edit Record</sys:String>
     <sys:String x:Key="Portfolio.Tx.MetaOnlyHint">Only date and note can be changed for this trade. To correct amount or quantity, delete and re-create; stock positions can also be edited directly on the Investment tab.</sys:String>
     <sys:String x:Key="Portfolio.Tx.Buy">Buy</sys:String>
