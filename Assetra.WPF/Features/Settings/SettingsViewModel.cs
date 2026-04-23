@@ -81,6 +81,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _historyProvider = "twse";
     [ObservableProperty] private string _fugleApiKey = string.Empty;
     [ObservableProperty] private string _dataSourceSaveStatus = string.Empty;
+    [ObservableProperty] private bool _isFugleHelpOpen;
 
     public ObservableCollection<string> SupportedCurrencies { get; } = [];
 
@@ -229,6 +230,18 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             "Assetra");
         if (Directory.Exists(folder))
             Process.Start(new ProcessStartInfo("explorer.exe", folder) { UseShellExecute = true });
+    }
+
+    [RelayCommand]
+    private void OpenFugleHelp() => IsFugleHelpOpen = true;
+
+    [RelayCommand]
+    private void CloseFugleHelp() => IsFugleHelpOpen = false;
+
+    [RelayCommand]
+    private void OpenFugleDeveloperSite()
+    {
+        Process.Start(new ProcessStartInfo("https://developer.fugle.tw/") { UseShellExecute = true });
     }
 
     public string DataFolderPath => Path.Combine(
