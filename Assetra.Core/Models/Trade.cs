@@ -56,6 +56,15 @@ namespace Assetra.Core.Models;
 ///   Principal         = 本金部分（減少負債餘額）
 ///   InterestPaid      = 利息部分（費用支出，不影響負債餘額）
 ///
+/// CreditCardCharge: 信用卡消費，增加信用卡未繳餘額
+///   CashAmount        = 消費金額
+///   LiabilityAssetId  = 對應的信用卡負債資產 Id
+///
+/// CreditCardPayment: 信用卡繳款，減少信用卡未繳餘額
+///   CashAmount        = 繳款金額
+///   CashAccountId     = 扣款的現金帳戶
+///   LiabilityAssetId  = 對應的信用卡負債資產 Id
+///
 /// ─── 關聯欄位 ─────────────────────────────────────────────────────────────
 /// CashAccountId: 任何涉及現金移動的交易都應設定；
 ///   Transfer 同時設定 ToCashAccountId。
@@ -65,6 +74,7 @@ namespace Assetra.Core.Models;
 ///   啟動時會試圖回填舊版缺少此欄的 Buy 記錄。
 ///
 /// LoanLabel: LoanBorrow / LoanRepay 的貸款名稱（如 "國泰信貸"）；其他類型為 null。
+/// LiabilityAssetId: 連結到負債資產（目前主要給信用卡使用）；一般交易為 null。
 /// </summary>
 public sealed record Trade(
     Guid Id,
@@ -94,6 +104,8 @@ public sealed record Trade(
     decimal? InterestPaid = null,        // LoanRepay：利息部分（費用，不減餘額）
     // ── 轉帳欄位（Transfer）──────────────────────────────────────
     Guid? ToCashAccountId = null,        // Transfer：目標現金帳戶
+    // ── 負債資產連結──────────────────────────────────────────────
+    Guid? LiabilityAssetId = null,       // 信用卡等負債資產 Id
     // ── 子記錄連結──────────────────────────────────────────────
     /// <summary>
     /// 若本筆是另一筆主交易的附屬費用子記錄（例如手續費 Withdrawal），

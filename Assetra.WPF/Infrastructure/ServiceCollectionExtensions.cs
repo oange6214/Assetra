@@ -190,6 +190,10 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<ICreditCardMutationWorkflowService>(sp =>
             new CreditCardMutationWorkflowService(
                 sp.GetRequiredService<IAssetRepository>()));
+        services.AddSingleton<ICreditCardTransactionWorkflowService>(sp =>
+            new CreditCardTransactionWorkflowService(
+                sp.GetRequiredService<IAssetRepository>(),
+                sp.GetRequiredService<ITransactionService>()));
         services.AddSingleton<ILoanPaymentWorkflowService>(sp =>
             new LoanPaymentWorkflowService(
                 sp.GetRequiredService<ITradeRepository>(),
