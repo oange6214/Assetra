@@ -18,7 +18,13 @@ public sealed record AssetItem(
     decimal?      LoanAnnualRate  = null,
     int?          LoanTermMonths  = null,
     DateOnly?     LoanStartDate   = null,
-    decimal?      LoanHandlingFee = null)
+    decimal?      LoanHandlingFee = null,
+    LiabilitySubtype? LiabilitySubtype = null,
+    int?          BillingDay      = null,
+    int?          DueDay          = null,
+    decimal?      CreditLimit     = null,
+    string?       IssuerName      = null)
 {
     public bool IsLoan => LoanAnnualRate.HasValue && LoanTermMonths.HasValue && LoanStartDate.HasValue;
+    public bool IsCreditCard => LiabilitySubtype == Models.LiabilitySubtype.CreditCard;
 };
