@@ -187,6 +187,9 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<IAccountUpsertWorkflowService>(sp =>
             new AccountUpsertWorkflowService(
                 sp.GetRequiredService<IAssetRepository>()));
+        services.AddSingleton<ICreditCardMutationWorkflowService>(sp =>
+            new CreditCardMutationWorkflowService(
+                sp.GetRequiredService<IAssetRepository>()));
         services.AddSingleton<ILoanPaymentWorkflowService>(sp =>
             new LoanPaymentWorkflowService(
                 sp.GetRequiredService<ITradeRepository>(),
