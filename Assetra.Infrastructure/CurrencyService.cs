@@ -70,19 +70,34 @@ public sealed class CurrencyService : ICurrencyService
             var json = await _http.GetStringAsync(url, cts.Token).ConfigureAwait(false);
 
             using var doc = JsonDocument.Parse(json);
-            var rates = doc.RootElement.GetProperty("rates");
+            if (!doc.RootElement.TryGetProperty("rates", out var rates) ||
+                rates.ValueKind != JsonValueKind.Object)
+            {
+                _logger.LogWarning("Frankfurter response did not include a valid 'rates' object");
+                return;
+            }
 
             var newRates = _exchangeRates.ToDictionary(kv => kv.Key, kv => kv.Value);
 
             // Frankfurter returns: 1 USD = N {currency}
             // We store: 1 {foreign currency} = N TWD
             // So: TWD rate of foreign = usdToTwd / usdToForeign
-            var usdToTwd = rates.GetProperty("TWD").GetDecimal();
+            if (!TryGetDecimalProperty(rates, "TWD", out var usdToTwd))
+            {
+                _logger.LogWarning("Frankfurter response did not include a valid TWD rate");
+                return;
+            }
 
             newRates["USD"] = usdToTwd;
-            newRates["JPY"] = Math.Round(usdToTwd / rates.GetProperty("JPY").GetDecimal(), 4);
-            newRates["EUR"] = Math.Round(usdToTwd / rates.GetProperty("EUR").GetDecimal(), 4);
-            newRates["HKD"] = Math.Round(usdToTwd / rates.GetProperty("HKD").GetDecimal(), 4);
+
+            if (TryGetDecimalProperty(rates, "JPY", out var usdToJpy) && usdToJpy > 0m)
+                newRates["JPY"] = Math.Round(usdToTwd / usdToJpy, 4);
+
+            if (TryGetDecimalProperty(rates, "EUR", out var usdToEur) && usdToEur > 0m)
+                newRates["EUR"] = Math.Round(usdToTwd / usdToEur, 4);
+
+            if (TryGetDecimalProperty(rates, "HKD", out var usdToHkd) && usdToHkd > 0m)
+                newRates["HKD"] = Math.Round(usdToTwd / usdToHkd, 4);
 
             _exchangeRates = newRates;
 
@@ -103,6 +118,14 @@ public sealed class CurrencyService : ICurrencyService
         {
             _logger.LogWarning(ex, "Frankfurter exchange rate fetch failed; using cached/default rates");
         }
+    }
+
+    private static bool TryGetDecimalProperty(JsonElement parent, string propertyName, out decimal value)
+    {
+        value = default;
+        return parent.TryGetProperty(propertyName, out var property) &&
+            property.ValueKind == JsonValueKind.Number &&
+            property.TryGetDecimal(out value);
     }
 
     // ── Formatting ──────────────────────────────────────────────────────────

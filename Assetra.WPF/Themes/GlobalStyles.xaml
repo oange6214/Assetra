@@ -102,7 +102,7 @@
         <Setter Property="Padding" Value="8,0" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="CornerRadius" Value="{StaticResource RadiusSm}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource RadiusSm}" />
     </Style>
 
     <Style x:Key="PortfolioBadgeText" TargetType="TextBlock">

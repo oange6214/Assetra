@@ -2,6 +2,8 @@ using Moq;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure;
+using Microsoft.Extensions.Logging.Abstractions;
+using System.Net.Http;
 using Xunit;
 
 namespace Assetra.Tests.Infrastructure;
@@ -19,7 +21,8 @@ public class CurrencyServiceTests
     private static CurrencyService Create(
         string currency = "TWD",
         decimal usdRate = 32.0m,
-        Dictionary<string, decimal>? rates = null)
+        Dictionary<string, decimal>? rates = null,
+        HttpClient? http = null)
     {
         var settings = new Mock<IAppSettingsService>();
         settings.SetupGet(s => s.Current)
@@ -28,8 +31,8 @@ public class CurrencyServiceTests
                 UsdTwdRate: usdRate,
                 ExchangeRates: rates));
         settings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>())).Returns(Task.CompletedTask);
-        var http = new System.Net.Http.HttpClient();
-        return new CurrencyService(settings.Object, http);
+        http ??= new HttpClient();
+        return new CurrencyService(settings.Object, http, NullLogger<CurrencyService>.Instance);
     }
 
     // ── SupportedCurrencies ────────────────────────────────────────────────
@@ -163,5 +166,51 @@ public class CurrencyServiceTests
         await svc.ApplyAsync("USD");
         Assert.Equal("USD", svc.Currency);
         Assert.True(fired);
+    }
+
+    [Fact]
+    public async Task RefreshRatesAsync_WhenResponseOmitsRates_KeepsExistingRates()
+    {
+        var http = CreateHttpClient("""{"amount":1.0,"base":"USD"}""");
+        var svc = Create("TWD", rates: new Dictionary<string, decimal>(DefaultRates), http: http);
+
+        await svc.RefreshRatesAsync();
+
+        Assert.Equal(DefaultRates["USD"], svc.ExchangeRates["USD"]);
+        Assert.Equal(DefaultRates["JPY"], svc.ExchangeRates["JPY"]);
+        Assert.Equal(DefaultRates["EUR"], svc.ExchangeRates["EUR"]);
+        Assert.Equal(DefaultRates["HKD"], svc.ExchangeRates["HKD"]);
+    }
+
+    [Fact]
+    public async Task RefreshRatesAsync_WhenResponseOmitsOptionalRate_UpdatesAvailableRatesOnly()
+    {
+        var http = CreateHttpClient(
+            """{"rates":{"TWD":31.5,"JPY":150.0,"EUR":0.92},"base":"USD"}""");
+        var svc = Create("TWD", rates: new Dictionary<string, decimal>(DefaultRates), http: http);
+
+        await svc.RefreshRatesAsync();
+
+        Assert.Equal(31.5m, svc.ExchangeRates["USD"]);
+        Assert.Equal(Math.Round(31.5m / 150.0m, 4), svc.ExchangeRates["JPY"]);
+        Assert.Equal(Math.Round(31.5m / 0.92m, 4), svc.ExchangeRates["EUR"]);
+        Assert.Equal(DefaultRates["HKD"], svc.ExchangeRates["HKD"]);
+    }
+
+    private static HttpClient CreateHttpClient(string responseBody) =>
+        new(new StubHttpMessageHandler(responseBody))
+        {
+            BaseAddress = new Uri("https://api.frankfurter.app/")
+        };
+
+    private sealed class StubHttpMessageHandler(string responseBody) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            {
+                Content = new StringContent(responseBody),
+            });
     }
 }
