@@ -11,7 +11,12 @@ public partial class LiabilityTabPanel : UserControl
 
     private void OnGridPreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-        var clickedRow = WpfUtils.FindAncestor<DataGridRow>(e.OriginalSource as DependencyObject);
+        var src = e.OriginalSource as DependencyObject;
+
+        if (WpfUtils.IsInsideActionControl(src))
+            return;
+
+        var clickedRow = WpfUtils.FindAncestor<DataGridRow>(src);
         if (e.ChangedButton == MouseButton.Left && clickedRow is not null && !clickedRow.IsSelected)
             clickedRow.IsSelected = true;
     }

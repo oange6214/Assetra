@@ -15,8 +15,6 @@
     <!--  Navigation  -->
     <sys:String x:Key="TitleBar.Search.Hint">輸入股票代號或名稱搜尋</sys:String>
     <sys:String x:Key="TitleBar.Search.Placeholder">搜尋股票...</sys:String>
-    <sys:String x:Key="Nav.AssetManagement.Short">資產</sys:String>
-    <sys:String x:Key="Nav.AssetManagement.Full">資產管理</sys:String>
     <sys:String x:Key="Nav.Alerts">警示</sys:String>
     <sys:String x:Key="Nav.Alerts.Tooltip">價格警示</sys:String>
     <sys:String x:Key="Nav.Settings">設定</sys:String>
@@ -214,6 +212,8 @@
     <sys:String x:Key="Portfolio.Loan.Paid">已繳</sys:String>
     <sys:String x:Key="Portfolio.Loan.Unpaid">未繳</sys:String>
     <sys:String x:Key="Portfolio.Loan.ConfirmPayment">確認繳款</sys:String>
+    <sys:String x:Key="Portfolio.Loan.PaymentPending">待繳款</sys:String>
+    <sys:String x:Key="Portfolio.Loan.PaymentConfirmed">已繳清</sys:String>
     <sys:String x:Key="Portfolio.Loan.PaidPrincipal">已還本金</sys:String>
     <sys:String x:Key="Portfolio.Loan.PaidInterest">已還利息</sys:String>
     <sys:String x:Key="Portfolio.Loan.RemainingBalance">剩餘本金</sys:String>
@@ -256,6 +256,7 @@
     <sys:String x:Key="Portfolio.Dialog.TypeCash">帳戶</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeLiability">負債</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeCreditCard">信用卡</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.TypeLoan">貸款</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddName">名稱</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddCost">持有成本</sys:String>
     <sys:String x:Key="Portfolio.Dialog.CryptoSymbol">幣種代號（如 BTC、ETH）</sys:String>

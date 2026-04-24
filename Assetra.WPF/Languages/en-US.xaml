@@ -13,11 +13,9 @@
     <sys:String x:Key="Splash.Alerts">Loading alerts…</sys:String>
 
     <!--  Navigation  -->
-            <sys:String x:Key="TitleBar.Search.Hint">Type a stock symbol or name to search</sys:String>
+    <sys:String x:Key="TitleBar.Search.Hint">Type a stock symbol or name to search</sys:String>
     <sys:String x:Key="TitleBar.Search.Placeholder">Search stocks...</sys:String>
-    <sys:String x:Key="Nav.AssetManagement.Short">Assets</sys:String>
-    <sys:String x:Key="Nav.AssetManagement.Full">Asset Management</sys:String>
-    <sys:String x:Key="Nav.Alerts">Alerts</sys:String>
+<sys:String x:Key="Nav.Alerts">Alerts</sys:String>
     <sys:String x:Key="Nav.Alerts.Tooltip">Price Alerts</sys:String>
     <sys:String x:Key="Nav.Settings">Settings</sys:String>
     <sys:String x:Key="Nav.GoBack">Go back</sys:String>
@@ -51,7 +49,7 @@
     <sys:String x:Key="StatusBar.Taiex">Taiex</sys:String>
     <sys:String x:Key="StatusBar.AlertsTooltip">Click to review triggered alerts</sys:String>
     <sys:String x:Key="StatusBar.AlertsPopupTitle">Triggered Alerts</sys:String>
-    <sys:String x:Key="StatusBar.AlertsCurrentPrice"> · Current </sys:String>
+    <sys:String x:Key="StatusBar.AlertsCurrentPrice">· Current</sys:String>
     <sys:String x:Key="StatusBar.AlertsViewAll">View all →</sys:String>
     <sys:String x:Key="StatusBar.Volume">Vol</sys:String>
     <sys:String x:Key="StatusBar.Futures">TXF</sys:String>
@@ -104,7 +102,7 @@
     <sys:String x:Key="Portfolio.TotalCostPaid">Total Cost</sys:String>
     <sys:String x:Key="Portfolio.SellConfirmLabel">Sell price</sys:String>
     <sys:String x:Key="Portfolio.SellConfirm">Confirm Sell</sys:String>
-<!-- Portfolio.TradeHistory.RealizedPnL / PnLPct removed — see zh-TW for note. -->
+    <!--  Portfolio.TradeHistory.RealizedPnL / PnLPct removed — see zh-TW for note.  -->
     <sys:String x:Key="Portfolio.TradeHistory.Date">Date</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Type">Type</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.UnitPrice">Unit Price</sys:String>
@@ -213,6 +211,8 @@
     <sys:String x:Key="Portfolio.Loan.Paid">Paid</sys:String>
     <sys:String x:Key="Portfolio.Loan.Unpaid">Unpaid</sys:String>
     <sys:String x:Key="Portfolio.Loan.ConfirmPayment">Confirm Payment</sys:String>
+    <sys:String x:Key="Portfolio.Loan.PaymentPending">Pending</sys:String>
+    <sys:String x:Key="Portfolio.Loan.PaymentConfirmed">Paid</sys:String>
     <sys:String x:Key="Portfolio.Loan.PaidPrincipal">Principal Paid</sys:String>
     <sys:String x:Key="Portfolio.Loan.PaidInterest">Interest Paid</sys:String>
     <sys:String x:Key="Portfolio.Loan.RemainingBalance">Remaining Balance</sys:String>
@@ -255,6 +255,7 @@
     <sys:String x:Key="Portfolio.Dialog.TypeCash">Account</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeLiability">Liability</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeCreditCard">Credit Card</sys:String>
+    <sys:String x:Key="Portfolio.Dialog.TypeLoan">Loan</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddName">Name</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddCost">Purchase Cost</sys:String>
     <sys:String x:Key="Portfolio.Dialog.CryptoSymbol">Symbol (e.g. BTC, ETH)</sys:String>

@@ -1,4 +1,7 @@
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace Assetra.WPF.Infrastructure;
@@ -20,4 +23,13 @@ internal static class WpfUtils
         }
         return null;
     }
+
+    /// <summary>
+    /// Returns true when the hit target is inside a button-like interactive control.
+    /// Used by DataGrid preview handlers so row selection does not steal clicks from
+    /// row action buttons.
+    /// </summary>
+    public static bool IsInsideActionControl(DependencyObject? d) =>
+        FindAncestor<ButtonBase>(d) is not null ||
+        FindAncestor<Hyperlink>(d) is not null;
 }

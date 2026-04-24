@@ -649,14 +649,17 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             AccountUpsert = services.AccountUpsert ?? (repositories.Asset is not null
                 ? new AccountUpsertWorkflowService(repositories.Asset)
                 : null),
-            AccountMutation = services.AccountMutation ?? (repositories.Asset is not null
-                ? new AccountMutationWorkflowService(repositories.Asset)
+            AccountMutation = services.AccountMutation ?? (repositories.Asset is not null && repositories.Trade is not null
+                ? new AccountMutationWorkflowService(repositories.Asset, repositories.Trade)
                 : null),
             LoanPayment = services.LoanPayment ?? (repositories.Trade is not null && repositories.LoanSchedule is not null
                 ? new LoanPaymentWorkflowService(repositories.Trade, repositories.LoanSchedule)
                 : null),
             LoanMutation = services.LoanMutation ?? (repositories.Asset is not null && repositories.LoanSchedule is not null && transactionService is not null
                 ? new LoanMutationWorkflowService(repositories.Asset, repositories.LoanSchedule, transactionService)
+                : null),
+            Sell = services.Sell ?? (repositories.Trade is not null && positionQuery is not null
+                ? new SellWorkflowService(repositories.Trade, repositories.Portfolio, repositories.Log, positionQuery)
                 : null),
             PositionMetadata = services.PositionMetadata ?? new PositionMetadataWorkflowService(repositories.Portfolio),
             TradeMetadata = services.TradeMetadata ?? (repositories.Trade is not null

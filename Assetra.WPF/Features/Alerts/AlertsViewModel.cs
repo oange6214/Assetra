@@ -27,6 +27,9 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _addCondition = "突破";
     [ObservableProperty] private string _addError = string.Empty;
     [ObservableProperty] private bool _hasNoRules = true;
+    [ObservableProperty] private bool _isSuggestionsOpen;
+    [ObservableProperty] private StockSearchResult? _selectedSuggestion;
+    [ObservableProperty] private IReadOnlyList<StockSearchResult> _symbolSuggestions = [];
 
     // NavRail badge
     [ObservableProperty]
@@ -38,6 +41,31 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
     public string TriggeredBadge => TriggeredCount > 99 ? "99+" : TriggeredCount.ToString();
 
     public IReadOnlyList<string> Conditions { get; } = ["突破", "跌破"];
+
+    partial void OnSelectedSuggestionChanged(StockSearchResult? value)
+    {
+        if (value is null)
+            return;
+
+        SelectSuggestion(value);
+        SelectedSuggestion = null;
+    }
+
+    partial void OnAddSymbolChanged(string value)
+    {
+        if (_suppressSuggestions)
+            return;
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            IsSuggestionsOpen = false;
+            SymbolSuggestions = [];
+            return;
+        }
+
+        SymbolSuggestions = _search.Search(value.Trim());
+        IsSuggestionsOpen = SymbolSuggestions.Count > 0;
+    }
 
     public AlertsViewModel(
         IAlertService alertRepo,
@@ -93,6 +121,8 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         Rules.Add(ToRow(rule));
         HasNoRules = false;
 
+        IsSuggestionsOpen = false;
+        SymbolSuggestions = [];
         AddSymbol = string.Empty;
         AddTargetPrice = string.Empty;
         var condLabel = condition == AlertCondition.Above
@@ -203,4 +233,14 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
 
     private string GetString(string key, string fallback) =>
         _localization.Get(key, fallback);
+
+    private bool _suppressSuggestions;
+
+    private void SelectSuggestion(StockSearchResult suggestion)
+    {
+        _suppressSuggestions = true;
+        IsSuggestionsOpen = false;
+        AddSymbol = suggestion.Symbol;
+        _suppressSuggestions = false;
+    }
 }

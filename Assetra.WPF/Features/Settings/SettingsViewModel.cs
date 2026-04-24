@@ -76,6 +76,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     }
 
     [ObservableProperty] private bool _isDarkTheme;
+    [ObservableProperty] private double _uiScale = 1.0;
     [ObservableProperty] private string _primaryCurrency = "TWD";
     [ObservableProperty] private string _quoteProvider = "official";
     [ObservableProperty] private string _historyProvider = "twse";
@@ -87,6 +88,25 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
     public string AppVersion { get; } = ResolveAppVersion();
     public bool IsFugleConfigured => !string.IsNullOrWhiteSpace(FugleApiKey);
+
+    private double _uiScalePreview = 1.0;
+
+    public double UiScalePreview
+    {
+        get => _uiScalePreview;
+        set
+        {
+            var snapped = Math.Clamp(Math.Round(value / 0.05) * 0.05, 0.75, 1.5);
+            if (Math.Abs(_uiScalePreview - snapped) < 0.001)
+                return;
+
+            _uiScalePreview = snapped;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(UiScaleDisplay));
+        }
+    }
+
+    public string UiScaleDisplay => $"{_uiScalePreview:0.00}×";
 
     public SettingsViewModel(
         IAppSettingsService settings,
@@ -121,6 +141,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             Language = s.Language;
             UseTaiwanColors = s.TaiwanColorScheme;
             IsDarkTheme = _theme.CurrentTheme == ApplicationTheme.Dark;
+            UiScale = s.UiScale is >= 0.75 and <= 1.5 ? s.UiScale : 1.0;
             PrimaryCurrency = string.IsNullOrWhiteSpace(s.PreferredCurrency)
                 ? "TWD"
                 : s.PreferredCurrency;
@@ -166,6 +187,13 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         _ = _currencyService.ApplyAsync(value);
     }
 
+    partial void OnUiScaleChanged(double value)
+    {
+        _uiScalePreview = value;
+        OnPropertyChanged(nameof(UiScalePreview));
+        OnPropertyChanged(nameof(UiScaleDisplay));
+    }
+
     partial void OnQuoteProviderChanged(string value)
     {
         if (_isLoading)
@@ -207,12 +235,23 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         {
             Language = Language,
             TaiwanColorScheme = UseTaiwanColors,
+            UiScale = UiScale,
             PreferredCurrency = PrimaryCurrency,
             QuoteProvider = QuoteProvider,
             HistoryProvider = HistoryProvider,
             FugleApiKey = FugleApiKey.Trim(),
         };
         await _settings.SaveAsync(updated);
+    }
+
+    public async Task CommitUiScaleAsync()
+    {
+        if (Math.Abs(UiScale - _uiScalePreview) < 0.001)
+            return;
+
+        UiScale = _uiScalePreview;
+        if (!_isLoading)
+            await SaveAsync();
     }
 
     [RelayCommand]

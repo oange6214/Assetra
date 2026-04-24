@@ -10,9 +10,10 @@
         <Border Background="{DynamicResource AppModalOverlay}" />
 
         <Border
-            Width="480"
-            MaxWidth="480"
+            Width="Auto"
+            MaxWidth="560"
             MaxHeight="620"
+            Margin="24"
             Padding="0"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
@@ -55,7 +56,7 @@
                             Style="{StaticResource BtnIcon}">
                             <TextBlock
                                 FontFamily="Segoe MDL2 Assets"
-                                FontSize="12"
+                                FontSize="{StaticResource FontSizeXs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="&#xE8BB;" />
                         </Button>

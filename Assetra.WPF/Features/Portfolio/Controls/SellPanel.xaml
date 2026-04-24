@@ -1,5 +1,6 @@
 <UserControl
     x:Class="Assetra.WPF.Features.Portfolio.Controls.SellPanel"
+    x:Name="Root"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,6 +10,15 @@
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
     <Grid>
+        <Grid>
+            <Grid.Visibility>
+                <MultiBinding Converter="{StaticResource InverseWidthScaleThresholdToVisibilityConverter}" ConverterParameter="980">
+                    <Binding ElementName="Root" Path="ActualWidth" />
+                    <Binding
+                        RelativeSource="{RelativeSource AncestorType=Window}"
+                        Path="DataContext.Settings.UiScale" />
+                </MultiBinding>
+            </Grid.Visibility>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" MinWidth="140" />
             <!--  Symbol + cost  -->
@@ -241,6 +251,215 @@
                 Style="{StaticResource BtnGhost}">
                 <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Cancel}" />
             </Button>
+        </StackPanel>
+        </Grid>
+
+        <StackPanel Margin="0,0,0,4">
+            <StackPanel.Visibility>
+                <MultiBinding Converter="{StaticResource WidthScaleThresholdToVisibilityConverter}" ConverterParameter="980">
+                    <Binding ElementName="Root" Path="ActualWidth" />
+                    <Binding
+                        RelativeSource="{RelativeSource AncestorType=Window}"
+                        Path="DataContext.Settings.UiScale" />
+                </MultiBinding>
+            </StackPanel.Visibility>
+
+            <Border
+                Padding="14,12"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource RadiusMd}">
+                <StackPanel>
+                    <TextBlock
+                        FontFamily="{StaticResource FontTabular}"
+                        FontSize="{StaticResource FontSizeLg}"
+                        FontWeight="Bold"
+                        Foreground="{DynamicResource AppDown}"
+                        Text="{Binding SellingRow.Symbol}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource FontSizeXs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{Binding SellingRow.Name}" />
+                    <TextBlock
+                        Margin="0,2,0,0"
+                        FontFamily="{StaticResource FontTabular}"
+                        FontSize="{StaticResource FontSizeXs}"
+                        Foreground="{DynamicResource AppTextMuted}">
+                        <Run Text="{DynamicResource Portfolio.Sell.CostLabel}" /><Run Text=" " /><Run Text="{Binding SellingRow.BuyPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}" />
+                    </TextBlock>
+
+                    <Grid Margin="0,14,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock
+                                Margin="0,0,0,4"
+                                FontSize="{StaticResource FontSizeXs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Portfolio.SellConfirmLabel}" />
+                            <TextBox
+                                Style="{StaticResource FormTextBox}"
+                                Text="{Binding SellPriceInput, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock
+                                Margin="0,0,0,4"
+                                FontSize="{StaticResource FontSizeXs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Portfolio.Sell.CashAccount}" />
+                            <ComboBox
+                                DisplayMemberPath="Name"
+                                ItemsSource="{Binding CashAccounts}"
+                                SelectedItem="{Binding SellCashAccount, Mode=TwoWay}"
+                                Style="{StaticResource FormComboBox}">
+                                <ComboBox.Resources>
+                                    <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
+                                </ComboBox.Resources>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+
+                    <WrapPanel Margin="0,14,0,0" ItemWidth="160">
+                        <Border
+                            Margin="0,0,10,10"
+                            Padding="10,8"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource RadiusSm}">
+                            <StackPanel>
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Portfolio.Sell.GrossAmount}" />
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    FontFamily="{StaticResource FontTabular}"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding SellGrossAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                            </StackPanel>
+                        </Border>
+                        <Border
+                            Margin="0,0,10,10"
+                            Padding="10,8"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource RadiusSm}">
+                            <StackPanel>
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Portfolio.Sell.Commission}" />
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    FontFamily="{StaticResource FontTabular}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppDown}"
+                                    Text="{Binding SellCommission, Converter={StaticResource CurrencyConverter}, ConverterParameter=deduct}" />
+                            </StackPanel>
+                        </Border>
+                        <Border
+                            Margin="0,0,10,10"
+                            Padding="10,8"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource RadiusSm}">
+                            <StackPanel>
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Portfolio.Sell.TransactionTax}" />
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    FontFamily="{StaticResource FontTabular}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppDown}"
+                                    Text="{Binding SellTransactionTax, Converter={StaticResource CurrencyConverter}, ConverterParameter=deduct}" />
+                            </StackPanel>
+                        </Border>
+                        <Border
+                            Margin="0,0,10,10"
+                            Padding="10,8"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource RadiusSm}">
+                            <StackPanel>
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Portfolio.Sell.EstPnL}" />
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    FontFamily="{StaticResource FontTabular}"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding SellEstimatedPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSellEstimatedPositive}" Value="True">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </WrapPanel>
+
+                    <TextBlock
+                        Margin="0,2,0,0"
+                        FontSize="{StaticResource FontSizeXs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Portfolio.Sell.NoCashLink}" />
+
+                    <StackPanel
+                        Margin="0,12,0,0"
+                        Orientation="Vertical"
+                        Visibility="{Binding SellPanelError, Converter={StaticResource StringToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontFamily="Segoe MDL2 Assets"
+                                FontSize="11"
+                                Foreground="{DynamicResource AppDown}"
+                                Text="&#xE7BA;" />
+                            <TextBlock
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppDown}"
+                                Text="{Binding SellPanelError}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,14,0,0">
+                        <Button
+                            Height="34"
+                            Command="{Binding ConfirmSellCommand}"
+                            Style="{StaticResource BtnDanger}">
+                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.SellConfirm}" />
+                        </Button>
+                        <Button
+                            Height="34"
+                            Margin="0,8,0,0"
+                            Command="{Binding CancelSellCommand}"
+                            Style="{StaticResource BtnGhost}">
+                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Cancel}" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
         </StackPanel>
     </Grid>
 </UserControl>

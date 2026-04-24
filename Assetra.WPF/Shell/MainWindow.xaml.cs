@@ -1,9 +1,6 @@
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.Extensions.DependencyInjection;
-using Assetra.WPF.Features.AddStock;
 using Wpf.Ui.Controls;
 
 namespace Assetra.WPF.Shell;
@@ -12,7 +9,7 @@ public partial class MainWindow : FluentWindow
 {
     private readonly MainViewModel _viewModel;
 
-    public MainWindow(MainViewModel viewModel, IServiceProvider services)
+    public MainWindow(MainViewModel viewModel)
     {
         InitializeComponent();
         DataContext = viewModel;
@@ -20,15 +17,6 @@ public partial class MainWindow : FluentWindow
 
         // Popup.CustomPopupPlacementCallback isn't XAML-settable; wire it here.
         SearchPopup.CustomPopupPlacementCallback = PlaceSearchPopup;
-
-        WeakReferenceMessenger.Default.Register<OpenAddStockMessage>(this, (_, _) =>
-        {
-            // Reset clears previous search so each open starts with a blank slate.
-            var vm = services.GetRequiredService<AddStockViewModel>();
-            vm.Reset();
-            var dlg = new AddStockDialog(vm) { Owner = this };
-            dlg.ShowDialog();
-        });
     }
 
     // Backdrop click handlers

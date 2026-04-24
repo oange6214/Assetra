@@ -21,37 +21,45 @@
             SelectedItem="{Binding TxCreditCard, Mode=TwoWay}"
             Style="{StaticResource FormComboBox}" />
 
-        <TextBlock
-            Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.Amount}" />
-        <TextBox
-            Margin="0,0,0,6"
-            Style="{StaticResource FormTextBox}"
-            Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock
-            Margin="0,0,0,12"
-            FontSize="{StaticResource FontSizeXs}"
-            Foreground="{DynamicResource AppDown}"
-            Text="{Binding TxAmountError}"
-            Visibility="{Binding TxAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
+        <Grid Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-        <StackPanel Visibility="{Binding TxTypeIsCreditCardPayment, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
-                Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Tx.CreditCardPaymentAccount}" />
-            <ComboBox
-                Margin="0,0,0,12"
-                DisplayMemberPath="Name"
-                ItemsSource="{Binding CashAccounts}"
-                SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
-                Style="{StaticResource FormComboBox}" />
-        </StackPanel>
+            <StackPanel Grid.Column="0">
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontSize="{StaticResource FontSizeXs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Portfolio.Tx.Amount}" />
+                <TextBox
+                    Margin="0,0,0,6"
+                    Style="{StaticResource FormTextBox}"
+                    Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    FontSize="{StaticResource FontSizeXs}"
+                    Foreground="{DynamicResource AppDown}"
+                    Text="{Binding TxAmountError}"
+                    Visibility="{Binding TxAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Visibility="{Binding TxTypeIsCreditCardPayment, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontSize="{StaticResource FontSizeXs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Portfolio.Tx.CreditCardPaymentAccount}" />
+                <ComboBox
+                    DisplayMemberPath="Name"
+                    ItemsSource="{Binding CashAccounts}"
+                    SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
+                    Style="{StaticResource FormComboBox}" />
+            </StackPanel>
+        </Grid>
 
         <TextBlock
             Margin="0,0,0,4"

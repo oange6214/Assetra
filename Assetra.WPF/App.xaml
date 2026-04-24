@@ -1,4 +1,4 @@
-﻿<Application
+<Application
     x:Class="Assetra.WPF.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -17,6 +17,10 @@
             <converters:TradeTypeConverter x:Key="TradeTypeConverter" />
             <converters:ResourceKeyToStringConverter x:Key="ResourceKeyToStringConverter" />
             <converters:ZeroToVisibleConverter x:Key="ZeroToVisibleConverter" />
+            <converters:WidthScaleThresholdToBooleanConverter x:Key="WidthScaleThresholdToBooleanConverter" />
+            <converters:WidthScaleThresholdToVisibilityConverter x:Key="WidthScaleThresholdToVisibilityConverter" />
+            <converters:InverseWidthScaleThresholdToVisibilityConverter x:Key="InverseWidthScaleThresholdToVisibilityConverter" />
+            <converters:AdaptivePanelWidthConverter x:Key="AdaptivePanelWidthConverter" />
 
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemesDictionary Theme="Dark" />

@@ -195,15 +195,7 @@ public partial class AccountDialogViewModel : ObservableObject
             L("Portfolio.Confirm.DeleteAccount", "確定刪除此帳戶？"),
             async () =>
             {
-                var result = await _accountMutation.DeleteAsync(row.Id);
-                if (!result.Success)
-                {
-                    var template = L("Portfolio.Account.HasReferencesError", "尚有 {0} 筆交易引用此帳戶，請先處理");
-                    var formatted = string.Format(System.Globalization.CultureInfo.CurrentCulture, template, result.ReferenceCount);
-                    _snackbar?.Warning(formatted);
-                    return;
-                }
-
+                await _accountMutation.DeleteAsync(row.Id);
                 _cashAccounts.Remove(row);
                 AccountChanged?.Invoke(this, EventArgs.Empty);
 
