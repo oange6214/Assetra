@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Assetra.WPF</RootNamespace>
-    <ApplicationIcon>Assets\assetra.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\web\favicon.ico</ApplicationIcon>
     <AssemblyTitle>Assetra</AssemblyTitle>
     <Product>Assetra</Product>
   </PropertyGroup>
@@ -30,12 +30,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- icon placeholders to be added in Phase 7 -->
-    <Resource Include="Assets\assetra.ico" />
-    <Resource Include="Assets\assetra_icon_64.png" />
     <Content Include="Assets\*.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\package\*.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\png\*.png" />
+    <Resource Include="Assets\web\*.ico" />
+    <Resource Include="Assets\svg\*.svg" />
   </ItemGroup>
 
   <ItemGroup>

@@ -14,7 +14,7 @@
   <Properties>
     <DisplayName>Assetra</DisplayName>
     <PublisherDisplayName>oange6214</PublisherDisplayName>
-    <Logo>Assets\StoreLogo.png</Logo>
+    <Logo>Assets\package\StoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
@@ -34,9 +34,9 @@
         DisplayName="Assetra"
         Description="Personal Asset Portfolio Dashboard"
         BackgroundColor="transparent"
-        Square150x150Logo="Assets\Square150x150Logo.png"
-        Square44x44Logo="Assets\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+        Square150x150Logo="Assets\package\Square150x150Logo.png"
+        Square44x44Logo="Assets\package\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\package\Wide310x150Logo.png" />
       </uap:VisualElements>
     </Application>
   </Applications>
