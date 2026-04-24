@@ -212,4 +212,14 @@ public sealed class TradeSqliteRepository : ITradeRepository
         cmd.Parameters.AddWithValue("$pid", parentId.ToString());
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
     }
+
+    public async Task RemoveByAccountIdAsync(Guid accountId, CancellationToken ct = default)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = "DELETE FROM trade WHERE cash_account_id = $id OR to_cash_account_id = $id;";
+        cmd.Parameters.AddWithValue("$id", accountId.ToString());
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+    }
 }

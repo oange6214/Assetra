@@ -109,8 +109,9 @@ public class PortfolioViewModelTests
         var (snapshotSvc, snapshotRepo) = SnapshotStubs();
         var (logRepo, backfill) = BackfillStubs(snapshotRepo);
 
+        var fakeTradeRepo = new FakeTradeRepo();
         var vm = new PortfolioViewModel(
-            new PortfolioRepositories(repo.Object, snapshotRepo.Object, logRepo.Object),
+            new PortfolioRepositories(repo.Object, snapshotRepo.Object, logRepo.Object, Trade: fakeTradeRepo),
             new PortfolioServices(SilentStockService().Object, search.Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
                 PositionQuery: positionQuery),
@@ -237,7 +238,7 @@ public class PortfolioViewModelTests
         var (logRepo1, backfill1) = BackfillStubs(snapshotRepo1);
 
         var vm = new PortfolioViewModel(
-            new PortfolioRepositories(repo.Object, snapshotRepo1.Object, logRepo1.Object),
+            new PortfolioRepositories(repo.Object, snapshotRepo1.Object, logRepo1.Object, Trade: new FakeTradeRepo()),
             new PortfolioServices(SilentStockService().Object, search.Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc1, backfill1)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
@@ -285,7 +286,7 @@ public class PortfolioViewModelTests
             .ReturnsAsync(0m);
 
         var vm = new PortfolioViewModel(
-            new PortfolioRepositories(repo.Object, snapshotRepo2.Object, logRepo2.Object),
+            new PortfolioRepositories(repo.Object, snapshotRepo2.Object, logRepo2.Object, Trade: new FakeTradeRepo()),
             new PortfolioServices(SilentStockService().Object, search.Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc2, backfill2),
                 PositionQuery: posQuery.Object),
@@ -449,6 +450,7 @@ public class PortfolioViewModelTests
         }
         public Task RemoveAsync(Guid id) { Store.RemoveAll(x => x.Id == id); return Task.CompletedTask; }
         public Task RemoveChildrenAsync(Guid parentId) { Store.RemoveAll(x => x.ParentTradeId == parentId); return Task.CompletedTask; }
+        public Task RemoveByAccountIdAsync(Guid accountId, CancellationToken ct = default) { Store.RemoveAll(x => x.CashAccountId == accountId || x.ToCashAccountId == accountId); return Task.CompletedTask; }
     }
 
     /// <summary>
@@ -693,10 +695,10 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
-    public async Task EditTrade_LoanRepay_ChangesAmount_BalanceReflectsNetDelta()
+    public async Task EditTrade_LoanRepay_MetaOnlyEdit_DoesNotChangeBalance()
     {
-        // Regression: editing a 還款 trade from 25,979 → 50,000 should leave the
-        // liability with a net decrease of 50,000 from the original (not 75,979).
+        // Edit mode in the TxDialog is metadata-only (date / note). Opening edit on an
+        // existing LoanRepay must not mutate the principal or the liability balance.
         var (vm, liabRepo, _, _) = await CreateVmWithLiabilityAsync(
             initialBalance: 2_000_000m, original: 2_000_000m);
 
@@ -706,14 +708,13 @@ public class PortfolioViewModelTests
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
         Assert.Equal(1_974_021m, vm.Liabilities[0].Balance);
 
-        // Edit the trade to 50,000 principal
+        // Open edit mode and attempt to change the principal — must have no effect on balance.
         var trade = vm.Trades.First(t => t.IsLoanRepay);
         vm.Transaction.EditTradeCommand.Execute(trade);
-        vm.Transaction.TxPrincipal = "50000";   // Phase 3: LoanRepay edit uses TxPrincipal
-        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.TxPrincipal = "50000";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.Equal(1_950_000m, vm.Liabilities[0].Balance);
+        Assert.Equal(1_974_021m, vm.Liabilities[0].Balance);
     }
 
     // Add liability (simplified): name only, zero balance
@@ -1254,15 +1255,15 @@ public class PortfolioViewModelTests
     /// refactor, old trade was deleted before the new one was validated → lost data.
     /// </summary>
     [Fact]
-    public async Task ConfirmTx_ValidationFailsOnEdit_OldTradeAndBalancePreserved()
+    public async Task EditTrade_MetaOnly_BalanceAndRecordPreserved()
     {
+        // Edit mode is metadata-only (date / note). Changing TxAmount while in edit mode
+        // must not affect the cash balance or remove the original trade record.
         var (vm, cashRepo, tradeRepo) = await CreateVmWithCashAsync(0m);
-        // Seed a cash account for the income to attach to.
         vm.AddAssetDialog.AddAssetType = "cash";
         vm.AddAssetDialog.AddAccountName = "現金";
         await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
-        // Create an Income of 10000 linked to the account.
         vm.Transaction.TxType = "income";
         vm.Transaction.TxAmount = "10000";
         vm.Transaction.TxCashAccount = vm.CashAccounts.First();
@@ -1270,13 +1271,12 @@ public class PortfolioViewModelTests
         Assert.Equal(10_000m, vm.CashAccounts[0].Balance);
         var originalTrade = vm.Trades.Single(t => t.IsIncome);
 
-        // Try to edit with an invalid amount.
+        // Open edit mode; TxAmount change must have no effect (metadata-only edit).
         vm.Transaction.EditTradeCommand.Execute(originalTrade);
-        vm.Transaction.TxAmount = "not-a-number";
+        vm.Transaction.TxAmount = "99999";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        // The error lands on the dialog, but the ledger and balance are untouched.
-        Assert.NotEmpty(vm.Transaction.TxError);
+        // Balance and original trade must be unchanged.
         Assert.Equal(10_000m, vm.CashAccounts[0].Balance);
         Assert.Contains(vm.Trades, t => t.Id == originalTrade.Id);
     }

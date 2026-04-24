@@ -7,18 +7,47 @@ namespace Assetra.Tests.Portfolio;
 
 public sealed class AccountMutationWorkflowServiceTests
 {
-    [Fact]
-    public async Task DeleteAsync_WhenReferenced_ReturnsBlockedAndSkipsDelete()
+    private static (AccountMutationWorkflowService, Mock<IAssetRepository>, Mock<ITradeRepository>) Build()
     {
-        var repo = new Mock<IAssetRepository>();
-        repo.Setup(r => r.HasTradeReferencesAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(3);
+        var assetRepo = new Mock<IAssetRepository>();
+        var tradeRepo = new Mock<ITradeRepository>();
+        var service = new AccountMutationWorkflowService(assetRepo.Object, tradeRepo.Object);
+        return (service, assetRepo, tradeRepo);
+    }
 
-        var service = new AccountMutationWorkflowService(repo.Object);
-        var result = await service.DeleteAsync(Guid.NewGuid());
+    [Fact]
+    public async Task DeleteAsync_DeletesReferencingTradesBeforeAccount()
+    {
+        var (service, assetRepo, tradeRepo) = Build();
+        var id = Guid.NewGuid();
 
-        Assert.False(result.Success);
-        Assert.Equal(3, result.ReferenceCount);
-        repo.Verify(r => r.DeleteItemAsync(It.IsAny<Guid>()), Times.Never);
+        var sequence = new List<string>();
+        tradeRepo.Setup(r => r.RemoveByAccountIdAsync(id, default))
+                 .Callback(() => sequence.Add("trades"))
+                 .Returns(Task.CompletedTask);
+        assetRepo.Setup(r => r.DeleteItemAsync(id))
+                 .Callback(() => sequence.Add("account"))
+                 .Returns(Task.CompletedTask);
+
+        var result = await service.DeleteAsync(id);
+
+        Assert.True(result.Success);
+        Assert.Equal(["trades", "account"], sequence);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_WithNoReferences_StillSucceeds()
+    {
+        var (service, assetRepo, tradeRepo) = Build();
+        var id = Guid.NewGuid();
+
+        tradeRepo.Setup(r => r.RemoveByAccountIdAsync(id, default)).Returns(Task.CompletedTask);
+        assetRepo.Setup(r => r.DeleteItemAsync(id)).Returns(Task.CompletedTask);
+
+        var result = await service.DeleteAsync(id);
+
+        Assert.True(result.Success);
+        tradeRepo.Verify(r => r.RemoveByAccountIdAsync(id, default), Times.Once);
+        assetRepo.Verify(r => r.DeleteItemAsync(id), Times.Once);
     }
 }

@@ -318,5 +318,6 @@ public class BalanceQueryServiceTests
         }
         public Task RemoveAsync(Guid id) { Store.RemoveAll(x => x.Id == id); return Task.CompletedTask; }
         public Task RemoveChildrenAsync(Guid parentId) { Store.RemoveAll(x => x.ParentTradeId == parentId); return Task.CompletedTask; }
+        public Task RemoveByAccountIdAsync(Guid accountId, CancellationToken ct = default) { Store.RemoveAll(x => x.CashAccountId == accountId || x.ToCashAccountId == accountId); return Task.CompletedTask; }
     }
 }

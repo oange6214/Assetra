@@ -26,4 +26,7 @@ public interface ITradeRepository
     /// 用於主交易刪除時連帶清除手續費等附屬 Withdrawal。
     /// </summary>
     Task RemoveChildrenAsync(Guid parentId);
+
+    /// <summary>刪除所有引用指定帳戶（cash_account_id 或 to_cash_account_id）的交易記錄。</summary>
+    Task RemoveByAccountIdAsync(Guid accountId, CancellationToken ct = default);
 }
