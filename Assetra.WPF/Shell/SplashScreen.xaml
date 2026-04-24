@@ -26,8 +26,7 @@
                 Width="82"
                 Height="82"
                 HorizontalAlignment="Center"
-                RenderOptions.BitmapScalingMode="HighQuality"
-                Source="pack://application:,,,/Assetra.WPF;component/Assets/png/asset-logo-dark-128.png" />
+                RenderOptions.BitmapScalingMode="HighQuality" />
 
             <!--  App name  -->
             <TextBlock
