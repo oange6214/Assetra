@@ -42,6 +42,7 @@ Desktop.ini
 *.snupkg
 .nuget/
 .dotnet-home*/
+.artifacts/
 
 # Generated
 *.g.cs

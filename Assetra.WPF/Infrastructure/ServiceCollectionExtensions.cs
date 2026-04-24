@@ -15,9 +15,9 @@ using Assetra.Infrastructure.Http;
 using Assetra.Infrastructure.Persistence;
 using Assetra.Infrastructure.Scheduling;
 using Assetra.Infrastructure.Search;
-using Assetra.WPF.Features.AddStock;
 using Assetra.WPF.Features.Alerts;
-using Assetra.WPF.Features.Allocation;
+using Assetra.WPF.Features.FinancialOverview;
+using Assetra.WPF.Features.Portfolio.Controls;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Features.Settings;
@@ -183,10 +183,18 @@ internal static class ServiceCollectionExtensions
                 sp.GetRequiredService<IPortfolioRepository>()));
         services.AddSingleton<IAccountMutationWorkflowService>(sp =>
             new AccountMutationWorkflowService(
-                sp.GetRequiredService<IAssetRepository>()));
+                sp.GetRequiredService<IAssetRepository>(),
+                sp.GetRequiredService<ITradeRepository>()));
         services.AddSingleton<IAccountUpsertWorkflowService>(sp =>
             new AccountUpsertWorkflowService(
                 sp.GetRequiredService<IAssetRepository>()));
+        services.AddSingleton<ICreditCardMutationWorkflowService>(sp =>
+            new CreditCardMutationWorkflowService(
+                sp.GetRequiredService<IAssetRepository>()));
+        services.AddSingleton<ICreditCardTransactionWorkflowService>(sp =>
+            new CreditCardTransactionWorkflowService(
+                sp.GetRequiredService<IAssetRepository>(),
+                sp.GetRequiredService<ITransactionService>()));
         services.AddSingleton<ILoanPaymentWorkflowService>(sp =>
             new LoanPaymentWorkflowService(
                 sp.GetRequiredService<ITradeRepository>(),
@@ -229,11 +237,15 @@ internal static class ServiceCollectionExtensions
                 BalanceQuery: sp.GetRequiredService<IBalanceQueryService>(),
                 PositionQuery: sp.GetRequiredService<IPositionQueryService>(),
                 TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>(),
+                AccountMutation: sp.GetRequiredService<IAccountMutationWorkflowService>(),
+                CreditCardMutation: sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
+                CreditCardTransaction: sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
                 // Pre-built Sub-VMs that don't require parent-VM callbacks at construction
                 // time. The parent PortfolioViewModel wires the delegate properties afterward.
                 AddAssetDialog: new AddAssetDialogViewModel(
                     sp.GetRequiredService<IAddAssetWorkflowService>(),
-                    sp.GetRequiredService<IAccountUpsertWorkflowService>()),
+                    sp.GetRequiredService<IAccountUpsertWorkflowService>(),
+                    sp.GetRequiredService<ICreditCardMutationWorkflowService>()),
                 SellPanel: new SellPanelViewModel(
                     sp.GetRequiredService<ISellWorkflowService>(),
                     new PortfolioSellPanelController(),
@@ -266,9 +278,8 @@ internal static class ServiceCollectionExtensions
             sp.GetRequiredService<ILocalizationService>(),
             sp.GetService<ICurrencyService>()));
         services.AddSingleton<SettingsViewModel>();
-        services.AddSingleton<AddStockViewModel>();
         services.AddSingleton<MainWindow>(sp =>
-            new MainWindow(sp.GetRequiredService<MainViewModel>(), sp));
+            new MainWindow(sp.GetRequiredService<MainViewModel>()));
         return services;
     }
 

@@ -19,7 +19,8 @@ internal sealed class PortfolioTradeDialogController
     public TradeDialogEditState CreateEditState(
         TradeRowViewModel row,
         IReadOnlyList<PortfolioRowViewModel> positions,
-        IReadOnlyList<CashAccountRowViewModel> cashAccounts)
+        IReadOnlyList<CashAccountRowViewModel> cashAccounts,
+        IReadOnlyList<LiabilityRowViewModel> liabilities)
     {
         var txType = MapType(row.Type);
         var cashAccount = row.CashAccountId is { } cashAcc
@@ -83,6 +84,12 @@ internal sealed class PortfolioTradeDialogController
                     ? Math.Round(row.InterestPaid.Value, 0).ToString("F0")
                     : "0"),
 
+            TradeType.CreditCardCharge or TradeType.CreditCardPayment => new TradeDialogEditState(
+                row.Id, row.TradeDate.ToLocalTime(), txType, row.Note ?? string.Empty,
+                TxAmount: row.CashAmount?.ToString("F0") ?? string.Empty,
+                TxCashAccount: cashAccount,
+                TxCreditCard: liabilities.FirstOrDefault(l => l.AssetId == row.LiabilityAssetId)),
+
             _ => new TradeDialogEditState(
                 row.Id,
                 row.TradeDate.ToLocalTime(),
@@ -103,6 +110,8 @@ internal sealed class PortfolioTradeDialogController
         TradeType.Transfer => "transfer",
         TradeType.LoanBorrow => "loanBorrow",
         TradeType.LoanRepay => "loanRepay",
+        TradeType.CreditCardCharge => "creditCardCharge",
+        TradeType.CreditCardPayment => "creditCardPayment",
         _ => "income",
     };
 }
@@ -136,6 +145,7 @@ internal sealed record TradeDialogEditState(
     PortfolioRowViewModel? TxSellPosition = null,
     string TxSellQuantity = "",
     CashAccountRowViewModel? SellCashAccount = null,
+    LiabilityRowViewModel? TxCreditCard = null,
     string SellPriceInput = "",
     string AddSymbol = "",
     string AddPrice = "",

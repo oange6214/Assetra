@@ -55,8 +55,7 @@ public sealed class PortfolioLoadService : IPortfolioLoadService
             liabilitySnapshotsTask,
             liabilityAssetsTask).ConfigureAwait(false);
 
-        var loanAssets = liabilityAssetsTask.Result
-            .Where(a => a.IsLoan)
+        var liabilityAssets = liabilityAssetsTask.Result
             .ToDictionary(a => a.Name, StringComparer.Ordinal);
 
         return new PortfolioLoadResult(
@@ -66,6 +65,6 @@ public sealed class PortfolioLoadService : IPortfolioLoadService
             cashAccountsTask.Result,
             cashBalancesTask.Result,
             liabilitySnapshotsTask.Result,
-            loanAssets);
+            liabilityAssets);
     }
 }

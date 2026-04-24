@@ -39,7 +39,7 @@
 
             <!--  Inner search field: fills remaining width.  -->
             <Border
-                Height="30"
+                MinHeight="34"
                 Background="{DynamicResource AppBackground}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
@@ -59,7 +59,7 @@
                         VerticalAlignment="Center"
                         DockPanel.Dock="Left"
                         FontFamily="Segoe MDL2 Assets"
-                        FontSize="12"
+                        FontSize="{StaticResource FontSizeXs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         IsHitTestVisible="False"
                         Text="&#xE721;" />

@@ -26,14 +26,15 @@ public sealed class TradeSqliteRepository : ITradeRepository
     //  7  quantity              17  principal
     //  8  realized_pnl          18  interest_paid
     //  9  realized_pnl_pct      19  to_cash_account_id
-    //                           20  parent_trade_id
+    //                           20  liability_asset_id
+    //                           21  parent_trade_id
 
     private const string SelectClause =
         "id, symbol, exchange, name, trade_type, trade_date, " +
         "price, quantity, realized_pnl, realized_pnl_pct, " +
         "cash_amount, cash_account_id, note, portfolio_entry_id, commission, " +
         "commission_discount, loan_label, principal, interest_paid, " +
-        "to_cash_account_id, parent_trade_id";
+        "to_cash_account_id, liability_asset_id, parent_trade_id";
 
     private static Trade MapTrade(SqliteDataReader r) => new(
         Id: Guid.Parse(r.GetString(0)),
@@ -56,7 +57,8 @@ public sealed class TradeSqliteRepository : ITradeRepository
         Principal: r.IsDBNull(17) ? null : (decimal)r.GetDouble(17),
         InterestPaid: r.IsDBNull(18) ? null : (decimal)r.GetDouble(18),
         ToCashAccountId: r.IsDBNull(19) ? null : Guid.Parse(r.GetString(19)),
-        ParentTradeId: r.IsDBNull(20) ? null : Guid.Parse(r.GetString(20)));
+        LiabilityAssetId: r.IsDBNull(20) ? null : Guid.Parse(r.GetString(20)),
+        ParentTradeId: r.IsDBNull(21) ? null : Guid.Parse(r.GetString(21)));
 
     private static void BindTradeParams(SqliteCommand cmd, Trade t)
     {
@@ -80,6 +82,7 @@ public sealed class TradeSqliteRepository : ITradeRepository
         cmd.Parameters.AddWithValue("$princ", t.Principal.HasValue ? (object)(double)t.Principal.Value : DBNull.Value);
         cmd.Parameters.AddWithValue("$int", t.InterestPaid.HasValue ? (object)(double)t.InterestPaid.Value : DBNull.Value);
         cmd.Parameters.AddWithValue("$to_acct", t.ToCashAccountId.HasValue ? (object)t.ToCashAccountId.Value.ToString() : DBNull.Value);
+        cmd.Parameters.AddWithValue("$liability_asset_id", t.LiabilityAssetId.HasValue ? (object)t.LiabilityAssetId.Value.ToString() : DBNull.Value);
         cmd.Parameters.AddWithValue("$parent_id", t.ParentTradeId.HasValue ? (object)t.ParentTradeId.Value.ToString() : DBNull.Value);
     }
 
@@ -148,12 +151,14 @@ public sealed class TradeSqliteRepository : ITradeRepository
                  realized_pnl, realized_pnl_pct, cash_amount, cash_account_id, note,
                  portfolio_entry_id, commission, commission_discount,
                  loan_label, principal, interest_paid, to_cash_account_id,
+                 liability_asset_id,
                  parent_trade_id, created_at, updated_at)
             VALUES
                 ($id, $sym, $ex, $name, $type, $date, $price, $qty,
                  $rpnl, $rpct, $cash, $acct, $note,
                  $pentry, $comm, $comm_d,
                  $loan_label, $princ, $int, $to_acct,
+                 $liability_asset_id,
                  $parent_id, $created_at, $updated_at);
             """;
         BindTradeParams(cmd, trade);
@@ -179,6 +184,7 @@ public sealed class TradeSqliteRepository : ITradeRepository
                 commission_discount = $comm_d,
                 loan_label = $loan_label, principal = $princ,
                 interest_paid = $int, to_cash_account_id = $to_acct,
+                liability_asset_id = $liability_asset_id,
                 parent_trade_id = $parent_id, updated_at = $updated_at
             WHERE id = $id;
             """;
@@ -205,5 +211,15 @@ public sealed class TradeSqliteRepository : ITradeRepository
         cmd.CommandText = "DELETE FROM trade WHERE parent_trade_id = $pid;";
         cmd.Parameters.AddWithValue("$pid", parentId.ToString());
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+    }
+
+    public async Task RemoveByAccountIdAsync(Guid accountId, CancellationToken ct = default)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = "DELETE FROM trade WHERE cash_account_id = $id OR to_cash_account_id = $id;";
+        cmd.Parameters.AddWithValue("$id", accountId.ToString());
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 }

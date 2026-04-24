@@ -1,5 +1,6 @@
 <UserControl
     x:Class="Assetra.WPF.Features.Portfolio.Controls.TxForms.LoanTxForm"
+    x:Name="Root"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
@@ -49,85 +50,217 @@
                 Text="{Binding TxAmountError}"
                 Visibility="{Binding TxAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-            <!--  年利率（選填）  -->
-            <TextBlock
-                Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
-            <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxLoanRate, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Margin="0,0,0,12"
-                Style="{StaticResource FormFieldError}"
-                Text="{Binding TxLoanRateError}"
-                Visibility="{Binding TxLoanRateError, Converter={StaticResource StringToVisibilityConverter}}" />
+            <Grid Margin="0,0,0,12">
+                <Grid.Visibility>
+                    <MultiBinding Converter="{StaticResource InverseWidthScaleThresholdToVisibilityConverter}" ConverterParameter="900">
+                        <Binding ElementName="Root" Path="ActualWidth" />
+                        <Binding
+                            RelativeSource="{RelativeSource AncestorType=Window}"
+                            Path="DataContext.Settings.UiScale" />
+                    </MultiBinding>
+                </Grid.Visibility>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock
+                        Margin="0,0,0,4"
+                        FontSize="{StaticResource FontSizeXs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
+                    <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxLoanRate, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock
+                        Margin="0,0,0,12"
+                        Style="{StaticResource FormFieldError}"
+                        Text="{Binding TxLoanRateError}"
+                        Visibility="{Binding TxLoanRateError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-            <!--  還款期數（選填）  -->
-            <TextBlock
-                Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Loan.TermMonths}" />
-            <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Margin="0,0,0,12"
-                Style="{StaticResource FormFieldError}"
-                Text="{Binding TxLoanTermMonthsError}"
-                Visibility="{Binding TxLoanTermMonthsError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    <TextBlock
+                        Margin="0,0,0,4"
+                        FontSize="{StaticResource FontSizeXs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Loan.StartDate}" />
+                    <DatePicker
+                        FontSize="{StaticResource FontSizeSm}"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        SelectedDate="{Binding TxLoanStartDate}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock
+                        Margin="0,0,0,4"
+                        FontSize="{StaticResource FontSizeXs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Loan.TermMonths}" />
+                    <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock
+                        Margin="0,0,0,12"
+                        Style="{StaticResource FormFieldError}"
+                        Text="{Binding TxLoanTermMonthsError}"
+                        Visibility="{Binding TxLoanTermMonthsError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-            <!--  首期還款日（選填）  -->
-            <TextBlock
-                Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Loan.StartDate}" />
-            <DatePicker
-                FontSize="{StaticResource FontSizeSm}"
-                Foreground="{DynamicResource AppTextPrimary}"
-                SelectedDate="{Binding TxLoanStartDate}" />
-            <TextBlock
-                Margin="0,4,0,12"
-                FontSize="{StaticResource FontSizeXs}"
-                Foreground="{DynamicResource AppTextMuted}"
-                Text="填寫年利率與期數可自動產生攤還表"
-                TextWrapping="Wrap" />
+                    <Border
+                        Padding="12,10"
+                        Background="{DynamicResource AppBackground}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource RadiusSm}">
+                        <TextBlock
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="填寫年利率與期數可自動產生攤還表"
+                            TextWrapping="Wrap" />
+                    </Border>
+                </StackPanel>
+            </Grid>
+            <StackPanel Margin="0,0,0,12">
+                <StackPanel.Visibility>
+                    <MultiBinding Converter="{StaticResource WidthScaleThresholdToVisibilityConverter}" ConverterParameter="900">
+                        <Binding ElementName="Root" Path="ActualWidth" />
+                        <Binding
+                            RelativeSource="{RelativeSource AncestorType=Window}"
+                            Path="DataContext.Settings.UiScale" />
+                    </MultiBinding>
+                </StackPanel.Visibility>
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontSize="{StaticResource FontSizeXs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
+                <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxLoanRate, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Margin="0,0,0,12"
+                    Style="{StaticResource FormFieldError}"
+                    Text="{Binding TxLoanRateError}"
+                    Visibility="{Binding TxLoanRateError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontSize="{StaticResource FontSizeXs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Portfolio.Loan.TermMonths}" />
+                <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Margin="0,0,0,12"
+                    Style="{StaticResource FormFieldError}"
+                    Text="{Binding TxLoanTermMonthsError}"
+                    Visibility="{Binding TxLoanTermMonthsError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontSize="{StaticResource FontSizeXs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Portfolio.Loan.StartDate}" />
+                <DatePicker
+                    FontSize="{StaticResource FontSizeSm}"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    SelectedDate="{Binding TxLoanStartDate}" />
+                <TextBlock
+                    Margin="0,4,0,0"
+                    FontSize="{StaticResource FontSizeXs}"
+                    Foreground="{DynamicResource AppTextMuted}"
+                    Text="填寫年利率與期數可自動產生攤還表"
+                    TextWrapping="Wrap" />
+            </StackPanel>
         </StackPanel>
 
         <!--  還款：本金 + 利息拆分  -->
         <StackPanel Visibility="{Binding TxTypeIsLoanRepay, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
-                Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Tx.Principal}" />
-            <TextBox
-                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                Style="{StaticResource FormTextBox}"
-                Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Margin="0,0,0,12"
-                Style="{StaticResource FormFieldError}"
-                Text="{Binding TxPrincipalError}"
-                Visibility="{Binding TxPrincipalError, Converter={StaticResource StringToVisibilityConverter}}" />
+            <Grid Margin="0,0,0,12">
+                <Grid.Visibility>
+                    <MultiBinding Converter="{StaticResource InverseWidthScaleThresholdToVisibilityConverter}" ConverterParameter="860">
+                        <Binding ElementName="Root" Path="ActualWidth" />
+                        <Binding
+                            RelativeSource="{RelativeSource AncestorType=Window}"
+                            Path="DataContext.Settings.UiScale" />
+                    </MultiBinding>
+                </Grid.Visibility>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock
+                        Margin="0,0,0,4"
+                        FontSize="{StaticResource FontSizeXs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Tx.Principal}" />
+                    <TextBox
+                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                        Style="{StaticResource FormTextBox}"
+                        Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock
+                        Margin="0,0,0,0"
+                        Style="{StaticResource FormFieldError}"
+                        Text="{Binding TxPrincipalError}"
+                        Visibility="{Binding TxPrincipalError, Converter={StaticResource StringToVisibilityConverter}}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock
+                        Margin="0,0,0,4"
+                        FontSize="{StaticResource FontSizeXs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Tx.InterestPaid}" />
+                    <TextBox
+                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                        Style="{StaticResource FormTextBox}"
+                        Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock
+                        Style="{StaticResource FormFieldError}"
+                        Text="{Binding TxInterestPaidError}"
+                        Visibility="{Binding TxInterestPaidError, Converter={StaticResource StringToVisibilityConverter}}" />
+                </StackPanel>
+            </Grid>
+            <StackPanel Margin="0,0,0,12">
+                <StackPanel.Visibility>
+                    <MultiBinding Converter="{StaticResource WidthScaleThresholdToVisibilityConverter}" ConverterParameter="860">
+                        <Binding ElementName="Root" Path="ActualWidth" />
+                        <Binding
+                            RelativeSource="{RelativeSource AncestorType=Window}"
+                            Path="DataContext.Settings.UiScale" />
+                    </MultiBinding>
+                </StackPanel.Visibility>
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontSize="{StaticResource FontSizeXs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Portfolio.Tx.Principal}" />
+                <TextBox
+                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                    Style="{StaticResource FormTextBox}"
+                    Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Margin="0,0,0,12"
+                    Style="{StaticResource FormFieldError}"
+                    Text="{Binding TxPrincipalError}"
+                    Visibility="{Binding TxPrincipalError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-            <TextBlock
-                Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Tx.InterestPaid}" />
-            <TextBox
-                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                Style="{StaticResource FormTextBox}"
-                Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Style="{StaticResource FormFieldError}"
-                Text="{Binding TxInterestPaidError}"
-                Visibility="{Binding TxInterestPaidError, Converter={StaticResource StringToVisibilityConverter}}" />
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontSize="{StaticResource FontSizeXs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Portfolio.Tx.InterestPaid}" />
+                <TextBox
+                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                    Style="{StaticResource FormTextBox}"
+                    Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Style="{StaticResource FormFieldError}"
+                    Text="{Binding TxInterestPaidError}"
+                    Visibility="{Binding TxInterestPaidError, Converter={StaticResource StringToVisibilityConverter}}" />
+            </StackPanel>
             <TextBlock
                 Margin="0,2,0,12"
                 FontSize="{StaticResource FontSizeXs}"

@@ -26,46 +26,41 @@
         <!--  ═══ Row 0: Debt Health Summary ═══  -->
         <Border
             Grid.Row="0"
-            Padding="12,8"
+            Padding="16,12"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="0,0,0,1">
-            <StackPanel>
-                <Grid Margin="0,0,0,4">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+            <WrapPanel Margin="0,0,0,2" ItemWidth="372" ItemHeight="Auto">
 
                     <!--  Left: Remaining + paid progress  -->
                     <Border
-                        Grid.Column="0"
-                        Padding="12,10"
+                        Margin="0,0,12,12"
+                        Padding="18,16"
                         Background="{DynamicResource AppBackground}"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="1"
                         CornerRadius="{StaticResource RadiusSm}">
                         <StackPanel>
                             <TextBlock
-                                Margin="0,0,0,4"
+                                Margin="0,0,0,8"
                                 FontSize="{StaticResource FontSizeXs}"
-                                Foreground="{DynamicResource AppTextSecondary}"
+                                Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Portfolio.Liability.TotalRemaining}" />
                             <TextBlock
-                                Margin="0,0,0,10"
-                                FontSize="{StaticResource FontSizeLg}"
-                                FontWeight="SemiBold"
+                                Margin="0,0,0,16"
+                                FontFamily="{StaticResource FontTabular}"
+                                FontSize="{StaticResource FontSizeXl}"
+                                FontWeight="Bold"
                                 Foreground="{DynamicResource AppDown}"
                                 Text="{Binding TotalLiabilities, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
 
-                            <Grid Margin="0,0,0,6">
+                            <Grid Margin="0,0,0,12">
                                 <Border
-                                    Height="6"
+                                    Height="7"
                                     Background="{DynamicResource AppBorder}"
                                     CornerRadius="{StaticResource RadiusSm}" />
                                 <Border
-                                    Height="6"
+                                    Height="7"
                                     HorizontalAlignment="Left"
                                     Background="{DynamicResource AppUp}"
                                     CornerRadius="{StaticResource RadiusSm}">
@@ -78,33 +73,57 @@
                                 </Border>
                             </Grid>
 
-                            <DockPanel>
-                                <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}">
-                                    <Run Text="{DynamicResource Portfolio.Liability.PaidPercent}" />
-                                    <Run
-                                        FontFamily="{StaticResource FontTabular}"
-                                        Foreground="{DynamicResource AppUp}"
-                                        Text="{Binding PaidPercentDisplay, Mode=OneWay}" />
-                                </TextBlock>
-                                <TextBlock
-                                    HorizontalAlignment="Right"
-                                    DockPanel.Dock="Right"
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    Foreground="{DynamicResource AppTextMuted}">
-                                    <Run Text="{DynamicResource Portfolio.Liability.TotalLoan}" />
-                                    <Run
-                                        FontFamily="{StaticResource FontTabular}"
-                                        Foreground="{DynamicResource AppTextSecondary}"
-                                        Text="{Binding TotalOriginalDisplay, Mode=OneWay}" />
-                                </TextBlock>
-                            </DockPanel>
+                            <UniformGrid Columns="2">
+                                <Border
+                                    Margin="0,0,6,0"
+                                    Padding="10,8"
+                                    Background="{DynamicResource AppSurface}"
+                                    BorderBrush="{DynamicResource AppBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusSm}">
+                                    <StackPanel>
+                                        <TextBlock
+                                            FontSize="{StaticResource FontSizeXs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{DynamicResource Portfolio.Liability.PaidPercent}" />
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            FontFamily="{StaticResource FontTabular}"
+                                            FontSize="{StaticResource FontSizeBase}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppUp}"
+                                            Text="{Binding PaidPercentDisplay, Mode=OneWay}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border
+                                    Margin="6,0,0,0"
+                                    Padding="10,8"
+                                    Background="{DynamicResource AppSurface}"
+                                    BorderBrush="{DynamicResource AppBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusSm}">
+                                    <StackPanel>
+                                        <TextBlock
+                                            FontSize="{StaticResource FontSizeXs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{DynamicResource Portfolio.Liability.TotalLoan}" />
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            FontFamily="{StaticResource FontTabular}"
+                                            FontSize="{StaticResource FontSizeBase}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding TotalOriginalDisplay, Mode=OneWay}" />
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
                         </StackPanel>
                     </Border>
 
                     <!--  Right: Leverage health  -->
                     <Border
-                        Grid.Column="2"
-                        Padding="12,10"
+                        Margin="0,0,12,12"
+                        Padding="18,16"
                         Background="{DynamicResource AppBackground}"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="1"
@@ -113,65 +132,85 @@
                         ToolTipService.InitialShowDelay="300"
                         ToolTipService.ShowDuration="20000">
                         <StackPanel>
-                            <DockPanel Margin="0,0,0,8">
+                            <DockPanel Margin="0,0,0,12">
                                 <TextBlock
                                     VerticalAlignment="Center"
                                     FontSize="{StaticResource FontSizeXs}"
-                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Foreground="{DynamicResource AppTextMuted}"
                                     Text="{DynamicResource Portfolio.Liability.Health.Label}" />
-                                <TextBlock
+                                <Border
                                     HorizontalAlignment="Right"
                                     DockPanel.Dock="Right"
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    FontWeight="SemiBold"
-                                    Foreground="{Binding DebtStatusTag, Converter={StaticResource StatusTagToBrush}}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Healthy}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding DebtStatusTag}" Value="warning">
-                                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Warning}" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding DebtStatusTag}" Value="danger">
-                                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Danger}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                    Padding="8,2"
+                                    Background="{DynamicResource AppSurface}"
+                                    BorderBrush="{DynamicResource AppBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusSm}">
+                                    <TextBlock
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{Binding DebtStatusTag, Converter={StaticResource StatusTagToBrush}}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Healthy}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding DebtStatusTag}" Value="warning">
+                                                        <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Warning}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding DebtStatusTag}" Value="danger">
+                                                        <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Danger}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
                             </DockPanel>
 
-                            <Grid Margin="0,0,0,10">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock
-                                        FontFamily="{StaticResource FontTabular}"
-                                        FontSize="{StaticResource FontSizeLg}"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding DebtRatioDisplay}" />
-                                    <TextBlock
-                                        FontSize="{StaticResource FontSizeXs}"
-                                        Foreground="{DynamicResource AppTextSecondary}"
-                                        Text="{DynamicResource Portfolio.Liability.DebtRatio}" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock
-                                        FontFamily="{StaticResource FontTabular}"
-                                        FontSize="{StaticResource FontSizeLg}"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding LeverageRatioDisplay}" />
-                                    <TextBlock
-                                        FontSize="{StaticResource FontSizeXs}"
-                                        Foreground="{DynamicResource AppTextSecondary}"
-                                        Text="{DynamicResource Portfolio.Liability.LeverageRatio}" />
-                                </StackPanel>
-                            </Grid>
+                            <UniformGrid Margin="0,0,0,14" Columns="2">
+                                <Border
+                                    Margin="0,0,6,0"
+                                    Padding="10,8"
+                                    Background="{DynamicResource AppSurface}"
+                                    BorderBrush="{DynamicResource AppBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusSm}">
+                                    <StackPanel>
+                                        <TextBlock
+                                            FontSize="{StaticResource FontSizeXs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{DynamicResource Portfolio.Liability.DebtRatio}" />
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            FontFamily="{StaticResource FontTabular}"
+                                            FontSize="{StaticResource FontSizeBase}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding DebtRatioDisplay}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border
+                                    Margin="6,0,0,0"
+                                    Padding="10,8"
+                                    Background="{DynamicResource AppSurface}"
+                                    BorderBrush="{DynamicResource AppBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusSm}">
+                                    <StackPanel>
+                                        <TextBlock
+                                            FontSize="{StaticResource FontSizeXs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{DynamicResource Portfolio.Liability.LeverageRatio}" />
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            FontFamily="{StaticResource FontTabular}"
+                                            FontSize="{StaticResource FontSizeBase}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding LeverageRatioDisplay}" />
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
 
                             <!--  Progress bar with 30% / 50% threshold tick marks  -->
                             <Grid Margin="0,0,0,4">
@@ -249,14 +288,31 @@
                             </Grid>
                         </StackPanel>
                     </Border>
-                </Grid>
-            </StackPanel>
+            </WrapPanel>
         </Border>
 
         <controls:SearchBox
             Grid.Row="1"
             Placeholder="{DynamicResource Portfolio.Filter.SearchLiabilities}"
-            Text="{Binding LiabilityFilterText}" />
+            Text="{Binding LiabilityFilterText}">
+            <controls:SearchBox.RightContent>
+                <Button
+                    MinHeight="32"
+                    Padding="10,0"
+                    Command="{Binding OpenAddCreditCardDialogCommand}"
+                    Style="{StaticResource BtnGhost}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            FontFamily="Segoe MDL2 Assets"
+                            FontSize="{StaticResource FontSizeXs}"
+                            Text="&#xE710;" />
+                        <TextBlock VerticalAlignment="Center" Text="{DynamicResource Portfolio.AddCreditCard}" />
+                    </StackPanel>
+                </Button>
+            </controls:SearchBox.RightContent>
+        </controls:SearchBox>
 
         <!--  ═══ Liabilities DataGrid ═══  -->
         <Grid Grid.Row="2">
@@ -279,6 +335,15 @@
                         FontSize="{StaticResource FontSizeSm}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Liability.Empty}" />
+                    <Button
+                        Height="34"
+                        Margin="0,16,0,0"
+                        Padding="20,0"
+                        HorizontalAlignment="Center"
+                        Command="{Binding OpenAddCreditCardDialogCommand}"
+                        Style="{StaticResource BtnPrimary}">
+                        <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.AddCreditCard}" />
+                    </Button>
                 </StackPanel>
             </Border>
 
@@ -300,7 +365,7 @@
                 Foreground="{DynamicResource AppTextPrimary}"
                 GridLinesVisibility="None"
                 HeadersVisibility="Column"
-                HorizontalScrollBarVisibility="Disabled"
+                HorizontalScrollBarVisibility="Auto"
                 IsReadOnly="True"
                 ItemsSource="{Binding LiabilitiesView}"
                 PreviewMouseDown="OnGridPreviewMouseDown"
@@ -326,19 +391,73 @@
                         <DataGridTemplateColumn.Header>
                             <TextBlock Text="{DynamicResource Common.Asset}" />
                         </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid VerticalAlignment="Center">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
                                 <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
                                     VerticalAlignment="Center"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
-                                    Text="{Binding Name}" />
+                                    Text="{Binding Name}"
+                                    TextTrimming="CharacterEllipsis" />
+
+                                <Border
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Margin="10,0,0,0"
+                                    HorizontalAlignment="Right"
+                                    Style="{StaticResource PortfolioLiabilityBadge}">
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style BasedOn="{StaticResource PortfolioBadgeText}" TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{DynamicResource Portfolio.Dialog.TypeLoan}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsCreditCard}" Value="True">
+                                                        <Setter Property="Text" Value="{DynamicResource Portfolio.Dialog.TypeCreditCard}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
+                                    Margin="0,4,0,0"
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    TextTrimming="CharacterEllipsis">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{Binding RateDisplay}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCreditCard}" Value="True">
+                                                    <Setter Property="Text" Value="{Binding IssuerName, FallbackValue=''}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
                     <!--  Remaining Balance  -->
-                    <DataGridTemplateColumn Width="130" SortMemberPath="Balance">
+                    <DataGridTemplateColumn Width="200" SortMemberPath="Balance">
                         <DataGridTemplateColumn.HeaderStyle>
                             <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Right" />
@@ -361,7 +480,7 @@
                     </DataGridTemplateColumn>
 
                     <!--  Original Amount  -->
-                    <DataGridTemplateColumn Width="130" SortMemberPath="OriginalAmount">
+                    <DataGridTemplateColumn Width="200" SortMemberPath="OriginalAmount">
                         <DataGridTemplateColumn.HeaderStyle>
                             <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Right" />
@@ -383,7 +502,7 @@
                     </DataGridTemplateColumn>
 
                     <!--  Paid %  -->
-                    <DataGridTemplateColumn Width="80" SortMemberPath="PaidPercent">
+                    <DataGridTemplateColumn Width="100" SortMemberPath="PaidPercent">
                         <DataGridTemplateColumn.HeaderStyle>
                             <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Right" />

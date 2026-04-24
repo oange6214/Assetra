@@ -54,6 +54,15 @@ public sealed class TransactionService : ITransactionService
             throw new InvalidOperationException(
                 $"{t.Type} 必須設定 LoanLabel（貸款名稱）。");
 
+        if (t.Type is TradeType.CreditCardCharge or TradeType.CreditCardPayment
+            && !t.LiabilityAssetId.HasValue)
+            throw new InvalidOperationException(
+                $"{t.Type} 必須設定 LiabilityAssetId（信用卡負債資產）。");
+
+        if (t.Type == TradeType.CreditCardPayment && !t.CashAccountId.HasValue)
+            throw new InvalidOperationException(
+                "CreditCardPayment 必須設定 CashAccountId（扣款現金帳戶）。");
+
         if (t.Type == TradeType.Transfer && !t.ToCashAccountId.HasValue)
             throw new InvalidOperationException(
                 "Transfer 必須設定 ToCashAccountId（目標現金帳戶）。");

@@ -10,4 +10,4 @@ public sealed record PortfolioLoadResult(
     IReadOnlyList<AssetItem> CashAccounts,
     IReadOnlyDictionary<Guid, decimal> CashBalances,
     IReadOnlyDictionary<string, LiabilitySnapshot> LiabilitySnapshots,
-    IReadOnlyDictionary<string, AssetItem> LoanAssets);
+    IReadOnlyDictionary<string, AssetItem> LiabilityAssets);

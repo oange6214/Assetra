@@ -9,7 +9,7 @@ internal static class TradeSchemaMigrator
         "cash_amount", "cash_account_id", "note", "portfolio_entry_id",
         "created_at", "updated_at", "commission", "commission_discount",
         "liability_account_id", "principal", "interest_paid", "to_cash_account_id",
-        "loan_label", "parent_trade_id",
+        "loan_label", "liability_asset_id", "parent_trade_id",
     };
 
     private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -61,15 +61,18 @@ internal static class TradeSchemaMigrator
             MigrateAddColumn(conn, tx, "interest_paid", "REAL");
             MigrateAddColumn(conn, tx, "to_cash_account_id", "TEXT");
             MigrateAddColumn(conn, tx, "loan_label", "TEXT");
+            MigrateAddColumn(conn, tx, "liability_asset_id", "TEXT");
             MigrateAddColumn(conn, tx, "parent_trade_id", "TEXT");
 
             cmd.CommandText = """
                 CREATE INDEX IF NOT EXISTS idx_trade_cash_acct ON trade (cash_account_id);
                 CREATE INDEX IF NOT EXISTS idx_trade_loan_label ON trade (loan_label);
+                CREATE INDEX IF NOT EXISTS idx_trade_liability_asset ON trade (liability_asset_id);
                 """;
             cmd.ExecuteNonQuery();
 
             BackfillLegacyLiabilityLinks(conn, tx, cmd);
+            BackfillLiabilityAssetIds(cmd);
             BackfillLoanLabels(conn, tx, cmd);
             NormalizeLegacyInterestTrades(cmd);
 
@@ -135,6 +138,17 @@ internal static class TradeSchemaMigrator
              WHERE trade_type IN ('LoanBorrow', 'LoanRepay')
                AND liability_account_id IS NOT NULL
                AND loan_label IS NULL;
+            """;
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void BackfillLiabilityAssetIds(SqliteCommand cmd)
+    {
+        cmd.CommandText = """
+            UPDATE trade
+               SET liability_asset_id = liability_account_id
+             WHERE liability_asset_id IS NULL
+               AND liability_account_id IS NOT NULL;
             """;
         cmd.ExecuteNonQuery();
     }

@@ -1,5 +1,6 @@
 using System.IO;
 using Microsoft.Data.Sqlite;
+using Assetra.Core.Models;
 using Assetra.Infrastructure.Persistence;
 using Xunit;
 
@@ -78,5 +79,34 @@ public class TradeSqliteRepositoryInitializeTests : IDisposable
 
         var ex = Record.Exception(() => new TradeSqliteRepository(_dbPath));
         Assert.Null(ex);
+    }
+
+    [Fact]
+    public async Task AddAsync_CreditCardTrade_RoundTripsLiabilityAssetId()
+    {
+        var repo = new TradeSqliteRepository(_dbPath);
+        var liabilityAssetId = Guid.NewGuid();
+        var trade = new Trade(
+            Guid.NewGuid(),
+            "Cube",
+            string.Empty,
+            "Cube",
+            TradeType.CreditCardCharge,
+            new DateTime(2026, 4, 23, 12, 0, 0, DateTimeKind.Utc),
+            0m,
+            1,
+            null,
+            null,
+            CashAmount: 1288m,
+            Note: "午餐",
+            LiabilityAssetId: liabilityAssetId);
+
+        await repo.AddAsync(trade);
+        var all = await repo.GetAllAsync();
+
+        var saved = Assert.Single(all);
+        Assert.Equal(TradeType.CreditCardCharge, saved.Type);
+        Assert.Equal(liabilityAssetId, saved.LiabilityAssetId);
+        Assert.Equal(1288m, saved.CashAmount);
     }
 }

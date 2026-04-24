@@ -12,6 +12,7 @@
     WindowStyle="None">
 
     <Border
+        x:Name="RootBorder"
         Background="{DynamicResource AppBackground}"
         BorderBrush="{DynamicResource AppBorder}"
         BorderThickness="1"
@@ -20,26 +21,12 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Center">
 
-            <!--  Vector logo — crisp at any DPI  -->
-            <Viewbox Width="72" Height="72" HorizontalAlignment="Center">
-                <Canvas Width="100" Height="100">
-                    <Rectangle Width="100" Height="100" RadiusX="17" RadiusY="17" Fill="#16A34A" />
-                    <Rectangle Canvas.Left="14" Canvas.Top="58" Width="19" Height="27" RadiusX="3" RadiusY="3" Fill="#FFFFFFBF" />
-                    <Rectangle Canvas.Left="41" Canvas.Top="42" Width="19" Height="43" RadiusX="3" RadiusY="3" Fill="#FFFFFFDF" />
-                    <Rectangle Canvas.Left="68" Canvas.Top="23" Width="19" Height="62" RadiusX="3" RadiusY="3" Fill="White" />
-                    <Polyline
-                        Points="23,58 50,42 77,23"
-                        Opacity="0.9"
-                        Stroke="White"
-                        StrokeEndLineCap="Round"
-                        StrokeLineJoin="Round"
-                        StrokeStartLineCap="Round"
-                        StrokeThickness="5" />
-                    <Ellipse Canvas.Left="18" Canvas.Top="53" Width="10" Height="10" Fill="White" />
-                    <Ellipse Canvas.Left="45" Canvas.Top="37" Width="10" Height="10" Fill="White" />
-                    <Ellipse Canvas.Left="72" Canvas.Top="18" Width="10" Height="10" Fill="White" />
-                </Canvas>
-            </Viewbox>
+            <Image
+                x:Name="SplashIcon"
+                Width="82"
+                Height="82"
+                HorizontalAlignment="Center"
+                RenderOptions.BitmapScalingMode="HighQuality" />
 
             <!--  App name  -->
             <TextBlock

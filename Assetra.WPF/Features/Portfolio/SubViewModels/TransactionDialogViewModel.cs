@@ -24,6 +24,7 @@ internal sealed record TransactionDialogDependencies(
     ITradeDeletionWorkflowService TradeDeletion,
     ITradeMetadataWorkflowService TradeMetadata,
     ILoanMutationWorkflowService LoanMutation,
+    ICreditCardTransactionWorkflowService CreditCardTransaction,
     IStockSearchService Search,
     PortfolioTradeDialogController TradeDialogController,
     IAccountUpsertWorkflowService? AccountUpsert,
@@ -58,6 +59,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
     private readonly ITradeMetadataWorkflowService _tradeMetadataWorkflowService;
     private readonly ILoanMutationWorkflowService _loanMutationWorkflowService;
+    private readonly ICreditCardTransactionWorkflowService _creditCardTransactionWorkflowService;
     private readonly IStockSearchService _search;
     private readonly PortfolioTradeDialogController _tradeDialogController;
     private readonly IAccountUpsertWorkflowService? _accountUpsert;
@@ -105,6 +107,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _tradeDeletionWorkflowService = deps.TradeDeletion;
         _tradeMetadataWorkflowService = deps.TradeMetadata;
         _loanMutationWorkflowService = deps.LoanMutation;
+        _creditCardTransactionWorkflowService = deps.CreditCardTransaction;
         _search = deps.Search;
         _tradeDialogController = deps.TradeDialogController;
         _accountUpsert = deps.AccountUpsert;
@@ -341,6 +344,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public bool TxTypeIsLoan => TxType is "loanBorrow" or "loanRepay";
     public bool TxTypeIsLoanBorrow => TxType == "loanBorrow";
     public bool TxTypeIsLoanRepay => TxType == "loanRepay";
+    public bool TxTypeIsCreditCard => TxType is "creditCardCharge" or "creditCardPayment";
+    public bool TxTypeIsCreditCardCharge => TxType == "creditCardCharge";
+    public bool TxTypeIsCreditCardPayment => TxType == "creditCardPayment";
     /// <summary>True for 轉帳 — money moves between two cash accounts.</summary>
     public bool TxTypeIsTransfer => TxType == "transfer";
     public bool TxTypeIsBuy => TxType == "buy";
@@ -365,6 +371,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// </summary>
     public IReadOnlyList<string> LoanLabelSuggestions =>
         Liabilities.Select(l => l.Label).OrderBy(l => l).ToList();
+
+    [ObservableProperty] private LiabilityRowViewModel? _txCreditCard;
+
+    public IReadOnlyList<LiabilityRowViewModel> CreditCardOptions =>
+        Liabilities.Where(l => !l.IsLoan).OrderBy(l => l.Label).ToList();
 
     // 轉帳 (Transfer)
     // 轉帳會建一組 Withdrawal (源) + Deposit (目) 對：
@@ -569,6 +580,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(TxTypeIsLoan));
         OnPropertyChanged(nameof(TxTypeIsLoanBorrow));
         OnPropertyChanged(nameof(TxTypeIsLoanRepay));
+        OnPropertyChanged(nameof(TxTypeIsCreditCard));
+        OnPropertyChanged(nameof(TxTypeIsCreditCardCharge));
+        OnPropertyChanged(nameof(TxTypeIsCreditCardPayment));
         OnPropertyChanged(nameof(TxTypeIsTransfer));
         OnPropertyChanged(nameof(TxTypeIsBuy));
         OnPropertyChanged(nameof(TxTypeIsSell));
@@ -748,6 +762,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxTransferTarget = null;
         TxTransferTargetName = string.Empty;
         TxTransferTargetAmount = string.Empty;
+        TxCreditCard = null;
         TxBuyAssetType = state.TxBuyAssetType;
         TxBuyPriceMode = state.TxBuyPriceMode;
         TxBuyTotalCost = string.Empty;
@@ -780,6 +795,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         AddAssetDialog.AddCryptoSymbol = string.Empty;
         AddAssetDialog.AddCryptoQty = string.Empty;
         AddAssetDialog.AddCryptoPrice = string.Empty;
+        AddAssetDialog.AddCreditCardName = string.Empty;
+        AddAssetDialog.AddCreditCardIssuer = string.Empty;
+        AddAssetDialog.AddCreditCardBillingDay = string.Empty;
+        AddAssetDialog.AddCreditCardDueDay = string.Empty;
+        AddAssetDialog.AddCreditCardLimit = string.Empty;
         SellPanel.SellCashAccount = null;
         SellPanel.SellPriceInput = string.Empty;
         AddAssetDialog.AddPriceError = string.Empty;
@@ -794,7 +814,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private void EditTrade(TradeRowViewModel row)
     {
         IsRevisionMode = false;
-        var editState = _tradeDialogController.CreateEditState(row, Positions, CashAccounts);
+        var editState = _tradeDialogController.CreateEditState(row, Positions, CashAccounts, Liabilities);
         EditingTradeId = editState.EditingTradeId;
         PopulateEditSummary(row);
         TxDate = editState.TxDate;
@@ -822,6 +842,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxTransferTarget = null;
         TxTransferTargetName = string.Empty;
         TxTransferTargetAmount = string.Empty;
+        TxCreditCard = null;
         TxPrincipal = string.Empty;
         TxInterestPaid = string.Empty;
         TxDivPosition = null;
@@ -841,6 +862,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         AddAssetDialog.AddCostError = string.Empty;
         AddAssetDialog.AddCryptoQtyError = string.Empty;
         AddAssetDialog.AddCryptoPriceError = string.Empty;
+        AddAssetDialog.AddCreditCardName = string.Empty;
+        AddAssetDialog.AddCreditCardIssuer = string.Empty;
+        AddAssetDialog.AddCreditCardBillingDay = string.Empty;
+        AddAssetDialog.AddCreditCardDueDay = string.Empty;
+        AddAssetDialog.AddCreditCardLimit = string.Empty;
         TxCommissionDiscount = "1.0";
         TxBuyAssetType = "stock";
         TxBuyPriceMode = "unit";
@@ -850,6 +876,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxDivTotalInput = string.Empty;
 
         TxType = editState.TxType;
+        TxCreditCard = editState.TxCreditCard;
 
         switch (row.Type)
         {
@@ -1100,6 +1127,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 break;
             case "loanRepay":
                 await ConfirmLoanAsync(TradeType.LoanRepay);
+                break;
+            case "creditCardCharge":
+                await ConfirmCreditCardChargeAsync();
+                break;
+            case "creditCardPayment":
+                await ConfirmCreditCardPaymentAsync();
                 break;
             case "transfer":
                 await ConfirmTransferAsync();
@@ -1558,6 +1591,57 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         // TransactionCompleted raised by ConfirmTx
     }
 
+    private async Task ConfirmCreditCardChargeAsync()
+    {
+        if (TxCreditCard?.AssetId is not { } cardId)
+        { TxError = "請選擇信用卡"; return; }
+        if (!ParseHelpers.TryParseDecimal(TxAmount, out var amount) || amount <= 0)
+        { TxError = "金額無效"; return; }
+
+        var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
+        await _creditCardTransactionWorkflowService.ChargeAsync(new CreditCardChargeRequest(
+            cardId,
+            TxCreditCard.Label,
+            tradeDate,
+            amount,
+            string.IsNullOrWhiteSpace(TxNote) ? null : TxNote));
+
+        await _reloadAccountBalancesAsync();
+        CloseTxDialog();
+        await _loadTradesAsync();
+    }
+
+    private async Task ConfirmCreditCardPaymentAsync()
+    {
+        if (TxCreditCard?.AssetId is not { } cardId)
+        { TxError = "請選擇信用卡"; return; }
+        if (!ParseHelpers.TryParseDecimal(TxAmount, out var amount) || amount <= 0)
+        { TxError = "金額無效"; return; }
+        var cashAccId = await ResolveCashAccountIdAsync();
+        if (cashAccId is null)
+        {
+            TxError = CashAccounts.Count == 0
+                ? "尚無帳戶，請先建立帳戶"
+                : "請選擇扣款帳戶";
+            return;
+        }
+
+        var accountName = TxCashAccount?.Name ?? TxCashAccountName.Trim();
+        var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
+        await _creditCardTransactionWorkflowService.PayAsync(new CreditCardPaymentRequest(
+            cardId,
+            TxCreditCard.Label,
+            cashAccId.Value,
+            accountName,
+            tradeDate,
+            amount,
+            string.IsNullOrWhiteSpace(TxNote) ? null : TxNote));
+
+        await _reloadAccountBalancesAsync();
+        CloseTxDialog();
+        await _loadTradesAsync();
+    }
+
     /// <summary>
     /// 轉帳 → 在兩個現金帳戶之間搬錢。
     /// </summary>
@@ -1618,6 +1702,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             TradeType.Transfer => L("Portfolio.TradeType.Transfer", "轉帳"),
             TradeType.LoanBorrow => L("Portfolio.TradeType.LoanBorrow", "借款"),
             TradeType.LoanRepay => L("Portfolio.TradeType.LoanRepay", "還款"),
+            TradeType.CreditCardCharge => L("Portfolio.TradeType.CreditCardCharge", "信用卡消費"),
+            TradeType.CreditCardPayment => L("Portfolio.TradeType.CreditCardPayment", "信用卡繳款"),
             _ => row.Type.ToString()
         };
 

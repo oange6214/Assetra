@@ -33,7 +33,7 @@
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="0,0,0,1">
             <StackPanel>
-                <UniformGrid Columns="3">
+                <WrapPanel ItemWidth="320" ItemHeight="Auto">
                     <!--  Card 1: Emergency fund months + progress  -->
                     <Border
                         MinHeight="80"
@@ -146,7 +146,7 @@
                                 Visibility="{Binding IsMonthlyExpenseSet, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                         </StackPanel>
                     </Border>
-                </UniformGrid>
+                </WrapPanel>
             </StackPanel>
         </Border>
 
@@ -166,7 +166,7 @@
                             Text="{DynamicResource Portfolio.Account.ShowArchived}" />
                     </CheckBox>
                     <Button
-                        Height="28"
+                        MinHeight="32"
                         Padding="10,0"
                         Command="{Binding OpenAddAccountDialogCommand}"
                         Style="{StaticResource BtnGhost}">
@@ -175,7 +175,7 @@
                                 Margin="0,0,6,0"
                                 VerticalAlignment="Center"
                                 FontFamily="Segoe MDL2 Assets"
-                                FontSize="10"
+                                FontSize="{StaticResource FontSizeXs}"
                                 Text="&#xE710;" />
                             <TextBlock VerticalAlignment="Center" Text="{DynamicResource Portfolio.AddCash}" />
                         </StackPanel>
@@ -226,7 +226,7 @@
                 Foreground="{DynamicResource AppTextPrimary}"
                 GridLinesVisibility="None"
                 HeadersVisibility="Column"
-                HorizontalScrollBarVisibility="Disabled"
+                HorizontalScrollBarVisibility="Auto"
                 IsReadOnly="True"
                 ItemsSource="{Binding CashAccountsView}"
                 PreviewMouseDown="OnGridPreviewMouseDown"
@@ -270,31 +270,56 @@
                         <DataGridTemplateColumn.Header>
                             <TextBlock Text="{DynamicResource Common.Asset}" />
                         </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                    <!--  預設徽章 — 僅預設帳戶顯示  -->
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid VerticalAlignment="Center">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding Name}"
+                                    TextTrimming="CharacterEllipsis" />
+
+                                <Border
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Margin="10,0,0,0"
+                                    HorizontalAlignment="Right"
+                                    ToolTip="{DynamicResource Portfolio.Cash.DefaultHint}"
+                                    Style="{StaticResource PortfolioDefaultBadge}"
+                                    Visibility="{Binding IsDefault, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock
-                                        Margin="0,0,6,0"
-                                        VerticalAlignment="Center"
-                                        FontFamily="Segoe MDL2 Assets"
-                                        FontSize="10"
-                                        Foreground="{DynamicResource AppAccent}"
-                                        Text="&#xE735;"
-                                        ToolTip="{DynamicResource Portfolio.Cash.DefaultHint}"
-                                        Visibility="{Binding IsDefault, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                    <TextBlock
-                                        VerticalAlignment="Center"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding Name}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                                        Style="{StaticResource PortfolioBadgeText}"
+                                        Text="{DynamicResource Portfolio.Cash.Default}" />
+                                </Border>
+
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
+                                    Margin="0,4,0,0"
+                                    FontFamily="{StaticResource FontTabular}"
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{Binding Currency}" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
                     <!--  市值 (原「餘額」— 與投資/負債分頁統一)  -->
-                    <DataGridTemplateColumn Width="140" SortMemberPath="Balance">
+                    <DataGridTemplateColumn Width="200" SortMemberPath="Balance">
                         <DataGridTemplateColumn.HeaderStyle>
                             <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Right" />
@@ -317,7 +342,7 @@
                     </DataGridTemplateColumn>
 
                     <!--  Created Date  -->
-                    <DataGridTemplateColumn Width="100" SortMemberPath="CreatedDate">
+                    <DataGridTemplateColumn Width="120" SortMemberPath="CreatedDate">
                         <DataGridTemplateColumn.Header>
                             <TextBlock Text="{DynamicResource Common.CreatedDate}" />
                         </DataGridTemplateColumn.Header>
@@ -334,15 +359,15 @@
                     </DataGridTemplateColumn>
 
                     <!--  Row actions: Archive (permanent-delete via row context menu)  -->
-                    <DataGridTemplateColumn Width="44">
+                    <DataGridTemplateColumn Width="50">
                         <DataGridTemplateColumn.Header>
                             <TextBlock Text="" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Button
-                                    Width="28"
-                                    Height="24"
+                                    Width="32"
+                                    Height="28"
                                     Padding="0"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
@@ -355,7 +380,7 @@
                                     <TextBlock
                                         VerticalAlignment="Center"
                                         FontFamily="Segoe MDL2 Assets"
-                                        FontSize="12"
+                                        FontSize="{StaticResource FontSizeXs}"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="&#xE7B3;" />
                                 </Button>

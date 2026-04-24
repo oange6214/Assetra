@@ -21,4 +21,6 @@ public enum TradeType
     LoanRepay,       // 還款（LoanLabel 必填；
                      //       Principal    = 本金部分，減少負債餘額；
                      //       InterestPaid = 利息部分，純費用不影響餘額）
+    CreditCardCharge,   // 信用卡消費（增加信用卡負債）
+    CreditCardPayment,  // 信用卡繳款（減少信用卡負債）
 }

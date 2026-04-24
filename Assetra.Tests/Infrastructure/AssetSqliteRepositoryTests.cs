@@ -240,6 +240,35 @@ public class AssetSqliteRepositoryTests : IDisposable
 
         var items = await repo.GetItemsByTypeAsync(FinancialType.Liability);
         Assert.Contains(items, i => i.Id == liabId && i.Name == "台新A 7y");
+        Assert.Contains(items, i => i.Id == liabId && i.LiabilitySubtype == LiabilitySubtype.Loan);
+    }
+
+    [Fact]
+    public async Task Items_CreditCardMetadata_RoundTrips()
+    {
+        var repo = new AssetSqliteRepository(_dbPath);
+        var item = new AssetItem(
+            Guid.NewGuid(),
+            "國泰 Cube",
+            FinancialType.Liability,
+            null,
+            "TWD",
+            DateOnly.FromDateTime(DateTime.Today),
+            LiabilitySubtype: LiabilitySubtype.CreditCard,
+            BillingDay: 8,
+            DueDay: 23,
+            CreditLimit: 200_000m,
+            IssuerName: "國泰世華");
+
+        await repo.AddItemAsync(item);
+
+        var found = await repo.GetByIdAsync(item.Id);
+        Assert.NotNull(found);
+        Assert.Equal(LiabilitySubtype.CreditCard, found.LiabilitySubtype);
+        Assert.Equal(8, found.BillingDay);
+        Assert.Equal(23, found.DueDay);
+        Assert.Equal(200_000m, found.CreditLimit);
+        Assert.Equal("國泰世華", found.IssuerName);
     }
 
     [Fact]

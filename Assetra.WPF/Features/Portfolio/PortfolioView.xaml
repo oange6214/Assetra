@@ -2,185 +2,189 @@
     x:Class="Assetra.WPF.Features.Portfolio.PortfolioView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:alloc="clr-namespace:Assetra.WPF.Features.Allocation"
     xmlns:conv="clr-namespace:Assetra.WPF.Infrastructure.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:Assetra.Core.Models;assembly=Assetra.Core"
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
+    x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
                                      IsDesignTimeCreatable=False}"
     d:DesignHeight="776"
     d:DesignWidth="1100"
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
-  <UserControl.Resources>
-    <conv:PercentToWidthConverter x:Key="PercentToWidthConverter" />
-  </UserControl.Resources>
+    <UserControl.Resources>
+        <conv:PercentToWidthConverter x:Key="PercentToWidthConverter" />
+    </UserControl.Resources>
 
-  <Grid>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <!--  Row 0: Tab bar  -->
-      <RowDefinition Height="Auto" />
-      <!--  Row 1: Setup notice  -->
-      <RowDefinition Height="*" />
-      <!--  Row 2: Tab content  -->
-    </Grid.RowDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <!--  Row 0: Tab bar  -->
+            <RowDefinition Height="Auto" />
+            <!--  Row 1: Setup notice  -->
+            <RowDefinition Height="*" />
+            <!--  Row 2: Tab content  -->
+        </Grid.RowDefinitions>
 
-    <!--  ── Row 0: Tab bar + Add button ──  -->
-    <Border
+        <!--  ── Row 0: Tab bar + Add button ──  -->
+        <Border
             Grid.Row="0"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="0,0,0,1">
-      <DockPanel LastChildFill="False">
-        <RadioButton
+            <DockPanel LastChildFill="False">
+                <RadioButton
                     Content="{DynamicResource Portfolio.Tab.Overview}"
                     DockPanel.Dock="Left"
                     GroupName="PortfolioTab"
                     IsChecked="{Binding IsDashboardTab, Mode=TwoWay}"
                     Style="{StaticResource NavTabBtn}" />
-        <RadioButton
+                <RadioButton
                     Content="{DynamicResource Portfolio.Tab.Allocation}"
                     DockPanel.Dock="Left"
                     GroupName="PortfolioTab"
                     IsChecked="{Binding IsAllocationAnalysisTab, Mode=TwoWay}"
                     Style="{StaticResource NavTabBtn}" />
-        <RadioButton
+                <RadioButton
                     Content="{DynamicResource Portfolio.Tab.Positions}"
                     DockPanel.Dock="Left"
                     GroupName="PortfolioTab"
                     IsChecked="{Binding IsPositionsTab, Mode=TwoWay}"
                     Style="{StaticResource NavTabBtn}" />
-        <RadioButton
+                <RadioButton
                     Content="{DynamicResource Portfolio.Tab.Cash}"
                     DockPanel.Dock="Left"
                     GroupName="PortfolioTab"
                     IsChecked="{Binding IsAccountsTab, Mode=TwoWay}"
                     Style="{StaticResource NavTabBtn}" />
-        <RadioButton
+                <RadioButton
                     Content="{DynamicResource Portfolio.Tab.Liability}"
                     DockPanel.Dock="Left"
                     GroupName="PortfolioTab"
                     IsChecked="{Binding IsLiabilityTab, Mode=TwoWay}"
                     Style="{StaticResource NavTabBtn}" />
-        <RadioButton
+                <RadioButton
                     Content="{DynamicResource Portfolio.Tab.Trades}"
                     DockPanel.Dock="Left"
                     GroupName="PortfolioTab"
                     IsChecked="{Binding IsTradesTab, Mode=TwoWay}"
                     Style="{StaticResource NavTabBtn}" />
 
-        <!--  + Add button (right-aligned)  -->
-        <Button
-                    Height="28"
+                <!--  + Add button (right-aligned)  -->
+                <Button
+                    Height="35"
                     Margin="0,0,12,0"
-                    Padding="10,0"
                     VerticalAlignment="Center"
                     Command="{Binding AddRecordCommand}"
                     DockPanel.Dock="Right"
                     Style="{StaticResource BtnPrimary}">
-          <StackPanel Orientation="Horizontal">
-            <TextBlock
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
                             Margin="0,0,4,0"
                             VerticalAlignment="Center"
                             FontFamily="Segoe MDL2 Assets"
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                             Text="&#xE710;" />
-            <TextBlock
+                        <TextBlock
                             VerticalAlignment="Center"
                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                             Text="{DynamicResource Portfolio.AddRecord}" />
-          </StackPanel>
-        </Button>
-      </DockPanel>
-    </Border>
+                    </StackPanel>
+                </Button>
+            </DockPanel>
+        </Border>
 
-    <!--  ── Row 1: Setup notice ──  -->
-    <Border
+        <!--  ── Row 1: Setup notice ──  -->
+        <Border
             Grid.Row="1"
             Padding="20,14"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="0,0,0,1"
             Visibility="{Binding HasSetupNotice, Converter={StaticResource BooleanToVisibilityConverter}}">
-      <Grid>
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*" />
-          <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-          <TextBlock
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock
                         FontSize="{StaticResource FontSizeMd}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding SetupNoticeTitle}" />
-          <TextBlock
+                    <TextBlock
                         Margin="0,4,0,0"
                         FontSize="{StaticResource FontSizeBase}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{Binding SetupNoticeMessage}"
                         TextWrapping="Wrap" />
-        </StackPanel>
-        <Button
+                </StackPanel>
+                <Button
                     Grid.Column="1"
                     Margin="12,0,0,0"
                     VerticalAlignment="Center"
                     Command="{Binding ExecuteSetupNoticeActionCommand}"
                     Content="{Binding SetupNoticeActionText}"
                     Style="{StaticResource BtnGhost}" />
-      </Grid>
-    </Border>
+            </Grid>
+        </Border>
 
-    <!--  ── Row 2: Tab content ──  -->
-    <pcontrols:DashboardTabPanel
+        <!--  ── Row 2: Tab content ──  -->
+        <pcontrols:DashboardTabPanel
             Grid.Row="2"
             DataContext="{Binding DataContext.Dashboard, RelativeSource={RelativeSource AncestorType=Window}}"
             Visibility="{Binding DataContext.Portfolio.IsDashboardTab, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-    <pcontrols:PositionsTabPanel Grid.Row="2" Visibility="{Binding IsPositionsTab, Converter={StaticResource BooleanToVisibilityConverter}}" />
-    <alloc:AllocationView
+        <pcontrols:PositionsTabPanel Grid.Row="2" Visibility="{Binding IsPositionsTab, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <pcontrols:AllocationView
             Grid.Row="2"
             DataContext="{Binding DataContext.Allocation, RelativeSource={RelativeSource AncestorType=Window}}"
             Visibility="{Binding DataContext.Portfolio.IsAllocationAnalysisTab, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-    <pcontrols:AccountsTabPanel Grid.Row="2" Visibility="{Binding IsAccountsTab, Converter={StaticResource BooleanToVisibilityConverter}}" />
-    <pcontrols:LiabilityTabPanel Grid.Row="2" Visibility="{Binding IsLiabilityTab, Converter={StaticResource BooleanToVisibilityConverter}}" />
-    <pcontrols:TradesTabPanel Grid.Row="2" Visibility="{Binding IsTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <pcontrols:AccountsTabPanel Grid.Row="2" Visibility="{Binding IsAccountsTab, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <pcontrols:LiabilityTabPanel Grid.Row="2" Visibility="{Binding IsLiabilityTab, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <pcontrols:TradesTabPanel Grid.Row="2" Visibility="{Binding IsTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-    <!--  ── Cash / Liability detail overlays (floating side panel with backdrop) ──  -->
-    <Grid
+        <!--  ── Cash / Liability detail overlays (floating side panel with backdrop) ──  -->
+        <Grid
             Grid.RowSpan="3"
             Panel.ZIndex="180"
             Visibility="{Binding HasSelectedCashRow, Converter={StaticResource BooleanToVisibilityConverter}}">
-      <!--  Click-to-close backdrop  -->
-      <Border Background="{DynamicResource AppModalOverlay}" MouseLeftButtonDown="OnCashDetailBackdropClick" />
+            <!--  Click-to-close backdrop  -->
+            <Border Background="{DynamicResource AppModalOverlay}" MouseLeftButtonDown="OnCashDetailBackdropClick" />
 
-      <!--  Floating panel anchored right  -->
-      <Border
-                Width="440"
+            <!--  Floating panel anchored right  -->
+            <Border
                 HorizontalAlignment="Right"
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1,0,0,0">
-        <Grid>
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-          </Grid.RowDefinitions>
+                <Border.Width>
+                    <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.44|420|620">
+                        <Binding ElementName="Root" Path="ActualWidth" />
+                        <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="DataContext.Settings.UiScale" />
+                    </MultiBinding>
+                </Border.Width>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-          <!--  Header  -->
-          <Border
+                    <!--  Header  -->
+                    <Border
                         Grid.Row="0"
                         Padding="16,14"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,0,0,1">
-            <DockPanel LastChildFill="True">
-              <!--  Close  -->
-              <Button
+                        <DockPanel LastChildFill="True">
+                            <!--  Close  -->
+                            <Button
                                 Width="30"
                                 Height="30"
                                 Margin="6,0,0,0"
@@ -188,14 +192,14 @@
                                 Command="{Binding CloseCashDetailCommand}"
                                 DockPanel.Dock="Right"
                                 Style="{StaticResource BtnIcon}">
-                <TextBlock
+                                <TextBlock
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="11"
                                     Foreground="{DynamicResource AppTextSecondary}"
                                     Text="&#xE711;" />
-              </Button>
-              <!--  Edit pencil → opens shared EditAssetDialog  -->
-              <Button
+                            </Button>
+                            <!--  Edit pencil → opens shared EditAssetDialog  -->
+                            <Button
                                 Width="30"
                                 Height="30"
                                 VerticalAlignment="Center"
@@ -203,14 +207,14 @@
                                 CommandParameter="{Binding SelectedCashRow}"
                                 DockPanel.Dock="Right"
                                 Style="{StaticResource BtnIcon}">
-                <TextBlock
+                                <TextBlock
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="12"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="&#xE70F;" />
-              </Button>
-              <!--  設為預設 / 取消預設 toggle  -->
-              <Button
+                            </Button>
+                            <!--  設為預設 / 取消預設 toggle  -->
+                            <Button
                                 Width="30"
                                 Height="30"
                                 Margin="0,0,4,0"
@@ -218,284 +222,263 @@
                                 Command="{Binding Account.ToggleDefaultCashAccountCommand}"
                                 CommandParameter="{Binding SelectedCashRow}"
                                 DockPanel.Dock="Right">
-                <Button.Style>
-                  <Style BasedOn="{StaticResource BtnIcon}" TargetType="Button">
-                    <Setter Property="ToolTip" Value="{DynamicResource Portfolio.Cash.SetDefault}" />
-                    <Style.Triggers>
-                      <DataTrigger Binding="{Binding SelectedCashRow.IsDefault}" Value="True">
-                        <Setter Property="ToolTip" Value="{DynamicResource Portfolio.Cash.UnsetDefault}" />
-                      </DataTrigger>
-                    </Style.Triggers>
-                  </Style>
-                </Button.Style>
-                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="12">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Text" Value="&#xE734;" />
-                      <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding SelectedCashRow.IsDefault}" Value="True">
-                          <Setter Property="Text" Value="&#xE735;" />
-                          <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-              </Button>
-              <TextBlock
+                                <Button.Style>
+                                    <Style BasedOn="{StaticResource BtnIcon}" TargetType="Button">
+                                        <Setter Property="ToolTip" Value="{DynamicResource Portfolio.Cash.SetDefault}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedCashRow.IsDefault}" Value="True">
+                                                <Setter Property="ToolTip" Value="{DynamicResource Portfolio.Cash.UnsetDefault}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="12">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="&#xE734;" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedCashRow.IsDefault}" Value="True">
+                                                    <Setter Property="Text" Value="&#xE735;" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Button>
+                            <TextBlock
                                 VerticalAlignment="Center"
                                 FontSize="{StaticResource FontSizeLg}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{Binding SelectedCashRow.Name, FallbackValue=''}"
                                 TextTrimming="CharacterEllipsis" />
-            </DockPanel>
-          </Border>
+                        </DockPanel>
+                    </Border>
 
-          <!--  Tab bar  -->
-          <Border
+                    <!--  Tab bar  -->
+                    <Border
                         Grid.Row="1"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal">
-              <RadioButton
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton
                                 Command="{Binding SwitchDetailTabCommand}"
                                 CommandParameter="overview"
                                 Content="{DynamicResource Portfolio.Detail.Overview}"
                                 GroupName="CashDetailTab"
                                 IsChecked="{Binding IsDetailOverviewTab, Mode=OneWay}"
                                 Style="{StaticResource NavTabBtn}" />
-              <RadioButton
+                            <RadioButton
                                 Command="{Binding SwitchDetailTabCommand}"
                                 CommandParameter="trades"
                                 Content="{DynamicResource Portfolio.Detail.Trades}"
                                 GroupName="CashDetailTab"
                                 IsChecked="{Binding IsDetailTradesTab, Mode=OneWay}"
                                 Style="{StaticResource NavTabBtn}" />
-            </StackPanel>
-          </Border>
+                        </StackPanel>
+                    </Border>
 
-          <!--  Tab content  -->
-          <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-            <Grid>
-              <StackPanel Margin="16,16,16,12" Visibility="{Binding IsDetailOverviewTab, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel>
-                  <TextBlock
+                    <!--  Tab content  -->
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                        <Grid>
+                            <StackPanel Margin="16,16,16,12" Visibility="{Binding IsDetailOverviewTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <StackPanel>
+                                    <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="{DynamicResource Portfolio.Cash.Amount}" />
-                  <TextBlock
+                                    <TextBlock
                                         Margin="0,2,0,14"
                                         FontFamily="{StaticResource FontTabular}"
                                         FontSize="{StaticResource FontSize2xl}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding SelectedCashRow.Balance, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue=''}" />
-                  <DockPanel Margin="0,0,0,14">
-                    <TextBlock
+                                    <DockPanel Margin="0,0,0,14">
+                                        <TextBlock
                                             DockPanel.Dock="Left"
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{DynamicResource Common.CreatedDate}" />
-                    <TextBlock
+                                        <TextBlock
                                             HorizontalAlignment="Right"
                                             DockPanel.Dock="Right"
                                             FontFamily="{StaticResource FontTabular}"
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{Binding SelectedCashRow.CreatedDate, StringFormat=yyyy/MM/dd, FallbackValue=''}" />
-                  </DockPanel>
-                  <Grid>
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="10" />
-                      <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Border
+                                    </DockPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border
                                             Grid.Column="0"
                                             Padding="12,10"
                                             Background="{DynamicResource AppBackground}"
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
                                             CornerRadius="{StaticResource RadiusSm}">
-                      <StackPanel>
-                        <TextBlock
+                                            <StackPanel>
+                                                <TextBlock
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{DynamicResource Portfolio.Detail.TotalDeposits}" />
-                        <TextBlock
+                                                <TextBlock
                                                     Margin="0,4,0,0"
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeSm}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppUp}"
                                                     Text="{Binding SelectedCashTotalDeposits, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                      </StackPanel>
-                    </Border>
-                    <Border
+                                            </StackPanel>
+                                        </Border>
+                                        <Border
                                             Grid.Column="2"
                                             Padding="12,10"
                                             Background="{DynamicResource AppBackground}"
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
                                             CornerRadius="{StaticResource RadiusSm}">
-                      <StackPanel>
-                        <TextBlock
+                                            <StackPanel>
+                                                <TextBlock
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{DynamicResource Portfolio.Detail.TotalWithdrawals}" />
-                        <TextBlock
+                                                <TextBlock
                                                     Margin="0,4,0,0"
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeSm}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppDown}"
                                                     Text="{Binding SelectedCashTotalWithdrawals, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                      </StackPanel>
-                    </Border>
-                  </Grid>
-                </StackPanel>
-              </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </StackPanel>
+                            </StackPanel>
 
-              <Grid Margin="16,12" Visibility="{Binding IsDetailTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock
+                            <Grid Margin="16,12" Visibility="{Binding IsDetailTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock
                                     Margin="0,24,0,0"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Top"
                                     FontSize="{StaticResource FontSizeSm}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{DynamicResource Portfolio.Detail.NoTrades}">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Visibility" Value="Collapsed" />
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding SelectedCashTrades.Count, FallbackValue=0}" Value="0">
-                          <Setter Property="Visibility" Value="Visible" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-                <DataGrid
-                                    AutoGenerateColumns="False"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    CanUserAddRows="False"
-                                    CanUserDeleteRows="False"
-                                    CanUserReorderColumns="False"
-                                    CanUserResizeColumns="False"
-                                    CanUserSortColumns="False"
-                                    EnableRowVirtualization="True"
-                                    FontFamily="{StaticResource FontBase}"
-                                    FontSize="{StaticResource FontSizeSm}"
-                                    Foreground="{DynamicResource AppTextPrimary}"
-                                    GridLinesVisibility="None"
-                                    HeadersVisibility="Column"
-                                    IsReadOnly="True"
-                                    ItemsSource="{Binding SelectedCashTrades}"
-                                    RowHeight="{StaticResource DataGridRowHeight}"
-                                    SelectionMode="Single">
-                  <DataGrid.ColumnHeaderStyle>
-                    <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
-                  </DataGrid.ColumnHeaderStyle>
-                  <DataGrid.CellStyle>
-                    <Style BasedOn="{StaticResource AppDataGridCell}" TargetType="DataGridCell" />
-                  </DataGrid.CellStyle>
-                  <DataGrid.RowStyle>
-                    <Style BasedOn="{StaticResource AppDataGridRow}" TargetType="DataGridRow" />
-                  </DataGrid.RowStyle>
-                  <DataGrid.Columns>
-                    <!--  日期  -->
-                    <DataGridTemplateColumn Width="90">
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.TradeHistory.Date}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <TextBlock
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontTabular}"
-                                                        FontSize="{StaticResource FontSizeSm}"
-                                                        Foreground="{DynamicResource AppTextSecondary}"
-                                                        Text="{Binding TradeDateLocal, StringFormat=yyyy/MM/dd}" />
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  類型  -->
-                    <DataGridTemplateColumn Width="64">
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.TradeHistory.Type}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <Border
-                                                        Margin="2,3"
-                                                        Padding="5,1"
-                                                        HorizontalAlignment="Left"
-                                                        VerticalAlignment="Center"
-                                                        Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
-                                                        CornerRadius="{StaticResource RadiusSm}">
-                            <TextBlock
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedCashTrades.Count, FallbackValue=0}" Value="0">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <ItemsControl ItemsSource="{Binding SelectedCashTrades}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border
+                                                Margin="0,0,0,10"
+                                                Padding="12"
+                                                Background="{DynamicResource AppSurface}"
+                                                BorderBrush="{DynamicResource AppBorder}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource RadiusSm}">
+                                                <StackPanel>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock
+                                                            Grid.Column="0"
+                                                            VerticalAlignment="Center"
+                                                            FontFamily="{StaticResource FontTabular}"
                                                             FontSize="{StaticResource FontSizeXs}"
-                                                            FontWeight="SemiBold"
-                                                            Foreground="{DynamicResource AppTextOnAccent}"
-                                                            Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
-                          </Border>
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  金額  -->
-                    <DataGridTemplateColumn Width="*">
-                      <DataGridTemplateColumn.HeaderStyle>
-                        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                          <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        </Style>
-                      </DataGridTemplateColumn.HeaderStyle>
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <TextBlock
-                                                        HorizontalAlignment="Right"
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontTabular}"
-                                                        FontWeight="SemiBold"
-                                                        Text="{Binding CashAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}" />
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  編輯  -->
-                    <DataGridTemplateColumn Width="32">
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <Button
-                                                        Width="24"
-                                                        Height="24"
-                                                        Padding="0"
-                                                        HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"
-                                                        Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                        CommandParameter="{Binding}"
-                                                        Style="{StaticResource BtnIcon}">
-                            <TextBlock
-                                                            FontFamily="Segoe MDL2 Assets"
-                                                            FontSize="11"
-                                                            Foreground="{DynamicResource AppTextMuted}"
-                                                            Text="&#xE70F;" />
-                          </Button>
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                  </DataGrid.Columns>
-                </DataGrid>
-              </Grid>
-            </Grid>
-          </ScrollViewer>
+                                                            Foreground="{DynamicResource AppTextSecondary}"
+                                                            Text="{Binding TradeDateLocal, StringFormat=yyyy/MM/dd}" />
+                                                        <Border
+                                                            Grid.Column="1"
+                                                            Margin="10,0,0,0"
+                                                            Padding="6,2"
+                                                            HorizontalAlignment="Left"
+                                                            VerticalAlignment="Center"
+                                                            Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
+                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextOnAccent}"
+                                                                Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
+                                                        </Border>
+                                                        <Button
+                                                            Grid.Column="2"
+                                                            Width="28"
+                                                            Height="28"
+                                                            Padding="0"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center"
+                                                            Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource BtnIcon}">
+                                                            <TextBlock
+                                                                FontFamily="Segoe MDL2 Assets"
+                                                                FontSize="11"
+                                                                Foreground="{DynamicResource AppTextMuted}"
+                                                                Text="&#xE70F;" />
+                                                        </Button>
+                                                    </Grid>
 
-          <!--  Danger zone  -->
-          <Border
+                                                    <WrapPanel Margin="0,12,0,0">
+                                                        <Border
+                                                            MinWidth="160"
+                                                            Margin="0,0,10,10"
+                                                            Padding="10,8"
+                                                            Background="{DynamicResource AppBackground}"
+                                                            BorderBrush="{DynamicResource AppBorder}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            <StackPanel>
+                                                                <TextBlock
+                                                                    FontSize="{StaticResource FontSizeXs}"
+                                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                                    Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
+                                                                <TextBlock
+                                                                    Margin="0,4,0,0"
+                                                                    FontFamily="{StaticResource FontTabular}"
+                                                                    FontSize="{StaticResource FontSizeSm}"
+                                                                    FontWeight="SemiBold"
+                                                                    Text="{Binding CashAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </WrapPanel>
+
+                                                    <TextBlock
+                                                        Margin="0,2,0,0"
+                                                        FontSize="{StaticResource FontSizeXs}"
+                                                        Foreground="{DynamicResource AppTextMuted}"
+                                                        Text="{Binding Note}"
+                                                        TextWrapping="Wrap"
+                                                        Visibility="{Binding Note, Converter={StaticResource StringToVisibilityConverter}}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </Grid>
+                    </ScrollViewer>
+
+                    <!--  Danger zone  -->
+                    <Border
                         Grid.Row="3"
                         Margin="16,0,16,16"
                         Padding="14,12"
@@ -503,33 +486,33 @@
                         BorderBrush="{DynamicResource AppDown}"
                         BorderThickness="1"
                         CornerRadius="{StaticResource RadiusSm}">
-            <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-              </Grid.ColumnDefinitions>
-              <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                <StackPanel Margin="0,0,0,2" Orientation="Horizontal">
-                  <TextBlock
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <StackPanel Margin="0,0,0,2" Orientation="Horizontal">
+                                    <TextBlock
                                         Margin="0,0,6,0"
                                         VerticalAlignment="Center"
                                         FontFamily="Segoe MDL2 Assets"
                                         FontSize="11"
                                         Foreground="{DynamicResource AppDown}"
                                         Text="&#xE74D;" />
-                  <TextBlock
+                                    <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppDown}"
                                         Text="{DynamicResource Portfolio.Detail.DeleteAccount}" />
-                </StackPanel>
-                <TextBlock
+                                </StackPanel>
+                                <TextBlock
                                     FontSize="{StaticResource FontSizeXs}"
                                     Foreground="{DynamicResource AppTextSecondary}"
                                     Text="{DynamicResource Portfolio.Detail.DeleteWarning}"
                                     TextWrapping="Wrap" />
-              </StackPanel>
-              <Button
+                            </StackPanel>
+                            <Button
                                 Grid.Column="1"
                                 Height="32"
                                 Margin="12,0,0,0"
@@ -538,44 +521,49 @@
                                 Command="{Binding Account.RemoveCashAccountCommand}"
                                 CommandParameter="{Binding SelectedCashRow}"
                                 Style="{StaticResource BtnDanger}">
-                <TextBlock
+                                <TextBlock
                                     FontSize="{StaticResource FontSizeXs}"
                                     Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                     Text="{DynamicResource Portfolio.Detail.DeleteAccount}" />
-              </Button>
-            </Grid>
-          </Border>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
         </Grid>
-      </Border>
-    </Grid>
 
-    <!--  Liability detail overlay  -->
-    <Grid
+        <!--  Liability detail overlay  -->
+        <Grid
             Grid.RowSpan="3"
             Panel.ZIndex="180"
             Visibility="{Binding HasSelectedLiabilityRow, Converter={StaticResource BooleanToVisibilityConverter}}">
-      <Border Background="{DynamicResource AppModalOverlay}" MouseLeftButtonDown="OnLiabilityDetailBackdropClick" />
-      <Border
-                Width="440"
+            <Border Background="{DynamicResource AppModalOverlay}" MouseLeftButtonDown="OnLiabilityDetailBackdropClick" />
+            <Border
                 HorizontalAlignment="Right"
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1,0,0,0">
-        <Grid>
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-          </Grid.RowDefinitions>
+                <Border.Width>
+                    <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.44|420|620">
+                        <Binding ElementName="Root" Path="ActualWidth" />
+                        <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="DataContext.Settings.UiScale" />
+                    </MultiBinding>
+                </Border.Width>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-          <Border
+                    <Border
                         Grid.Row="0"
                         Padding="16,14"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,0,0,1">
-            <DockPanel LastChildFill="True">
-              <!--  Close  -->
-              <Button
+                        <DockPanel LastChildFill="True">
+                            <!--  Close  -->
+                            <Button
                                 Width="30"
                                 Height="30"
                                 Margin="6,0,0,0"
@@ -583,42 +571,42 @@
                                 Command="{Binding CloseLiabilityDetailCommand}"
                                 DockPanel.Dock="Right"
                                 Style="{StaticResource BtnIcon}">
-                <TextBlock
+                                <TextBlock
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="11"
                                     Foreground="{DynamicResource AppTextSecondary}"
                                     Text="&#xE711;" />
-              </Button>
-              <TextBlock
+                            </Button>
+                            <TextBlock
                                 VerticalAlignment="Center"
                                 FontSize="{StaticResource FontSizeLg}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{Binding SelectedLiabilityRow.Name, FallbackValue=''}"
                                 TextTrimming="CharacterEllipsis" />
-            </DockPanel>
-          </Border>
+                        </DockPanel>
+                    </Border>
 
-          <Border
+                    <Border
                         Grid.Row="1"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal">
-              <RadioButton
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton
                                 Command="{Binding SwitchDetailTabCommand}"
                                 CommandParameter="overview"
                                 Content="{DynamicResource Portfolio.Detail.Overview}"
                                 GroupName="LiabilityDetailTab"
                                 IsChecked="{Binding IsDetailOverviewTab, Mode=OneWay}"
                                 Style="{StaticResource NavTabBtn}" />
-              <RadioButton
+                            <RadioButton
                                 Command="{Binding SwitchDetailTabCommand}"
                                 CommandParameter="trades"
                                 Content="{DynamicResource Portfolio.Detail.Trades}"
                                 GroupName="LiabilityDetailTab"
                                 IsChecked="{Binding IsDetailTradesTab, Mode=OneWay}"
                                 Style="{StaticResource NavTabBtn}" />
-              <RadioButton
+                            <RadioButton
                                 Command="{Binding SwitchDetailTabCommand}"
                                 CommandParameter="schedule"
                                 Content="{DynamicResource Portfolio.Loan.Schedule}"
@@ -626,234 +614,213 @@
                                 IsChecked="{Binding IsDetailScheduleTab, Mode=OneWay}"
                                 Style="{StaticResource NavTabBtn}"
                                 Visibility="{Binding SelectedLiabilityRow.IsLoan, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
-            </StackPanel>
-          </Border>
+                        </StackPanel>
+                    </Border>
 
-          <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-            <Grid>
-              <StackPanel Margin="16,16,16,12" Visibility="{Binding IsDetailOverviewTab, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel>
-                  <!--  Two stat cards: 總借款 + 剩餘債務 (with paid progress)  -->
-                  <Grid>
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="10" />
-                      <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                        <Grid>
+                            <StackPanel Margin="16,16,16,12" Visibility="{Binding IsDetailOverviewTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <StackPanel>
+                                    <!--  Two stat cards: 總借款 + 剩餘債務 (with paid progress)  -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
 
-                    <!--  Left: 總借款 (sum of LoanBorrow trades — what was actually borrowed)  -->
-                    <Border
+                                        <!--  Left: 總借款 (sum of LoanBorrow trades — what was actually borrowed)  -->
+                                        <Border
                                             Grid.Column="0"
                                             Padding="14,12"
                                             Background="{DynamicResource AppBackground}"
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
                                             CornerRadius="{StaticResource RadiusSm}">
-                      <StackPanel>
-                        <TextBlock
+                                            <StackPanel>
+                                                <TextBlock
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{DynamicResource Portfolio.Detail.TotalBorrows}" />
-                        <TextBlock
+                                                <TextBlock
                                                     Margin="0,6,0,0"
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXl}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{Binding SelectedLiabilityTotalBorrows, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                      </StackPanel>
-                    </Border>
+                                            </StackPanel>
+                                        </Border>
 
-                    <!--  Right: 剩餘債務 (current outstanding balance + paid progress bar)  -->
-                    <Border
+                                        <!--  Right: 剩餘債務 (current outstanding balance + paid progress bar)  -->
+                                        <Border
                                             Grid.Column="2"
                                             Padding="14,12"
                                             Background="{DynamicResource AppBackground}"
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
                                             CornerRadius="{StaticResource RadiusSm}">
-                      <StackPanel>
-                        <TextBlock
+                                            <StackPanel>
+                                                <TextBlock
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{DynamicResource Portfolio.Detail.RemainingDebt}" />
-                        <TextBlock
+                                                <TextBlock
                                                     Margin="0,6,0,10"
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXl}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppDown}"
                                                     Text="{Binding SelectedLiabilityRow.Balance, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue=''}" />
-                        <Grid Margin="0,0,0,4">
-                          <Border
+                                                <Grid Margin="0,0,0,4">
+                                                    <Border
                                                         Height="6"
                                                         Background="{DynamicResource AppBorder}"
                                                         CornerRadius="{StaticResource RadiusSm}" />
-                          <Border
+                                                    <Border
                                                         Height="6"
                                                         HorizontalAlignment="Left"
                                                         Background="{DynamicResource AppUp}"
                                                         CornerRadius="{StaticResource RadiusSm}">
-                            <Border.Width>
-                              <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
-                                <Binding FallbackValue="0" Path="SelectedLiabilityRow.PaidPercent" />
-                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
-                              </MultiBinding>
-                            </Border.Width>
-                          </Border>
-                        </Grid>
-                        <TextBlock
+                                                        <Border.Width>
+                                                            <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                                                <Binding FallbackValue="0" Path="SelectedLiabilityRow.PaidPercent" />
+                                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                                                            </MultiBinding>
+                                                        </Border.Width>
+                                                    </Border>
+                                                </Grid>
+                                                <TextBlock
                                                     HorizontalAlignment="Right"
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextMuted}"
                                                     Text="{Binding SelectedLiabilityRow.PaidPercentDisplay, FallbackValue=''}" />
-                      </StackPanel>
-                    </Border>
-                  </Grid>
-                </StackPanel>
-              </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </StackPanel>
+                            </StackPanel>
 
-              <Grid Margin="16,12" Visibility="{Binding IsDetailTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock
+                            <Grid Margin="16,12" Visibility="{Binding IsDetailTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock
                                     Margin="0,24,0,0"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Top"
                                     FontSize="{StaticResource FontSizeSm}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{DynamicResource Portfolio.Detail.NoTrades}">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Visibility" Value="Collapsed" />
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding SelectedLiabilityTrades.Count, FallbackValue=0}" Value="0">
-                          <Setter Property="Visibility" Value="Visible" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-                <DataGrid
-                                    AutoGenerateColumns="False"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    CanUserAddRows="False"
-                                    CanUserDeleteRows="False"
-                                    CanUserReorderColumns="False"
-                                    CanUserResizeColumns="False"
-                                    CanUserSortColumns="False"
-                                    EnableRowVirtualization="True"
-                                    FontFamily="{StaticResource FontBase}"
-                                    FontSize="{StaticResource FontSizeSm}"
-                                    Foreground="{DynamicResource AppTextPrimary}"
-                                    GridLinesVisibility="None"
-                                    HeadersVisibility="Column"
-                                    IsReadOnly="True"
-                                    ItemsSource="{Binding SelectedLiabilityTrades}"
-                                    RowHeight="{StaticResource DataGridRowHeight}"
-                                    SelectionMode="Single">
-                  <DataGrid.ColumnHeaderStyle>
-                    <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
-                  </DataGrid.ColumnHeaderStyle>
-                  <DataGrid.CellStyle>
-                    <Style BasedOn="{StaticResource AppDataGridCell}" TargetType="DataGridCell" />
-                  </DataGrid.CellStyle>
-                  <DataGrid.RowStyle>
-                    <Style BasedOn="{StaticResource AppDataGridRow}" TargetType="DataGridRow" />
-                  </DataGrid.RowStyle>
-                  <DataGrid.Columns>
-                    <!--  日期  -->
-                    <DataGridTemplateColumn Width="90">
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.TradeHistory.Date}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <TextBlock
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontTabular}"
-                                                        FontSize="{StaticResource FontSizeSm}"
-                                                        Foreground="{DynamicResource AppTextSecondary}"
-                                                        Text="{Binding TradeDateLocal, StringFormat=yyyy/MM/dd}" />
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  類型  -->
-                    <DataGridTemplateColumn Width="64">
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.TradeHistory.Type}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <Border
-                                                        Margin="2,3"
-                                                        Padding="5,1"
-                                                        HorizontalAlignment="Left"
-                                                        VerticalAlignment="Center"
-                                                        Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
-                                                        CornerRadius="{StaticResource RadiusSm}">
-                            <TextBlock
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedLiabilityTrades.Count, FallbackValue=0}" Value="0">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <ItemsControl ItemsSource="{Binding SelectedLiabilityTrades}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border
+                                                Margin="0,0,0,10"
+                                                Padding="12"
+                                                Background="{DynamicResource AppSurface}"
+                                                BorderBrush="{DynamicResource AppBorder}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource RadiusSm}">
+                                                <StackPanel>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock
+                                                            Grid.Column="0"
+                                                            VerticalAlignment="Center"
+                                                            FontFamily="{StaticResource FontTabular}"
                                                             FontSize="{StaticResource FontSizeXs}"
-                                                            FontWeight="SemiBold"
-                                                            Foreground="{DynamicResource AppTextOnAccent}"
-                                                            Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
-                          </Border>
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  金額  -->
-                    <DataGridTemplateColumn Width="*">
-                      <DataGridTemplateColumn.HeaderStyle>
-                        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                          <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        </Style>
-                      </DataGridTemplateColumn.HeaderStyle>
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <TextBlock
-                                                        HorizontalAlignment="Right"
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontTabular}"
-                                                        FontWeight="SemiBold"
-                                                        Text="{Binding CashAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}" />
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  編輯  -->
-                    <DataGridTemplateColumn Width="32">
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <Button
-                                                        Width="24"
-                                                        Height="24"
-                                                        Padding="0"
-                                                        HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"
-                                                        Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                        CommandParameter="{Binding}"
-                                                        Style="{StaticResource BtnIcon}">
-                            <TextBlock
-                                                            FontFamily="Segoe MDL2 Assets"
-                                                            FontSize="11"
-                                                            Foreground="{DynamicResource AppTextMuted}"
-                                                            Text="&#xE70F;" />
-                          </Button>
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                  </DataGrid.Columns>
-                </DataGrid>
-              </Grid>
+                                                            Foreground="{DynamicResource AppTextSecondary}"
+                                                            Text="{Binding TradeDateLocal, StringFormat=yyyy/MM/dd}" />
+                                                        <Border
+                                                            Grid.Column="1"
+                                                            Margin="10,0,0,0"
+                                                            Padding="6,2"
+                                                            HorizontalAlignment="Left"
+                                                            VerticalAlignment="Center"
+                                                            Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
+                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextOnAccent}"
+                                                                Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
+                                                        </Border>
+                                                        <Button
+                                                            Grid.Column="2"
+                                                            Width="28"
+                                                            Height="28"
+                                                            Padding="0"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center"
+                                                            Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource BtnIcon}">
+                                                            <TextBlock
+                                                                FontFamily="Segoe MDL2 Assets"
+                                                                FontSize="11"
+                                                                Foreground="{DynamicResource AppTextMuted}"
+                                                                Text="&#xE70F;" />
+                                                        </Button>
+                                                    </Grid>
 
-              <!--  ── 攤還表 tab ──  -->
-              <StackPanel Margin="16,12,16,16" Visibility="{Binding IsDetailScheduleTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <WrapPanel Margin="0,12,0,0">
+                                                        <Border
+                                                            MinWidth="160"
+                                                            Margin="0,0,10,10"
+                                                            Padding="10,8"
+                                                            Background="{DynamicResource AppBackground}"
+                                                            BorderBrush="{DynamicResource AppBorder}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            <StackPanel>
+                                                                <TextBlock
+                                                                    FontSize="{StaticResource FontSizeXs}"
+                                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                                    Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
+                                                                <TextBlock
+                                                                    Margin="0,4,0,0"
+                                                                    FontFamily="{StaticResource FontTabular}"
+                                                                    FontSize="{StaticResource FontSizeSm}"
+                                                                    FontWeight="SemiBold"
+                                                                    Text="{Binding CashAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </WrapPanel>
 
-                <!--  Loan metadata  -->
-                <DockPanel Margin="0,0,0,8">
-                  <TextBlock
+                                                    <TextBlock
+                                                        Margin="0,2,0,0"
+                                                        FontSize="{StaticResource FontSizeXs}"
+                                                        Foreground="{DynamicResource AppTextMuted}"
+                                                        Text="{Binding Note}"
+                                                        TextWrapping="Wrap"
+                                                        Visibility="{Binding Note, Converter={StaticResource StringToVisibilityConverter}}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+
+                            <!--  ── 攤還表 tab ──  -->
+                            <StackPanel Margin="16,12,16,16" Visibility="{Binding IsDetailScheduleTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                                <!--  Loan metadata  -->
+                                <DockPanel Margin="0,0,0,8">
+                                    <TextBlock
                                         VerticalAlignment="Center"
                                         FontSize="{StaticResource FontSizeXs}"
                                         Foreground="{DynamicResource AppTextMuted}">
@@ -864,279 +831,298 @@
                                         <Run Text="{DynamicResource Portfolio.Loan.Term}" />
                                         <Run Text=":" />
                                         <Run FontFamily="{StaticResource FontTabular}" Text="{Binding SelectedLiabilityRow.TermDisplay, FallbackValue='—', Mode=OneWay}" />
-                  </TextBlock>
-                </DockPanel>
+                                    </TextBlock>
+                                </DockPanel>
 
-                <!--  3 summary cards  -->
-                <UniformGrid
-                                    Margin="0,0,0,12"
-                                    Columns="3">
-                  <Border
-                                        Margin="0,0,4,0"
-                                        Padding="10,8"
+                                <!--  3 summary cards  -->
+                                <WrapPanel Margin="0,0,0,14" ItemWidth="152">
+                                    <Border
+                                        Margin="0,0,12,12"
+                                        Padding="12,10"
                                         Background="{DynamicResource AppBackground}"
                                         BorderBrush="{DynamicResource AppBorder}"
                                         BorderThickness="1"
                                         CornerRadius="{StaticResource RadiusSm}">
-                    <StackPanel>
-                      <TextBlock
+                                        <StackPanel>
+                                            <TextBlock
                                                 FontSize="{StaticResource FontSizeXs}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{DynamicResource Portfolio.Loan.PaidPrincipal}" />
-                      <TextBlock
+                                            <TextBlock
                                                 Margin="0,4,0,0"
                                                 FontFamily="{StaticResource FontTabular}"
                                                 FontSize="{StaticResource FontSizeSm}"
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppUp}"
                                                 Text="{Binding SelectedLiabilityRow.PaidPrincipal, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue='—'}" />
-                    </StackPanel>
-                  </Border>
-                  <Border
-                                        Margin="2,0,2,0"
-                                        Padding="10,8"
+                                        </StackPanel>
+                                    </Border>
+                                    <Border
+                                        Margin="0,0,12,12"
+                                        Padding="12,10"
                                         Background="{DynamicResource AppBackground}"
                                         BorderBrush="{DynamicResource AppBorder}"
                                         BorderThickness="1"
                                         CornerRadius="{StaticResource RadiusSm}">
-                    <StackPanel>
-                      <TextBlock
+                                        <StackPanel>
+                                            <TextBlock
                                                 FontSize="{StaticResource FontSizeXs}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{DynamicResource Portfolio.Loan.PaidInterest}" />
-                      <TextBlock
+                                            <TextBlock
                                                 Margin="0,4,0,0"
                                                 FontFamily="{StaticResource FontTabular}"
                                                 FontSize="{StaticResource FontSizeSm}"
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppTextPrimary}"
                                                 Text="{Binding SelectedLiabilityRow.PaidInterest, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue='—'}" />
-                    </StackPanel>
-                  </Border>
-                  <Border
-                                        Margin="4,0,0,0"
-                                        Padding="10,8"
+                                        </StackPanel>
+                                    </Border>
+                                    <Border
+                                        Margin="0,0,12,12"
+                                        Padding="12,10"
                                         Background="{DynamicResource AppBackground}"
                                         BorderBrush="{DynamicResource AppBorder}"
                                         BorderThickness="1"
                                         CornerRadius="{StaticResource RadiusSm}">
-                    <StackPanel>
-                      <TextBlock
+                                        <StackPanel>
+                                            <TextBlock
                                                 FontSize="{StaticResource FontSizeXs}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{DynamicResource Portfolio.Loan.RemainingBalance}" />
-                      <TextBlock
+                                            <TextBlock
                                                 Margin="0,4,0,0"
                                                 FontFamily="{StaticResource FontTabular}"
                                                 FontSize="{StaticResource FontSizeSm}"
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppDown}"
                                                 Text="{Binding SelectedLiabilityRow.RemainingFromSchedule, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue='—'}" />
-                    </StackPanel>
-                  </Border>
-                </UniformGrid>
+                                            </StackPanel>
+                                        </Border>
+                                </WrapPanel>
 
-                <!--  Empty state  -->
-                <TextBlock
+                                <!--  Empty state  -->
+                                <TextBlock
                                     Margin="0,16,0,0"
                                     HorizontalAlignment="Center"
                                     FontSize="{StaticResource FontSizeSm}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{DynamicResource Portfolio.Loan.NoSchedule}">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Visibility" Value="Collapsed" />
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding SelectedLiabilityRow.HasSchedule, FallbackValue=False}" Value="False">
-                          <Setter Property="Visibility" Value="Visible" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedLiabilityRow.HasSchedule, FallbackValue=False}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
 
-                <!--  Schedule DataGrid  -->
-                <DataGrid
-                                    x:Name="ScheduleGrid"
-                                    AutoGenerateColumns="False"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    CanUserAddRows="False"
-                                    CanUserDeleteRows="False"
-                                    CanUserReorderColumns="False"
-                                    CanUserResizeColumns="False"
-                                    CanUserSortColumns="False"
-                                    EnableRowVirtualization="True"
-                                    FontFamily="{StaticResource FontBase}"
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    Foreground="{DynamicResource AppTextPrimary}"
-                                    GridLinesVisibility="None"
-                                    HeadersVisibility="Column"
-                                    IsReadOnly="True"
+                                <ItemsControl
                                     ItemsSource="{Binding SelectedLiabilityRow.ScheduleEntries}"
-                                    RowHeight="32"
-                                    SelectionMode="Single"
                                     Visibility="{Binding SelectedLiabilityRow.HasSchedule, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
-                  <DataGrid.ColumnHeaderStyle>
-                    <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
-                  </DataGrid.ColumnHeaderStyle>
-                  <DataGrid.CellStyle>
-                    <Style BasedOn="{StaticResource AppDataGridCell}" TargetType="DataGridCell" />
-                  </DataGrid.CellStyle>
-                  <DataGrid.RowStyle>
-                    <Style BasedOn="{StaticResource AppDataGridRowSelectable}" TargetType="DataGridRow">
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsPaid}" Value="True">
-                          <Setter Property="Opacity" Value="0.45" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </DataGrid.RowStyle>
-                  <DataGrid.Columns>
-                    <!--  #  -->
-                    <DataGridTemplateColumn Width="32" SortMemberPath="Period">
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.Loan.Period}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <TextBlock
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontTabular}"
-                                                        Foreground="{DynamicResource AppTextMuted}"
-                                                        Text="{Binding Period}" />
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  應繳日  -->
-                    <DataGridTemplateColumn Width="96" SortMemberPath="DueDate">
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.Loan.DueDate}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <TextBlock
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontTabular}"
-                                                        Foreground="{DynamicResource AppTextSecondary}"
-                                                        Text="{Binding DueDateDisplay}" />
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  本金  -->
-                    <DataGridTemplateColumn Width="72">
-                      <DataGridTemplateColumn.HeaderStyle>
-                        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                          <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        </Style>
-                      </DataGridTemplateColumn.HeaderStyle>
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.Loan.Principal}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <TextBlock
-                                                        HorizontalAlignment="Right"
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontTabular}"
-                                                        Text="{Binding PrincipalAmount, StringFormat=N0}" />
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  利息  -->
-                    <DataGridTemplateColumn Width="60">
-                      <DataGridTemplateColumn.HeaderStyle>
-                        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                          <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        </Style>
-                      </DataGridTemplateColumn.HeaderStyle>
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.Loan.Interest}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <TextBlock
-                                                        HorizontalAlignment="Right"
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontTabular}"
-                                                        Foreground="{DynamicResource AppTextSecondary}"
-                                                        Text="{Binding InterestAmount, StringFormat=N0}" />
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  確認繳款 按鈕  -->
-                    <DataGridTemplateColumn Width="*">
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <Button
-                                                        Height="22"
-                                                        Margin="2,2"
-                                                        Padding="8,0"
-                                                        HorizontalAlignment="Right"
-                                                        Command="{Binding DataContext.Loan.ConfirmLoanPaymentCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border
+                                                Margin="0,0,0,10"
+                                                Padding="12"
+                                                Background="{DynamicResource AppSurface}"
+                                                BorderBrush="{DynamicResource AppBorder}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource RadiusSm}">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Opacity" Value="1" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsPaid}" Value="True">
+                                                                <Setter Property="Opacity" Value="0.55" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <StackPanel>
+                                                    <DockPanel LastChildFill="True">
+                                                        <Border
+                                                            DockPanel.Dock="Left"
+                                                            Margin="0,0,10,0"
+                                                            Padding="8,3"
+                                                            Background="{DynamicResource AppBackground}"
+                                                            BorderBrush="{DynamicResource AppBorder}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            <TextBlock
+                                                                FontFamily="{StaticResource FontTabular}"
+                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                                Text="{Binding Period, StringFormat={}{0:00}}" />
+                                                        </Border>
+                                                        <TextBlock
+                                                            DockPanel.Dock="Right"
+                                                            FontFamily="{StaticResource FontTabular}"
+                                                            FontSize="{StaticResource FontSizeXs}"
+                                                            Foreground="{DynamicResource AppTextMuted}"
+                                                            Text="{Binding DueDateDisplay}" />
+                                                        <TextBlock
+                                                            FontSize="{StaticResource FontSizeSm}"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextPrimary}">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Loan.PaymentPending}" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsPaid}" Value="True">
+                                                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Loan.PaymentConfirmed}" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </DockPanel>
+
+                                                    <WrapPanel Margin="0,12,0,0">
+                                                        <Border
+                                                            Margin="0,0,10,10"
+                                                            Padding="10,8"
+                                                            Background="{DynamicResource AppBackground}"
+                                                            BorderBrush="{DynamicResource AppBorder}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            <StackPanel>
+                                                                <TextBlock
+                                                                    FontSize="{StaticResource FontSizeXs}"
+                                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                                    Text="{DynamicResource Portfolio.Loan.Principal}" />
+                                                                <TextBlock
+                                                                    Margin="0,4,0,0"
+                                                                    FontFamily="{StaticResource FontTabular}"
+                                                                    FontSize="{StaticResource FontSizeSm}"
+                                                                    FontWeight="SemiBold"
+                                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                                    Text="{Binding PrincipalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                        <Border
+                                                            Margin="0,0,10,10"
+                                                            Padding="10,8"
+                                                            Background="{DynamicResource AppBackground}"
+                                                            BorderBrush="{DynamicResource AppBorder}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            <StackPanel>
+                                                                <TextBlock
+                                                                    FontSize="{StaticResource FontSizeXs}"
+                                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                                    Text="{DynamicResource Portfolio.Loan.Interest}" />
+                                                                <TextBlock
+                                                                    Margin="0,4,0,0"
+                                                                    FontFamily="{StaticResource FontTabular}"
+                                                                    FontSize="{StaticResource FontSizeSm}"
+                                                                    FontWeight="SemiBold"
+                                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                                    Text="{Binding InterestAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                        <Border
+                                                            Margin="0,0,10,10"
+                                                            Padding="10,8"
+                                                            Background="{DynamicResource AppBackground}"
+                                                            BorderBrush="{DynamicResource AppBorder}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            <StackPanel>
+                                                                <TextBlock
+                                                                    FontSize="{StaticResource FontSizeXs}"
+                                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                                    Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
+                                                                <TextBlock
+                                                                    Margin="0,4,0,0"
+                                                                    FontFamily="{StaticResource FontTabular}"
+                                                                    FontSize="{StaticResource FontSizeSm}"
+                                                                    FontWeight="SemiBold"
+                                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                                    Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </WrapPanel>
+
+                                                    <Button
+                                                        Height="28"
+                                                        Margin="0,2,0,0"
+                                                        Padding="10,0"
+                                                        HorizontalAlignment="Left"
+                                                        Command="{Binding DataContext.Loan.ConfirmLoanPaymentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}">
-                            <Button.Style>
-                              <Style BasedOn="{StaticResource BtnPrimary}" TargetType="Button">
-                                <Style.Triggers>
-                                  <DataTrigger Binding="{Binding IsPaid}" Value="True">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                  </DataTrigger>
-                                </Style.Triggers>
-                              </Style>
-                            </Button.Style>
-                            <TextBlock
+                                                        <Button.Style>
+                                                            <Style BasedOn="{StaticResource BtnPrimary}" TargetType="Button">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsPaid}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                        <TextBlock
                                                             FontSize="{StaticResource FontSizeXs}"
                                                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                             Text="{DynamicResource Portfolio.Loan.ConfirmPayment}" />
-                          </Button>
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                  </DataGrid.Columns>
-                </DataGrid>
-              </StackPanel>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
 
-            </Grid>
-          </ScrollViewer>
+                        </Grid>
+                    </ScrollViewer>
 
+                </Grid>
+            </Border>
         </Grid>
-      </Border>
-    </Grid>
 
-    <!--  ── Position detail overlay (investment) ──  -->
-    <Grid
+        <!--  ── Position detail overlay (investment) ──  -->
+        <Grid
             Grid.RowSpan="3"
             Panel.ZIndex="180"
             Visibility="{Binding HasSelectedPositionRow, Converter={StaticResource BooleanToVisibilityConverter}}">
-      <Border Background="{DynamicResource AppModalOverlay}" MouseLeftButtonDown="OnPositionDetailBackdropClick" />
-      <Border
-                Width="440"
+            <Border Background="{DynamicResource AppModalOverlay}" MouseLeftButtonDown="OnPositionDetailBackdropClick" />
+            <Border
                 HorizontalAlignment="Right"
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1,0,0,0">
-        <Grid>
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <!--  Header (symbol + name + actions)  -->
-            <RowDefinition Height="Auto" />
-            <!--  Tab bar  -->
-            <RowDefinition Height="*" />
-            <!--  Tab content  -->
-            <RowDefinition Height="Auto" />
-            <!--  Danger zone  -->
-          </Grid.RowDefinitions>
+                <Border.Width>
+                    <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.44|420|620">
+                        <Binding ElementName="Root" Path="ActualWidth" />
+                        <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="DataContext.Settings.UiScale" />
+                    </MultiBinding>
+                </Border.Width>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <!--  Header (symbol + name + actions)  -->
+                        <RowDefinition Height="Auto" />
+                        <!--  Tab bar  -->
+                        <RowDefinition Height="*" />
+                        <!--  Tab content  -->
+                        <RowDefinition Height="Auto" />
+                        <!--  Danger zone  -->
+                    </Grid.RowDefinitions>
 
-          <!--  ── Header ──  -->
-          <Border
+                    <!--  ── Header ──  -->
+                    <Border
                         Grid.Row="0"
                         Padding="16,14"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,0,0,1">
-            <StackPanel>
-              <DockPanel LastChildFill="True">
-                <!--  Close  -->
-                <Button
+                        <StackPanel>
+                            <DockPanel LastChildFill="True">
+                                <!--  Close  -->
+                                <Button
                                     Width="30"
                                     Height="30"
                                     Margin="6,0,0,0"
@@ -1144,14 +1130,14 @@
                                     Command="{Binding ClosePositionDetailCommand}"
                                     DockPanel.Dock="Right"
                                     Style="{StaticResource BtnIcon}">
-                  <TextBlock
+                                    <TextBlock
                                         FontFamily="Segoe MDL2 Assets"
                                         FontSize="11"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="&#xE711;" />
-                </Button>
-                <!--  Edit pencil → opens shared EditAssetDialog  -->
-                <Button
+                                </Button>
+                                <!--  Edit pencil → opens shared EditAssetDialog  -->
+                                <Button
                                     Width="30"
                                     Height="30"
                                     VerticalAlignment="Center"
@@ -1159,221 +1145,221 @@
                                     CommandParameter="{Binding SelectedPositionRow}"
                                     DockPanel.Dock="Right"
                                     Style="{StaticResource BtnIcon}">
-                  <TextBlock
+                                    <TextBlock
                                         FontFamily="Segoe MDL2 Assets"
                                         FontSize="12"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="&#xE70F;" />
-                </Button>
-                <!--  Symbol + Name (left-fill)  -->
-                <StackPanel Orientation="Horizontal">
-                  <TextBlock
+                                </Button>
+                                <!--  Symbol + Name (left-fill)  -->
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock
                                         VerticalAlignment="Center"
                                         FontFamily="{StaticResource FontTabular}"
                                         FontSize="{StaticResource FontSizeXl}"
                                         FontWeight="Bold"
                                         Foreground="{DynamicResource AppAccent}"
                                         Text="{Binding SelectedPositionRow.Symbol, FallbackValue=''}" />
-                  <TextBlock
+                                    <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
                                         FontSize="{StaticResource FontSizeSm}"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="{Binding SelectedPositionRow.Name, FallbackValue=''}"
                                         TextTrimming="CharacterEllipsis" />
-                </StackPanel>
-              </DockPanel>
-              <TextBlock
+                                </StackPanel>
+                            </DockPanel>
+                            <TextBlock
                                 Margin="0,8,0,8"
                                 FontSize="{StaticResource FontSizeXs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Portfolio.Detail.Subtitle}" />
-              <!--
+                            <!--
                                 Asset-type badges — 一律實色填充 + 白字，無 border，
                                 統一高度 & 視覺語法（跟 DataGrid 資產欄的徽章風格一致）
                             -->
-              <StackPanel Orientation="Horizontal">
-                <!--  主要類型徽章（股 / 基 / 金 / 債 / 密）— 顏色依資產類型  -->
-                <Border Padding="8,2" CornerRadius="{StaticResource RadiusSm}">
-                  <Border.Style>
-                    <Style TargetType="Border">
-                      <Setter Property="Background" Value="#0062AD" />
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding SelectedPositionRow.AssetType, FallbackValue={x:Null}}" Value="{x:Static models:AssetType.Fund}">
-                          <Setter Property="Background" Value="#0A7A55" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding SelectedPositionRow.AssetType, FallbackValue={x:Null}}" Value="{x:Static models:AssetType.PreciousMetal}">
-                          <Setter Property="Background" Value="#966300" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding SelectedPositionRow.AssetType, FallbackValue={x:Null}}" Value="{x:Static models:AssetType.Bond}">
-                          <Setter Property="Background" Value="#374151" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding SelectedPositionRow.AssetType, FallbackValue={x:Null}}" Value="{x:Static models:AssetType.Crypto}">
-                          <Setter Property="Background" Value="#5B21B6" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </Border.Style>
-                  <TextBlock
+                            <StackPanel Orientation="Horizontal">
+                                <!--  主要類型徽章（股 / 基 / 金 / 債 / 密）— 顏色依資產類型  -->
+                                <Border Padding="8,2" CornerRadius="{StaticResource RadiusSm}">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="#0062AD" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedPositionRow.AssetType, FallbackValue={x:Null}}" Value="{x:Static models:AssetType.Fund}">
+                                                    <Setter Property="Background" Value="#0A7A55" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedPositionRow.AssetType, FallbackValue={x:Null}}" Value="{x:Static models:AssetType.PreciousMetal}">
+                                                    <Setter Property="Background" Value="#966300" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedPositionRow.AssetType, FallbackValue={x:Null}}" Value="{x:Static models:AssetType.Bond}">
+                                                    <Setter Property="Background" Value="#374151" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedPositionRow.AssetType, FallbackValue={x:Null}}" Value="{x:Static models:AssetType.Crypto}">
+                                                    <Setter Property="Background" Value="#5B21B6" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextOnAccent}"
                                         Text="{Binding SelectedPositionRow.AssetTypeBadgeLabel, FallbackValue=''}" />
-                </Border>
-                <!--  ETF 副徽章 — 僅股票型 ETF 顯示（非債券 ETF）  -->
-                <Border
+                                </Border>
+                                <!--  ETF 副徽章 — 僅股票型 ETF 顯示（非債券 ETF）  -->
+                                <Border
                                     Margin="6,0,0,0"
                                     Padding="8,2"
                                     Background="#0891B2"
                                     CornerRadius="{StaticResource RadiusSm}"
                                     ToolTip="證交稅 0.1%">
-                  <Border.Style>
-                    <Style TargetType="Border">
-                      <Setter Property="Visibility" Value="Collapsed" />
-                      <Style.Triggers>
-                        <MultiDataTrigger>
-                          <MultiDataTrigger.Conditions>
-                            <Condition Binding="{Binding SelectedPositionRow.IsEtf, FallbackValue=False}" Value="True" />
-                            <Condition Binding="{Binding SelectedPositionRow.IsBondEtf, FallbackValue=False}" Value="False" />
-                          </MultiDataTrigger.Conditions>
-                          <Setter Property="Visibility" Value="Visible" />
-                        </MultiDataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </Border.Style>
-                  <TextBlock
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding SelectedPositionRow.IsEtf, FallbackValue=False}" Value="True" />
+                                                        <Condition Binding="{Binding SelectedPositionRow.IsBondEtf, FallbackValue=False}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextOnAccent}"
                                         Text="ETF" />
-                </Border>
-                <!--  債券 ETF 副徽章 — 深灰提示免徵證交稅  -->
-                <Border
+                                </Border>
+                                <!--  債券 ETF 副徽章 — 深灰提示免徵證交稅  -->
+                                <Border
                                     Margin="6,0,0,0"
                                     Padding="8,2"
                                     Background="#374151"
                                     CornerRadius="{StaticResource RadiusSm}"
                                     ToolTip="債券 ETF — 證交稅免徵（延長至 2026 底）"
                                     Visibility="{Binding SelectedPositionRow.IsBondEtf, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
-                  <TextBlock
+                                    <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextOnAccent}"
                                         Text="債券 ETF" />
-                </Border>
-              </StackPanel>
-            </StackPanel>
-          </Border>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
 
-          <!--  ── Tab bar ──  -->
-          <Border
+                    <!--  ── Tab bar ──  -->
+                    <Border
                         Grid.Row="1"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal">
-              <RadioButton
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton
                                 Command="{Binding SwitchDetailTabCommand}"
                                 CommandParameter="overview"
                                 Content="{DynamicResource Portfolio.Detail.Overview}"
                                 GroupName="PositionDetailTab"
                                 IsChecked="{Binding IsDetailOverviewTab, Mode=OneWay}"
                                 Style="{StaticResource NavTabBtn}" />
-              <RadioButton
+                            <RadioButton
                                 Command="{Binding SwitchDetailTabCommand}"
                                 CommandParameter="trades"
                                 Content="{DynamicResource Portfolio.Detail.Trades}"
                                 GroupName="PositionDetailTab"
                                 IsChecked="{Binding IsDetailTradesTab, Mode=OneWay}"
                                 Style="{StaticResource NavTabBtn}" />
-            </StackPanel>
-          </Border>
+                        </StackPanel>
+                    </Border>
 
-          <!--  ── Tab content ──  -->
-          <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-            <Grid>
-              <!--  Overview tab  -->
-              <StackPanel Margin="20,16,20,12" Visibility="{Binding IsDetailOverviewTab, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <!--  View mode: 2x2 stats grid + realized P&L section  -->
-                <StackPanel>
-                  <!--  🆕 快速動作列：從 Detail 直接發起交易（現代 UX: reduce navigation friction）  -->
-                  <UniformGrid
+                    <!--  ── Tab content ──  -->
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                        <Grid>
+                            <!--  Overview tab  -->
+                            <StackPanel Margin="20,16,20,12" Visibility="{Binding IsDetailOverviewTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <!--  View mode: 2x2 stats grid + realized P&L section  -->
+                                <StackPanel>
+                                    <!--  🆕 快速動作列：從 Detail 直接發起交易（現代 UX: reduce navigation friction）  -->
+                                    <UniformGrid
                                         Margin="0,0,0,14"
                                         Columns="3"
                                         Visibility="{Binding SelectedPositionRow.IsStock, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Button
+                                        <Button
                                             Height="32"
                                             Margin="0,0,4,0"
                                             Command="{Binding BeginBuyForSelectedPositionCommand}"
                                             Style="{StaticResource BtnGhost}">
-                      <StackPanel Orientation="Horizontal">
-                        <TextBlock
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock
                                                     Margin="0,0,6,0"
                                                     VerticalAlignment="Center"
                                                     FontFamily="Segoe MDL2 Assets"
                                                     FontSize="10"
                                                     Foreground="{DynamicResource AppUp}"
                                                     Text="&#xE710;" />
-                        <TextBlock
+                                                <TextBlock
                                                     VerticalAlignment="Center"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Text="{DynamicResource Portfolio.Detail.Action.Buy}" />
-                      </StackPanel>
-                    </Button>
-                    <Button
+                                            </StackPanel>
+                                        </Button>
+                                        <Button
                                             Height="32"
                                             Margin="2,0,2,0"
                                             Command="{Binding BeginSellForSelectedPositionCommand}"
                                             Style="{StaticResource BtnGhost}">
-                      <StackPanel Orientation="Horizontal">
-                        <TextBlock
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock
                                                     Margin="0,0,6,0"
                                                     VerticalAlignment="Center"
                                                     FontFamily="Segoe MDL2 Assets"
                                                     FontSize="10"
                                                     Foreground="{DynamicResource AppDown}"
                                                     Text="&#xE738;" />
-                        <TextBlock
+                                                <TextBlock
                                                     VerticalAlignment="Center"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Text="{DynamicResource Portfolio.Detail.Action.Sell}" />
-                      </StackPanel>
-                    </Button>
-                    <Button
+                                            </StackPanel>
+                                        </Button>
+                                        <Button
                                             Height="32"
                                             Margin="4,0,0,0"
                                             Command="{Binding BeginDividendForSelectedPositionCommand}"
                                             Style="{StaticResource BtnGhost}">
-                      <StackPanel Orientation="Horizontal">
-                        <TextBlock
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock
                                                     Margin="0,0,6,0"
                                                     VerticalAlignment="Center"
                                                     FontFamily="Segoe MDL2 Assets"
                                                     FontSize="10"
                                                     Foreground="{DynamicResource AppAccent}"
                                                     Text="&#xE7BF;" />
-                        <TextBlock
+                                                <TextBlock
                                                     VerticalAlignment="Center"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Text="{DynamicResource Portfolio.Detail.Action.Dividend}" />
-                      </StackPanel>
-                    </Button>
-                  </UniformGrid>
+                                            </StackPanel>
+                                        </Button>
+                                    </UniformGrid>
 
-                  <!--  Stats grid (2x2)  -->
-                  <Grid>
-                    <Grid.RowDefinitions>
-                      <RowDefinition Height="Auto" />
-                      <RowDefinition Height="10" />
-                      <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="10" />
-                      <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                                    <!--  Stats grid (2x2)  -->
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="10" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
 
-                    <!--  Card: 現價 / 均價  -->
-                    <Border
+                                        <!--  Card: 現價 / 均價  -->
+                                        <Border
                                             Grid.Row="0"
                                             Grid.Column="0"
                                             Padding="14,12"
@@ -1381,59 +1367,59 @@
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
                                             CornerRadius="{StaticResource RadiusSm}">
-                      <StackPanel>
-                        <TextBlock
+                                            <StackPanel>
+                                                <TextBlock
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{DynamicResource Portfolio.Detail.PriceAvg}" />
-                        <StackPanel Margin="0,4,0,2" Orientation="Horizontal">
-                          <TextBlock
+                                                <StackPanel Margin="0,4,0,2" Orientation="Horizontal">
+                                                    <TextBlock
                                                         FontFamily="{StaticResource FontTabular}"
                                                         FontSize="{StaticResource FontSizeXl}"
                                                         FontWeight="SemiBold"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding SelectedPositionRow.CurrentPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, FallbackValue=''}" />
-                          <TextBlock
+                                                    <TextBlock
                                                         Margin="6,0,0,0"
                                                         VerticalAlignment="Bottom"
                                                         FontFamily="{StaticResource FontTabular}"
                                                         FontSize="{StaticResource FontSizeXs}"
                                                         Text="{Binding SelectedPositionRow.DayChangePercent, StringFormat={}{0:+0.00;-0.00;0.00}%, FallbackValue=''}">
-                            <TextBlock.Style>
-                              <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                <Style.Triggers>
-                                  <DataTrigger Binding="{Binding SelectedPositionRow.IsDayChangePositive}" Value="True">
-                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                  </DataTrigger>
-                                </Style.Triggers>
-                              </Style>
-                            </TextBlock.Style>
-                          </TextBlock>
-                        </StackPanel>
-                        <!--  成交均價（交易記錄加總）— 對照側面板的交易記錄可直接手算  -->
-                        <TextBlock
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding SelectedPositionRow.IsDayChangePositive}" Value="True">
+                                                                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                                <!--  成交均價（交易記錄加總）— 對照側面板的交易記錄可直接手算  -->
+                                                <TextBlock
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextMuted}">
                                                     <Run Text="{DynamicResource Portfolio.Detail.TradeAvgPrice}" />
                                                     <Run Text=":" />
                                                     <Run Text="{Binding SelectedPositionTradeAvgPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, Mode=OneWay, FallbackValue=''}" />
-                        </TextBlock>
-                        <!--  成本均價（含買入手續費攤平）— 等於持倉 DataGrid 上的數字  -->
-                        <TextBlock
+                                                </TextBlock>
+                                                <!--  成本均價（含買入手續費攤平）— 等於持倉 DataGrid 上的數字  -->
+                                                <TextBlock
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextMuted}">
                                                     <Run Text="{DynamicResource Portfolio.Detail.CostAvgPrice}" />
                                                     <Run Text=":" />
                                                     <Run Text="{Binding SelectedPositionRow.BuyPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, Mode=OneWay, FallbackValue=''}" />
-                        </TextBlock>
-                      </StackPanel>
-                    </Border>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
 
-                    <!--  Card: 持有數量  -->
-                    <Border
+                                        <!--  Card: 持有數量  -->
+                                        <Border
                                             Grid.Row="0"
                                             Grid.Column="2"
                                             Padding="14,12"
@@ -1441,23 +1427,23 @@
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
                                             CornerRadius="{StaticResource RadiusSm}">
-                      <StackPanel>
-                        <TextBlock
+                                            <StackPanel>
+                                                <TextBlock
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{DynamicResource Portfolio.Detail.Holdings}" />
-                        <TextBlock
+                                                <TextBlock
                                                     Margin="0,4,0,0"
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXl}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{Binding SelectedPositionRow.QuantityDisplay, FallbackValue=''}" />
-                      </StackPanel>
-                    </Border>
+                                            </StackPanel>
+                                        </Border>
 
-                    <!--  Card: 市值 / 成本  -->
-                    <Border
+                                        <!--  Card: 市值 / 成本  -->
+                                        <Border
                                             Grid.Row="2"
                                             Grid.Column="0"
                                             Padding="14,12"
@@ -1465,42 +1451,42 @@
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
                                             CornerRadius="{StaticResource RadiusSm}">
-                      <StackPanel>
-                        <TextBlock
+                                            <StackPanel>
+                                                <TextBlock
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{DynamicResource Portfolio.Detail.MarketValueCost}" />
-                        <!--  淨值（與 DataGrid 一致；已扣預估賣出費與證交稅）  -->
-                        <TextBlock
+                                                <!--  淨值（與 DataGrid 一致；已扣預估賣出費與證交稅）  -->
+                                                <TextBlock
                                                     Margin="0,4,0,2"
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXl}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{Binding SelectedPositionRow.NetValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue=''}" />
-                        <!--  市值（毛）  -->
-                        <TextBlock
+                                                <!--  市值（毛）  -->
+                                                <TextBlock
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextMuted}">
                                                     <Run Text="{DynamicResource Portfolio.Detail.MarketValue}" />
                                                     <Run Text=":" />
                                                     <Run Text="{Binding SelectedPositionRow.MarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}" />
-                        </TextBlock>
-                        <!--  成本（實付含買入手續費）  -->
-                        <TextBlock
+                                                </TextBlock>
+                                                <!--  成本（實付含買入手續費）  -->
+                                                <TextBlock
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextMuted}">
                                                     <Run Text="{DynamicResource Portfolio.Detail.Cost}" />
                                                     <Run Text=":" />
                                                     <Run Text="{Binding SelectedPositionRow.Cost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}" />
-                        </TextBlock>
-                      </StackPanel>
-                    </Border>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
 
-                    <!--  Card: 總損益 + %  -->
-                    <Border
+                                        <!--  Card: 總損益 + %  -->
+                                        <Border
                                             Grid.Row="2"
                                             Grid.Column="2"
                                             Padding="14,12"
@@ -1508,79 +1494,79 @@
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
                                             CornerRadius="{StaticResource RadiusSm}">
-                      <StackPanel>
-                        <TextBlock
+                                            <StackPanel>
+                                                <TextBlock
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{DynamicResource Common.TotalPnL}" />
-                        <TextBlock
+                                                <TextBlock
                                                     Margin="0,4,0,2"
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXl}"
                                                     FontWeight="SemiBold"
                                                     Text="{Binding SelectedPositionRow.Pnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed, FallbackValue=''}">
-                          <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                              <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                              <Style.Triggers>
-                                <DataTrigger Binding="{Binding SelectedPositionRow.IsPnlPositive}" Value="True">
-                                  <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                </DataTrigger>
-                              </Style.Triggers>
-                            </Style>
-                          </TextBlock.Style>
-                        </TextBlock>
-                        <TextBlock
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SelectedPositionRow.IsPnlPositive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Text="{Binding SelectedPositionRow.PnlPercent, StringFormat={}{0:+0.00;-0.00;0.00}%, FallbackValue=''}">
-                          <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                              <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                              <Style.Triggers>
-                                <DataTrigger Binding="{Binding SelectedPositionRow.IsPnlPositive}" Value="True">
-                                  <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                </DataTrigger>
-                              </Style.Triggers>
-                            </Style>
-                          </TextBlock.Style>
-                        </TextBlock>
-                      </StackPanel>
-                    </Border>
-                  </Grid>
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SelectedPositionRow.IsPnlPositive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
 
-                  <!--  Realized P&L section — 只在有資料時顯示，避免 3 行 NT$0 雜訊  -->
-                  <Border
+                                    <!--  Realized P&L section — 只在有資料時顯示，避免 3 行 NT$0 雜訊  -->
+                                    <Border
                                         Margin="0,16,0,0"
                                         Background="{DynamicResource AppBackground}"
                                         BorderBrush="{DynamicResource AppBorder}"
                                         BorderThickness="1"
                                         CornerRadius="{StaticResource RadiusSm}"
                                         Visibility="{Binding HasSelectedPositionRealized, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
-                    <StackPanel>
-                      <Border
+                                        <StackPanel>
+                                            <Border
                                                 Padding="14,10"
                                                 BorderBrush="{DynamicResource AppBorder}"
                                                 BorderThickness="0,0,0,1">
-                        <TextBlock
+                                                <TextBlock
                                                     FontSize="{StaticResource FontSizeSm}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{DynamicResource Portfolio.Detail.RealizedPnL}" />
-                      </Border>
-                      <Grid Margin="14,8">
-                        <Grid.ColumnDefinitions>
-                          <ColumnDefinition Width="*" />
-                          <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock
+                                            </Border>
+                                            <Grid Margin="14,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock
                                                     Grid.Column="0"
                                                     VerticalAlignment="Center"
                                                     FontSize="{StaticResource FontSizeSm}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{DynamicResource Portfolio.Detail.TotalRealized}" />
-                        <TextBlock
+                                                <TextBlock
                                                     Grid.Column="1"
                                                     VerticalAlignment="Center"
                                                     FontFamily="{StaticResource FontTabular}"
@@ -1588,244 +1574,225 @@
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppUp}"
                                                     Text="{Binding SelectedPositionRealizedTotal, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                      </Grid>
-                      <Grid Margin="14,6">
-                        <Grid.ColumnDefinitions>
-                          <ColumnDefinition Width="*" />
-                          <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock
+                                            </Grid>
+                                            <Grid Margin="14,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock
                                                     Grid.Column="0"
                                                     VerticalAlignment="Center"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{DynamicResource Portfolio.Detail.CapitalGain}" />
-                        <TextBlock
+                                                <TextBlock
                                                     Grid.Column="1"
                                                     VerticalAlignment="Center"
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextMuted}"
                                                     Text="{Binding SelectedPositionCapitalGain, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                      </Grid>
-                      <Grid Margin="14,6,14,12">
-                        <Grid.ColumnDefinitions>
-                          <ColumnDefinition Width="*" />
-                          <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock
+                                            </Grid>
+                                            <Grid Margin="14,6,14,12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock
                                                     Grid.Column="0"
                                                     VerticalAlignment="Center"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{DynamicResource Portfolio.Detail.DividendIncome}" />
-                        <TextBlock
+                                                <TextBlock
                                                     Grid.Column="1"
                                                     VerticalAlignment="Center"
                                                     FontFamily="{StaticResource FontTabular}"
                                                     FontSize="{StaticResource FontSizeXs}"
                                                     Foreground="{DynamicResource AppUp}"
                                                     Text="{Binding SelectedPositionDividendIncome, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                      </Grid>
-                    </StackPanel>
-                  </Border>
-                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
 
-              </StackPanel>
+                            </StackPanel>
 
-              <!--  Trades tab  -->
-              <Grid Margin="20,12" Visibility="{Binding IsDetailTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock
+                            <!--  Trades tab  -->
+                            <Grid Margin="20,12" Visibility="{Binding IsDetailTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock
                                     Margin="0,24,0,0"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Top"
                                     FontSize="{StaticResource FontSizeSm}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{DynamicResource Portfolio.Detail.NoTrades}">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Visibility" Value="Collapsed" />
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding SelectedPositionTrades.Count, FallbackValue=0}" Value="0">
-                          <Setter Property="Visibility" Value="Visible" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-                <DataGrid
-                                    AutoGenerateColumns="False"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    CanUserAddRows="False"
-                                    CanUserDeleteRows="False"
-                                    CanUserReorderColumns="False"
-                                    CanUserResizeColumns="False"
-                                    CanUserSortColumns="False"
-                                    EnableRowVirtualization="True"
-                                    FontFamily="{StaticResource FontBase}"
-                                    FontSize="{StaticResource FontSizeSm}"
-                                    Foreground="{DynamicResource AppTextPrimary}"
-                                    GridLinesVisibility="None"
-                                    HeadersVisibility="Column"
-                                    IsReadOnly="True"
-                                    ItemsSource="{Binding SelectedPositionTrades}"
-                                    RowHeight="{StaticResource DataGridRowHeight}"
-                                    SelectionMode="Single">
-                  <DataGrid.ColumnHeaderStyle>
-                    <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
-                  </DataGrid.ColumnHeaderStyle>
-                  <DataGrid.CellStyle>
-                    <Style BasedOn="{StaticResource AppDataGridCell}" TargetType="DataGridCell" />
-                  </DataGrid.CellStyle>
-                  <DataGrid.RowStyle>
-                    <Style BasedOn="{StaticResource AppDataGridRow}" TargetType="DataGridRow" />
-                  </DataGrid.RowStyle>
-                  <DataGrid.Columns>
-                    <!--  日期  -->
-                    <DataGridTemplateColumn Width="90">
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.TradeHistory.Date}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <TextBlock
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontTabular}"
-                                                        FontSize="{StaticResource FontSizeSm}"
-                                                        Foreground="{DynamicResource AppTextSecondary}"
-                                                        Text="{Binding TradeDateLocal, StringFormat=yyyy/MM/dd}" />
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  類型  -->
-                    <DataGridTemplateColumn Width="64">
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.TradeHistory.Type}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <Border
-                                                        Margin="2,3"
-                                                        Padding="5,1"
-                                                        HorizontalAlignment="Left"
-                                                        VerticalAlignment="Center"
-                                                        Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
-                                                        CornerRadius="{StaticResource RadiusSm}">
-                            <TextBlock
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedPositionTrades.Count, FallbackValue=0}" Value="0">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <ItemsControl ItemsSource="{Binding SelectedPositionTrades}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border
+                                                Margin="0,0,0,10"
+                                                Padding="12"
+                                                Background="{DynamicResource AppSurface}"
+                                                BorderBrush="{DynamicResource AppBorder}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource RadiusSm}">
+                                                <StackPanel>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock
+                                                            Grid.Column="0"
+                                                            VerticalAlignment="Center"
+                                                            FontFamily="{StaticResource FontTabular}"
                                                             FontSize="{StaticResource FontSizeXs}"
-                                                            FontWeight="SemiBold"
-                                                            Foreground="{DynamicResource AppTextOnAccent}"
-                                                            Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
-                          </Border>
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  數量  -->
-                    <DataGridTemplateColumn Width="60">
-                      <DataGridTemplateColumn.HeaderStyle>
-                        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                          <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        </Style>
-                      </DataGridTemplateColumn.HeaderStyle>
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.Shares}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <TextBlock
-                                                        HorizontalAlignment="Right"
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontTabular}"
-                                                        Text="{Binding DisplayQuantityText}" />
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  單價  -->
-                    <DataGridTemplateColumn Width="70">
-                      <DataGridTemplateColumn.HeaderStyle>
-                        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                          <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        </Style>
-                      </DataGridTemplateColumn.HeaderStyle>
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.TradeHistory.UnitPrice}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <TextBlock
-                                                        HorizontalAlignment="Right"
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontTabular}"
-                                                        Text="{Binding Price, Converter={StaticResource CurrencyConverter}, ConverterParameter=price-dash}" />
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  總額（實際現金流動；符號依流入/流出）  -->
-                    <DataGridTemplateColumn Width="*">
-                      <DataGridTemplateColumn.HeaderStyle>
-                        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                          <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        </Style>
-                      </DataGridTemplateColumn.HeaderStyle>
-                      <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
-                      </DataGridTemplateColumn.Header>
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <TextBlock
-                                                        HorizontalAlignment="Right"
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontTabular}"
-                                                        FontWeight="SemiBold"
-                                                        Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}">
-                            <TextBlock.Style>
-                              <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                <Style.Triggers>
-                                  <DataTrigger Binding="{Binding IsAmountPositive}" Value="True">
-                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                  </DataTrigger>
-                                  <DataTrigger Binding="{Binding TotalAmount}" Value="0">
-                                    <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
-                                  </DataTrigger>
-                                </Style.Triggers>
-                              </Style>
-                            </TextBlock.Style>
-                          </TextBlock>
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <!--  編輯  -->
-                    <DataGridTemplateColumn Width="32">
-                      <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                          <Button
-                                                        Width="24"
-                                                        Height="24"
-                                                        Padding="0"
-                                                        HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"
-                                                        Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                        CommandParameter="{Binding}"
-                                                        Style="{StaticResource BtnIcon}">
-                            <TextBlock
-                                                            FontFamily="Segoe MDL2 Assets"
-                                                            FontSize="11"
-                                                            Foreground="{DynamicResource AppTextMuted}"
-                                                            Text="&#xE70F;" />
-                          </Button>
-                        </DataTemplate>
-                      </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                  </DataGrid.Columns>
-                </DataGrid>
-              </Grid>
-            </Grid>
-          </ScrollViewer>
+                                                            Foreground="{DynamicResource AppTextSecondary}"
+                                                            Text="{Binding TradeDateLocal, StringFormat=yyyy/MM/dd}" />
+                                                        <Border
+                                                            Grid.Column="1"
+                                                            Margin="10,0,0,0"
+                                                            Padding="6,2"
+                                                            HorizontalAlignment="Left"
+                                                            VerticalAlignment="Center"
+                                                            Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
+                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextOnAccent}"
+                                                                Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
+                                                        </Border>
+                                                        <Button
+                                                            Grid.Column="2"
+                                                            Width="28"
+                                                            Height="28"
+                                                            Padding="0"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center"
+                                                            Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource BtnIcon}">
+                                                            <TextBlock
+                                                                FontFamily="Segoe MDL2 Assets"
+                                                                FontSize="11"
+                                                                Foreground="{DynamicResource AppTextMuted}"
+                                                                Text="&#xE70F;" />
+                                                        </Button>
+                                                    </Grid>
 
-          <!--  ── Danger zone ──  -->
-          <Border
+                                                    <WrapPanel Margin="0,12,0,0">
+                                                        <Border
+                                                            MinWidth="116"
+                                                            Margin="0,0,10,10"
+                                                            Padding="10,8"
+                                                            Background="{DynamicResource AppBackground}"
+                                                            BorderBrush="{DynamicResource AppBorder}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            <StackPanel>
+                                                                <TextBlock
+                                                                    FontSize="{StaticResource FontSizeXs}"
+                                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                                    Text="{DynamicResource Portfolio.Shares}" />
+                                                                <TextBlock
+                                                                    Margin="0,4,0,0"
+                                                                    FontFamily="{StaticResource FontTabular}"
+                                                                    FontSize="{StaticResource FontSizeSm}"
+                                                                    FontWeight="SemiBold"
+                                                                    Text="{Binding DisplayQuantityText}" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                        <Border
+                                                            MinWidth="116"
+                                                            Margin="0,0,10,10"
+                                                            Padding="10,8"
+                                                            Background="{DynamicResource AppBackground}"
+                                                            BorderBrush="{DynamicResource AppBorder}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            <StackPanel>
+                                                                <TextBlock
+                                                                    FontSize="{StaticResource FontSizeXs}"
+                                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                                    Text="{DynamicResource Portfolio.TradeHistory.UnitPrice}" />
+                                                                <TextBlock
+                                                                    Margin="0,4,0,0"
+                                                                    FontFamily="{StaticResource FontTabular}"
+                                                                    FontSize="{StaticResource FontSizeSm}"
+                                                                    FontWeight="SemiBold"
+                                                                    Text="{Binding Price, Converter={StaticResource CurrencyConverter}, ConverterParameter=price-dash}" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                        <Border
+                                                            MinWidth="140"
+                                                            Margin="0,0,10,10"
+                                                            Padding="10,8"
+                                                            Background="{DynamicResource AppBackground}"
+                                                            BorderBrush="{DynamicResource AppBorder}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            <StackPanel>
+                                                                <TextBlock
+                                                                    FontSize="{StaticResource FontSizeXs}"
+                                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                                    Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
+                                                                <TextBlock
+                                                                    Margin="0,4,0,0"
+                                                                    FontFamily="{StaticResource FontTabular}"
+                                                                    FontSize="{StaticResource FontSizeSm}"
+                                                                    FontWeight="SemiBold"
+                                                                    Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}">
+                                                                    <TextBlock.Style>
+                                                                        <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding IsAmountPositive}" Value="True">
+                                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding TotalAmount}" Value="0">
+                                                                                    <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </WrapPanel>
+
+                                                    <TextBlock
+                                                        Margin="0,2,0,0"
+                                                        FontSize="{StaticResource FontSizeXs}"
+                                                        Foreground="{DynamicResource AppTextMuted}"
+                                                        Text="{Binding Note}"
+                                                        TextWrapping="Wrap"
+                                                        Visibility="{Binding Note, Converter={StaticResource StringToVisibilityConverter}}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </Grid>
+                    </ScrollViewer>
+
+                    <!--  ── Danger zone ──  -->
+                    <Border
                         Grid.Row="3"
                         Margin="20,0,20,16"
                         Padding="14,12"
@@ -1833,33 +1800,33 @@
                         BorderBrush="{DynamicResource AppDown}"
                         BorderThickness="1"
                         CornerRadius="{StaticResource RadiusSm}">
-            <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-              </Grid.ColumnDefinitions>
-              <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                <StackPanel Margin="0,0,0,2" Orientation="Horizontal">
-                  <TextBlock
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <StackPanel Margin="0,0,0,2" Orientation="Horizontal">
+                                    <TextBlock
                                         Margin="0,0,6,0"
                                         VerticalAlignment="Center"
                                         FontFamily="Segoe MDL2 Assets"
                                         FontSize="11"
                                         Foreground="{DynamicResource AppDown}"
                                         Text="&#xE74D;" />
-                  <TextBlock
+                                    <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppDown}"
                                         Text="{DynamicResource Portfolio.Detail.DeleteAsset}" />
-                </StackPanel>
-                <TextBlock
+                                </StackPanel>
+                                <TextBlock
                                     FontSize="{StaticResource FontSizeXs}"
                                     Foreground="{DynamicResource AppTextSecondary}"
                                     Text="{DynamicResource Portfolio.Detail.DeleteWarning}"
                                     TextWrapping="Wrap" />
-              </StackPanel>
-              <Button
+                            </StackPanel>
+                            <Button
                                 Grid.Column="1"
                                 Height="32"
                                 Margin="12,0,0,0"
@@ -1868,28 +1835,34 @@
                                 Command="{Binding RemovePositionCommand}"
                                 CommandParameter="{Binding SelectedPositionRow}"
                                 Style="{StaticResource BtnDanger}">
-                <TextBlock
+                                <TextBlock
                                     FontSize="{StaticResource FontSizeXs}"
                                     Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                     Text="{DynamicResource Portfolio.Detail.DeleteAsset}" />
-              </Button>
-            </Grid>
-          </Border>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
         </Grid>
-      </Border>
-    </Grid>
 
-    <!--  ── Dialog overlays ──  -->
-    <pcontrols:AddRecordDialog Grid.RowSpan="3" Panel.ZIndex="210" DataContext="{Binding Transaction}" />
-    <pcontrols:AddAssetDialog Grid.RowSpan="3" Panel.ZIndex="200" />
-    <pcontrols:EditAssetDialog Grid.RowSpan="3" Panel.ZIndex="205" DataContext="{Binding Account}" />
-    <!--  ── Confirm dialog ──  -->
-    <Grid
+        <!--  ── Dialog overlays ──  -->
+        <pcontrols:AddRecordDialog
+            Grid.RowSpan="3"
+            Panel.ZIndex="210"
+            DataContext="{Binding Transaction}" />
+        <pcontrols:AddAssetDialog Grid.RowSpan="3" Panel.ZIndex="200" />
+        <pcontrols:EditAssetDialog
+            Grid.RowSpan="3"
+            Panel.ZIndex="205"
+            DataContext="{Binding Account}" />
+        <!--  ── Confirm dialog ──  -->
+        <Grid
             Grid.RowSpan="3"
             Panel.ZIndex="220"
             Visibility="{Binding IsConfirmDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-      <Border Background="{DynamicResource AppModalOverlay}" />
-      <Border
+            <Border Background="{DynamicResource AppModalOverlay}" />
+            <Border
                 Width="320"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
@@ -1897,38 +1870,38 @@
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
                 CornerRadius="{StaticResource RadiusMd}">
-        <StackPanel Margin="24,20">
-          <TextBlock
+                <StackPanel Margin="24,20">
+                    <TextBlock
                         Margin="0,0,0,4"
                         FontSize="{StaticResource FontSizeSm}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Portfolio.Confirm.Title}" />
-          <TextBlock
+                    <TextBlock
                         Margin="0,0,0,20"
                         FontSize="{StaticResource FontSizeSm}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{Binding ConfirmDialogMessage}"
                         TextWrapping="Wrap" />
-          <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-            <Button
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <Button
                             Height="30"
                             Margin="0,0,8,0"
                             Padding="14,0"
                             Command="{Binding ConfirmDialogNoCommand}"
                             Style="{StaticResource BtnGhost}">
-              <TextBlock Text="{DynamicResource Common.Cancel}" />
-            </Button>
-            <Button
+                            <TextBlock Text="{DynamicResource Common.Cancel}" />
+                        </Button>
+                        <Button
                             Height="30"
                             Padding="14,0"
                             Command="{Binding ConfirmDialogYesCommand}"
                             Style="{StaticResource BtnDanger}">
-              <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Confirm.Delete}" />
-            </Button>
-          </StackPanel>
-        </StackPanel>
-      </Border>
+                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Confirm.Delete}" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
-  </Grid>
 </UserControl>

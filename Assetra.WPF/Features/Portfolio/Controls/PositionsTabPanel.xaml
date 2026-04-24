@@ -8,6 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:Assetra.Core.Models;assembly=Assetra.Core"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
+    x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
@@ -32,7 +33,7 @@
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="0,0,0,1">
-            <UniformGrid Columns="4">
+            <WrapPanel ItemWidth="250" ItemHeight="Auto">
 
                 <!--  Card 1: 總市值  -->
                 <Border
@@ -197,7 +198,7 @@
                     </StackPanel>
                 </Border>
 
-            </UniformGrid>
+            </WrapPanel>
         </Border>
 
         <!--  ═══ Row 1: Text search ═══  -->
@@ -266,6 +267,164 @@
                 </StackPanel>
             </Border>
 
+            <ListBox
+                Margin="12"
+                Background="Transparent"
+                BorderThickness="0"
+                ItemsSource="{Binding PositionsView}"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                SelectedItem="{Binding SelectedPositionRow, Mode=TwoWay}">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.Style>
+                    <Style TargetType="ListBox">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1180">
+                                        <Binding ElementName="Root" Path="ActualWidth" />
+                                        <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="DataContext.Settings.UiScale" />
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.Style>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            Margin="0,0,0,10"
+                            Padding="14,12"
+                            CornerRadius="{StaticResource RadiusMd}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource AppHover}" />
+                                            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderStrong}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource AppSelection}" />
+                                            <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                                            <Setter Property="BorderThickness" Value="1.5" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="72" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Margin="0,0,10,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{StaticResource FontTabular}"
+                                        FontSize="{StaticResource FontSizeSm}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding Symbol}" />
+
+                                    <Border
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Margin="0,0,10,0"
+                                        Style="{StaticResource PortfolioAssetTypeBadge}">
+                                        <TextBlock
+                                            Style="{StaticResource PortfolioBadgeText}"
+                                            Text="{Binding AssetTypeBadgeLabel}" />
+                                    </Border>
+
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Margin="0,6,0,0"
+                                        FontSize="{StaticResource FontSizeSm}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{Binding Name}"
+                                        TextTrimming="CharacterEllipsis" />
+                                </Grid>
+
+                                <Border
+                                    Margin="0,10,0,0"
+                                    BorderBrush="{DynamicResource AppBorder}"
+                                    BorderThickness="0,1,0,0"
+                                    Opacity="0.7" />
+
+                                <WrapPanel Margin="0,10,0,0" ItemWidth="160">
+                                    <StackPanel Margin="0,0,12,8">
+                                        <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.Shares}" />
+                                        <TextBlock FontFamily="{StaticResource FontTabular}" FontSize="{StaticResource FontSizeSm}" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding QuantityDisplay}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,8">
+                                        <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.CostPerShare}" />
+                                        <TextBlock FontFamily="{StaticResource FontTabular}" FontSize="{StaticResource FontSizeSm}" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding BuyPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,8">
+                                        <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.Price}" />
+                                        <TextBlock FontFamily="{StaticResource FontTabular}" FontSize="{StaticResource FontSizeSm}" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding CurrentPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,8">
+                                        <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Common.TotalPnL}" />
+                                        <TextBlock
+                                            FontFamily="{StaticResource FontTabular}"
+                                            FontSize="{StaticResource FontSizeSm}"
+                                            FontWeight="SemiBold"
+                                            Text="{Binding Pnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsPnlPositive}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Pnl}" Value="0">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,8">
+                                        <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.NetVal}" />
+                                        <TextBlock FontFamily="{StaticResource FontTabular}" FontSize="{StaticResource FontSizeSm}" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding NetValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,8">
+                                        <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.PercentOfPortfolio}" />
+                                        <TextBlock FontFamily="{StaticResource FontTabular}" FontSize="{StaticResource FontSizeSm}" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding PercentOfPortfolio, StringFormat={}{0:F1}%}" />
+                                    </StackPanel>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
             <DataGrid
                 x:Name="PortfolioGrid"
                 AlternationCount="2"
@@ -293,6 +452,22 @@
                 SelectionMode="Single"
                 VirtualizingPanel.IsVirtualizing="True"
                 VirtualizingPanel.VirtualizationMode="Recycling">
+                <DataGrid.Style>
+                    <Style TargetType="DataGrid">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1180">
+                                        <Binding ElementName="Root" Path="ActualWidth" />
+                                        <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="DataContext.Settings.UiScale" />
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Style>
 
                 <DataGrid.ColumnHeaderStyle>
                     <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
@@ -315,67 +490,36 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <!--  Grid 固定欄寬：代號 72 (右對齊) | Badge 38 | 名稱 *  -->
                                 <Grid VerticalAlignment="Center">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="72" />
-                                        <ColumnDefinition Width="38" />
+                                        <ColumnDefinition Width="42" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <!--  Col 0: 代號（右對齊，固定欄寬 → badge 永遠對齊）  -->
                                     <TextBlock
                                         Grid.Column="0"
-                                        Margin="0,0,6,0"
-                                        HorizontalAlignment="Right"
+                                        Margin="0,0,10,0"
                                         VerticalAlignment="Center"
                                         FontFamily="{StaticResource FontTabular}"
                                         FontSize="{StaticResource FontSizeSm}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Symbol}" />
-                                    <!--  Col 1: 類型徽章（固定欄寬，為對齊錨點）  -->
                                     <Border
                                         Grid.Column="1"
-                                        Width="30"
-                                        Height="18"
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Center"
-                                        CornerRadius="{StaticResource RadiusSm}">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="#0062AD" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding AssetType}" Value="{x:Static models:AssetType.Fund}">
-                                                        <Setter Property="Background" Value="#0A7A55" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding AssetType}" Value="{x:Static models:AssetType.PreciousMetal}">
-                                                        <Setter Property="Background" Value="#966300" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding AssetType}" Value="{x:Static models:AssetType.Bond}">
-                                                        <Setter Property="Background" Value="#374151" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding AssetType}" Value="{x:Static models:AssetType.Crypto}">
-                                                        <Setter Property="Background" Value="#5B21B6" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
+                                        Margin="0,0,10,0"
+                                        HorizontalAlignment="Center"
+                                        Style="{StaticResource PortfolioAssetTypeBadge}">
                                         <TextBlock
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            FontSize="10"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextOnAccent}"
+                                            Style="{StaticResource PortfolioBadgeText}"
                                             Text="{Binding AssetTypeBadgeLabel}" />
                                     </Border>
-                                    <!--  Col 2: 名稱  -->
                                     <TextBlock
                                         Grid.Column="2"
-                                        Margin="4,0,0,0"
                                         VerticalAlignment="Center"
                                         FontFamily="{StaticResource FontBase}"
                                         FontSize="{StaticResource FontSizeSm}"
-                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Name}"
                                         TextTrimming="CharacterEllipsis" />
                                 </Grid>
@@ -384,7 +528,7 @@
                     </DataGridTemplateColumn>
 
                     <!--  股數  -->
-                    <DataGridTemplateColumn Width="80" SortMemberPath="Quantity">
+                    <DataGridTemplateColumn Width="150" SortMemberPath="Quantity">
                         <DataGridTemplateColumn.HeaderStyle>
                             <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Right" />
@@ -441,7 +585,7 @@
                     </DataGridTemplateColumn>
 
                     <!--  成本/股（含手續費，可編輯）  -->
-                    <DataGridTemplateColumn Width="90" SortMemberPath="BuyPrice">
+                    <DataGridTemplateColumn Width="120" SortMemberPath="BuyPrice">
                         <DataGridTemplateColumn.HeaderStyle>
                             <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Right" />
@@ -499,7 +643,7 @@
                     </DataGridTemplateColumn>
 
                     <!--  現價（合併今日漲跌% 小字）  -->
-                    <DataGridTemplateColumn Width="110" SortMemberPath="CurrentPrice">
+                    <DataGridTemplateColumn Width="120" SortMemberPath="CurrentPrice">
                         <DataGridTemplateColumn.HeaderStyle>
                             <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Right" />
@@ -568,7 +712,7 @@
                     </DataGridTemplateColumn>
 
                     <!--  淨損益（合併 $ + % 垂直疊合）  -->
-                    <DataGridTemplateColumn Width="110" SortMemberPath="Pnl">
+                    <DataGridTemplateColumn Width="200" SortMemberPath="Pnl">
                         <DataGridTemplateColumn.HeaderStyle>
                             <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Right" />
@@ -639,7 +783,7 @@
                     </DataGridTemplateColumn>
 
                     <!--  淨值（主數字）+ 成本（次級小字，合併原「付出成本」欄）  -->
-                    <DataGridTemplateColumn Width="120" SortMemberPath="NetValue">
+                    <DataGridTemplateColumn Width="200" SortMemberPath="NetValue">
                         <DataGridTemplateColumn.HeaderStyle>
                             <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Right" />
@@ -684,7 +828,7 @@
                     </DataGridTemplateColumn>
 
                     <!--  佔比% — 持倉佔投資組合淨值的比例；小進度條視覺化  -->
-                    <DataGridTemplateColumn Width="80" SortMemberPath="PercentOfPortfolio">
+                    <DataGridTemplateColumn Width="120" SortMemberPath="PercentOfPortfolio">
                         <DataGridTemplateColumn.HeaderStyle>
                             <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Right" />
@@ -720,7 +864,6 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-
                 </DataGrid.Columns>
             </DataGrid>
 

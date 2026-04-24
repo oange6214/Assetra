@@ -487,6 +487,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         var addAssetWorkflow = services.AddAsset ?? new NullAddAssetWorkflowService();
         var accountUpsertWorkflow = services.AccountUpsert ?? new NullAccountUpsertWorkflowService();
         var accountMutationWorkflow = services.AccountMutation ?? new NullAccountMutationWorkflowService();
+        var creditCardMutationWorkflow = services.CreditCardMutation ?? new NullCreditCardMutationWorkflowService();
+        var creditCardTransactionWorkflow = services.CreditCardTransaction ?? new NullCreditCardTransactionWorkflowService();
         var sellWorkflow = services.Sell ?? new NullSellWorkflowService();
         var tradeMetadataWorkflow = services.TradeMetadata ?? new NullTradeMetadataWorkflowService();
         var loanPaymentWorkflow = services.LoanPayment ?? new NullLoanPaymentWorkflowService();
@@ -496,7 +498,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         // the Transaction sub-VM is constructed (delegates reference Transaction properties).
         AddAssetDialog = services.AddAssetDialog ?? new AddAssetDialogViewModel(
             addAssetWorkflow,
-            accountUpsertWorkflow);
+            accountUpsertWorkflow,
+            creditCardMutationWorkflow);
         AddAssetDialog.AssetAdded += OnAssetAdded;
 
         // Build the SellPanel sub-VM and wire delegates for Tx-dialog fields it needs.
@@ -536,6 +539,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 TradeDeletion: _tradeDeletionWorkflowService,
                 TradeMetadata: tradeMetadataWorkflow,
                 LoanMutation: loanMutationWorkflowService,
+                CreditCardTransaction: creditCardTransactionWorkflow,
                 Search: _search,
                 TradeDialogController: _tradeDialogController,
                 AccountUpsert: accountUpsertWorkflow,
@@ -645,14 +649,17 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             AccountUpsert = services.AccountUpsert ?? (repositories.Asset is not null
                 ? new AccountUpsertWorkflowService(repositories.Asset)
                 : null),
-            AccountMutation = services.AccountMutation ?? (repositories.Asset is not null
-                ? new AccountMutationWorkflowService(repositories.Asset)
+            AccountMutation = services.AccountMutation ?? (repositories.Asset is not null && repositories.Trade is not null
+                ? new AccountMutationWorkflowService(repositories.Asset, repositories.Trade)
                 : null),
             LoanPayment = services.LoanPayment ?? (repositories.Trade is not null && repositories.LoanSchedule is not null
                 ? new LoanPaymentWorkflowService(repositories.Trade, repositories.LoanSchedule)
                 : null),
             LoanMutation = services.LoanMutation ?? (repositories.Asset is not null && repositories.LoanSchedule is not null && transactionService is not null
                 ? new LoanMutationWorkflowService(repositories.Asset, repositories.LoanSchedule, transactionService)
+                : null),
+            Sell = services.Sell ?? (repositories.Trade is not null && positionQuery is not null
+                ? new SellWorkflowService(repositories.Trade, repositories.Portfolio, repositories.Log, positionQuery)
                 : null),
             PositionMetadata = services.PositionMetadata ?? new PositionMetadataWorkflowService(repositories.Portfolio),
             TradeMetadata = services.TradeMetadata ?? (repositories.Trade is not null
@@ -1474,6 +1481,20 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         AddAssetDialog.IsAddDialogOpen = true;
     }
 
+    [RelayCommand]
+    private void OpenAddCreditCardDialog()
+    {
+        SelectedTab = PortfolioTab.Liability;
+        AddAssetDialog.AddAssetType = "creditCard";
+        AddAssetDialog.AddError = string.Empty;
+        AddAssetDialog.AddCreditCardName = string.Empty;
+        AddAssetDialog.AddCreditCardIssuer = string.Empty;
+        AddAssetDialog.AddCreditCardBillingDay = string.Empty;
+        AddAssetDialog.AddCreditCardDueDay = string.Empty;
+        AddAssetDialog.AddCreditCardLimit = string.Empty;
+        AddAssetDialog.IsAddDialogOpen = true;
+    }
+
     // ── Supported currencies (static list — referenced from XAML as PortfolioViewModel.SupportedCurrencies) ─
 
     public static IReadOnlyList<CurrencyOption> SupportedCurrencies =>
@@ -1551,16 +1572,16 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private void ApplyLiabilities(PortfolioLoadResult loaded)
     {
         var snapshots = loaded.LiabilitySnapshots;
-        var loanAssets = loaded.LoanAssets;
+        var liabilityAssets = loaded.LiabilityAssets;
 
         Liabilities.Clear();
         foreach (var (label, snap) in snapshots.OrderBy(kv => kv.Key))
         {
-            loanAssets.TryGetValue(label, out var asset);
+            liabilityAssets.TryGetValue(label, out var asset);
             Liabilities.Add(new LiabilityRowViewModel(label, snap, asset));
         }
 
-        foreach (var (name, asset) in loanAssets)
+        foreach (var (name, asset) in liabilityAssets)
         {
             if (!snapshots.ContainsKey(name))
                 Liabilities.Add(new LiabilityRowViewModel(name, LiabilitySnapshot.Empty, asset));
@@ -1652,29 +1673,44 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             ? Trades.Where(t => t.CashAccountId == r.Id &&
                                 (t.Type == TradeType.Withdrawal ||
                                  t.Type == TradeType.Buy ||
-                                 t.Type == TradeType.LoanRepay))
+                                 t.Type == TradeType.LoanRepay ||
+                                 t.Type == TradeType.CreditCardPayment))
                     .Sum(t => Math.Abs(t.CashAmount ?? 0))
             : 0m;
 
     // Liability stats + filtered trades
     public IEnumerable<TradeRowViewModel> SelectedLiabilityTrades =>
         SelectedLiabilityRow is { } r
-            ? Trades.Where(t => (t.Type == TradeType.LoanBorrow || t.Type == TradeType.LoanRepay) &&
-                                t.LoanLabel == r.Label)
+            ? Trades.Where(t => IsTradeForLiability(t, r))
                     .OrderByDescending(t => t.TradeDate)
             : [];
 
     public decimal SelectedLiabilityTotalBorrows =>
         SelectedLiabilityRow is { } r
-            ? Trades.Where(t => t.Type == TradeType.LoanBorrow && t.LoanLabel == r.Label)
+            ? Trades.Where(t =>
+                    (t.Type == TradeType.LoanBorrow && t.LoanLabel == r.Label) ||
+                    (t.Type == TradeType.CreditCardCharge && LiabilityMatches(t, r)))
                     .Sum(t => t.CashAmount ?? 0)
             : 0m;
 
     public decimal SelectedLiabilityTotalRepays =>
         SelectedLiabilityRow is { } r
-            ? Trades.Where(t => t.Type == TradeType.LoanRepay && t.LoanLabel == r.Label)
+            ? Trades.Where(t =>
+                    (t.Type == TradeType.LoanRepay && t.LoanLabel == r.Label) ||
+                    (t.Type == TradeType.CreditCardPayment && LiabilityMatches(t, r)))
                     .Sum(t => t.CashAmount ?? 0)
             : 0m;
+
+    private static bool IsTradeForLiability(TradeRowViewModel trade, LiabilityRowViewModel liability) =>
+        trade.Type switch
+        {
+            TradeType.LoanBorrow or TradeType.LoanRepay => trade.LoanLabel == liability.Label,
+            TradeType.CreditCardCharge or TradeType.CreditCardPayment => LiabilityMatches(trade, liability),
+            _ => false,
+        };
+
+    private static bool LiabilityMatches(TradeRowViewModel trade, LiabilityRowViewModel liability) =>
+        liability.AssetId.HasValue && trade.LiabilityAssetId == liability.AssetId;
 
     // Investment position stats + filtered trades
     public IEnumerable<TradeRowViewModel> SelectedPositionTrades =>
@@ -1868,6 +1904,77 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     {
         public Task<LoanMutationResult> RecordAsync(LoanTransactionRequest request, CancellationToken ct = default) =>
             Task.FromResult(new LoanMutationResult(null, null));
+    }
+
+    private sealed class NullCreditCardMutationWorkflowService : ICreditCardMutationWorkflowService
+    {
+        public Task<CreditCardUpsertResult> CreateAsync(CreateCreditCardRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new CreditCardUpsertResult(
+                new AssetItem(
+                    Guid.NewGuid(),
+                    request.Name,
+                    FinancialType.Liability,
+                    null,
+                    request.Currency,
+                    request.CreatedDate,
+                    LiabilitySubtype: LiabilitySubtype.CreditCard,
+                    BillingDay: request.BillingDay,
+                    DueDay: request.DueDay,
+                    CreditLimit: request.CreditLimit,
+                    IssuerName: request.IssuerName)));
+
+        public Task<CreditCardUpsertResult> UpdateAsync(UpdateCreditCardRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new CreditCardUpsertResult(
+                new AssetItem(
+                    request.CardId,
+                    request.Name,
+                    FinancialType.Liability,
+                    null,
+                    request.Currency,
+                    request.CreatedDate,
+                    LiabilitySubtype: LiabilitySubtype.CreditCard,
+                    BillingDay: request.BillingDay,
+                    DueDay: request.DueDay,
+                    CreditLimit: request.CreditLimit,
+                    IssuerName: request.IssuerName)));
+    }
+
+    private sealed class NullCreditCardTransactionWorkflowService : ICreditCardTransactionWorkflowService
+    {
+        public Task<CreditCardTransactionResult> ChargeAsync(CreditCardChargeRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new CreditCardTransactionResult(
+                new Trade(
+                    Guid.NewGuid(),
+                    string.Empty,
+                    string.Empty,
+                    request.CardName,
+                    TradeType.CreditCardCharge,
+                    request.TradeDate,
+                    request.Amount,
+                    1,
+                    0m,
+                    0m,
+                    request.Amount,
+                    LiabilityAssetId: request.CreditCardAssetId,
+                    Note: request.Note)));
+
+        public Task<CreditCardTransactionResult> PayAsync(CreditCardPaymentRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new CreditCardTransactionResult(
+                new Trade(
+                    Guid.NewGuid(),
+                    string.Empty,
+                    string.Empty,
+                    request.CardName,
+                    TradeType.CreditCardPayment,
+                    request.TradeDate,
+                    request.Amount,
+                    1,
+                    0m,
+                    0m,
+                    request.Amount,
+                    request.CashAccountId,
+                    LiabilityAssetId: request.CreditCardAssetId,
+                    Note: request.Note)));
     }
 
     private sealed class NullPortfolioLoadService : IPortfolioLoadService

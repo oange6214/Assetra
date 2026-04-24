@@ -16,7 +16,7 @@ public partial class PositionsTabPanel : UserControl
     {
         var src = e.OriginalSource as DependencyObject;
 
-        if (WpfUtils.FindAncestor<Button>(src) is not null)
+        if (WpfUtils.IsInsideActionControl(src))
             return;
 
         var clickedRow = WpfUtils.FindAncestor<DataGridRow>(src);

@@ -15,6 +15,7 @@ internal static class AssetSchemaMigrator
     {
         "is_active", "updated_at",
         "loan_annual_rate", "loan_term_months", "loan_start_date", "loan_handling_fee",
+        "liability_subtype", "billing_day", "due_day", "credit_limit", "issuer_name",
     };
 
     private static readonly HashSet<string> AssetAllowedTypeDefs = new(StringComparer.OrdinalIgnoreCase)
@@ -78,6 +79,7 @@ internal static class AssetSchemaMigrator
             EnsureAssetIndexes(conn, tx);
             MigrateLegacyCashAccounts(cmd, conn, tx);
             MigrateLegacyLiabilityAccounts(cmd, conn, tx);
+            BackfillLiabilitySubtype(cmd);
 
             tx.Commit();
         }
@@ -123,6 +125,17 @@ internal static class AssetSchemaMigrator
             "loan_start_date", "TEXT", AssetAllowedColumns, AssetAllowedTypeDefs);
         SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
             "loan_handling_fee", "REAL", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+            "liability_subtype", "TEXT",
+            AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+            "billing_day", "INTEGER", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+            "due_day", "INTEGER", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+            "credit_limit", "REAL", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+            "issuer_name", "TEXT", AssetAllowedColumns, AssetAllowedTypeDefs);
     }
 
     private static void EnsureAssetIndexes(SqliteConnection conn, SqliteTransaction tx)
@@ -160,15 +173,31 @@ internal static class AssetSchemaMigrator
             return;
 
         cmd.CommandText = $"""
-            INSERT OR IGNORE INTO asset (id, name, asset_type, group_id, currency, created_date)
+            INSERT OR IGNORE INTO asset (id, name, asset_type, group_id, currency, created_date, liability_subtype)
             SELECT id, name, 'Liability', '{GrpBankLoan}', COALESCE(currency, 'TWD'),
-                   COALESCE(created_date, date('now'))
+                   COALESCE(created_date, date('now')), 'Loan'
             FROM liability_account;
             """;
         cmd.ExecuteNonQuery();
 
         cmd.CommandText = "DROP TABLE IF EXISTS liability_account;";
         cmd.ExecuteNonQuery();
+    }
+
+    private static void BackfillLiabilitySubtype(SqliteCommand cmd)
+    {
+        cmd.CommandText = """
+            UPDATE asset
+               SET liability_subtype = CASE
+                   WHEN group_id = $credit_card_group THEN 'CreditCard'
+                   ELSE 'Loan'
+               END
+             WHERE asset_type = 'Liability'
+               AND (liability_subtype IS NULL OR liability_subtype = '');
+            """;
+        cmd.Parameters.AddWithValue("$credit_card_group", GrpCreditCard.ToString());
+        cmd.ExecuteNonQuery();
+        cmd.Parameters.Clear();
     }
 
     private static bool TableExists(SqliteConnection conn, SqliteTransaction tx, string table)
