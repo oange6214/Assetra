@@ -32,6 +32,12 @@ public partial class App : System.Windows.Application
         }
         catch (Exception ex)
         {
+            if (await TryRecoverFromStartupFailureAsync().ConfigureAwait(true))
+            {
+                Shutdown(0);
+                return;
+            }
+
             MessageBox.Show(
                 $"應用程式啟動失敗：{ex.Message}",
                 "Assetra",
@@ -78,22 +84,29 @@ public partial class App : System.Windows.Application
         var alertsVm = _host.Services.GetRequiredService<AlertsViewModel>();
         await alertsVm.LoadAsync();
 
+        if (await TryApplyPendingUpdateAsync().ConfigureAwait(true))
+        {
+            splash.Close();
+            Shutdown(0);
+            return;
+        }
+
         // Show main window, close splash
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
         splash.Close();
-
-        _ = CheckForUpdatesAsync();
     }
 
-    private static async Task CheckForUpdatesAsync()
+    private static UpdateManager CreateUpdateManager() =>
+        new(new GithubSource("https://github.com/oange6214/Assetra", null, false));
+
+    private static async Task<bool> TryApplyPendingUpdateAsync()
     {
         try
         {
-            var mgr = new UpdateManager(
-                new GithubSource("https://github.com/oange6214/Assetra", null, false));
+            var mgr = CreateUpdateManager();
             var newVersion = await mgr.CheckForUpdatesAsync();
-            if (newVersion is null) return;
+            if (newVersion is null) return false;
             await mgr.DownloadUpdatesAsync(newVersion);
             var result = MessageBox.Show(
                 $"發現新版本 {newVersion.TargetFullRelease.Version}，已下載完成。立即重新啟動以套用更新？",
@@ -101,9 +114,46 @@ public partial class App : System.Windows.Application
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Information);
             if (result == MessageBoxResult.Yes)
+            {
                 mgr.ApplyUpdatesAndRestart(newVersion);
+                return true;
+            }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "Failed to check for updates during startup");
+        }
+
+        return false;
+    }
+
+    private static async Task<bool> TryRecoverFromStartupFailureAsync()
+    {
+        try
+        {
+            var mgr = CreateUpdateManager();
+            var newVersion = await mgr.CheckForUpdatesAsync();
+            if (newVersion is null) return false;
+
+            await mgr.DownloadUpdatesAsync(newVersion);
+            var result = MessageBox.Show(
+                $"啟動時發生錯誤，但偵測到新版本 {newVersion.TargetFullRelease.Version}。要立即更新並重新啟動嗎？",
+                "Assetra 修復更新",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                mgr.ApplyUpdatesAndRestart(newVersion);
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "Failed to recover from startup failure via update");
+        }
+
+        return false;
     }
 
     protected override void OnExit(ExitEventArgs e)
