@@ -6,7 +6,8 @@
 - `svg/asset-logo-dark.svg` — dark theme app icon source
 - `svg/asset-logo-mark-transparent.svg` — transparent mark source for in-app use
 - `png/` — generated PNG exports from 16px to 1024px
-- `web/favicon.ico` — canonical Windows / web `.ico` bundle used by the WPF app
+- `web/favicon.ico` — web favicon
+- `windows/assetra-app.ico` — canonical Windows app/window `.ico` bundle used by the WPF app
 - `package/` — generated Windows package tile/store logo PNGs
 - `android/` — Android adaptive icon XML example
 
@@ -30,7 +31,7 @@ Dark theme:
   - light theme -> `png/asset-logo-light-128.png`
   - dark theme -> `png/asset-logo-dark-128.png`
 - App / window icon:
-  - `web/favicon.ico`
+  - `windows/assetra-app.ico`
 - Package / tile logos:
   - `package/StoreLogo.png`
   - `package/Square44x44Logo.png`

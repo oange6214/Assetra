@@ -19,7 +19,7 @@
     MinWidth="900"
     MinHeight="600"
     Background="{DynamicResource AppBackground}"
-    Icon="pack://application:,,,/Assetra.WPF;component/Assets/web/favicon.ico"
+    Icon="pack://application:,,,/Assetra.WPF;component/Assets/windows/assetra-app.ico"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 

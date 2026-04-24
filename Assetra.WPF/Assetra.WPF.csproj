@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Assetra.WPF</RootNamespace>
-    <ApplicationIcon>Assets\web\favicon.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\windows\assetra-app.ico</ApplicationIcon>
     <AssemblyTitle>Assetra</AssemblyTitle>
     <Product>Assetra</Product>
   </PropertyGroup>
@@ -44,6 +44,7 @@
   <ItemGroup>
     <Resource Include="Assets\png\*.png" />
     <Resource Include="Assets\web\*.ico" />
+    <Resource Include="Assets\windows\*.ico" />
     <Resource Include="Assets\svg\*.svg" />
   </ItemGroup>
 
