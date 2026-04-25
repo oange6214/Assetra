@@ -8,7 +8,7 @@
 - 交易記錄 + 配息追蹤
 - 價格警示
 
-目前里程碑版本：`v0.4.0`
+目前里程碑版本：`v0.5.5`
 
 ## 架構
 
@@ -23,10 +23,13 @@
 
 相關文件：
 
-- [Architecture](docs/Architecture.md)
-- [Portfolio Module Map](docs/Portfolio-Module-Map.md)
-- [Changelog](docs/CHANGELOG.md)
-- [Fugle API Key Setup](docs/Fugle-API-Key-Setup.md)
+- [Docs Index](docs/INDEX.md)
+- [Architecture](docs/architecture/Architecture.md)
+- [Portfolio Module Map](docs/architecture/Portfolio-Module-Map.md)
+- [Technical Architecture Blueprint](docs/architecture/Technical-Architecture-Blueprint.md)
+- [Feature Blueprint and Roadmap](docs/planning/Assetra-Feature-Blueprint-and-Roadmap.md)
+- [Changelog](docs/releases/CHANGELOG.md)
+- [Fugle API Key Setup](docs/guides/Fugle-API-Key-Setup.md)
 
 ## 建置
 

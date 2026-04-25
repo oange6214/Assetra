@@ -1,0 +1,240 @@
+# Assetra Bounded Contexts
+
+## 一、目的
+
+這份文件用來定義 Assetra 未來可拆分的 bounded contexts，避免新功能全部繼續塞進單一 `Portfolio` 心智模型。
+
+---
+
+## 二、建議的 Context 劃分
+
+## 1. Portfolio Context
+
+### 責任
+- 投資部位
+- 現金帳戶
+- 負債
+- 信用卡
+- 交易記錄
+- 配置分析
+- 再平衡
+
+### 主要模型
+- `Trade`
+- `AssetItem`
+- `PortfolioEntry`
+- `PositionSnapshot`
+- `LiabilitySubtype`
+
+### 主要服務
+- `PortfolioLoadService`
+- `PortfolioSummaryService`
+- `TransactionWorkflowService`
+- `CreditCardTransactionWorkflowService`
+
+---
+
+## 2. Budgeting Context
+
+### 責任
+- 預算分類
+- 月度預算
+- 固定支出
+- 月結
+- 預算差異追蹤
+
+### 主要模型
+- `BudgetCategory`
+- `BudgetPlan`
+- `BudgetPeriod`
+- `RecurringExpenseRule`
+
+### 主要服務
+- `BudgetPlanningService`
+- `BudgetTrackingService`
+- `RecurringTransactionWorkflowService`
+
+### 與 Portfolio 的關係
+- 讀取交易資料做分類與月結
+- 不直接擁有投資部位與負債邏輯
+
+---
+
+## 3. Goals Context
+
+### 責任
+- 財務目標
+- 里程碑
+- 目標進度
+- 資金來源規則
+
+### 主要模型
+- `FinancialGoal`
+- `GoalMilestone`
+- `GoalFundingRule`
+
+### 主要服務
+- `GoalPlanningService`
+- `GoalProgressQueryService`
+- `GoalFundingWorkflowService`
+
+---
+
+## 4. Analysis Context
+
+### 責任
+- 淨資產趨勢
+- 投資績效
+- 風險分析
+- 報表計算
+
+### 主要模型
+- `NetWorthSnapshot`
+- `PerformanceSnapshot`
+- `RiskMetrics`
+- `TaxSummary`
+
+### 主要服務
+- `NetWorthTrendQueryService`
+- `PerformanceAnalysisService`
+- `RiskAnalysisService`
+- `TaxSummaryService`
+
+### 原則
+- 主要提供計算與 projection
+- 不直接處理 UI 或資料庫細節
+
+---
+
+## 5. Importing Context
+
+### 責任
+- 檔案匯入
+- 欄位映射
+- 去重
+- 衝突確認
+- 對帳
+
+### 主要模型
+- `ImportBatch`
+- `ImportRule`
+- `ImportPreviewItem`
+- `ImportConflict`
+
+### 主要服務
+- `ImportPreviewService`
+- `ImportMappingService`
+- `ImportDeduplicationService`
+- `ImportCommitWorkflowService`
+- `ReconciliationService`
+
+---
+
+## 6. Reporting Context
+
+### 責任
+- 財務報表
+- PDF / CSV 匯出
+- 圖表輸出
+
+### 主要模型
+- `ReportPeriod`
+- `ReportSection`
+- `StatementRow`
+- `ExportFormat`
+
+### 主要服務
+- `IncomeStatementService`
+- `BalanceSheetService`
+- `CashFlowStatementService`
+- `ReportExportService`
+
+---
+
+## 7. Platform Context
+
+### 責任
+- 設定
+- 更新
+- 備份還原
+- 同步
+- 通知
+- 品牌資產與應用程式層設定
+
+### 主要模型
+- `AppSettings`
+- `SyncMetadata`
+- `BackupManifest`
+
+### 主要服務
+- `AppSettingsService`
+- `UpdateService`
+- `BackupService`
+- `SyncService`
+- `NotificationService`
+
+---
+
+## 三、Context 關係
+
+```text
+Portfolio ----> Analysis
+Portfolio ----> Reporting
+Portfolio ----> Budgeting
+Portfolio ----> Goals
+Importing ----> Portfolio
+Importing ----> Budgeting
+Platform  ----> all
+```
+
+### 說明
+- `Portfolio` 是目前主核心
+- `Analysis` 依賴 Portfolio 的資料做計算
+- `Reporting` 依賴 Portfolio 與 Analysis 的結果
+- `Budgeting` 依賴交易資料，但不是 Portfolio 的子畫面而已
+- `Goals` 依賴帳戶、投資、預算資料做進度追蹤
+- `Importing` 是進資料的入口，不應直接寫進 UI 狀態
+
+---
+
+## 四、實作建議
+
+### 短期
+- 維持 monolith 專案結構
+- 先在 `Application` 層按 context 分資料夾
+- 先建立 service / DTO / workflow 邊界
+
+### 中期
+- 將 repository / service / docs / tests 按 context 分組
+- 明確建立 context 對應的測試集
+
+### 長期
+- 若功能繼續成長，可考慮拆成多專案：
+  - `Assetra.Budgeting`
+  - `Assetra.Analysis`
+  - `Assetra.Reporting`
+
+---
+
+## 五、原則
+
+1. 新功能先決定屬於哪個 context，再開始寫
+2. 不要讓 `PortfolioViewModel` 繼續吸收所有新需求
+3. 分析、報表、匯入都應是獨立 context，不是工具類別集合
+4. `Platform` 只負責應用程式層能力，不承擔財務業務邏輯
+
+---
+
+## 六、總結
+
+Assetra 未來最值得的演進方向，不是只持續往 `Portfolio` 疊功能，而是逐步形成：
+
+- `Portfolio`
+- `Budgeting`
+- `Goals`
+- `Analysis`
+- `Importing`
+- `Reporting`
+- `Platform`
+
+這樣才能在功能變多時，仍然保持結構穩定、測試清楚、UI 不失控。
