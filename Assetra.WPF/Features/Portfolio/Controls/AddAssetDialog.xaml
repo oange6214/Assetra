@@ -111,16 +111,25 @@
                     VerticalScrollBarVisibility="Auto">
                     <Grid>
                         <assetSections:AccountCreateSection
-                            DataContext="{Binding AddAssetDialog}"
-                            Visibility="{Binding AddAssetDialog.AddTypeIsAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            DataContext="{Binding AddAssetDialog}">
+                            <assetSections:AccountCreateSection.Visibility>
+                                <Binding ElementName="Root" Path="DataContext.AddAssetDialog.AddTypeIsAccount" Converter="{StaticResource BooleanToVisibilityConverter}" />
+                            </assetSections:AccountCreateSection.Visibility>
+                        </assetSections:AccountCreateSection>
 
                         <assetSections:LoanCreateSection
-                            DataContext="{Binding AddAssetDialog}"
-                            Visibility="{Binding AddAssetDialog.AddTypeIsLoan, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            DataContext="{Binding AddAssetDialog}">
+                            <assetSections:LoanCreateSection.Visibility>
+                                <Binding ElementName="Root" Path="DataContext.AddAssetDialog.AddTypeIsLoan" Converter="{StaticResource BooleanToVisibilityConverter}" />
+                            </assetSections:LoanCreateSection.Visibility>
+                        </assetSections:LoanCreateSection>
 
                         <assetSections:CreditCardCreateSection
-                            DataContext="{Binding AddAssetDialog}"
-                            Visibility="{Binding AddAssetDialog.AddTypeIsCreditCard, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            DataContext="{Binding AddAssetDialog}">
+                            <assetSections:CreditCardCreateSection.Visibility>
+                                <Binding ElementName="Root" Path="DataContext.AddAssetDialog.AddTypeIsCreditCard" Converter="{StaticResource BooleanToVisibilityConverter}" />
+                            </assetSections:CreditCardCreateSection.Visibility>
+                        </assetSections:CreditCardCreateSection>
                     </Grid>
                 </ScrollViewer>
 

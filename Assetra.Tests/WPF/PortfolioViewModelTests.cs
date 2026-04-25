@@ -568,7 +568,8 @@ public class PortfolioViewModelTests
             new PortfolioUiServices(ImmediateScheduler.Instance));
         await vm.LoadAsync();
 
-        vm.OpenAddCreditCardDialogCommand.Execute(null);
+        vm.OpenAddLiabilityDialogCommand.Execute(null);
+        vm.AddAssetDialog.AddAssetType = "creditCard";
         vm.AddAssetDialog.AddCreditCardName = "富邦 J 卡";
         vm.AddAssetDialog.AddCreditCardIssuer = "Fubon";
         vm.AddAssetDialog.AddCreditCardBillingDay = "5";

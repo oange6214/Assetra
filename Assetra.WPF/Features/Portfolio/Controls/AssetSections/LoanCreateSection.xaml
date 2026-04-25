@@ -183,10 +183,10 @@
                         Background="{DynamicResource AppAccentSoft}"
                         BorderBrush="{DynamicResource AppAccent}"
                         BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusPill}"
+                        CornerRadius="{StaticResource RadiusLg}"
                         DockPanel.Dock="Right">
                         <TextBlock
-                            FontSize="{StaticResource FontSize2Xs}"
+                            FontSize="{StaticResource FontSizeXs}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppAccentText}"
                             Text="{DynamicResource Portfolio.AssetDialog.Required}" />
