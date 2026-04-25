@@ -196,6 +196,10 @@ internal static class ServiceCollectionExtensions
             new AccountMutationWorkflowService(
                 sp.GetRequiredService<IAssetRepository>(),
                 sp.GetRequiredService<ITradeRepository>()));
+        services.AddSingleton<ILiabilityMutationWorkflowService>(sp =>
+            new LiabilityMutationWorkflowService(
+                sp.GetRequiredService<IAssetRepository>(),
+                sp.GetRequiredService<ITradeRepository>()));
         services.AddSingleton<IAccountUpsertWorkflowService>(sp =>
             new AccountUpsertWorkflowService(
                 sp.GetRequiredService<IAssetRepository>()));
@@ -249,6 +253,7 @@ internal static class ServiceCollectionExtensions
                 PositionQuery: sp.GetRequiredService<IPositionQueryService>(),
                 TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>(),
                 AccountMutation: sp.GetRequiredService<IAccountMutationWorkflowService>(),
+                LiabilityMutation: sp.GetRequiredService<ILiabilityMutationWorkflowService>(),
                 CreditCardMutation: sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
                 CreditCardTransaction: sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
                 CategoryRepository: sp.GetRequiredService<ICategoryRepository>(),

@@ -270,17 +270,17 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
+                    <ControlTemplate.Resources>
+                        <!--  Override implicit TextBlock style so string content uses the button's Foreground  -->
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+                        </Style>
+                    </ControlTemplate.Resources>
                     <Border
                         Padding="{TemplateBinding Padding}"
                         Background="{TemplateBinding Background}"
                         CornerRadius="{StaticResource RadiusSm}"
                         TextElement.Foreground="{TemplateBinding Foreground}">
-                        <Border.Resources>
-                            <!--  Override WPF-UI implicit TextBlock style so string content inherits the button Foreground  -->
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
-                            </Style>
-                        </Border.Resources>
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -422,16 +422,16 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
+                    <ControlTemplate.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+                        </Style>
+                    </ControlTemplate.Resources>
                     <Border
                         Padding="{TemplateBinding Padding}"
                         Background="{TemplateBinding Background}"
                         CornerRadius="{StaticResource RadiusSm}"
                         TextElement.Foreground="{TemplateBinding Foreground}">
-                        <Border.Resources>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
-                            </Style>
-                        </Border.Resources>
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -1440,32 +1440,38 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
+                    <ControlTemplate.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{Binding (TextElement.Foreground), RelativeSource={RelativeSource AncestorType=Border}}" />
+                        </Style>
+                    </ControlTemplate.Resources>
                     <Border
                         x:Name="Bd"
                         Padding="{TemplateBinding Padding}"
                         Background="{TemplateBinding Background}"
                         BorderBrush="Transparent"
                         BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}">
+                        CornerRadius="{StaticResource RadiusSm}"
+                        TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource AppAccent}" />
-                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppAccent}" />
+                            <Setter TargetName="Bd" Property="TextElement.Foreground" Value="{DynamicResource AppTextOnAccent}" />
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource AppHover}" />
-                            <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHover}" />
+                            <Setter TargetName="Bd" Property="TextElement.Foreground" Value="{DynamicResource AppTextPrimary}" />
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsChecked" Value="True" />
                                 <Condition Property="IsMouseOver" Value="True" />
                             </MultiTrigger.Conditions>
-                            <Setter Property="Background" Value="{DynamicResource AppAccent}" />
-                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppAccent}" />
+                            <Setter TargetName="Bd" Property="TextElement.Foreground" Value="{DynamicResource AppTextOnAccent}" />
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
                         </MultiTrigger>
                         <!--  Keyboard focus ring  -->

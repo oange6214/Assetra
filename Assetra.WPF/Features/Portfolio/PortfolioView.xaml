@@ -554,6 +554,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <Border
@@ -1079,6 +1080,58 @@
 
                         </Grid>
                     </ScrollViewer>
+
+                    <!--  Danger zone  -->
+                    <Border
+                        Grid.Row="3"
+                        Margin="16,0,16,16"
+                        Padding="14,12"
+                        Background="{DynamicResource AppBackground}"
+                        BorderBrush="{DynamicResource AppDown}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource RadiusSm}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <StackPanel Margin="0,0,0,2" Orientation="Horizontal">
+                                    <TextBlock
+                                        Margin="0,0,6,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Segoe MDL2 Assets"
+                                        FontSize="11"
+                                        Foreground="{DynamicResource AppDown}"
+                                        Text="&#xE74D;" />
+                                    <TextBlock
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppDown}"
+                                        Text="{DynamicResource Portfolio.Detail.DeleteLiability}" />
+                                </StackPanel>
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{DynamicResource Portfolio.Detail.DeleteWarning}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Button
+                                Grid.Column="1"
+                                Height="32"
+                                Margin="12,0,0,0"
+                                Padding="14,0"
+                                VerticalAlignment="Center"
+                                Command="{Binding RemoveLiabilityCommand}"
+                                CommandParameter="{Binding SelectedLiabilityRow}"
+                                Style="{StaticResource BtnDanger}">
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                    Text="{DynamicResource Portfolio.Detail.DeleteLiability}" />
+                            </Button>
+                        </Grid>
+                    </Border>
 
                 </Grid>
             </Border>

@@ -157,6 +157,7 @@
     <sys:String x:Key="Portfolio.AssetDialog.LoanBorrowRecordHint">這筆借款會和貸款本身一起建立，用來決定起始負債金額。</sys:String>
     <sys:String x:Key="Portfolio.AssetDialog.Required">必填</sys:String>
     <sys:String x:Key="Portfolio.AssetDialog.CreditCardInfoHint">先建立信用卡本身，再決定是否補上目前未繳金額。</sys:String>
+    <sys:String x:Key="Portfolio.AssetDialog.Advanced">進階設定</sys:String>
     <sys:String x:Key="Portfolio.CreditCard.Title">新增負債</sys:String>
     <sys:String x:Key="Portfolio.Liability.Title">新增負債</sys:String>
     <sys:String x:Key="Portfolio.CreditCard.Name">信用卡名稱</sys:String>
@@ -273,6 +274,10 @@
     <sys:String x:Key="Portfolio.Dialog.TypeLiability">負債</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeCreditCard">信用卡</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeLoan">貸款</sys:String>
+    <sys:String x:Key="Portfolio.Liability.PickType.Heading">選擇負債類型</sys:String>
+    <sys:String x:Key="Portfolio.Liability.PickType.LoanDesc">銀行或個人借款，含本息攤還表</sys:String>
+    <sys:String x:Key="Portfolio.Liability.PickType.CreditCardDesc">信用卡，可記帳單日與信用額度</sys:String>
+    <sys:String x:Key="Common.Back">返回</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddName">名稱</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddCost">持有成本</sys:String>
     <sys:String x:Key="Portfolio.Dialog.CryptoSymbol">幣種代號（如 BTC、ETH）</sys:String>

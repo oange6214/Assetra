@@ -321,20 +321,19 @@
                 Padding="32"
                 Background="{DynamicResource AppBackground}"
                 Visibility="{Binding HasNoLiabilities, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Opacity="0.4">
-                    <TextBlock
-                        Margin="0,0,0,6"
-                        HorizontalAlignment="Center"
-                        FontSize="{StaticResource FontSize2xl}"
-                        Text="&#x1F4C4;" />
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        FontSize="{StaticResource FontSizeSm}"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Portfolio.Liability.Empty}" />
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel HorizontalAlignment="Center" Opacity="0.4">
+                        <TextBlock
+                            Margin="0,0,0,6"
+                            HorizontalAlignment="Center"
+                            FontSize="{StaticResource FontSize2xl}"
+                            Text="&#x1F4C4;" />
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            FontSize="{StaticResource FontSizeSm}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Liability.Empty}" />
+                    </StackPanel>
                     <Button
                         Height="34"
                         Margin="0,16,0,0"

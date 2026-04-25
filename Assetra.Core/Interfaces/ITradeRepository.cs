@@ -29,4 +29,10 @@ public interface ITradeRepository
 
     /// <summary>刪除所有引用指定帳戶（cash_account_id 或 to_cash_account_id）的交易記錄。</summary>
     Task RemoveByAccountIdAsync(Guid accountId, CancellationToken ct = default);
+
+    /// <summary>
+    /// 刪除所有引用指定負債的交易記錄。信用卡走 <c>liability_asset_id</c>，貸款走 <c>loan_label</c>。
+    /// 至少要提供其中一個；兩個皆有時 OR 條件套用。
+    /// </summary>
+    Task RemoveByLiabilityAsync(Guid? liabilityAssetId, string? loanLabel, CancellationToken ct = default);
 }

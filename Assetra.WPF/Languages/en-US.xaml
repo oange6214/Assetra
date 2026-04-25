@@ -156,6 +156,7 @@
     <sys:String x:Key="Portfolio.AssetDialog.LoanBorrowRecordHint">This opening borrow is created together with the loan and sets the starting liability balance.</sys:String>
     <sys:String x:Key="Portfolio.AssetDialog.Required">Required</sys:String>
     <sys:String x:Key="Portfolio.AssetDialog.CreditCardInfoHint">Create the card first, then decide whether to add the current outstanding balance.</sys:String>
+    <sys:String x:Key="Portfolio.AssetDialog.Advanced">Advanced settings</sys:String>
     <sys:String x:Key="Portfolio.CreditCard.Title">Add Liability</sys:String>
     <sys:String x:Key="Portfolio.Liability.Title">Add Liability</sys:String>
     <sys:String x:Key="Portfolio.CreditCard.Name">Card name</sys:String>
@@ -272,6 +273,10 @@
     <sys:String x:Key="Portfolio.Dialog.TypeLiability">Liability</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeCreditCard">Credit Card</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeLoan">Loan</sys:String>
+    <sys:String x:Key="Portfolio.Liability.PickType.Heading">Choose liability type</sys:String>
+    <sys:String x:Key="Portfolio.Liability.PickType.LoanDesc">Bank or personal loan with amortization schedule</sys:String>
+    <sys:String x:Key="Portfolio.Liability.PickType.CreditCardDesc">Credit card with billing day and limit tracking</sys:String>
+    <sys:String x:Key="Common.Back">Back</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddName">Name</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddCost">Purchase Cost</sys:String>
     <sys:String x:Key="Portfolio.Dialog.CryptoSymbol">Symbol (e.g. BTC, ETH)</sys:String>

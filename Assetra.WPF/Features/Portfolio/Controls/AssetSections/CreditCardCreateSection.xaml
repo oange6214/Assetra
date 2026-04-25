@@ -42,7 +42,16 @@
             Style="{StaticResource FormTextBox}"
             Text="{Binding AddCreditCardIssuer, UpdateSourceTrigger=PropertyChanged}" />
 
-        <Grid Margin="0,0,0,10">
+        <Expander Margin="0,0,0,10" IsExpanded="False">
+            <Expander.Header>
+                <TextBlock
+                    FontSize="{StaticResource FontSizeXs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Portfolio.AssetDialog.Advanced}" />
+            </Expander.Header>
+            <StackPanel Margin="0,8,0,0">
+                <Grid Margin="0,0,0,10">
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Setter Property="Visibility" Value="Visible" />
@@ -136,6 +145,8 @@
             Margin="0,0,0,8"
             Style="{StaticResource FormTextBox}"
             Text="{Binding AddCreditCardLimit, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </Expander>
 
         <TextBlock
             Margin="0,0,0,12"

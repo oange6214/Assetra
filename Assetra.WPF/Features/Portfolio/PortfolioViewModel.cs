@@ -47,6 +47,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly PortfolioSellPanelController _sellPanelController = new();
     private readonly PortfolioTradeDialogController _tradeDialogController = new();
     private readonly IPositionDeletionWorkflowService _positionDeletionWorkflowService;
+    private readonly ILiabilityMutationWorkflowService _liabilityMutationWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly IPortfolioHistoryMaintenanceService _historyMaintenanceService;
     private readonly ILocalizationService? _localization;
@@ -468,6 +469,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _transactionWorkflowService = services.TransactionWorkflow ?? new NullTransactionWorkflowService();
         _tradeDeletionWorkflowService = services.TradeDeletionWorkflow ?? new NullTradeDeletionWorkflowService();
         _positionDeletionWorkflowService = services.PositionDeletionWorkflow ?? new NullPositionDeletionWorkflowService();
+        _liabilityMutationWorkflowService = services.LiabilityMutation ?? new NullLiabilityMutationWorkflowService();
         var positionMetadataWorkflowService = services.PositionMetadata ?? new NullPositionMetadataWorkflowService();
         var loanMutationWorkflowService = services.LoanMutation ?? new NullLoanMutationWorkflowService();
         _summaryService = services.Summary;
@@ -1483,6 +1485,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         SelectedTab = PortfolioTab.Accounts;
         AddAssetDialog.AddDialogMode = "account";
         AddAssetDialog.AddAssetType = "cash";
+        AddAssetDialog.IsTypePickerStep = false;
         AddAssetDialog.AddError = string.Empty;
         AddAssetDialog.AddAccountName = string.Empty;
         AddAssetDialog.AddInitialDepositEnabled = false;
@@ -1497,7 +1500,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     {
         SelectedTab = PortfolioTab.Liability;
         AddAssetDialog.AddDialogMode = "liability";
-        AddAssetDialog.AddAssetType = "loan";
+        AddAssetDialog.IsTypePickerStep = true;
         AddAssetDialog.AddError = string.Empty;
         AddAssetDialog.AddLoanName = string.Empty;
         AddAssetDialog.AddLoanAmount = string.Empty;
@@ -1814,6 +1817,31 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         });
     }
 
+    /// <summary>
+    /// Permanently removes a liability (loan / credit card) and cascades all
+    /// referencing trade rows (loan_label match for loans, liability_asset_id for credit cards).
+    /// </summary>
+    [RelayCommand]
+    private void RemoveLiability(LiabilityRowViewModel row)
+    {
+        if (row is null)
+            return;
+        var msg = L("Portfolio.Detail.DeleteWarning", "刪除後無法復原，請確認不再需要後再操作。");
+        AskConfirm(msg, async () =>
+        {
+            await _liabilityMutationWorkflowService.DeleteAsync(
+                new LiabilityDeletionRequest(row.AssetId, row.Label));
+
+            Liabilities.Remove(row);
+            if (ReferenceEquals(SelectedLiabilityRow, row))
+                SelectedLiabilityRow = null;
+            RebuildTotals();
+
+            await LoadTradesAsync();
+            await ReloadAccountBalancesAsync();
+        });
+    }
+
     [RelayCommand]
     private void SwitchDetailTab(string tab) => DetailTab = tab;
 
@@ -1884,6 +1912,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
         public Task<AccountDeletionResult> DeleteAsync(Guid accountId, CancellationToken ct = default) =>
             Task.FromResult(new AccountDeletionResult(false));
+    }
+
+    private sealed class NullLiabilityMutationWorkflowService : ILiabilityMutationWorkflowService
+    {
+        public Task<LiabilityDeletionResult> DeleteAsync(LiabilityDeletionRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new LiabilityDeletionResult(false));
     }
 
     private sealed class NullAccountUpsertWorkflowService : IAccountUpsertWorkflowService
