@@ -293,6 +293,13 @@
     <sys:String x:Key="Portfolio.Record.Summary.Target">對象</sys:String>
     <sys:String x:Key="Portfolio.Record.Summary.Amount">金額 / 單價</sys:String>
     <sys:String x:Key="Portfolio.Record.Summary.Quantity">數量</sys:String>
+    <sys:String x:Key="Portfolio.Record.Section.Basic">基本資訊</sys:String>
+    <sys:String x:Key="Portfolio.Record.Section.BasicHint">先選日期與類型。</sys:String>
+    <sys:String x:Key="Portfolio.Record.Section.Details">紀錄內容</sys:String>
+    <sys:String x:Key="Portfolio.Record.Section.DetailsHint">依所選類型填寫主要內容。</sys:String>
+    <sys:String x:Key="Portfolio.Record.Group.Investment">投資與收益</sys:String>
+    <sys:String x:Key="Portfolio.Record.Group.Cash">現金流動</sys:String>
+    <sys:String x:Key="Portfolio.Record.Group.Liability">借貸與信用</sys:String>
     <sys:String x:Key="Portfolio.Tx.Income">收入</sys:String>
     <sys:String x:Key="Portfolio.Tx.CashDiv">現金股利</sys:String>
     <sys:String x:Key="Portfolio.Tx.StockDiv">股票股利</sys:String>

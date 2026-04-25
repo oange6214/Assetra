@@ -264,130 +264,251 @@
                                 TextWrapping="Wrap" />
             </Border>
 
-            <!--  Type selector (10 types: Buy/Sell + 8 existing)  -->
-            <WrapPanel Margin="0,0,0,12" Visibility="{Binding IsEditMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-              <RadioButton
-                                Content="{DynamicResource Portfolio.Tx.Buy}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=buy, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-              <RadioButton
-                                Content="{DynamicResource Portfolio.Tx.Sell}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=sell, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-              <RadioButton
-                                Content="{DynamicResource Portfolio.Tx.Income}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=income, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-              <RadioButton
-                                Content="{DynamicResource Portfolio.Tx.CashDiv}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=cashDiv, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-              <RadioButton
-                                Content="{DynamicResource Portfolio.Tx.StockDiv}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=stockDiv, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-              <RadioButton
-                                Content="{DynamicResource Portfolio.TradeType.Deposit}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=deposit, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-              <RadioButton
-                                Content="{DynamicResource Portfolio.TradeType.Withdrawal}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=withdrawal, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-              <RadioButton
-                                Content="{DynamicResource Portfolio.TradeType.Transfer}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=transfer, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-              <RadioButton
-                                Content="{DynamicResource Portfolio.TradeType.LoanBorrow}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=loanBorrow, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-              <RadioButton
-                                Content="{DynamicResource Portfolio.TradeType.LoanRepay}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=loanRepay, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-              <RadioButton
-                                Content="{DynamicResource Portfolio.TradeType.CreditCardCharge}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=creditCardCharge, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-              <RadioButton
-                                Content="{DynamicResource Portfolio.TradeType.CreditCardPayment}"
-                                GroupName="TxType"
-                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=creditCardPayment, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-            </WrapPanel>
-
             <StackPanel Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-              <!--  日期（共用）  -->
-              <TextBlock
-                                Margin="0,0,0,4"
-                                FontSize="{StaticResource FontSizeXs}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{DynamicResource Portfolio.Tx.Date}" />
-              <controls:FormDatePicker
+              <Border
                                 Margin="0,0,0,12"
-                                DisplayDateEnd="{x:Static system:DateTime.Today}"
-                                SelectedDate="{Binding TxDate, Mode=TwoWay}"
-                                ShowTime="True" />
+                                Padding="14,12"
+                                Background="{DynamicResource AppBackground}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSm}">
+                <DockPanel LastChildFill="True">
+                  <TextBlock
+                                        DockPanel.Dock="Top"
+                                        FontSize="{StaticResource FontSizeSm}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{DynamicResource Portfolio.Record.Section.Basic}" />
+                  <TextBlock
+                                        DockPanel.Dock="Top"
+                                        Margin="0,4,0,12"
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{DynamicResource Portfolio.Record.Section.BasicHint}"
+                                        TextWrapping="Wrap"
+                                        Visibility="{Binding IsEditMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                  <Border
+                                        DockPanel.Dock="Left"
+                                        Width="172"
+                                        Margin="0,0,12,0"
+                                        Padding="0"
+                                        Background="Transparent">
+                    <StackPanel>
+                    <TextBlock
+                                            Margin="0,0,0,4"
+                                            FontSize="{StaticResource FontSizeXs}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{DynamicResource Portfolio.Tx.Date}" />
+                    <controls:FormDatePicker
+                                            DisplayDateEnd="{x:Static system:DateTime.Today}"
+                                            SelectedDate="{Binding TxDate, Mode=TwoWay}"
+                                            ShowTime="True" />
+                    </StackPanel>
+                  </Border>
 
-              <StackPanel Visibility="{Binding IsEditMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                <!--  ======== 買入欄位 ========  -->
-                <txforms:BuyTxForm />
+                  <StackPanel
+                                        Visibility="{Binding IsEditMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <TextBlock
+                                            Margin="0,0,0,4"
+                                            FontSize="{StaticResource FontSizeXs}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{DynamicResource Portfolio.TradeHistory.Type}" />
+                    <Border
+                                                Padding="10"
+                                                Background="{DynamicResource AppSurface}"
+                                                BorderBrush="{DynamicResource AppBorder}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource RadiusSm}">
+                      <StackPanel>
+                        <Border
+                                                    Padding="8"
+                                                    Background="Transparent"
+                                                    BorderBrush="{DynamicResource AppBorder}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="{StaticResource RadiusSm}">
+                          <StackPanel>
+                            <TextBlock
+                                                    FontSize="{StaticResource FontSizeXs}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Text="{DynamicResource Portfolio.Record.Group.Investment}" />
+                            <WrapPanel Margin="0,6,0,0">
+                              <RadioButton
+                                                        Content="{DynamicResource Portfolio.Tx.Buy}"
+                                                        GroupName="TxType"
+                                                        IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=buy, Mode=TwoWay}"
+                                                        Style="{StaticResource SegmentBtn}" />
+                              <RadioButton
+                                                        Content="{DynamicResource Portfolio.Tx.Sell}"
+                                                        GroupName="TxType"
+                                                        IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=sell, Mode=TwoWay}"
+                                                        Style="{StaticResource SegmentBtn}" />
+                              <RadioButton
+                                                        Content="{DynamicResource Portfolio.Tx.Income}"
+                                                        GroupName="TxType"
+                                                        IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=income, Mode=TwoWay}"
+                                                        Style="{StaticResource SegmentBtn}" />
+                              <RadioButton
+                                                        Content="{DynamicResource Portfolio.Tx.CashDiv}"
+                                                        GroupName="TxType"
+                                                        IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=cashDiv, Mode=TwoWay}"
+                                                        Style="{StaticResource SegmentBtn}" />
+                              <RadioButton
+                                                        Content="{DynamicResource Portfolio.Tx.StockDiv}"
+                                                        GroupName="TxType"
+                                                        IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=stockDiv, Mode=TwoWay}"
+                                                        Style="{StaticResource SegmentBtn}" />
+                            </WrapPanel>
+                          </StackPanel>
+                        </Border>
 
-                <!--  ======== 賣出欄位 ========  -->
-                <txforms:SellTxForm />
+                        <Border
+                                                    Margin="0,6,0,0"
+                                                    Padding="8"
+                                                    Background="Transparent"
+                                                    BorderBrush="{DynamicResource AppBorder}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="{StaticResource RadiusSm}">
+                          <StackPanel>
+                            <TextBlock
+                                                    FontSize="{StaticResource FontSizeXs}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Text="{DynamicResource Portfolio.Record.Group.Cash}" />
+                            <WrapPanel Margin="0,6,0,0">
+                              <RadioButton
+                                                        Content="{DynamicResource Portfolio.TradeType.Deposit}"
+                                                        GroupName="TxType"
+                                                        IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=deposit, Mode=TwoWay}"
+                                                        Style="{StaticResource SegmentBtn}" />
+                              <RadioButton
+                                                        Content="{DynamicResource Portfolio.TradeType.Withdrawal}"
+                                                        GroupName="TxType"
+                                                        IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=withdrawal, Mode=TwoWay}"
+                                                        Style="{StaticResource SegmentBtn}" />
+                              <RadioButton
+                                                        Content="{DynamicResource Portfolio.TradeType.Transfer}"
+                                                        GroupName="TxType"
+                                                        IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=transfer, Mode=TwoWay}"
+                                                        Style="{StaticResource SegmentBtn}" />
+                            </WrapPanel>
+                          </StackPanel>
+                        </Border>
 
-                <!--  ======== 收入欄位 ========  -->
-                <txforms:IncomeTxForm />
+                        <Border
+                                                    Margin="0,6,0,0"
+                                                    Padding="8"
+                                                    Background="Transparent"
+                                                    BorderBrush="{DynamicResource AppBorder}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="{StaticResource RadiusSm}">
+                          <StackPanel>
+                            <TextBlock
+                                                    FontSize="{StaticResource FontSizeXs}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Text="{DynamicResource Portfolio.Record.Group.Liability}" />
+                            <WrapPanel Margin="0,6,0,0">
+                              <RadioButton
+                                                        Content="{DynamicResource Portfolio.TradeType.LoanBorrow}"
+                                                        GroupName="TxType"
+                                                        IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=loanBorrow, Mode=TwoWay}"
+                                                        Style="{StaticResource SegmentBtn}" />
+                              <RadioButton
+                                                        Content="{DynamicResource Portfolio.TradeType.LoanRepay}"
+                                                        GroupName="TxType"
+                                                        IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=loanRepay, Mode=TwoWay}"
+                                                        Style="{StaticResource SegmentBtn}" />
+                              <RadioButton
+                                                        Content="{DynamicResource Portfolio.TradeType.CreditCardCharge}"
+                                                        GroupName="TxType"
+                                                        IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=creditCardCharge, Mode=TwoWay}"
+                                                        Style="{StaticResource SegmentBtn}" />
+                              <RadioButton
+                                                        Content="{DynamicResource Portfolio.TradeType.CreditCardPayment}"
+                                                        GroupName="TxType"
+                                                        IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=creditCardPayment, Mode=TwoWay}"
+                                                        Style="{StaticResource SegmentBtn}" />
+                            </WrapPanel>
+                          </StackPanel>
+                        </Border>
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
+                </DockPanel>
+              </Border>
 
-                <!--  ======== 現金股利欄位 ========  -->
-                <txforms:CashDividendTxForm />
+              <Border
+                                Padding="14,12"
+                                Background="{DynamicResource AppBackground}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSm}">
+                <StackPanel>
+                  <TextBlock
+                                        FontSize="{StaticResource FontSizeSm}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{DynamicResource Portfolio.Record.Section.Details}" />
+                  <TextBlock
+                                        Margin="0,4,0,12"
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{DynamicResource Portfolio.Record.Section.DetailsHint}"
+                                        TextWrapping="Wrap"
+                                        Visibility="{Binding IsEditMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
 
-                <!--  ======== 股票股利欄位 ========  -->
-                <txforms:StockDividendTxForm />
+                  <StackPanel Visibility="{Binding IsEditMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <Border Height="2" Background="Transparent" />
+                    <!--  ======== 買入欄位 ========  -->
+                    <txforms:BuyTxForm />
 
-                <!--  ======== 存入/提款欄位 ========  -->
-                <txforms:CashFlowTxForm />
+                    <!--  ======== 賣出欄位 ========  -->
+                    <txforms:SellTxForm />
 
-                <!--  ======== 借款/還款欄位 ========  -->
-                <txforms:LoanTxForm />
+                    <!--  ======== 收入欄位 ========  -->
+                    <txforms:IncomeTxForm />
 
-                <!--  ======== 信用卡欄位 ========  -->
-                <txforms:CreditCardTxForm />
+                    <!--  ======== 現金股利欄位 ========  -->
+                    <txforms:CashDividendTxForm />
 
-                <!--  ======== 轉帳欄位 ========  -->
-                <txforms:TransferTxForm />
-              </StackPanel>
+                    <!--  ======== 股票股利欄位 ========  -->
+                    <txforms:StockDividendTxForm />
 
-              <StackPanel Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock
-                                    Margin="0,0,0,4"
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    FontWeight="SemiBold"
-                                    Foreground="{DynamicResource AppTextSecondary}"
-                                    Text="{DynamicResource Portfolio.Tx.Note}" />
-                <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
-              </StackPanel>
+                    <!--  ======== 存入/提款欄位 ========  -->
+                    <txforms:CashFlowTxForm />
 
-              <!--  Error  -->
-              <TextBlock
-                                Margin="0,12,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
-                                Foreground="{DynamicResource AppDown}"
-                                Text="{Binding TxError}"
-                                Visibility="{Binding TxError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    <!--  ======== 借款/還款欄位 ========  -->
+                    <txforms:LoanTxForm />
+
+                    <!--  ======== 信用卡欄位 ========  -->
+                    <txforms:CreditCardTxForm />
+
+                    <!--  ======== 轉帳欄位 ========  -->
+                    <txforms:TransferTxForm />
+                  </StackPanel>
+
+                  <StackPanel Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock
+                                            Margin="0,0,0,4"
+                                            FontSize="{StaticResource FontSizeXs}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{DynamicResource Portfolio.Tx.Note}" />
+                    <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
+                  </StackPanel>
+
+                  <!--  Error  -->
+                  <TextBlock
+                                        Margin="0,12,0,0"
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        Foreground="{DynamicResource AppDown}"
+                                        Text="{Binding TxError}"
+                                        Visibility="{Binding TxError, Converter={StaticResource StringToVisibilityConverter}}" />
+                </StackPanel>
+              </Border>
             </StackPanel>
 
             <StackPanel Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource BooleanToVisibilityConverter}}">

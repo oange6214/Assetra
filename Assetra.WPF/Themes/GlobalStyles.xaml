@@ -45,8 +45,8 @@
             <TextBlock
                 Grid.Column="0"
                 VerticalAlignment="Center"
-                FontFamily="{StaticResource FontTabular}"
-                FontSize="{StaticResource FontSizeSm}"
+                FontFamily="{DynamicResource FontTabular}"
+                FontSize="{DynamicResource FontSizeSm}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextPrimary}"
                 Text="{Binding Symbol}" />
@@ -63,7 +63,7 @@
                 <TextBlock
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{DynamicResource FontSizeXs}"
                     FontWeight="SemiBold"
                     Foreground="White"
                     Text="股">
@@ -82,13 +82,13 @@
 
             <StackPanel Grid.Column="2">
                 <TextBlock
-                    FontSize="{StaticResource FontSizeSm}"
+                    FontSize="{DynamicResource FontSizeSm}"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{Binding Name}"
                     TextTrimming="CharacterEllipsis" />
                 <TextBlock
                     Margin="0,2,0,0"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{DynamicResource FontSizeXs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{Binding Exchange}"
                     TextTrimming="CharacterEllipsis" />
@@ -108,7 +108,7 @@
     <Style x:Key="PortfolioBadgeText" TargetType="TextBlock">
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeXs}" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeXs}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
     </Style>
@@ -1433,7 +1433,7 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="Padding" Value="12,5" />
         <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
         <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
         <Setter Property="Cursor" Value="Hand" />
@@ -1451,13 +1451,23 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource AppAccentSubtle}" />
-                            <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
+                            <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Background" Value="{DynamicResource AppHover}" />
                             <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
                         </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True" />
+                                <Condition Property="IsMouseOver" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                        </MultiTrigger>
                         <!--  Keyboard focus ring  -->
                         <Trigger Property="IsFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />

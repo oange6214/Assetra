@@ -292,6 +292,13 @@
     <sys:String x:Key="Portfolio.Record.Summary.Target">Target</sys:String>
     <sys:String x:Key="Portfolio.Record.Summary.Amount">Amount / Price</sys:String>
     <sys:String x:Key="Portfolio.Record.Summary.Quantity">Quantity</sys:String>
+    <sys:String x:Key="Portfolio.Record.Section.Basic">Basics</sys:String>
+    <sys:String x:Key="Portfolio.Record.Section.BasicHint">Choose the date and type first.</sys:String>
+    <sys:String x:Key="Portfolio.Record.Section.Details">Details</sys:String>
+    <sys:String x:Key="Portfolio.Record.Section.DetailsHint">Fill in the main details for the selected type.</sys:String>
+    <sys:String x:Key="Portfolio.Record.Group.Investment">Investing &amp; Income</sys:String>
+    <sys:String x:Key="Portfolio.Record.Group.Cash">Cash Flow</sys:String>
+    <sys:String x:Key="Portfolio.Record.Group.Liability">Borrowing &amp; Credit</sys:String>
     <sys:String x:Key="Portfolio.Tx.Income">Income</sys:String>
     <sys:String x:Key="Portfolio.Tx.CashDiv">Cash Dividend</sys:String>
     <sys:String x:Key="Portfolio.Tx.StockDiv">Stock Dividend</sys:String>
