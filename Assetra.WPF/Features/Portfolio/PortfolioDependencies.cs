@@ -48,6 +48,7 @@ public sealed record PortfolioServices(
     IAddAssetWorkflowService? AddAsset = null,
     IAccountUpsertWorkflowService? AccountUpsert = null,
     IAccountMutationWorkflowService? AccountMutation = null,
+    ILiabilityMutationWorkflowService? LiabilityMutation = null,
     ICreditCardMutationWorkflowService? CreditCardMutation = null,
     ICreditCardTransactionWorkflowService? CreditCardTransaction = null,
     ISellWorkflowService? Sell = null,

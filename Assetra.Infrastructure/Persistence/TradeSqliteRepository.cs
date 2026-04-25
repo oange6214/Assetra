@@ -234,4 +234,29 @@ public sealed class TradeSqliteRepository : ITradeRepository
         cmd.Parameters.AddWithValue("$id", accountId.ToString());
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
+
+    public async Task RemoveByLiabilityAsync(Guid? liabilityAssetId, string? loanLabel, CancellationToken ct = default)
+    {
+        if (!liabilityAssetId.HasValue && string.IsNullOrEmpty(loanLabel))
+            return;
+
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+
+        var clauses = new List<string>();
+        if (liabilityAssetId.HasValue)
+        {
+            clauses.Add("liability_asset_id = $aid");
+            cmd.Parameters.AddWithValue("$aid", liabilityAssetId.Value.ToString());
+        }
+        if (!string.IsNullOrEmpty(loanLabel))
+        {
+            clauses.Add("loan_label = $label");
+            cmd.Parameters.AddWithValue("$label", loanLabel);
+        }
+
+        cmd.CommandText = "DELETE FROM trade WHERE " + string.Join(" OR ", clauses) + ";";
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+    }
 }

@@ -103,6 +103,7 @@ public class MonthlyBudgetSummaryServiceTests
         public Task RemoveAsync(Guid id) => Task.CompletedTask;
         public Task RemoveChildrenAsync(Guid parentId) => Task.CompletedTask;
         public Task RemoveByAccountIdAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveByLiabilityAsync(Guid? liabilityAssetId, string? loanLabel, CancellationToken ct = default) => Task.CompletedTask;
     }
 
     private sealed class FakeBudgetRepo : IBudgetRepository
