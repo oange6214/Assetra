@@ -14,6 +14,7 @@ public partial class CategoriesViewModel : ObservableObject
     private readonly ICategoryRepository _repository;
     private readonly IAutoCategorizationRuleRepository _ruleRepository;
     private readonly IBudgetRepository _budgetRepository;
+    private readonly IBudgetRefreshNotifier _budgetRefreshNotifier;
     private readonly ISnackbarService _snackbar;
     private readonly ILocalizationService _localization;
 
@@ -63,12 +64,14 @@ public partial class CategoriesViewModel : ObservableObject
         ICategoryRepository repository,
         IAutoCategorizationRuleRepository ruleRepository,
         IBudgetRepository budgetRepository,
+        IBudgetRefreshNotifier budgetRefreshNotifier,
         ISnackbarService snackbar,
         ILocalizationService localization)
     {
         _repository = repository;
         _ruleRepository = ruleRepository;
         _budgetRepository = budgetRepository;
+        _budgetRefreshNotifier = budgetRefreshNotifier;
         _snackbar = snackbar;
         _localization = localization;
 
@@ -253,6 +256,14 @@ public partial class CategoriesViewModel : ObservableObject
     private async Task DeleteAsync(CategoryRowViewModel row)
     {
         if (row is null) return;
+        var budgetRefs = Budgets.Count(b => b.CategoryId == row.Id);
+        var ruleRefs = Rules.Count(r => r.CategoryId == row.Id);
+        if (budgetRefs > 0 || ruleRefs > 0)
+        {
+            var message = GetDeleteBlockedMessage(row.Name, budgetRefs, ruleRefs);
+            _snackbar.Warning(message);
+            return;
+        }
         await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
         Categories.Remove(row);
         RefreshAvailableCategories();
@@ -403,6 +414,7 @@ public partial class CategoriesViewModel : ObservableObject
 
         await _budgetRepository.AddAsync(budget).ConfigureAwait(true);
         Budgets.Add(BudgetRowViewModel.FromModel(budget, LookupBudgetCategoryDisplay(categoryId)));
+        _budgetRefreshNotifier.NotifyChanged();
 
         AddBudgetAmount = 0m;
         AddBudgetNote = string.Empty;
@@ -429,6 +441,7 @@ public partial class CategoriesViewModel : ObservableObject
         row.Note = NullIfBlank(row.EditNote);
         row.IsEditing = false;
         await _budgetRepository.UpdateAsync(row.ToModel()).ConfigureAwait(true);
+        _budgetRefreshNotifier.NotifyChanged();
         _snackbar.Success(GetString("Categories.Budget.Toast.Updated", "已更新預算"));
     }
 
@@ -438,11 +451,43 @@ public partial class CategoriesViewModel : ObservableObject
         if (row is null) return;
         await _budgetRepository.RemoveAsync(row.Id).ConfigureAwait(true);
         Budgets.Remove(row);
+        _budgetRefreshNotifier.NotifyChanged();
         _snackbar.Success(GetString("Categories.Budget.Toast.Deleted", "已刪除預算"));
     }
 
     private static string? NullIfBlank(string? s) =>
         string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+
+    private string GetDeleteBlockedMessage(string categoryName, int budgetRefs, int ruleRefs)
+    {
+        if (budgetRefs > 0 && ruleRefs > 0)
+        {
+            return string.Format(
+                GetString(
+                    "Categories.Error.DeleteBlockedByBudgetAndRule",
+                    "分類「{0}」仍被 {1} 筆預算與 {2} 筆自動分類規則使用，請先解除關聯後再刪除"),
+                categoryName,
+                budgetRefs,
+                ruleRefs);
+        }
+
+        if (budgetRefs > 0)
+        {
+            return string.Format(
+                GetString(
+                    "Categories.Error.DeleteBlockedByBudget",
+                    "分類「{0}」仍被 {1} 筆預算使用，請先解除關聯後再刪除"),
+                categoryName,
+                budgetRefs);
+        }
+
+        return string.Format(
+            GetString(
+                "Categories.Error.DeleteBlockedByRule",
+                "分類「{0}」仍被 {1} 筆自動分類規則使用，請先解除關聯後再刪除"),
+            categoryName,
+            ruleRefs);
+    }
 
     private string GetString(string key, string fallback) =>
         _localization.Get(key, fallback);

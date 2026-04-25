@@ -12,6 +12,7 @@ using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Alerts;
 using Assetra.WPF.Features.Categories;
 using Assetra.WPF.Features.Portfolio;
+using Assetra.WPF.Features.Recurring;
 using Assetra.WPF.Infrastructure;
 using Assetra.WPF.Infrastructure.Converters;
 using Assetra.WPF.Shell;
@@ -99,8 +100,13 @@ public partial class App : System.Windows.Application
         var alertsVm = _host.Services.GetRequiredService<AlertsViewModel>();
         await alertsVm.LoadAsync();
 
+        splash.Advance("Splash.Categories");
         var categoriesVm = _host.Services.GetRequiredService<CategoriesViewModel>();
         await categoriesVm.LoadAsync();
+
+        splash.Advance("Splash.Recurring");
+        var recurringVm = _host.Services.GetRequiredService<RecurringViewModel>();
+        await recurringVm.LoadAsync();
 
         // Show main window, close splash
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();

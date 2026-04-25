@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Assetra.Application.Budget.Services;
 using Assetra.Core.Models;
+using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -9,6 +10,7 @@ namespace Assetra.WPF.Features.Portfolio;
 public sealed partial class BudgetSummaryCardViewModel : ObservableObject
 {
     private readonly MonthlyBudgetSummaryService _service;
+    private readonly IBudgetRefreshNotifier _budgetRefreshNotifier;
 
     [ObservableProperty] private int _year = DateTime.Today.Year;
     [ObservableProperty] private int _month = DateTime.Today.Month;
@@ -51,11 +53,18 @@ public sealed partial class BudgetSummaryCardViewModel : ObservableObject
         OnPropertyChanged(nameof(IsOverBudget));
     }
 
-    public BudgetSummaryCardViewModel(MonthlyBudgetSummaryService service)
+    public BudgetSummaryCardViewModel(
+        MonthlyBudgetSummaryService service,
+        IBudgetRefreshNotifier budgetRefreshNotifier)
     {
         ArgumentNullException.ThrowIfNull(service);
+        ArgumentNullException.ThrowIfNull(budgetRefreshNotifier);
         _service = service;
+        _budgetRefreshNotifier = budgetRefreshNotifier;
+        _budgetRefreshNotifier.BudgetChanged += OnBudgetChanged;
     }
+
+    private void OnBudgetChanged(object? sender, EventArgs e) => _ = LoadAsync();
 
     [RelayCommand]
     public async Task LoadAsync()
