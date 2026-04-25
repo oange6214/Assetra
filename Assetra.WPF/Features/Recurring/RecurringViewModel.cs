@@ -46,7 +46,7 @@ public partial class RecurringViewModel : ObservableObject
         [AutoGenerationMode.PendingConfirm, AutoGenerationMode.AutoApply];
 
     public IReadOnlyList<TradeType> TradeTypeOptions { get; } =
-        [TradeType.Withdrawal, TradeType.Income, TradeType.CreditCardCharge, TradeType.Deposit];
+        [TradeType.Withdrawal, TradeType.Income, TradeType.Deposit];
 
     public RecurringViewModel(
         IRecurringTransactionRepository recurringRepo,
@@ -121,6 +121,11 @@ public partial class RecurringViewModel : ObservableObject
         if (AddInterval < 1)
         {
             AddError = GetString("Recurring.Error.IntervalInvalid", "間隔必須 ≥ 1");
+            return;
+        }
+        if (!TradeTypeOptions.Contains(AddTradeType))
+        {
+            AddError = GetString("Recurring.Error.UnsupportedTradeType", "此交易類型目前不支援訂閱排程");
             return;
         }
 
