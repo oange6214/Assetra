@@ -191,20 +191,28 @@
                 Padding="32"
                 Background="{DynamicResource AppBackground}"
                 Visibility="{Binding HasNoCashAccounts, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Opacity="0.4">
-                    <TextBlock
-                        Margin="0,0,0,6"
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel HorizontalAlignment="Center" Opacity="0.4">
+                        <TextBlock
+                            Margin="0,0,0,6"
+                            HorizontalAlignment="Center"
+                            FontSize="{StaticResource FontSize2xl}"
+                            Text="&#x1F4B0;" />
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            FontSize="{StaticResource FontSizeSm}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Cash.Empty}" />
+                    </StackPanel>
+                    <Button
+                        Height="34"
+                        Margin="0,16,0,0"
+                        Padding="20,0"
                         HorizontalAlignment="Center"
-                        FontSize="{StaticResource FontSize2xl}"
-                        Text="&#x1F4B0;" />
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        FontSize="{StaticResource FontSizeSm}"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Portfolio.Cash.Empty}" />
+                        Command="{Binding OpenAddAccountDialogCommand}"
+                        Style="{StaticResource BtnPrimary}">
+                        <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.AddCash}" />
+                    </Button>
                 </StackPanel>
             </Border>
 
