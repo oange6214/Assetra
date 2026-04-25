@@ -2,6 +2,7 @@ using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Models;
 using Assetra.Core.Trading;
+using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,7 +18,10 @@ public partial class AddAssetDialogViewModel : ObservableObject
 {
     private readonly IAddAssetWorkflowService _addAssetWorkflow;
     private readonly IAccountUpsertWorkflowService _accountUpsertWorkflow;
+    private readonly ITransactionWorkflowService? _transactionWorkflow;
     private readonly ICreditCardMutationWorkflowService _creditCardMutationWorkflow;
+    private readonly ICreditCardTransactionWorkflowService? _creditCardTransactionWorkflow;
+    private readonly ILoanMutationWorkflowService? _loanMutationWorkflow;
 
     /// <summary>
     /// Raised after every successful add (stock buy, crypto, non-stock, cash account).
@@ -48,16 +52,31 @@ public partial class AddAssetDialogViewModel : ObservableObject
         IAddAssetWorkflowService addAssetWorkflow,
         IAccountUpsertWorkflowService accountUpsertWorkflow,
         ICreditCardMutationWorkflowService creditCardMutationWorkflow)
+        : this(addAssetWorkflow, accountUpsertWorkflow, null, creditCardMutationWorkflow)
+    {
+    }
+
+    public AddAssetDialogViewModel(
+        IAddAssetWorkflowService addAssetWorkflow,
+        IAccountUpsertWorkflowService accountUpsertWorkflow,
+        ITransactionWorkflowService? transactionWorkflow,
+        ICreditCardMutationWorkflowService creditCardMutationWorkflow,
+        ICreditCardTransactionWorkflowService? creditCardTransactionWorkflow = null,
+        ILoanMutationWorkflowService? loanMutationWorkflow = null)
     {
         _addAssetWorkflow = addAssetWorkflow;
         _accountUpsertWorkflow = accountUpsertWorkflow;
+        _transactionWorkflow = transactionWorkflow;
         _creditCardMutationWorkflow = creditCardMutationWorkflow;
+        _creditCardTransactionWorkflow = creditCardTransactionWorkflow;
+        _loanMutationWorkflow = loanMutationWorkflow;
     }
 
     // ── Dialog visibility ────────────────────────────────────────────────────────────
 
     [ObservableProperty] private bool _isAddDialogOpen;
     [ObservableProperty] private bool _addDialogIsInvestmentMode = true;
+    [ObservableProperty] private string _addDialogMode = "account";
 
     // ── Asset type ───────────────────────────────────────────────────────────────────
 
@@ -282,6 +301,10 @@ public partial class AddAssetDialogViewModel : ObservableObject
     // ── Cash account field ───────────────────────────────────────────────────────────
 
     [ObservableProperty] private string _addAccountName = string.Empty;
+    [ObservableProperty] private bool _addInitialDepositEnabled;
+    [ObservableProperty] private string _addInitialDepositAmount = string.Empty;
+    [ObservableProperty] private DateTime? _addInitialDepositDate = DateTime.Today;
+    [ObservableProperty] private string _addInitialDepositNote = string.Empty;
 
     // ── Credit card fields ───────────────────────────────────────────────────────────
 
@@ -290,6 +313,20 @@ public partial class AddAssetDialogViewModel : ObservableObject
     [ObservableProperty] private string _addCreditCardBillingDay = string.Empty;
     [ObservableProperty] private string _addCreditCardDueDay = string.Empty;
     [ObservableProperty] private string _addCreditCardLimit = string.Empty;
+    [ObservableProperty] private bool _addInitialCreditCardBalanceEnabled;
+    [ObservableProperty] private string _addInitialCreditCardBalanceAmount = string.Empty;
+    [ObservableProperty] private DateTime? _addInitialCreditCardBalanceDate = DateTime.Today;
+    [ObservableProperty] private string _addInitialCreditCardBalanceNote = string.Empty;
+
+    // ── Loan fields ──────────────────────────────────────────────────────────────────
+
+    [ObservableProperty] private string _addLoanName = string.Empty;
+    [ObservableProperty] private string _addLoanAmount = string.Empty;
+    [ObservableProperty] private string _addLoanAnnualRate = string.Empty;
+    [ObservableProperty] private string _addLoanTermMonths = string.Empty;
+    [ObservableProperty] private DateTime? _addLoanStartDate = DateTime.Today;
+    [ObservableProperty] private string _addLoanHandlingFee = string.Empty;
+    [ObservableProperty] private CashAccountRowViewModel? _selectedLoanCashAccount;
 
     // ── Asset type toggle helpers (for RadioButton IsChecked TwoWay) ─────────────────
 
@@ -299,7 +336,13 @@ public partial class AddAssetDialogViewModel : ObservableObject
     public bool AddTypeIsBond { get => AddAssetType == "bond"; set { if (value) AddAssetType = "bond"; } }
     public bool AddTypeIsCrypto { get => AddAssetType == "crypto"; set { if (value) AddAssetType = "crypto"; } }
     public bool AddTypeIsAccount { get => AddAssetType == "cash"; set { if (value) AddAssetType = "cash"; } }
+    public bool AddTypeIsLoan { get => AddAssetType == "loan"; set { if (value) AddAssetType = "loan"; } }
     public bool AddTypeIsCreditCard { get => AddAssetType == "creditCard"; set { if (value) AddAssetType = "creditCard"; } }
+    public bool IsAccountDialogMode => AddDialogMode == "account";
+    public bool IsLiabilityDialogMode => AddDialogMode == "liability";
+    public IReadOnlyList<CashAccountRowViewModel> LoanCashAccountOptions => GetCashAccounts();
+
+    public Func<IReadOnlyList<CashAccountRowViewModel>> GetCashAccounts { get; set; } = static () => [];
 
     // Fund / precious-metal / bond share "name + total cost" form
     public bool AddTypeIsNonStockInvestment => AddAssetType is "fund" or "metal" or "bond";
@@ -315,10 +358,17 @@ public partial class AddAssetDialogViewModel : ObservableObject
         OnPropertyChanged(nameof(AddTypeIsBond));
         OnPropertyChanged(nameof(AddTypeIsCrypto));
         OnPropertyChanged(nameof(AddTypeIsAccount));
+        OnPropertyChanged(nameof(AddTypeIsLoan));
         OnPropertyChanged(nameof(AddTypeIsCreditCard));
         OnPropertyChanged(nameof(AddTypeIsNonStockInvestment));
         OnPropertyChanged(nameof(AddTypeIsCryptoForm));
         AddError = string.Empty;
+    }
+
+    partial void OnAddDialogModeChanged(string _)
+    {
+        OnPropertyChanged(nameof(IsAccountDialogMode));
+        OnPropertyChanged(nameof(IsLiabilityDialogMode));
     }
 
     // ── Commands ─────────────────────────────────────────────────────────────────────
@@ -352,6 +402,9 @@ public partial class AddAssetDialogViewModel : ObservableObject
                 break;
             case "cash":
                 await AddAccountAsync();
+                break;
+            case "loan":
+                await AddLoanAsync();
                 break;
             case "creditCard":
                 await AddCreditCardAsync();
@@ -501,10 +554,33 @@ public partial class AddAssetDialogViewModel : ObservableObject
 
         // Balance is a projection over the trade journal — a fresh account starts at 0
         // and only gains value once the user records a Deposit / Income / etc. trade.
-        await _accountUpsertWorkflow.CreateAsync(new CreateAccountRequest(
+        var created = await _accountUpsertWorkflow.CreateAsync(new CreateAccountRequest(
             AddAccountName.Trim(),
             "TWD",
             DateOnly.FromDateTime(DateTime.Today)));
+
+        if (AddInitialDepositEnabled)
+        {
+            if (_transactionWorkflow is null)
+            { AddError = "初始存入功能尚未就緒"; return; }
+            if (!ParseHelpers.TryParseDecimal(AddInitialDepositAmount, out var initialAmount) || initialAmount <= 0)
+            { AddError = "初始存入金額無效"; return; }
+
+            await _transactionWorkflow.RecordCashFlowAsync(new CashFlowTransactionRequest(
+                TradeType.Deposit,
+                initialAmount,
+                (AddInitialDepositDate ?? DateTime.Today).Date,
+                created.Account.Id,
+                created.Account.Name,
+                string.IsNullOrWhiteSpace(AddInitialDepositNote) ? null : AddInitialDepositNote.Trim(),
+                0m));
+        }
+
+        AddAccountName = string.Empty;
+        AddInitialDepositEnabled = false;
+        AddInitialDepositAmount = string.Empty;
+        AddInitialDepositDate = DateTime.Today;
+        AddInitialDepositNote = string.Empty;
 
         IsAddDialogOpen = false;
 
@@ -541,7 +617,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
             creditLimit = parsedLimit;
         }
 
-        await _creditCardMutationWorkflow.CreateAsync(new CreateCreditCardRequest(
+        var created = await _creditCardMutationWorkflow.CreateAsync(new CreateCreditCardRequest(
             AddCreditCardName.Trim(),
             "TWD",
             DateOnly.FromDateTime(DateTime.Today),
@@ -550,11 +626,79 @@ public partial class AddAssetDialogViewModel : ObservableObject
             creditLimit,
             string.IsNullOrWhiteSpace(AddCreditCardIssuer) ? null : AddCreditCardIssuer.Trim()));
 
+        if (AddInitialCreditCardBalanceEnabled)
+        {
+            if (_creditCardTransactionWorkflow is null)
+            { AddError = "初始未繳金額功能尚未就緒"; return; }
+            if (!ParseHelpers.TryParseDecimal(AddInitialCreditCardBalanceAmount, out var initialAmount) || initialAmount <= 0)
+            { AddError = "目前未繳金額無效"; return; }
+
+            await _creditCardTransactionWorkflow.ChargeAsync(new CreditCardChargeRequest(
+                created.CreditCard.Id,
+                created.CreditCard.Name,
+                (AddInitialCreditCardBalanceDate ?? DateTime.Today).Date,
+                initialAmount,
+                string.IsNullOrWhiteSpace(AddInitialCreditCardBalanceNote) ? null : AddInitialCreditCardBalanceNote.Trim()));
+        }
+
         AddCreditCardName = string.Empty;
         AddCreditCardIssuer = string.Empty;
         AddCreditCardBillingDay = string.Empty;
         AddCreditCardDueDay = string.Empty;
         AddCreditCardLimit = string.Empty;
+        AddInitialCreditCardBalanceEnabled = false;
+        AddInitialCreditCardBalanceAmount = string.Empty;
+        AddInitialCreditCardBalanceDate = DateTime.Today;
+        AddInitialCreditCardBalanceNote = string.Empty;
+        IsAddDialogOpen = false;
+
+        AssetAdded?.Invoke(this, EventArgs.Empty);
+    }
+
+    private async Task AddLoanAsync()
+    {
+        AddError = string.Empty;
+        if (_loanMutationWorkflow is null)
+        {
+            AddError = "貸款功能尚未就緒";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(AddLoanName))
+        { AddError = "請輸入貸款名稱"; return; }
+        if (!ParseHelpers.TryParseDecimal(AddLoanAmount, out var amount) || amount <= 0)
+        { AddError = "借款金額無效"; return; }
+        if (!ParseHelpers.TryParseDecimal(AddLoanAnnualRate, out var annualRate) || annualRate <= 0)
+        { AddError = "年利率無效"; return; }
+        if (!ParseHelpers.TryParseInt(AddLoanTermMonths, out var termMonths) || termMonths <= 0)
+        { AddError = "還款期數無效"; return; }
+
+        decimal fee = 0m;
+        if (!string.IsNullOrWhiteSpace(AddLoanHandlingFee))
+        {
+            if (!ParseHelpers.TryParseDecimal(AddLoanHandlingFee, out fee) || fee < 0)
+            { AddError = "手續費無效"; return; }
+        }
+
+        var firstPaymentDate = DateOnly.FromDateTime((AddLoanStartDate ?? DateTime.Today).Date);
+        await _loanMutationWorkflow.RecordAsync(new LoanTransactionRequest(
+            TradeType.LoanBorrow,
+            amount,
+            DateTime.Today,
+            AddLoanName.Trim(),
+            SelectedLoanCashAccount?.Id,
+            null,
+            fee,
+            AmortAnnualRate: annualRate,
+            AmortTermMonths: termMonths,
+            FirstPaymentDate: firstPaymentDate));
+
+        AddLoanName = string.Empty;
+        AddLoanAmount = string.Empty;
+        AddLoanAnnualRate = string.Empty;
+        AddLoanTermMonths = string.Empty;
+        AddLoanHandlingFee = string.Empty;
+        AddLoanStartDate = DateTime.Today;
+        SelectedLoanCashAccount = null;
         IsAddDialogOpen = false;
 
         AssetAdded?.Invoke(this, EventArgs.Empty);

@@ -499,7 +499,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         AddAssetDialog = services.AddAssetDialog ?? new AddAssetDialogViewModel(
             addAssetWorkflow,
             accountUpsertWorkflow,
-            creditCardMutationWorkflow);
+            _transactionWorkflowService,
+            creditCardMutationWorkflow,
+            creditCardTransactionWorkflow,
+            loanMutationWorkflowService);
         AddAssetDialog.AssetAdded += OnAssetAdded;
 
         // Build the SellPanel sub-VM and wire delegates for Tx-dialog fields it needs.
@@ -582,6 +585,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         AddAssetDialog.GetTxBuyMetaOnly = () => Transaction.TxBuyMetaOnly;
         AddAssetDialog.GetTxCashAccountId = () => Transaction.TxCashAccount?.Id;
         AddAssetDialog.GetTxUseCashAccount = () => Transaction.TxUseCashAccount;
+        AddAssetDialog.GetCashAccounts = () => CashAccounts;
         SellPanel.GetTxCommissionDiscountValue = () => Transaction.TxCommissionDiscountValue;
         SellPanel.GetTxFee = () => Transaction.TxFee;
 
@@ -1477,23 +1481,40 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private void OpenAddAccountDialog()
     {
         SelectedTab = PortfolioTab.Accounts;
+        AddAssetDialog.AddDialogMode = "account";
         AddAssetDialog.AddAssetType = "cash";
         AddAssetDialog.AddError = string.Empty;
         AddAssetDialog.AddAccountName = string.Empty;
+        AddAssetDialog.AddInitialDepositEnabled = false;
+        AddAssetDialog.AddInitialDepositAmount = string.Empty;
+        AddAssetDialog.AddInitialDepositDate = DateTime.Today;
+        AddAssetDialog.AddInitialDepositNote = string.Empty;
         AddAssetDialog.IsAddDialogOpen = true;
     }
 
     [RelayCommand]
-    private void OpenAddCreditCardDialog()
+    private void OpenAddLiabilityDialog()
     {
         SelectedTab = PortfolioTab.Liability;
-        AddAssetDialog.AddAssetType = "creditCard";
+        AddAssetDialog.AddDialogMode = "liability";
+        AddAssetDialog.AddAssetType = "loan";
         AddAssetDialog.AddError = string.Empty;
+        AddAssetDialog.AddLoanName = string.Empty;
+        AddAssetDialog.AddLoanAmount = string.Empty;
+        AddAssetDialog.AddLoanAnnualRate = string.Empty;
+        AddAssetDialog.AddLoanTermMonths = string.Empty;
+        AddAssetDialog.AddLoanHandlingFee = string.Empty;
+        AddAssetDialog.AddLoanStartDate = DateTime.Today;
+        AddAssetDialog.SelectedLoanCashAccount = null;
         AddAssetDialog.AddCreditCardName = string.Empty;
         AddAssetDialog.AddCreditCardIssuer = string.Empty;
         AddAssetDialog.AddCreditCardBillingDay = string.Empty;
         AddAssetDialog.AddCreditCardDueDay = string.Empty;
         AddAssetDialog.AddCreditCardLimit = string.Empty;
+        AddAssetDialog.AddInitialCreditCardBalanceEnabled = false;
+        AddAssetDialog.AddInitialCreditCardBalanceAmount = string.Empty;
+        AddAssetDialog.AddInitialCreditCardBalanceDate = DateTime.Today;
+        AddAssetDialog.AddInitialCreditCardBalanceNote = string.Empty;
         AddAssetDialog.IsAddDialogOpen = true;
     }
 

@@ -299,7 +299,7 @@
                 <Button
                     MinHeight="32"
                     Padding="10,0"
-                    Command="{Binding OpenAddCreditCardDialogCommand}"
+                    Command="{Binding OpenAddLiabilityDialogCommand}"
                     Style="{StaticResource BtnGhost}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock
@@ -308,7 +308,7 @@
                             FontFamily="Segoe MDL2 Assets"
                             FontSize="{StaticResource FontSizeXs}"
                             Text="&#xE710;" />
-                        <TextBlock VerticalAlignment="Center" Text="{DynamicResource Portfolio.AddCreditCard}" />
+                        <TextBlock VerticalAlignment="Center" Text="{DynamicResource Portfolio.AddLiability}" />
                     </StackPanel>
                 </Button>
             </controls:SearchBox.RightContent>
@@ -340,9 +340,9 @@
                         Margin="0,16,0,0"
                         Padding="20,0"
                         HorizontalAlignment="Center"
-                        Command="{Binding OpenAddCreditCardDialogCommand}"
+                        Command="{Binding OpenAddLiabilityDialogCommand}"
                         Style="{StaticResource BtnPrimary}">
-                        <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.AddCreditCard}" />
+                        <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.AddLiability}" />
                     </Button>
                 </StackPanel>
             </Border>

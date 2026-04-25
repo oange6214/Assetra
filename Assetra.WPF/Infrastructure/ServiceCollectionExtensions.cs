@@ -105,6 +105,7 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<SnackbarViewModel>();
         services.AddSingleton<ISnackbarService>(sp =>
             new SnackbarService(sp.GetRequiredService<SnackbarViewModel>()));
+        services.AddSingleton<IBudgetRefreshNotifier, BudgetRefreshNotifier>();
 
         services.AddSingleton<IStockraImportService>(_ => new StockraImportService(dbPath));
         return services;
@@ -257,7 +258,10 @@ internal static class ServiceCollectionExtensions
                 AddAssetDialog: new AddAssetDialogViewModel(
                     sp.GetRequiredService<IAddAssetWorkflowService>(),
                     sp.GetRequiredService<IAccountUpsertWorkflowService>(),
-                    sp.GetRequiredService<ICreditCardMutationWorkflowService>()),
+                    sp.GetRequiredService<ITransactionWorkflowService>(),
+                    sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
+                    sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
+                    sp.GetRequiredService<ILoanMutationWorkflowService>()),
                 SellPanel: new SellPanelViewModel(
                     sp.GetRequiredService<ISellWorkflowService>(),
                     new PortfolioSellPanelController(),
@@ -276,7 +280,8 @@ internal static class ServiceCollectionExtensions
             sp.GetRequiredService<PortfolioViewModel>(),
             sp.GetRequiredService<IAppSettingsService>()));
         services.AddSingleton<BudgetSummaryCardViewModel>(sp => new BudgetSummaryCardViewModel(
-            sp.GetRequiredService<Assetra.Application.Budget.Services.MonthlyBudgetSummaryService>()));
+            sp.GetRequiredService<Assetra.Application.Budget.Services.MonthlyBudgetSummaryService>(),
+            sp.GetRequiredService<IBudgetRefreshNotifier>()));
         services.AddSingleton<DashboardViewModel>(sp => new DashboardViewModel(
             sp.GetRequiredService<PortfolioViewModel>(),
             sp.GetService<IThemeService>(),
@@ -296,6 +301,7 @@ internal static class ServiceCollectionExtensions
             sp.GetRequiredService<ICategoryRepository>(),
             sp.GetRequiredService<IAutoCategorizationRuleRepository>(),
             sp.GetRequiredService<IBudgetRepository>(),
+            sp.GetRequiredService<IBudgetRefreshNotifier>(),
             sp.GetRequiredService<ISnackbarService>(),
             sp.GetRequiredService<ILocalizationService>()));
         services.AddSingleton<RecurringViewModel>(sp => new RecurringViewModel(
