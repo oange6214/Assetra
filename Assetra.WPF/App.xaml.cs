@@ -21,18 +21,32 @@ namespace Assetra.WPF;
 public partial class App : System.Windows.Application
 {
     private IHost _host = null!;
+    private bool _startupCompleted;
+    private static string StartupMarkerPath =>
+        Path.Combine(AppRuntimePaths.Resolve().DataDir, "startup.pending");
 
     protected override async void OnStartup(StartupEventArgs e)
     {
         VelopackApp.Build().Run();
         base.OnStartup(e);
+        var shouldTryRecoveryUpdate = File.Exists(StartupMarkerPath);
+        WriteStartupMarker();
         try
         {
+            if (shouldTryRecoveryUpdate &&
+                await TryApplyRecoveryUpdateAsync().ConfigureAwait(true))
+            {
+                Shutdown(0);
+                return;
+            }
+
             await StartupAsync();
+            _startupCompleted = true;
+            ClearStartupMarker();
         }
         catch (Exception ex)
         {
-            if (await TryRecoverFromStartupFailureAsync().ConfigureAwait(true))
+            if (await TryApplyRecoveryUpdateAsync().ConfigureAwait(true))
             {
                 Shutdown(0);
                 return;
@@ -84,29 +98,24 @@ public partial class App : System.Windows.Application
         var alertsVm = _host.Services.GetRequiredService<AlertsViewModel>();
         await alertsVm.LoadAsync();
 
-        if (await TryApplyPendingUpdateAsync().ConfigureAwait(true))
-        {
-            splash.Close();
-            Shutdown(0);
-            return;
-        }
-
         // Show main window, close splash
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
         splash.Close();
+
+        _ = CheckForUpdatesInBackgroundAsync();
     }
 
     private static UpdateManager CreateUpdateManager() =>
         new(new GithubSource("https://github.com/oange6214/Assetra", null, false));
 
-    private static async Task<bool> TryApplyPendingUpdateAsync()
+    private static async Task CheckForUpdatesInBackgroundAsync()
     {
         try
         {
             var mgr = CreateUpdateManager();
             var newVersion = await mgr.CheckForUpdatesAsync();
-            if (newVersion is null) return false;
+            if (newVersion is null) return;
             await mgr.DownloadUpdatesAsync(newVersion);
             var result = MessageBox.Show(
                 $"發現新版本 {newVersion.TargetFullRelease.Version}，已下載完成。立即重新啟動以套用更新？",
@@ -114,20 +123,15 @@ public partial class App : System.Windows.Application
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Information);
             if (result == MessageBoxResult.Yes)
-            {
                 mgr.ApplyUpdatesAndRestart(newVersion);
-                return true;
-            }
         }
         catch (Exception ex)
         {
-            Serilog.Log.Warning(ex, "Failed to check for updates during startup");
+            Serilog.Log.Warning(ex, "Failed to check for updates in background");
         }
-
-        return false;
     }
 
-    private static async Task<bool> TryRecoverFromStartupFailureAsync()
+    private static async Task<bool> TryApplyRecoveryUpdateAsync()
     {
         try
         {
@@ -163,7 +167,36 @@ public partial class App : System.Windows.Application
             _host.StopAsync(TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
             _host.Dispose();
         }
+
+        if (_startupCompleted)
+            ClearStartupMarker();
+
         base.OnExit(e);
+    }
+
+    private static void WriteStartupMarker()
+    {
+        try
+        {
+            File.WriteAllText(StartupMarkerPath, DateTimeOffset.Now.ToString("O"));
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "Failed to write startup marker");
+        }
+    }
+
+    private static void ClearStartupMarker()
+    {
+        try
+        {
+            if (File.Exists(StartupMarkerPath))
+                File.Delete(StartupMarkerPath);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "Failed to clear startup marker");
+        }
     }
 
     /// <summary>
