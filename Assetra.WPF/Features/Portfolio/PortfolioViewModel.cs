@@ -557,7 +557,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 LoadTradesAsync: LoadTradesAsync,
                 ReloadAccountBalancesAsync: ReloadAccountBalancesAsync,
                 RebuildTotals: RebuildTotals,
-                Localize: L));
+                Localize: L,
+                CategoryRepository: services.CategoryRepository,
+                AutoCategorizationRuleRepository: services.AutoCategorizationRuleRepository));
         Transaction.TransactionCompleted += OnTransactionCompleted;
         Transaction.TradeDeleted += OnTradeDeleted;
 

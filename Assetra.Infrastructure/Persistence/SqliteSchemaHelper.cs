@@ -25,6 +25,13 @@ internal static class SqliteSchemaHelper
         "asset",
         "asset_event",
         "loan_schedule",
+        "expense_category",
+        "auto_categorization_rule",
+        "budget",
+        "budget_template",
+        "budget_template_item",
+        "recurring_transaction",
+        "pending_recurring_entry",
     };
 
     /// <summary>

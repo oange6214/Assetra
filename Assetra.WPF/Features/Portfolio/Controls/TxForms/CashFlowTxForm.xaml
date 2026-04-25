@@ -77,5 +77,19 @@
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Note}" />
         <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
+
+        <!--  分類（P1 收支管理）— 提款 / 信用卡消費等支出時可分類  -->
+        <TextBlock
+            Margin="0,12,0,4"
+            FontSize="{StaticResource FontSizeXs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Categories.Rule.CategoryHint}" />
+        <ComboBox
+            DisplayMemberPath="Name"
+            ItemsSource="{Binding ExpenseCategories}"
+            SelectedValue="{Binding TxCategoryId, Mode=TwoWay}"
+            SelectedValuePath="Id"
+            Style="{StaticResource FormComboBox}" />
     </StackPanel>
 </UserControl>

@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ctrl="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     d:DataContext="{d:DesignInstance Type={x:Type vm:DashboardViewModel},
                                      IsDesignTimeCreatable=False}"
@@ -16,6 +17,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="12" />
                 <RowDefinition Height="200" />
+                <RowDefinition Height="12" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="12" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
@@ -397,6 +400,9 @@
                     </StackPanel>
                 </Border>
             </Grid>
+
+            <!--  ═══ Row 6: Budget Summary Card ═══  -->
+            <ctrl:BudgetSummaryCard Grid.Row="6" DataContext="{Binding BudgetSummary}" />
 
         </Grid>
     </ScrollViewer>

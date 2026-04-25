@@ -20,9 +20,21 @@ public sealed partial class DashboardViewModel : ObservableObject
     [ObservableProperty] private ICartesianAxis[] _tenDayXAxes = [new Axis { IsVisible = false }];
     [ObservableProperty] private ICartesianAxis[] _tenDayYAxes = [new Axis { IsVisible = false }];
 
-    public DashboardViewModel(PortfolioViewModel portfolio, IThemeService? themeService = null)
+    public BudgetSummaryCardViewModel? BudgetSummary { get; }
+
+    public DashboardViewModel(
+        PortfolioViewModel portfolio,
+        IThemeService? themeService = null,
+        BudgetSummaryCardViewModel? budgetSummary = null)
     {
         _portfolio = portfolio;
+        BudgetSummary = budgetSummary;
+        if (BudgetSummary is not null)
+        {
+            _portfolio.Trades.CollectionChanged += (_, _) =>
+                _ = BudgetSummary.LoadAsync();
+            _ = BudgetSummary.LoadAsync();
+        }
 
         _portfolio.PropertyChanged += (_, e) =>
         {

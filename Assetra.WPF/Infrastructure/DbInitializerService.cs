@@ -11,6 +11,7 @@ internal sealed class DbInitializerService : IHostedService
     private readonly IPortfolioRepository _portfolio;
     private readonly IAlertRepository _alerts;
     private readonly ITradeRepository _trades;
+    private readonly ICategoryRepository _categories;
     private readonly IStockraImportService _importService;
     private readonly ISnackbarService _snackbar;
     private readonly ILogger<DbInitializerService> _logger;
@@ -19,6 +20,7 @@ internal sealed class DbInitializerService : IHostedService
         IPortfolioRepository portfolio,
         IAlertRepository alerts,
         ITradeRepository trades,
+        ICategoryRepository categories,
         IStockraImportService importService,
         ISnackbarService snackbar,
         ILogger<DbInitializerService> logger)
@@ -26,6 +28,7 @@ internal sealed class DbInitializerService : IHostedService
         _portfolio = portfolio;
         _alerts = alerts;
         _trades = trades;
+        _categories = categories;
         _importService = importService;
         _snackbar = snackbar;
         _logger = logger;
@@ -66,7 +69,18 @@ internal sealed class DbInitializerService : IHostedService
                 "Transfer pair migration failed; existing transfer records are not affected");
         }
 
-        // ── Step 3 (first-run only): import from Stockra DB if present ──────
+        // ── Step 3: seed default expense/income categories on first install ──
+        try
+        {
+            await CategorySeeder.EnsureSeededAsync(_categories, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Category seeding failed; existing categories are not affected");
+        }
+
+        // ── Step 4 (first-run only): import from Stockra DB if present ──────
         if (isFirstRun)
         {
             await TryImportFromStockraAsync().ConfigureAwait(false);

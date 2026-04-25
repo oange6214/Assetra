@@ -456,7 +456,7 @@
                                                                     FontFamily="{StaticResource FontTabular}"
                                                                     FontSize="{StaticResource FontSizeSm}"
                                                                     FontWeight="SemiBold"
-                                                                    Text="{Binding CashAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}" />
+                                                                    Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}" />
                                                             </StackPanel>
                                                         </Border>
                                                     </WrapPanel>

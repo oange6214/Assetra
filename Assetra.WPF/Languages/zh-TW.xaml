@@ -569,4 +569,104 @@
     <sys:String x:Key="Settings.FugleApiKey">Fugle API Key</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">盤中</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">休市</sys:String>
+
+    <!--  Categories  -->
+    <sys:String x:Key="Nav.Categories">收支分類</sys:String>
+    <sys:String x:Key="Categories.Title">收支分類管理</sys:String>
+    <sys:String x:Key="Categories.Expense">支出</sys:String>
+    <sys:String x:Key="Categories.Income">收入</sys:String>
+    <sys:String x:Key="Categories.ShowArchived">顯示已封存</sys:String>
+    <sys:String x:Key="Categories.ArchivedTag">（已封存）</sys:String>
+    <sys:String x:Key="Categories.Add">新增分類</sys:String>
+    <sys:String x:Key="Categories.NameHint">分類名稱</sys:String>
+    <sys:String x:Key="Categories.IconHint">圖示（emoji）</sys:String>
+    <sys:String x:Key="Categories.ColorHint">顏色 #RRGGBB</sys:String>
+    <sys:String x:Key="Categories.ToggleArchive">切換封存</sys:String>
+    <sys:String x:Key="Categories.Error.NameRequired">請輸入分類名稱</sys:String>
+    <sys:String x:Key="Categories.Error.NameDuplicate">已存在同名分類</sys:String>
+    <sys:String x:Key="Categories.Toast.Added">已新增分類「{0}」</sys:String>
+    <sys:String x:Key="Categories.Toast.Updated">已更新分類「{0}」</sys:String>
+    <sys:String x:Key="Categories.Toast.Archived">已封存「{0}」</sys:String>
+    <sys:String x:Key="Categories.Toast.Restored">已還原「{0}」</sys:String>
+    <sys:String x:Key="Categories.Toast.Deleted">已刪除分類「{0}」</sys:String>
+
+    <!--  Categories — Tabs & Auto-categorization Rules  -->
+    <sys:String x:Key="Categories.Tab.Categories">分類</sys:String>
+    <sys:String x:Key="Categories.Tab.Rules">自動分類規則</sys:String>
+    <sys:String x:Key="Categories.Rule.Hint">當交易備註包含關鍵字時，自動套用指定分類。優先順序數字越小越優先。</sys:String>
+    <sys:String x:Key="Categories.Rule.Add">新增規則</sys:String>
+    <sys:String x:Key="Categories.Rule.KeywordHint">關鍵字</sys:String>
+    <sys:String x:Key="Categories.Rule.CategoryHint">分類</sys:String>
+    <sys:String x:Key="Categories.Rule.PriorityHint">優先序</sys:String>
+    <sys:String x:Key="Categories.Rule.CaseSensitive">區分大小寫</sys:String>
+    <sys:String x:Key="Categories.Rule.ToggleEnabled">啟用 / 停用</sys:String>
+    <sys:String x:Key="Categories.Rule.UnknownCategory">（未知分類）</sys:String>
+    <sys:String x:Key="Categories.Rule.Error.KeywordRequired">請輸入關鍵字</sys:String>
+    <sys:String x:Key="Categories.Rule.Error.CategoryRequired">請選擇分類</sys:String>
+    <sys:String x:Key="Categories.Rule.Toast.Added">已新增規則「{0}」</sys:String>
+    <sys:String x:Key="Categories.Rule.Toast.Updated">已更新規則「{0}」</sys:String>
+    <sys:String x:Key="Categories.Rule.Toast.Deleted">已刪除規則「{0}」</sys:String>
+
+    <!-- Budget management -->
+    <sys:String x:Key="Categories.Tab.Budgets">預算</sys:String>
+    <sys:String x:Key="Categories.Budget.Hint">為特定分類或全部支出設定每月／每年的預算上限。</sys:String>
+    <sys:String x:Key="Categories.Budget.Add">新增預算</sys:String>
+    <sys:String x:Key="Categories.Budget.Total">（總預算）</sys:String>
+    <sys:String x:Key="Categories.Budget.YearHint">年份（例如 2026）</sys:String>
+    <sys:String x:Key="Categories.Budget.MonthHint">月份（1~12，年度預算可留空）</sys:String>
+    <sys:String x:Key="Categories.Budget.CategoryHint">分類（可留空表示總預算）</sys:String>
+    <sys:String x:Key="Categories.Budget.AmountHint">金額</sys:String>
+    <sys:String x:Key="Categories.Budget.NoteHint">備註（選填）</sys:String>
+    <sys:String x:Key="Categories.Budget.Error.AmountRequired">請輸入大於 0 的金額</sys:String>
+    <sys:String x:Key="Categories.Budget.Error.YearInvalid">年份不在合理範圍</sys:String>
+    <sys:String x:Key="Categories.Budget.Error.MonthInvalid">月份必須介於 1~12</sys:String>
+    <sys:String x:Key="Categories.Budget.Error.Duplicate">該期間已設定預算</sys:String>
+    <sys:String x:Key="Categories.Budget.Toast.Added">已新增預算</sys:String>
+    <sys:String x:Key="Categories.Budget.Toast.Updated">已更新預算</sys:String>
+    <sys:String x:Key="Categories.Budget.Toast.Deleted">已刪除預算</sys:String>
+
+    <!-- Dashboard budget summary card -->
+    <sys:String x:Key="Dashboard.Budget.Title">本月收支</sys:String>
+    <sys:String x:Key="Dashboard.Budget.Income">收入</sys:String>
+    <sys:String x:Key="Dashboard.Budget.Expense">支出</sys:String>
+    <sys:String x:Key="Dashboard.Budget.Net">淨流量</sys:String>
+    <sys:String x:Key="Dashboard.Budget.Budget">總預算</sys:String>
+
+    <sys:String x:Key="Common.Delete">刪除</sys:String>
+
+    <!-- Recurring transactions / subscriptions -->
+    <sys:String x:Key="Nav.Recurring">訂閱排程</sys:String>
+    <sys:String x:Key="Recurring.Title">訂閱與待確認排程</sys:String>
+    <sys:String x:Key="Recurring.Tab.Subscriptions">訂閱項目</sys:String>
+    <sys:String x:Key="Recurring.Tab.Pending">待確認</sys:String>
+    <sys:String x:Key="Recurring.Run">立即結算</sys:String>
+    <sys:String x:Key="Recurring.Run.Status">已套用 {0} 筆，新增 {1} 筆待確認</sys:String>
+    <sys:String x:Key="Recurring.Add">新增</sys:String>
+    <sys:String x:Key="Recurring.NameHint">名稱</sys:String>
+    <sys:String x:Key="Recurring.AmountHint">金額</sys:String>
+    <sys:String x:Key="Recurring.Error.NameRequired">請輸入名稱</sys:String>
+    <sys:String x:Key="Recurring.Error.AmountRequired">請輸入大於 0 的金額</sys:String>
+    <sys:String x:Key="Recurring.Error.IntervalInvalid">間隔必須 ≥ 1</sys:String>
+    <sys:String x:Key="Recurring.Toast.Added">已新增訂閱「{0}」</sys:String>
+    <sys:String x:Key="Recurring.Toast.Deleted">已刪除「{0}」</sys:String>
+    <sys:String x:Key="Recurring.Pending.Confirm">確認</sys:String>
+    <sys:String x:Key="Recurring.Pending.Skip">略過</sys:String>
+    <sys:String x:Key="Recurring.Pending.Toast.Confirmed">已確認</sys:String>
+    <sys:String x:Key="Recurring.Pending.Toast.Skipped">已略過</sys:String>
+
+    <!-- Recurrence frequency -->
+    <sys:String x:Key="Recurring.Frequency.Daily">每日</sys:String>
+    <sys:String x:Key="Recurring.Frequency.Weekly">每週</sys:String>
+    <sys:String x:Key="Recurring.Frequency.BiWeekly">每雙週</sys:String>
+    <sys:String x:Key="Recurring.Frequency.Monthly">每月</sys:String>
+    <sys:String x:Key="Recurring.Frequency.Quarterly">每季</sys:String>
+    <sys:String x:Key="Recurring.Frequency.Yearly">每年</sys:String>
+
+    <!-- Auto generation mode -->
+    <sys:String x:Key="Recurring.Mode.AutoApply">自動寫入</sys:String>
+    <sys:String x:Key="Recurring.Mode.PendingConfirm">需確認</sys:String>
+
+    <!-- Budget mode -->
+    <sys:String x:Key="Categories.Budget.Mode.Monthly">月預算</sys:String>
+    <sys:String x:Key="Categories.Budget.Mode.Yearly">年預算</sys:String>
 </ResourceDictionary>

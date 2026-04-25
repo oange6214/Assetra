@@ -10,6 +10,7 @@ internal static class TradeSchemaMigrator
         "created_at", "updated_at", "commission", "commission_discount",
         "liability_account_id", "principal", "interest_paid", "to_cash_account_id",
         "loan_label", "liability_asset_id", "parent_trade_id",
+        "category_id", "recurring_source_id",
     };
 
     private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -63,11 +64,15 @@ internal static class TradeSchemaMigrator
             MigrateAddColumn(conn, tx, "loan_label", "TEXT");
             MigrateAddColumn(conn, tx, "liability_asset_id", "TEXT");
             MigrateAddColumn(conn, tx, "parent_trade_id", "TEXT");
+            MigrateAddColumn(conn, tx, "category_id", "TEXT");
+            MigrateAddColumn(conn, tx, "recurring_source_id", "TEXT");
 
             cmd.CommandText = """
                 CREATE INDEX IF NOT EXISTS idx_trade_cash_acct ON trade (cash_account_id);
                 CREATE INDEX IF NOT EXISTS idx_trade_loan_label ON trade (loan_label);
                 CREATE INDEX IF NOT EXISTS idx_trade_liability_asset ON trade (liability_asset_id);
+                CREATE INDEX IF NOT EXISTS idx_trade_category ON trade (category_id);
+                CREATE INDEX IF NOT EXISTS idx_trade_recurring_source ON trade (recurring_source_id);
                 """;
             cmd.ExecuteNonQuery();
 

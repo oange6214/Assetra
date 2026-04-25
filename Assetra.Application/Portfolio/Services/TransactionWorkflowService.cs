@@ -87,7 +87,8 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
             RealizedPnlPct: null,
             CashAmount: request.Amount,
             CashAccountId: request.CashAccountId,
-            Note: request.Note);
+            Note: request.Note,
+            CategoryId: request.CategoryId);
 
         await _txService.RecordAsync(mainTrade).ConfigureAwait(false);
 
@@ -120,7 +121,8 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
             RealizedPnlPct: null,
             CashAmount: request.Amount,
             CashAccountId: request.CashAccountId,
-            Note: request.Note);
+            Note: request.Note,
+            CategoryId: request.CategoryId);
 
         await _txService.RecordAsync(mainTrade).ConfigureAwait(false);
 

@@ -3,7 +3,9 @@ using System.Reactive.Disposables;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Features.Alerts;
+using Assetra.WPF.Features.Categories;
 using Assetra.WPF.Features.FinancialOverview;
+using Assetra.WPF.Features.Recurring;
 using Assetra.WPF.Features.Portfolio.Controls;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Settings;
@@ -28,6 +30,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public DashboardViewModel Dashboard { get; }
     public FinancialOverviewViewModel FinancialOverview { get; }
     public AlertsViewModel Alerts { get; }
+    public CategoriesViewModel Categories { get; }
+    public RecurringViewModel Recurring { get; }
     public SettingsViewModel Settings { get; }
     public SnackbarViewModel Snackbar { get; }
 
@@ -118,6 +122,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
         DashboardViewModel dashboard,
         FinancialOverviewViewModel financialOverview,
         AlertsViewModel alerts,
+        CategoriesViewModel categories,
+        RecurringViewModel recurring,
         SettingsViewModel settings,
         SnackbarViewModel snackbar,
         IThemeService themeService,
@@ -130,6 +136,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
         Dashboard = dashboard;
         FinancialOverview = financialOverview;
         Alerts = alerts;
+        Categories = categories;
+        Recurring = recurring;
         Settings = settings;
         Snackbar = snackbar;
         _themeService = themeService;

@@ -16,7 +16,9 @@ using Assetra.Infrastructure.Persistence;
 using Assetra.Infrastructure.Scheduling;
 using Assetra.Infrastructure.Search;
 using Assetra.WPF.Features.Alerts;
+using Assetra.WPF.Features.Categories;
 using Assetra.WPF.Features.FinancialOverview;
+using Assetra.WPF.Features.Recurring;
 using Assetra.WPF.Features.Portfolio.Controls;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
@@ -118,6 +120,14 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<PortfolioSnapshotService>();
         services.AddSingleton<PortfolioBackfillService>();
         services.AddSingleton<IAlertRepository>(_ => new AlertSqliteRepository(dbPath));
+        services.AddSingleton<ICategoryRepository>(_ => new CategorySqliteRepository(dbPath));
+        services.AddSingleton<IAutoCategorizationRuleRepository>(_ => new AutoCategorizationRuleSqliteRepository(dbPath));
+        services.AddSingleton<IBudgetRepository>(_ => new BudgetSqliteRepository(dbPath));
+        services.AddSingleton<Assetra.Application.Budget.Services.MonthlyBudgetSummaryService>();
+        services.AddSingleton<IRecurringTransactionRepository>(_ => new RecurringTransactionSqliteRepository(dbPath));
+        services.AddSingleton<IPendingRecurringEntryRepository>(_ => new PendingRecurringEntrySqliteRepository(dbPath));
+        services.AddSingleton<Assetra.Application.Recurring.Services.RecurringTransactionScheduler>();
+        services.AddSingleton<Assetra.Application.Reports.Services.MonthEndReportService>();
         services.AddSingleton<IAlertService, AlertService>();
         services.AddSingleton<ILoanScheduleService, LoanScheduleService>();
         services.AddSingleton<ITradeRepository>(_ => new TradeSqliteRepository(dbPath));
@@ -240,6 +250,8 @@ internal static class ServiceCollectionExtensions
                 AccountMutation: sp.GetRequiredService<IAccountMutationWorkflowService>(),
                 CreditCardMutation: sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
                 CreditCardTransaction: sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
+                CategoryRepository: sp.GetRequiredService<ICategoryRepository>(),
+                AutoCategorizationRuleRepository: sp.GetRequiredService<IAutoCategorizationRuleRepository>(),
                 // Pre-built Sub-VMs that don't require parent-VM callbacks at construction
                 // time. The parent PortfolioViewModel wires the delegate properties afterward.
                 AddAssetDialog: new AddAssetDialogViewModel(
@@ -263,9 +275,12 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<AllocationViewModel>(sp => new AllocationViewModel(
             sp.GetRequiredService<PortfolioViewModel>(),
             sp.GetRequiredService<IAppSettingsService>()));
+        services.AddSingleton<BudgetSummaryCardViewModel>(sp => new BudgetSummaryCardViewModel(
+            sp.GetRequiredService<Assetra.Application.Budget.Services.MonthlyBudgetSummaryService>()));
         services.AddSingleton<DashboardViewModel>(sp => new DashboardViewModel(
             sp.GetRequiredService<PortfolioViewModel>(),
-            sp.GetService<IThemeService>()));
+            sp.GetService<IThemeService>(),
+            sp.GetService<BudgetSummaryCardViewModel>()));
         services.AddSingleton<FinancialOverviewViewModel>(sp => new FinancialOverviewViewModel(
             sp.GetRequiredService<IFinancialOverviewQueryService>(),
             sp.GetRequiredService<PortfolioViewModel>()));
@@ -277,6 +292,18 @@ internal static class ServiceCollectionExtensions
             sp.GetRequiredService<ISnackbarService>(),
             sp.GetRequiredService<ILocalizationService>(),
             sp.GetService<ICurrencyService>()));
+        services.AddSingleton<CategoriesViewModel>(sp => new CategoriesViewModel(
+            sp.GetRequiredService<ICategoryRepository>(),
+            sp.GetRequiredService<IAutoCategorizationRuleRepository>(),
+            sp.GetRequiredService<IBudgetRepository>(),
+            sp.GetRequiredService<ISnackbarService>(),
+            sp.GetRequiredService<ILocalizationService>()));
+        services.AddSingleton<RecurringViewModel>(sp => new RecurringViewModel(
+            sp.GetRequiredService<IRecurringTransactionRepository>(),
+            sp.GetRequiredService<IPendingRecurringEntryRepository>(),
+            sp.GetRequiredService<Assetra.Application.Recurring.Services.RecurringTransactionScheduler>(),
+            sp.GetRequiredService<ISnackbarService>(),
+            sp.GetRequiredService<ILocalizationService>()));
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<MainWindow>(sp =>
             new MainWindow(sp.GetRequiredService<MainViewModel>()));

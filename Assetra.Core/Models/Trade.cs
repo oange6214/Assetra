@@ -112,4 +112,7 @@ public sealed record Trade(
     /// 此欄位指向主交易的 <see cref="Id"/>。主交易刪除時應連帶刪除所有子記錄。
     /// 一般交易為 null。
     /// </summary>
-    Guid? ParentTradeId = null);         // 主交易 Id（費用子記錄使用）
+    Guid? ParentTradeId = null,          // 主交易 Id（費用子記錄使用）
+    // ── 收支分類 / 週期交易來源（P1 收支管理）────────────────────
+    Guid? CategoryId = null,             // 收支分類（ExpenseCategory.Id）
+    Guid? RecurringSourceId = null);     // 來源訂閱 / 週期交易（RecurringTransaction.Id）

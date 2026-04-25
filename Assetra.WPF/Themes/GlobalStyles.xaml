@@ -168,7 +168,7 @@
     <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="FontSize3xl">48</System:Double>
 
     <!--  ── Layout Sizing Tokens ──  -->
-    <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="DataGridRowHeight">36</System:Double>
+    <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="DataGridRowHeight">52</System:Double>
     <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="DataGridHeaderHeight">40</System:Double>
     <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="DialogWidth">440</System:Double>
     <System:Double xmlns:System="clr-namespace:System;assembly=mscorlib" x:Key="DialogMaxHeight">720</System:Double>
@@ -1243,7 +1243,8 @@
 
     <!--  ComboBox shell + dropdown  -->
     <Style x:Key="FormComboBox" TargetType="ComboBox">
-        <Setter Property="Height" Value="30" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Background" Value="{DynamicResource AppBackground}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="FontFamily" Value="{StaticResource FontBase}" />

@@ -28,13 +28,16 @@ public sealed class TradeSqliteRepository : ITradeRepository
     //  9  realized_pnl_pct      19  to_cash_account_id
     //                           20  liability_asset_id
     //                           21  parent_trade_id
+    //                           22  category_id
+    //                           23  recurring_source_id
 
     private const string SelectClause =
         "id, symbol, exchange, name, trade_type, trade_date, " +
         "price, quantity, realized_pnl, realized_pnl_pct, " +
         "cash_amount, cash_account_id, note, portfolio_entry_id, commission, " +
         "commission_discount, loan_label, principal, interest_paid, " +
-        "to_cash_account_id, liability_asset_id, parent_trade_id";
+        "to_cash_account_id, liability_asset_id, parent_trade_id, " +
+        "category_id, recurring_source_id";
 
     private static Trade MapTrade(SqliteDataReader r) => new(
         Id: Guid.Parse(r.GetString(0)),
@@ -58,7 +61,9 @@ public sealed class TradeSqliteRepository : ITradeRepository
         InterestPaid: r.IsDBNull(18) ? null : (decimal)r.GetDouble(18),
         ToCashAccountId: r.IsDBNull(19) ? null : Guid.Parse(r.GetString(19)),
         LiabilityAssetId: r.IsDBNull(20) ? null : Guid.Parse(r.GetString(20)),
-        ParentTradeId: r.IsDBNull(21) ? null : Guid.Parse(r.GetString(21)));
+        ParentTradeId: r.IsDBNull(21) ? null : Guid.Parse(r.GetString(21)),
+        CategoryId: r.IsDBNull(22) ? null : Guid.Parse(r.GetString(22)),
+        RecurringSourceId: r.IsDBNull(23) ? null : Guid.Parse(r.GetString(23)));
 
     private static void BindTradeParams(SqliteCommand cmd, Trade t)
     {
@@ -84,6 +89,8 @@ public sealed class TradeSqliteRepository : ITradeRepository
         cmd.Parameters.AddWithValue("$to_acct", t.ToCashAccountId.HasValue ? (object)t.ToCashAccountId.Value.ToString() : DBNull.Value);
         cmd.Parameters.AddWithValue("$liability_asset_id", t.LiabilityAssetId.HasValue ? (object)t.LiabilityAssetId.Value.ToString() : DBNull.Value);
         cmd.Parameters.AddWithValue("$parent_id", t.ParentTradeId.HasValue ? (object)t.ParentTradeId.Value.ToString() : DBNull.Value);
+        cmd.Parameters.AddWithValue("$category_id", t.CategoryId.HasValue ? (object)t.CategoryId.Value.ToString() : DBNull.Value);
+        cmd.Parameters.AddWithValue("$recurring_source_id", t.RecurringSourceId.HasValue ? (object)t.RecurringSourceId.Value.ToString() : DBNull.Value);
     }
 
     // ─── Queries ─────────────────────────────────────────────────────────
@@ -152,14 +159,16 @@ public sealed class TradeSqliteRepository : ITradeRepository
                  portfolio_entry_id, commission, commission_discount,
                  loan_label, principal, interest_paid, to_cash_account_id,
                  liability_asset_id,
-                 parent_trade_id, created_at, updated_at)
+                 parent_trade_id, category_id, recurring_source_id,
+                 created_at, updated_at)
             VALUES
                 ($id, $sym, $ex, $name, $type, $date, $price, $qty,
                  $rpnl, $rpct, $cash, $acct, $note,
                  $pentry, $comm, $comm_d,
                  $loan_label, $princ, $int, $to_acct,
                  $liability_asset_id,
-                 $parent_id, $created_at, $updated_at);
+                 $parent_id, $category_id, $recurring_source_id,
+                 $created_at, $updated_at);
             """;
         BindTradeParams(cmd, trade);
         var now = DateTime.UtcNow.ToString("o");
@@ -185,7 +194,10 @@ public sealed class TradeSqliteRepository : ITradeRepository
                 loan_label = $loan_label, principal = $princ,
                 interest_paid = $int, to_cash_account_id = $to_acct,
                 liability_asset_id = $liability_asset_id,
-                parent_trade_id = $parent_id, updated_at = $updated_at
+                parent_trade_id = $parent_id,
+                category_id = $category_id,
+                recurring_source_id = $recurring_source_id,
+                updated_at = $updated_at
             WHERE id = $id;
             """;
         BindTradeParams(cmd, trade);

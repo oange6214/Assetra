@@ -51,6 +51,51 @@
                     </RadioButton.ToolTip>
                 </RadioButton>
 
+                <!--  Categories (收支分類)  -->
+                <RadioButton
+                    Content="{DynamicResource Nav.Categories}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Categories}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE8FD;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource Nav.Categories}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
+                <!--  Recurring (訂閱與待確認) with pending count badge  -->
+                <Grid>
+                    <RadioButton
+                        Content="{DynamicResource Nav.Recurring}"
+                        GroupName="NavSections"
+                        IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Recurring}"
+                        Style="{StaticResource NavRailBtn}"
+                        Tag="&#xE823;">
+                        <RadioButton.ToolTip>
+                            <ToolTip Content="{DynamicResource Nav.Recurring}" Style="{DynamicResource NavRailToolTip}" />
+                        </RadioButton.ToolTip>
+                    </RadioButton>
+                    <Border
+                        Width="18"
+                        Height="18"
+                        Margin="18,4,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Background="{DynamicResource AppAccent}"
+                        CornerRadius="8"
+                        IsHitTestVisible="False"
+                        Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource FontTabular}"
+                            FontSize="{StaticResource FontSizeXs}"
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource AppTextOnAccent}"
+                            Text="{Binding Recurring.PendingBadge}" />
+                    </Border>
+                </Grid>
+
                 <!--  警示 with triggered-count badge  -->
                 <Grid>
                     <RadioButton

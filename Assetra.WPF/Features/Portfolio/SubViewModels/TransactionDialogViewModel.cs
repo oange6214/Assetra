@@ -2,9 +2,11 @@ using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
+using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Core.Trading;
+using Assetra.WPF.Features.Categories;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -45,7 +47,10 @@ internal sealed record TransactionDialogDependencies(
     Func<Task> LoadTradesAsync,
     Func<Task> ReloadAccountBalancesAsync,
     Action RebuildTotals,
-    Func<string, string, string> Localize);
+    Func<string, string, string> Localize,
+    // P1 收支管理：收支分類與自動分類規則來源（皆可為 null 以保留向後相容）
+    ICategoryRepository? CategoryRepository = null,
+    IAutoCategorizationRuleRepository? AutoCategorizationRuleRepository = null);
 
 /// <summary>
 /// Owns all transaction-dialog observable state, validation, and commands.
@@ -64,6 +69,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private readonly PortfolioTradeDialogController _tradeDialogController;
     private readonly IAccountUpsertWorkflowService? _accountUpsert;
     private readonly ISnackbarService? _snackbar;
+    private readonly ICategoryRepository? _categoryRepository;
+    private readonly IAutoCategorizationRuleRepository? _ruleRepository;
+    private IReadOnlyList<AutoCategorizationRule> _autoRulesCache = Array.Empty<AutoCategorizationRule>();
 
     // Shared parent collections exposed as forwarding properties so TxForm XAML
     // (whose DataContext becomes this VM) can still bind to CashAccounts, Positions, etc.
@@ -129,6 +137,81 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _reloadAccountBalancesAsync = deps.ReloadAccountBalancesAsync;
         _rebuildTotals = deps.RebuildTotals;
         _localize = deps.Localize;
+        _categoryRepository = deps.CategoryRepository;
+        _ruleRepository = deps.AutoCategorizationRuleRepository;
+
+        // 啟動時載入分類與自動規則快照（失敗不影響其它功能）
+        if (_categoryRepository is not null || _ruleRepository is not null)
+            _ = LoadCategoriesAsync();
+    }
+
+    // ── P1 收支管理：分類下拉與自動分類 ────────────────────────────
+
+    /// <summary>支出分類（已過濾封存與排序）。供 CashFlow 等支出表單下拉選用。</summary>
+    public ObservableCollection<CategoryRowViewModel> ExpenseCategories { get; } = [];
+
+    /// <summary>收入分類（已過濾封存與排序）。供 Income 表單下拉選用。</summary>
+    public ObservableCollection<CategoryRowViewModel> IncomeCategories { get; } = [];
+
+    [ObservableProperty] private Guid? _txCategoryId;
+    private bool _txCategoryAutoMatched;
+    private bool _suppressCategoryAutoTracking;
+
+    private async Task LoadCategoriesAsync()
+    {
+        try
+        {
+            if (_categoryRepository is not null)
+            {
+                var cats = await _categoryRepository.GetAllAsync().ConfigureAwait(true);
+                ExpenseCategories.Clear();
+                IncomeCategories.Clear();
+                foreach (var c in cats.Where(x => !x.IsArchived).OrderBy(x => x.SortOrder))
+                {
+                    var row = CategoryRowViewModel.FromModel(c);
+                    if (c.Kind == CategoryKind.Expense) ExpenseCategories.Add(row);
+                    else IncomeCategories.Add(row);
+                }
+            }
+            if (_ruleRepository is not null)
+            {
+                _autoRulesCache = await _ruleRepository.GetAllAsync().ConfigureAwait(true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to load categories/rules for transaction dialog");
+        }
+    }
+
+    partial void OnTxNoteChanged(string value)
+    {
+        // 僅當使用者尚未手動指定分類，或上次是被自動匹配的，才重新自動匹配
+        if (!_txCategoryAutoMatched && TxCategoryId.HasValue) return;
+        if (_autoRulesCache.Count == 0) return;
+        var match = AutoCategorizationEngine.Match(value, _autoRulesCache);
+        _suppressCategoryAutoTracking = true;
+        try
+        {
+            if (match.HasValue)
+            {
+                TxCategoryId = match.Value;
+                _txCategoryAutoMatched = true;
+            }
+            else if (_txCategoryAutoMatched)
+            {
+                TxCategoryId = null;
+                _txCategoryAutoMatched = false;
+            }
+        }
+        finally { _suppressCategoryAutoTracking = false; }
+    }
+
+    partial void OnTxCategoryIdChanged(Guid? value)
+    {
+        // 使用者主動透過下拉變更 → 取消自動匹配旗標，避免 Note 變更覆寫使用者選擇
+        if (!_suppressCategoryAutoTracking)
+            _txCategoryAutoMatched = false;
     }
 
     // ── Transaction Dialog state ──────────────────────────────────────────────────────
@@ -748,6 +831,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxCommissionDiscountError = string.Empty;
         TxAmount = string.Empty;
         TxNote = string.Empty;
+        _suppressCategoryAutoTracking = true;
+        try { TxCategoryId = null; } finally { _suppressCategoryAutoTracking = false; }
+        _txCategoryAutoMatched = false;
         // 新增（非編輯）時帶入使用者在現金頁設定的預設帳戶
         TxCashAccount = state.TxCashAccount;
         TxDivPosition = null;
@@ -1347,7 +1433,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             tradeDate,
             cashAccId,
             TxNote,
-            fee));
+            fee,
+            TxCategoryId));
 
         await _reloadAccountBalancesAsync();
         CloseTxDialog();
@@ -1460,7 +1547,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             cashAccId.Value,
             accountName,
             cleanNote,
-            fee));
+            fee,
+            TxCategoryId));
 
         await _reloadAccountBalancesAsync();
         CloseTxDialog();

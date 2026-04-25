@@ -7,7 +7,8 @@ public sealed record IncomeTransactionRequest(
     DateTime TradeDate,
     Guid? CashAccountId,
     string Note,
-    decimal Fee);
+    decimal Fee,
+    Guid? CategoryId = null);
 
 public sealed record CashDividendTransactionRequest(
     string Symbol,
@@ -35,7 +36,8 @@ public sealed record CashFlowTransactionRequest(
     Guid CashAccountId,
     string AccountName,
     string? Note,
-    decimal Fee);
+    decimal Fee,
+    Guid? CategoryId = null);
 
 public sealed record LoanTransactionRequest(
     TradeType Type,

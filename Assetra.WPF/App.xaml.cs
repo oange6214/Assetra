@@ -10,6 +10,7 @@ using SkiaSharp;
 using Assetra.Core.Interfaces;
 using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Alerts;
+using Assetra.WPF.Features.Categories;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Infrastructure;
 using Assetra.WPF.Infrastructure.Converters;
@@ -97,6 +98,9 @@ public partial class App : System.Windows.Application
         splash.Advance("Splash.Alerts");
         var alertsVm = _host.Services.GetRequiredService<AlertsViewModel>();
         await alertsVm.LoadAsync();
+
+        var categoriesVm = _host.Services.GetRequiredService<CategoriesViewModel>();
+        await categoriesVm.LoadAsync();
 
         // Show main window, close splash
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();

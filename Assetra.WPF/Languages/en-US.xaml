@@ -567,4 +567,104 @@
     <sys:String x:Key="Settings.FugleApiKey">Fugle API Key</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">Market open</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">Market closed</sys:String>
+
+    <!--  Categories  -->
+    <sys:String x:Key="Nav.Categories">Categories</sys:String>
+    <sys:String x:Key="Categories.Title">Income &amp; Expense Categories</sys:String>
+    <sys:String x:Key="Categories.Expense">Expense</sys:String>
+    <sys:String x:Key="Categories.Income">Income</sys:String>
+    <sys:String x:Key="Categories.ShowArchived">Show archived</sys:String>
+    <sys:String x:Key="Categories.ArchivedTag">(archived)</sys:String>
+    <sys:String x:Key="Categories.Add">Add category</sys:String>
+    <sys:String x:Key="Categories.NameHint">Category name</sys:String>
+    <sys:String x:Key="Categories.IconHint">Icon (emoji)</sys:String>
+    <sys:String x:Key="Categories.ColorHint">Color #RRGGBB</sys:String>
+    <sys:String x:Key="Categories.ToggleArchive">Toggle archive</sys:String>
+    <sys:String x:Key="Categories.Error.NameRequired">Please enter a category name</sys:String>
+    <sys:String x:Key="Categories.Error.NameDuplicate">A category with this name already exists</sys:String>
+    <sys:String x:Key="Categories.Toast.Added">Added category "{0}"</sys:String>
+    <sys:String x:Key="Categories.Toast.Updated">Updated category "{0}"</sys:String>
+    <sys:String x:Key="Categories.Toast.Archived">Archived "{0}"</sys:String>
+    <sys:String x:Key="Categories.Toast.Restored">Restored "{0}"</sys:String>
+    <sys:String x:Key="Categories.Toast.Deleted">Deleted category "{0}"</sys:String>
+
+    <!--  Categories — Tabs &amp; Auto-categorization Rules  -->
+    <sys:String x:Key="Categories.Tab.Categories">Categories</sys:String>
+    <sys:String x:Key="Categories.Tab.Rules">Auto-categorization rules</sys:String>
+    <sys:String x:Key="Categories.Rule.Hint">When a transaction note contains the keyword, apply the chosen category. Lower priority numbers win.</sys:String>
+    <sys:String x:Key="Categories.Rule.Add">Add rule</sys:String>
+    <sys:String x:Key="Categories.Rule.KeywordHint">Keyword</sys:String>
+    <sys:String x:Key="Categories.Rule.CategoryHint">Category</sys:String>
+    <sys:String x:Key="Categories.Rule.PriorityHint">Priority</sys:String>
+    <sys:String x:Key="Categories.Rule.CaseSensitive">Case sensitive</sys:String>
+    <sys:String x:Key="Categories.Rule.ToggleEnabled">Enable / disable</sys:String>
+    <sys:String x:Key="Categories.Rule.UnknownCategory">(unknown category)</sys:String>
+    <sys:String x:Key="Categories.Rule.Error.KeywordRequired">Please enter a keyword</sys:String>
+    <sys:String x:Key="Categories.Rule.Error.CategoryRequired">Please choose a category</sys:String>
+    <sys:String x:Key="Categories.Rule.Toast.Added">Added rule "{0}"</sys:String>
+    <sys:String x:Key="Categories.Rule.Toast.Updated">Updated rule "{0}"</sys:String>
+    <sys:String x:Key="Categories.Rule.Toast.Deleted">Deleted rule "{0}"</sys:String>
+
+    <!-- Budget management -->
+    <sys:String x:Key="Categories.Tab.Budgets">Budgets</sys:String>
+    <sys:String x:Key="Categories.Budget.Hint">Set a monthly or yearly cap per category or for total expenses.</sys:String>
+    <sys:String x:Key="Categories.Budget.Add">Add budget</sys:String>
+    <sys:String x:Key="Categories.Budget.Total">(Total)</sys:String>
+    <sys:String x:Key="Categories.Budget.YearHint">Year (e.g., 2026)</sys:String>
+    <sys:String x:Key="Categories.Budget.MonthHint">Month (1-12, leave blank for yearly)</sys:String>
+    <sys:String x:Key="Categories.Budget.CategoryHint">Category (blank = total)</sys:String>
+    <sys:String x:Key="Categories.Budget.AmountHint">Amount</sys:String>
+    <sys:String x:Key="Categories.Budget.NoteHint">Note (optional)</sys:String>
+    <sys:String x:Key="Categories.Budget.Error.AmountRequired">Amount must be greater than 0</sys:String>
+    <sys:String x:Key="Categories.Budget.Error.YearInvalid">Year is out of range</sys:String>
+    <sys:String x:Key="Categories.Budget.Error.MonthInvalid">Month must be between 1 and 12</sys:String>
+    <sys:String x:Key="Categories.Budget.Error.Duplicate">A budget already exists for this period</sys:String>
+    <sys:String x:Key="Categories.Budget.Toast.Added">Budget added</sys:String>
+    <sys:String x:Key="Categories.Budget.Toast.Updated">Budget updated</sys:String>
+    <sys:String x:Key="Categories.Budget.Toast.Deleted">Budget deleted</sys:String>
+
+    <!-- Dashboard budget summary card -->
+    <sys:String x:Key="Dashboard.Budget.Title">This Month</sys:String>
+    <sys:String x:Key="Dashboard.Budget.Income">Income</sys:String>
+    <sys:String x:Key="Dashboard.Budget.Expense">Expense</sys:String>
+    <sys:String x:Key="Dashboard.Budget.Net">Net</sys:String>
+    <sys:String x:Key="Dashboard.Budget.Budget">Budget</sys:String>
+
+    <sys:String x:Key="Common.Delete">Delete</sys:String>
+
+    <!-- Recurring transactions / subscriptions -->
+    <sys:String x:Key="Nav.Recurring">Recurring</sys:String>
+    <sys:String x:Key="Recurring.Title">Subscriptions &amp; Pending</sys:String>
+    <sys:String x:Key="Recurring.Tab.Subscriptions">Subscriptions</sys:String>
+    <sys:String x:Key="Recurring.Tab.Pending">Pending</sys:String>
+    <sys:String x:Key="Recurring.Run">Run now</sys:String>
+    <sys:String x:Key="Recurring.Run.Status">Applied {0}, queued {1} pending</sys:String>
+    <sys:String x:Key="Recurring.Add">Add</sys:String>
+    <sys:String x:Key="Recurring.NameHint">Name</sys:String>
+    <sys:String x:Key="Recurring.AmountHint">Amount</sys:String>
+    <sys:String x:Key="Recurring.Error.NameRequired">Name is required</sys:String>
+    <sys:String x:Key="Recurring.Error.AmountRequired">Amount must be greater than 0</sys:String>
+    <sys:String x:Key="Recurring.Error.IntervalInvalid">Interval must be ≥ 1</sys:String>
+    <sys:String x:Key="Recurring.Toast.Added">Added subscription "{0}"</sys:String>
+    <sys:String x:Key="Recurring.Toast.Deleted">Deleted "{0}"</sys:String>
+    <sys:String x:Key="Recurring.Pending.Confirm">Confirm</sys:String>
+    <sys:String x:Key="Recurring.Pending.Skip">Skip</sys:String>
+    <sys:String x:Key="Recurring.Pending.Toast.Confirmed">Confirmed</sys:String>
+    <sys:String x:Key="Recurring.Pending.Toast.Skipped">Skipped</sys:String>
+
+    <!-- Recurrence frequency -->
+    <sys:String x:Key="Recurring.Frequency.Daily">Daily</sys:String>
+    <sys:String x:Key="Recurring.Frequency.Weekly">Weekly</sys:String>
+    <sys:String x:Key="Recurring.Frequency.BiWeekly">Bi-weekly</sys:String>
+    <sys:String x:Key="Recurring.Frequency.Monthly">Monthly</sys:String>
+    <sys:String x:Key="Recurring.Frequency.Quarterly">Quarterly</sys:String>
+    <sys:String x:Key="Recurring.Frequency.Yearly">Yearly</sys:String>
+
+    <!-- Auto generation mode -->
+    <sys:String x:Key="Recurring.Mode.AutoApply">Auto apply</sys:String>
+    <sys:String x:Key="Recurring.Mode.PendingConfirm">Needs confirm</sys:String>
+
+    <!-- Budget mode -->
+    <sys:String x:Key="Categories.Budget.Mode.Monthly">Monthly</sys:String>
+    <sys:String x:Key="Categories.Budget.Mode.Yearly">Yearly</sys:String>
 </ResourceDictionary>

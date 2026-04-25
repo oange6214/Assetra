@@ -3,10 +3,12 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:alerts="clr-namespace:Assetra.WPF.Features.Alerts"
+    xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
     xmlns:financialoverview="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:portfolio="clr-namespace:Assetra.WPF.Features.Portfolio"
+    xmlns:recurring="clr-namespace:Assetra.WPF.Features.Recurring"
     xmlns:settings="clr-namespace:Assetra.WPF.Features.Settings"
     xmlns:shell="clr-namespace:Assetra.WPF.Shell"
     xmlns:snackbar="clr-namespace:Assetra.WPF.Features.Snackbar"
@@ -191,6 +193,16 @@
                 <!--  財務總覽 / 配置  -->
                 <Grid d:Visibility="Collapsed">
                     <financialoverview:FinancialOverviewView DataContext="{Binding FinancialOverview}" Visibility="{Binding DataContext.NavRail.IsFinancialOverviewActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </Grid>
+
+                <!--  收支分類  -->
+                <Grid d:Visibility="Collapsed">
+                    <categories:CategoriesView DataContext="{Binding Categories}" Visibility="{Binding DataContext.NavRail.IsCategoriesActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </Grid>
+
+                <!--  訂閱與待確認  -->
+                <Grid d:Visibility="Collapsed">
+                    <recurring:RecurringView DataContext="{Binding Recurring}" Visibility="{Binding DataContext.NavRail.IsRecurringActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </Grid>
 
                 <!--  警示  -->

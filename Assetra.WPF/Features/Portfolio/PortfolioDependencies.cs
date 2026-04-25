@@ -94,7 +94,15 @@ public sealed record PortfolioServices(
     /// resolved workflow services. Pass an explicit instance from DI (or a test double)
     /// to override the default construction.
     /// </summary>
-    SubViewModels.LoanDialogViewModel? Loan = null)
+    SubViewModels.LoanDialogViewModel? Loan = null,
+    /// <summary>
+    /// 收支分類資料來源（P1 收支管理）。為 null 時 TxForm 不顯示分類下拉。
+    /// </summary>
+    ICategoryRepository? CategoryRepository = null,
+    /// <summary>
+    /// 自動分類規則來源（P1 收支管理）。為 null 時不執行 Note → Category 自動匹配。
+    /// </summary>
+    IAutoCategorizationRuleRepository? AutoCategorizationRuleRepository = null)
 {
     /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。
