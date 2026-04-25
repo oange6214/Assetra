@@ -78,6 +78,20 @@ public partial class AddAssetDialogViewModel : ObservableObject
     [ObservableProperty] private bool _addDialogIsInvestmentMode = true;
     [ObservableProperty] private string _addDialogMode = "account";
 
+    /// <summary>True while the user is on the type-picker step (liability mode only).</summary>
+    [ObservableProperty] private bool _isTypePickerStep;
+
+    public bool IsFormStep => !IsTypePickerStep;
+
+    /// <summary>True only when the liability dialog is on its form step (back arrow visible).</summary>
+    public bool IsLiabilityFormStep => IsFormStep && AddDialogMode == "liability";
+
+    partial void OnIsTypePickerStepChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsFormStep));
+        OnPropertyChanged(nameof(IsLiabilityFormStep));
+    }
+
     // ── Asset type ───────────────────────────────────────────────────────────────────
 
     [ObservableProperty] private string _addAssetType = "stock";
@@ -369,6 +383,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(IsAccountDialogMode));
         OnPropertyChanged(nameof(IsLiabilityDialogMode));
+        OnPropertyChanged(nameof(IsLiabilityFormStep));
     }
 
     // ── Commands ─────────────────────────────────────────────────────────────────────
@@ -378,6 +393,24 @@ public partial class AddAssetDialogViewModel : ObservableObject
     {
         IsSuggestionsOpen = false;
         IsAddDialogOpen = false;
+    }
+
+    /// <summary>Liability picker step: user picks a subtype (loan / creditCard / …) and advances to the form.</summary>
+    [RelayCommand]
+    private void SelectLiabilityType(string kind)
+    {
+        if (string.IsNullOrEmpty(kind)) return;
+        AddAssetType = kind;
+        AddError = string.Empty;
+        IsTypePickerStep = false;
+    }
+
+    /// <summary>Returns from the form to the type-picker step without losing dialog open state.</summary>
+    [RelayCommand]
+    private void BackToTypePicker()
+    {
+        AddError = string.Empty;
+        IsTypePickerStep = true;
     }
 
     [RelayCommand]

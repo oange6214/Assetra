@@ -273,6 +273,10 @@
     <sys:String x:Key="Portfolio.Dialog.TypeLiability">Liability</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeCreditCard">Credit Card</sys:String>
     <sys:String x:Key="Portfolio.Dialog.TypeLoan">Loan</sys:String>
+    <sys:String x:Key="Portfolio.Liability.PickType.Heading">Choose liability type</sys:String>
+    <sys:String x:Key="Portfolio.Liability.PickType.LoanDesc">Bank or personal loan with amortization schedule</sys:String>
+    <sys:String x:Key="Portfolio.Liability.PickType.CreditCardDesc">Credit card with billing day and limit tracking</sys:String>
+    <sys:String x:Key="Common.Back">Back</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddName">Name</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddCost">Purchase Cost</sys:String>
     <sys:String x:Key="Portfolio.Dialog.CryptoSymbol">Symbol (e.g. BTC, ETH)</sys:String>

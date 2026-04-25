@@ -1483,6 +1483,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         SelectedTab = PortfolioTab.Accounts;
         AddAssetDialog.AddDialogMode = "account";
         AddAssetDialog.AddAssetType = "cash";
+        AddAssetDialog.IsTypePickerStep = false;
         AddAssetDialog.AddError = string.Empty;
         AddAssetDialog.AddAccountName = string.Empty;
         AddAssetDialog.AddInitialDepositEnabled = false;
@@ -1497,7 +1498,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     {
         SelectedTab = PortfolioTab.Liability;
         AddAssetDialog.AddDialogMode = "liability";
-        AddAssetDialog.AddAssetType = "loan";
+        AddAssetDialog.IsTypePickerStep = true;
         AddAssetDialog.AddError = string.Empty;
         AddAssetDialog.AddLoanName = string.Empty;
         AddAssetDialog.AddLoanAmount = string.Empty;
