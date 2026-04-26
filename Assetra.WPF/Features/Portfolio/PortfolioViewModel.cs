@@ -213,58 +213,14 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(IsTradesTab));
     }
 
-    // 負債健康度（供 Liability tab 摘要卡片使用）
-    /// <summary>負債 / 總資產，0–100 範圍，供 ProgressBar 直接綁定。Cached via RecalcFinancialSummary().</summary>
-    [ObservableProperty] private decimal _debtRatioValue;
-    public string DebtRatioDisplay => TotalAssets > 0 ? $"{DebtRatioValue:F1}%" : "—";
-    public string LeverageRatioDisplay => NetWorth > 0 ? $"{TotalAssets / NetWorth:F2}" : "—";
-    public bool IsDebtHealthy => DebtRatioValue < 30m;
-    public bool IsDebtWarning => DebtRatioValue is >= 30m and < 50m;
-    public bool IsDebtDanger => DebtRatioValue >= 50m;
+    // 負債健康度 + 緊急預備金 — owned by FinancialSummaryViewModel.
+    public FinancialSummaryViewModel Financial { get; }
 
-    /// <summary>"healthy" | "warning" | "danger" | "none" — single binding for XAML color triggers.</summary>
-    public string DebtStatusTag => IsDebtDanger ? "danger" : IsDebtWarning ? "warning" : IsDebtHealthy ? "healthy" : "none";
-
-    /// <summary>所有負債的原始借款總額（OriginalAmount = 0 的條目以 Balance 補位）。Cached via RecalcFinancialSummary().</summary>
-    [ObservableProperty] private decimal _totalOriginalLiabilities;
-
-    /// <summary>已繳百分比（0–100），供 ProgressBar 直接綁定。Cached via RecalcFinancialSummary().</summary>
-    [ObservableProperty] private decimal _paidPercentValue;
-
-    public string PaidPercentDisplay => $"{PaidPercentValue:F1}%";
-
-    public string TotalOriginalDisplay =>
-        $"NT${TotalOriginalLiabilities:N0}";
-
-    // 緊急預備金（供 Cash tab 摘要卡片使用）
-    /// <summary>每月預估開銷（從 AppSettings 讀取，可由 UI 修改）。</summary>
-    [ObservableProperty] private decimal _monthlyExpense;
-
-    partial void OnMonthlyExpenseChanged(decimal value)
+    private void OnMonthlyExpenseFromSubVm(decimal value)
     {
-        ApplyFinancialSummary(_summaryService.Calculate(BuildSummaryInput()));
-        OnPropertyChanged(nameof(IsMonthlyExpenseSet));
+        Financial.Apply(_summaryService.Calculate(BuildSummaryInput()));
         _ = SaveMonthlyExpenseAsync();
     }
-
-    public bool IsMonthlyExpenseSet => MonthlyExpense > 0;
-
-    /// <summary>可撐幾個月（無上限）。Cached via RecalcFinancialSummary().</summary>
-    [ObservableProperty] private decimal _emergencyFundMonths;
-
-    public string EmergencyFundMonthsDisplay =>
-        MonthlyExpense > 0 ? $"{EmergencyFundMonths:F1}" : "—";
-
-    /// <summary>0–100，超過 12 個月視為滿格。</summary>
-    public decimal EmergencyFundBarValue =>
-        MonthlyExpense > 0 ? Math.Min(EmergencyFundMonths / 12m * 100m, 100m) : 0m;
-
-    public bool IsEmergencySafe => EmergencyFundMonths >= 6m;
-    public bool IsEmergencyWarning => EmergencyFundMonths is >= 3m and < 6m;
-    public bool IsEmergencyDanger => MonthlyExpense > 0 && EmergencyFundMonths < 3m;
-
-    /// <summary>"safe" | "warning" | "danger" | "none" — single binding for XAML color triggers.</summary>
-    public string EmergencyStatusTag => IsEmergencyDanger ? "danger" : IsEmergencyWarning ? "warning" : IsEmergencySafe ? "safe" : "none";
 
     private async Task SaveMonthlyExpenseAsync()
     {
@@ -272,7 +228,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             return;
         try
         {
-            var updated = _settingsService.Current with { MonthlyExpense = MonthlyExpense };
+            var updated = _settingsService.Current with { MonthlyExpense = Financial.MonthlyExpense };
             await _settingsService.SaveAsync(updated);
         }
         catch (Exception ex)
@@ -460,6 +416,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _localization = ui.Localization;
         Allocation = new AllocationPanelViewModel(ui.Localization);
         DivCalendar = new DividendCalendarViewModel(Trades);
+        Financial = new FinancialSummaryViewModel(
+            getTotalAssets: () => TotalAssets,
+            getNetWorth: () => NetWorth,
+            onMonthlyExpenseChanged: OnMonthlyExpenseFromSubVm);
         History = new PortfolioHistoryViewModel(
             services.HistoryQuery ?? new NullPortfolioHistoryQueryService(),
             ui.Localization);
@@ -847,8 +807,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     public async Task LoadAsync()
     {
         // Bypass OnMonthlyExpenseChanged (avoids premature save); RebuildTotals() below reads MonthlyExpense.
-        // Restore persisted monthly expense (set via property to avoid triggering save-back on load)
-        SetProperty(ref _monthlyExpense, _settingsService?.Current?.MonthlyExpense ?? 0m, nameof(MonthlyExpense));
+        Financial.InitializeMonthlyExpense(_settingsService?.Current?.MonthlyExpense ?? 0m);
 
         var loaded = await _loadService.LoadAsync();
 
@@ -1073,43 +1032,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         IsDayPnlPositive = summary.IsDayPnlPositive;
 
         // Recompute cached financial summary properties and notify all dependents
-        ApplyFinancialSummary(summary);
+        Financial.Apply(summary);
 
         Allocation.Apply(summary.AllocationSlices);
 
         // Fire-and-forget: record today's snapshot once prices are live
         _ = RecordSnapshotAsync();
-    }
-
-    /// <summary>
-    /// Recomputes all cached financial-summary properties that depend on Liabilities,
-    /// TotalAssets, TotalLiabilities, TotalCash, NetWorth, or MonthlyExpense, then
-    /// fires PropertyChanged for every downstream display property.
-    /// Call this from RebuildTotals() and OnMonthlyExpenseChanged().
-    /// </summary>
-    private void ApplyFinancialSummary(PortfolioSummaryResult summary)
-    {
-        TotalOriginalLiabilities = summary.TotalOriginalLiabilities;
-        DebtRatioValue = summary.DebtRatioValue;
-        PaidPercentValue = summary.PaidPercentValue;
-        EmergencyFundMonths = summary.EmergencyFundMonths;
-
-        // Notify derived display properties (the backing-field setters above already
-        // raise PropertyChanged for the four cached properties themselves)
-        OnPropertyChanged(nameof(DebtRatioDisplay));
-        OnPropertyChanged(nameof(LeverageRatioDisplay));
-        OnPropertyChanged(nameof(IsDebtHealthy));
-        OnPropertyChanged(nameof(IsDebtWarning));
-        OnPropertyChanged(nameof(IsDebtDanger));
-        OnPropertyChanged(nameof(DebtStatusTag));
-        OnPropertyChanged(nameof(PaidPercentDisplay));
-        OnPropertyChanged(nameof(TotalOriginalDisplay));
-        OnPropertyChanged(nameof(EmergencyFundMonthsDisplay));
-        OnPropertyChanged(nameof(EmergencyFundBarValue));
-        OnPropertyChanged(nameof(IsEmergencySafe));
-        OnPropertyChanged(nameof(IsEmergencyWarning));
-        OnPropertyChanged(nameof(IsEmergencyDanger));
-        OnPropertyChanged(nameof(EmergencyStatusTag));
     }
 
     private async Task RecordSnapshotAsync()
@@ -1246,7 +1174,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(TotalAssets));
         OnPropertyChanged(nameof(NetWorth));
         SellPanel.NotifyCurrencyChanged();
-        ApplyFinancialSummary(_summaryService.Calculate(BuildSummaryInput()));
+        Financial.Apply(_summaryService.Calculate(BuildSummaryInput()));
     }
 
     private PortfolioSummaryInput BuildSummaryInput()
@@ -1267,7 +1195,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 l.AssetId ?? Guid.Empty,
                 l.Balance,
                 l.OriginalAmount)).ToList(),
-            MonthlyExpense);
+            Financial.MonthlyExpense);
     }
 
     /// <summary>

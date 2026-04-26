@@ -69,7 +69,7 @@
                                 CornerRadius="{StaticResource RadiusSm}">
                                 <Border.Width>
                                     <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
-                                        <Binding Path="PaidPercentValue" />
+                                        <Binding Path="Financial.PaidPercentValue" />
                                         <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
                                     </MultiBinding>
                                 </Border.Width>
@@ -95,7 +95,7 @@
                                         FontSize="{StaticResource FontSizeBase}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppUp}"
-                                        Text="{Binding PaidPercentDisplay, Mode=OneWay}" />
+                                        Text="{Binding Financial.PaidPercentDisplay, Mode=OneWay}" />
                                 </StackPanel>
                             </Border>
                             <Border
@@ -116,7 +116,7 @@
                                         FontSize="{StaticResource FontSizeBase}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding TotalOriginalDisplay, Mode=OneWay}" />
+                                        Text="{Binding Financial.TotalOriginalDisplay, Mode=OneWay}" />
                                 </StackPanel>
                             </Border>
                         </UniformGrid>
@@ -152,15 +152,15 @@
                                 <TextBlock
                                     FontSize="{StaticResource FontSizeXs}"
                                     FontWeight="SemiBold"
-                                    Foreground="{Binding DebtStatusTag, Converter={StaticResource StatusTagToBrush}}">
+                                    Foreground="{Binding Financial.DebtStatusTag, Converter={StaticResource StatusTagToBrush}}">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Healthy}" />
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding DebtStatusTag}" Value="warning">
+                                                <DataTrigger Binding="{Binding Financial.DebtStatusTag}" Value="warning">
                                                     <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Warning}" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding DebtStatusTag}" Value="danger">
+                                                <DataTrigger Binding="{Binding Financial.DebtStatusTag}" Value="danger">
                                                     <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Danger}" />
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -189,7 +189,7 @@
                                         FontSize="{StaticResource FontSizeBase}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding DebtRatioDisplay}" />
+                                        Text="{Binding Financial.DebtRatioDisplay}" />
                                 </StackPanel>
                             </Border>
                             <Border
@@ -210,7 +210,7 @@
                                         FontSize="{StaticResource FontSizeBase}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding LeverageRatioDisplay}" />
+                                        Text="{Binding Financial.LeverageRatioDisplay}" />
                                 </StackPanel>
                             </Border>
                         </UniformGrid>
@@ -226,11 +226,11 @@
                             <Border
                                 Height="6"
                                 HorizontalAlignment="Left"
-                                Background="{Binding DebtStatusTag, Converter={StaticResource StatusTagToBrush}}"
+                                Background="{Binding Financial.DebtStatusTag, Converter={StaticResource StatusTagToBrush}}"
                                 CornerRadius="{StaticResource RadiusSm}">
                                 <Border.Width>
                                     <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
-                                        <Binding Path="DebtRatioValue" />
+                                        <Binding Path="Financial.DebtRatioValue" />
                                         <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
                                     </MultiBinding>
                                 </Border.Width>

@@ -94,7 +94,7 @@ public sealed partial class DashboardViewModel : ObservableObject
     public string  TotalAssetsDisplay    => $"NT${TotalAssets:N0}";
     public decimal TotalLiabilities      => _portfolio.TotalLiabilities;
     public string  TotalLiabilitiesDisplay => $"NT${TotalLiabilities:N0}";
-    public decimal DebtRatioValue        => _portfolio.DebtRatioValue;
+    public decimal DebtRatioValue        => _portfolio.Financial.DebtRatioValue;
     public decimal LeverageRatio         => _portfolio.NetWorth > 0
         ? _portfolio.TotalAssets / _portfolio.NetWorth
         : 0m;
