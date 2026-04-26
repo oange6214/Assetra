@@ -1,12 +1,6 @@
 using System.Net.Http;
 using System.Reactive.Concurrency;
-using Assetra.Application.Alerts.Contracts;
-using Assetra.Application.Alerts.Services;
-using Assetra.Application.Loans.Contracts;
-using Assetra.Application.Loans.Services;
 using Assetra.Application.Portfolio.Contracts;
-using Assetra.Application.Portfolio.Services;
-using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
 using Assetra.Infrastructure;
 using Assetra.Infrastructure.FinMind;
@@ -15,13 +9,6 @@ using Assetra.Infrastructure.Http;
 using Assetra.Infrastructure.Persistence;
 using Assetra.Infrastructure.Scheduling;
 using Assetra.Infrastructure.Search;
-using Assetra.WPF.Features.Alerts;
-using Assetra.WPF.Features.Categories;
-using Assetra.WPF.Features.FinancialOverview;
-using Assetra.WPF.Features.Recurring;
-using Assetra.WPF.Features.Portfolio.Controls;
-using Assetra.WPF.Features.Portfolio;
-using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Features.Settings;
 using Assetra.WPF.Features.Snackbar;
 using Assetra.WPF.Features.StatusBar;
@@ -105,216 +92,16 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<SnackbarViewModel>();
         services.AddSingleton<ISnackbarService>(sp =>
             new SnackbarService(sp.GetRequiredService<SnackbarViewModel>()));
-        services.AddSingleton<IBudgetRefreshNotifier, BudgetRefreshNotifier>();
 
         services.AddSingleton<IStockraImportService>(_ => new StockraImportService(dbPath));
         return services;
     }
 
-    public static IServiceCollection AddAssetraDataServices(
-        this IServiceCollection services,
-        string dbPath)
-    {
-        services.AddSingleton<IPortfolioRepository>(_ => new PortfolioSqliteRepository(dbPath));
-        services.AddSingleton<IPortfolioSnapshotRepository>(_ => new PortfolioSnapshotSqliteRepository(dbPath));
-        services.AddSingleton<IPortfolioPositionLogRepository>(_ => new PortfolioPositionLogSqliteRepository(dbPath));
-        services.AddSingleton<PortfolioSnapshotService>();
-        services.AddSingleton<PortfolioBackfillService>();
-        services.AddSingleton<IAlertRepository>(_ => new AlertSqliteRepository(dbPath));
-        services.AddSingleton<ICategoryRepository>(_ => new CategorySqliteRepository(dbPath));
-        services.AddSingleton<IAutoCategorizationRuleRepository>(_ => new AutoCategorizationRuleSqliteRepository(dbPath));
-        services.AddSingleton<IBudgetRepository>(_ => new BudgetSqliteRepository(dbPath));
-        services.AddSingleton<Assetra.Application.Budget.Services.MonthlyBudgetSummaryService>();
-        services.AddSingleton<IRecurringTransactionRepository>(_ => new RecurringTransactionSqliteRepository(dbPath));
-        services.AddSingleton<IPendingRecurringEntryRepository>(_ => new PendingRecurringEntrySqliteRepository(dbPath));
-        services.AddSingleton<Assetra.Application.Recurring.Services.RecurringTransactionScheduler>();
-        services.AddSingleton<Assetra.Application.Reports.Services.MonthEndReportService>();
-        services.AddSingleton<IAlertService, AlertService>();
-        services.AddSingleton<ILoanScheduleService, LoanScheduleService>();
-        services.AddSingleton<ITradeRepository>(_ => new TradeSqliteRepository(dbPath));
-        services.AddSingleton<IAssetRepository>(_ => new AssetSqliteRepository(dbPath));
-        services.AddSingleton<ILoanScheduleRepository>(_ => new LoanScheduleSqliteRepository(dbPath));
-        services.AddSingleton<ITransactionService>(sp => new TransactionService(
-            sp.GetRequiredService<ITradeRepository>()));
-        services.AddSingleton<IBalanceQueryService>(sp =>
-            new BalanceQueryService(sp.GetRequiredService<ITradeRepository>()));
-        services.AddSingleton<IPositionQueryService>(sp =>
-            new Assetra.Infrastructure.PositionQueryService(
-                sp.GetRequiredService<ITradeRepository>()));
-        services.AddSingleton<ICryptoService, CoinGeckoService>();
-
-        return services;
-    }
-
-    public static IServiceCollection AddAssetraCoreServices(this IServiceCollection services)
-    {
-        services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
-        return services;
-    }
-
-    public static IServiceCollection AddAssetraApplicationServices(this IServiceCollection services)
-    {
-        services.AddSingleton<IPortfolioLoadService>(sp => new PortfolioLoadService(
-            sp.GetRequiredService<IPortfolioRepository>(),
-            sp.GetRequiredService<IPositionQueryService>(),
-            sp.GetRequiredService<ITradeRepository>(),
-            sp.GetRequiredService<IBalanceQueryService>(),
-            sp.GetService<IAssetRepository>()));
-        services.AddSingleton<IPortfolioHistoryQueryService>(sp =>
-            new PortfolioHistoryQueryService(
-                sp.GetRequiredService<IPortfolioSnapshotRepository>()));
-        services.AddSingleton<IFinancialOverviewQueryService>(sp =>
-            new FinancialOverviewQueryService(
-                sp.GetRequiredService<IAssetRepository>(),
-                sp.GetRequiredService<IBalanceQueryService>()));
-        services.AddSingleton<IPortfolioHistoryMaintenanceService>(sp =>
-            new PortfolioHistoryMaintenanceService(
-                sp.GetRequiredService<PortfolioSnapshotService>(),
-                sp.GetRequiredService<PortfolioBackfillService>()));
-        services.AddSingleton<ITradeDeletionWorkflowService>(sp =>
-            new TradeDeletionWorkflowService(
-                sp.GetRequiredService<ITradeRepository>(),
-                sp.GetRequiredService<IPortfolioRepository>(),
-                sp.GetRequiredService<IPositionQueryService>()));
-        services.AddSingleton<ITradeMetadataWorkflowService>(sp =>
-            new TradeMetadataWorkflowService(
-                sp.GetRequiredService<ITradeRepository>()));
-        services.AddSingleton<ISellWorkflowService>(sp =>
-            new SellWorkflowService(
-                sp.GetRequiredService<ITradeRepository>(),
-                sp.GetRequiredService<IPortfolioRepository>(),
-                sp.GetRequiredService<IPortfolioPositionLogRepository>(),
-                sp.GetRequiredService<IPositionQueryService>()));
-        services.AddSingleton<IPositionDeletionWorkflowService>(sp =>
-            new PositionDeletionWorkflowService(
-                sp.GetRequiredService<ITradeRepository>(),
-                sp.GetRequiredService<IPortfolioRepository>()));
-        services.AddSingleton<IPositionMetadataWorkflowService>(sp =>
-            new PositionMetadataWorkflowService(
-                sp.GetRequiredService<IPortfolioRepository>()));
-        services.AddSingleton<IAccountMutationWorkflowService>(sp =>
-            new AccountMutationWorkflowService(
-                sp.GetRequiredService<IAssetRepository>(),
-                sp.GetRequiredService<ITradeRepository>()));
-        services.AddSingleton<ILiabilityMutationWorkflowService>(sp =>
-            new LiabilityMutationWorkflowService(
-                sp.GetRequiredService<IAssetRepository>(),
-                sp.GetRequiredService<ITradeRepository>()));
-        services.AddSingleton<IAccountUpsertWorkflowService>(sp =>
-            new AccountUpsertWorkflowService(
-                sp.GetRequiredService<IAssetRepository>()));
-        services.AddSingleton<ICreditCardMutationWorkflowService>(sp =>
-            new CreditCardMutationWorkflowService(
-                sp.GetRequiredService<IAssetRepository>()));
-        services.AddSingleton<ICreditCardTransactionWorkflowService>(sp =>
-            new CreditCardTransactionWorkflowService(
-                sp.GetRequiredService<IAssetRepository>(),
-                sp.GetRequiredService<ITransactionService>()));
-        services.AddSingleton<ILoanPaymentWorkflowService>(sp =>
-            new LoanPaymentWorkflowService(
-                sp.GetRequiredService<ITradeRepository>(),
-                sp.GetRequiredService<ILoanScheduleRepository>()));
-        services.AddSingleton<ILoanMutationWorkflowService>(sp =>
-            new LoanMutationWorkflowService(
-                sp.GetRequiredService<IAssetRepository>(),
-                sp.GetRequiredService<ILoanScheduleRepository>(),
-                sp.GetRequiredService<ITransactionService>()));
-        services.AddSingleton<IAddAssetWorkflowService>(sp => new AddAssetWorkflowService(
-            sp.GetRequiredService<IStockSearchService>(),
-            sp.GetService<IStockHistoryProvider>(),
-            sp.GetRequiredService<IPortfolioRepository>(),
-            sp.GetRequiredService<IPortfolioPositionLogRepository>(),
-            sp.GetRequiredService<ITransactionService>()));
-        services.AddSingleton<ITransactionWorkflowService>(sp =>
-            new TransactionWorkflowService(
-                sp.GetRequiredService<ITransactionService>()));
-        return services;
-    }
-
-    public static IServiceCollection AddAssetraViewModels(this IServiceCollection services)
+    public static IServiceCollection AddAssetraShell(this IServiceCollection services)
     {
         services.AddSingleton<NavRailViewModel>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<StatusBarViewModel>();
-        services.AddSingleton<PortfolioViewModel>(sp => new PortfolioViewModel(
-            new PortfolioServices(
-                Stock: sp.GetRequiredService<IStockService>(),
-                Search: sp.GetRequiredService<IStockSearchService>(),
-                HistoryMaintenance: sp.GetRequiredService<IPortfolioHistoryMaintenanceService>(),
-                HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
-                TradeDeletionWorkflow: sp.GetRequiredService<ITradeDeletionWorkflowService>(),
-                PositionDeletionWorkflow: sp.GetRequiredService<IPositionDeletionWorkflowService>(),
-                LoanSchedule: sp.GetRequiredService<ILoanScheduleService>(),
-                Load: sp.GetRequiredService<IPortfolioLoadService>(),
-                History: sp.GetRequiredService<IStockHistoryProvider>(),
-                Currency: sp.GetRequiredService<ICurrencyService>(),
-                Crypto: sp.GetRequiredService<ICryptoService>(),
-                BalanceQuery: sp.GetRequiredService<IBalanceQueryService>(),
-                PositionQuery: sp.GetRequiredService<IPositionQueryService>(),
-                TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>(),
-                AccountMutation: sp.GetRequiredService<IAccountMutationWorkflowService>(),
-                LiabilityMutation: sp.GetRequiredService<ILiabilityMutationWorkflowService>(),
-                CreditCardMutation: sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
-                CreditCardTransaction: sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
-                CategoryRepository: sp.GetRequiredService<ICategoryRepository>(),
-                AutoCategorizationRuleRepository: sp.GetRequiredService<IAutoCategorizationRuleRepository>(),
-                // Pre-built Sub-VMs that don't require parent-VM callbacks at construction
-                // time. The parent PortfolioViewModel wires the delegate properties afterward.
-                AddAssetDialog: new AddAssetDialogViewModel(
-                    sp.GetRequiredService<IAddAssetWorkflowService>(),
-                    sp.GetRequiredService<IAccountUpsertWorkflowService>(),
-                    sp.GetRequiredService<ITransactionWorkflowService>(),
-                    sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
-                    sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
-                    sp.GetRequiredService<ILoanMutationWorkflowService>()),
-                SellPanel: new SellPanelViewModel(
-                    sp.GetRequiredService<ISellWorkflowService>(),
-                    new PortfolioSellPanelController(),
-                    sp.GetRequiredService<ISnackbarService>(),
-                    sp.GetRequiredService<ILocalizationService>()))
-            {
-                Summary = sp.GetRequiredService<IPortfolioSummaryService>(),
-            },
-            new PortfolioUiServices(
-                DefaultScheduler.Instance,
-                sp.GetService<IThemeService>(),
-                sp.GetRequiredService<IAppSettingsService>(),
-                sp.GetRequiredService<ISnackbarService>(),
-                sp.GetRequiredService<ILocalizationService>())));
-        services.AddSingleton<AllocationViewModel>(sp => new AllocationViewModel(
-            sp.GetRequiredService<PortfolioViewModel>(),
-            sp.GetRequiredService<IAppSettingsService>()));
-        services.AddSingleton<BudgetSummaryCardViewModel>(sp => new BudgetSummaryCardViewModel(
-            sp.GetRequiredService<Assetra.Application.Budget.Services.MonthlyBudgetSummaryService>(),
-            sp.GetRequiredService<IBudgetRefreshNotifier>()));
-        services.AddSingleton<DashboardViewModel>(sp => new DashboardViewModel(
-            sp.GetRequiredService<PortfolioViewModel>(),
-            sp.GetService<IThemeService>(),
-            sp.GetService<BudgetSummaryCardViewModel>()));
-        services.AddSingleton<FinancialOverviewViewModel>(sp => new FinancialOverviewViewModel(
-            sp.GetRequiredService<IFinancialOverviewQueryService>(),
-            sp.GetRequiredService<PortfolioViewModel>()));
-        services.AddSingleton<AlertsViewModel>(sp => new AlertsViewModel(
-            sp.GetRequiredService<IAlertService>(),
-            sp.GetRequiredService<IStockSearchService>(),
-            sp.GetRequiredService<IStockService>(),
-            sp.GetRequiredService<IScheduler>(),
-            sp.GetRequiredService<ISnackbarService>(),
-            sp.GetRequiredService<ILocalizationService>(),
-            sp.GetService<ICurrencyService>()));
-        services.AddSingleton<CategoriesViewModel>(sp => new CategoriesViewModel(
-            sp.GetRequiredService<ICategoryRepository>(),
-            sp.GetRequiredService<IAutoCategorizationRuleRepository>(),
-            sp.GetRequiredService<IBudgetRepository>(),
-            sp.GetRequiredService<IBudgetRefreshNotifier>(),
-            sp.GetRequiredService<ISnackbarService>(),
-            sp.GetRequiredService<ILocalizationService>()));
-        services.AddSingleton<RecurringViewModel>(sp => new RecurringViewModel(
-            sp.GetRequiredService<IRecurringTransactionRepository>(),
-            sp.GetRequiredService<IPendingRecurringEntryRepository>(),
-            sp.GetRequiredService<Assetra.Application.Recurring.Services.RecurringTransactionScheduler>(),
-            sp.GetRequiredService<ISnackbarService>(),
-            sp.GetRequiredService<ILocalizationService>()));
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<MainWindow>(sp =>
             new MainWindow(sp.GetRequiredService<MainViewModel>()));

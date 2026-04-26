@@ -20,10 +20,13 @@ internal static class AppBootstrapper
 
         builder.Services
             .AddAssetraPlatformServices(paths.AssetsDir, paths.DbPath)
-            .AddAssetraDataServices(paths.DbPath)
-            .AddAssetraCoreServices()
-            .AddAssetraApplicationServices()
-            .AddAssetraViewModels()
+            .AddPortfolioContext(paths.DbPath)
+            .AddBudgetContext(paths.DbPath)
+            .AddRecurringContext(paths.DbPath)
+            .AddReportsContext()
+            .AddAlertsContext(paths.DbPath)
+            .AddLoansContext(paths.DbPath)
+            .AddAssetraShell()
             .AddAssetraHostedServices();
 
         var host = builder.Build();
