@@ -1,5 +1,11 @@
 # Assetra 技術架構藍圖
 
+> 本文件描述的是 **中長期目標架構** 與建議演進方向，不代表所有模組都已經完整落地。
+> 目前實作狀態請優先對照：
+> - `docs/planning/Implementation-Roadmap.md`
+> - `docs/planning/Next-Sprint-v0.6.0.md`
+> - 根目錄 `README.md`
+
 ## 一、架構目標
 
 Assetra 的技術架構目標是：
@@ -321,6 +327,9 @@ UI 可以繼續用自然語意：
 
 ## 4. 財務目標子系統（Goals）
 
+> 現況：已落地的是 `Goals MVP`（資料模型、repository、WPF 頁面與基本進度呈現）。
+> 下列 service 切分是建議中的完整形態，尚未全部在 `Application` 層獨立實作。
+
 ### Core
 - `FinancialGoal`
 - `GoalMilestone`
@@ -443,6 +452,9 @@ UI 可以繼續用自然語意：
 ---
 
 ## 七、報表與輸出架構
+
+> 現況：目前已實作的是 `MonthEndReportService + ReportsView` 的月結報告 MVP。
+> 下列資產負債表 / 現金流量表 / 損益表 / 匯出流程，仍屬目標架構。
 
 ### Core
 - `ReportPeriod`

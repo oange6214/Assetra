@@ -15,6 +15,14 @@ public sealed record CategorySpendSummary(
 
     public bool IsOverBudget =>
         BudgetAmount is { } amt && Spent > amt;
+
+    /// <summary>
+    /// 超出預算的百分比 (e.g. 花了預算的 130% → 30)。預算缺失或未超支時為 null。
+    /// </summary>
+    public decimal? OveragePercent =>
+        BudgetAmount is { } amt && amt > 0 && Spent > amt
+            ? (Spent - amt) / amt * 100m
+            : null;
 }
 
 /// <summary>月度收支彙總。</summary>

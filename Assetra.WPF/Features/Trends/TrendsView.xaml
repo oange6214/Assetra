@@ -14,6 +14,25 @@
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
 
+    <UserControl.Resources>
+        <Style x:Key="BtnPeriod" TargetType="Button" BasedOn="{StaticResource BtnGhost}">
+            <Style.Triggers>
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding Path="Tag" RelativeSource="{RelativeSource Self}" />
+                            <Binding Path="DataContext.ActivePeriod" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+                    <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -42,31 +61,36 @@
                 Command="{Binding ChangePeriodCommand}"
                 CommandParameter="30"
                 Content="{DynamicResource Trends.Period.30}"
-                Style="{StaticResource BtnGhost}" />
+                Style="{StaticResource BtnPeriod}"
+                Tag="30" />
             <Button
                 Margin="0,0,8,0"
                 Command="{Binding ChangePeriodCommand}"
                 CommandParameter="90"
                 Content="{DynamicResource Trends.Period.90}"
-                Style="{StaticResource BtnGhost}" />
+                Style="{StaticResource BtnPeriod}"
+                Tag="90" />
             <Button
                 Margin="0,0,8,0"
                 Command="{Binding ChangePeriodCommand}"
                 CommandParameter="180"
                 Content="{DynamicResource Trends.Period.180}"
-                Style="{StaticResource BtnGhost}" />
+                Style="{StaticResource BtnPeriod}"
+                Tag="180" />
             <Button
                 Margin="0,0,8,0"
                 Command="{Binding ChangePeriodCommand}"
                 CommandParameter="365"
                 Content="{DynamicResource Trends.Period.365}"
-                Style="{StaticResource BtnGhost}" />
+                Style="{StaticResource BtnPeriod}"
+                Tag="365" />
             <Button
                 Margin="0,0,16,0"
                 Command="{Binding ChangePeriodCommand}"
                 CommandParameter="3650"
                 Content="{DynamicResource Trends.Period.All}"
-                Style="{StaticResource BtnGhost}" />
+                Style="{StaticResource BtnPeriod}"
+                Tag="3650" />
 
             <controls:DateRangePicker
                 MinWidth="260"

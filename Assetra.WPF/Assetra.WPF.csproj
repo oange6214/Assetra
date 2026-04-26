@@ -15,7 +15,6 @@
     <PackageReference Include="Velopack" />
     <PackageReference Include="Microsoft.Web.WebView2" />
     <PackageReference Include="WPF-UI" />
-    <PackageReference Include="MahApps.Metro.IconPacks.Material" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="System.Reactive" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />

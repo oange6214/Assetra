@@ -4,8 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:Assetra.WPF.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     x:Name="Root"
@@ -144,7 +144,8 @@
                         Cursor="Hand"
                         FontSize="{StaticResource FontSizeSm}"
                         Foreground="{DynamicResource AppTextPrimary}" />
-                    <iconPacks:PackIconMaterial
+                    <ui:SymbolIcon
+                        FontSize="12"
                         Width="12"
                         Height="12"
                         Margin="0,0,10,0"
@@ -152,7 +153,7 @@
                         VerticalAlignment="Center"
                         Foreground="{DynamicResource AppTextMuted}"
                         IsHitTestVisible="False"
-                        Kind="ChevronDown" />
+                        Symbol="ChevronDown24" />
                     <Popup
                         AllowsTransparency="True"
                         IsOpen="{Binding IsChecked, ElementName=TradeAssetPopupToggle}"
@@ -187,14 +188,15 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <iconPacks:PackIconMaterial
+                                        <ui:SymbolIcon
                                             Grid.Column="0"
+                                            FontSize="12"
                                             Width="12"
                                             Height="12"
                                             Margin="8,0,4,0"
                                             VerticalAlignment="Center"
                                             Foreground="{DynamicResource AppTextMuted}"
-                                            Kind="Magnify" />
+                                            Symbol="Search24" />
                                         <TextBox
                                             Grid.Column="1"
                                             Margin="4,0,8,0"
@@ -282,7 +284,8 @@
                         FontSize="{StaticResource FontSizeSm}"
                         Foreground="{DynamicResource AppTextPrimary}" />
                     <!--  Caret (chevron)  -->
-                    <iconPacks:PackIconMaterial
+                    <ui:SymbolIcon
+                        FontSize="12"
                         Width="12"
                         Height="12"
                         Margin="0,0,10,0"
@@ -290,7 +293,7 @@
                         VerticalAlignment="Center"
                         Foreground="{DynamicResource AppTextMuted}"
                         IsHitTestVisible="False"
-                        Kind="ChevronDown" />
+                        Symbol="ChevronDown24" />
                     <!--  Popup  -->
                     <Popup
                         AllowsTransparency="True"
@@ -329,14 +332,15 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <iconPacks:PackIconMaterial
+                                        <ui:SymbolIcon
                                             Grid.Column="0"
+                                            FontSize="12"
                                             Width="12"
                                             Height="12"
                                             Margin="8,0,4,0"
                                             VerticalAlignment="Center"
                                             Foreground="{DynamicResource AppTextMuted}"
-                                            Kind="Magnify" />
+                                            Symbol="Search24" />
                                         <TextBox
                                             Grid.Column="1"
                                             Margin="4,0,8,0"
@@ -834,11 +838,12 @@
                         Padding="0"
                         Command="{Binding TradeFilter.TradePagePrevCommand}"
                         Style="{StaticResource BtnGhost}">
-                        <iconPacks:PackIconMaterial
-                            Width="14"
+                        <ui:SymbolIcon
+                            FontSize="14"
+                        Width="14"
                             Height="14"
                             Foreground="{DynamicResource AppTextSecondary}"
-                            Kind="ChevronLeft" />
+                            Symbol="ChevronLeft24" />
                     </Button>
 
                     <!--  頁碼按鈕（動態生成，當前頁高亮；省略號為純顯示）  -->
@@ -900,11 +905,12 @@
                         Padding="0"
                         Command="{Binding TradeFilter.TradePageNextCommand}"
                         Style="{StaticResource BtnGhost}">
-                        <iconPacks:PackIconMaterial
-                            Width="14"
+                        <ui:SymbolIcon
+                            FontSize="14"
+                        Width="14"
                             Height="14"
                             Foreground="{DynamicResource AppTextSecondary}"
-                            Kind="ChevronRight" />
+                            Symbol="ChevronRight24" />
                     </Button>
 
                     <!--  跳頁輸入：頁碼: [input] / total  -->
@@ -977,11 +983,12 @@
                             Padding="0"
                             Command="{Binding TradeFilter.TradePagePrevCommand}"
                             Style="{StaticResource BtnGhost}">
-                            <iconPacks:PackIconMaterial
-                                Width="14"
+                            <ui:SymbolIcon
+                                FontSize="14"
+                        Width="14"
                                 Height="14"
                                 Foreground="{DynamicResource AppTextSecondary}"
-                                Kind="ChevronLeft" />
+                                Symbol="ChevronLeft24" />
                         </Button>
 
                         <ItemsControl VerticalAlignment="Center" ItemsSource="{Binding TradeFilter.TradePageNumbers}">
@@ -1039,11 +1046,12 @@
                             Padding="0"
                             Command="{Binding TradeFilter.TradePageNextCommand}"
                             Style="{StaticResource BtnGhost}">
-                            <iconPacks:PackIconMaterial
-                                Width="14"
+                            <ui:SymbolIcon
+                                FontSize="14"
+                        Width="14"
                                 Height="14"
                                 Foreground="{DynamicResource AppTextSecondary}"
-                                Kind="ChevronRight" />
+                                Symbol="ChevronRight24" />
                         </Button>
 
                         <StackPanel

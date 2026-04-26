@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Reports"
     d:DataContext="{d:DesignInstance Type={x:Type vm:ReportsViewModel},
                                      IsDesignTimeCreatable=False}"
@@ -39,10 +40,12 @@
                 <Button
                     Width="32"
                     Height="32"
+                    Padding="0"
                     Command="{Binding PrevMonthCommand}"
-                    Content="‹"
-                    FontSize="{DynamicResource FontSizeMd}"
-                    Style="{StaticResource BtnGhost}" />
+                    Style="{StaticResource BtnGhost}"
+                    ToolTip="{DynamicResource Reports.PrevMonth}">
+                    <ui:SymbolIcon FontSize="16" Symbol="ChevronLeft24" />
+                </Button>
                 <TextBlock
                     Margin="12,0"
                     VerticalAlignment="Center"
@@ -54,10 +57,12 @@
                 <Button
                     Width="32"
                     Height="32"
+                    Padding="0"
                     Command="{Binding NextMonthCommand}"
-                    Content="›"
-                    FontSize="{DynamicResource FontSizeMd}"
-                    Style="{StaticResource BtnGhost}" />
+                    Style="{StaticResource BtnGhost}"
+                    ToolTip="{DynamicResource Reports.NextMonth}">
+                    <ui:SymbolIcon FontSize="16" Symbol="ChevronRight24" />
+                </Button>
                 <Button
                     Margin="16,0,0,0"
                     Command="{Binding LoadCommand}"
@@ -225,27 +230,64 @@
                         Visibility="{Binding HasOverBudget, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="0,4">
+                                <Grid Margin="0,6">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
+                                        Grid.Row="0"
                                         Grid.Column="0"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding CategoryName}" />
                                     <TextBlock
+                                        Grid.Row="0"
                                         Grid.Column="1"
-                                        Margin="12,0"
+                                        Margin="12,0,0,0"
                                         FontFamily="{StaticResource FontTabular}"
                                         Foreground="{DynamicResource AppDown}"
                                         Text="{Binding Spent, StringFormat=NT${0:N0}}" />
                                     <TextBlock
+                                        Grid.Row="0"
                                         Grid.Column="2"
+                                        Margin="6,0,12,0"
                                         FontFamily="{StaticResource FontTabular}"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="{Binding BudgetAmount, StringFormat=/ NT${0:N0}}" />
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Grid.Column="3"
+                                        FontFamily="{StaticResource FontTabular}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppDown}"
+                                        Text="{Binding OveragePercent, StringFormat=+{0:F0}%}" />
+
+                                    <Border
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="4"
+                                        Height="4"
+                                        Margin="0,4,0,0"
+                                        Background="{DynamicResource AppBorder}"
+                                        CornerRadius="2">
+                                        <Border
+                                            HorizontalAlignment="Left"
+                                            Background="{DynamicResource AppDown}"
+                                            CornerRadius="2">
+                                            <Border.Width>
+                                                <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                                    <Binding Path="OveragePercent" />
+                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                </MultiBinding>
+                                            </Border.Width>
+                                        </Border>
+                                    </Border>
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

@@ -13,6 +13,8 @@
             <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
             <converters:HexToBrushConverter x:Key="HexToBrushConverter" />
             <converters:StringEqualityConverter x:Key="EqualityConverter" />
+            <converters:StatusTagToBrushConverter x:Key="StatusTagToBrushConverter" />
+            <converters:PercentToWidthConverter x:Key="PercentToWidthConverter" />
             <converters:CurrencyConverter x:Key="CurrencyConverter" />
             <converters:TradeTypeConverter x:Key="TradeTypeConverter" />
             <converters:ResourceKeyToStringConverter x:Key="ResourceKeyToStringConverter" />

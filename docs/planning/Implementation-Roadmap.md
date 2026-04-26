@@ -2,13 +2,13 @@
 
 ## Phase 1：財務核心補齊
 
-### 1. Budgeting 子系統  *(已完成 ~95%)*
+### 1. Budgeting 子系統  *(已完成 ~95%，仍缺匯入治理與對帳流程)*
 - [x] 建立 `ExpenseCategory`（取代原規劃的 `BudgetCategory`）
 - [x] 建立 `Budget` / `BudgetTemplate`（取代原規劃的 `BudgetPlan`）
 - [x] 建立 `BudgetSqliteRepository`
 - [x] 新增 `MonthlyBudgetSummaryService`（合併原規劃的 `BudgetPlanningService` + `BudgetTrackingService`）
 - [x] 製作預算頁（`CategoriesView`）
-- [x] 製作月結報告完整 UI（v0.6.0：`Features/Reports/ReportsView` + `ReportsViewModel`）
+- [x] 製作月結報告 MVP UI（v0.6.0：`Features/Reports/ReportsView` + `ReportsViewModel`）
 
 ### 2. Recurring 子系統  *(已完成)*
 
@@ -19,7 +19,7 @@
 - [x] 建立 `RecurringTransactionScheduler`
 - [x] 製作 `RecurringView` / `RecurringViewModel`
 
-### 3. Goals 子系統  *(MVP 完成 — v0.6.0)*
+### 3. Goals 子系統  *(MVP 完成 — v0.6.0；完整子系統未完成)*
 
 > Goals = 財務目標（買房頭期款、退休、旅遊基金）。**不要與已完成的 Recurring 混淆**。
 
@@ -31,7 +31,7 @@
 - [ ] 新增 `GoalProgressQueryService`（v0.7+；目前進度由 `FinancialGoal` 衍生屬性 + ViewModel 計算）
 - [x] 新增 Goals 畫面（`Features/Goals/GoalsView` + `GoalsViewModel`）
 
-### 4. 淨資產趨勢  *(MVP 完成 — v0.6.0；堆疊圖與事件標註延後)*
+### 4. 淨資產趨勢  *(MVP 完成 — v0.6.0；堆疊圖、事件標註與更完整分析延後)*
 - [x] `PortfolioDailySnapshot` / `PositionSnapshot` 資料層已備
 - [x] `FinancialOverviewViewModel` 計算 `TotalNetWorth`
 - [x] `DashboardViewModel` / `DashboardTabPanel` 基本 UI

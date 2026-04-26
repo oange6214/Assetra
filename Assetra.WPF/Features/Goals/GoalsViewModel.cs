@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -26,13 +27,27 @@ public sealed partial class GoalsViewModel : ObservableObject
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string? _errorMessage;
 
-    // ── Add form ──
+    // ── Add / Edit form (shared) ──
     [ObservableProperty] private string _addName = string.Empty;
     [ObservableProperty] private string _addTargetAmount = string.Empty;
     [ObservableProperty] private string _addCurrentAmount = string.Empty;
     [ObservableProperty] private DateTime? _addDeadline;
     [ObservableProperty] private string _addNotes = string.Empty;
     [ObservableProperty] private string? _addError;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditing))]
+    [NotifyPropertyChangedFor(nameof(FormTitle))]
+    [NotifyPropertyChangedFor(nameof(SubmitText))]
+    private Guid? _editingId;
+
+    public bool IsEditing => EditingId.HasValue;
+    public string FormTitle => IsEditing
+        ? L("Goals.Edit.Title", "Edit goal")
+        : L("Goals.Add.Title", "Add goal");
+    public string SubmitText => IsEditing
+        ? L("Goals.Edit.Submit", "Save")
+        : L("Goals.Add.Submit", "Add");
 
     public bool HasGoals   => Goals.Count > 0;
     public bool HasNoGoals => IsLoaded && Goals.Count == 0;
@@ -98,7 +113,7 @@ public sealed partial class GoalsViewModel : ObservableObject
         TryParseAmount(AddCurrentAmount, out var current);
 
         var goal = new FinancialGoal(
-            Guid.NewGuid(),
+            EditingId ?? Guid.NewGuid(),
             AddName.Trim(),
             target,
             current,
@@ -107,8 +122,18 @@ public sealed partial class GoalsViewModel : ObservableObject
 
         try
         {
-            await _repository.AddAsync(goal).ConfigureAwait(true);
-            Goals.Add(new GoalRowViewModel(goal, _currency, _localization));
+            if (EditingId is { } id)
+            {
+                await _repository.UpdateAsync(goal).ConfigureAwait(true);
+                var existing = Goals.FirstOrDefault(g => g.Id == id);
+                if (existing is not null)
+                    existing.Goal = goal;
+            }
+            else
+            {
+                await _repository.AddAsync(goal).ConfigureAwait(true);
+                Goals.Add(new GoalRowViewModel(goal, _currency, _localization));
+            }
             ResetAddForm();
         }
         catch (Exception ex)
@@ -118,13 +143,40 @@ public sealed partial class GoalsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void Edit(GoalRowViewModel? row)
+    {
+        if (row is null) return;
+        AddError = null;
+        EditingId = row.Id;
+        AddName = row.Goal.Name;
+        AddTargetAmount = row.Goal.TargetAmount.ToString("0.##", CultureInfo.InvariantCulture);
+        AddCurrentAmount = row.Goal.CurrentAmount.ToString("0.##", CultureInfo.InvariantCulture);
+        AddDeadline = row.Goal.Deadline is { } d ? d.ToDateTime(TimeOnly.MinValue) : null;
+        AddNotes = row.Goal.Notes ?? string.Empty;
+    }
+
+    [RelayCommand]
+    private void CancelEdit() => ResetAddForm();
+
+    [RelayCommand]
     private async Task RemoveAsync(GoalRowViewModel? row)
     {
         if (row is null) return;
+
+        var title = L("Goals.Delete.ConfirmTitle", "Delete goal");
+        var template = L("Goals.Delete.ConfirmMessage", "Delete \"{0}\"? This cannot be undone.");
+        var message = string.Format(CultureInfo.CurrentCulture, template, row.Goal.Name);
+
+        var result = MessageBox.Show(
+            message, title, MessageBoxButton.OKCancel, MessageBoxImage.Warning,
+            MessageBoxResult.Cancel);
+        if (result != MessageBoxResult.OK) return;
+
         try
         {
             await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
             Goals.Remove(row);
+            if (EditingId == row.Id) ResetAddForm();
         }
         catch (Exception ex)
         {
@@ -134,11 +186,13 @@ public sealed partial class GoalsViewModel : ObservableObject
 
     private void ResetAddForm()
     {
+        EditingId = null;
         AddName = string.Empty;
         AddTargetAmount = string.Empty;
         AddCurrentAmount = string.Empty;
         AddDeadline = null;
         AddNotes = string.Empty;
+        AddError = null;
     }
 
     private static bool TryParseAmount(string? input, out decimal value)
@@ -162,6 +216,8 @@ public sealed partial class GoalsViewModel : ObservableObject
     {
         foreach (var row in Goals)
             row.RefreshDisplayStrings();
+        OnPropertyChanged(nameof(FormTitle));
+        OnPropertyChanged(nameof(SubmitText));
     }
 
     private string L(string key, string fallback) =>

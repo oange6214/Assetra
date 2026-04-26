@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="clr-namespace:Assetra.WPF.Controls"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Goals"
     d:DataContext="{d:DesignInstance Type={x:Type vm:GoalsViewModel},
                                      IsDesignTimeCreatable=False}"
@@ -81,15 +82,28 @@
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{Binding Name}" />
 
-                                        <!--  Delete  -->
-                                        <Button
+                                        <!--  Edit / Delete  -->
+                                        <StackPanel
                                             Grid.Row="0"
                                             Grid.Column="1"
                                             VerticalAlignment="Center"
-                                            Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"
-                                            Content="✕"
-                                            Style="{StaticResource BtnIcon}" />
+                                            Orientation="Horizontal">
+                                            <Button
+                                                Margin="0,0,4,0"
+                                                Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource BtnIcon}"
+                                                ToolTip="{DynamicResource Goals.Edit.Action}">
+                                                <ui:SymbolIcon FontSize="14" Symbol="Edit24" />
+                                            </Button>
+                                            <Button
+                                                Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource BtnIcon}"
+                                                ToolTip="{DynamicResource Goals.Delete.ConfirmTitle}">
+                                                <ui:SymbolIcon FontSize="14" Symbol="Dismiss24" />
+                                            </Button>
+                                        </StackPanel>
 
                                         <!--  Numbers row  -->
                                         <StackPanel
@@ -125,12 +139,13 @@
                                                 Text="{Binding DeadlineDisplay}" />
                                         </StackPanel>
 
-                                        <!--  Progress bar  -->
+                                        <!--  Progress bar (color by status)  -->
                                         <ProgressBar
                                             Grid.Row="2"
                                             Grid.Column="0"
                                             Grid.ColumnSpan="2"
                                             Height="8"
+                                            Foreground="{Binding StatusTag, Converter={StaticResource StatusTagToBrushConverter}}"
                                             Maximum="100"
                                             Value="{Binding ProgressPercent, Mode=OneWay}" />
                                     </Grid>
@@ -156,7 +171,7 @@
                     Margin="0,0,0,8"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
-                    Text="{DynamicResource Goals.Add.Title}" />
+                    Text="{Binding FormTitle}" />
 
                 <WrapPanel ItemHeight="{x:Static sys:Double.NaN}">
                     <WrapPanel.Resources>
@@ -207,11 +222,20 @@
 
                     <Button
                         MinWidth="96"
-                        Margin="0,0,0,12"
+                        Margin="0,0,8,12"
                         VerticalAlignment="Top"
                         Command="{Binding AddCommand}"
-                        Content="{DynamicResource Goals.Add.Submit}"
+                        Content="{Binding SubmitText}"
                         Style="{StaticResource BtnPrimary}" />
+
+                    <Button
+                        MinWidth="80"
+                        Margin="0,0,0,12"
+                        VerticalAlignment="Top"
+                        Command="{Binding CancelEditCommand}"
+                        Content="{DynamicResource Goals.Edit.Cancel}"
+                        Style="{StaticResource BtnGhost}"
+                        Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </WrapPanel>
 
                 <TextBlock

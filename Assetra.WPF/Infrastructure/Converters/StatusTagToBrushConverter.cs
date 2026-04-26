@@ -28,9 +28,9 @@ public sealed class StatusTagToBrushConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
         (value as string) switch
         {
-            "safe" or "healthy" => BrushUp,
+            "safe" or "healthy" or "achieved" or "ontrack" => BrushUp,
             "warning" => BrushWarning,
-            "danger" => BrushDown,
+            "danger" or "overdue" => BrushDown,
             _ => BrushMuted,
         };
 

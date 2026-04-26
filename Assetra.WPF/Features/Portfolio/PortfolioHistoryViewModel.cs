@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using Assetra.Application.Portfolio.Contracts;
@@ -42,8 +43,29 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     [ObservableProperty] private DateTime? _customStartDate;
     [ObservableProperty] private DateTime? _customEndDate;
 
-    partial void OnCustomStartDateChanged(DateTime? _) => RefreshChart();
-    partial void OnCustomEndDateChanged(DateTime? _) => RefreshChart();
+    /// <summary>
+    /// Tag of the currently-active preset ("30"/"90"/"180"/"365"/"3650"), or
+    /// "Custom" when both ends of the custom range are set. Drives the active
+    /// state of the Trends preset buttons.
+    /// </summary>
+    public string ActivePeriod =>
+        (CustomStartDate, CustomEndDate) is ({ }, { })
+            ? "Custom"
+            : SelectedDays.ToString(CultureInfo.InvariantCulture);
+
+    partial void OnSelectedDaysChanged(int _) => OnPropertyChanged(nameof(ActivePeriod));
+
+    partial void OnCustomStartDateChanged(DateTime? _)
+    {
+        OnPropertyChanged(nameof(ActivePeriod));
+        RefreshChart();
+    }
+
+    partial void OnCustomEndDateChanged(DateTime? _)
+    {
+        OnPropertyChanged(nameof(ActivePeriod));
+        RefreshChart();
+    }
 
     // Visibility guards
     [ObservableProperty] private bool _hasHistory;
