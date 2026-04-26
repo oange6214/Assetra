@@ -1442,7 +1442,7 @@
                 <ControlTemplate TargetType="RadioButton">
                     <ControlTemplate.Resources>
                         <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="{Binding (TextElement.Foreground), RelativeSource={RelativeSource AncestorType=Border}}" />
+                            <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" />
                         </Style>
                     </ControlTemplate.Resources>
                     <Border
@@ -1451,19 +1451,18 @@
                         Background="{TemplateBinding Background}"
                         BorderBrush="Transparent"
                         BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}"
-                        TextElement.Foreground="{TemplateBinding Foreground}">
+                        CornerRadius="{StaticResource RadiusSm}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppAccent}" />
-                            <Setter TargetName="Bd" Property="TextElement.Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHover}" />
-                            <Setter TargetName="Bd" Property="TextElement.Foreground" Value="{DynamicResource AppTextPrimary}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
@@ -1471,7 +1470,7 @@
                                 <Condition Property="IsMouseOver" Value="True" />
                             </MultiTrigger.Conditions>
                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppAccent}" />
-                            <Setter TargetName="Bd" Property="TextElement.Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
                         </MultiTrigger>
                         <!--  Keyboard focus ring  -->

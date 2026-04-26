@@ -437,28 +437,19 @@
                                                         </Button>
                                                     </Grid>
 
-                                                    <WrapPanel Margin="0,12,0,0">
-                                                        <Border
-                                                            MinWidth="160"
-                                                            Margin="0,0,10,10"
-                                                            Padding="10,8"
-                                                            Background="{DynamicResource AppBackground}"
-                                                            BorderBrush="{DynamicResource AppBorder}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="{StaticResource RadiusSm}">
-                                                            <StackPanel>
-                                                                <TextBlock
-                                                                    FontSize="{StaticResource FontSizeXs}"
-                                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                                    Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
-                                                                <TextBlock
-                                                                    Margin="0,4,0,0"
-                                                                    FontFamily="{StaticResource FontTabular}"
-                                                                    FontSize="{StaticResource FontSizeSm}"
-                                                                    FontWeight="SemiBold"
-                                                                    Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}" />
-                                                            </StackPanel>
-                                                        </Border>
+                                                    <WrapPanel Margin="0,8,0,0">
+                                                        <StackPanel MinWidth="160" Margin="0,0,20,4">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                                Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
+                                                            <TextBlock
+                                                                Margin="0,2,0,0"
+                                                                FontFamily="{StaticResource FontTabular}"
+                                                                FontSize="{StaticResource FontSizeSm}"
+                                                                FontWeight="SemiBold"
+                                                                Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}" />
+                                                        </StackPanel>
                                                     </WrapPanel>
 
                                                     <TextBlock
@@ -778,28 +769,19 @@
                                                         </Button>
                                                     </Grid>
 
-                                                    <WrapPanel Margin="0,12,0,0">
-                                                        <Border
-                                                            MinWidth="160"
-                                                            Margin="0,0,10,10"
-                                                            Padding="10,8"
-                                                            Background="{DynamicResource AppBackground}"
-                                                            BorderBrush="{DynamicResource AppBorder}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="{StaticResource RadiusSm}">
-                                                            <StackPanel>
-                                                                <TextBlock
-                                                                    FontSize="{StaticResource FontSizeXs}"
-                                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                                    Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
-                                                                <TextBlock
-                                                                    Margin="0,4,0,0"
-                                                                    FontFamily="{StaticResource FontTabular}"
-                                                                    FontSize="{StaticResource FontSizeSm}"
-                                                                    FontWeight="SemiBold"
-                                                                    Text="{Binding CashAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}" />
-                                                            </StackPanel>
-                                                        </Border>
+                                                    <WrapPanel Margin="0,8,0,0">
+                                                        <StackPanel MinWidth="160" Margin="0,0,20,4">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                                Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
+                                                            <TextBlock
+                                                                Margin="0,2,0,0"
+                                                                FontFamily="{StaticResource FontTabular}"
+                                                                FontSize="{StaticResource FontSizeSm}"
+                                                                FontWeight="SemiBold"
+                                                                Text="{Binding CashAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}" />
+                                                        </StackPanel>
                                                     </WrapPanel>
 
                                                     <TextBlock
@@ -983,70 +965,46 @@
                                                         </TextBlock>
                                                     </DockPanel>
 
-                                                    <WrapPanel Margin="0,12,0,0">
-                                                        <Border
-                                                            Margin="0,0,10,10"
-                                                            Padding="10,8"
-                                                            Background="{DynamicResource AppBackground}"
-                                                            BorderBrush="{DynamicResource AppBorder}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="{StaticResource RadiusSm}">
-                                                            <StackPanel>
-                                                                <TextBlock
-                                                                    FontSize="{StaticResource FontSizeXs}"
-                                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                                    Text="{DynamicResource Portfolio.Loan.Principal}" />
-                                                                <TextBlock
-                                                                    Margin="0,4,0,0"
-                                                                    FontFamily="{StaticResource FontTabular}"
-                                                                    FontSize="{StaticResource FontSizeSm}"
-                                                                    FontWeight="SemiBold"
-                                                                    Foreground="{DynamicResource AppTextPrimary}"
-                                                                    Text="{Binding PrincipalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                                                            </StackPanel>
-                                                        </Border>
-                                                        <Border
-                                                            Margin="0,0,10,10"
-                                                            Padding="10,8"
-                                                            Background="{DynamicResource AppBackground}"
-                                                            BorderBrush="{DynamicResource AppBorder}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="{StaticResource RadiusSm}">
-                                                            <StackPanel>
-                                                                <TextBlock
-                                                                    FontSize="{StaticResource FontSizeXs}"
-                                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                                    Text="{DynamicResource Portfolio.Loan.Interest}" />
-                                                                <TextBlock
-                                                                    Margin="0,4,0,0"
-                                                                    FontFamily="{StaticResource FontTabular}"
-                                                                    FontSize="{StaticResource FontSizeSm}"
-                                                                    FontWeight="SemiBold"
-                                                                    Foreground="{DynamicResource AppTextPrimary}"
-                                                                    Text="{Binding InterestAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                                                            </StackPanel>
-                                                        </Border>
-                                                        <Border
-                                                            Margin="0,0,10,10"
-                                                            Padding="10,8"
-                                                            Background="{DynamicResource AppBackground}"
-                                                            BorderBrush="{DynamicResource AppBorder}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="{StaticResource RadiusSm}">
-                                                            <StackPanel>
-                                                                <TextBlock
-                                                                    FontSize="{StaticResource FontSizeXs}"
-                                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                                    Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
-                                                                <TextBlock
-                                                                    Margin="0,4,0,0"
-                                                                    FontFamily="{StaticResource FontTabular}"
-                                                                    FontSize="{StaticResource FontSizeSm}"
-                                                                    FontWeight="SemiBold"
-                                                                    Foreground="{DynamicResource AppTextPrimary}"
-                                                                    Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                                                            </StackPanel>
-                                                        </Border>
+                                                    <WrapPanel Margin="0,8,0,0">
+                                                        <StackPanel Margin="0,0,20,4">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                                Text="{DynamicResource Portfolio.Loan.Principal}" />
+                                                            <TextBlock
+                                                                Margin="0,2,0,0"
+                                                                FontFamily="{StaticResource FontTabular}"
+                                                                FontSize="{StaticResource FontSizeSm}"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                                Text="{Binding PrincipalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                                                        </StackPanel>
+                                                        <StackPanel Margin="0,0,20,4">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                                Text="{DynamicResource Portfolio.Loan.Interest}" />
+                                                            <TextBlock
+                                                                Margin="0,2,0,0"
+                                                                FontFamily="{StaticResource FontTabular}"
+                                                                FontSize="{StaticResource FontSizeSm}"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                                Text="{Binding InterestAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                                                        </StackPanel>
+                                                        <StackPanel Margin="0,0,20,4">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                                Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
+                                                            <TextBlock
+                                                                Margin="0,2,0,0"
+                                                                FontFamily="{StaticResource FontTabular}"
+                                                                FontSize="{StaticResource FontSizeSm}"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                                Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                                                        </StackPanel>
                                                     </WrapPanel>
 
                                                     <Button
@@ -1748,84 +1706,57 @@
                                                         </Button>
                                                     </Grid>
 
-                                                    <WrapPanel Margin="0,12,0,0">
-                                                        <Border
-                                                            MinWidth="116"
-                                                            Margin="0,0,10,10"
-                                                            Padding="10,8"
-                                                            Background="{DynamicResource AppBackground}"
-                                                            BorderBrush="{DynamicResource AppBorder}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="{StaticResource RadiusSm}">
-                                                            <StackPanel>
-                                                                <TextBlock
-                                                                    FontSize="{StaticResource FontSizeXs}"
-                                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                                    Text="{DynamicResource Portfolio.Shares}" />
-                                                                <TextBlock
-                                                                    Margin="0,4,0,0"
-                                                                    FontFamily="{StaticResource FontTabular}"
-                                                                    FontSize="{StaticResource FontSizeSm}"
-                                                                    FontWeight="SemiBold"
-                                                                    Text="{Binding DisplayQuantityText}" />
-                                                            </StackPanel>
-                                                        </Border>
-                                                        <Border
-                                                            MinWidth="116"
-                                                            Margin="0,0,10,10"
-                                                            Padding="10,8"
-                                                            Background="{DynamicResource AppBackground}"
-                                                            BorderBrush="{DynamicResource AppBorder}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="{StaticResource RadiusSm}">
-                                                            <StackPanel>
-                                                                <TextBlock
-                                                                    FontSize="{StaticResource FontSizeXs}"
-                                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                                    Text="{DynamicResource Portfolio.TradeHistory.UnitPrice}" />
-                                                                <TextBlock
-                                                                    Margin="0,4,0,0"
-                                                                    FontFamily="{StaticResource FontTabular}"
-                                                                    FontSize="{StaticResource FontSizeSm}"
-                                                                    FontWeight="SemiBold"
-                                                                    Text="{Binding Price, Converter={StaticResource CurrencyConverter}, ConverterParameter=price-dash}" />
-                                                            </StackPanel>
-                                                        </Border>
-                                                        <Border
-                                                            MinWidth="140"
-                                                            Margin="0,0,10,10"
-                                                            Padding="10,8"
-                                                            Background="{DynamicResource AppBackground}"
-                                                            BorderBrush="{DynamicResource AppBorder}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="{StaticResource RadiusSm}">
-                                                            <StackPanel>
-                                                                <TextBlock
-                                                                    FontSize="{StaticResource FontSizeXs}"
-                                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                                    Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
-                                                                <TextBlock
-                                                                    Margin="0,4,0,0"
-                                                                    FontFamily="{StaticResource FontTabular}"
-                                                                    FontSize="{StaticResource FontSizeSm}"
-                                                                    FontWeight="SemiBold"
-                                                                    Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}">
-                                                                    <TextBlock.Style>
-                                                                        <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
-                                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                                            <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding IsAmountPositive}" Value="True">
-                                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                                                </DataTrigger>
-                                                                                <DataTrigger Binding="{Binding TotalAmount}" Value="0">
-                                                                                    <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
-                                                                                </DataTrigger>
-                                                                            </Style.Triggers>
-                                                                        </Style>
-                                                                    </TextBlock.Style>
-                                                                </TextBlock>
-                                                            </StackPanel>
-                                                        </Border>
+                                                    <WrapPanel Margin="0,8,0,0">
+                                                        <StackPanel MinWidth="116" Margin="0,0,20,4">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                                Text="{DynamicResource Portfolio.Shares}" />
+                                                            <TextBlock
+                                                                Margin="0,2,0,0"
+                                                                FontFamily="{StaticResource FontTabular}"
+                                                                FontSize="{StaticResource FontSizeSm}"
+                                                                FontWeight="SemiBold"
+                                                                Text="{Binding DisplayQuantityText}" />
+                                                        </StackPanel>
+                                                        <StackPanel MinWidth="116" Margin="0,0,20,4">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                                Text="{DynamicResource Portfolio.TradeHistory.UnitPrice}" />
+                                                            <TextBlock
+                                                                Margin="0,2,0,0"
+                                                                FontFamily="{StaticResource FontTabular}"
+                                                                FontSize="{StaticResource FontSizeSm}"
+                                                                FontWeight="SemiBold"
+                                                                Text="{Binding Price, Converter={StaticResource CurrencyConverter}, ConverterParameter=price-dash}" />
+                                                        </StackPanel>
+                                                        <StackPanel MinWidth="140" Margin="0,0,20,4">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                                Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
+                                                            <TextBlock
+                                                                Margin="0,2,0,0"
+                                                                FontFamily="{StaticResource FontTabular}"
+                                                                FontSize="{StaticResource FontSizeSm}"
+                                                                FontWeight="SemiBold"
+                                                                Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}">
+                                                                <TextBlock.Style>
+                                                                    <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                                                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsAmountPositive}" Value="True">
+                                                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding TotalAmount}" Value="0">
+                                                                                <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </StackPanel>
                                                     </WrapPanel>
 
                                                     <TextBlock
