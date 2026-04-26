@@ -23,7 +23,9 @@ public sealed record AssetItem(
     int?          BillingDay      = null,
     int?          DueDay          = null,
     decimal?      CreditLimit     = null,
-    string?       IssuerName      = null)
+    string?       IssuerName      = null,
+    // Free-form user-facing label for preset categorization (e.g., 房貸/車貸/數位活存)
+    string?       Subtype         = null)
 {
     public bool IsLoan => LoanAnnualRate.HasValue && LoanTermMonths.HasValue && LoanStartDate.HasValue;
     public bool IsCreditCard => LiabilitySubtype == Models.LiabilitySubtype.CreditCard;

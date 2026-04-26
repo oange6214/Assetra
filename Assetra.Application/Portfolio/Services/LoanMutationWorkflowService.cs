@@ -48,7 +48,9 @@ public sealed class LoanMutationWorkflowService : ILoanMutationWorkflowService
                 LoanAnnualRate: request.AmortAnnualRate,
                 LoanTermMonths: request.AmortTermMonths,
                 LoanStartDate: request.FirstPaymentDate,
-                LoanHandlingFee: request.Fee > 0 ? request.Fee : null);
+                LoanHandlingFee: request.Fee > 0 ? request.Fee : null,
+                LiabilitySubtype: LiabilitySubtype.Loan,
+                Subtype: string.IsNullOrWhiteSpace(request.Subtype) ? null : request.Subtype.Trim());
             scheduleEntries = AmortizationService.Generate(
                 liabilityAsset.Id,
                 request.CashAmount,

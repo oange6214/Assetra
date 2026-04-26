@@ -97,6 +97,9 @@ public partial class AddAssetDialogViewModel : ObservableObject
     [ObservableProperty] private string _addAssetType = "stock";
     // "stock" | "fund" | "metal" | "bond" | "crypto" | "cash" | "liability"
 
+    /// <summary>Free-form preset label (e.g., 房貸/車貸/0% 分期). Set by picker, editable by user.</summary>
+    [ObservableProperty] private string _addSubtype = string.Empty;
+
     // ── Stock / ETF fields ───────────────────────────────────────────────────────────
 
     [ObservableProperty] private DateTime _addBuyDate = DateTime.Today;
@@ -395,12 +398,19 @@ public partial class AddAssetDialogViewModel : ObservableObject
         IsAddDialogOpen = false;
     }
 
-    /// <summary>Liability picker step: user picks a subtype (loan / creditCard / …) and advances to the form.</summary>
+    /// <summary>Liability picker step: user picks a preset and advances to the form.</summary>
+    /// <param name="kind">Preset key. Either a base type ("loan" / "creditCard") or "{base}:{label}" pair.</param>
     [RelayCommand]
     private void SelectLiabilityType(string kind)
     {
         if (string.IsNullOrEmpty(kind)) return;
-        AddAssetType = kind;
+
+        var sep = kind.IndexOf(':');
+        var baseType = sep < 0 ? kind : kind[..sep];
+        var defaultSubtype = sep < 0 ? string.Empty : kind[(sep + 1)..];
+
+        AddAssetType = baseType;
+        AddSubtype = defaultSubtype;
         AddError = string.Empty;
         IsTypePickerStep = false;
     }
@@ -657,7 +667,8 @@ public partial class AddAssetDialogViewModel : ObservableObject
             billingDay,
             dueDay,
             creditLimit,
-            string.IsNullOrWhiteSpace(AddCreditCardIssuer) ? null : AddCreditCardIssuer.Trim()));
+            string.IsNullOrWhiteSpace(AddCreditCardIssuer) ? null : AddCreditCardIssuer.Trim(),
+            string.IsNullOrWhiteSpace(AddSubtype) ? null : AddSubtype.Trim()));
 
         if (AddInitialCreditCardBalanceEnabled)
         {
@@ -674,6 +685,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
                 string.IsNullOrWhiteSpace(AddInitialCreditCardBalanceNote) ? null : AddInitialCreditCardBalanceNote.Trim()));
         }
 
+        AddSubtype = string.Empty;
         AddCreditCardName = string.Empty;
         AddCreditCardIssuer = string.Empty;
         AddCreditCardBillingDay = string.Empty;
@@ -723,8 +735,10 @@ public partial class AddAssetDialogViewModel : ObservableObject
             fee,
             AmortAnnualRate: annualRate,
             AmortTermMonths: termMonths,
-            FirstPaymentDate: firstPaymentDate));
+            FirstPaymentDate: firstPaymentDate,
+            Subtype: string.IsNullOrWhiteSpace(AddSubtype) ? null : AddSubtype.Trim()));
 
+        AddSubtype = string.Empty;
         AddLoanName = string.Empty;
         AddLoanAmount = string.Empty;
         AddLoanAnnualRate = string.Empty;

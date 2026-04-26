@@ -276,6 +276,17 @@
     <sys:String x:Key="Portfolio.Liability.PickType.Heading">Choose liability type</sys:String>
     <sys:String x:Key="Portfolio.Liability.PickType.LoanDesc">Bank or personal loan with amortization schedule</sys:String>
     <sys:String x:Key="Portfolio.Liability.PickType.CreditCardDesc">Credit card with billing day and limit tracking</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.CreditCard">Credit Card</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.Installment">Installment</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.CashAdvance">Cash Advance</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.Mortgage">Mortgage</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.CarLoan">Car Loan</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.StudentLoan">Student Loan</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.PersonalLoan">Personal Loan</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.FriendLoan">Friend / Family</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.Custom">Custom</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Subtype">Label</sys:String>
+    <sys:String x:Key="Portfolio.Liability.SubtypeHint">Free-form label, e.g. "Mortgage", "0% Installment", "Cathay Pi Card"</sys:String>
     <sys:String x:Key="Common.Back">Back</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddName">Name</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddCost">Purchase Cost</sys:String>
