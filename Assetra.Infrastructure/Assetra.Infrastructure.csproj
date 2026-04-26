@@ -11,6 +11,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="System.Reactive" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+    <PackageReference Include="CsvHelper" />
+    <PackageReference Include="ClosedXML" />
     <ProjectReference Include="..\Assetra.Core\Assetra.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
