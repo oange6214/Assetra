@@ -5,7 +5,14 @@
 - `Assetra.Core`
   - Domain models and repository/service contracts.
 - `Assetra.Application`
-  - Alert services, query services, workflow services, and summary/load orchestration.
+  - Organized by context folder. Currently:
+    - `Portfolio/` — load / summary / query / transaction workflow services for positions, cash, liabilities, credit cards, trades.
+    - `Alerts/` — alert rule evaluation behind `IAlertService`.
+    - `Loans/` — loan amortization and payment workflows.
+    - `Budget/` — budget plans, categories, monthly summary (`MonthlyBudgetSummaryService`).
+    - `Recurring/` — recurring/subscription transactions (`RecurringTransactionScheduler`, pending entry handling).
+    - `Reports/` — period reports (`MonthEndReportService`).
+  - Each context exposes query services, workflow services, and summary services as needed.
 - `Assetra.Infrastructure`
   - SQLite repositories, external market-data clients, schedulers, migration helpers.
 - `Assetra.WPF`
@@ -39,6 +46,8 @@
 
 - `AlertsViewModel` now depends on an application-layer alert service rather than a repository.
 - `FinancialOverviewViewModel` reads through an application query service instead of composing repository calls directly in the ViewModel.
+- `RecurringViewModel` and `CategoriesViewModel` (expense categories / budgets) wire into the `Recurring` and `Budget` application contexts respectively.
+- `DashboardViewModel` composes net-worth and budget summaries from `Portfolio` and `Budget` query services.
 
 ## Guardrails
 

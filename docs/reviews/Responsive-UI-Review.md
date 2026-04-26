@@ -49,7 +49,7 @@ These are the places where scaling alone is not a complete answer.
 ### 1. Portfolio Side-Panel Detail Widgets
 Files:
 - `D:\Workspaces\Finances\Assetra\Assetra.WPF\Features\Portfolio\PortfolioView.xaml`
-- `D:\Workspaces\Finances\Assetra\Assetra.WPF\Features\Portfolio\Controls\CreditCardTxForm.xaml`
+- `D:\Workspaces\Finances\Assetra\Assetra.WPF\Features\Portfolio\Controls\TxForms\CreditCardTxForm.xaml`
 - `D:\Workspaces\Finances\Assetra\Assetra.WPF\Features\Portfolio\Controls\AddAssetDialog.xaml`
 
 Current risk:

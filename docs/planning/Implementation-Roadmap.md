@@ -2,33 +2,45 @@
 
 ## Phase 1：財務核心補齊
 
-### 1. Budgeting 子系統
-- 建立 `BudgetCategory`
-- 建立 `BudgetPlan`
-- 建立 `BudgetPeriod`
-- 建立 `RecurringExpenseRule`
-- 建立 `BudgetSqliteRepository`
-- 新增 `BudgetPlanningService`
-- 新增 `BudgetTrackingService`
-- 新增 `RecurringTransactionWorkflowService`
-- 製作預算頁與月結頁
+### 1. Budgeting 子系統  *(已完成 ~95%)*
+- [x] 建立 `ExpenseCategory`（取代原規劃的 `BudgetCategory`）
+- [x] 建立 `Budget` / `BudgetTemplate`（取代原規劃的 `BudgetPlan`）
+- [x] 建立 `BudgetSqliteRepository`
+- [x] 新增 `MonthlyBudgetSummaryService`（合併原規劃的 `BudgetPlanningService` + `BudgetTrackingService`）
+- [x] 製作預算頁（`CategoriesView`）
+- [ ] 製作月結報告完整 UI
 
-### 2. Goals 子系統
-- 建立 `FinancialGoal`
-- 建立 `GoalMilestone`
-- 建立 `GoalFundingRule`
-- 建立 `GoalSqliteRepository`
-- 新增 `GoalPlanningService`
-- 新增 `GoalProgressQueryService`
-- 新增 Goals 畫面
+### 2. Recurring 子系統  *(已完成)*
 
-### 3. 淨資產趨勢
-- 建立趨勢 query service
-- 建立月 / 季 / 年切換
-- 加入重大事件標註
-- 製作趨勢圖與堆疊圖 UI
+> 注意：先前文件把這項放在 Budgeting 之下並命名為「`RecurringExpenseRule` / `RecurringTransactionWorkflowService`」；實際以獨立 context 完成，與 Goals 是不同概念。
 
-### 4. 匯入治理基礎
+- [x] 建立 `RecurringTransaction`
+- [x] 建立 `PendingRecurringEntry`
+- [x] 建立 `RecurringTransactionScheduler`
+- [x] 製作 `RecurringView` / `RecurringViewModel`
+
+### 3. Goals 子系統  *(尚未開始)*
+
+> Goals = 財務目標（買房頭期款、退休、旅遊基金）。**不要與已完成的 Recurring 混淆**。
+
+- [ ] 建立 `FinancialGoal`
+- [ ] 建立 `GoalMilestone`
+- [ ] 建立 `GoalFundingRule`
+- [ ] 建立 `GoalSqliteRepository`
+- [ ] 新增 `GoalPlanningService`
+- [ ] 新增 `GoalProgressQueryService`
+- [ ] 新增 Goals 畫面
+
+### 4. 淨資產趨勢  *(基礎完成，視覺化未做)*
+- [x] `PortfolioDailySnapshot` / `PositionSnapshot` 資料層已備
+- [x] `FinancialOverviewViewModel` 計算 `TotalNetWorth`
+- [x] `DashboardViewModel` / `DashboardTabPanel` 基本 UI
+- [ ] 建立趨勢 query service（時間範圍聚合）
+- [ ] 建立月 / 季 / 年切換
+- [ ] 加入重大事件標註
+- [ ] 製作趨勢圖與堆疊圖 UI
+
+### 5. 匯入治理基礎  *(尚未開始)*
 - 建立 `ImportBatch`
 - 建立 `ImportRule`
 - 建立 `ImportPreviewItem`
