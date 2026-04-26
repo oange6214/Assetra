@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.5.7 - 2026-04-26
+
+This release polishes responsive UX across the portfolio dialogs and tables.
+
+### Highlights
+
+- Forced horizontal two-column layout for toggle pairs in 新增紀錄 dialog (no more vertical fallback at narrow widths).
+- Fixed hover rectangle overflow on investment Position cards by overriding the default `ListBoxItem` template.
+- Replaced fixed-width `WrapPanel` with `UniformGrid` so position stat cells fill available width without trailing gaps.
+- Renamed Accounts / Liability DataGrid first column header from "資產" to "名稱"; renamed investment column header to "標的".
+- Refactored Accounts / Liability cell template to a single-row `Grid` so the default badge vertically centers against the full cell height.
+- Updated 新增紀錄 footer to follow Windows dialog convention (取消 left, 確認 right) and shortened wording from "取消編輯" to "取消".
+
+## v0.5.6 - 2026-04-25
+
+This release fixes a regression in the liability creation flow.
+
+### Highlights
+
+- Fixed liability creation dialog not showing the loan section under certain states.
+
 ## v0.5.5 - 2026-04-24
 
 This release refines startup reliability and recovery behavior.
@@ -85,6 +106,15 @@ This release adds credit-card flows and a broad responsive UI pass.
 
 - Added credit card workflows, schema support, and regression tests.
 - Reworked many WPF layouts to better support larger `UiScale` and narrower widths.
+
+## v0.4.1 - 2026-04-23
+
+This release adds in-app guidance for Fugle API key setup.
+
+### Highlights
+
+- Added a Fugle help dialog accessible from the Settings page.
+- Surfaced setup steps in zh-TW and en-US so users can configure the key without leaving the app.
 
 ## v0.4.0 - 2026-04-23
 

@@ -59,10 +59,6 @@
 - [Changelog](releases/CHANGELOG.md)
   - 版本里程碑與主要變更摘要。
 
-## Downloads
-- [Architecture Docs (7z)](downloads/Assetra-Architecture-Docs.7z)
-- [Architecture Docs (zip)](downloads/Assetra-Architecture-Docs.zip)
-
 ## Archive
 - `archive/superpowers/`
   - 歷史設計與規劃草稿，保留作為參考，不作為目前正式架構文件。
