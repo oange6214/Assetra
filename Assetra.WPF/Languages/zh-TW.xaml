@@ -145,7 +145,7 @@
   <sys:String x:Key="Portfolio.AddCash">帳戶</sys:String>
   <sys:String x:Key="Portfolio.AddLiability">新增負債</sys:String>
   <sys:String x:Key="Portfolio.AddCreditCard">新增負債</sys:String>
-  <sys:String x:Key="Portfolio.Cash.AddHint">建立後，請點選「新增紀錄」並選擇「存入」以記錄金額；存提款會自動累計。</sys:String>
+  <sys:String x:Key="Portfolio.Cash.AddHint">建立帳戶時可選擇一併記錄初始存入；之後的存提款會自動累計餘額。</sys:String>
   <sys:String x:Key="Portfolio.Cash.InitialDeposit.Toggle">建立後立即記錄一筆存入</sys:String>
   <sys:String x:Key="Portfolio.Cash.InitialDeposit.Amount">初始金額</sys:String>
   <sys:String x:Key="Portfolio.Cash.InitialDeposit.Date">記錄日期</sys:String>
@@ -166,7 +166,7 @@
   <sys:String x:Key="Portfolio.CreditCard.BillingDay">帳單日</sys:String>
   <sys:String x:Key="Portfolio.CreditCard.DueDay">繳款截止日</sys:String>
   <sys:String x:Key="Portfolio.CreditCard.CreditLimit">信用額度（選填）</sys:String>
-  <sys:String x:Key="Portfolio.CreditCard.AddHint">建立後，可透過「新增紀錄」記錄信用卡消費與繳款，未繳餘額會自動累計。</sys:String>
+  <sys:String x:Key="Portfolio.CreditCard.AddHint">建立信用卡時可選擇一併記錄目前未繳金額；之後的消費與繳款會自動更新餘額。</sys:String>
   <sys:String x:Key="Portfolio.CreditCard.InitialBalance.Toggle">建立後立即記錄目前未繳金額</sys:String>
   <sys:String x:Key="Portfolio.CreditCard.InitialBalance.Amount">目前未繳金額</sys:String>
   <sys:String x:Key="Portfolio.CreditCard.InitialBalance.Date">記錄日期</sys:String>
@@ -209,7 +209,7 @@
   <sys:String x:Key="Portfolio.Liability.Name">負債名稱</sys:String>
   <sys:String x:Key="Portfolio.Liability.Amount">剩餘金額</sys:String>
   <sys:String x:Key="Portfolio.Liability.OriginalAmount">總借款金額</sys:String>
-  <sys:String x:Key="Portfolio.Liability.AddHint">建立後，請點選「新增紀錄」並選擇「借款」以記錄金額；還款進度會自動累計。</sys:String>
+  <sys:String x:Key="Portfolio.Liability.AddHint">建立貸款時會一起產生借款紀錄與攤還表；後續還款進度會自動累計。</sys:String>
   <sys:String x:Key="Portfolio.Liability.AddLoan">新增貸款</sys:String>
   <sys:String x:Key="Portfolio.Loan.DialogTitle">新增貸款</sys:String>
   <sys:String x:Key="Portfolio.Loan.Name">貸款名稱</sys:String>
@@ -531,11 +531,11 @@
   <sys:String x:Key="Settings.DataSource">歷史資料來源</sys:String>
   <sys:String x:Key="Settings.DataSourceDesc">切換後立即生效，無需重新啟動</sys:String>
   <sys:String x:Key="Settings.QuoteSource">即時報價來源</sys:String>
-  <sys:String x:Key="Settings.FugleApiKeyHint">僅儲存在本機 %APPDATA%\Assetra\settings.json，不會寫入 GitHub。修改後請按儲存。</sys:String>
+  <sys:String x:Key="Settings.FugleApiKeyHint">貼上 Fugle API Key 後按下儲存，即可在設定中選用 Fugle 資料來源。</sys:String>
   <sys:String x:Key="Settings.DataSource.Saved">資料來源設定已儲存</sys:String>
   <sys:String x:Key="Settings.FugleHelp.Tooltip">查看 Fugle API Key 申請與設定說明</sys:String>
   <sys:String x:Key="Settings.FugleHelp.Title">Fugle API Key 教學</sys:String>
-  <sys:String x:Key="Settings.FugleHelp.Subtitle">在 app 內快速查看申請流程與安全保存方式。</sys:String>
+  <sys:String x:Key="Settings.FugleHelp.Subtitle">在 app 內快速查看申請流程與設定步驟。</sys:String>
   <sys:String x:Key="Settings.FugleHelp.Intro">Fugle API key 用來啟用你在 Assetra 裡選擇的 Fugle 報價與歷史資料來源。</sys:String>
   <sys:String x:Key="Settings.FugleHelp.Step1.Title">1. 建立 Fugle Developer 帳號</sys:String>
   <sys:String x:Key="Settings.FugleHelp.Step1.Body">前往 Fugle Developer 網站註冊或登入，進入開發者後台。</sys:String>

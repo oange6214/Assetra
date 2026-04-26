@@ -144,7 +144,7 @@
     <sys:String x:Key="Portfolio.AddCash">Account</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">Add Liability</sys:String>
     <sys:String x:Key="Portfolio.AddCreditCard">Add Liability</sys:String>
-    <sys:String x:Key="Portfolio.Cash.AddHint">Once created, click "Add Record" and choose "Deposit" to record the amount. Deposits and withdrawals accumulate automatically.</sys:String>
+    <sys:String x:Key="Portfolio.Cash.AddHint">When creating the account, you can also record an opening deposit. Future deposits and withdrawals will update the balance automatically.</sys:String>
     <sys:String x:Key="Portfolio.Cash.InitialDeposit.Toggle">Record an initial deposit right away</sys:String>
     <sys:String x:Key="Portfolio.Cash.InitialDeposit.Amount">Initial amount</sys:String>
     <sys:String x:Key="Portfolio.Cash.InitialDeposit.Date">Record date</sys:String>
@@ -165,7 +165,7 @@
     <sys:String x:Key="Portfolio.CreditCard.BillingDay">Billing day</sys:String>
     <sys:String x:Key="Portfolio.CreditCard.DueDay">Due day</sys:String>
     <sys:String x:Key="Portfolio.CreditCard.CreditLimit">Credit limit (optional)</sys:String>
-    <sys:String x:Key="Portfolio.CreditCard.AddHint">After creating it, use Add Record to log card charges and payments. Outstanding balance updates automatically.</sys:String>
+    <sys:String x:Key="Portfolio.CreditCard.AddHint">When creating the card, you can also record the current outstanding balance. Future charges and payments will update the balance automatically.</sys:String>
     <sys:String x:Key="Portfolio.CreditCard.InitialBalance.Toggle">Record the current outstanding balance right away</sys:String>
     <sys:String x:Key="Portfolio.CreditCard.InitialBalance.Amount">Outstanding balance</sys:String>
     <sys:String x:Key="Portfolio.CreditCard.InitialBalance.Date">Record date</sys:String>
@@ -208,7 +208,7 @@
     <sys:String x:Key="Portfolio.Liability.Name">Liability name</sys:String>
     <sys:String x:Key="Portfolio.Liability.Amount">Remaining balance</sys:String>
     <sys:String x:Key="Portfolio.Liability.OriginalAmount">Total loan amount</sys:String>
-    <sys:String x:Key="Portfolio.Liability.AddHint">Once created, click "Add Record" and choose "Borrow" to record the amount. Repayment progress accumulates automatically.</sys:String>
+    <sys:String x:Key="Portfolio.Liability.AddHint">Creating a loan also creates the opening borrow record and amortization schedule. Future repayments update the progress automatically.</sys:String>
     <sys:String x:Key="Portfolio.Liability.AddLoan">Add Loan</sys:String>
     <sys:String x:Key="Portfolio.Loan.DialogTitle">Add Loan</sys:String>
     <sys:String x:Key="Portfolio.Loan.Name">Loan Name</sys:String>
@@ -529,11 +529,11 @@
     <sys:String x:Key="Settings.DataSource">Historical data source</sys:String>
     <sys:String x:Key="Settings.DataSourceDesc">Takes effect immediately, no restart needed</sys:String>
     <sys:String x:Key="Settings.QuoteSource">Live quote source</sys:String>
-    <sys:String x:Key="Settings.FugleApiKeyHint">Stored only in local %APPDATA%\Assetra\settings.json and never committed to GitHub. Click Save after editing.</sys:String>
+    <sys:String x:Key="Settings.FugleApiKeyHint">Paste your Fugle API key here and click Save to enable Fugle as a data source in Settings.</sys:String>
     <sys:String x:Key="Settings.DataSource.Saved">Data source settings saved</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Tooltip">View how to apply for and configure a Fugle API key</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Title">Fugle API Key Help</sys:String>
-    <sys:String x:Key="Settings.FugleHelp.Subtitle">Quickly view the application steps and local storage policy inside the app.</sys:String>
+    <sys:String x:Key="Settings.FugleHelp.Subtitle">Quickly view the application steps and setup flow inside the app.</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Intro">A Fugle API key lets you enable Fugle as the quote or history provider in Assetra.</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Step1.Title">1. Create a Fugle Developer account</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Step1.Body">Open the Fugle Developer site, then sign up or sign in to the developer console.</sys:String>
@@ -679,7 +679,7 @@
     <sys:String x:Key="Categories.Budget.Toast.Deleted">Budget deleted</sys:String>
 
     <!-- Dashboard budget summary card -->
-    <sys:String x:Key="Dashboard.Budget.Title">This Month</sys:String>
+    <sys:String x:Key="Dashboard.Budget.Title">This Month's Cash Flow</sys:String>
     <sys:String x:Key="Dashboard.Budget.Income">Income</sys:String>
     <sys:String x:Key="Dashboard.Budget.Expense">Expense</sys:String>
     <sys:String x:Key="Dashboard.Budget.Net">Net</sys:String>
@@ -688,8 +688,8 @@
     <sys:String x:Key="Common.Delete">Delete</sys:String>
 
     <!-- Recurring transactions / subscriptions -->
-    <sys:String x:Key="Nav.Recurring">Recurring</sys:String>
-    <sys:String x:Key="Recurring.Title">Subscriptions &amp; Pending</sys:String>
+    <sys:String x:Key="Nav.Recurring">Subscriptions</sys:String>
+    <sys:String x:Key="Recurring.Title">Subscriptions &amp; Pending Items</sys:String>
     <sys:String x:Key="Recurring.Tab.Subscriptions">Subscriptions</sys:String>
     <sys:String x:Key="Recurring.Tab.Pending">Pending</sys:String>
     <sys:String x:Key="Recurring.Run">Run now</sys:String>
