@@ -69,6 +69,9 @@ public partial class NavRailViewModel : ObservableObject
         OnPropertyChanged(nameof(IsFinancialOverviewActive));
         OnPropertyChanged(nameof(IsCategoriesActive));
         OnPropertyChanged(nameof(IsRecurringActive));
+        OnPropertyChanged(nameof(IsReportsActive));
+        OnPropertyChanged(nameof(IsTrendsActive));
+        OnPropertyChanged(nameof(IsGoalsActive));
         OnPropertyChanged(nameof(IsAlertsActive));
         OnPropertyChanged(nameof(IsSettingsActive));
     }
@@ -79,6 +82,9 @@ public partial class NavRailViewModel : ObservableObject
     public bool IsFinancialOverviewActive => ActiveSection == NavSection.FinancialOverview;
     public bool IsCategoriesActive        => ActiveSection == NavSection.Categories;
     public bool IsRecurringActive         => ActiveSection == NavSection.Recurring;
+    public bool IsReportsActive           => ActiveSection == NavSection.Reports;
+    public bool IsTrendsActive            => ActiveSection == NavSection.Trends;
+    public bool IsGoalsActive             => ActiveSection == NavSection.Goals;
     public bool IsAlertsActive            => ActiveSection == NavSection.Alerts;
     public bool IsSettingsActive          => ActiveSection == NavSection.Settings;
 }

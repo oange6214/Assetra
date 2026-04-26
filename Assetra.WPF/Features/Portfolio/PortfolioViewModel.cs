@@ -137,25 +137,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _hasNoTrades = true;
     [ObservableProperty] private bool _hasAnyDividendTrades;
 
-    public bool HasSetupNotice => HasNoCashAccounts || HasNoTrades;
-    public string SetupNoticeTitle =>
-        HasNoCashAccounts
-            ? L("Portfolio.Setup.NoAccounts.Title")
-            : HasNoTrades
-                ? L("Portfolio.Setup.NoTrades.Title")
-                : string.Empty;
-    public string SetupNoticeMessage =>
-        HasNoCashAccounts
-            ? L("Portfolio.Setup.NoAccounts.Message")
-            : HasNoTrades
-                ? L("Portfolio.Setup.NoTrades.Message")
-                : string.Empty;
-    public string SetupNoticeActionText =>
-        HasNoCashAccounts
-            ? L("Portfolio.Setup.NoAccounts.Action")
-            : HasNoTrades
-                ? L("Portfolio.Setup.NoTrades.Action")
-                : string.Empty;
+    /// <summary>Empty-state notice shown above the tabs. Owns its own visibility,
+    /// title/message/action text and the action command. Refreshed by
+    /// <see cref="RaiseSetupNoticeChanged"/> whenever account/trade counts shift.</summary>
+    public SetupNoticeViewModel SetupNotice { get; }
 
     /// <summary>
     /// Trade filter, pagination, and sort state. All Trades-tab bindings that
@@ -420,6 +405,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             getTotalAssets: () => TotalAssets,
             getNetWorth: () => NetWorth,
             onMonthlyExpenseChanged: OnMonthlyExpenseFromSubVm);
+        SetupNotice = new SetupNoticeViewModel(
+            ui.Localization ?? NullLocalizationService.Instance,
+            onAddAccount: OpenAddAccountDialog,
+            onAddTrade: AddRecord);
         History = new PortfolioHistoryViewModel(
             services.HistoryQuery ?? new NullPortfolioHistoryQueryService(),
             ui.Localization);
@@ -783,26 +772,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     partial void OnShowArchivedPositionsChanged(bool value) => _ = LoadPositionsAsync();
     partial void OnHideEmptyPositionsChanged(bool value) => _ = LoadPositionsAsync();
 
-    [RelayCommand]
-    private void ExecuteSetupNoticeAction()
-    {
-        if (HasNoCashAccounts)
-        {
-            OpenAddAccountDialog();
-            return;
-        }
-
-        if (HasNoTrades)
-            AddRecord();
-    }
-
     private void RaiseSetupNoticeChanged()
-    {
-        OnPropertyChanged(nameof(HasSetupNotice));
-        OnPropertyChanged(nameof(SetupNoticeTitle));
-        OnPropertyChanged(nameof(SetupNoticeMessage));
-        OnPropertyChanged(nameof(SetupNoticeActionText));
-    }
+        => SetupNotice.Refresh(HasNoCashAccounts, HasNoTrades);
 
     public async Task LoadAsync()
     {

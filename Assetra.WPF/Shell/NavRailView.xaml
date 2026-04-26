@@ -96,6 +96,42 @@
                     </Border>
                 </Grid>
 
+                <!--  Goals (財務目標)  -->
+                <RadioButton
+                    Content="{DynamicResource Nav.Goals}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Goals}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE945;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource Nav.Goals}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
+                <!--  Trends (淨資產趨勢)  -->
+                <RadioButton
+                    Content="{DynamicResource Nav.Trends}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Trends}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE9D9;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource Nav.Trends}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
+                <!--  Reports (月結報告)  -->
+                <RadioButton
+                    Content="{DynamicResource Nav.Reports}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Reports}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE9F9;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource Nav.Reports}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
                 <!--  警示 with triggered-count badge  -->
                 <Grid>
                     <RadioButton

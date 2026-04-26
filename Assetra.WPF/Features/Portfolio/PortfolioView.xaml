@@ -105,7 +105,7 @@
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="0,0,0,1"
-            Visibility="{Binding HasSetupNotice, Converter={StaticResource BooleanToVisibilityConverter}}">
+            Visibility="{Binding SetupNotice.HasSetupNotice, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -116,20 +116,20 @@
                         FontSize="{StaticResource FontSizeMd}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{Binding SetupNoticeTitle}" />
+                        Text="{Binding SetupNotice.Title}" />
                     <TextBlock
                         Margin="0,4,0,0"
                         FontSize="{StaticResource FontSizeBase}"
                         Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{Binding SetupNoticeMessage}"
+                        Text="{Binding SetupNotice.Message}"
                         TextWrapping="Wrap" />
                 </StackPanel>
                 <Button
                     Grid.Column="1"
                     Margin="12,0,0,0"
                     VerticalAlignment="Center"
-                    Command="{Binding ExecuteSetupNoticeActionCommand}"
-                    Content="{Binding SetupNoticeActionText}"
+                    Command="{Binding SetupNotice.ExecuteCommand}"
+                    Content="{Binding SetupNotice.ActionText}"
                     Style="{StaticResource BtnGhost}" />
             </Grid>
         </Border>

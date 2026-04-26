@@ -38,6 +38,13 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     // Period selection
     [ObservableProperty] private int _selectedDays = 30;
 
+    // Custom range (overrides SelectedDays when both ends are set)
+    [ObservableProperty] private DateTime? _customStartDate;
+    [ObservableProperty] private DateTime? _customEndDate;
+
+    partial void OnCustomStartDateChanged(DateTime? _) => RefreshChart();
+    partial void OnCustomEndDateChanged(DateTime? _) => RefreshChart();
+
     // Visibility guards
     [ObservableProperty] private bool _hasHistory;
     [ObservableProperty] private bool _isChartVisible = true;
@@ -78,6 +85,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     {
         if (int.TryParse(daysStr, out var days) && days > 0)
         {
+            // Selecting a preset clears any custom range.
+            CustomStartDate = null;
+            CustomEndDate = null;
             SelectedDays = days;
             RefreshChart();
         }
@@ -87,7 +97,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
     private void RefreshChart()
     {
-        var filtered = FilterByDays(_allSnapshots, SelectedDays);
+        var filtered = (CustomStartDate, CustomEndDate) is ({ } s, { } e)
+            ? FilterByRange(_allSnapshots, s, e)
+            : FilterByDays(_allSnapshots, SelectedDays);
         BuildChart(filtered);
     }
 
@@ -96,6 +108,15 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     {
         var cutoff = DateOnly.FromDateTime(DateTime.Today.AddDays(-(days - 1)));
         return all.Where(s => s.SnapshotDate >= cutoff).ToList();
+    }
+
+    private static IReadOnlyList<PortfolioDailySnapshot> FilterByRange(
+        IReadOnlyList<PortfolioDailySnapshot> all, DateTime start, DateTime end)
+    {
+        var (lo, hi) = start <= end ? (start, end) : (end, start);
+        var loDate = DateOnly.FromDateTime(lo);
+        var hiDate = DateOnly.FromDateTime(hi);
+        return all.Where(s => s.SnapshotDate >= loDate && s.SnapshotDate <= hiDate).ToList();
     }
 
     private void BuildChart(IReadOnlyList<PortfolioDailySnapshot> snapshots)

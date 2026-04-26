@@ -1,0 +1,114 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Trends.TrendsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:controls="clr-namespace:Assetra.WPF.Controls"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:portfolio="clr-namespace:Assetra.WPF.Features.Portfolio"
+    d:DataContext="{d:DesignInstance Type={x:Type portfolio:PortfolioHistoryViewModel},
+                                     IsDesignTimeCreatable=False}"
+    d:DesignHeight="776"
+    d:DesignWidth="1100"
+    Background="{DynamicResource AppBackground}"
+    mc:Ignorable="d">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--  Header  -->
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,0,0,16"
+            FontFamily="{StaticResource FontTabular}"
+            FontSize="{DynamicResource FontSizeXl}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextPrimary}"
+            Text="{DynamicResource Trends.Title}" />
+
+        <!--  Period buttons  -->
+        <StackPanel
+            Grid.Row="1"
+            Margin="0,0,0,12"
+            Orientation="Horizontal">
+            <Button
+                Margin="0,0,8,0"
+                Command="{Binding ChangePeriodCommand}"
+                CommandParameter="30"
+                Content="{DynamicResource Trends.Period.30}"
+                Style="{StaticResource BtnGhost}" />
+            <Button
+                Margin="0,0,8,0"
+                Command="{Binding ChangePeriodCommand}"
+                CommandParameter="90"
+                Content="{DynamicResource Trends.Period.90}"
+                Style="{StaticResource BtnGhost}" />
+            <Button
+                Margin="0,0,8,0"
+                Command="{Binding ChangePeriodCommand}"
+                CommandParameter="180"
+                Content="{DynamicResource Trends.Period.180}"
+                Style="{StaticResource BtnGhost}" />
+            <Button
+                Margin="0,0,8,0"
+                Command="{Binding ChangePeriodCommand}"
+                CommandParameter="365"
+                Content="{DynamicResource Trends.Period.365}"
+                Style="{StaticResource BtnGhost}" />
+            <Button
+                Margin="0,0,16,0"
+                Command="{Binding ChangePeriodCommand}"
+                CommandParameter="3650"
+                Content="{DynamicResource Trends.Period.All}"
+                Style="{StaticResource BtnGhost}" />
+
+            <controls:DateRangePicker
+                MinWidth="260"
+                EndDate="{Binding CustomEndDate, Mode=TwoWay}"
+                Placeholder="{DynamicResource Trends.CustomRange}"
+                StartDate="{Binding CustomStartDate, Mode=TwoWay}" />
+        </StackPanel>
+
+        <!--  Chart  -->
+        <Border
+            Grid.Row="2"
+            Padding="16"
+            Background="{DynamicResource AppSurface}"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="1"
+            CornerRadius="8">
+            <Grid>
+                <lvc:CartesianChart
+                    Background="Transparent"
+                    Series="{Binding ValueSeries}"
+                    TooltipPosition="Top"
+                    TooltipTextSize="12"
+                    Visibility="{Binding HasHistory, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    XAxes="{Binding XAxes}"
+                    YAxes="{Binding YAxes}" />
+
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontStyle="Italic"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Trends.Empty}"
+                    Visibility="{Binding HasHistory, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+            </Grid>
+        </Border>
+
+        <!--  Footer hint  -->
+        <TextBlock
+            Grid.Row="3"
+            Margin="0,12,0,0"
+            FontSize="{DynamicResource FontSizeXs}"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Trends.Hint}" />
+    </Grid>
+</UserControl>

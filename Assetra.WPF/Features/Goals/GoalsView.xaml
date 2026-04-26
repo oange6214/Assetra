@@ -1,0 +1,231 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Goals.GoalsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="clr-namespace:Assetra.WPF.Controls"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Goals"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:GoalsViewModel},
+                                     IsDesignTimeCreatable=False}"
+    d:DesignHeight="776"
+    d:DesignWidth="1100"
+    Background="{DynamicResource AppBackground}"
+    mc:Ignorable="d">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--  Header  -->
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,0,0,16"
+            FontFamily="{StaticResource FontTabular}"
+            FontSize="{DynamicResource FontSizeXl}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextPrimary}"
+            Text="{DynamicResource Goals.Title}" />
+
+        <!--  Goal list  -->
+        <Border
+            Grid.Row="1"
+            Padding="16"
+            Background="{DynamicResource AppSurface}"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="1"
+            CornerRadius="8">
+            <Grid>
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontStyle="Italic"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Goals.Empty}"
+                    Visibility="{Binding HasNoGoals, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                <ScrollViewer
+                    VerticalScrollBarVisibility="Auto"
+                    Visibility="{Binding HasGoals, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ItemsControl ItemsSource="{Binding Goals}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:GoalRowViewModel}">
+                                <Border
+                                    Margin="0,0,0,12"
+                                    Padding="12"
+                                    Background="{DynamicResource AppSurfaceAlt}"
+                                    BorderBrush="{DynamicResource AppBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="6">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!--  Title  -->
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="0"
+                                            FontSize="{DynamicResource FontSizeMd}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding Name}" />
+
+                                        <!--  Delete  -->
+                                        <Button
+                                            Grid.Row="0"
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Content="✕"
+                                            Style="{StaticResource BtnIcon}" />
+
+                                        <!--  Numbers row  -->
+                                        <StackPanel
+                                            Grid.Row="1"
+                                            Grid.Column="0"
+                                            Grid.ColumnSpan="2"
+                                            Margin="0,8,0,8"
+                                            Orientation="Horizontal">
+                                            <TextBlock
+                                                FontFamily="{StaticResource FontTabular}"
+                                                FontSize="{DynamicResource FontSizeSm}"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding CurrentDisplay}" />
+                                            <TextBlock
+                                                Margin="6,0"
+                                                FontFamily="{StaticResource FontTabular}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="/" />
+                                            <TextBlock
+                                                FontFamily="{StaticResource FontTabular}"
+                                                FontSize="{DynamicResource FontSizeSm}"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding TargetDisplay}" />
+                                            <TextBlock
+                                                Margin="16,0,0,0"
+                                                FontFamily="{StaticResource FontTabular}"
+                                                Foreground="{DynamicResource AppAccent}"
+                                                Text="{Binding ProgressDisplay}" />
+                                            <TextBlock
+                                                Margin="16,0,0,0"
+                                                FontFamily="{StaticResource FontTabular}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{Binding DeadlineDisplay}" />
+                                        </StackPanel>
+
+                                        <!--  Progress bar  -->
+                                        <ProgressBar
+                                            Grid.Row="2"
+                                            Grid.Column="0"
+                                            Grid.ColumnSpan="2"
+                                            Height="8"
+                                            Maximum="100"
+                                            Value="{Binding ProgressPercent, Mode=OneWay}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!--  ── Add form ──  -->
+        <Border
+            Grid.Row="2"
+            Margin="0,16,0,0"
+            Padding="16"
+            Background="{DynamicResource AppSurface}"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="1"
+            CornerRadius="8">
+            <StackPanel>
+                <TextBlock
+                    Margin="0,0,0,8"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    Text="{DynamicResource Goals.Add.Title}" />
+
+                <Grid>
+                    <Grid.Resources>
+                        <Style x:Key="FormFieldLabel" TargetType="TextBlock">
+                            <Setter Property="Margin" Value="0,0,0,4" />
+                            <Setter Property="FontSize" Value="{DynamicResource FontSizeXs}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Name}" />
+                        <TextBox
+                            MinHeight="36"
+                            Style="{StaticResource FormTextBox}"
+                            Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Target}" />
+                        <TextBox
+                            MinHeight="36"
+                            Style="{StaticResource FormTextBox}"
+                            Text="{Binding AddTargetAmount, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Margin="0,0,8,0">
+                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Current}" />
+                        <TextBox
+                            MinHeight="36"
+                            Style="{StaticResource FormTextBox}"
+                            Text="{Binding AddCurrentAmount, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="3" Margin="0,0,8,0">
+                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Deadline}" />
+                        <controls:FormDatePicker SelectedDate="{Binding AddDeadline, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="4" Margin="0,0,8,0">
+                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Notes}" />
+                        <TextBox
+                            MinHeight="36"
+                            Style="{StaticResource FormTextBox}"
+                            Text="{Binding AddNotes, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <Button
+                        Grid.Column="5"
+                        VerticalAlignment="Bottom"
+                        Command="{Binding AddCommand}"
+                        Content="{DynamicResource Goals.Add.Submit}"
+                        Style="{StaticResource BtnPrimary}" />
+                </Grid>
+
+                <TextBlock
+                    Margin="0,8,0,0"
+                    Foreground="{DynamicResource AppDown}"
+                    Text="{Binding AddError}"
+                    Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

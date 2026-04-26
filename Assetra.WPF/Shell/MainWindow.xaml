@@ -9,6 +9,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:portfolio="clr-namespace:Assetra.WPF.Features.Portfolio"
     xmlns:recurring="clr-namespace:Assetra.WPF.Features.Recurring"
+    xmlns:reports="clr-namespace:Assetra.WPF.Features.Reports"
+    xmlns:trends="clr-namespace:Assetra.WPF.Features.Trends"
+    xmlns:goals="clr-namespace:Assetra.WPF.Features.Goals"
     xmlns:settings="clr-namespace:Assetra.WPF.Features.Settings"
     xmlns:shell="clr-namespace:Assetra.WPF.Shell"
     xmlns:snackbar="clr-namespace:Assetra.WPF.Features.Snackbar"
@@ -203,6 +206,21 @@
                 <!--  訂閱與待確認  -->
                 <Grid d:Visibility="Collapsed">
                     <recurring:RecurringView DataContext="{Binding Recurring}" Visibility="{Binding DataContext.NavRail.IsRecurringActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </Grid>
+
+                <!--  財務目標  -->
+                <Grid d:Visibility="Collapsed">
+                    <goals:GoalsView DataContext="{Binding Goals}" Visibility="{Binding DataContext.NavRail.IsGoalsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </Grid>
+
+                <!--  淨資產趨勢  -->
+                <Grid d:Visibility="Collapsed">
+                    <trends:TrendsView DataContext="{Binding Portfolio.History}" Visibility="{Binding DataContext.NavRail.IsTrendsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </Grid>
+
+                <!--  月結報告  -->
+                <Grid d:Visibility="Collapsed">
+                    <reports:ReportsView DataContext="{Binding Reports}" Visibility="{Binding DataContext.NavRail.IsReportsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </Grid>
 
                 <!--  警示  -->

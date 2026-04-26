@@ -15,6 +15,9 @@
   <!--  Navigation  -->
   <sys:String x:Key="TitleBar.Search.Hint">輸入股票代號或名稱搜尋</sys:String>
   <sys:String x:Key="TitleBar.Search.Placeholder">搜尋股票...</sys:String>
+  <sys:String x:Key="Nav.Reports">月結報告</sys:String>
+  <sys:String x:Key="Nav.Trends">資產趨勢</sys:String>
+  <sys:String x:Key="Nav.Goals">財務目標</sys:String>
   <sys:String x:Key="Nav.Alerts">警示</sys:String>
   <sys:String x:Key="Nav.Alerts.Tooltip">價格警示</sys:String>
   <sys:String x:Key="Nav.Settings">設定</sys:String>
@@ -725,4 +728,40 @@
   <!--  Budget mode  -->
   <sys:String x:Key="Categories.Budget.Mode.Monthly">月預算</sys:String>
   <sys:String x:Key="Categories.Budget.Mode.Yearly">年預算</sys:String>
+
+  <!--  Reports / 月結報告  -->
+  <sys:String x:Key="Reports.Title">月結報告</sys:String>
+  <sys:String x:Key="Reports.Reload">重新載入</sys:String>
+  <sys:String x:Key="Reports.Loading">載入中…</sys:String>
+  <sys:String x:Key="Reports.Income">本月收入</sys:String>
+  <sys:String x:Key="Reports.Expense">本月支出</sys:String>
+  <sys:String x:Key="Reports.Net">本月淨流</sys:String>
+  <sys:String x:Key="Reports.SavingsRate">儲蓄率</sys:String>
+  <sys:String x:Key="Reports.DeltaTooltip">與上月比較</sys:String>
+  <sys:String x:Key="Reports.OverBudget.Title">超支分類</sys:String>
+  <sys:String x:Key="Reports.OverBudget.Empty">本月無超支分類</sys:String>
+  <sys:String x:Key="Reports.Upcoming.Title">未來 14 天到期</sys:String>
+  <sys:String x:Key="Reports.Upcoming.Empty">未來 14 天無到期項目</sys:String>
+
+  <!--  Trends / 資產趨勢  -->
+  <sys:String x:Key="Trends.Title">資產趨勢</sys:String>
+  <sys:String x:Key="Trends.Period.30">近 30 天</sys:String>
+  <sys:String x:Key="Trends.Period.90">近 3 個月</sys:String>
+  <sys:String x:Key="Trends.Period.180">近 6 個月</sys:String>
+  <sys:String x:Key="Trends.Period.365">近 1 年</sys:String>
+  <sys:String x:Key="Trends.Period.All">全部</sys:String>
+  <sys:String x:Key="Trends.Empty">尚無歷史快照</sys:String>
+  <sys:String x:Key="Trends.Hint">資料來自每日投資組合快照（市值）</sys:String>
+  <sys:String x:Key="Trends.CustomRange">自訂範圍</sys:String>
+
+  <!--  Goals / 財務目標  -->
+  <sys:String x:Key="Goals.Title">財務目標</sys:String>
+  <sys:String x:Key="Goals.Empty">尚未建立任何目標</sys:String>
+  <sys:String x:Key="Goals.Add.Title">新增目標</sys:String>
+  <sys:String x:Key="Goals.Add.Name">名稱</sys:String>
+  <sys:String x:Key="Goals.Add.Target">目標金額</sys:String>
+  <sys:String x:Key="Goals.Add.Current">目前金額</sys:String>
+  <sys:String x:Key="Goals.Add.Notes">備註</sys:String>
+  <sys:String x:Key="Goals.Add.Deadline">期限</sys:String>
+  <sys:String x:Key="Goals.Add.Submit">新增</sys:String>
 </ResourceDictionary>

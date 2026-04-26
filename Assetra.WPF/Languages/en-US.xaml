@@ -15,7 +15,10 @@
     <!--  Navigation  -->
     <sys:String x:Key="TitleBar.Search.Hint">Type a stock symbol or name to search</sys:String>
     <sys:String x:Key="TitleBar.Search.Placeholder">Search stocks...</sys:String>
-<sys:String x:Key="Nav.Alerts">Alerts</sys:String>
+<sys:String x:Key="Nav.Reports">Reports</sys:String>
+    <sys:String x:Key="Nav.Trends">Trends</sys:String>
+    <sys:String x:Key="Nav.Goals">Goals</sys:String>
+    <sys:String x:Key="Nav.Alerts">Alerts</sys:String>
     <sys:String x:Key="Nav.Alerts.Tooltip">Price Alerts</sys:String>
     <sys:String x:Key="Nav.Settings">Settings</sys:String>
     <sys:String x:Key="Nav.GoBack">Go back</sys:String>
@@ -723,4 +726,40 @@
     <!-- Budget mode -->
     <sys:String x:Key="Categories.Budget.Mode.Monthly">Monthly</sys:String>
     <sys:String x:Key="Categories.Budget.Mode.Yearly">Yearly</sys:String>
+
+    <!-- Reports / Month-End Report -->
+    <sys:String x:Key="Reports.Title">Month-End Report</sys:String>
+    <sys:String x:Key="Reports.Reload">Reload</sys:String>
+    <sys:String x:Key="Reports.Loading">Loading…</sys:String>
+    <sys:String x:Key="Reports.Income">Income</sys:String>
+    <sys:String x:Key="Reports.Expense">Expense</sys:String>
+    <sys:String x:Key="Reports.Net">Net cash flow</sys:String>
+    <sys:String x:Key="Reports.SavingsRate">Savings rate</sys:String>
+    <sys:String x:Key="Reports.DeltaTooltip">Δ vs previous month</sys:String>
+    <sys:String x:Key="Reports.OverBudget.Title">Over-budget categories</sys:String>
+    <sys:String x:Key="Reports.OverBudget.Empty">No categories over budget this month</sys:String>
+    <sys:String x:Key="Reports.Upcoming.Title">Upcoming (next 14 days)</sys:String>
+    <sys:String x:Key="Reports.Upcoming.Empty">No upcoming items in the next 14 days</sys:String>
+
+    <!-- Trends / Net-worth trend -->
+    <sys:String x:Key="Trends.Title">Net-Worth Trend</sys:String>
+    <sys:String x:Key="Trends.Period.30">30 D</sys:String>
+    <sys:String x:Key="Trends.Period.90">3 M</sys:String>
+    <sys:String x:Key="Trends.Period.180">6 M</sys:String>
+    <sys:String x:Key="Trends.Period.365">1 Y</sys:String>
+    <sys:String x:Key="Trends.Period.All">All</sys:String>
+    <sys:String x:Key="Trends.Empty">No history snapshots yet</sys:String>
+    <sys:String x:Key="Trends.Hint">Data sourced from daily portfolio snapshots (market value)</sys:String>
+    <sys:String x:Key="Trends.CustomRange">Custom range</sys:String>
+
+    <!-- Goals / Financial Goals -->
+    <sys:String x:Key="Goals.Title">Financial Goals</sys:String>
+    <sys:String x:Key="Goals.Empty">No goals yet</sys:String>
+    <sys:String x:Key="Goals.Add.Title">New Goal</sys:String>
+    <sys:String x:Key="Goals.Add.Name">Name</sys:String>
+    <sys:String x:Key="Goals.Add.Target">Target</sys:String>
+    <sys:String x:Key="Goals.Add.Current">Current</sys:String>
+    <sys:String x:Key="Goals.Add.Notes">Notes</sys:String>
+    <sys:String x:Key="Goals.Add.Deadline">Deadline</sys:String>
+    <sys:String x:Key="Goals.Add.Submit">Add</sys:String>
 </ResourceDictionary>
