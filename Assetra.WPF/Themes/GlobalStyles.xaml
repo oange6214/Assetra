@@ -411,7 +411,7 @@
 
     <!--  ── Danger Button — solid red background, white text ──  -->
     <Style x:Key="BtnDanger" TargetType="Button">
-        <Setter Property="Background" Value="{DynamicResource AppDown}" />
+        <Setter Property="Background" Value="{DynamicResource AppDanger}" />
         <Setter Property="Foreground" Value="#FFFFFF" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="14,6" />
@@ -572,12 +572,12 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppDown}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppDanger}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppDanger}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppDown}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppDanger}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppDanger}" />
                             <Setter TargetName="Icon" Property="Opacity" Value="0.6" />
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -1151,7 +1151,7 @@
     <!--  ── Form Field Validation Error ──  -->
     <Style x:Key="FormFieldError" TargetType="TextBlock">
         <Setter Property="FontSize" Value="{StaticResource FontSizeXs}" />
-        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppDanger}" />
         <Setter Property="Margin" Value="0,2,0,0" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>

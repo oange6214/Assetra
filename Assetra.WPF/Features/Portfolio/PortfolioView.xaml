@@ -483,7 +483,7 @@
                         Margin="16,0,16,16"
                         Padding="14,12"
                         Background="{DynamicResource AppBackground}"
-                        BorderBrush="{DynamicResource AppDown}"
+                        BorderBrush="{DynamicResource AppDanger}"
                         BorderThickness="1"
                         CornerRadius="{StaticResource RadiusSm}">
                         <Grid>
@@ -498,12 +498,12 @@
                                         VerticalAlignment="Center"
                                         FontFamily="Segoe MDL2 Assets"
                                         FontSize="11"
-                                        Foreground="{DynamicResource AppDown}"
+                                        Foreground="{DynamicResource AppDanger}"
                                         Text="&#xE74D;" />
                                     <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
                                         FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppDown}"
+                                        Foreground="{DynamicResource AppDanger}"
                                         Text="{DynamicResource Portfolio.Detail.DeleteAccount}" />
                                 </StackPanel>
                                 <TextBlock
@@ -1087,7 +1087,7 @@
                         Margin="16,0,16,16"
                         Padding="14,12"
                         Background="{DynamicResource AppBackground}"
-                        BorderBrush="{DynamicResource AppDown}"
+                        BorderBrush="{DynamicResource AppDanger}"
                         BorderThickness="1"
                         CornerRadius="{StaticResource RadiusSm}">
                         <Grid>
@@ -1102,12 +1102,12 @@
                                         VerticalAlignment="Center"
                                         FontFamily="Segoe MDL2 Assets"
                                         FontSize="11"
-                                        Foreground="{DynamicResource AppDown}"
+                                        Foreground="{DynamicResource AppDanger}"
                                         Text="&#xE74D;" />
                                     <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
                                         FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppDown}"
+                                        Foreground="{DynamicResource AppDanger}"
                                         Text="{DynamicResource Portfolio.Detail.DeleteLiability}" />
                                 </StackPanel>
                                 <TextBlock
@@ -1850,7 +1850,7 @@
                         Margin="20,0,20,16"
                         Padding="14,12"
                         Background="{DynamicResource AppBackground}"
-                        BorderBrush="{DynamicResource AppDown}"
+                        BorderBrush="{DynamicResource AppDanger}"
                         BorderThickness="1"
                         CornerRadius="{StaticResource RadiusSm}">
                         <Grid>
@@ -1865,12 +1865,12 @@
                                         VerticalAlignment="Center"
                                         FontFamily="Segoe MDL2 Assets"
                                         FontSize="11"
-                                        Foreground="{DynamicResource AppDown}"
+                                        Foreground="{DynamicResource AppDanger}"
                                         Text="&#xE74D;" />
                                     <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
                                         FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppDown}"
+                                        Foreground="{DynamicResource AppDanger}"
                                         Text="{DynamicResource Portfolio.Detail.DeleteAsset}" />
                                 </StackPanel>
                                 <TextBlock

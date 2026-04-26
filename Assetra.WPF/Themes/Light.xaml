@@ -44,6 +44,9 @@
     <SolidColorBrush x:Key="AppDown" Color="#C42B1C" />
     <SolidColorBrush x:Key="AppFlat" Color="#616161" />
 
+    <!--  Semantic — destructive action (always red, independent of price-direction convention)  -->
+    <SolidColorBrush x:Key="AppDanger" Color="#C42B1C" />
+
     <!--  Accent — Windows system accent blue  -->
     <SolidColorBrush x:Key="AppAccent"       Color="#0078D4" />
     <SolidColorBrush x:Key="AppAccentHover"  Color="#006CBE" />

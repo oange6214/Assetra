@@ -45,6 +45,9 @@
     <!--  #909090 gives 4.82:1 on AppSurface — passes WCAG AA (was #808080 at 3.64:1)  -->
     <SolidColorBrush x:Key="AppFlat" Color="#909090" />
 
+    <!--  Semantic — destructive action (always red, independent of price-direction convention)  -->
+    <SolidColorBrush x:Key="AppDanger" Color="#F24B4B" />
+
     <!--  Accent — Windows system accent blue  -->
     <SolidColorBrush x:Key="AppAccent" Color="#0078D4" />
     <SolidColorBrush x:Key="AppAccentHover" Color="#006CBE" />
