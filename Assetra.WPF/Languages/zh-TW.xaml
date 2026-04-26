@@ -662,7 +662,7 @@
   <sys:String x:Key="Categories.Rule.Toast.Updated">已更新規則「{0}」</sys:String>
   <sys:String x:Key="Categories.Rule.Toast.Deleted">已刪除規則「{0}」</sys:String>
 
-  <!-- Budget management -->
+  <!--  Budget management  -->
   <sys:String x:Key="Categories.Tab.Budgets">預算</sys:String>
   <sys:String x:Key="Categories.Budget.Hint">為特定分類或全部支出設定每月／每年的預算上限。</sys:String>
   <sys:String x:Key="Categories.Budget.Add">新增預算</sys:String>
@@ -680,7 +680,7 @@
   <sys:String x:Key="Categories.Budget.Toast.Updated">已更新預算</sys:String>
   <sys:String x:Key="Categories.Budget.Toast.Deleted">已刪除預算</sys:String>
 
-  <!-- Dashboard budget summary card -->
+  <!--  Dashboard budget summary card  -->
   <sys:String x:Key="Dashboard.Budget.Title">本月收支</sys:String>
   <sys:String x:Key="Dashboard.Budget.Income">收入</sys:String>
   <sys:String x:Key="Dashboard.Budget.Expense">支出</sys:String>
@@ -689,7 +689,7 @@
 
   <sys:String x:Key="Common.Delete">刪除</sys:String>
 
-  <!-- Recurring transactions / subscriptions -->
+  <!--  Recurring transactions / subscriptions  -->
   <sys:String x:Key="Nav.Recurring">訂閱排程</sys:String>
   <sys:String x:Key="Recurring.Title">訂閱與待確認排程</sys:String>
   <sys:String x:Key="Recurring.Tab.Subscriptions">訂閱項目</sys:String>
@@ -710,7 +710,7 @@
   <sys:String x:Key="Recurring.Pending.Toast.Confirmed">已確認</sys:String>
   <sys:String x:Key="Recurring.Pending.Toast.Skipped">已略過</sys:String>
 
-  <!-- Recurrence frequency -->
+  <!--  Recurrence frequency  -->
   <sys:String x:Key="Recurring.Frequency.Daily">每日</sys:String>
   <sys:String x:Key="Recurring.Frequency.Weekly">每週</sys:String>
   <sys:String x:Key="Recurring.Frequency.BiWeekly">每雙週</sys:String>
@@ -718,11 +718,11 @@
   <sys:String x:Key="Recurring.Frequency.Quarterly">每季</sys:String>
   <sys:String x:Key="Recurring.Frequency.Yearly">每年</sys:String>
 
-  <!-- Auto generation mode -->
+  <!--  Auto generation mode  -->
   <sys:String x:Key="Recurring.Mode.AutoApply">自動寫入</sys:String>
   <sys:String x:Key="Recurring.Mode.PendingConfirm">需確認</sys:String>
 
-  <!-- Budget mode -->
+  <!--  Budget mode  -->
   <sys:String x:Key="Categories.Budget.Mode.Monthly">月預算</sys:String>
   <sys:String x:Key="Categories.Budget.Mode.Yearly">年預算</sys:String>
 </ResourceDictionary>
