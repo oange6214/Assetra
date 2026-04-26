@@ -938,7 +938,13 @@ public class PortfolioViewModelTests
 
         Assert.True(vm.IsAccountsTab);
         Assert.True(vm.AddAssetDialog.IsAddDialogOpen);
+        Assert.True(vm.AddAssetDialog.IsTypePickerStep);
+        Assert.True(vm.AddAssetDialog.IsAccountDialogMode);
+
+        vm.AddAssetDialog.SelectLiabilityTypeCommand.Execute("cash:銀行活存");
         Assert.Equal("cash", vm.AddAssetDialog.AddAssetType);
+        Assert.Equal("銀行活存", vm.AddAssetDialog.AddSubtype);
+        Assert.False(vm.AddAssetDialog.IsTypePickerStep);
     }
 
     [Fact]

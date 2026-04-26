@@ -1484,9 +1484,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     {
         SelectedTab = PortfolioTab.Accounts;
         AddAssetDialog.AddDialogMode = "account";
-        AddAssetDialog.AddAssetType = "cash";
-        AddAssetDialog.IsTypePickerStep = false;
+        AddAssetDialog.IsTypePickerStep = true;
         AddAssetDialog.AddError = string.Empty;
+        AddAssetDialog.AddSubtype = string.Empty;
         AddAssetDialog.AddAccountName = string.Empty;
         AddAssetDialog.AddInitialDepositEnabled = false;
         AddAssetDialog.AddInitialDepositAmount = string.Empty;

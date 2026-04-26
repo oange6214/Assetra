@@ -24,7 +24,8 @@ public sealed class AccountUpsertWorkflowService : IAccountUpsertWorkflowService
             FinancialType.Asset,
             null,
             request.Currency,
-            request.CreatedDate);
+            request.CreatedDate,
+            Subtype: string.IsNullOrWhiteSpace(request.Subtype) ? null : request.Subtype.Trim());
 
         await _assetRepository.AddItemAsync(account).ConfigureAwait(false);
         return new AccountUpsertResult(account);
@@ -40,7 +41,8 @@ public sealed class AccountUpsertWorkflowService : IAccountUpsertWorkflowService
             FinancialType.Asset,
             null,
             request.Currency,
-            request.CreatedDate);
+            request.CreatedDate,
+            Subtype: string.IsNullOrWhiteSpace(request.Subtype) ? null : request.Subtype.Trim());
 
         await _assetRepository.UpdateItemAsync(account).ConfigureAwait(false);
         return new AccountUpsertResult(account);
