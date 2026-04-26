@@ -67,6 +67,106 @@ public class MonthEndReportServiceTests
         Assert.Equal("Soon", report.Upcoming[0].Name);
     }
 
+    [Fact]
+    public async Task BuildAsync_AcrossYearBoundary_ResolvesPreviousAsLastDecember()
+    {
+        var trades = new FakeTradeRepo();
+        var budgets = new FakeBudgetRepo();
+        var categories = new FakeCategoryRepo();
+        var recurring = new FakeRecurringRepo();
+
+        // December 2025 (previous of January 2026)
+        trades.Store.Add(MakeIncome(new DateTime(2025, 12, 5), 80000m));
+        // January 2026 (current)
+        trades.Store.Add(MakeIncome(new DateTime(2026, 1, 5), 90000m));
+
+        var summary = new MonthlyBudgetSummaryService(trades, budgets, categories);
+        var svc = new MonthEndReportService(summary, recurring);
+
+        var report = await svc.BuildAsync(2026, 1);
+
+        Assert.NotNull(report.Previous);
+        Assert.Equal(2025, report.Previous!.Year);
+        Assert.Equal(12, report.Previous.Month);
+        Assert.Equal(80000m, report.Previous.TotalIncome);
+        Assert.Equal(10000m, report.IncomeDelta);
+    }
+
+    [Fact]
+    public async Task BuildAsync_ZeroIncome_SavingsRateIsZero_AndNoNegativeDivide()
+    {
+        var trades = new FakeTradeRepo();
+        var budgets = new FakeBudgetRepo();
+        var categories = new FakeCategoryRepo();
+        var recurring = new FakeRecurringRepo();
+
+        trades.Store.Add(MakeWithdrawal(new DateTime(2026, 4, 5), 500m, Guid.NewGuid()));
+
+        var summary = new MonthlyBudgetSummaryService(trades, budgets, categories);
+        var svc = new MonthEndReportService(summary, recurring);
+
+        var report = await svc.BuildAsync(2026, 4);
+
+        Assert.Equal(0m, report.Current.TotalIncome);
+        Assert.Equal(0m, report.SavingsRate);
+    }
+
+    [Fact]
+    public async Task BuildAsync_MultipleCategoriesOverBudget_AllListed()
+    {
+        var foodCat = Guid.NewGuid();
+        var transitCat = Guid.NewGuid();
+        var trades = new FakeTradeRepo();
+        var budgets = new FakeBudgetRepo();
+        var categories = new FakeCategoryRepo
+        {
+            Items =
+            {
+                new ExpenseCategory(foodCat, "餐飲", CategoryKind.Expense),
+                new ExpenseCategory(transitCat, "交通", CategoryKind.Expense),
+            },
+        };
+        var recurring = new FakeRecurringRepo();
+
+        trades.Store.Add(MakeWithdrawal(new DateTime(2026, 4, 5), 5000m, foodCat));
+        trades.Store.Add(MakeWithdrawal(new DateTime(2026, 4, 6), 3000m, transitCat));
+        budgets.Store.Add(new Budget(Guid.NewGuid(), foodCat, BudgetMode.Monthly, 2026, 4, 1000m));
+        budgets.Store.Add(new Budget(Guid.NewGuid(), transitCat, BudgetMode.Monthly, 2026, 4, 1500m));
+
+        var summary = new MonthlyBudgetSummaryService(trades, budgets, categories);
+        var svc = new MonthEndReportService(summary, recurring);
+
+        var report = await svc.BuildAsync(2026, 4);
+
+        Assert.Equal(2, report.OverBudgetCategories.Count);
+        Assert.Contains(report.OverBudgetCategories, c => c.CategoryId == foodCat);
+        Assert.Contains(report.OverBudgetCategories, c => c.CategoryId == transitCat);
+    }
+
+    [Fact]
+    public async Task BuildAsync_UpcomingRecurring_SortedByDueDate()
+    {
+        var trades = new FakeTradeRepo();
+        var budgets = new FakeBudgetRepo();
+        var categories = new FakeCategoryRepo();
+        var recurring = new FakeRecurringRepo();
+
+        var today = DateTime.Today;
+        recurring.Store.Add(MakeRecurring("Day10", today.AddDays(10)));
+        recurring.Store.Add(MakeRecurring("Day2",  today.AddDays(2)));
+        recurring.Store.Add(MakeRecurring("Day7",  today.AddDays(7)));
+
+        var summary = new MonthlyBudgetSummaryService(trades, budgets, categories);
+        var svc = new MonthEndReportService(summary, recurring);
+
+        var report = await svc.BuildAsync(today.Year, today.Month);
+
+        Assert.Equal(3, report.Upcoming.Count);
+        Assert.Equal("Day2",  report.Upcoming[0].Name);
+        Assert.Equal("Day7",  report.Upcoming[1].Name);
+        Assert.Equal("Day10", report.Upcoming[2].Name);
+    }
+
     private static Trade MakeIncome(DateTime when, decimal amount) => new(
         Guid.NewGuid(), string.Empty, string.Empty, "income",
         TradeType.Income, when, 0m, 1, null, null,
