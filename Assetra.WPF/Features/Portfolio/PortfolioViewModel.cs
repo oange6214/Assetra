@@ -58,17 +58,14 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     public ObservableCollection<CashAccountRowViewModel> CashAccounts { get; } = [];
     public ObservableCollection<LiabilityRowViewModel> Liabilities { get; } = [];
 
-    // Asset allocation (pie chart)
-    public ObservableCollection<AssetAllocationSlice> AllocationSlices { get; } = [];
-    [ObservableProperty] private ISeries[] _allocationPieSeries = [];
+    // Asset allocation (pie chart) — owned by AllocationPanelViewModel.
+    public AllocationPanelViewModel Allocation { get; }
     [ObservableProperty] private bool _isAllocationVisible = true;
     [ObservableProperty] private bool _isMetricCardsExpanded = true;
     [ObservableProperty] private bool _isPositionsSummaryExpanded = true;
     [ObservableProperty] private bool _isCashSummaryExpanded = true;
     [ObservableProperty] private bool _isLiabilitySummaryExpanded = true;
     [ObservableProperty] private bool _isDivCalendarExpanded = true;
-
-    public bool HasAllocationData => AllocationSlices.Count > 0;
 
     // Totals
     [ObservableProperty] private decimal _totalCost;
@@ -476,6 +473,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         _historyMaintenanceService = services.HistoryMaintenance
             ?? new NullPortfolioHistoryMaintenanceService();
         _localization = ui.Localization;
+        Allocation = new AllocationPanelViewModel(ui.Localization);
         History = new PortfolioHistoryViewModel(
             services.HistoryQuery ?? new NullPortfolioHistoryQueryService(),
             ui.Localization);
@@ -1091,7 +1089,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         // Recompute cached financial summary properties and notify all dependents
         ApplyFinancialSummary(summary);
 
-        RebuildAllocationSlices(summary.AllocationSlices);
+        Allocation.Apply(summary.AllocationSlices);
 
         // Fire-and-forget: record today's snapshot once prices are live
         _ = RecordSnapshotAsync();
@@ -1126,105 +1124,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(IsEmergencyWarning));
         OnPropertyChanged(nameof(IsEmergencyDanger));
         OnPropertyChanged(nameof(EmergencyStatusTag));
-    }
-
-    private static readonly IReadOnlyDictionary<AssetType, (string LabelKey, string Color)> AssetTypeColors =
-        new Dictionary<AssetType, (string, string)>
-        {
-            [AssetType.Stock] = ("Portfolio.AssetType.Stock", "#3B82F6"),
-            [AssetType.Fund] = ("Portfolio.AssetType.Fund", "#10B981"),
-            [AssetType.PreciousMetal] = ("Portfolio.AssetType.Metal", "#F59E0B"),
-            [AssetType.Bond] = ("Portfolio.AssetType.Bond", "#6B7280"),
-            [AssetType.Crypto] = ("Portfolio.AssetType.Crypto", "#8B5CF6"),
-        };
-
-    private void RebuildAllocationSlices(IReadOnlyList<AllocationSliceResult> slices)
-    {
-        // Build the new slice list without touching the observable collection yet.
-        var newSlices = new List<AssetAllocationSlice>();
-
-        foreach (var slice in slices)
-        {
-            switch (slice.Kind)
-            {
-                case AllocationSliceKind.AssetType when slice.AssetType is AssetType assetType:
-                    if (!AssetTypeColors.TryGetValue(assetType, out var meta))
-                        continue;
-                    var label = L(meta.LabelKey, assetType.ToString());
-                    newSlices.Add(new AssetAllocationSlice(label, slice.Value, slice.Percent, meta.Color));
-                    break;
-                case AllocationSliceKind.Cash:
-                    newSlices.Add(new AssetAllocationSlice(
-                        L("Portfolio.Header.Cash", "Cash"),
-                        slice.Value,
-                        slice.Percent,
-                        "#94A3B8"));
-                    break;
-                case AllocationSliceKind.Liabilities:
-                    newSlices.Add(new AssetAllocationSlice(
-                        L("Portfolio.Header.Liabilities", "Liabilities"),
-                        slice.Value,
-                        slice.Percent,
-                        "#EF4444"));
-                    break;
-            }
-        }
-
-        // Dirty-check: only rebuild AllocationPieSeries when slice data has materially changed.
-        // LiveCharts treats a new ISeries[] reference as a full chart reset (animation flicker + GC).
-        // Comparing by label + value (rounded to nearest integer) avoids churn on tiny price ticks.
-        bool slicesChanged = newSlices.Count != AllocationSlices.Count;
-        if (!slicesChanged)
-        {
-            for (var i = 0; i < newSlices.Count; i++)
-            {
-                var n = newSlices[i];
-                var o = AllocationSlices[i];
-                if (n.Label != o.Label || Math.Round(n.Value) != Math.Round(o.Value))
-                {
-                    slicesChanged = true;
-                    break;
-                }
-            }
-        }
-
-        if (!slicesChanged)
-            return;
-
-        // Slices changed — update observable collection and rebuild PieSeries array.
-        AllocationSlices.Clear();
-        foreach (var s in newSlices)
-            AllocationSlices.Add(s);
-
-        if (newSlices.Count == 0)
-        {
-            AllocationPieSeries = [];
-            OnPropertyChanged(nameof(HasAllocationData));
-            return;
-        }
-
-        // Build PieSeries for LiveChartsCore v2 (must use double, not decimal)
-        AllocationPieSeries = AllocationSlices
-            .Select(s =>
-            {
-                var paint = new LiveChartsCore.SkiaSharpView.Painting.SolidColorPaint(SKColor.Parse(s.ColorHex));
-                return (ISeries)new PieSeries<double>
-                {
-                    Values = new[] { (double)s.Value },
-                    // Name drives the LiveChartsCore tooltip (built-in legend is hidden).
-                    // Embed value + percent so the tooltip popup shows useful info on hover.
-                    Name = $"{s.Label}  NT${s.Value:N0}  ({s.Percent:F1}%)",
-                    InnerRadius = 40,
-                    Fill = paint,
-                    Stroke = null,
-                    DataLabelsSize = 0,
-                    HoverPushout = 6,
-                    AnimationsSpeed = TimeSpan.Zero,
-                };
-            })
-            .ToArray();
-
-        OnPropertyChanged(nameof(HasAllocationData));
     }
 
     private async Task RecordSnapshotAsync()

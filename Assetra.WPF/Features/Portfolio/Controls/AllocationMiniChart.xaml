@@ -32,7 +32,7 @@
                 Background="Transparent"
                 InitialRotation="-90"
                 LegendPosition="Hidden"
-                Series="{Binding AllocationPieSeries}"
+                Series="{Binding Allocation.PieSeries}"
                 TooltipPosition="Center"
                 TooltipTextSize="11" />
 
@@ -41,7 +41,7 @@
                 Grid.Column="1"
                 Margin="16,4,0,0"
                 VerticalAlignment="Center"
-                ItemsSource="{Binding AllocationSlices}">
+                ItemsSource="{Binding Allocation.Slices}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="0,2">
@@ -104,7 +104,7 @@
                 FontSize="{StaticResource FontSizeSm}"
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{DynamicResource Portfolio.Allocation.Empty}"
-                Visibility="{Binding HasAllocationData, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                Visibility="{Binding Allocation.HasData, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
         </Grid>
     </Border>
 </UserControl>
