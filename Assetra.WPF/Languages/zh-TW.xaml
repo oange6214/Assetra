@@ -764,4 +764,8 @@
   <sys:String x:Key="Goals.Add.Notes">備註</sys:String>
   <sys:String x:Key="Goals.Add.Deadline">期限</sys:String>
   <sys:String x:Key="Goals.Add.Submit">新增</sys:String>
+  <sys:String x:Key="Goals.Error.NameRequired">請輸入目標名稱</sys:String>
+  <sys:String x:Key="Goals.Error.TargetAmountInvalid">請輸入大於 0 的目標金額</sys:String>
+  <sys:String x:Key="Goals.Deadline.DaysRemaining">剩 {0} 天</sys:String>
+  <sys:String x:Key="Goals.Deadline.Overdue">已逾期</sys:String>
 </ResourceDictionary>

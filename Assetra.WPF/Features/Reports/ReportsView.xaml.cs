@@ -8,12 +8,12 @@ public partial class ReportsView : UserControl
     public ReportsView()
     {
         InitializeComponent();
-        Loaded += OnLoaded;
+        IsVisibleChanged += OnIsVisibleChanged;
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        if (DataContext is ReportsViewModel vm && !vm.HasReport && !vm.IsLoading)
+        if (e.NewValue is true && DataContext is ReportsViewModel vm && !vm.IsLoading)
             vm.LoadCommand.Execute(null);
     }
 }

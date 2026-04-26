@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="clr-namespace:Assetra.WPF.Controls"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Goals"
     d:DataContext="{d:DesignInstance Type={x:Type vm:GoalsViewModel},
                                      IsDesignTimeCreatable=False}"
@@ -157,25 +158,17 @@
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Goals.Add.Title}" />
 
-                <Grid>
-                    <Grid.Resources>
+                <WrapPanel ItemHeight="{x:Static sys:Double.NaN}">
+                    <WrapPanel.Resources>
                         <Style x:Key="FormFieldLabel" TargetType="TextBlock">
                             <Setter Property="Margin" Value="0,0,0,4" />
                             <Setter Property="FontSize" Value="{DynamicResource FontSizeXs}" />
                             <Setter Property="FontWeight" Value="SemiBold" />
                             <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
                         </Style>
-                    </Grid.Resources>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                    </WrapPanel.Resources>
 
-                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                    <StackPanel Width="260" Margin="0,0,12,12">
                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Name}" />
                         <TextBox
                             MinHeight="36"
@@ -183,7 +176,7 @@
                             Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                    <StackPanel Width="150" Margin="0,0,12,12">
                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Target}" />
                         <TextBox
                             MinHeight="36"
@@ -191,7 +184,7 @@
                             Text="{Binding AddTargetAmount, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="2" Margin="0,0,8,0">
+                    <StackPanel Width="150" Margin="0,0,12,12">
                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Current}" />
                         <TextBox
                             MinHeight="36"
@@ -199,12 +192,12 @@
                             Text="{Binding AddCurrentAmount, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="3" Margin="0,0,8,0">
+                    <StackPanel Width="170" Margin="0,0,12,12">
                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Deadline}" />
                         <controls:FormDatePicker SelectedDate="{Binding AddDeadline, Mode=TwoWay}" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="4" Margin="0,0,8,0">
+                    <StackPanel Width="260" Margin="0,0,12,12">
                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Notes}" />
                         <TextBox
                             MinHeight="36"
@@ -213,12 +206,13 @@
                     </StackPanel>
 
                     <Button
-                        Grid.Column="5"
-                        VerticalAlignment="Bottom"
+                        MinWidth="96"
+                        Margin="0,0,0,12"
+                        VerticalAlignment="Top"
                         Command="{Binding AddCommand}"
                         Content="{DynamicResource Goals.Add.Submit}"
                         Style="{StaticResource BtnPrimary}" />
-                </Grid>
+                </WrapPanel>
 
                 <TextBlock
                     Margin="0,8,0,0"

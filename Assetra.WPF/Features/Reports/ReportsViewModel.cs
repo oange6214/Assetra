@@ -1,4 +1,5 @@
 using Assetra.Application.Reports.Services;
+using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,6 +13,8 @@ namespace Assetra.WPF.Features.Reports;
 public sealed partial class ReportsViewModel : ObservableObject
 {
     private readonly MonthEndReportService _service;
+    private readonly ICurrencyService? _currency;
+    private readonly ILocalizationService? _localization;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MonthHeader))]
@@ -42,26 +45,36 @@ public sealed partial class ReportsViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(Upcoming))]
     private MonthEndReport? _report;
 
-    public ReportsViewModel(MonthEndReportService service)
+    public ReportsViewModel(
+        MonthEndReportService service,
+        ICurrencyService? currency = null,
+        ILocalizationService? localization = null)
     {
         ArgumentNullException.ThrowIfNull(service);
         _service = service;
+        _currency = currency;
+        _localization = localization;
 
         var today = DateTime.Today;
         _year = today.Year;
         _month = today.Month;
+
+        if (_currency is not null)
+            _currency.CurrencyChanged += OnCurrencyChanged;
+        if (_localization is not null)
+            _localization.LanguageChanged += OnLanguageChanged;
     }
 
     public string MonthHeader => $"{Year}-{Month:D2}";
     public bool   HasReport   => Report is not null;
 
-    public string IncomeDisplay  => Report is null ? "—" : $"NT${Report.Current.TotalIncome:N0}";
-    public string ExpenseDisplay => Report is null ? "—" : $"NT${Report.Current.TotalExpense:N0}";
-    public string NetDisplay     => Report is null ? "—" : $"NT${Report.Current.NetCashFlow:N0}";
+    public string IncomeDisplay  => Report is null ? "—" : FormatAmount(Report.Current.TotalIncome);
+    public string ExpenseDisplay => Report is null ? "—" : FormatAmount(Report.Current.TotalExpense);
+    public string NetDisplay     => Report is null ? "—" : FormatAmount(Report.Current.NetCashFlow);
 
-    public string IncomeDeltaDisplay  => FormatDelta(Report?.IncomeDelta);
-    public string ExpenseDeltaDisplay => FormatDelta(Report?.ExpenseDelta);
-    public string NetDeltaDisplay     => FormatDelta(Report?.NetDelta);
+    public string IncomeDeltaDisplay  => FormatDeltaInstance(Report?.IncomeDelta);
+    public string ExpenseDeltaDisplay => FormatDeltaInstance(Report?.ExpenseDelta);
+    public string NetDeltaDisplay     => FormatDeltaInstance(Report?.NetDelta);
 
     public bool IsIncomeUp  => (Report?.IncomeDelta  ?? 0m) >= 0m;
     public bool IsExpenseUp => (Report?.ExpenseDelta ?? 0m) >= 0m;
@@ -116,10 +129,27 @@ public sealed partial class ReportsViewModel : ObservableObject
         await LoadAsync().ConfigureAwait(true);
     }
 
-    private static string FormatDelta(decimal? value)
+    private string FormatDeltaInstance(decimal? value)
     {
         if (value is not { } v) return "—";
-        var sign = v >= 0 ? "+" : "-";
-        return $"{sign}NT${Math.Abs(v):N0}";
+        return _currency?.FormatSigned(v)
+               ?? (v >= 0 ? $"+NT${Math.Abs(v):N0}" : $"-NT${Math.Abs(v):N0}");
+    }
+
+    private string FormatAmount(decimal value) =>
+        _currency?.FormatAmount(value) ?? $"NT${value:N0}";
+
+    private void OnCurrencyChanged() => RaiseDisplayStrings();
+
+    private void OnLanguageChanged(object? sender, EventArgs e) => RaiseDisplayStrings();
+
+    private void RaiseDisplayStrings()
+    {
+        OnPropertyChanged(nameof(IncomeDisplay));
+        OnPropertyChanged(nameof(ExpenseDisplay));
+        OnPropertyChanged(nameof(NetDisplay));
+        OnPropertyChanged(nameof(IncomeDeltaDisplay));
+        OnPropertyChanged(nameof(ExpenseDeltaDisplay));
+        OnPropertyChanged(nameof(NetDeltaDisplay));
     }
 }

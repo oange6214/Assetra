@@ -762,4 +762,8 @@
     <sys:String x:Key="Goals.Add.Notes">Notes</sys:String>
     <sys:String x:Key="Goals.Add.Deadline">Deadline</sys:String>
     <sys:String x:Key="Goals.Add.Submit">Add</sys:String>
+    <sys:String x:Key="Goals.Error.NameRequired">Please enter a goal name</sys:String>
+    <sys:String x:Key="Goals.Error.TargetAmountInvalid">Please enter a target amount greater than 0</sys:String>
+    <sys:String x:Key="Goals.Deadline.DaysRemaining">{0}d left</sys:String>
+    <sys:String x:Key="Goals.Deadline.Overdue">Overdue</sys:String>
 </ResourceDictionary>

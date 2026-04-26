@@ -13,6 +13,8 @@ namespace Assetra.WPF.Features.Goals;
 public sealed partial class GoalsViewModel : ObservableObject
 {
     private readonly IFinancialGoalRepository _repository;
+    private readonly ICurrencyService? _currency;
+    private readonly ILocalizationService? _localization;
 
     public ObservableCollection<GoalRowViewModel> Goals { get; } = [];
 
@@ -35,15 +37,24 @@ public sealed partial class GoalsViewModel : ObservableObject
     public bool HasGoals   => Goals.Count > 0;
     public bool HasNoGoals => IsLoaded && Goals.Count == 0;
 
-    public GoalsViewModel(IFinancialGoalRepository repository)
+    public GoalsViewModel(
+        IFinancialGoalRepository repository,
+        ICurrencyService? currency = null,
+        ILocalizationService? localization = null)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
+        _currency = currency;
+        _localization = localization;
         Goals.CollectionChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(HasGoals));
             OnPropertyChanged(nameof(HasNoGoals));
         };
+        if (_currency is not null)
+            _currency.CurrencyChanged += OnCurrencyChanged;
+        if (_localization is not null)
+            _localization.LanguageChanged += OnLanguageChanged;
     }
 
     [RelayCommand]
@@ -57,7 +68,7 @@ public sealed partial class GoalsViewModel : ObservableObject
             var goals = await _repository.GetAllAsync().ConfigureAwait(true);
             Goals.Clear();
             foreach (var g in goals)
-                Goals.Add(new GoalRowViewModel(g));
+                Goals.Add(new GoalRowViewModel(g, _currency, _localization));
             IsLoaded = true;
         }
         catch (Exception ex)
@@ -76,12 +87,12 @@ public sealed partial class GoalsViewModel : ObservableObject
         AddError = null;
         if (string.IsNullOrWhiteSpace(AddName))
         {
-            AddError = "Name is required";
+            AddError = L("Goals.Error.NameRequired", "Please enter a name");
             return;
         }
         if (!TryParseAmount(AddTargetAmount, out var target) || target <= 0m)
         {
-            AddError = "Target amount must be > 0";
+            AddError = L("Goals.Error.TargetAmountInvalid", "Target amount must be greater than 0");
             return;
         }
         TryParseAmount(AddCurrentAmount, out var current);
@@ -97,7 +108,7 @@ public sealed partial class GoalsViewModel : ObservableObject
         try
         {
             await _repository.AddAsync(goal).ConfigureAwait(true);
-            Goals.Add(new GoalRowViewModel(goal));
+            Goals.Add(new GoalRowViewModel(goal, _currency, _localization));
             ResetAddForm();
         }
         catch (Exception ex)
@@ -140,4 +151,19 @@ public sealed partial class GoalsViewModel : ObservableObject
         return decimal.TryParse(input, NumberStyles.Number, CultureInfo.InvariantCulture, out value)
             || decimal.TryParse(input, NumberStyles.Number, CultureInfo.CurrentCulture, out value);
     }
+
+    private void OnCurrencyChanged()
+    {
+        foreach (var row in Goals)
+            row.RefreshDisplayStrings();
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        foreach (var row in Goals)
+            row.RefreshDisplayStrings();
+    }
+
+    private string L(string key, string fallback) =>
+        _localization?.Get(key, fallback) ?? fallback;
 }

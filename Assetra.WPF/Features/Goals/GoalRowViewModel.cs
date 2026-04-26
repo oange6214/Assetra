@@ -1,4 +1,5 @@
 using Assetra.Core.Models;
+using Assetra.Core.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.Goals;
@@ -8,6 +9,9 @@ namespace Assetra.WPF.Features.Goals;
 /// </summary>
 public sealed partial class GoalRowViewModel : ObservableObject
 {
+    private readonly ICurrencyService? _currency;
+    private readonly ILocalizationService? _localization;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Name))]
     [NotifyPropertyChangedFor(nameof(TargetDisplay))]
@@ -20,19 +24,24 @@ public sealed partial class GoalRowViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(StatusTag))]
     private FinancialGoal _goal;
 
-    public GoalRowViewModel(FinancialGoal goal)
+    public GoalRowViewModel(
+        FinancialGoal goal,
+        ICurrencyService? currency = null,
+        ILocalizationService? localization = null)
     {
         ArgumentNullException.ThrowIfNull(goal);
         _goal = goal;
+        _currency = currency;
+        _localization = localization;
     }
 
     public Guid Id            => Goal.Id;
     public string Name        => Goal.Name;
     public string? Notes      => Goal.Notes;
 
-    public string TargetDisplay    => $"NT${Goal.TargetAmount:N0}";
-    public string CurrentDisplay   => $"NT${Goal.CurrentAmount:N0}";
-    public string RemainingDisplay => $"NT${Goal.Remaining:N0}";
+    public string TargetDisplay    => FormatAmount(Goal.TargetAmount);
+    public string CurrentDisplay   => FormatAmount(Goal.CurrentAmount);
+    public string RemainingDisplay => FormatAmount(Goal.Remaining);
 
     public decimal ProgressPercent => Goal.ProgressPercent;
     public string  ProgressDisplay => $"{ProgressPercent:F1}%";
@@ -44,8 +53,8 @@ public sealed partial class GoalRowViewModel : ObservableObject
             if (Goal.Deadline is not { } d) return "—";
             var days = Goal.DaysRemaining ?? 0;
             return days >= 0
-                ? $"{d:yyyy-MM-dd} ({days}d)"
-                : $"{d:yyyy-MM-dd} (overdue)";
+                ? $"{d:yyyy-MM-dd} ({FormatDaysRemaining(days)})"
+                : $"{d:yyyy-MM-dd} ({L("Goals.Deadline.Overdue", "Overdue")})";
         }
     }
 
@@ -65,4 +74,24 @@ public sealed partial class GoalRowViewModel : ObservableObject
             return "ontrack";
         }
     }
+
+    public void RefreshDisplayStrings()
+    {
+        OnPropertyChanged(nameof(TargetDisplay));
+        OnPropertyChanged(nameof(CurrentDisplay));
+        OnPropertyChanged(nameof(RemainingDisplay));
+        OnPropertyChanged(nameof(DeadlineDisplay));
+    }
+
+    private string FormatAmount(decimal value) =>
+        _currency?.FormatAmount(value) ?? $"NT${value:N0}";
+
+    private string FormatDaysRemaining(int days)
+    {
+        var template = L("Goals.Deadline.DaysRemaining", "{0}d");
+        return string.Format(template, days);
+    }
+
+    private string L(string key, string fallback) =>
+        _localization?.Get(key, fallback) ?? fallback;
 }
