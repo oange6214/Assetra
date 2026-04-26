@@ -158,20 +158,27 @@
 以下能力在 docs 中有規劃，但目前尚未完整落地：
 
 ### 1. 匯入治理（Importing / Data Governance）
-目前最明顯的缺口之一。
+目前最明顯的缺口之一，但已不再是「尚未開始」。
+
+目前已開始落地：
+- `ImportBatch`
+- `ImportConflict`
+- `ImportPreviewRow`
+- `ImportSourceKind`
+- `IImportFormatDetector`
+- `IImportParser`
 
 尚缺：
-- import preview
+- import preview flow
 - 欄位映射
 - 去重
 - conflict resolution
 - rollback
 - reconciliation
 
-雖然已有：
-- `StockraImportService`
-
-但這還不等於完整的匯入治理子系統。
+所以目前較準確的判定應是：
+- **匯入治理基礎模型與介面已開始**
+- **完整 importing 子系統尚未完成**
 
 ---
 
@@ -277,4 +284,3 @@
 
 而是：
 - **「文件與實作大方向一致，但需要更清楚標明哪些是 MVP、哪些是目標架構、哪些是正式已完成能力。」**
-

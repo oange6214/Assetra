@@ -404,11 +404,21 @@ UI 可以繼續用自然語意：
 
 ## 1. 匯入管線（Import Pipeline）
 
+> 現況：核心端已開始落地的是：
+> - `ImportBatch`
+> - `ImportConflict`
+> - `ImportPreviewRow`
+> - `ImportSourceKind`
+> - `IImportFormatDetector`
+> - `IImportParser`
+>
+> 下列 `ImportRule`、preview flow、dedupe / reconciliation service 仍屬目標架構。
+
 ### Core
-- `ImportSourceType`
+- `ImportSourceKind`
 - `ImportBatch`
 - `ImportRule`
-- `ImportPreviewItem`
+- `ImportPreviewRow`
 - `ImportConflict`
 
 ### Application
@@ -419,6 +429,8 @@ UI 可以繼續用自然語意：
 - `ReconciliationService`
 
 ### Infrastructure
+- `IImportFormatDetector` 實作
+- `IImportParser` 實作
 - CSV parser
 - Excel parser
 - PDF parser

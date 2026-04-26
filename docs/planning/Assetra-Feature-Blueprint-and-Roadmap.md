@@ -110,6 +110,9 @@ Assetra 的定位應逐步從「投資追蹤工具」擴展成：
 - 稅損收割（Tax-loss harvesting）建議
 
 ### K. 資料治理與匯入
+
+> 現況：基礎模型與介面已開始，包含 `ImportBatch`、`ImportConflict`、`ImportPreviewRow`、`IImportFormatDetector`、`IImportParser`。
+> preview flow、dedupe、conflict resolution、reconciliation 仍未完成。
 - 匯入欄位映射規則
 - 匯入去重與重複交易偵測
 - 手動確認與修正流程

@@ -54,6 +54,8 @@
 ## Reviews
 - [Responsive UI Review](reviews/Responsive-UI-Review.md)
   - 響應式 UI 整修結果與剩餘待改善項目。
+- [Docs Gap Review](reviews/Docs-Gap-Review.md)
+  - 對照文件與實作現況的成熟度差距檢查。
 
 ## Releases
 - [Changelog](releases/CHANGELOG.md)
