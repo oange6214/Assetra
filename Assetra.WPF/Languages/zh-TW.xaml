@@ -34,6 +34,7 @@
   <sys:String x:Key="Common.Symbol">代號</sys:String>
   <sys:String x:Key="Common.Name">名稱</sys:String>
   <sys:String x:Key="Common.Asset">資產</sys:String>
+  <sys:String x:Key="Common.Target">標的</sys:String>
   <sys:String x:Key="Common.Price">現價</sys:String>
   <sys:String x:Key="Common.Cancel">取消</sys:String>
   <sys:String x:Key="Common.Save">儲存</sys:String>
@@ -92,7 +93,7 @@
   <sys:String x:Key="Portfolio.Detail.Action.Dividend">配息入帳</sys:String>
   <sys:String x:Key="Portfolio.Detail.Action.Edit">編輯</sys:String>
   <sys:String x:Key="Portfolio.NetVal.Tooltip">淨值 = 市值 − 預估賣出手續費 − 證交稅&#x0a;證交稅依資產類型：ETF 0.1% / 一般股票 0.3%&#x0a;反映「現在賣掉可實得」金額，便於快速評估離場淨收。</sys:String>
-  <sys:String x:Key="Portfolio.Cancel">取消編輯</sys:String>
+  <sys:String x:Key="Portfolio.Cancel">取消</sys:String>
   <sys:String x:Key="Portfolio.Empty">尚無持倉</sys:String>
   <sys:String x:Key="Portfolio.Empty.Hint">記錄股票、ETF、基金等投資，追蹤損益與配置</sys:String>
   <sys:String x:Key="Portfolio.Empty.Cta">新增第一筆持倉</sys:String>

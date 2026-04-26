@@ -11,103 +11,89 @@
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
-    <!--  ======== 買入欄位 ========  -->
-    <StackPanel Visibility="{Binding TxTypeIsBuy, Converter={StaticResource BooleanToVisibilityConverter}}">
-        <!--  Asset type selector (ComboBox)  -->
-        <TextBlock
+  <!--  ======== 買入欄位 ========  -->
+  <StackPanel Visibility="{Binding TxTypeIsBuy, Converter={StaticResource BooleanToVisibilityConverter}}">
+    <!--  Asset type selector (ComboBox)  -->
+    <TextBlock
             Margin="0,0,0,4"
             FontSize="{StaticResource FontSizeXs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.AssetType}" />
-        <ComboBox
+    <ComboBox
             Margin="0,0,0,12"
             SelectedValue="{Binding TxBuyAssetType, Mode=TwoWay}"
             SelectedValuePath="Tag"
             Style="{StaticResource FormComboBox}">
-            <ComboBox.Resources>
-                <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
-            </ComboBox.Resources>
-            <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeStock}" Tag="stock" />
-            <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeFund}" Tag="fund" />
-            <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeMetal}" Tag="metal" />
-            <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeBond}" Tag="bond" />
-            <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeCrypto}" Tag="crypto" />
-        </ComboBox>
+      <ComboBox.Resources>
+        <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
+      </ComboBox.Resources>
+      <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeStock}" Tag="stock" />
+      <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeFund}" Tag="fund" />
+      <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeMetal}" Tag="metal" />
+      <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeBond}" Tag="bond" />
+      <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeCrypto}" Tag="crypto" />
+    </ComboBox>
 
-        <!--  Stock/ETF: Symbol + autocomplete  -->
-        <StackPanel d:Visibility="Visible" Visibility="{Binding TxBuyIsStock, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <!--  Dual-mode toggle: full Buy trade vs. metadata-only (Task 18 Option B) — Stock only  -->
-            <TextBlock
+    <!--  Stock/ETF: Symbol + autocomplete  -->
+    <StackPanel d:Visibility="Visible" Visibility="{Binding TxBuyIsStock, Converter={StaticResource BooleanToVisibilityConverter}}">
+      <!--  Dual-mode toggle: full Buy trade vs. metadata-only (Task 18 Option B) — Stock only  -->
+      <TextBlock
                 Margin="0,0,0,4"
                 FontSize="{StaticResource FontSizeXs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.BuyMode}" />
-            <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
-                <StackPanel.Visibility>
-                    <MultiBinding Converter="{StaticResource InverseWidthScaleThresholdToVisibilityConverter}" ConverterParameter="900">
-                        <Binding ElementName="Root" Path="ActualWidth" />
-                        <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                    </MultiBinding>
-                </StackPanel.Visibility>
-                <RadioButton
+      <Grid Margin="0,0,0,12">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <RadioButton
+                    Grid.Column="0"
+                    Margin="0,0,3,0"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
                     Content="{DynamicResource Portfolio.Tx.BuyModeFull}"
                     GroupName="TxBuyMode"
                     IsChecked="True"
                     Style="{StaticResource SegmentBtn}" />
-                <RadioButton
-                    Margin="6,0,0,0"
+        <RadioButton
+                    Grid.Column="1"
+                    Margin="3,0,0,0"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
                     Content="{DynamicResource Portfolio.Tx.BuyModeMetaOnly}"
                     GroupName="TxBuyMode"
                     IsChecked="{Binding TxBuyMetaOnly, Mode=TwoWay}"
                     Style="{StaticResource SegmentBtn}" />
-            </StackPanel>
-            <StackPanel Margin="0,0,0,12">
-                <StackPanel.Visibility>
-                    <MultiBinding Converter="{StaticResource WidthScaleThresholdToVisibilityConverter}" ConverterParameter="900">
-                        <Binding ElementName="Root" Path="ActualWidth" />
-                        <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                    </MultiBinding>
-                </StackPanel.Visibility>
-                <RadioButton
-                    Content="{DynamicResource Portfolio.Tx.BuyModeFull}"
-                    GroupName="TxBuyMode"
-                    IsChecked="True"
-                    Style="{StaticResource SegmentBtn}" />
-                <RadioButton
-                    Margin="0,6,0,0"
-                    Content="{DynamicResource Portfolio.Tx.BuyModeMetaOnly}"
-                    GroupName="TxBuyMode"
-                    IsChecked="{Binding TxBuyMetaOnly, Mode=TwoWay}"
-                    Style="{StaticResource SegmentBtn}" />
-            </StackPanel>
+      </Grid>
 
-            <TextBlock
+      <TextBlock
                 Margin="0,0,0,4"
                 FontSize="{StaticResource FontSizeXs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Symbol}" />
-            <Grid Margin="0,0,0,12">
-                <TextBox
+      <Grid Margin="0,0,0,12">
+        <TextBox
                     x:Name="TxSymbolBox"
                     IsEnabled="{Binding AreEconomicFieldsEditable}"
                     Style="{StaticResource FormTextBox}"
                     Text="{Binding AddAssetDialog.AddSymbol, UpdateSourceTrigger=PropertyChanged}" />
-                <Popup
+        <Popup
                     Width="{Binding ActualWidth, ElementName=TxSymbolBox}"
                     AllowsTransparency="True"
                     IsOpen="{Binding AddAssetDialog.IsSuggestionsOpen}"
                     Placement="Bottom"
                     PlacementTarget="{Binding ElementName=TxSymbolBox}"
                     StaysOpen="True">
-                    <Border
+          <Border
                         Background="{DynamicResource AppSurface}"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="1"
                         CornerRadius="{StaticResource RadiusSm}">
-                        <ListBox
+            <ListBox
                             MaxHeight="240"
                             Background="Transparent"
                             BorderThickness="0"
@@ -116,191 +102,175 @@
                             ItemsSource="{Binding AddAssetDialog.SymbolSuggestions}"
                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                             SelectedItem="{Binding AddAssetDialog.SelectedSuggestion, Mode=TwoWay}" />
-                    </Border>
-                </Popup>
-            </Grid>
+          </Border>
+        </Popup>
+      </Grid>
 
-            <!--  Economic fields — hidden in meta-only mode  -->
-            <StackPanel>
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Setter Property="Visibility" Value="Visible" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding TxBuyMetaOnly}" Value="True">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </StackPanel.Style>
+      <!--  Economic fields — hidden in meta-only mode  -->
+      <StackPanel>
+        <StackPanel.Style>
+          <Style TargetType="StackPanel">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding TxBuyMetaOnly}" Value="True">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </StackPanel.Style>
 
-                <!--  價格輸入模式 toggle: 單價 vs 總額 (AscentPortfolio pattern)  -->
-                <TextBlock
+        <!--  價格輸入模式 toggle: 單價 vs 總額 (AscentPortfolio pattern)  -->
+        <TextBlock
                     Margin="0,0,0,4"
                     FontSize="{StaticResource FontSizeXs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.PriceMode}" />
-                <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                    <StackPanel.Visibility>
-                        <MultiBinding Converter="{StaticResource InverseWidthScaleThresholdToVisibilityConverter}" ConverterParameter="900">
-                            <Binding ElementName="Root" Path="ActualWidth" />
-                            <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                        </MultiBinding>
-                    </StackPanel.Visibility>
-                    <RadioButton
+        <Grid Margin="0,0,0,8">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <RadioButton
+                        Grid.Column="0"
+                        Margin="0,0,3,0"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
                         Content="{DynamicResource Portfolio.Tx.PriceModeUnit}"
                         GroupName="TxBuyPriceMode"
                         IsChecked="{Binding TxBuyPriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=unit, Mode=TwoWay}"
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
                         Style="{StaticResource SegmentBtn}" />
-                    <RadioButton
-                        Margin="6,0,0,0"
+          <RadioButton
+                        Grid.Column="1"
+                        Margin="3,0,0,0"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
                         Content="{DynamicResource Portfolio.Tx.PriceModeTotal}"
                         GroupName="TxBuyPriceMode"
                         IsChecked="{Binding TxBuyPriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=total, Mode=TwoWay}"
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
                         Style="{StaticResource SegmentBtn}" />
-                </StackPanel>
-                <StackPanel Margin="0,0,0,8">
-                    <StackPanel.Visibility>
-                        <MultiBinding Converter="{StaticResource WidthScaleThresholdToVisibilityConverter}" ConverterParameter="900">
-                            <Binding ElementName="Root" Path="ActualWidth" />
-                            <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                        </MultiBinding>
-                    </StackPanel.Visibility>
-                    <RadioButton
-                        Content="{DynamicResource Portfolio.Tx.PriceModeUnit}"
-                        GroupName="TxBuyPriceMode"
-                        IsChecked="{Binding TxBuyPriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=unit, Mode=TwoWay}"
-                        IsEnabled="{Binding AreEconomicFieldsEditable}"
-                        Style="{StaticResource SegmentBtn}" />
-                    <RadioButton
-                        Margin="0,6,0,0"
-                        Content="{DynamicResource Portfolio.Tx.PriceModeTotal}"
-                        GroupName="TxBuyPriceMode"
-                        IsChecked="{Binding TxBuyPriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=total, Mode=TwoWay}"
-                        IsEnabled="{Binding AreEconomicFieldsEditable}"
-                        Style="{StaticResource SegmentBtn}" />
-                </StackPanel>
+        </Grid>
 
-                <!--  單價輸入 (在 unit mode 顯示)  -->
-                <StackPanel d:Visibility="Visible" Visibility="{Binding TxBuyIsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock
+        <!--  單價輸入 (在 unit mode 顯示)  -->
+        <StackPanel d:Visibility="Visible" Visibility="{Binding TxBuyIsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+          <TextBlock
                         Margin="0,0,0,4"
                         FontSize="{StaticResource FontSizeXs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.AddPrice}" />
-                    <TextBox
+          <TextBox
                         behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
                         Style="{StaticResource FormTextBox}"
                         Text="{Binding AddAssetDialog.AddPrice, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
+          <TextBlock
                         Style="{StaticResource FormFieldError}"
                         Text="{Binding AddAssetDialog.AddPriceError}"
                         Visibility="{Binding AddAssetDialog.AddPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
-                    <TextBlock
+          <TextBlock
                         Margin="0,2,0,8"
                         FontSize="{StaticResource FontSizeXs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{Binding AddAssetDialog.ClosePriceHint}"
                         Visibility="{Binding AddAssetDialog.ClosePriceHint, Converter={StaticResource StringToVisibilityConverter}}" />
-                </StackPanel>
+        </StackPanel>
 
-                <!--  總額輸入 (在 total mode 顯示)  -->
-                <StackPanel d:Visibility="Collapsed" Visibility="{Binding TxBuyIsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock
+        <!--  總額輸入 (在 total mode 顯示)  -->
+        <StackPanel d:Visibility="Collapsed" Visibility="{Binding TxBuyIsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+          <TextBlock
                         Margin="0,0,0,4"
                         FontSize="{StaticResource FontSizeXs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Tx.TotalAmount}" />
-                    <TextBox
+          <TextBox
                         behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
                         Style="{StaticResource FormTextBox}"
                         Text="{Binding TxBuyTotalCost, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
+          <TextBlock
                         Margin="0,0,0,8"
                         Style="{StaticResource FormFieldError}"
                         Text="{Binding TxBuyTotalCostError}"
                         Visibility="{Binding TxBuyTotalCostError, Converter={StaticResource StringToVisibilityConverter}}" />
-                </StackPanel>
+        </StackPanel>
 
-                <TextBlock
+        <TextBlock
                     Margin="0,0,0,4"
                     FontSize="{StaticResource FontSizeXs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.AddQuantity}" />
-                <TextBox
+        <TextBox
                     behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                     IsEnabled="{Binding AreEconomicFieldsEditable}"
                     Style="{StaticResource FormTextBox}"
                     Text="{Binding AddAssetDialog.AddQuantity, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock
+        <TextBlock
                     Margin="0,0,0,4"
                     Style="{StaticResource FormFieldError}"
                     Text="{Binding AddAssetDialog.AddQuantityError}"
                     Visibility="{Binding AddAssetDialog.AddQuantityError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-                <TextBlock
+        <TextBlock
                     Margin="0,0,0,4"
                     FontSize="{StaticResource FontSizeXs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.CommissionDiscount}" />
-                <Grid>
-                    <Grid.Visibility>
-                        <MultiBinding Converter="{StaticResource InverseWidthScaleThresholdToVisibilityConverter}" ConverterParameter="940">
-                            <Binding ElementName="Root" Path="ActualWidth" />
-                            <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                        </MultiBinding>
-                    </Grid.Visibility>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="80" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBox
+        <Grid>
+          <Grid.Visibility>
+            <MultiBinding Converter="{StaticResource InverseWidthScaleThresholdToVisibilityConverter}" ConverterParameter="940">
+              <Binding ElementName="Root" Path="ActualWidth" />
+              <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
+            </MultiBinding>
+          </Grid.Visibility>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="80" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <TextBox
                         Grid.Column="0"
                         Style="{StaticResource FormTextBox}"
                         Text="{Binding TxCommissionDiscount, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
+          <TextBlock
                         Grid.Column="1"
                         Margin="8,0,0,0"
                         VerticalAlignment="Center"
                         FontSize="{StaticResource FontSizeXs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource Portfolio.Tx.CommissionDiscountHint}" />
-                </Grid>
-                <StackPanel>
-                    <StackPanel.Visibility>
-                        <MultiBinding Converter="{StaticResource WidthScaleThresholdToVisibilityConverter}" ConverterParameter="940">
-                            <Binding ElementName="Root" Path="ActualWidth" />
-                            <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                        </MultiBinding>
-                    </StackPanel.Visibility>
-                    <TextBox
+        </Grid>
+        <StackPanel>
+          <StackPanel.Visibility>
+            <MultiBinding Converter="{StaticResource WidthScaleThresholdToVisibilityConverter}" ConverterParameter="940">
+              <Binding ElementName="Root" Path="ActualWidth" />
+              <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
+            </MultiBinding>
+          </StackPanel.Visibility>
+          <TextBox
                         Width="96"
                         HorizontalAlignment="Left"
                         Style="{StaticResource FormTextBox}"
                         Text="{Binding TxCommissionDiscount, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
+          <TextBlock
                         Margin="0,6,0,0"
                         FontSize="{StaticResource FontSizeXs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource Portfolio.Tx.CommissionDiscountHint}"
                         TextWrapping="Wrap" />
-                </StackPanel>
-                <TextBlock
+        </StackPanel>
+        <TextBlock
                     Margin="0,0,0,12"
                     Style="{StaticResource FormFieldError}"
                     Text="{Binding TxCommissionDiscountError}"
                     Visibility="{Binding TxCommissionDiscountError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-                <!--  Fee preview  -->
-                <Border
+        <!--  Fee preview  -->
+        <Border
                     Margin="0,0,0,8"
                     Padding="10,8"
                     Background="{DynamicResource AppBackground}"
@@ -308,58 +278,58 @@
                     BorderThickness="1"
                     CornerRadius="{StaticResource RadiusSm}"
                     Visibility="{Binding AddAssetDialog.HasAddPreview, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="6" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <TextBlock
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="6" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock
                             Grid.Row="0"
                             Grid.Column="0"
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Add.GrossAmount}" />
-                        <TextBlock
+            <TextBlock
                             Grid.Row="0"
                             Grid.Column="1"
                             FontFamily="{StaticResource FontTabular}"
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{Binding AddAssetDialog.AddGrossAmount, StringFormat={}{0:N0}}" />
-                        <TextBlock
+            <TextBlock
                             Grid.Row="1"
                             Grid.Column="0"
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Add.Commission}" />
-                        <TextBlock
+            <TextBlock
                             Grid.Row="1"
                             Grid.Column="1"
                             FontFamily="{StaticResource FontTabular}"
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppDown}"
                             Text="{Binding AddAssetDialog.AddCommission, StringFormat=+{0:N0}}" />
-                        <Rectangle
+            <Rectangle
                             Grid.Row="2"
                             Grid.Column="0"
                             Grid.ColumnSpan="2"
                             Margin="0,1"
                             Fill="{DynamicResource AppBorder}" />
-                        <TextBlock
+            <TextBlock
                             Grid.Row="3"
                             Grid.Column="0"
                             FontSize="{StaticResource FontSizeXs}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.Add.TotalCost}" />
-                        <TextBlock
+            <TextBlock
                             Grid.Row="3"
                             Grid.Column="1"
                             FontFamily="{StaticResource FontTabular}"
@@ -367,14 +337,14 @@
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding AddAssetDialog.AddTotalCost, StringFormat={}{0:N0}}" />
-                        <TextBlock
+            <TextBlock
                             Grid.Row="4"
                             Grid.Column="0"
                             Margin="0,2,0,0"
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Add.CostPerShare}" />
-                        <TextBlock
+            <TextBlock
                             Grid.Row="4"
                             Grid.Column="1"
                             Margin="0,2,0,0"
@@ -382,131 +352,131 @@
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{Binding AddAssetDialog.AddCostPerShare, StringFormat={}{0:F4}}" />
-                    </Grid>
-                </Border>
-            </StackPanel>
-        </StackPanel>
+          </Grid>
+        </Border>
+      </StackPanel>
+    </StackPanel>
 
-        <!--  Non-stock (Fund/Metal/Bond): Name + Cost  -->
-        <StackPanel Visibility="{Binding TxBuyIsNonStock, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
+    <!--  Non-stock (Fund/Metal/Bond): Name + Cost  -->
+    <StackPanel Visibility="{Binding TxBuyIsNonStock, Converter={StaticResource BooleanToVisibilityConverter}}">
+      <TextBlock
                 Margin="0,0,0,4"
                 FontSize="{StaticResource FontSizeXs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Dialog.AddName}" />
-            <TextBox
+      <TextBox
                 Margin="0,0,0,12"
                 Style="{StaticResource FormTextBox}"
                 Text="{Binding AddAssetDialog.AddName, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
+      <TextBlock
                 Margin="0,0,0,4"
                 FontSize="{StaticResource FontSizeXs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Dialog.AddCost}" />
-            <TextBox
+      <TextBox
                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                 Style="{StaticResource FormTextBox}"
                 Text="{Binding AddAssetDialog.AddCost, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
+      <TextBlock
                 Style="{StaticResource FormFieldError}"
                 Text="{Binding AddAssetDialog.AddCostError}"
                 Visibility="{Binding AddAssetDialog.AddCostError, Converter={StaticResource StringToVisibilityConverter}}" />
-        </StackPanel>
+    </StackPanel>
 
-        <!--  Crypto: Symbol + Qty + Price  -->
-        <StackPanel Visibility="{Binding TxBuyIsCrypto, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
+    <!--  Crypto: Symbol + Qty + Price  -->
+    <StackPanel Visibility="{Binding TxBuyIsCrypto, Converter={StaticResource BooleanToVisibilityConverter}}">
+      <TextBlock
                 Margin="0,0,0,4"
                 FontSize="{StaticResource FontSizeXs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Dialog.CryptoSymbol}" />
-            <TextBox
+      <TextBox
                 Margin="0,0,0,12"
                 Style="{StaticResource FormTextBox}"
                 Text="{Binding AddAssetDialog.AddCryptoSymbol, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
+      <TextBlock
                 Margin="0,0,0,4"
                 FontSize="{StaticResource FontSizeXs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Dialog.CryptoQty}" />
-            <TextBox
+      <TextBox
                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                 Style="{StaticResource FormTextBox}"
                 Text="{Binding AddAssetDialog.AddCryptoQty, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
+      <TextBlock
                 Style="{StaticResource FormFieldError}"
                 Text="{Binding AddAssetDialog.AddCryptoQtyError}"
                 Visibility="{Binding AddAssetDialog.AddCryptoQtyError, Converter={StaticResource StringToVisibilityConverter}}" />
-            <TextBlock
+      <TextBlock
                 Margin="0,12,0,4"
                 FontSize="{StaticResource FontSizeXs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Dialog.CryptoPrice}" />
-            <TextBox
+      <TextBox
                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                 Style="{StaticResource FormTextBox}"
                 Text="{Binding AddAssetDialog.AddCryptoPrice, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
+      <TextBlock
                 Style="{StaticResource FormFieldError}"
                 Text="{Binding AddAssetDialog.AddCryptoPriceError}"
                 Visibility="{Binding AddAssetDialog.AddCryptoPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
-        </StackPanel>
+    </StackPanel>
 
-        <!--  Fee + cash-account — hidden in meta-only mode  -->
-        <StackPanel>
-            <StackPanel.Style>
-                <Style TargetType="StackPanel">
-                    <Setter Property="Visibility" Value="Visible" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding TxBuyMetaOnly}" Value="True">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </StackPanel.Style>
+    <!--  Fee + cash-account — hidden in meta-only mode  -->
+    <StackPanel>
+      <StackPanel.Style>
+        <Style TargetType="StackPanel">
+          <Setter Property="Visibility" Value="Visible" />
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding TxBuyMetaOnly}" Value="True">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </StackPanel.Style>
 
-            <!--  手續費 (manual override; 留空 → 走 TxCommissionDiscount 自動計算)  -->
-            <TextBlock
+      <!--  手續費 (manual override; 留空 → 走 TxCommissionDiscount 自動計算)  -->
+      <TextBlock
                 Margin="0,12,0,4"
                 FontSize="{StaticResource FontSizeXs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.Fee}" />
-            <TextBox
+      <TextBox
                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                 Style="{StaticResource FormTextBox}"
                 Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
+      <TextBlock
                 Style="{StaticResource FormFieldError}"
                 Text="{Binding TxFeeError}"
                 Visibility="{Binding TxFeeError, Converter={StaticResource StringToVisibilityConverter}}" />
-            <TextBlock
+      <TextBlock
                 Margin="0,2,0,12"
                 FontSize="{StaticResource FontSizeXs}"
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{DynamicResource Portfolio.Tx.FeeOverrideHint}"
                 TextWrapping="Wrap" />
 
-            <!--  從現金帳戶扣款 — checkbox + dropdown (一致 with 借款/還款 / Transfer)  -->
-            <CheckBox
+      <!--  從現金帳戶扣款 — checkbox + dropdown (一致 with 借款/還款 / Transfer)  -->
+      <CheckBox
                 Margin="0,0,0,4"
                 Content="{DynamicResource Portfolio.Tx.UseLoanCashAccount}"
                 FontSize="{StaticResource FontSizeXs}"
                 Foreground="{DynamicResource AppTextSecondary}"
                 IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
-            <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock
+      <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <TextBlock
                     Margin="0,0,0,4"
                     FontSize="{StaticResource FontSizeXs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.LoanCashAccount}" />
-                <ComboBox
+        <ComboBox
                     Margin="0,0,0,4"
                     DisplayMemberPath="Name"
                     IsEditable="True"
@@ -515,17 +485,17 @@
                     SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
                     Style="{StaticResource FormComboBox}"
                     Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-                    <ComboBox.Resources>
-                        <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
-                    </ComboBox.Resources>
-                </ComboBox>
-                <TextBlock
+          <ComboBox.Resources>
+            <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
+          </ComboBox.Resources>
+        </ComboBox>
+        <TextBlock
                     Margin="0,2,0,0"
                     FontSize="{StaticResource FontSizeXs}"
                     Foreground="{DynamicResource AppAccent}"
                     Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
                     Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            </StackPanel>
-        </StackPanel>
+      </StackPanel>
     </StackPanel>
+  </StackPanel>
 </UserControl>

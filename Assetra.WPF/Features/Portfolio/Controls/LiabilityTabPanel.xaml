@@ -388,37 +388,47 @@
                 </DataGrid.RowStyle>
 
                 <DataGrid.Columns>
-                    <!--  資產 (原「負債名稱」— 統一三個分頁的首欄為「資產」)  -->
                     <DataGridTemplateColumn Width="*" SortMemberPath="Name">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Common.Asset}" />
+                            <TextBlock Text="{DynamicResource Common.Name}" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid VerticalAlignment="Center">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="0"
-                                        VerticalAlignment="Center"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding Name}"
-                                        TextTrimming="CharacterEllipsis" />
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding Name}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            FontSize="{StaticResource FontSizeXs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            TextTrimming="CharacterEllipsis">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="{Binding RateDisplay}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCreditCard}" Value="True">
+                                                            <Setter Property="Text" Value="{Binding IssuerName, FallbackValue=''}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
 
                                     <Border
-                                        Grid.Row="0"
                                         Grid.Column="1"
                                         Margin="10,0,0,0"
                                         HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
                                         Style="{StaticResource PortfolioLiabilityBadge}">
                                         <TextBlock>
                                             <TextBlock.Style>
@@ -433,26 +443,6 @@
                                             </TextBlock.Style>
                                         </TextBlock>
                                     </Border>
-
-                                    <TextBlock
-                                        Grid.Row="1"
-                                        Grid.Column="0"
-                                        Grid.ColumnSpan="2"
-                                        Margin="0,4,0,0"
-                                        FontSize="{StaticResource FontSizeXs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        TextTrimming="CharacterEllipsis">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Text" Value="{Binding RateDisplay}" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsCreditCard}" Value="True">
-                                                        <Setter Property="Text" Value="{Binding IssuerName, FallbackValue=''}" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
                                 </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

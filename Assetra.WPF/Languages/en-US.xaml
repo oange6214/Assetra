@@ -34,6 +34,7 @@
     <sys:String x:Key="Common.Symbol">Symbol</sys:String>
     <sys:String x:Key="Common.Name">Name</sys:String>
     <sys:String x:Key="Common.Asset">Asset</sys:String>
+    <sys:String x:Key="Common.Target">Target</sys:String>
     <sys:String x:Key="Common.Price">Price</sys:String>
     <sys:String x:Key="Common.Cancel">Cancel</sys:String>
     <sys:String x:Key="Common.Save">Save</sys:String>
@@ -91,7 +92,7 @@
     <sys:String x:Key="Portfolio.Detail.Action.Dividend">Dividend</sys:String>
     <sys:String x:Key="Portfolio.Detail.Action.Edit">Edit</sys:String>
     <sys:String x:Key="Portfolio.NetVal.Tooltip">Net Value = Market Value − est. sell commission − securities tax&#x0a;Tax rate by asset: ETF 0.1% / Stock 0.3%&#x0a;Represents the actual cash received if sold at current price.</sys:String>
-    <sys:String x:Key="Portfolio.Cancel">Cancel edit</sys:String>
+    <sys:String x:Key="Portfolio.Cancel">Cancel</sys:String>
     <sys:String x:Key="Portfolio.Empty">No positions yet</sys:String>
     <sys:String x:Key="Portfolio.Empty.Hint">Track stocks, ETFs, and funds to monitor P&amp;L and allocation</sys:String>
     <sys:String x:Key="Portfolio.Empty.Cta">Add your first position</sys:String>
