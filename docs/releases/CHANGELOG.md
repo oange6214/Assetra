@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.5.8 - 2026-04-26
+
+This release polishes localized hint copy and tidies project documentation.
+
+### Highlights
+
+- Refined Cash / Credit Card / Liability add-dialog hint strings in zh-TW and en-US so they reflect the current "record initial entry on create" flow instead of the older "go add a record afterwards" wording.
+- Backfilled missing v0.4.1, v0.5.6, v0.5.7 entries in `CHANGELOG.md`.
+- Removed dead `Downloads` links from `docs/INDEX.md`.
+
 ## v0.5.7 - 2026-04-26
 
 This release polishes responsive UX across the portfolio dialogs and tables.
