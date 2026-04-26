@@ -25,6 +25,18 @@
             FontSize="{StaticResource FontSizeXs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Portfolio.Account.Subtype}" />
+        <TextBox
+            Margin="0,0,0,10"
+            Style="{StaticResource FormTextBox}"
+            ToolTip="{DynamicResource Portfolio.Account.SubtypeHint}"
+            Text="{Binding AddSubtype, UpdateSourceTrigger=PropertyChanged}" />
+
+        <TextBlock
+            Margin="0,0,0,4"
+            FontSize="{StaticResource FontSizeXs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Cash.Name}" />
         <TextBox
             Margin="0,0,0,8"

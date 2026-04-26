@@ -83,8 +83,9 @@ public partial class AddAssetDialogViewModel : ObservableObject
 
     public bool IsFormStep => !IsTypePickerStep;
 
-    /// <summary>True only when the liability dialog is on its form step (back arrow visible).</summary>
-    public bool IsLiabilityFormStep => IsFormStep && AddDialogMode == "liability";
+    /// <summary>True when the dialog is on its form step in a mode that came from the picker (back arrow visible).</summary>
+    public bool IsLiabilityFormStep =>
+        IsFormStep && (AddDialogMode == "liability" || AddDialogMode == "account");
 
     partial void OnIsTypePickerStepChanged(bool value)
     {
@@ -600,7 +601,8 @@ public partial class AddAssetDialogViewModel : ObservableObject
         var created = await _accountUpsertWorkflow.CreateAsync(new CreateAccountRequest(
             AddAccountName.Trim(),
             "TWD",
-            DateOnly.FromDateTime(DateTime.Today)));
+            DateOnly.FromDateTime(DateTime.Today),
+            Subtype: string.IsNullOrWhiteSpace(AddSubtype) ? null : AddSubtype.Trim()));
 
         if (AddInitialDepositEnabled)
         {

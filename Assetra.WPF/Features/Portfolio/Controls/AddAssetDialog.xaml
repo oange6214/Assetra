@@ -101,7 +101,7 @@
                     </DockPanel>
                 </Border>
 
-                <!--  Liability type picker (Step 1 — only shown when IsTypePickerStep)  -->
+                <!--  Type picker (Step 1 — only shown when IsTypePickerStep)  -->
                 <Grid
                     Grid.Row="1"
                     Grid.RowSpan="4"
@@ -117,10 +117,20 @@
                         FontSize="{StaticResource FontSizeSm}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Portfolio.Liability.PickType.Heading}" />
+                        Text="{DynamicResource Portfolio.Liability.PickType.Heading}"
+                        Visibility="{Binding AddAssetDialog.IsLiabilityDialogMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Margin="0,0,0,12"
+                        FontSize="{StaticResource FontSizeSm}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Account.PickType.Heading}"
+                        Visibility="{Binding AddAssetDialog.IsAccountDialogMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <UniformGrid
                         Grid.Row="1"
-                        Columns="3">
+                        Columns="3"
+                        Visibility="{Binding AddAssetDialog.IsLiabilityDialogMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <!--  Card: 信用卡  -->
                         <Button
                             Margin="0,0,4,8"
@@ -290,6 +300,120 @@
                                 <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.Custom}" />
+                            </StackPanel>
+                        </Button>
+                    </UniformGrid>
+                    <!--  Account preset picker (mode=account)  -->
+                    <UniformGrid
+                        Grid.Row="1"
+                        Columns="3"
+                        Visibility="{Binding AddAssetDialog.IsAccountDialogMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Button Margin="0,0,4,8" Padding="14,16"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:現金"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4B5;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Account.Preset.Cash}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="4,0,4,8" Padding="14,16"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:銀行活存"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F3E6;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Account.Preset.Bank}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="4,0,0,8" Padding="14,16"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:數位活存"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4F1;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Account.Preset.Digital}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="0,0,4,8" Padding="14,16"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:定存"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F512;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Account.Preset.TimeDeposit}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="4,0,4,8" Padding="14,16"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:外幣活存"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4B1;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Account.Preset.Foreign}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="4,0,0,8" Padding="14,16"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:交割戶"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4C8;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Account.Preset.Brokerage}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="0,0,4,0" Padding="14,16"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:電子支付"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4F2;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Account.Preset.EWallet}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="4,0,4,0" Padding="14,16"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:儲值卡"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F381;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Account.Preset.PrepaidCard}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="4,0,0,0" Padding="14,16"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x2795;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Account.Preset.Custom}" />
                             </StackPanel>
                         </Button>
                     </UniformGrid>
