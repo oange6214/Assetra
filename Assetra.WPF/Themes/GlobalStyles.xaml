@@ -113,7 +113,10 @@
         <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
     </Style>
 
-    <Style x:Key="PortfolioAssetTypeBadge" BasedOn="{StaticResource PortfolioBadgeBase}" TargetType="Border">
+    <Style
+        x:Key="PortfolioAssetTypeBadge"
+        BasedOn="{StaticResource PortfolioBadgeBase}"
+        TargetType="Border">
         <Setter Property="Background" Value="#0062AD" />
         <Setter Property="MinWidth" Value="34" />
         <Style.Triggers>
@@ -132,11 +135,17 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="PortfolioDefaultBadge" BasedOn="{StaticResource PortfolioBadgeBase}" TargetType="Border">
+    <Style
+        x:Key="PortfolioDefaultBadge"
+        BasedOn="{StaticResource PortfolioBadgeBase}"
+        TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource AppAccent}" />
     </Style>
 
-    <Style x:Key="PortfolioLiabilityBadge" BasedOn="{StaticResource PortfolioBadgeBase}" TargetType="Border">
+    <Style
+        x:Key="PortfolioLiabilityBadge"
+        BasedOn="{StaticResource PortfolioBadgeBase}"
+        TargetType="Border">
         <Setter Property="Background" Value="#374151" />
         <Setter Property="MinWidth" Value="42" />
         <Style.Triggers>
@@ -1440,11 +1449,6 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <ControlTemplate.Resources>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" />
-                        </Style>
-                    </ControlTemplate.Resources>
                     <Border
                         x:Name="Bd"
                         Padding="{TemplateBinding Padding}"
@@ -1452,7 +1456,14 @@
                         BorderBrush="Transparent"
                         BorderThickness="1"
                         CornerRadius="{StaticResource RadiusSm}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontFamily="{TemplateBinding FontFamily}"
+                            FontSize="{TemplateBinding FontSize}"
+                            FontWeight="{TemplateBinding FontWeight}"
+                            Foreground="{TemplateBinding Foreground}"
+                            Text="{TemplateBinding Content}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">

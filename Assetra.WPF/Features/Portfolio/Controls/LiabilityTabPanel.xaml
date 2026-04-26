@@ -30,264 +30,267 @@
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="0,0,0,1">
-            <WrapPanel Margin="0,0,0,2" ItemWidth="372" ItemHeight="Auto">
+            <WrapPanel
+                Margin="0,0,0,2"
+                ItemHeight="Auto"
+                ItemWidth="372">
 
-                    <!--  Left: Remaining + paid progress  -->
-                    <Border
-                        Margin="0,0,12,12"
-                        Padding="18,16"
-                        Background="{DynamicResource AppBackground}"
-                        BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}">
-                        <StackPanel>
-                            <TextBlock
-                                Margin="0,0,0,8"
-                                FontSize="{StaticResource FontSizeXs}"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Text="{DynamicResource Portfolio.Liability.TotalRemaining}" />
-                            <TextBlock
-                                Margin="0,0,0,16"
-                                FontFamily="{StaticResource FontTabular}"
-                                FontSize="{StaticResource FontSizeXl}"
-                                FontWeight="Bold"
-                                Foreground="{DynamicResource AppDown}"
-                                Text="{Binding TotalLiabilities, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                <!--  Left: Remaining + paid progress  -->
+                <Border
+                    Margin="0,0,12,12"
+                    Padding="18,16"
+                    Background="{DynamicResource AppBackground}"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource RadiusSm}">
+                    <StackPanel>
+                        <TextBlock
+                            Margin="0,0,0,8"
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.Liability.TotalRemaining}" />
+                        <TextBlock
+                            Margin="0,0,0,16"
+                            FontFamily="{StaticResource FontTabular}"
+                            FontSize="{StaticResource FontSizeXl}"
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource AppDown}"
+                            Text="{Binding TotalLiabilities, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
 
-                            <Grid Margin="0,0,0,12">
-                                <Border
-                                    Height="7"
-                                    Background="{DynamicResource AppBorder}"
-                                    CornerRadius="{StaticResource RadiusSm}" />
-                                <Border
-                                    Height="7"
-                                    HorizontalAlignment="Left"
-                                    Background="{DynamicResource AppUp}"
-                                    CornerRadius="{StaticResource RadiusSm}">
-                                    <Border.Width>
-                                        <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
-                                            <Binding Path="PaidPercentValue" />
-                                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
-                                        </MultiBinding>
-                                    </Border.Width>
-                                </Border>
-                            </Grid>
+                        <Grid Margin="0,0,0,12">
+                            <Border
+                                Height="7"
+                                Background="{DynamicResource AppBorder}"
+                                CornerRadius="{StaticResource RadiusSm}" />
+                            <Border
+                                Height="7"
+                                HorizontalAlignment="Left"
+                                Background="{DynamicResource AppUp}"
+                                CornerRadius="{StaticResource RadiusSm}">
+                                <Border.Width>
+                                    <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                        <Binding Path="PaidPercentValue" />
+                                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                                    </MultiBinding>
+                                </Border.Width>
+                            </Border>
+                        </Grid>
 
-                            <UniformGrid Columns="2">
-                                <Border
-                                    Margin="0,0,6,0"
-                                    Padding="10,8"
-                                    Background="{DynamicResource AppSurface}"
-                                    BorderBrush="{DynamicResource AppBorder}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource RadiusSm}">
-                                    <StackPanel>
-                                        <TextBlock
-                                            FontSize="{StaticResource FontSizeXs}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{DynamicResource Portfolio.Liability.PaidPercent}" />
-                                        <TextBlock
-                                            Margin="0,4,0,0"
-                                            FontFamily="{StaticResource FontTabular}"
-                                            FontSize="{StaticResource FontSizeBase}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppUp}"
-                                            Text="{Binding PaidPercentDisplay, Mode=OneWay}" />
-                                    </StackPanel>
-                                </Border>
-                                <Border
-                                    Margin="6,0,0,0"
-                                    Padding="10,8"
-                                    Background="{DynamicResource AppSurface}"
-                                    BorderBrush="{DynamicResource AppBorder}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource RadiusSm}">
-                                    <StackPanel>
-                                        <TextBlock
-                                            FontSize="{StaticResource FontSizeXs}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{DynamicResource Portfolio.Liability.TotalLoan}" />
-                                        <TextBlock
-                                            Margin="0,4,0,0"
-                                            FontFamily="{StaticResource FontTabular}"
-                                            FontSize="{StaticResource FontSizeBase}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding TotalOriginalDisplay, Mode=OneWay}" />
-                                    </StackPanel>
-                                </Border>
-                            </UniformGrid>
-                        </StackPanel>
-                    </Border>
-
-                    <!--  Right: Leverage health  -->
-                    <Border
-                        Margin="0,0,12,12"
-                        Padding="18,16"
-                        Background="{DynamicResource AppBackground}"
-                        BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}"
-                        ToolTip="{DynamicResource Portfolio.Liability.Health.Tooltip}"
-                        ToolTipService.InitialShowDelay="300"
-                        ToolTipService.ShowDuration="20000">
-                        <StackPanel>
-                            <DockPanel Margin="0,0,0,12">
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="{DynamicResource Portfolio.Liability.Health.Label}" />
-                                <Border
-                                    HorizontalAlignment="Right"
-                                    DockPanel.Dock="Right"
-                                    Padding="8,2"
-                                    Background="{DynamicResource AppSurface}"
-                                    BorderBrush="{DynamicResource AppBorder}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource RadiusSm}">
+                        <UniformGrid Columns="2">
+                            <Border
+                                Margin="0,0,6,0"
+                                Padding="10,8"
+                                Background="{DynamicResource AppSurface}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSm}">
+                                <StackPanel>
                                     <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{DynamicResource Portfolio.Liability.PaidPercent}" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontFamily="{StaticResource FontTabular}"
+                                        FontSize="{StaticResource FontSizeBase}"
                                         FontWeight="SemiBold"
-                                        Foreground="{Binding DebtStatusTag, Converter={StaticResource StatusTagToBrush}}">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Healthy}" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding DebtStatusTag}" Value="warning">
-                                                        <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Warning}" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding DebtStatusTag}" Value="danger">
-                                                        <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Danger}" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Border>
-                            </DockPanel>
+                                        Foreground="{DynamicResource AppUp}"
+                                        Text="{Binding PaidPercentDisplay, Mode=OneWay}" />
+                                </StackPanel>
+                            </Border>
+                            <Border
+                                Margin="6,0,0,0"
+                                Padding="10,8"
+                                Background="{DynamicResource AppSurface}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSm}">
+                                <StackPanel>
+                                    <TextBlock
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{DynamicResource Portfolio.Liability.TotalLoan}" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontFamily="{StaticResource FontTabular}"
+                                        FontSize="{StaticResource FontSizeBase}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding TotalOriginalDisplay, Mode=OneWay}" />
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
 
-                            <UniformGrid Margin="0,0,0,14" Columns="2">
-                                <Border
-                                    Margin="0,0,6,0"
-                                    Padding="10,8"
-                                    Background="{DynamicResource AppSurface}"
-                                    BorderBrush="{DynamicResource AppBorder}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource RadiusSm}">
-                                    <StackPanel>
-                                        <TextBlock
-                                            FontSize="{StaticResource FontSizeXs}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{DynamicResource Portfolio.Liability.DebtRatio}" />
-                                        <TextBlock
-                                            Margin="0,4,0,0"
-                                            FontFamily="{StaticResource FontTabular}"
-                                            FontSize="{StaticResource FontSizeBase}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding DebtRatioDisplay}" />
-                                    </StackPanel>
-                                </Border>
-                                <Border
-                                    Margin="6,0,0,0"
-                                    Padding="10,8"
-                                    Background="{DynamicResource AppSurface}"
-                                    BorderBrush="{DynamicResource AppBorder}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource RadiusSm}">
-                                    <StackPanel>
-                                        <TextBlock
-                                            FontSize="{StaticResource FontSizeXs}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{DynamicResource Portfolio.Liability.LeverageRatio}" />
-                                        <TextBlock
-                                            Margin="0,4,0,0"
-                                            FontFamily="{StaticResource FontTabular}"
-                                            FontSize="{StaticResource FontSizeBase}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding LeverageRatioDisplay}" />
-                                    </StackPanel>
-                                </Border>
-                            </UniformGrid>
+                <!--  Right: Leverage health  -->
+                <Border
+                    Margin="0,0,12,12"
+                    Padding="18,16"
+                    Background="{DynamicResource AppBackground}"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource RadiusSm}"
+                    ToolTip="{DynamicResource Portfolio.Liability.Health.Tooltip}"
+                    ToolTipService.InitialShowDelay="300"
+                    ToolTipService.ShowDuration="20000">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,12">
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Portfolio.Liability.Health.Label}" />
+                            <Border
+                                Padding="8,2"
+                                HorizontalAlignment="Right"
+                                Background="{DynamicResource AppSurface}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSm}"
+                                DockPanel.Dock="Right">
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{Binding DebtStatusTag, Converter={StaticResource StatusTagToBrush}}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Healthy}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding DebtStatusTag}" Value="warning">
+                                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Warning}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding DebtStatusTag}" Value="danger">
+                                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Liability.Health.Danger}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+                        </DockPanel>
 
-                            <!--  Progress bar with 30% / 50% threshold tick marks  -->
-                            <Grid Margin="0,0,0,4">
-                                <!--  Background track  -->
-                                <Border
-                                    Height="6"
-                                    Background="{DynamicResource AppBorder}"
-                                    CornerRadius="{StaticResource RadiusSm}" />
-                                <!--  Filled portion  -->
-                                <Border
-                                    Height="6"
-                                    HorizontalAlignment="Left"
-                                    Background="{Binding DebtStatusTag, Converter={StaticResource StatusTagToBrush}}"
-                                    CornerRadius="{StaticResource RadiusSm}">
-                                    <Border.Width>
-                                        <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
-                                            <Binding Path="DebtRatioValue" />
-                                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
-                                        </MultiBinding>
-                                    </Border.Width>
-                                </Border>
-                                <!--  Tick marks at 30% (right edge of col 0) and 50% (right edge of col 1)  -->
-                                <Grid IsHitTestVisible="False">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="3*" />
-                                        <ColumnDefinition Width="2*" />
-                                        <ColumnDefinition Width="5*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Border
-                                        Grid.Column="0"
-                                        Width="1"
-                                        Height="10"
-                                        HorizontalAlignment="Right"
-                                        Background="{DynamicResource AppBackground}" />
-                                    <Border
-                                        Grid.Column="1"
-                                        Width="1"
-                                        Height="10"
-                                        HorizontalAlignment="Right"
-                                        Background="{DynamicResource AppBackground}" />
-                                </Grid>
-                            </Grid>
+                        <UniformGrid Margin="0,0,0,14" Columns="2">
+                            <Border
+                                Margin="0,0,6,0"
+                                Padding="10,8"
+                                Background="{DynamicResource AppSurface}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSm}">
+                                <StackPanel>
+                                    <TextBlock
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{DynamicResource Portfolio.Liability.DebtRatio}" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontFamily="{StaticResource FontTabular}"
+                                        FontSize="{StaticResource FontSizeBase}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding DebtRatioDisplay}" />
+                                </StackPanel>
+                            </Border>
+                            <Border
+                                Margin="6,0,0,0"
+                                Padding="10,8"
+                                Background="{DynamicResource AppSurface}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSm}">
+                                <StackPanel>
+                                    <TextBlock
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{DynamicResource Portfolio.Liability.LeverageRatio}" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontFamily="{StaticResource FontTabular}"
+                                        FontSize="{StaticResource FontSizeBase}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding LeverageRatioDisplay}" />
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
 
-                            <!--  Threshold labels: 0% | 30% | 50% | 100%  -->
-                            <Grid>
+                        <!--  Progress bar with 30% / 50% threshold tick marks  -->
+                        <Grid Margin="0,0,0,4">
+                            <!--  Background track  -->
+                            <Border
+                                Height="6"
+                                Background="{DynamicResource AppBorder}"
+                                CornerRadius="{StaticResource RadiusSm}" />
+                            <!--  Filled portion  -->
+                            <Border
+                                Height="6"
+                                HorizontalAlignment="Left"
+                                Background="{Binding DebtStatusTag, Converter={StaticResource StatusTagToBrush}}"
+                                CornerRadius="{StaticResource RadiusSm}">
+                                <Border.Width>
+                                    <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                        <Binding Path="DebtRatioValue" />
+                                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                                    </MultiBinding>
+                                </Border.Width>
+                            </Border>
+                            <!--  Tick marks at 30% (right edge of col 0) and 50% (right edge of col 1)  -->
+                            <Grid IsHitTestVisible="False">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="3*" />
                                     <ColumnDefinition Width="2*" />
                                     <ColumnDefinition Width="5*" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock
+                                <Border
                                     Grid.Column="0"
-                                    HorizontalAlignment="Left"
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="0%" />
-                                <TextBlock
-                                    Grid.Column="0"
+                                    Width="1"
+                                    Height="10"
                                     HorizontalAlignment="Right"
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="30%" />
-                                <TextBlock
+                                    Background="{DynamicResource AppBackground}" />
+                                <Border
                                     Grid.Column="1"
+                                    Width="1"
+                                    Height="10"
                                     HorizontalAlignment="Right"
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="50%" />
-                                <TextBlock
-                                    Grid.Column="2"
-                                    HorizontalAlignment="Right"
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="100%" />
+                                    Background="{DynamicResource AppBackground}" />
                             </Grid>
-                        </StackPanel>
-                    </Border>
+                        </Grid>
+
+                        <!--  Threshold labels: 0% | 30% | 50% | 100%  -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*" />
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="5*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                HorizontalAlignment="Left"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="0%" />
+                            <TextBlock
+                                Grid.Column="0"
+                                HorizontalAlignment="Right"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="30%" />
+                            <TextBlock
+                                Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="50%" />
+                            <TextBlock
+                                Grid.Column="2"
+                                HorizontalAlignment="Right"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="100%" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
             </WrapPanel>
         </Border>
 
@@ -390,63 +393,63 @@
                         <DataGridTemplateColumn.Header>
                             <TextBlock Text="{DynamicResource Common.Asset}" />
                         </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Grid VerticalAlignment="Center">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
 
-                                <TextBlock
-                                    Grid.Row="0"
-                                    Grid.Column="0"
-                                    VerticalAlignment="Center"
-                                    FontWeight="SemiBold"
-                                    Foreground="{DynamicResource AppTextPrimary}"
-                                    Text="{Binding Name}"
-                                    TextTrimming="CharacterEllipsis" />
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        VerticalAlignment="Center"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding Name}"
+                                        TextTrimming="CharacterEllipsis" />
 
-                                <Border
-                                    Grid.Row="0"
-                                    Grid.Column="1"
-                                    Margin="10,0,0,0"
-                                    HorizontalAlignment="Right"
-                                    Style="{StaticResource PortfolioLiabilityBadge}">
-                                    <TextBlock>
+                                    <Border
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Margin="10,0,0,0"
+                                        HorizontalAlignment="Right"
+                                        Style="{StaticResource PortfolioLiabilityBadge}">
+                                        <TextBlock>
+                                            <TextBlock.Style>
+                                                <Style BasedOn="{StaticResource PortfolioBadgeText}" TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Dialog.TypeLoan}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCreditCard}" Value="True">
+                                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Dialog.TypeCreditCard}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        Margin="0,4,0,0"
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        TextTrimming="CharacterEllipsis">
                                         <TextBlock.Style>
-                                            <Style BasedOn="{StaticResource PortfolioBadgeText}" TargetType="TextBlock">
-                                                <Setter Property="Text" Value="{DynamicResource Portfolio.Dialog.TypeLoan}" />
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding RateDisplay}" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsCreditCard}" Value="True">
-                                                        <Setter Property="Text" Value="{DynamicResource Portfolio.Dialog.TypeCreditCard}" />
+                                                        <Setter Property="Text" Value="{Binding IssuerName, FallbackValue=''}" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Border>
-
-                                <TextBlock
-                                    Grid.Row="1"
-                                    Grid.Column="0"
-                                    Grid.ColumnSpan="2"
-                                    Margin="0,4,0,0"
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    TextTrimming="CharacterEllipsis">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="{Binding RateDisplay}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsCreditCard}" Value="True">
-                                                    <Setter Property="Text" Value="{Binding IssuerName, FallbackValue=''}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>

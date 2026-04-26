@@ -1,12 +1,12 @@
 <UserControl
     x:Class="Assetra.WPF.Features.Portfolio.Controls.TxForms.LoanTxForm"
-    x:Name="Root"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
+    x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel},
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
@@ -54,9 +54,7 @@
                 <Grid.Visibility>
                     <MultiBinding Converter="{StaticResource InverseWidthScaleThresholdToVisibilityConverter}" ConverterParameter="900">
                         <Binding ElementName="Root" Path="ActualWidth" />
-                        <Binding
-                            RelativeSource="{RelativeSource AncestorType=Window}"
-                            Path="DataContext.Settings.UiScale" />
+                        <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                     </MultiBinding>
                 </Grid.Visibility>
                 <Grid.ColumnDefinitions>
@@ -121,9 +119,7 @@
                 <StackPanel.Visibility>
                     <MultiBinding Converter="{StaticResource WidthScaleThresholdToVisibilityConverter}" ConverterParameter="900">
                         <Binding ElementName="Root" Path="ActualWidth" />
-                        <Binding
-                            RelativeSource="{RelativeSource AncestorType=Window}"
-                            Path="DataContext.Settings.UiScale" />
+                        <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                     </MultiBinding>
                 </StackPanel.Visibility>
                 <TextBlock
@@ -177,9 +173,7 @@
                 <Grid.Visibility>
                     <MultiBinding Converter="{StaticResource InverseWidthScaleThresholdToVisibilityConverter}" ConverterParameter="860">
                         <Binding ElementName="Root" Path="ActualWidth" />
-                        <Binding
-                            RelativeSource="{RelativeSource AncestorType=Window}"
-                            Path="DataContext.Settings.UiScale" />
+                        <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                     </MultiBinding>
                 </Grid.Visibility>
                 <Grid.ColumnDefinitions>
@@ -225,9 +219,7 @@
                 <StackPanel.Visibility>
                     <MultiBinding Converter="{StaticResource WidthScaleThresholdToVisibilityConverter}" ConverterParameter="860">
                         <Binding ElementName="Root" Path="ActualWidth" />
-                        <Binding
-                            RelativeSource="{RelativeSource AncestorType=Window}"
-                            Path="DataContext.Settings.UiScale" />
+                        <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                     </MultiBinding>
                 </StackPanel.Visibility>
                 <TextBlock
