@@ -88,7 +88,7 @@ public sealed class AssetSqliteRepository : IAssetRepository
         await conn.OpenAsync().ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText =
-            "SELECT id, name, asset_type, group_id, currency, created_date, is_active, updated_at, loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee, liability_subtype, billing_day, due_day, credit_limit, issuer_name " +
+            "SELECT id, name, asset_type, group_id, currency, created_date, is_active, updated_at, loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee, liability_subtype, billing_day, due_day, credit_limit, issuer_name, subtype " +
             "FROM asset ORDER BY rowid;";
         return await ReadItemsAsync(cmd).ConfigureAwait(false);
     }
@@ -99,7 +99,7 @@ public sealed class AssetSqliteRepository : IAssetRepository
         await conn.OpenAsync().ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText =
-            "SELECT id, name, asset_type, group_id, currency, created_date, is_active, updated_at, loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee, liability_subtype, billing_day, due_day, credit_limit, issuer_name " +
+            "SELECT id, name, asset_type, group_id, currency, created_date, is_active, updated_at, loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee, liability_subtype, billing_day, due_day, credit_limit, issuer_name, subtype " +
             "FROM asset WHERE asset_type=$type ORDER BY rowid;";
         cmd.Parameters.AddWithValue("$type", type.ToString());
         return await ReadItemsAsync(cmd).ConfigureAwait(false);
@@ -111,7 +111,7 @@ public sealed class AssetSqliteRepository : IAssetRepository
         await conn.OpenAsync().ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText =
-            "SELECT id, name, asset_type, group_id, currency, created_date, is_active, updated_at, loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee, liability_subtype, billing_day, due_day, credit_limit, issuer_name " +
+            "SELECT id, name, asset_type, group_id, currency, created_date, is_active, updated_at, loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee, liability_subtype, billing_day, due_day, credit_limit, issuer_name, subtype " +
             "FROM asset WHERE id=$id;";
         cmd.Parameters.AddWithValue("$id", id.ToString());
         await using var r = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
@@ -127,9 +127,9 @@ public sealed class AssetSqliteRepository : IAssetRepository
         cmd.CommandText = """
             INSERT INTO asset (id, name, asset_type, group_id, currency, created_date, is_active, updated_at,
                 loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee,
-                liability_subtype, billing_day, due_day, credit_limit, issuer_name)
+                liability_subtype, billing_day, due_day, credit_limit, issuer_name, subtype)
             VALUES ($id, $name, $type, $grp, $cur, $dt, $ia, $ua, $lar, $ltm, $lsd, $lhf,
-                $lst, $bill, $due, $limit, $issuer);
+                $lst, $bill, $due, $limit, $issuer, $sub);
             """;
         BindItem(cmd, item);
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
@@ -145,7 +145,7 @@ public sealed class AssetSqliteRepository : IAssetRepository
             "UPDATE asset SET name=$name, asset_type=$type, group_id=$grp, currency=$cur, " +
             "is_active=$ia, updated_at=$ua, " +
             "loan_annual_rate=$lar, loan_term_months=$ltm, loan_start_date=$lsd, loan_handling_fee=$lhf, " +
-            "liability_subtype=$lst, billing_day=$bill, due_day=$due, credit_limit=$limit, issuer_name=$issuer " +
+            "liability_subtype=$lst, billing_day=$bill, due_day=$due, credit_limit=$limit, issuer_name=$issuer, subtype=$sub " +
             "WHERE id=$id;";
         BindItem(cmd, item);
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
@@ -344,6 +344,7 @@ public sealed class AssetSqliteRepository : IAssetRepository
         int? dueDay = r.IsDBNull(14) ? null : r.GetInt32(14);
         decimal? creditLimit = r.IsDBNull(15) ? null : (decimal)r.GetDouble(15);
         string? issuerName = r.IsDBNull(16) ? null : r.GetString(16);
+        string? subtype = r.IsDBNull(17) ? null : r.GetString(17);
         return new AssetItem(
             Guid.Parse(r.GetString(0)),
             r.GetString(1),
@@ -361,7 +362,8 @@ public sealed class AssetSqliteRepository : IAssetRepository
             billingDay,
             dueDay,
             creditLimit,
-            issuerName);
+            issuerName,
+            subtype);
     }
 
     private static void BindItem(SqliteCommand cmd, AssetItem i)
@@ -383,6 +385,7 @@ public sealed class AssetSqliteRepository : IAssetRepository
         cmd.Parameters.AddWithValue("$due", i.DueDay.HasValue ? (object)i.DueDay.Value : DBNull.Value);
         cmd.Parameters.AddWithValue("$limit", i.CreditLimit.HasValue ? (object)(double)i.CreditLimit.Value : DBNull.Value);
         cmd.Parameters.AddWithValue("$issuer", i.IssuerName is not null ? (object)i.IssuerName : DBNull.Value);
+        cmd.Parameters.AddWithValue("$sub", i.Subtype is not null ? (object)i.Subtype : DBNull.Value);
     }
 
     private static AssetEvent MapEvent(SqliteDataReader r) => new(

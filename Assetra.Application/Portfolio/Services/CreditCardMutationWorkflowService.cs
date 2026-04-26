@@ -29,7 +29,8 @@ public sealed class CreditCardMutationWorkflowService : ICreditCardMutationWorkf
             BillingDay: request.BillingDay,
             DueDay: request.DueDay,
             CreditLimit: request.CreditLimit,
-            IssuerName: string.IsNullOrWhiteSpace(request.IssuerName) ? null : request.IssuerName.Trim());
+            IssuerName: string.IsNullOrWhiteSpace(request.IssuerName) ? null : request.IssuerName.Trim(),
+            Subtype: string.IsNullOrWhiteSpace(request.Subtype) ? null : request.Subtype.Trim());
 
         await _assetRepository.AddItemAsync(creditCard).ConfigureAwait(false);
         return new CreditCardUpsertResult(creditCard);
@@ -50,7 +51,8 @@ public sealed class CreditCardMutationWorkflowService : ICreditCardMutationWorkf
             BillingDay: request.BillingDay,
             DueDay: request.DueDay,
             CreditLimit: request.CreditLimit,
-            IssuerName: string.IsNullOrWhiteSpace(request.IssuerName) ? null : request.IssuerName.Trim());
+            IssuerName: string.IsNullOrWhiteSpace(request.IssuerName) ? null : request.IssuerName.Trim(),
+            Subtype: string.IsNullOrWhiteSpace(request.Subtype) ? null : request.Subtype.Trim());
 
         await _assetRepository.UpdateItemAsync(creditCard).ConfigureAwait(false);
         return new CreditCardUpsertResult(creditCard);

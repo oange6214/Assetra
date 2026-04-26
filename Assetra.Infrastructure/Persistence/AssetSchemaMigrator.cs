@@ -16,6 +16,7 @@ internal static class AssetSchemaMigrator
         "is_active", "updated_at",
         "loan_annual_rate", "loan_term_months", "loan_start_date", "loan_handling_fee",
         "liability_subtype", "billing_day", "due_day", "credit_limit", "issuer_name",
+        "subtype",
     };
 
     private static readonly HashSet<string> AssetAllowedTypeDefs = new(StringComparer.OrdinalIgnoreCase)
@@ -136,6 +137,8 @@ internal static class AssetSchemaMigrator
             "credit_limit", "REAL", AssetAllowedColumns, AssetAllowedTypeDefs);
         SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
             "issuer_name", "TEXT", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+            "subtype", "TEXT", AssetAllowedColumns, AssetAllowedTypeDefs);
     }
 
     private static void EnsureAssetIndexes(SqliteConnection conn, SqliteTransaction tx)

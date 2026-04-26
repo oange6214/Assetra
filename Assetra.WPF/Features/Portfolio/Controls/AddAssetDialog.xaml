@@ -120,12 +120,163 @@
                         Text="{DynamicResource Portfolio.Liability.PickType.Heading}" />
                     <UniformGrid
                         Grid.Row="1"
-                        Columns="2"
-                        Rows="1">
-                        <!--  Card: 借款  -->
+                        Columns="3">
+                        <!--  Card: 信用卡  -->
                         <Button
-                            Margin="0,0,8,0"
-                            Padding="16,18"
+                            Margin="0,0,4,8"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="creditCard:信用卡"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4B3;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Liability.Preset.CreditCard}" />
+                            </StackPanel>
+                        </Button>
+                        <!--  Card: 分期付款  -->
+                        <Button
+                            Margin="4,0,4,8"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="creditCard:0% 分期"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4C5;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Liability.Preset.Installment}" />
+                            </StackPanel>
+                        </Button>
+                        <!--  Card: 預借現金  -->
+                        <Button
+                            Margin="4,0,0,8"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="creditCard:預借現金"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F9FE;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Liability.Preset.CashAdvance}" />
+                            </StackPanel>
+                        </Button>
+                        <!--  Card: 房屋貸款  -->
+                        <Button
+                            Margin="0,0,4,8"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="loan:房貸"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F3E0;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Liability.Preset.Mortgage}" />
+                            </StackPanel>
+                        </Button>
+                        <!--  Card: 車輛貸款  -->
+                        <Button
+                            Margin="4,0,4,8"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="loan:車貸"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F697;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Liability.Preset.CarLoan}" />
+                            </StackPanel>
+                        </Button>
+                        <!--  Card: 助學貸款  -->
+                        <Button
+                            Margin="4,0,0,8"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="loan:學貸"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F393;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Liability.Preset.StudentLoan}" />
+                            </StackPanel>
+                        </Button>
+                        <!--  Card: 信用貸款  -->
+                        <Button
+                            Margin="0,0,4,0"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="loan:信貸"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4B0;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Liability.Preset.PersonalLoan}" />
+                            </StackPanel>
+                        </Button>
+                        <!--  Card: 親友借款  -->
+                        <Button
+                            Margin="4,0,4,0"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="loan:親友借款"
+                            Style="{StaticResource BtnGhost}">
+                            <StackPanel HorizontalAlignment="Left">
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F465;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.Liability.Preset.FriendLoan}" />
+                            </StackPanel>
+                        </Button>
+                        <!--  Card: 自訂  -->
+                        <Button
+                            Margin="4,0,0,0"
+                            Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
                             Background="{DynamicResource AppBackground}"
@@ -135,51 +286,10 @@
                             CommandParameter="loan"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
-                                    Margin="0,0,0,8"
-                                    FontSize="{StaticResource FontSize2xl}"
-                                    Text="&#x1F3E6;" />
-                                <TextBlock
-                                    Margin="0,0,0,4"
-                                    FontSize="{StaticResource FontSizeBase}"
-                                    FontWeight="SemiBold"
+                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x2795;" />
+                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
-                                    Text="{DynamicResource Portfolio.Dialog.TypeLoan}" />
-                                <TextBlock
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="{DynamicResource Portfolio.Liability.PickType.LoanDesc}"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Button>
-                        <!--  Card: 信用卡  -->
-                        <Button
-                            Margin="8,0,0,0"
-                            Padding="16,18"
-                            HorizontalContentAlignment="Stretch"
-                            VerticalContentAlignment="Stretch"
-                            Background="{DynamicResource AppBackground}"
-                            BorderBrush="{DynamicResource AppBorder}"
-                            BorderThickness="1"
-                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="creditCard"
-                            Style="{StaticResource BtnGhost}">
-                            <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
-                                    Margin="0,0,0,8"
-                                    FontSize="{StaticResource FontSize2xl}"
-                                    Text="&#x1F4B3;" />
-                                <TextBlock
-                                    Margin="0,0,0,4"
-                                    FontSize="{StaticResource FontSizeBase}"
-                                    FontWeight="SemiBold"
-                                    Foreground="{DynamicResource AppTextPrimary}"
-                                    Text="{DynamicResource Portfolio.Dialog.TypeCreditCard}" />
-                                <TextBlock
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="{DynamicResource Portfolio.Liability.PickType.CreditCardDesc}"
-                                    TextWrapping="Wrap" />
+                                    Text="{DynamicResource Portfolio.Liability.Preset.Custom}" />
                             </StackPanel>
                         </Button>
                     </UniformGrid>

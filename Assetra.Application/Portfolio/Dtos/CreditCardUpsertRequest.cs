@@ -9,7 +9,8 @@ public sealed record CreateCreditCardRequest(
     int? BillingDay,
     int? DueDay,
     decimal? CreditLimit,
-    string? IssuerName);
+    string? IssuerName,
+    string? Subtype = null);
 
 public sealed record UpdateCreditCardRequest(
     Guid CardId,
@@ -19,7 +20,8 @@ public sealed record UpdateCreditCardRequest(
     int? BillingDay,
     int? DueDay,
     decimal? CreditLimit,
-    string? IssuerName);
+    string? IssuerName,
+    string? Subtype = null);
 
 public sealed record CreditCardUpsertResult(
     AssetItem CreditCard);

@@ -277,6 +277,17 @@
     <sys:String x:Key="Portfolio.Liability.PickType.Heading">選擇負債類型</sys:String>
     <sys:String x:Key="Portfolio.Liability.PickType.LoanDesc">銀行或個人借款，含本息攤還表</sys:String>
     <sys:String x:Key="Portfolio.Liability.PickType.CreditCardDesc">信用卡，可記帳單日與信用額度</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.CreditCard">信用卡</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.Installment">分期付款</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.CashAdvance">預借現金</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.Mortgage">房屋貸款</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.CarLoan">車輛貸款</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.StudentLoan">助學貸款</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.PersonalLoan">信用貸款</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.FriendLoan">親友借款</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Preset.Custom">自訂</sys:String>
+    <sys:String x:Key="Portfolio.Liability.Subtype">分類標籤</sys:String>
+    <sys:String x:Key="Portfolio.Liability.SubtypeHint">可自由命名，例如「房貸」「0% 分期」「玉山 Pi 卡」</sys:String>
     <sys:String x:Key="Common.Back">返回</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddName">名稱</sys:String>
     <sys:String x:Key="Portfolio.Dialog.AddCost">持有成本</sys:String>
