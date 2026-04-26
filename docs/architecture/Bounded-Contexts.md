@@ -79,25 +79,27 @@
 
 ---
 
-## 4. Goals Context  *(尚未實作)*
+## 4. Goals Context  *(已實作 MVP — v0.6.0)*
 
 > Goals = 財務目標（買房頭期款、退休、旅遊基金）。**不要與 Recurring（訂閱/固定支出）混淆**。
 
 ### 責任
 - 財務目標
-- 里程碑
+- 里程碑（規劃中）
 - 目標進度
-- 資金來源規則
+- 資金來源規則（規劃中）
 
-### 主要模型
-- `FinancialGoal`
-- `GoalMilestone`
-- `GoalFundingRule`
+### 主要模型（現況）
+- `FinancialGoal`（v0.6.0 已實作；含 `TargetAmount` / `CurrentAmount` / `Deadline` / `Notes` 與衍生 `ProgressPercent` / `Remaining` / `DaysRemaining`）
+- `GoalMilestone`（規劃中）
+- `GoalFundingRule`（規劃中）
 
-### 主要服務
-- `GoalPlanningService`
-- `GoalProgressQueryService`
-- `GoalFundingWorkflowService`
+### 主要服務（現況）
+- `IFinancialGoalRepository` / `GoalSqliteRepository`（v0.6.0 已實作；含 `GoalSchemaMigrator`）
+- `GoalsViewModel` / `GoalRowViewModel` 於 WPF 層提供 CRUD UI
+- `GoalPlanningService`（規劃中）
+- `GoalProgressQueryService`（規劃中）
+- `GoalFundingWorkflowService`（規劃中）
 
 ---
 

@@ -8,7 +8,7 @@
 - [x] 建立 `BudgetSqliteRepository`
 - [x] 新增 `MonthlyBudgetSummaryService`（合併原規劃的 `BudgetPlanningService` + `BudgetTrackingService`）
 - [x] 製作預算頁（`CategoriesView`）
-- [ ] 製作月結報告完整 UI
+- [x] 製作月結報告完整 UI（v0.6.0：`Features/Reports/ReportsView` + `ReportsViewModel`）
 
 ### 2. Recurring 子系統  *(已完成)*
 
@@ -19,26 +19,27 @@
 - [x] 建立 `RecurringTransactionScheduler`
 - [x] 製作 `RecurringView` / `RecurringViewModel`
 
-### 3. Goals 子系統  *(尚未開始)*
+### 3. Goals 子系統  *(MVP 完成 — v0.6.0)*
 
 > Goals = 財務目標（買房頭期款、退休、旅遊基金）。**不要與已完成的 Recurring 混淆**。
 
-- [ ] 建立 `FinancialGoal`
-- [ ] 建立 `GoalMilestone`
-- [ ] 建立 `GoalFundingRule`
-- [ ] 建立 `GoalSqliteRepository`
-- [ ] 新增 `GoalPlanningService`
-- [ ] 新增 `GoalProgressQueryService`
-- [ ] 新增 Goals 畫面
+- [x] 建立 `FinancialGoal`
+- [ ] 建立 `GoalMilestone`（v0.7+）
+- [ ] 建立 `GoalFundingRule`（v0.7+）
+- [x] 建立 `GoalSqliteRepository`（含 `GoalSchemaMigrator`）
+- [ ] 新增 `GoalPlanningService`（v0.7+）
+- [ ] 新增 `GoalProgressQueryService`（v0.7+；目前進度由 `FinancialGoal` 衍生屬性 + ViewModel 計算）
+- [x] 新增 Goals 畫面（`Features/Goals/GoalsView` + `GoalsViewModel`）
 
-### 4. 淨資產趨勢  *(基礎完成，視覺化未做)*
+### 4. 淨資產趨勢  *(MVP 完成 — v0.6.0；堆疊圖與事件標註延後)*
 - [x] `PortfolioDailySnapshot` / `PositionSnapshot` 資料層已備
 - [x] `FinancialOverviewViewModel` 計算 `TotalNetWorth`
 - [x] `DashboardViewModel` / `DashboardTabPanel` 基本 UI
-- [ ] 建立趨勢 query service（時間範圍聚合）
-- [ ] 建立月 / 季 / 年切換
-- [ ] 加入重大事件標註
-- [ ] 製作趨勢圖與堆疊圖 UI
+- [x] 建立趨勢 query service（沿用 `IPortfolioHistoryQueryService`，由 `PortfolioHistoryViewModel` 篩選）
+- [x] 建立 30 / 90 / 180 / 365 / All 切換 + 自訂日期範圍（`DateRangePicker`）
+- [ ] 加入重大事件標註（v0.7+）
+- [x] 製作趨勢圖（`Features/Trends/TrendsView`，LiveCharts 折線圖）
+- [ ] 堆疊圖 UI（v0.7+：依資產類別堆疊，需 `PortfolioDailySnapshot` schema 擴充）
 
 ### 5. 匯入治理基礎  *(尚未開始)*
 - 建立 `ImportBatch`
