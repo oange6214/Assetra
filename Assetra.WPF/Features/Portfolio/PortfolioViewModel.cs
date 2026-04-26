@@ -65,7 +65,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isPositionsSummaryExpanded = true;
     [ObservableProperty] private bool _isCashSummaryExpanded = true;
     [ObservableProperty] private bool _isLiabilitySummaryExpanded = true;
-    [ObservableProperty] private bool _isDivCalendarExpanded = true;
 
     // Totals
     [ObservableProperty] private decimal _totalCost;
@@ -361,7 +360,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void FilterByDividendMonth(int month)
     {
-        TradeFilter.FilterByDividendMonth(month, DivCalendarYear);
+        TradeFilter.FilterByDividendMonth(month, DivCalendar.Year);
     }
 
     [RelayCommand]
@@ -433,21 +432,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     public SubViewModels.LoanDialogViewModel Loan { get; }
 
     // Dividend calendar
-    [ObservableProperty] private int _divCalendarYear = DateTime.Today.Year;
-
-    [RelayCommand]
-    private void DivCalendarPrevYear() => DivCalendarYear--;
-
-    [RelayCommand]
-    private void DivCalendarNextYear() => DivCalendarYear++;
-
-    public IReadOnlyDictionary<int, decimal> GetDividendsByMonth(int year)
-    {
-        return Trades
-            .Where(t => t.IsCashDividend && t.TradeDate.Year == year)
-            .GroupBy(t => t.TradeDate.Month)
-            .ToDictionary(g => g.Key, g => g.Sum(t => t.CashAmount ?? 0));
-    }
+    public DividendCalendarViewModel DivCalendar { get; }
 
     public PortfolioViewModel(
         PortfolioServices services,
@@ -474,6 +459,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             ?? new NullPortfolioHistoryMaintenanceService();
         _localization = ui.Localization;
         Allocation = new AllocationPanelViewModel(ui.Localization);
+        DivCalendar = new DividendCalendarViewModel(Trades);
         History = new PortfolioHistoryViewModel(
             services.HistoryQuery ?? new NullPortfolioHistoryQueryService(),
             ui.Localization);

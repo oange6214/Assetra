@@ -22,8 +22,8 @@ public partial class DividendCalendarPanel : UserControl
             return;
 
         MonthGrid.Children.Clear();
-        var year = vm.DivCalendarYear;
-        var monthlyTotals = vm.GetDividendsByMonth(year);
+        var year = vm.DivCalendar.Year;
+        var monthlyTotals = vm.DivCalendar.GetDividendsByMonth(year);
         var hasDividends = monthlyTotals.Count > 0;
         var yearTotal = monthlyTotals.Values.Sum();
 

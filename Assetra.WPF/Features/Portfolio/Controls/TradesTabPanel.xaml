@@ -40,7 +40,7 @@
                         Height="24"
                         Padding="0"
                         VerticalAlignment="Center"
-                        IsChecked="{Binding IsDivCalendarExpanded, Mode=TwoWay}"
+                        IsChecked="{Binding DivCalendar.IsExpanded, Mode=TwoWay}"
                         Style="{StaticResource BtnIconToggle}">
                         <TextBlock
                             FontFamily="Segoe MDL2 Assets"
@@ -50,7 +50,7 @@
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Text" Value="&#xE70D;" />
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsDivCalendarExpanded}" Value="False">
+                                        <DataTrigger Binding="{Binding DivCalendar.IsExpanded}" Value="False">
                                             <Setter Property="Text" Value="&#xE70E;" />
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -66,7 +66,7 @@
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.DivCalendar.Title}" />
                 </StackPanel>
-                <pcontrols:DividendCalendarPanel Visibility="{Binding IsDivCalendarExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <pcontrols:DividendCalendarPanel Visibility="{Binding DivCalendar.IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
             </StackPanel>
         </Border>
 
