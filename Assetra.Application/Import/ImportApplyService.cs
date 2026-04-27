@@ -14,7 +14,7 @@ namespace Assetra.Application.Import;
 /// </summary>
 public sealed class ImportApplyService : IImportApplyService
 {
-    internal static readonly JsonSerializerOptions SnapshotJsonOptions = new()
+    public static readonly JsonSerializerOptions SnapshotJsonOptions = new()
     {
         WriteIndented = false,
         PropertyNamingPolicy = null,

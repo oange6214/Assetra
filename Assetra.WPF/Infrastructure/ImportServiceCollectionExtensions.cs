@@ -17,6 +17,7 @@ internal static class ImportServiceCollectionExtensions
         services.AddSingleton<IImportRowMapper, ImportRowMapper>();
         services.AddSingleton<IImportBatchHistoryRepository>(_ => new ImportBatchHistorySqliteRepository(dbPath));
         services.AddSingleton<IImportApplyService, ImportApplyService>();
+        services.AddSingleton<IImportRollbackService, ImportRollbackService>();
         services.AddSingleton<ImportViewModel>();
         return services;
     }
