@@ -123,9 +123,8 @@ public sealed class ImportApplyService : IImportApplyService
         }
 
         var quantityInt = (int)Math.Round(qty);
-        var price = quantityInt > 0 ? row.Amount / quantityInt : 0m;
-        var isSell = (row.Counterparty ?? string.Empty).Contains("賣", StringComparison.Ordinal)
-            || (row.Counterparty ?? string.Empty).Contains("Sell", StringComparison.OrdinalIgnoreCase);
+        var isSell = IsSell(row.Counterparty);
+        var price = ResolveBrokerUnitPrice(row, quantityInt, isSell);
 
         return new Trade(
             Id: Guid.NewGuid(),
@@ -138,9 +137,28 @@ public sealed class ImportApplyService : IImportApplyService
             Quantity: quantityInt,
             RealizedPnl: null,
             RealizedPnlPct: null,
+            Commission: row.Commission,
             CashAccountId: options.CashAccountId,
             Note: note);
     }
+
+    private static decimal ResolveBrokerUnitPrice(ImportPreviewRow row, int quantity, bool isSell)
+    {
+        if (row.UnitPrice is { } explicitPrice && explicitPrice > 0m)
+            return explicitPrice;
+
+        var commission = row.Commission ?? 0m;
+        var grossTradeAmount = isSell
+            ? row.Amount + commission
+            : row.Amount - commission;
+
+        if (quantity <= 0) return 0m;
+        return grossTradeAmount / quantity;
+    }
+
+    private static bool IsSell(string? directionText) =>
+        (directionText ?? string.Empty).Contains("賣", StringComparison.Ordinal)
+        || (directionText ?? string.Empty).Contains("Sell", StringComparison.OrdinalIgnoreCase);
 
     private static string ComposeNote(ImportPreviewRow row, ImportSourceKind kind, ImportApplyOptions options)
     {

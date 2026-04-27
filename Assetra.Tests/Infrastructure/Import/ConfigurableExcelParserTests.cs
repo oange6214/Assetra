@@ -42,6 +42,23 @@ public class ConfigurableExcelParserTests
         Assert.Equal(1500m, rows[1].Amount);
     }
 
+    [Fact]
+    public async Task YuantaBroker_ParsesPriceAndCommission()
+    {
+        using var ms = BuildWorkbook(headers: new[] { "成交日期", "股票代號", "成交股數", "成交價", "成交金額", "手續費", "買賣別", "備註" }, rows: new[]
+        {
+            new object?[] { new DateTime(2026, 4, 26), "2330", 1000m, 910m, 910425m, 425m, "買進", null },
+        });
+
+        var parser = new ConfigurableExcelParser(ExcelParserConfigs.YuantaSecurities);
+        var rows = await parser.ParseAsync(ms);
+
+        Assert.Single(rows);
+        Assert.Equal(910425m, rows[0].Amount);
+        Assert.Equal(910m, rows[0].UnitPrice);
+        Assert.Equal(425m, rows[0].Commission);
+    }
+
     private static MemoryStream BuildWorkbook(string[] headers, object?[][] rows)
     {
         using var wb = new XLWorkbook();

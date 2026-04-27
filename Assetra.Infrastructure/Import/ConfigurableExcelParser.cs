@@ -45,6 +45,8 @@ public sealed class ConfigurableExcelParser : IImportParser
         var memoCol = ResolveColumn(headers, mapping.MemoColumn);
         var symbolCol = ResolveColumn(headers, mapping.SymbolColumn);
         var quantityCol = ResolveColumn(headers, mapping.QuantityColumn);
+        var priceCol = ResolveColumn(headers, mapping.PriceColumn);
+        var commissionCol = ResolveColumn(headers, mapping.CommissionColumn);
 
         var results = new List<ImportPreviewRow>();
         var rowIndex = 0;
@@ -67,7 +69,9 @@ public sealed class ConfigurableExcelParser : IImportParser
                 Counterparty: counterpartyCol is { } cp ? Cell(sheet, r, cp) : null,
                 Memo: memoCol is { } mc ? Cell(sheet, r, mc) : null,
                 Symbol: symbolCol is { } sc ? Cell(sheet, r, sc) : null,
-                Quantity: quantityCol is { } qc ? ParseDecimal(Cell(sheet, r, qc)) : null));
+                Quantity: quantityCol is { } qc ? ParseDecimal(Cell(sheet, r, qc)) : null,
+                UnitPrice: priceCol is { } pc ? ParseDecimal(Cell(sheet, r, pc)) : null,
+                Commission: commissionCol is { } cc ? ParseDecimal(Cell(sheet, r, cc)) : null));
         }
 
         return Task.FromResult<IReadOnlyList<ImportPreviewRow>>(results);

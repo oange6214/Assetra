@@ -41,15 +41,15 @@
 - [x] 製作趨勢圖（`Features/Trends/TrendsView`，LiveCharts 折線圖）
 - [ ] 堆疊圖 UI（v0.7+：依資產類別堆疊，需 `PortfolioDailySnapshot` schema 擴充）
 
-### 5. 匯入治理基礎  *(基礎模型與介面已開始；preview / dedupe / reconciliation 尚未完成)*
+### 5. 匯入治理基礎  *(v0.7.0 完成 MVP — Top 5 銀行 / 券商 CSV+Excel；ImportRule 進階規則延後)*
 - [x] 建立 `ImportBatch`
 - [x] 建立 `ImportConflict`
 - [x] 建立 `ImportPreviewRow`
 - [x] 建立 `ImportSourceKind` / `ImportFileType` / `ImportFormat`
 - [x] 建立 `IImportFormatDetector` / `IImportParser`
-- [ ] 建立 `ImportRule`
-- [ ] 建立 CSV / Excel import preview flow
-- [ ] 建立去重與確認提交流程
+- [x] 建立 CSV / Excel import preview flow（`ConfigurableCsvParser` / `ConfigurableExcelParser` 由 `CsvParserConfigs` / `ExcelParserConfigs` 驅動）
+- [x] 建立去重與確認提交流程（`ImportConflictDetector` + `ImportApplyService` + `Features/Import` UI）
+- [ ] 建立 `ImportRule`（自動分類規則，v0.8+）
 
 ## Phase 2：投資分析與專業化
 

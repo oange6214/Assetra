@@ -93,7 +93,9 @@ public sealed class ConfigurableCsvParser : IImportParser
             Counterparty: Field(csv, _config.CounterpartyColumn),
             Memo: Field(csv, _config.MemoColumn),
             Symbol: Field(csv, _config.SymbolColumn),
-            Quantity: ParseDecimal(Field(csv, _config.QuantityColumn)));
+            Quantity: ParseDecimal(Field(csv, _config.QuantityColumn)),
+            UnitPrice: ParseDecimal(Field(csv, _config.PriceColumn)),
+            Commission: ParseDecimal(Field(csv, _config.CommissionColumn)));
     }
 
     private bool TryResolveAmount(CsvReader csv, out decimal amount)

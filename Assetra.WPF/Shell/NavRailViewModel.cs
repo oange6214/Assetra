@@ -73,6 +73,7 @@ public partial class NavRailViewModel : ObservableObject
         OnPropertyChanged(nameof(IsTrendsActive));
         OnPropertyChanged(nameof(IsGoalsActive));
         OnPropertyChanged(nameof(IsAlertsActive));
+        OnPropertyChanged(nameof(IsImportActive));
         OnPropertyChanged(nameof(IsSettingsActive));
     }
 
@@ -86,5 +87,6 @@ public partial class NavRailViewModel : ObservableObject
     public bool IsTrendsActive            => ActiveSection == NavSection.Trends;
     public bool IsGoalsActive             => ActiveSection == NavSection.Goals;
     public bool IsAlertsActive            => ActiveSection == NavSection.Alerts;
+    public bool IsImportActive            => ActiveSection == NavSection.Import;
     public bool IsSettingsActive          => ActiveSection == NavSection.Settings;
 }

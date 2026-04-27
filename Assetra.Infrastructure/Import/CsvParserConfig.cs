@@ -30,6 +30,8 @@ public sealed record CsvParserConfig
     public string? MemoColumn { get; init; }
     public string? SymbolColumn { get; init; }
     public string? QuantityColumn { get; init; }
+    public string? PriceColumn { get; init; }
+    public string? CommissionColumn { get; init; }
 
     public string DateFormat { get; init; } = "yyyy/MM/dd";
 

@@ -20,7 +20,32 @@
     <sys:String x:Key="Nav.Goals">Goals</sys:String>
     <sys:String x:Key="Nav.Alerts">Alerts</sys:String>
     <sys:String x:Key="Nav.Alerts.Tooltip">Price Alerts</sys:String>
+    <sys:String x:Key="Nav.Import">Import</sys:String>
     <sys:String x:Key="Nav.Settings">Settings</sys:String>
+
+    <!--  Import feature  -->
+    <sys:String x:Key="Import.Title">Import Statement</sys:String>
+    <sys:String x:Key="Import.Subtitle">CSV and Excel files from supported banks and brokers. Format auto-detected; duplicates flagged.</sys:String>
+    <sys:String x:Key="Import.DropZone.Title">Drop a file here, or click to choose</sys:String>
+    <sys:String x:Key="Import.DropZone.Hint">.csv / .xlsx / .xls. Top 5 Taiwan banks &amp; brokers detected automatically.</sys:String>
+    <sys:String x:Key="Import.Button.Browse">Browse</sys:String>
+    <sys:String x:Key="Import.Button.Clear">Clear</sys:String>
+    <sys:String x:Key="Import.Button.Apply">Apply</sys:String>
+    <sys:String x:Key="Import.Apply.Tooltip">Select a cash account before applying</sys:String>
+    <sys:String x:Key="Import.Detected.Prefix">Detected format:</sys:String>
+    <sys:String x:Key="Import.CashAccount.Label">Cash account</sys:String>
+    <sys:String x:Key="Import.Empty">Choose a file to begin.</sys:String>
+    <sys:String x:Key="Import.Pick.Title">Choose statement file</sys:String>
+    <sys:String x:Key="Import.Status.ParsedRows">Parsed {0} rows ({1} conflicts).</sys:String>
+    <sys:String x:Key="Import.Apply.Summary">Applied {0} new, overwrote {1}, skipped {2}.</sys:String>
+    <sys:String x:Key="Import.Error.UnsupportedExtension">Only .csv, .xlsx and .xls files are supported.</sys:String>
+    <sys:String x:Key="Import.Resolution.New">New</sys:String>
+    <sys:String x:Key="Import.Col.Date">Date</sys:String>
+    <sys:String x:Key="Import.Col.Amount">Amount</sys:String>
+    <sys:String x:Key="Import.Col.Symbol">Symbol</sys:String>
+    <sys:String x:Key="Import.Col.Counterparty">Counterparty</sys:String>
+    <sys:String x:Key="Import.Col.Memo">Memo</sys:String>
+    <sys:String x:Key="Import.Col.Resolution">Resolution</sys:String>
     <sys:String x:Key="Nav.GoBack">Go back</sys:String>
     <sys:String x:Key="Nav.GoForward">Go forward</sys:String>
 

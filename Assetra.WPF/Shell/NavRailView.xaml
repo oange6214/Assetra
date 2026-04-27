@@ -132,6 +132,18 @@
                     </RadioButton.ToolTip>
                 </RadioButton>
 
+                <!--  Import (匯入)  -->
+                <RadioButton
+                    Content="{DynamicResource Nav.Import}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Import}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE8B5;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource Nav.Import}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
                 <!--  警示 with triggered-count badge  -->
                 <Grid>
                     <RadioButton

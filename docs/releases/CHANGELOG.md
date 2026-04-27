@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.7.0 - 2026-04-27
+
+新增 Import Governance：把銀行對帳單與券商交易明細的 CSV / Excel 匯入到 Assetra，並自動偵測重複交易。
+
+### 重點
+
+- **匯入功能（v0.7 主題）** — 新增 `Import` bounded context，支援 Top 5 銀行（國泰世華 / 玉山 / 中信 / 台新 / 富邦）與 Top 5 券商（元大 / 富邦 / 凱基 / 永豐金 / 群益）對帳單。CSV 與 Excel（.xlsx / .xls）皆可，UTF-8 / Big5 編碼自動辨識。
+- **格式驅動的 Parser** — 解析行為由 `CsvParserConfigs` / `ExcelParserConfigs` 宣告式定義；新增或修正某家銀行 / 券商格式時只要改 config 不必動程式碼。
+- **重複交易偵測** — 以 `date | abs(amount) | symbol` 為跨資料庫比對 key，UI 預覽列以 Skip / Overwrite / Add anyway 三種處置方式呈現。
+- **Modern UX 匯入頁** — 拖放區、自動偵測格式 chip、預覽 DataGrid（含每列衝突處理下拉）、現金帳戶選擇（必選才能套用）、結果 snackbar。
+
+### 內部變更
+
+- 新增 `Assetra.Core/Models/Import/`、`Assetra.Core/Interfaces/Import/`、`Assetra.Application/Import/`、`Assetra.Infrastructure/Import/`、`Assetra.WPF/Features/Import/`。
+- 新增套件 `CsvHelper` 33.0.1、`ClosedXML` 0.105.0。
+- `AppBootstrapper` 加入 `AddImportContext()`；NavRail 在 Settings 上方加入 Import 入口（Segoe Fluent `&#xE8B5;`）。
+- 392 → 多筆 import 測試（Core models、parsers、format detector、conflict detector、apply service）全綠。
+
 ## v0.6.0 - 2026-04-26
 
 收尾 v0.6.0 sprint：月結報告 UI、淨資產趨勢視覺化，以及 Goals MVP。

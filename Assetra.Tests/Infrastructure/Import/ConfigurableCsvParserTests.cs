@@ -40,7 +40,7 @@ public class ConfigurableCsvParserTests
     [Fact]
     public async Task Yuanta_ParsesBrokerWithSymbolAndQuantity()
     {
-        const string csv = "成交日期,股票代號,成交股數,成交金額,買賣別,備註\n2026/04/26,2330,1000,910000,買進,\n";
+        const string csv = "成交日期,股票代號,成交股數,成交價,成交金額,手續費,買賣別,備註\n2026/04/26,2330,1000,910,910425,425,買進,\n";
         var parser = new ConfigurableCsvParser(CsvParserConfigs.YuantaSecurities);
 
         var rows = await ParseAsync(parser, csv, Encoding.GetEncoding("big5"));
@@ -48,7 +48,9 @@ public class ConfigurableCsvParserTests
         Assert.Single(rows);
         Assert.Equal("2330", rows[0].Symbol);
         Assert.Equal(1000m, rows[0].Quantity);
-        Assert.Equal(910000m, rows[0].Amount);
+        Assert.Equal(910425m, rows[0].Amount);
+        Assert.Equal(910m, rows[0].UnitPrice);
+        Assert.Equal(425m, rows[0].Commission);
         Assert.Equal("買進", rows[0].Counterparty);
     }
 

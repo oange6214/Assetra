@@ -59,6 +59,38 @@ public class ImportApplyServiceTests
     }
 
     [Fact]
+    public async Task BrokerRow_PreservesExplicitUnitPriceAndCommission()
+    {
+        var added = new List<Trade>();
+        var repo = NewRepo(added);
+        var batch = BrokerBatch(
+            new ImportPreviewRow(1, new DateOnly(2026, 4, 26), 910425m, "買進", null,
+                Symbol: "2330", Quantity: 1000m, UnitPrice: 910m, Commission: 425m));
+
+        await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions(Exchange: "TWSE"));
+
+        Assert.Single(added);
+        Assert.Equal(910m, added[0].Price);
+        Assert.Equal(425m, added[0].Commission);
+    }
+
+    [Fact]
+    public async Task BrokerRow_DerivesUnitPriceExcludingCommission_WhenPriceMissing()
+    {
+        var added = new List<Trade>();
+        var repo = NewRepo(added);
+        var batch = BrokerBatch(
+            new ImportPreviewRow(1, new DateOnly(2026, 4, 26), 910425m, "買進", null,
+                Symbol: "2330", Quantity: 1000m, Commission: 425m));
+
+        await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions(Exchange: "TWSE"));
+
+        Assert.Single(added);
+        Assert.Equal(910m, added[0].Price);
+        Assert.Equal(425m, added[0].Commission);
+    }
+
+    [Fact]
     public async Task BrokerRow_SellKeyword_CreatesSellTrade()
     {
         var added = new List<Trade>();

@@ -10,5 +10,6 @@ public enum NavSection
     Trends,             // 淨資產趨勢
     Goals,              // 財務目標
     Alerts,
+    Import,             // 匯入銀行/券商對帳單
     Settings,
 }

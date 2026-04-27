@@ -6,6 +6,7 @@ using Assetra.WPF.Features.Alerts;
 using Assetra.WPF.Features.Categories;
 using Assetra.WPF.Features.FinancialOverview;
 using Assetra.WPF.Features.Goals;
+using Assetra.WPF.Features.Import;
 using Assetra.WPF.Features.Recurring;
 using Assetra.WPF.Features.Reports;
 using Assetra.WPF.Features.Portfolio.Controls;
@@ -36,6 +37,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public RecurringViewModel Recurring { get; }
     public ReportsViewModel Reports { get; }
     public GoalsViewModel Goals { get; }
+    public ImportViewModel Import { get; }
     public SettingsViewModel Settings { get; }
     public SnackbarViewModel Snackbar { get; }
 
@@ -130,6 +132,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         RecurringViewModel recurring,
         ReportsViewModel reports,
         GoalsViewModel goals,
+        ImportViewModel import,
         SettingsViewModel settings,
         SnackbarViewModel snackbar,
         IThemeService themeService,
@@ -146,6 +149,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         Recurring = recurring;
         Reports = reports;
         Goals = goals;
+        Import = import;
         Settings = settings;
         Snackbar = snackbar;
         _themeService = themeService;

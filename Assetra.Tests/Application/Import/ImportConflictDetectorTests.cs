@@ -41,6 +41,34 @@ public class ImportConflictDetectorTests
     }
 
     [Fact]
+    public async Task NoConflict_WhenBrokerQuantityDiffers()
+    {
+        var existing = NewBuyTrade(new DateTime(2026, 4, 26), 910m, 1000, "2330");
+        var repo = MockRepo(existing);
+
+        var batch = NewBatch(new ImportPreviewRow(1, new DateOnly(2026, 4, 26), 910000m,
+            "買進", null, Symbol: "2330", Quantity: 999m));
+
+        var result = await new ImportConflictDetector(repo.Object).DetectAsync(batch);
+
+        Assert.Empty(result.Conflicts);
+    }
+
+    [Fact]
+    public async Task NoConflict_WhenBrokerDirectionDiffers()
+    {
+        var existing = NewBuyTrade(new DateTime(2026, 4, 26), 910m, 1000, "2330");
+        var repo = MockRepo(existing);
+
+        var batch = NewBatch(new ImportPreviewRow(1, new DateOnly(2026, 4, 26), 910000m,
+            "賣出", null, Symbol: "2330", Quantity: 1000m));
+
+        var result = await new ImportConflictDetector(repo.Object).DetectAsync(batch);
+
+        Assert.Empty(result.Conflicts);
+    }
+
+    [Fact]
     public async Task FlagsRow_ForBankIncomeMatchingExistingIncome()
     {
         var existing = NewIncomeTrade(new DateTime(2026, 4, 27), amount: 1500m);
