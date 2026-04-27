@@ -693,6 +693,24 @@
     <sys:String x:Key="Categories.Rule.Toast.Added">已新增規則「{0}」</sys:String>
     <sys:String x:Key="Categories.Rule.Toast.Updated">已更新規則「{0}」</sys:String>
     <sys:String x:Key="Categories.Rule.Toast.Deleted">已刪除規則「{0}」</sys:String>
+    <sys:String x:Key="Categories.Rule.Advanced">進階選項</sys:String>
+    <sys:String x:Key="Categories.Rule.Name">規則名稱</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchField">比對欄位</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchField.Counterparty">對方／商家</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchField.Memo">備註</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchField.Either">兩者任一</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchField.AnyText">完整內文</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchType">比對方式</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchType.Contains">包含</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchType.Equals">等於</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchType.StartsWith">開頭是</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchType.Regex">正規表達式</sys:String>
+    <sys:String x:Key="Categories.Rule.AppliesTo">套用範圍</sys:String>
+    <sys:String x:Key="Categories.Rule.AppliesTo.Manual">手動建立交易</sys:String>
+    <sys:String x:Key="Categories.Rule.AppliesTo.Import">匯入對帳單</sys:String>
+    <sys:String x:Key="Categories.Rule.LiveTest">即時測試</sys:String>
+    <sys:String x:Key="Categories.Rule.LiveTest.Counterparty">對方範例</sys:String>
+    <sys:String x:Key="Categories.Rule.LiveTest.Memo">備註範例</sys:String>
 
     <!--  Budget management  -->
     <sys:String x:Key="Categories.Tab.Budgets">預算</sys:String>

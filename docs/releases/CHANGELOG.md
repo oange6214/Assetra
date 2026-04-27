@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.8.0 - 2026-04-27
+
+收尾 Import Governance Phase 2：把匯入端與手動端的自動分類規則整合為單一規則系統，加入批次歷史與 rollback。
+
+### 重點
+
+- **統一自動分類規則（F1）** — 將匯入用 `ImportRule` 與手動用 `AutoCategorizationRule` 整合為同一個模型；新增 `Name`、`MatchField`（對方／備註／兩者任一／完整內文）、`MatchType`（包含／等於／開頭是／正規表達式）與 `[Flags] AppliesTo`（Manual / Import / Both）。既有規則以「AnyText + Contains + Both」做向後相容預設值。
+- **匯入時自動帶入分類（F2）** — `ImportRowMapper` / `ImportApplyService` 套用規則 snapshot；命中規則時自動帶入 `Trade.CategoryId`，未命中保持空。
+- **批次歷史 + Rollback（F3）** — `ImportBatchHistoryRepository` 紀錄每批匯入的 entries（新增 / 覆蓋 / 跳過 + JSON snapshot），`ImportRollbackService` 可一鍵還原已套用的批次；UI 新增 Import 歷史摺疊區與 rollback 按鈕。
+- **Categories 進階規則 UX（C4）** — 規則行 inline 編輯下方新增「進階選項」Expander，包含 MatchField / MatchType 單選、AppliesTo 雙勾選與「即時測試」面板（輸入對方／備註範例即顯示 ✓／✗），新增規則表單同步擁有相同進階區。預設摺疊；簡單模式視覺零變化。
+
+### 內部變更
+
+- 擴充 `AutoCategorizationRule` 為 record-with 模式並向後相容（新欄位皆有預設值）；schema 以 `ALTER TABLE` 加上 `name` / `match_field` / `match_type` / `applies_to` 欄位。
+- `AutoCategorizationEngine` 改為 dual-API：保留 `Match(string?, rules)` 給手動路徑，新增 `Match(AutoCategorizationContext, rules)` 並依 `AppliesTo & Source` 過濾。
+- `ImportApplyService` 接收選用 `IAutoCategorizationRuleRepository`；DI 端在 `ImportServiceCollectionExtensions` 用 lambda factory 串接。
+- `Languages/zh-TW.xaml` / `en-US.xaml` 新增 19 組 `Categories.Rule.*` 鍵（Advanced / MatchField / MatchType / AppliesTo / LiveTest 等）。
+- 421 筆測試全綠（含 7 筆新引擎測試 + 2 筆 ImportApplyService 自動分類測試）。
+
 ## v0.7.0 - 2026-04-27
 
 新增 Import Governance：把銀行對帳單與券商交易明細的 CSV / Excel 匯入到 Assetra，並自動偵測重複交易。

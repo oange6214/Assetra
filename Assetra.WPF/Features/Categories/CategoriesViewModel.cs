@@ -43,7 +43,24 @@ public partial class CategoriesViewModel : ObservableObject
     [ObservableProperty] private CategoryRowViewModel? _addRuleCategory;
     [ObservableProperty] private int _addRulePriority;
     [ObservableProperty] private bool _addRuleCaseSensitive;
+    [ObservableProperty] private string _addRuleName = string.Empty;
+    [ObservableProperty] private AutoCategorizationMatchField _addRuleMatchField = AutoCategorizationMatchField.AnyText;
+    [ObservableProperty] private AutoCategorizationMatchType _addRuleMatchType = AutoCategorizationMatchType.Contains;
+    [ObservableProperty] private bool _addRuleAppliesToManual = true;
+    [ObservableProperty] private bool _addRuleAppliesToImport = true;
     [ObservableProperty] private string _addRuleError = string.Empty;
+
+    public IReadOnlyList<AutoCategorizationMatchField> MatchFieldOptions { get; } =
+        [AutoCategorizationMatchField.Counterparty,
+         AutoCategorizationMatchField.Memo,
+         AutoCategorizationMatchField.Either,
+         AutoCategorizationMatchField.AnyText];
+
+    public IReadOnlyList<AutoCategorizationMatchType> MatchTypeOptions { get; } =
+        [AutoCategorizationMatchType.Contains,
+         AutoCategorizationMatchType.Equals,
+         AutoCategorizationMatchType.StartsWith,
+         AutoCategorizationMatchType.Regex];
 
     // Budget add-form
     [ObservableProperty] private CategoryRowViewModel? _addBudgetCategory;
@@ -289,13 +306,18 @@ public partial class CategoriesViewModel : ObservableObject
             return;
         }
 
+        var scope = ResolveAddRuleScope();
         var rule = new AutoCategorizationRule(
             Id: Guid.NewGuid(),
             KeywordPattern: keyword,
             CategoryId: AddRuleCategory.Id,
             Priority: AddRulePriority,
             IsEnabled: true,
-            MatchCaseSensitive: AddRuleCaseSensitive);
+            MatchCaseSensitive: AddRuleCaseSensitive,
+            Name: string.IsNullOrWhiteSpace(AddRuleName) ? null : AddRuleName.Trim(),
+            MatchField: AddRuleMatchField,
+            MatchType: AddRuleMatchType,
+            AppliesTo: scope);
 
         await _ruleRepository.AddAsync(rule).ConfigureAwait(true);
         var row = AutoCategorizationRuleRowViewModel.FromModel(rule);
@@ -305,6 +327,11 @@ public partial class CategoriesViewModel : ObservableObject
         AddRuleKeyword = string.Empty;
         AddRulePriority = 0;
         AddRuleCaseSensitive = false;
+        AddRuleName = string.Empty;
+        AddRuleMatchField = AutoCategorizationMatchField.AnyText;
+        AddRuleMatchType = AutoCategorizationMatchType.Contains;
+        AddRuleAppliesToManual = true;
+        AddRuleAppliesToImport = true;
 
         _snackbar.Success(string.Format(
             GetString("Categories.Rule.Toast.Added", "已新增規則「{0}」"), keyword));
@@ -337,6 +364,10 @@ public partial class CategoriesViewModel : ObservableObject
         row.CategoryId = row.EditCategoryId;
         row.Priority = row.EditPriority;
         row.MatchCaseSensitive = row.EditCaseSensitive;
+        row.Name = string.IsNullOrWhiteSpace(row.EditName) ? null : row.EditName.Trim();
+        row.MatchField = row.EditMatchField;
+        row.MatchType = row.EditMatchType;
+        row.AppliesTo = row.ResolveEditAppliesTo();
         row.CategoryDisplay = LookupCategoryDisplay(row.CategoryId);
         row.IsEditing = false;
 
@@ -361,6 +392,14 @@ public partial class CategoriesViewModel : ObservableObject
         Rules.Remove(row);
         _snackbar.Success(string.Format(
             GetString("Categories.Rule.Toast.Deleted", "已刪除規則「{0}」"), row.KeywordPattern));
+    }
+
+    private AutoCategorizationScope ResolveAddRuleScope()
+    {
+        var scope = AutoCategorizationScope.None;
+        if (AddRuleAppliesToManual) scope |= AutoCategorizationScope.Manual;
+        if (AddRuleAppliesToImport) scope |= AutoCategorizationScope.Import;
+        return scope == AutoCategorizationScope.None ? AutoCategorizationScope.Both : scope;
     }
 
     private void RefreshRuleDisplaysFor(Guid categoryId)

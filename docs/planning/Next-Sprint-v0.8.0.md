@@ -1,5 +1,7 @@
 # v0.8.0 Sprint Plan — Import Governance Phase 2
 
+> **Status (2026-04-27)：已釋出。** 實際落地時把原計畫的 `ImportRule` 與既有手動端 `AutoCategorizationRule` 合併為單一規則模型（避免雙系統），加上 `MatchField` / `MatchType` / `[Flags] AppliesTo` 與「進階選項 + 即時測試」UX。F2 / F3 依設計實作（batch history + rollback）。
+>
 > 範圍：2–3 週。在 v0.7.0 CSV/Excel 匯入 MVP 之上，補齊「自動分類規則」與「匯入歷史 + rollback」兩條主線。
 > 對帳（reconciliation）獨立成 v0.9 sprint，不在本期範圍。
 

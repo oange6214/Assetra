@@ -691,6 +691,24 @@
     <sys:String x:Key="Categories.Rule.Toast.Added">Added rule "{0}"</sys:String>
     <sys:String x:Key="Categories.Rule.Toast.Updated">Updated rule "{0}"</sys:String>
     <sys:String x:Key="Categories.Rule.Toast.Deleted">Deleted rule "{0}"</sys:String>
+    <sys:String x:Key="Categories.Rule.Advanced">Advanced options</sys:String>
+    <sys:String x:Key="Categories.Rule.Name">Rule name</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchField">Match field</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchField.Counterparty">Counterparty</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchField.Memo">Memo</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchField.Either">Either</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchField.AnyText">Any text</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchType">Match type</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchType.Contains">Contains</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchType.Equals">Equals</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchType.StartsWith">Starts with</sys:String>
+    <sys:String x:Key="Categories.Rule.MatchType.Regex">Regex</sys:String>
+    <sys:String x:Key="Categories.Rule.AppliesTo">Applies to</sys:String>
+    <sys:String x:Key="Categories.Rule.AppliesTo.Manual">Manual entries</sys:String>
+    <sys:String x:Key="Categories.Rule.AppliesTo.Import">Statement imports</sys:String>
+    <sys:String x:Key="Categories.Rule.LiveTest">Live test</sys:String>
+    <sys:String x:Key="Categories.Rule.LiveTest.Counterparty">Counterparty</sys:String>
+    <sys:String x:Key="Categories.Rule.LiveTest.Memo">Memo</sys:String>
 
     <!-- Budget management -->
     <sys:String x:Key="Categories.Tab.Budgets">Budgets</sys:String>

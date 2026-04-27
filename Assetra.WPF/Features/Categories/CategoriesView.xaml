@@ -477,9 +477,9 @@
                       </StackPanel>
 
                       <!--  Edit mode  -->
-                      <Grid Grid.Column="1">
-                        <Grid.Style>
-                          <Style TargetType="Grid">
+                      <StackPanel Grid.Column="1">
+                        <StackPanel.Style>
+                          <Style TargetType="StackPanel">
                             <Setter Property="Visibility" Value="Collapsed" />
                             <Style.Triggers>
                               <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -487,38 +487,176 @@
                               </DataTrigger>
                             </Style.Triggers>
                           </Style>
-                        </Grid.Style>
-                        <Grid.ColumnDefinitions>
-                          <ColumnDefinition Width="*" />
-                          <ColumnDefinition Width="6" />
-                          <ColumnDefinition Width="160" />
-                          <ColumnDefinition Width="6" />
-                          <ColumnDefinition Width="60" />
-                          <ColumnDefinition Width="6" />
-                          <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBox
-                            Grid.Column="0"
-                            Style="{StaticResource FormTextBox}"
-                            Text="{Binding EditKeyword, UpdateSourceTrigger=PropertyChanged}" />
-                        <ComboBox
-                            Grid.Column="2"
-                            DisplayMemberPath="Name"
-                            ItemsSource="{Binding DataContext.AvailableCategories, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            SelectedValuePath="Id"
-                            SelectedValue="{Binding EditCategoryId}"
-                            Style="{StaticResource FormComboBox}" />
-                        <TextBox
-                            Grid.Column="4"
-                            Style="{StaticResource FormTextBox}"
-                            Text="{Binding EditPriority, UpdateSourceTrigger=PropertyChanged}" />
-                        <CheckBox
-                            Grid.Column="6"
-                            VerticalAlignment="Center"
-                            Content="{DynamicResource Categories.Rule.CaseSensitive}"
-                            Foreground="{DynamicResource AppTextSecondary}"
-                            IsChecked="{Binding EditCaseSensitive}" />
-                      </Grid>
+                        </StackPanel.Style>
+                        <Grid>
+                          <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="160" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="60" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="Auto" />
+                          </Grid.ColumnDefinitions>
+                          <TextBox
+                              Grid.Column="0"
+                              Style="{StaticResource FormTextBox}"
+                              Text="{Binding EditKeyword, UpdateSourceTrigger=PropertyChanged}" />
+                          <ComboBox
+                              Grid.Column="2"
+                              DisplayMemberPath="Name"
+                              ItemsSource="{Binding DataContext.AvailableCategories, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                              SelectedValuePath="Id"
+                              SelectedValue="{Binding EditCategoryId}"
+                              Style="{StaticResource FormComboBox}" />
+                          <TextBox
+                              Grid.Column="4"
+                              Style="{StaticResource FormTextBox}"
+                              Text="{Binding EditPriority, UpdateSourceTrigger=PropertyChanged}" />
+                          <CheckBox
+                              Grid.Column="6"
+                              VerticalAlignment="Center"
+                              Content="{DynamicResource Categories.Rule.CaseSensitive}"
+                              Foreground="{DynamicResource AppTextSecondary}"
+                              IsChecked="{Binding EditCaseSensitive}" />
+                        </Grid>
+
+                        <Expander Margin="0,8,0,0"
+                                  Foreground="{DynamicResource AppTextSecondary}"
+                                  Header="{DynamicResource Categories.Rule.Advanced}">
+                          <StackPanel Margin="0,8,0,0">
+                            <Grid Margin="0,0,0,6">
+                              <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                              </Grid.ColumnDefinitions>
+                              <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                                         FontSize="{StaticResource FontSizeXs}"
+                                         Foreground="{DynamicResource AppTextMuted}"
+                                         Text="{DynamicResource Categories.Rule.Name}" />
+                              <TextBox Grid.Column="1"
+                                       Style="{StaticResource FormTextBox}"
+                                       Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}" />
+                            </Grid>
+
+                            <TextBlock FontSize="{StaticResource FontSizeXs}"
+                                       Foreground="{DynamicResource AppTextMuted}"
+                                       Text="{DynamicResource Categories.Rule.MatchField}" />
+                            <StackPanel Margin="0,4,0,8" Orientation="Horizontal">
+                              <RadioButton Margin="0,0,12,0"
+                                           Content="{DynamicResource Categories.Rule.MatchField.Counterparty}"
+                                           IsChecked="{Binding EditMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Counterparty}" />
+                              <RadioButton Margin="0,0,12,0"
+                                           Content="{DynamicResource Categories.Rule.MatchField.Memo}"
+                                           IsChecked="{Binding EditMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Memo}" />
+                              <RadioButton Margin="0,0,12,0"
+                                           Content="{DynamicResource Categories.Rule.MatchField.Either}"
+                                           IsChecked="{Binding EditMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Either}" />
+                              <RadioButton Content="{DynamicResource Categories.Rule.MatchField.AnyText}"
+                                           IsChecked="{Binding EditMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=AnyText}" />
+                            </StackPanel>
+
+                            <TextBlock FontSize="{StaticResource FontSizeXs}"
+                                       Foreground="{DynamicResource AppTextMuted}"
+                                       Text="{DynamicResource Categories.Rule.MatchType}" />
+                            <StackPanel Margin="0,4,0,8" Orientation="Horizontal">
+                              <RadioButton Margin="0,0,12,0"
+                                           Content="{DynamicResource Categories.Rule.MatchType.Contains}"
+                                           IsChecked="{Binding EditMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Contains}" />
+                              <RadioButton Margin="0,0,12,0"
+                                           Content="{DynamicResource Categories.Rule.MatchType.Equals}"
+                                           IsChecked="{Binding EditMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Equals}" />
+                              <RadioButton Margin="0,0,12,0"
+                                           Content="{DynamicResource Categories.Rule.MatchType.StartsWith}"
+                                           IsChecked="{Binding EditMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=StartsWith}" />
+                              <RadioButton Content="{DynamicResource Categories.Rule.MatchType.Regex}"
+                                           IsChecked="{Binding EditMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Regex}" />
+                            </StackPanel>
+
+                            <TextBlock FontSize="{StaticResource FontSizeXs}"
+                                       Foreground="{DynamicResource AppTextMuted}"
+                                       Text="{DynamicResource Categories.Rule.AppliesTo}" />
+                            <StackPanel Margin="0,4,0,8" Orientation="Horizontal">
+                              <CheckBox Margin="0,0,12,0"
+                                        Content="{DynamicResource Categories.Rule.AppliesTo.Manual}"
+                                        IsChecked="{Binding EditAppliesToManual}" />
+                              <CheckBox Content="{DynamicResource Categories.Rule.AppliesTo.Import}"
+                                        IsChecked="{Binding EditAppliesToImport}" />
+                            </StackPanel>
+
+                            <Border Margin="0,8,0,0" Padding="10,8"
+                                    Background="{DynamicResource AppSurface}"
+                                    BorderBrush="{DynamicResource AppBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusSm}">
+                              <StackPanel>
+                                <TextBlock FontSize="{StaticResource FontSizeXs}"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppTextSecondary}"
+                                           Text="{DynamicResource Categories.Rule.LiveTest}" />
+                                <Grid Margin="0,6,0,0">
+                                  <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="32" />
+                                  </Grid.ColumnDefinitions>
+                                  <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                                             FontSize="{StaticResource FontSizeXs}"
+                                             Foreground="{DynamicResource AppTextMuted}"
+                                             Text="{DynamicResource Categories.Rule.LiveTest.Counterparty}" />
+                                  <TextBox Grid.Column="1"
+                                           Style="{StaticResource FormTextBox}"
+                                           Text="{Binding LiveTestCounterparty, UpdateSourceTrigger=PropertyChanged}" />
+                                  <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                             FontFamily="Segoe MDL2 Assets" FontSize="{StaticResource FontSizeBase}">
+                                    <TextBlock.Style>
+                                      <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="&#xE711;" />
+                                        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                                        <Style.Triggers>
+                                          <DataTrigger Binding="{Binding LiveTestCounterpartyHit}" Value="True">
+                                            <Setter Property="Text" Value="&#xE73E;" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                          </DataTrigger>
+                                        </Style.Triggers>
+                                      </Style>
+                                    </TextBlock.Style>
+                                  </TextBlock>
+                                </Grid>
+                                <Grid Margin="0,6,0,0">
+                                  <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="32" />
+                                  </Grid.ColumnDefinitions>
+                                  <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                                             FontSize="{StaticResource FontSizeXs}"
+                                             Foreground="{DynamicResource AppTextMuted}"
+                                             Text="{DynamicResource Categories.Rule.LiveTest.Memo}" />
+                                  <TextBox Grid.Column="1"
+                                           Style="{StaticResource FormTextBox}"
+                                           Text="{Binding LiveTestMemo, UpdateSourceTrigger=PropertyChanged}" />
+                                  <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                             FontFamily="Segoe MDL2 Assets" FontSize="{StaticResource FontSizeBase}">
+                                    <TextBlock.Style>
+                                      <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="&#xE711;" />
+                                        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                                        <Style.Triggers>
+                                          <DataTrigger Binding="{Binding LiveTestMemoHit}" Value="True">
+                                            <Setter Property="Text" Value="&#xE73E;" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                          </DataTrigger>
+                                        </Style.Triggers>
+                                      </Style>
+                                    </TextBlock.Style>
+                                  </TextBlock>
+                                </Grid>
+                              </StackPanel>
+                            </Border>
+                          </StackPanel>
+                        </Expander>
+                      </StackPanel>
 
                       <!--  Buttons  -->
                       <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
@@ -627,6 +765,7 @@
             <Grid.RowDefinitions>
               <RowDefinition Height="Auto" />
               <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
               <Grid.ColumnDefinitions>
@@ -674,8 +813,73 @@
                            Text="{DynamicResource Categories.Rule.Add}" />
               </Button>
             </Grid>
+
+            <Expander Grid.Row="1" Margin="0,10,0,0"
+                      Foreground="{DynamicResource AppTextSecondary}"
+                      Header="{DynamicResource Categories.Rule.Advanced}">
+              <StackPanel Margin="0,8,0,0">
+                <Grid Margin="0,0,0,6">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                             FontSize="{StaticResource FontSizeXs}"
+                             Foreground="{DynamicResource AppTextMuted}"
+                             Text="{DynamicResource Categories.Rule.Name}" />
+                  <TextBox Grid.Column="1"
+                           Style="{StaticResource FormTextBox}"
+                           Text="{Binding AddRuleName, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+                <TextBlock FontSize="{StaticResource FontSizeXs}"
+                           Foreground="{DynamicResource AppTextMuted}"
+                           Text="{DynamicResource Categories.Rule.MatchField}" />
+                <StackPanel Margin="0,4,0,8" Orientation="Horizontal">
+                  <RadioButton Margin="0,0,12,0" GroupName="AddRuleField"
+                               Content="{DynamicResource Categories.Rule.MatchField.Counterparty}"
+                               IsChecked="{Binding AddRuleMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Counterparty}" />
+                  <RadioButton Margin="0,0,12,0" GroupName="AddRuleField"
+                               Content="{DynamicResource Categories.Rule.MatchField.Memo}"
+                               IsChecked="{Binding AddRuleMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Memo}" />
+                  <RadioButton Margin="0,0,12,0" GroupName="AddRuleField"
+                               Content="{DynamicResource Categories.Rule.MatchField.Either}"
+                               IsChecked="{Binding AddRuleMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Either}" />
+                  <RadioButton GroupName="AddRuleField"
+                               Content="{DynamicResource Categories.Rule.MatchField.AnyText}"
+                               IsChecked="{Binding AddRuleMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=AnyText}" />
+                </StackPanel>
+                <TextBlock FontSize="{StaticResource FontSizeXs}"
+                           Foreground="{DynamicResource AppTextMuted}"
+                           Text="{DynamicResource Categories.Rule.MatchType}" />
+                <StackPanel Margin="0,4,0,8" Orientation="Horizontal">
+                  <RadioButton Margin="0,0,12,0" GroupName="AddRuleType"
+                               Content="{DynamicResource Categories.Rule.MatchType.Contains}"
+                               IsChecked="{Binding AddRuleMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Contains}" />
+                  <RadioButton Margin="0,0,12,0" GroupName="AddRuleType"
+                               Content="{DynamicResource Categories.Rule.MatchType.Equals}"
+                               IsChecked="{Binding AddRuleMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Equals}" />
+                  <RadioButton Margin="0,0,12,0" GroupName="AddRuleType"
+                               Content="{DynamicResource Categories.Rule.MatchType.StartsWith}"
+                               IsChecked="{Binding AddRuleMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=StartsWith}" />
+                  <RadioButton GroupName="AddRuleType"
+                               Content="{DynamicResource Categories.Rule.MatchType.Regex}"
+                               IsChecked="{Binding AddRuleMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Regex}" />
+                </StackPanel>
+                <TextBlock FontSize="{StaticResource FontSizeXs}"
+                           Foreground="{DynamicResource AppTextMuted}"
+                           Text="{DynamicResource Categories.Rule.AppliesTo}" />
+                <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                  <CheckBox Margin="0,0,12,0"
+                            Content="{DynamicResource Categories.Rule.AppliesTo.Manual}"
+                            IsChecked="{Binding AddRuleAppliesToManual}" />
+                  <CheckBox Content="{DynamicResource Categories.Rule.AppliesTo.Import}"
+                            IsChecked="{Binding AddRuleAppliesToImport}" />
+                </StackPanel>
+              </StackPanel>
+            </Expander>
+
             <TextBlock
-                Grid.Row="1"
+                Grid.Row="2"
                 Margin="0,8,0,0"
                 FontSize="{StaticResource FontSizeXs}"
                 Foreground="{DynamicResource AppDown}"

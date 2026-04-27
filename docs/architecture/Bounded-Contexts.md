@@ -144,7 +144,8 @@
 - `ImportBatch` ✅
 - `ImportPreviewRow` ✅（取代原規劃的 `ImportPreviewItem`）
 - `ImportConflict` ✅
-- `ImportRule` ⏳ v0.8+
+- `AutoCategorizationRule` ✅ v0.8（手動 + 匯入共用，含 `MatchField` / `MatchType` / `AppliesTo`，取代原規劃的 `ImportRule`）
+- `ImportBatchHistory` ✅ v0.8（rollback 用 entries + JSON snapshot）
 
 ### 主要服務
 - `ImportConflictDetector` ✅（取代原規劃的 `ImportDeduplicationService`）
