@@ -6,6 +6,11 @@
     <!--  App  -->
     <sys:String x:Key="App.Title">Assetra</sys:String>
 
+    <!--  Shared controls  -->
+    <sys:String x:Key="ColorPicker.Presets">Presets</sys:String>
+    <sys:String x:Key="ColorPicker.Apply">Apply</sys:String>
+    <sys:String x:Key="ColorPicker.HexInvalid">Enter a 6-digit hex color (e.g. #3B82F6)</sys:String>
+
     <!--  Splash  -->
     <sys:String x:Key="Splash.Init">Initializing…</sys:String>
     <sys:String x:Key="Splash.Services">Starting data services…</sys:String>
@@ -661,8 +666,8 @@
     <sys:String x:Key="Categories.ArchivedTag">(archived)</sys:String>
     <sys:String x:Key="Categories.Add">Add category</sys:String>
     <sys:String x:Key="Categories.NameHint">Category name</sys:String>
-    <sys:String x:Key="Categories.IconHint">Icon (emoji)</sys:String>
-    <sys:String x:Key="Categories.ColorHint">Color #RRGGBB</sys:String>
+    <sys:String x:Key="Categories.IconHint">Choose the icon shown for this category</sys:String>
+    <sys:String x:Key="Categories.ColorHint">Pick a category color from the preset palette</sys:String>
     <sys:String x:Key="Categories.ToggleArchive">Toggle archive</sys:String>
     <sys:String x:Key="Categories.Error.NameRequired">Please enter a category name</sys:String>
     <sys:String x:Key="Categories.Error.NameDuplicate">A category with this name already exists</sys:String>
@@ -677,8 +682,22 @@
 
     <!--  Categories — Tabs &amp; Auto-categorization Rules  -->
     <sys:String x:Key="Categories.Tab.Categories">Categories</sys:String>
+    <sys:String x:Key="Categories.AddForm.Title">Add Category</sys:String>
+    <sys:String x:Key="Categories.AddForm.Hint">Create income or expense categories for budgets, auto-categorization, and month-end reports.</sys:String>
+    <sys:String x:Key="Categories.Field.Kind">Type</sys:String>
+    <sys:String x:Key="Categories.Field.Icon">Icon</sys:String>
+    <sys:String x:Key="Categories.Field.Name">Name</sys:String>
+    <sys:String x:Key="Categories.Field.Color">Color</sys:String>
+    <sys:String x:Key="Categories.Field.Preview">Preview</sys:String>
+    <sys:String x:Key="Categories.PreviewPlaceholder">Name preview</sys:String>
     <sys:String x:Key="Categories.Tab.Rules">Auto-categorization rules</sys:String>
     <sys:String x:Key="Categories.Rule.Hint">When a transaction note contains the keyword, apply the chosen category. Lower priority numbers win.</sys:String>
+    <sys:String x:Key="Categories.Rule.AddForm.Title">Add Rule</sys:String>
+    <sys:String x:Key="Categories.Rule.AddForm.Hint">Start with a keyword and category, then expand advanced options if you need more precise matching.</sys:String>
+    <sys:String x:Key="Categories.Field.Keyword">Keyword</sys:String>
+    <sys:String x:Key="Categories.Field.Category">Category</sys:String>
+    <sys:String x:Key="Categories.Field.Priority">Priority</sys:String>
+    <sys:String x:Key="Categories.Field.CaseSensitive">Match option</sys:String>
     <sys:String x:Key="Categories.Rule.Add">Add rule</sys:String>
     <sys:String x:Key="Categories.Rule.KeywordHint">Keyword</sys:String>
     <sys:String x:Key="Categories.Rule.CategoryHint">Category</sys:String>
@@ -713,6 +732,13 @@
     <!-- Budget management -->
     <sys:String x:Key="Categories.Tab.Budgets">Budgets</sys:String>
     <sys:String x:Key="Categories.Budget.Hint">Set a monthly or yearly cap per category or for total expenses.</sys:String>
+    <sys:String x:Key="Categories.Budget.AddForm.Title">Add Budget</sys:String>
+    <sys:String x:Key="Categories.Budget.AddForm.Hint">Create monthly or yearly budgets for a category or total spending. They will feed the dashboard summary automatically.</sys:String>
+    <sys:String x:Key="Categories.Field.BudgetMode">Budget mode</sys:String>
+    <sys:String x:Key="Categories.Field.Year">Year</sys:String>
+    <sys:String x:Key="Categories.Field.Month">Month</sys:String>
+    <sys:String x:Key="Categories.Field.Amount">Amount</sys:String>
+    <sys:String x:Key="Categories.Field.Note">Note</sys:String>
     <sys:String x:Key="Categories.Budget.Add">Add budget</sys:String>
     <sys:String x:Key="Categories.Budget.Total">(Total)</sys:String>
     <sys:String x:Key="Categories.Budget.YearHint">Year (e.g., 2026)</sys:String>
@@ -744,6 +770,13 @@
     <sys:String x:Key="Recurring.Tab.Pending">Pending</sys:String>
     <sys:String x:Key="Recurring.Run">Run now</sys:String>
     <sys:String x:Key="Recurring.Run.Status">Applied {0}, queued {1} pending</sys:String>
+    <sys:String x:Key="Recurring.AddForm.Title">Add Subscription</sys:String>
+    <sys:String x:Key="Recurring.AddForm.Hint">Set the amount, frequency, and handling mode. Due items can auto-apply or go into the pending queue.</sys:String>
+    <sys:String x:Key="Recurring.Field.Name">Name</sys:String>
+    <sys:String x:Key="Recurring.Field.Type">Type</sys:String>
+    <sys:String x:Key="Recurring.Field.Amount">Amount</sys:String>
+    <sys:String x:Key="Recurring.Field.Frequency">Frequency</sys:String>
+    <sys:String x:Key="Recurring.Field.Mode">Handling mode</sys:String>
     <sys:String x:Key="Recurring.Add">Add</sys:String>
     <sys:String x:Key="Recurring.NameHint">Name</sys:String>
     <sys:String x:Key="Recurring.AmountHint">Amount</sys:String>

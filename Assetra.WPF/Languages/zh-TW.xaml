@@ -6,6 +6,11 @@
     <!--  App  -->
     <sys:String x:Key="App.Title">Assetra</sys:String>
 
+    <!--  Shared controls  -->
+    <sys:String x:Key="ColorPicker.Presets">常用色票</sys:String>
+    <sys:String x:Key="ColorPicker.Apply">套用</sys:String>
+    <sys:String x:Key="ColorPicker.HexInvalid">請輸入 6 位十六進位色碼（例：#3B82F6）</sys:String>
+
     <!--  Splash  -->
     <sys:String x:Key="Splash.Init">正在初始化…</sys:String>
     <sys:String x:Key="Splash.Services">正在啟動資料服務…</sys:String>
@@ -663,8 +668,8 @@
     <sys:String x:Key="Categories.ArchivedTag">（已封存）</sys:String>
     <sys:String x:Key="Categories.Add">新增分類</sys:String>
     <sys:String x:Key="Categories.NameHint">分類名稱</sys:String>
-    <sys:String x:Key="Categories.IconHint">圖示（emoji）</sys:String>
-    <sys:String x:Key="Categories.ColorHint">顏色 #RRGGBB</sys:String>
+    <sys:String x:Key="Categories.IconHint">選擇這個分類要顯示的圖示</sys:String>
+    <sys:String x:Key="Categories.ColorHint">從常用色票中選擇分類顏色</sys:String>
     <sys:String x:Key="Categories.ToggleArchive">切換封存</sys:String>
     <sys:String x:Key="Categories.Error.NameRequired">請輸入分類名稱</sys:String>
     <sys:String x:Key="Categories.Error.NameDuplicate">已存在同名分類</sys:String>
@@ -679,8 +684,22 @@
 
     <!--  Categories — Tabs & Auto-categorization Rules  -->
     <sys:String x:Key="Categories.Tab.Categories">分類</sys:String>
+    <sys:String x:Key="Categories.AddForm.Title">新增分類</sys:String>
+    <sys:String x:Key="Categories.AddForm.Hint">建立收入或支出分類，供預算、自動分類與月結報告使用。</sys:String>
+    <sys:String x:Key="Categories.Field.Kind">類型</sys:String>
+    <sys:String x:Key="Categories.Field.Icon">圖示</sys:String>
+    <sys:String x:Key="Categories.Field.Name">名稱</sys:String>
+    <sys:String x:Key="Categories.Field.Color">顏色</sys:String>
+    <sys:String x:Key="Categories.Field.Preview">預覽</sys:String>
+    <sys:String x:Key="Categories.PreviewPlaceholder">尚未輸入名稱</sys:String>
     <sys:String x:Key="Categories.Tab.Rules">自動分類規則</sys:String>
     <sys:String x:Key="Categories.Rule.Hint">當交易備註包含關鍵字時，自動套用指定分類。優先順序數字越小越優先。</sys:String>
+    <sys:String x:Key="Categories.Rule.AddForm.Title">新增規則</sys:String>
+    <sys:String x:Key="Categories.Rule.AddForm.Hint">先設定關鍵字與分類；需要更精準的條件時，再展開進階選項。</sys:String>
+    <sys:String x:Key="Categories.Field.Keyword">關鍵字</sys:String>
+    <sys:String x:Key="Categories.Field.Category">分類</sys:String>
+    <sys:String x:Key="Categories.Field.Priority">優先序</sys:String>
+    <sys:String x:Key="Categories.Field.CaseSensitive">比對選項</sys:String>
     <sys:String x:Key="Categories.Rule.Add">新增規則</sys:String>
     <sys:String x:Key="Categories.Rule.KeywordHint">關鍵字</sys:String>
     <sys:String x:Key="Categories.Rule.CategoryHint">分類</sys:String>
@@ -715,6 +734,13 @@
     <!--  Budget management  -->
     <sys:String x:Key="Categories.Tab.Budgets">預算</sys:String>
     <sys:String x:Key="Categories.Budget.Hint">為特定分類或全部支出設定每月／每年的預算上限。</sys:String>
+    <sys:String x:Key="Categories.Budget.AddForm.Title">新增預算</sys:String>
+    <sys:String x:Key="Categories.Budget.AddForm.Hint">可針對分類或整體支出建立月預算或年預算，之後會同步反映在儀表板摘要。</sys:String>
+    <sys:String x:Key="Categories.Field.BudgetMode">預算模式</sys:String>
+    <sys:String x:Key="Categories.Field.Year">年份</sys:String>
+    <sys:String x:Key="Categories.Field.Month">月份</sys:String>
+    <sys:String x:Key="Categories.Field.Amount">金額</sys:String>
+    <sys:String x:Key="Categories.Field.Note">備註</sys:String>
     <sys:String x:Key="Categories.Budget.Add">新增預算</sys:String>
     <sys:String x:Key="Categories.Budget.Total">（總預算）</sys:String>
     <sys:String x:Key="Categories.Budget.YearHint">年份（例如 2026）</sys:String>
@@ -746,6 +772,13 @@
     <sys:String x:Key="Recurring.Tab.Pending">待確認</sys:String>
     <sys:String x:Key="Recurring.Run">立即結算</sys:String>
     <sys:String x:Key="Recurring.Run.Status">已套用 {0} 筆，新增 {1} 筆待確認</sys:String>
+    <sys:String x:Key="Recurring.AddForm.Title">新增訂閱項目</sys:String>
+    <sys:String x:Key="Recurring.AddForm.Hint">設定固定金額、頻率與處理方式；到期時可自動寫入或加入待確認清單。</sys:String>
+    <sys:String x:Key="Recurring.Field.Name">名稱</sys:String>
+    <sys:String x:Key="Recurring.Field.Type">類型</sys:String>
+    <sys:String x:Key="Recurring.Field.Amount">金額</sys:String>
+    <sys:String x:Key="Recurring.Field.Frequency">頻率</sys:String>
+    <sys:String x:Key="Recurring.Field.Mode">處理方式</sys:String>
     <sys:String x:Key="Recurring.Add">新增</sys:String>
     <sys:String x:Key="Recurring.NameHint">名稱</sys:String>
     <sys:String x:Key="Recurring.AmountHint">金額</sys:String>

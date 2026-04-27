@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ctrl="clr-namespace:Assetra.WPF.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Categories"
     d:DataContext="{d:DesignInstance Type={x:Type vm:CategoriesViewModel},
                                      IsDesignTimeCreatable=False}"
@@ -14,6 +15,59 @@
     mc:Ignorable="d">
 
   <UserControl.Resources>
+    <Style x:Key="InlineFormLabel" TargetType="TextBlock">
+      <Setter Property="Margin" Value="0,0,0,6" />
+      <Setter Property="FontSize" Value="{StaticResource FontSizeXs}" />
+      <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+    </Style>
+
+    <Style x:Key="InlineFormField" TargetType="StackPanel">
+      <Setter Property="Margin" Value="0,0,12,10" />
+      <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <Style x:Key="CategoryColorPalette" TargetType="ListBox">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+      <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
+    </Style>
+
+    <Style x:Key="CategoryColorPaletteItem" TargetType="ListBoxItem">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="0,0,8,8" />
+      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Stretch" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ListBoxItem">
+            <Border
+                x:Name="Outer"
+                Padding="3"
+                Background="Transparent"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource RadiusMd}">
+              <ContentPresenter />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Outer" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+              </Trigger>
+              <Trigger Property="IsSelected" Value="True">
+                <Setter TargetName="Outer" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                <Setter TargetName="Outer" Property="Background" Value="{DynamicResource AppHover}" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
     <DataTemplate x:Key="CategoryRowTemplate" DataType="{x:Type vm:CategoryRowViewModel}">
       <Border
           Margin="0,0,0,6"
@@ -72,27 +126,104 @@
                 </Style.Triggers>
               </Style>
             </StackPanel.Style>
-            <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="60" />
-                <ColumnDefinition Width="6" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="6" />
-                <ColumnDefinition Width="100" />
-              </Grid.ColumnDefinitions>
-              <TextBox
-                  Grid.Column="0"
-                  Style="{StaticResource FormTextBox}"
-                  Text="{Binding EditIcon, UpdateSourceTrigger=PropertyChanged}" />
-              <TextBox
-                  Grid.Column="2"
-                  Style="{StaticResource FormTextBox}"
-                  Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}" />
-              <TextBox
-                  Grid.Column="4"
-                  Style="{StaticResource FormTextBox}"
-                  Text="{Binding EditColorHex, UpdateSourceTrigger=PropertyChanged}" />
-            </Grid>
+            <WrapPanel Orientation="Horizontal">
+              <StackPanel Width="164" Margin="0,0,12,8">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Icon}" />
+                <ComboBox
+                    MinHeight="36"
+                    ItemsSource="{Binding DataContext.IconOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    SelectedValue="{Binding EditIcon}"
+                    SelectedValuePath="Value"
+                    Style="{StaticResource FormComboBox}">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                      <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,8,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeMd}"
+                            Text="{Binding Value}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeSm}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{Binding Label}" />
+                      </StackPanel>
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </StackPanel>
+
+              <StackPanel Width="240" Margin="0,0,12,8">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Name}" />
+                <TextBox
+                    MinHeight="36"
+                    Style="{StaticResource FormTextBox}"
+                    Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}" />
+              </StackPanel>
+
+              <StackPanel Width="184" Margin="0,0,0,8">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Color}" />
+                <ctrl:ColorPickerButton
+                    Presets="{Binding DataContext.ColorOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    SelectedColor="{Binding EditColorHex, Mode=TwoWay}" />
+              </StackPanel>
+
+              <StackPanel Width="180" Margin="12,0,0,8">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Preview}" />
+                <Border
+                    Padding="10,8"
+                    Background="{DynamicResource AppSurface}"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource RadiusSm}">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="0,0,8,0"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource FontSizeMd}"
+                        Text="{Binding EditIcon}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource FontSizeSm}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding EditName}"
+                        TextTrimming="CharacterEllipsis">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Text" Value="{Binding EditName}" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding EditName}" Value="">
+                              <Setter Property="Text" Value="{DynamicResource Categories.PreviewPlaceholder}" />
+                              <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                              <Setter Property="FontWeight" Value="Normal" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                    <Border
+                        Grid.Column="2"
+                        Width="18"
+                        Height="18"
+                        Margin="8,0,0,0"
+                        VerticalAlignment="Center"
+                        Background="{Binding EditColorHex, Converter={StaticResource HexToBrushConverter}}"
+                        BorderBrush="#33000000"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource RadiusSm}" />
+                  </Grid>
+                </Border>
+              </StackPanel>
+            </WrapPanel>
             <TextBlock
                 Margin="0,4,0,0"
                 FontSize="{StaticResource FontSizeXs}"
@@ -305,84 +436,175 @@
         BorderBrush="{DynamicResource AppBorder}"
         BorderThickness="1"
         CornerRadius="{StaticResource RadiusMd}">
-      <Grid>
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="120" />
-            <ColumnDefinition Width="8" />
-            <ColumnDefinition Width="60" />
-            <ColumnDefinition Width="8" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="8" />
-            <ColumnDefinition Width="100" />
-            <ColumnDefinition Width="8" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
+      <StackPanel>
+        <TextBlock
+            FontSize="{StaticResource FontSizeMd}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextPrimary}"
+            Text="{DynamicResource Categories.AddForm.Title}" />
+        <TextBlock
+            Margin="0,4,0,12"
+            FontSize="{StaticResource FontSizeSm}"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Categories.AddForm.Hint}"
+            TextWrapping="Wrap" />
+        <WrapPanel Orientation="Horizontal">
+          <StackPanel Style="{StaticResource InlineFormField}">
+            <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Kind}" />
+            <ComboBox
+                Width="140"
+                MinHeight="36"
+                ItemsSource="{Binding KindOptions}"
+                SelectedItem="{Binding AddKind}"
+                Style="{StaticResource FormComboBox}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock>
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="{DynamicResource Categories.Expense}" />
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding}" Value="Income">
+                            <Setter Property="Text" Value="{DynamicResource Categories.Income}" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </StackPanel>
 
-          <ComboBox
-              Grid.Column="0"
-              ItemsSource="{Binding KindOptions}"
-              SelectedItem="{Binding AddKind}"
-              Style="{StaticResource FormComboBox}">
-            <ComboBox.ItemTemplate>
-              <DataTemplate>
-                <TextBlock>
+          <StackPanel Style="{StaticResource InlineFormField}">
+            <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Icon}" />
+            <ComboBox
+                Width="164"
+                MinHeight="36"
+                ItemsSource="{Binding IconOptions}"
+                SelectedValue="{Binding AddIcon}"
+                SelectedValuePath="Value"
+                Style="{StaticResource FormComboBox}"
+                ToolTip="{DynamicResource Categories.IconHint}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        Margin="0,0,8,0"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource FontSizeMd}"
+                        Text="{Binding Value}" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource FontSizeSm}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{Binding Label}" />
+                  </StackPanel>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource InlineFormField}">
+            <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Name}" />
+            <TextBox
+                Width="280"
+                MinHeight="36"
+                Style="{StaticResource FormTextBox}"
+                Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}"
+                ToolTip="{DynamicResource Categories.NameHint}" />
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource InlineFormField}">
+            <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Color}" />
+            <ctrl:ColorPickerButton
+                Width="184"
+                Presets="{Binding ColorOptions}"
+                SelectedColor="{Binding AddColorHex, Mode=TwoWay}"
+                ToolTip="{DynamicResource Categories.ColorHint}" />
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource InlineFormField}" Width="180">
+            <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Preview}" />
+            <Border
+                Padding="10,8"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource RadiusSm}">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Column="0"
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource FontSizeMd}"
+                    Text="{Binding AddIcon}" />
+                <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource FontSizeSm}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    Text="{Binding AddName}"
+                    TextTrimming="CharacterEllipsis">
                   <TextBlock.Style>
                     <Style TargetType="TextBlock">
-                      <Setter Property="Text" Value="{DynamicResource Categories.Expense}" />
+                      <Setter Property="Text" Value="{Binding AddName}" />
                       <Style.Triggers>
-                        <DataTrigger Binding="{Binding}" Value="Income">
-                          <Setter Property="Text" Value="{DynamicResource Categories.Income}" />
+                        <DataTrigger Binding="{Binding AddName}" Value="">
+                          <Setter Property="Text" Value="{DynamicResource Categories.PreviewPlaceholder}" />
+                          <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                          <Setter Property="FontWeight" Value="Normal" />
                         </DataTrigger>
                       </Style.Triggers>
                     </Style>
                   </TextBlock.Style>
                 </TextBlock>
-              </DataTemplate>
-            </ComboBox.ItemTemplate>
-          </ComboBox>
+                <Border
+                    Grid.Column="2"
+                    Width="18"
+                    Height="18"
+                    Margin="8,0,0,0"
+                    VerticalAlignment="Center"
+                    Background="{Binding AddColorHex, Converter={StaticResource HexToBrushConverter}}"
+                    BorderBrush="#33000000"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource RadiusSm}" />
+              </Grid>
+            </Border>
+          </StackPanel>
 
-          <TextBox
-              Grid.Column="2"
-              Style="{StaticResource FormTextBox}"
-              Text="{Binding AddIcon, UpdateSourceTrigger=PropertyChanged}"
-              ToolTip="{DynamicResource Categories.IconHint}" />
-
-          <TextBox
-              Grid.Column="4"
-              Style="{StaticResource FormTextBox}"
-              Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}"
-              ToolTip="{DynamicResource Categories.NameHint}" />
-
-          <TextBox
-              Grid.Column="6"
-              Style="{StaticResource FormTextBox}"
-              Text="{Binding AddColorHex, UpdateSourceTrigger=PropertyChanged}"
-              ToolTip="{DynamicResource Categories.ColorHint}" />
-
-          <Button
-              Grid.Column="8"
-              MinWidth="120"
-              MinHeight="36"
-              Padding="16,0"
-              Command="{Binding AddCategoryCommand}"
-              Style="{StaticResource BtnPrimary}">
-            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                       Text="{DynamicResource Categories.Add}" />
-          </Button>
-        </Grid>
+        </WrapPanel>
+        <Border
+            Margin="0,4,0,0"
+            Padding="0,10,0,0"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="0,1,0,0">
+          <DockPanel LastChildFill="False">
+            <Button
+                DockPanel.Dock="Right"
+                MinWidth="120"
+                MinHeight="36"
+                Padding="16,0"
+                Command="{Binding AddCategoryCommand}"
+                Style="{StaticResource BtnPrimary}">
+              <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                         Text="{DynamicResource Categories.Add}" />
+            </Button>
+          </DockPanel>
+        </Border>
         <TextBlock
-            Grid.Row="1"
             Margin="0,8,0,0"
             FontSize="{StaticResource FontSizeXs}"
             Foreground="{DynamicResource AppDown}"
             Text="{Binding AddError}"
             Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
-      </Grid>
+      </StackPanel>
     </Border>
      </Grid>
     </TabItem>
@@ -761,60 +983,76 @@
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
             CornerRadius="{StaticResource RadiusMd}">
-          <Grid>
-            <Grid.RowDefinitions>
-              <RowDefinition Height="Auto" />
-              <RowDefinition Height="Auto" />
-              <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="180" />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="80" />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="Auto" />
-              </Grid.ColumnDefinitions>
-              <TextBox
-                  Grid.Column="0"
-                  Style="{StaticResource FormTextBox}"
-                  Text="{Binding AddRuleKeyword, UpdateSourceTrigger=PropertyChanged}"
-                  ToolTip="{DynamicResource Categories.Rule.KeywordHint}" />
-              <ComboBox
-                  Grid.Column="2"
-                  DisplayMemberPath="Name"
-                  ItemsSource="{Binding AvailableCategories}"
-                  SelectedItem="{Binding AddRuleCategory}"
-                  Style="{StaticResource FormComboBox}"
-                  ToolTip="{DynamicResource Categories.Rule.CategoryHint}" />
-              <TextBox
-                  Grid.Column="4"
-                  Style="{StaticResource FormTextBox}"
-                  Text="{Binding AddRulePriority, UpdateSourceTrigger=PropertyChanged}"
-                  ToolTip="{DynamicResource Categories.Rule.PriorityHint}" />
-              <CheckBox
-                  Grid.Column="6"
-                  VerticalAlignment="Center"
-                  Content="{DynamicResource Categories.Rule.CaseSensitive}"
-                  Foreground="{DynamicResource AppTextSecondary}"
-                  IsChecked="{Binding AddRuleCaseSensitive}" />
-              <Button
-                  Grid.Column="8"
-                  MinWidth="120"
-                  MinHeight="36"
-                  Padding="16,0"
-                  Command="{Binding AddRuleCommand}"
-                  Style="{StaticResource BtnPrimary}">
-                <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                           Text="{DynamicResource Categories.Rule.Add}" />
-              </Button>
-            </Grid>
+          <StackPanel>
+            <TextBlock
+                FontSize="{StaticResource FontSizeMd}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource Categories.Rule.AddForm.Title}" />
+            <TextBlock
+                Margin="0,4,0,12"
+                FontSize="{StaticResource FontSizeSm}"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{DynamicResource Categories.Rule.AddForm.Hint}"
+                TextWrapping="Wrap" />
+            <WrapPanel Orientation="Horizontal">
+              <StackPanel Style="{StaticResource InlineFormField}">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Keyword}" />
+                <TextBox
+                    Width="280"
+                    Style="{StaticResource FormTextBox}"
+                    Text="{Binding AddRuleKeyword, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="{DynamicResource Categories.Rule.KeywordHint}" />
+              </StackPanel>
 
-            <Expander Grid.Row="1" Margin="0,10,0,0"
+              <StackPanel Style="{StaticResource InlineFormField}">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Category}" />
+                <ComboBox
+                    Width="200"
+                    DisplayMemberPath="Name"
+                    ItemsSource="{Binding AvailableCategories}"
+                    SelectedItem="{Binding AddRuleCategory}"
+                    Style="{StaticResource FormComboBox}"
+                    ToolTip="{DynamicResource Categories.Rule.CategoryHint}" />
+              </StackPanel>
+
+              <StackPanel Style="{StaticResource InlineFormField}">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Priority}" />
+                <TextBox
+                    Width="88"
+                    Style="{StaticResource FormTextBox}"
+                    Text="{Binding AddRulePriority, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="{DynamicResource Categories.Rule.PriorityHint}" />
+              </StackPanel>
+
+              <StackPanel Style="{StaticResource InlineFormField}" Width="160" VerticalAlignment="Bottom">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.CaseSensitive}" />
+                <CheckBox
+                    VerticalAlignment="Center"
+                    Content="{DynamicResource Categories.Rule.CaseSensitive}"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    IsChecked="{Binding AddRuleCaseSensitive}" />
+              </StackPanel>
+            </WrapPanel>
+            <Border
+                Margin="0,4,0,0"
+                Padding="0,10,0,0"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="0,1,0,0">
+              <DockPanel LastChildFill="False">
+                <Button
+                    DockPanel.Dock="Right"
+                    MinWidth="120"
+                    MinHeight="36"
+                    Padding="16,0"
+                    Command="{Binding AddRuleCommand}"
+                    Style="{StaticResource BtnPrimary}">
+                  <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                             Text="{DynamicResource Categories.Rule.Add}" />
+                </Button>
+              </DockPanel>
+            </Border>
+            <Expander Margin="0,10,0,0"
                       Foreground="{DynamicResource AppTextSecondary}"
                       Header="{DynamicResource Categories.Rule.Advanced}">
               <StackPanel Margin="0,8,0,0">
@@ -879,13 +1117,12 @@
             </Expander>
 
             <TextBlock
-                Grid.Row="2"
                 Margin="0,8,0,0"
                 FontSize="{StaticResource FontSizeXs}"
                 Foreground="{DynamicResource AppDown}"
                 Text="{Binding AddRuleError}"
                 Visibility="{Binding AddRuleError, Converter={StaticResource StringToVisibilityConverter}}" />
-          </Grid>
+          </StackPanel>
         </Border>
       </Grid>
     </TabItem>
@@ -1114,95 +1351,117 @@
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
             CornerRadius="{StaticResource RadiusMd}">
-          <Grid>
-            <Grid.RowDefinitions>
-              <RowDefinition Height="Auto" />
-              <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100" />
-                <ColumnDefinition Width="6" />
-                <ColumnDefinition Width="80" />
-                <ColumnDefinition Width="6" />
-                <ColumnDefinition Width="60" />
-                <ColumnDefinition Width="6" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="6" />
-                <ColumnDefinition Width="120" />
-                <ColumnDefinition Width="6" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="6" />
-                <ColumnDefinition Width="Auto" />
-              </Grid.ColumnDefinitions>
-              <ComboBox
-                  Grid.Column="0"
-                  ItemsSource="{Binding BudgetModeOptions}"
-                  SelectedItem="{Binding AddBudgetMode}"
-                  Style="{StaticResource FormComboBox}">
-                <ComboBox.ItemTemplate>
-                  <DataTemplate>
-                    <TextBlock>
-                      <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                          <Setter Property="Text" Value="{DynamicResource Categories.Budget.Mode.Monthly}" />
-                          <Style.Triggers>
-                            <DataTrigger Binding="{Binding}" Value="Yearly">
-                              <Setter Property="Text" Value="{DynamicResource Categories.Budget.Mode.Yearly}" />
-                            </DataTrigger>
-                          </Style.Triggers>
-                        </Style>
-                      </TextBlock.Style>
-                    </TextBlock>
-                  </DataTemplate>
-                </ComboBox.ItemTemplate>
-              </ComboBox>
-              <TextBox
-                  Grid.Column="2"
-                  Style="{StaticResource FormTextBox}"
-                  Text="{Binding AddBudgetYear, UpdateSourceTrigger=PropertyChanged}"
-                  ToolTip="{DynamicResource Categories.Budget.YearHint}" />
-              <TextBox
-                  Grid.Column="4"
-                  Style="{StaticResource FormTextBox}"
-                  Text="{Binding AddBudgetMonth, UpdateSourceTrigger=PropertyChanged}"
-                  ToolTip="{DynamicResource Categories.Budget.MonthHint}" />
-              <ComboBox
-                  Grid.Column="6"
-                  DisplayMemberPath="Name"
-                  ItemsSource="{Binding AvailableCategories}"
-                  SelectedItem="{Binding AddBudgetCategory}"
-                  Style="{StaticResource FormComboBox}"
-                  ToolTip="{DynamicResource Categories.Budget.CategoryHint}" />
-              <TextBox
-                  Grid.Column="8"
-                  Style="{StaticResource FormTextBox}"
-                  Text="{Binding AddBudgetAmount, UpdateSourceTrigger=PropertyChanged}"
-                  ToolTip="{DynamicResource Categories.Budget.AmountHint}" />
-              <TextBox
-                  Grid.Column="10"
-                  Style="{StaticResource FormTextBox}"
-                  Text="{Binding AddBudgetNote, UpdateSourceTrigger=PropertyChanged}"
-                  ToolTip="{DynamicResource Categories.Budget.NoteHint}" />
-              <Button
-                  Grid.Column="12"
-                  MinWidth="100"
-                  MinHeight="36"
-                  Padding="16,0"
-                  Command="{Binding AddBudgetCommand}"
-                  Style="{StaticResource BtnPrimary}">
-                <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                           Text="{DynamicResource Categories.Budget.Add}" />
-              </Button>
-            </Grid>
+          <StackPanel>
             <TextBlock
-                Grid.Row="1"
+                FontSize="{StaticResource FontSizeMd}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource Categories.Budget.AddForm.Title}" />
+            <TextBlock
+                Margin="0,4,0,12"
+                FontSize="{StaticResource FontSizeSm}"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{DynamicResource Categories.Budget.AddForm.Hint}"
+                TextWrapping="Wrap" />
+            <WrapPanel Orientation="Horizontal">
+              <StackPanel Style="{StaticResource InlineFormField}">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.BudgetMode}" />
+                <ComboBox
+                    Width="120"
+                    ItemsSource="{Binding BudgetModeOptions}"
+                    SelectedItem="{Binding AddBudgetMode}"
+                    Style="{StaticResource FormComboBox}">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock>
+                        <TextBlock.Style>
+                          <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="{DynamicResource Categories.Budget.Mode.Monthly}" />
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding}" Value="Yearly">
+                                <Setter Property="Text" Value="{DynamicResource Categories.Budget.Mode.Yearly}" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </TextBlock.Style>
+                      </TextBlock>
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </StackPanel>
+
+              <StackPanel Style="{StaticResource InlineFormField}">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Year}" />
+                <TextBox
+                    Width="84"
+                    Style="{StaticResource FormTextBox}"
+                    Text="{Binding AddBudgetYear, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="{DynamicResource Categories.Budget.YearHint}" />
+              </StackPanel>
+
+              <StackPanel Style="{StaticResource InlineFormField}">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Month}" />
+                <TextBox
+                    Width="72"
+                    Style="{StaticResource FormTextBox}"
+                    Text="{Binding AddBudgetMonth, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="{DynamicResource Categories.Budget.MonthHint}" />
+              </StackPanel>
+
+              <StackPanel Style="{StaticResource InlineFormField}">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Category}" />
+                <ComboBox
+                    Width="240"
+                    DisplayMemberPath="Name"
+                    ItemsSource="{Binding AvailableCategories}"
+                    SelectedItem="{Binding AddBudgetCategory}"
+                    Style="{StaticResource FormComboBox}"
+                    ToolTip="{DynamicResource Categories.Budget.CategoryHint}" />
+              </StackPanel>
+
+              <StackPanel Style="{StaticResource InlineFormField}">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Amount}" />
+                <TextBox
+                    Width="120"
+                    Style="{StaticResource FormTextBox}"
+                    Text="{Binding AddBudgetAmount, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="{DynamicResource Categories.Budget.AmountHint}" />
+              </StackPanel>
+
+              <StackPanel Style="{StaticResource InlineFormField}">
+                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Note}" />
+                <TextBox
+                    Width="240"
+                    Style="{StaticResource FormTextBox}"
+                    Text="{Binding AddBudgetNote, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="{DynamicResource Categories.Budget.NoteHint}" />
+              </StackPanel>
+            </WrapPanel>
+            <Border
+                Margin="0,4,0,0"
+                Padding="0,10,0,0"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="0,1,0,0">
+              <DockPanel LastChildFill="False">
+                <Button
+                    DockPanel.Dock="Right"
+                    MinWidth="100"
+                    MinHeight="36"
+                    Padding="16,0"
+                    Command="{Binding AddBudgetCommand}"
+                    Style="{StaticResource BtnPrimary}">
+                  <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                             Text="{DynamicResource Categories.Budget.Add}" />
+                </Button>
+              </DockPanel>
+            </Border>
+            <TextBlock
                 Margin="0,8,0,0"
                 FontSize="{StaticResource FontSizeXs}"
                 Foreground="{DynamicResource AppDown}"
                 Text="{Binding AddBudgetError}"
                 Visibility="{Binding AddBudgetError, Converter={StaticResource StringToVisibilityConverter}}" />
-          </Grid>
+          </StackPanel>
         </Border>
       </Grid>
     </TabItem>
