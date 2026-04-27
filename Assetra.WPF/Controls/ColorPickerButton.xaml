@@ -10,7 +10,7 @@
     <!--  Trigger button: current color swatch + hex label + chevron  -->
     <Button
         x:Name="OpenButton"
-        MinHeight="34"
+        MinHeight="{Binding MinHeight, RelativeSource={RelativeSource AncestorType=UserControl}}"
         Padding="6,4"
         HorizontalContentAlignment="Stretch"
         Background="{DynamicResource AppBackground}"

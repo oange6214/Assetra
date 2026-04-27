@@ -217,24 +217,33 @@
                             Style="{StaticResource FormTextBox}"
                             Text="{Binding AddNotes, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-
-                    <Button
-                        MinWidth="96"
-                        Margin="0,0,8,12"
-                        VerticalAlignment="Top"
-                        Command="{Binding AddCommand}"
-                        Content="{Binding SubmitText}"
-                        Style="{StaticResource BtnPrimary}" />
-
-                    <Button
-                        MinWidth="80"
-                        Margin="0,0,0,12"
-                        VerticalAlignment="Top"
-                        Command="{Binding CancelEditCommand}"
-                        Content="{DynamicResource Goals.Edit.Cancel}"
-                        Style="{StaticResource BtnGhost}"
-                        Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </WrapPanel>
+
+                <Border
+                    Margin="0,4,0,0"
+                    Padding="0,10,0,0"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="0,1,0,0">
+                    <DockPanel LastChildFill="False">
+                        <Button
+                            DockPanel.Dock="Right"
+                            MinWidth="96"
+                            MinHeight="36"
+                            Margin="8,0,0,0"
+                            Command="{Binding AddCommand}"
+                            Content="{Binding SubmitText}"
+                            Style="{StaticResource BtnPrimary}" />
+
+                        <Button
+                            DockPanel.Dock="Right"
+                            MinWidth="80"
+                            MinHeight="36"
+                            Command="{Binding CancelEditCommand}"
+                            Content="{DynamicResource Goals.Edit.Cancel}"
+                            Style="{StaticResource BtnGhost}"
+                            Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </DockPanel>
+                </Border>
 
                 <TextBlock
                     Margin="0,8,0,0"

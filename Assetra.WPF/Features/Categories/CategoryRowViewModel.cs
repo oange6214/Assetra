@@ -1,4 +1,5 @@
 using Assetra.Core.Models;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.Categories;
@@ -20,6 +21,8 @@ public partial class CategoryRowViewModel : ObservableObject
     [ObservableProperty] private string? _editIcon;
     [ObservableProperty] private string? _editColorHex;
     [ObservableProperty] private string _editError = string.Empty;
+
+    public ObservableCollection<CategoryVisualOption> EditIconOptions { get; } = [];
 
     public bool IsIncome => Kind == CategoryKind.Income;
     public bool IsExpense => Kind == CategoryKind.Expense;
@@ -54,11 +57,12 @@ public partial class CategoryRowViewModel : ObservableObject
         EditColorHex = c.ColorHex,
     };
 
-    public void EnterEditMode()
+    public void EnterEditMode(IReadOnlyList<CategoryVisualOption>? iconOptions = null, string currentIconLabel = "Current")
     {
         EditName = Name;
         EditIcon = Icon;
         EditColorHex = ColorHex;
+        RefreshEditIconOptions(iconOptions, currentIconLabel);
         EditError = string.Empty;
         IsEditing = true;
     }
@@ -67,6 +71,19 @@ public partial class CategoryRowViewModel : ObservableObject
     {
         EditError = string.Empty;
         IsEditing = false;
+    }
+
+    private void RefreshEditIconOptions(IReadOnlyList<CategoryVisualOption>? iconOptions, string currentIconLabel)
+    {
+        EditIconOptions.Clear();
+        if (iconOptions is not null)
+        {
+            foreach (var option in iconOptions)
+                EditIconOptions.Add(option);
+        }
+
+        if (!string.IsNullOrWhiteSpace(EditIcon) && EditIconOptions.All(x => x.Value != EditIcon))
+            EditIconOptions.Insert(0, new CategoryVisualOption(EditIcon!, currentIconLabel));
     }
 
     public override string ToString() => Name;

@@ -77,6 +77,52 @@ public partial class CategoriesViewModel : ObservableObject
     public IReadOnlyList<CategoryKind> KindOptions { get; } =
         [CategoryKind.Expense, CategoryKind.Income];
 
+    public IReadOnlyList<CategoryVisualOption> IconOptions { get; } =
+    [
+        new("🍱", "飲食"),
+        new("🚇", "交通"),
+        new("🏠", "居住"),
+        new("💡", "水電"),
+        new("📱", "通訊"),
+        new("🛍️", "購物"),
+        new("🎬", "娛樂"),
+        new("🏥", "醫療"),
+        new("📚", "教育"),
+        new("🛡️", "保險"),
+        new("🔁", "訂閱"),
+        new("💸", "支出"),
+        new("💼", "薪資"),
+        new("🎁", "獎金"),
+        new("🏦", "利息"),
+        new("🧾", "退稅"),
+        new("💰", "收入"),
+        new("📈", "投資"),
+        new("✈️", "旅遊"),
+        new("🏃", "運動"),
+        new("👨‍👩‍👧", "家庭"),
+        new("🐾", "寵物")
+    ];
+
+    public IReadOnlyList<string> ColorOptions { get; } =
+    [
+        "#F59E0B",
+        "#3B82F6",
+        "#8B5CF6",
+        "#06B6D4",
+        "#0EA5E9",
+        "#EC4899",
+        "#A855F7",
+        "#EF4444",
+        "#10B981",
+        "#64748B",
+        "#F97316",
+        "#9CA3AF",
+        "#22C55E",
+        "#EAB308",
+        "#14B8A6",
+        "#84CC16"
+    ];
+
     public CategoriesViewModel(
         ICategoryRepository repository,
         IAutoCategorizationRuleRepository ruleRepository,
@@ -102,6 +148,7 @@ public partial class CategoriesViewModel : ObservableObject
         ExpenseView.SortDescriptions.Add(new SortDescription(nameof(CategoryRowViewModel.SortOrder), ListSortDirection.Ascending));
 
         _localization.LanguageChanged += OnLanguageChanged;
+        ApplyAddDefaults(AddKind);
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
@@ -117,6 +164,8 @@ public partial class CategoriesViewModel : ObservableObject
         ExpenseView.Refresh();
         IncomeView.Refresh();
     }
+
+    partial void OnAddKindChanged(CategoryKind value) => ApplyAddDefaults(value);
 
     public async Task LoadAsync()
     {
@@ -210,15 +259,17 @@ public partial class CategoriesViewModel : ObservableObject
         RefreshAvailableCategories();
 
         AddName = string.Empty;
-        AddIcon = string.Empty;
-        AddColorHex = string.Empty;
+        ApplyAddDefaults(AddKind);
 
         _snackbar.Success(string.Format(
             GetString("Categories.Toast.Added", "已新增分類「{0}」"), name));
     }
 
     [RelayCommand]
-    private void BeginEdit(CategoryRowViewModel row) => row?.EnterEditMode();
+    private void BeginEdit(CategoryRowViewModel row) =>
+        row?.EnterEditMode(
+            IconOptions,
+            GetString("Categories.Field.CurrentIcon", "Current icon"));
 
     [RelayCommand]
     private void CancelEdit(CategoryRowViewModel row) => row?.CancelEditMode();
@@ -530,4 +581,12 @@ public partial class CategoriesViewModel : ObservableObject
 
     private string GetString(string key, string fallback) =>
         _localization.Get(key, fallback);
+
+    private void ApplyAddDefaults(CategoryKind kind)
+    {
+        AddIcon = kind == CategoryKind.Income ? "💼" : "🍱";
+        AddColorHex = kind == CategoryKind.Income ? "#22C55E" : "#F59E0B";
+    }
 }
+
+public sealed record CategoryVisualOption(string Value, string Label);

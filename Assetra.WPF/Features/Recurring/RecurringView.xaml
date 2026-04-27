@@ -10,6 +10,17 @@
     d:DesignHeight="700" d:DesignWidth="1000"
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
+  <UserControl.Resources>
+    <Style x:Key="InlineFormLabel" TargetType="TextBlock">
+      <Setter Property="Margin" Value="0,0,0,6" />
+      <Setter Property="FontSize" Value="{StaticResource FontSizeXs}" />
+      <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+    </Style>
+    <Style x:Key="InlineFormField" TargetType="StackPanel">
+      <Setter Property="Margin" Value="0,0,12,10" />
+      <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+  </UserControl.Resources>
 
   <Grid Margin="24">
     <Grid.RowDefinitions>
@@ -59,113 +70,153 @@
               BorderThickness="1"
               CornerRadius="{StaticResource RadiusSm}">
             <StackPanel>
-              <UniformGrid Columns="6" Rows="1">
-                <TextBox
-                    Margin="2"
-                    MinHeight="36"
-                    Style="{StaticResource FormTextBox}"
-                    ToolTip="{DynamicResource Recurring.NameHint}"
-                    Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}" />
-                <ComboBox
-                    Margin="2"
-                    MinHeight="36"
-                    ItemsSource="{Binding TradeTypeOptions}"
-                    SelectedItem="{Binding AddTradeType}"
-                    Style="{StaticResource FormComboBox}">
-                  <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                      <TextBlock>
-                        <TextBlock.Style>
-                          <Style TargetType="TextBlock">
-                            <Setter Property="Text" Value="{DynamicResource Portfolio.TradeType.Withdrawal}" />
-                            <Style.Triggers>
-                              <DataTrigger Binding="{Binding}" Value="Income">
-                                <Setter Property="Text" Value="{DynamicResource Portfolio.TradeType.Income}" />
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding}" Value="Deposit">
-                                <Setter Property="Text" Value="{DynamicResource Portfolio.TradeType.Deposit}" />
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding}" Value="CreditCardCharge">
-                                <Setter Property="Text" Value="{DynamicResource Portfolio.TradeType.CreditCardCharge}" />
-                              </DataTrigger>
-                            </Style.Triggers>
-                          </Style>
-                        </TextBlock.Style>
-                      </TextBlock>
-                    </DataTemplate>
-                  </ComboBox.ItemTemplate>
-                </ComboBox>
-                <TextBox
-                    Margin="2"
-                    MinHeight="36"
-                    Style="{StaticResource FormTextBox}"
-                    ToolTip="{DynamicResource Recurring.AmountHint}"
-                    Text="{Binding AddAmount, UpdateSourceTrigger=PropertyChanged}" />
-                <ComboBox
-                    Margin="2"
-                    MinHeight="36"
-                    ItemsSource="{Binding FrequencyOptions}"
-                    SelectedItem="{Binding AddFrequency}"
-                    Style="{StaticResource FormComboBox}">
-                  <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                      <TextBlock>
-                        <TextBlock.Style>
-                          <Style TargetType="TextBlock">
-                            <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Monthly}" />
-                            <Style.Triggers>
-                              <DataTrigger Binding="{Binding}" Value="Daily">
-                                <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Daily}" />
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding}" Value="Weekly">
-                                <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Weekly}" />
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding}" Value="BiWeekly">
-                                <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.BiWeekly}" />
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding}" Value="Quarterly">
-                                <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Quarterly}" />
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding}" Value="Yearly">
-                                <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Yearly}" />
-                              </DataTrigger>
-                            </Style.Triggers>
-                          </Style>
-                        </TextBlock.Style>
-                      </TextBlock>
-                    </DataTemplate>
-                  </ComboBox.ItemTemplate>
-                </ComboBox>
-                <ComboBox
-                    Margin="2"
-                    MinHeight="36"
-                    ItemsSource="{Binding ModeOptions}"
-                    SelectedItem="{Binding AddGenerationMode}"
-                    Style="{StaticResource FormComboBox}">
-                  <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                      <TextBlock>
-                        <TextBlock.Style>
-                          <Style TargetType="TextBlock">
-                            <Setter Property="Text" Value="{DynamicResource Recurring.Mode.PendingConfirm}" />
-                            <Style.Triggers>
-                              <DataTrigger Binding="{Binding}" Value="AutoApply">
-                                <Setter Property="Text" Value="{DynamicResource Recurring.Mode.AutoApply}" />
-                              </DataTrigger>
-                            </Style.Triggers>
-                          </Style>
-                        </TextBlock.Style>
-                      </TextBlock>
-                    </DataTemplate>
-                  </ComboBox.ItemTemplate>
-                </ComboBox>
-                <Button
-                    Margin="2"
-                    MinHeight="36"
-                    Command="{Binding AddSubscriptionCommand}"
-                    Content="{DynamicResource Recurring.Add}"
-                    Style="{StaticResource BtnPrimary}" />
-              </UniformGrid>
+              <TextBlock
+                  FontSize="{StaticResource FontSizeMd}"
+                  FontWeight="SemiBold"
+                  Foreground="{DynamicResource AppTextPrimary}"
+                  Text="{DynamicResource Recurring.AddForm.Title}" />
+              <TextBlock
+                  Margin="0,4,0,12"
+                  FontSize="{StaticResource FontSizeSm}"
+                  Foreground="{DynamicResource AppTextSecondary}"
+                  Text="{DynamicResource Recurring.AddForm.Hint}"
+                  TextWrapping="Wrap" />
+              <WrapPanel Orientation="Horizontal">
+                <StackPanel Style="{StaticResource InlineFormField}">
+                  <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Recurring.Field.Name}" />
+                  <TextBox
+                      Width="240"
+                      MinHeight="36"
+                      Style="{StaticResource FormTextBox}"
+                      ToolTip="{DynamicResource Recurring.NameHint}"
+                      Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <StackPanel Style="{StaticResource InlineFormField}">
+                  <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Recurring.Field.Type}" />
+                  <ComboBox
+                      Width="180"
+                      MinHeight="36"
+                      ItemsSource="{Binding TradeTypeOptions}"
+                      SelectedItem="{Binding AddTradeType}"
+                      Style="{StaticResource FormComboBox}">
+                    <ComboBox.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock>
+                          <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                              <Setter Property="Text" Value="{DynamicResource Portfolio.TradeType.Withdrawal}" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding}" Value="Income">
+                                  <Setter Property="Text" Value="{DynamicResource Portfolio.TradeType.Income}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="Deposit">
+                                  <Setter Property="Text" Value="{DynamicResource Portfolio.TradeType.Deposit}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="CreditCardCharge">
+                                  <Setter Property="Text" Value="{DynamicResource Portfolio.TradeType.CreditCardCharge}" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </TextBlock.Style>
+                        </TextBlock>
+                      </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
+                </StackPanel>
+
+                <StackPanel Style="{StaticResource InlineFormField}">
+                  <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Recurring.Field.Amount}" />
+                  <TextBox
+                      Width="140"
+                      MinHeight="36"
+                      Style="{StaticResource FormTextBox}"
+                      ToolTip="{DynamicResource Recurring.AmountHint}"
+                      Text="{Binding AddAmount, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <StackPanel Style="{StaticResource InlineFormField}">
+                  <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Recurring.Field.Frequency}" />
+                  <ComboBox
+                      Width="160"
+                      MinHeight="36"
+                      ItemsSource="{Binding FrequencyOptions}"
+                      SelectedItem="{Binding AddFrequency}"
+                      Style="{StaticResource FormComboBox}">
+                    <ComboBox.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock>
+                          <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                              <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Monthly}" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding}" Value="Daily">
+                                  <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Daily}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="Weekly">
+                                  <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Weekly}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="BiWeekly">
+                                  <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.BiWeekly}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="Quarterly">
+                                  <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Quarterly}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="Yearly">
+                                  <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Yearly}" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </TextBlock.Style>
+                        </TextBlock>
+                      </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
+                </StackPanel>
+
+                <StackPanel Style="{StaticResource InlineFormField}">
+                  <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Recurring.Field.Mode}" />
+                  <ComboBox
+                      Width="180"
+                      MinHeight="36"
+                      ItemsSource="{Binding ModeOptions}"
+                      SelectedItem="{Binding AddGenerationMode}"
+                      Style="{StaticResource FormComboBox}">
+                    <ComboBox.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock>
+                          <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                              <Setter Property="Text" Value="{DynamicResource Recurring.Mode.PendingConfirm}" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding}" Value="AutoApply">
+                                  <Setter Property="Text" Value="{DynamicResource Recurring.Mode.AutoApply}" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </TextBlock.Style>
+                        </TextBlock>
+                      </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
+                </StackPanel>
+
+              </WrapPanel>
+              <Border
+                  Margin="0,4,0,0"
+                  Padding="0,10,0,0"
+                  BorderBrush="{DynamicResource AppBorder}"
+                  BorderThickness="0,1,0,0">
+                <DockPanel LastChildFill="False">
+                  <Button
+                      DockPanel.Dock="Right"
+                      MinWidth="120"
+                      MinHeight="36"
+                      Command="{Binding AddSubscriptionCommand}"
+                      Content="{DynamicResource Recurring.Add}"
+                      Style="{StaticResource BtnPrimary}" />
+                </DockPanel>
+              </Border>
               <TextBlock
                   Margin="2,4,0,0"
                   FontSize="{StaticResource FontSizeXs}"

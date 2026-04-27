@@ -26,6 +26,22 @@
       <Setter Property="VerticalAlignment" Value="Top" />
     </Style>
 
+    <Style x:Key="InlineTextBox" TargetType="TextBox" BasedOn="{StaticResource FormTextBox}">
+      <Setter Property="MinHeight" Value="36" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="InlineComboBox" TargetType="ComboBox" BasedOn="{StaticResource FormComboBox}">
+      <Setter Property="MinHeight" Value="36" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="InlineNumericTextBox" TargetType="TextBox" BasedOn="{StaticResource FormTextBox}">
+      <Setter Property="MinHeight" Value="36" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="FontFamily" Value="{StaticResource FontTabular}" />
+    </Style>
+
     <Style x:Key="CategoryColorPalette" TargetType="ListBox">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
@@ -127,14 +143,13 @@
               </Style>
             </StackPanel.Style>
             <WrapPanel Orientation="Horizontal">
-              <StackPanel Width="164" Margin="0,0,12,8">
+              <StackPanel Width="152" Margin="0,0,12,8">
                 <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Icon}" />
                 <ComboBox
-                    MinHeight="36"
-                    ItemsSource="{Binding DataContext.IconOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    ItemsSource="{Binding EditIconOptions}"
                     SelectedValue="{Binding EditIcon}"
                     SelectedValuePath="Value"
-                    Style="{StaticResource FormComboBox}">
+                    Style="{StaticResource InlineComboBox}">
                   <ComboBox.ItemTemplate>
                     <DataTemplate>
                       <StackPanel Orientation="Horizontal">
@@ -154,74 +169,19 @@
                 </ComboBox>
               </StackPanel>
 
-              <StackPanel Width="240" Margin="0,0,12,8">
+              <StackPanel Width="280" Margin="0,0,12,8">
                 <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Name}" />
                 <TextBox
-                    MinHeight="36"
-                    Style="{StaticResource FormTextBox}"
+                    Style="{StaticResource InlineTextBox}"
                     Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}" />
               </StackPanel>
 
-              <StackPanel Width="184" Margin="0,0,0,8">
+              <StackPanel Width="196" Margin="0,0,0,8">
                 <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Color}" />
                 <ctrl:ColorPickerButton
+                    MinHeight="36"
                     Presets="{Binding DataContext.ColorOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     SelectedColor="{Binding EditColorHex, Mode=TwoWay}" />
-              </StackPanel>
-
-              <StackPanel Width="180" Margin="12,0,0,8">
-                <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Preview}" />
-                <Border
-                    Padding="10,8"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusSm}">
-                  <Grid>
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="Auto" />
-                      <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock
-                        Grid.Column="0"
-                        Margin="0,0,8,0"
-                        VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeMd}"
-                        Text="{Binding EditIcon}" />
-                    <TextBlock
-                        Grid.Column="1"
-                        VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeSm}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{Binding EditName}"
-                        TextTrimming="CharacterEllipsis">
-                      <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                          <Setter Property="Text" Value="{Binding EditName}" />
-                          <Style.Triggers>
-                            <DataTrigger Binding="{Binding EditName}" Value="">
-                              <Setter Property="Text" Value="{DynamicResource Categories.PreviewPlaceholder}" />
-                              <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                              <Setter Property="FontWeight" Value="Normal" />
-                            </DataTrigger>
-                          </Style.Triggers>
-                        </Style>
-                      </TextBlock.Style>
-                    </TextBlock>
-                    <Border
-                        Grid.Column="2"
-                        Width="18"
-                        Height="18"
-                        Margin="8,0,0,0"
-                        VerticalAlignment="Center"
-                        Background="{Binding EditColorHex, Converter={StaticResource HexToBrushConverter}}"
-                        BorderBrush="#33000000"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}" />
-                  </Grid>
-                </Border>
               </StackPanel>
             </WrapPanel>
             <TextBlock
@@ -453,10 +413,9 @@
             <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Kind}" />
             <ComboBox
                 Width="140"
-                MinHeight="36"
                 ItemsSource="{Binding KindOptions}"
                 SelectedItem="{Binding AddKind}"
-                Style="{StaticResource FormComboBox}">
+                Style="{StaticResource InlineComboBox}">
               <ComboBox.ItemTemplate>
                 <DataTemplate>
                   <TextBlock>
@@ -479,12 +438,11 @@
           <StackPanel Style="{StaticResource InlineFormField}">
             <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Icon}" />
             <ComboBox
-                Width="164"
-                MinHeight="36"
+                Width="152"
                 ItemsSource="{Binding IconOptions}"
                 SelectedValue="{Binding AddIcon}"
                 SelectedValuePath="Value"
-                Style="{StaticResource FormComboBox}"
+                Style="{StaticResource InlineComboBox}"
                 ToolTip="{DynamicResource Categories.IconHint}">
               <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -508,9 +466,8 @@
           <StackPanel Style="{StaticResource InlineFormField}">
             <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Name}" />
             <TextBox
-                Width="280"
-                MinHeight="36"
-                Style="{StaticResource FormTextBox}"
+                Width="320"
+                Style="{StaticResource InlineTextBox}"
                 Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}"
                 ToolTip="{DynamicResource Categories.NameHint}" />
           </StackPanel>
@@ -519,64 +476,10 @@
             <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Color}" />
             <ctrl:ColorPickerButton
                 Width="184"
+                MinHeight="36"
                 Presets="{Binding ColorOptions}"
                 SelectedColor="{Binding AddColorHex, Mode=TwoWay}"
                 ToolTip="{DynamicResource Categories.ColorHint}" />
-          </StackPanel>
-
-          <StackPanel Style="{StaticResource InlineFormField}" Width="180">
-            <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Preview}" />
-            <Border
-                Padding="10,8"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource RadiusSm}">
-              <Grid>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="Auto" />
-                  <ColumnDefinition Width="*" />
-                  <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock
-                    Grid.Column="0"
-                    Margin="0,0,8,0"
-                    VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSizeMd}"
-                    Text="{Binding AddIcon}" />
-                <TextBlock
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSizeSm}"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource AppTextPrimary}"
-                    Text="{Binding AddName}"
-                    TextTrimming="CharacterEllipsis">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Text" Value="{Binding AddName}" />
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding AddName}" Value="">
-                          <Setter Property="Text" Value="{DynamicResource Categories.PreviewPlaceholder}" />
-                          <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                          <Setter Property="FontWeight" Value="Normal" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-                <Border
-                    Grid.Column="2"
-                    Width="18"
-                    Height="18"
-                    Margin="8,0,0,0"
-                    VerticalAlignment="Center"
-                    Background="{Binding AddColorHex, Converter={StaticResource HexToBrushConverter}}"
-                    BorderBrush="#33000000"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusSm}" />
-              </Grid>
-            </Border>
           </StackPanel>
 
         </WrapPanel>
@@ -722,7 +625,7 @@
                           </Grid.ColumnDefinitions>
                           <TextBox
                               Grid.Column="0"
-                              Style="{StaticResource FormTextBox}"
+                              Style="{StaticResource InlineTextBox}"
                               Text="{Binding EditKeyword, UpdateSourceTrigger=PropertyChanged}" />
                           <ComboBox
                               Grid.Column="2"
@@ -730,10 +633,10 @@
                               ItemsSource="{Binding DataContext.AvailableCategories, RelativeSource={RelativeSource AncestorType=UserControl}}"
                               SelectedValuePath="Id"
                               SelectedValue="{Binding EditCategoryId}"
-                              Style="{StaticResource FormComboBox}" />
+                              Style="{StaticResource InlineComboBox}" />
                           <TextBox
                               Grid.Column="4"
-                              Style="{StaticResource FormTextBox}"
+                              Style="{StaticResource InlineNumericTextBox}"
                               Text="{Binding EditPriority, UpdateSourceTrigger=PropertyChanged}" />
                           <CheckBox
                               Grid.Column="6"
@@ -757,7 +660,7 @@
                                          Foreground="{DynamicResource AppTextMuted}"
                                          Text="{DynamicResource Categories.Rule.Name}" />
                               <TextBox Grid.Column="1"
-                                       Style="{StaticResource FormTextBox}"
+                                       Style="{StaticResource InlineTextBox}"
                                        Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}" />
                             </Grid>
 
@@ -827,7 +730,7 @@
                                              Foreground="{DynamicResource AppTextMuted}"
                                              Text="{DynamicResource Categories.Rule.LiveTest.Counterparty}" />
                                   <TextBox Grid.Column="1"
-                                           Style="{StaticResource FormTextBox}"
+                                           Style="{StaticResource InlineTextBox}"
                                            Text="{Binding LiveTestCounterparty, UpdateSourceTrigger=PropertyChanged}" />
                                   <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center"
                                              FontFamily="Segoe MDL2 Assets" FontSize="{StaticResource FontSizeBase}">
@@ -856,7 +759,7 @@
                                              Foreground="{DynamicResource AppTextMuted}"
                                              Text="{DynamicResource Categories.Rule.LiveTest.Memo}" />
                                   <TextBox Grid.Column="1"
-                                           Style="{StaticResource FormTextBox}"
+                                           Style="{StaticResource InlineTextBox}"
                                            Text="{Binding LiveTestMemo, UpdateSourceTrigger=PropertyChanged}" />
                                   <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center"
                                              FontFamily="Segoe MDL2 Assets" FontSize="{StaticResource FontSizeBase}">
@@ -1000,7 +903,7 @@
                 <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Keyword}" />
                 <TextBox
                     Width="280"
-                    Style="{StaticResource FormTextBox}"
+                    Style="{StaticResource InlineTextBox}"
                     Text="{Binding AddRuleKeyword, UpdateSourceTrigger=PropertyChanged}"
                     ToolTip="{DynamicResource Categories.Rule.KeywordHint}" />
               </StackPanel>
@@ -1012,7 +915,7 @@
                     DisplayMemberPath="Name"
                     ItemsSource="{Binding AvailableCategories}"
                     SelectedItem="{Binding AddRuleCategory}"
-                    Style="{StaticResource FormComboBox}"
+                    Style="{StaticResource InlineComboBox}"
                     ToolTip="{DynamicResource Categories.Rule.CategoryHint}" />
               </StackPanel>
 
@@ -1020,7 +923,7 @@
                 <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Priority}" />
                 <TextBox
                     Width="88"
-                    Style="{StaticResource FormTextBox}"
+                    Style="{StaticResource InlineNumericTextBox}"
                     Text="{Binding AddRulePriority, UpdateSourceTrigger=PropertyChanged}"
                     ToolTip="{DynamicResource Categories.Rule.PriorityHint}" />
               </StackPanel>
@@ -1066,7 +969,7 @@
                              Foreground="{DynamicResource AppTextMuted}"
                              Text="{DynamicResource Categories.Rule.Name}" />
                   <TextBox Grid.Column="1"
-                           Style="{StaticResource FormTextBox}"
+                           Style="{StaticResource InlineTextBox}"
                            Text="{Binding AddRuleName, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
                 <TextBlock FontSize="{StaticResource FontSizeXs}"
@@ -1220,7 +1123,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBox
                             Grid.Column="0"
-                            Style="{StaticResource FormTextBox}"
+                            Style="{StaticResource InlineTextBox}"
                             Text="{Binding EditNote, UpdateSourceTrigger=PropertyChanged}" />
                       </Grid>
 
@@ -1250,6 +1153,8 @@
                           <TextBox.Style>
                             <Style BasedOn="{StaticResource FormTextBox}" TargetType="TextBox">
                               <Setter Property="Visibility" Value="Collapsed" />
+                              <Setter Property="MinHeight" Value="36" />
+                              <Setter Property="VerticalContentAlignment" Value="Center" />
                               <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsEditing}" Value="True">
                                   <Setter Property="Visibility" Value="Visible" />
@@ -1370,7 +1275,7 @@
                     Width="120"
                     ItemsSource="{Binding BudgetModeOptions}"
                     SelectedItem="{Binding AddBudgetMode}"
-                    Style="{StaticResource FormComboBox}">
+                    Style="{StaticResource InlineComboBox}">
                   <ComboBox.ItemTemplate>
                     <DataTemplate>
                       <TextBlock>
@@ -1394,7 +1299,7 @@
                 <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Year}" />
                 <TextBox
                     Width="84"
-                    Style="{StaticResource FormTextBox}"
+                    Style="{StaticResource InlineNumericTextBox}"
                     Text="{Binding AddBudgetYear, UpdateSourceTrigger=PropertyChanged}"
                     ToolTip="{DynamicResource Categories.Budget.YearHint}" />
               </StackPanel>
@@ -1403,7 +1308,7 @@
                 <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Month}" />
                 <TextBox
                     Width="72"
-                    Style="{StaticResource FormTextBox}"
+                    Style="{StaticResource InlineNumericTextBox}"
                     Text="{Binding AddBudgetMonth, UpdateSourceTrigger=PropertyChanged}"
                     ToolTip="{DynamicResource Categories.Budget.MonthHint}" />
               </StackPanel>
@@ -1415,7 +1320,7 @@
                     DisplayMemberPath="Name"
                     ItemsSource="{Binding AvailableCategories}"
                     SelectedItem="{Binding AddBudgetCategory}"
-                    Style="{StaticResource FormComboBox}"
+                    Style="{StaticResource InlineComboBox}"
                     ToolTip="{DynamicResource Categories.Budget.CategoryHint}" />
               </StackPanel>
 
@@ -1423,7 +1328,7 @@
                 <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Amount}" />
                 <TextBox
                     Width="120"
-                    Style="{StaticResource FormTextBox}"
+                    Style="{StaticResource InlineNumericTextBox}"
                     Text="{Binding AddBudgetAmount, UpdateSourceTrigger=PropertyChanged}"
                     ToolTip="{DynamicResource Categories.Budget.AmountHint}" />
               </StackPanel>
@@ -1432,7 +1337,7 @@
                 <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Note}" />
                 <TextBox
                     Width="240"
-                    Style="{StaticResource FormTextBox}"
+                    Style="{StaticResource InlineTextBox}"
                     Text="{Binding AddBudgetNote, UpdateSourceTrigger=PropertyChanged}"
                     ToolTip="{DynamicResource Categories.Budget.NoteHint}" />
               </StackPanel>
