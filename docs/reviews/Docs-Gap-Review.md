@@ -157,28 +157,26 @@
 
 以下能力在 docs 中有規劃，但目前尚未完整落地：
 
-### 1. 匯入治理（Importing / Data Governance）
-目前最明顯的缺口之一，但已不再是「尚未開始」。
+### 1. 匯入治理（Importing / Data Governance）  *(v0.7.0：MVP 完成)*
 
-目前已開始落地：
-- `ImportBatch`
-- `ImportConflict`
-- `ImportPreviewRow`
-- `ImportSourceKind`
-- `IImportFormatDetector`
-- `IImportParser`
+v0.7.0 完成了 CSV / Excel 匯入 MVP，覆蓋台股 Top 5 銀行（國泰世華 / 玉山 / 中信 / 台新 / 富邦）與 Top 5 券商（元大 / 富邦 / 凱基 / 永豐金 / 群益）。
 
-尚缺：
-- import preview flow
-- 欄位映射
-- 去重
-- conflict resolution
-- rollback
-- reconciliation
+已落地：
+- Core 模型：`ImportBatch` / `ImportConflict` / `ImportPreviewRow` / `ImportFormat` / `ImportApplyOptions` / `ImportApplyResult`
+- 介面：`IImportFormatDetector` / `IImportParser` / `IImportConflictDetector` / `IImportApplyService`
+- Application：`ImportConflictDetector`、`ImportApplyService`、`ImportMatchKey`
+- Infrastructure：`ImportFormatDetector`、`ConfigurableCsvParser` / `ConfigurableExcelParser`（由 `CsvParserConfigs` / `ExcelParserConfigs` 宣告式驅動，新增格式只需改 config）、`ImportParserFactory`
+- WPF：`Features/Import/ImportView` + `ImportViewModel`（拖放、自動偵測、預覽 grid + 每列 Resolution 下拉、現金帳戶必選 + Apply）
 
-所以目前較準確的判定應是：
-- **匯入治理基礎模型與介面已開始**
-- **完整 importing 子系統尚未完成**
+仍未完整：
+- `ImportRule`（自動分類 / 自動套用備註）
+- 匯入歷史紀錄與 rollback
+- reconciliation（對帳）
+- PDF / OCR 匯入
+
+判定：
+- **MVP 完成**：CSV / Excel 主流程、去重、衝突確認、套用全鏈路可用
+- **完整 importing 子系統未完成**：對帳、回滾、自動規則、PDF/OCR 仍待後續版本
 
 ---
 

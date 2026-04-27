@@ -111,13 +111,14 @@ Assetra 的定位應逐步從「投資追蹤工具」擴展成：
 
 ### K. 資料治理與匯入
 
-> 現況：基礎模型與介面已開始，包含 `ImportBatch`、`ImportConflict`、`ImportPreviewRow`、`IImportFormatDetector`、`IImportParser`。
-> preview flow、dedupe、conflict resolution、reconciliation 仍未完成。
-- 匯入欄位映射規則
-- 匯入去重與重複交易偵測
-- 手動確認與修正流程
-- 匯入歷史紀錄與回滾
-- 對帳機制（帳戶 / 信用卡 / 證券）
+> 現況（v0.7.0）：CSV / Excel 匯入 MVP 完成，覆蓋台股 Top 5 銀行 / 券商。preview + dedupe + conflict resolution + apply 全鏈路可用；歷史紀錄、回滾、對帳尚未完成。
+- 匯入欄位映射規則 ✅（以宣告式 `CsvParserConfigs` / `ExcelParserConfigs` 提供，新增格式只需改 config）
+- 匯入去重與重複交易偵測 ✅（`ImportConflictDetector` + `ImportMatchKey`，date | abs(amount) | symbol）
+- 手動確認與修正流程 ✅（每列 Skip / Overwrite / Add anyway 下拉，搭配現金帳戶必選）
+- 匯入歷史紀錄與回滾 ⏳ v0.8+
+- 對帳機制（帳戶 / 信用卡 / 證券）⏳ v0.8+
+- `ImportRule`（自動分類 / 自動套用備註）⏳ v0.8+
+- PDF / OCR 匯入 ⏳ Phase 2
 
 ## 四、優先級規劃
 

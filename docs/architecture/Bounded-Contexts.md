@@ -129,27 +129,28 @@
 
 ---
 
-## 6. Importing Context
+## 6. Importing Context  *(MVP 完成 — v0.7.0；對帳 / OCR 延後)*
+
+> 對應實作位於 `Assetra.Application/Import/`、`Assetra.Infrastructure/Import/`、`Assetra.WPF/Features/Import/`。
 
 ### 責任
-- 檔案匯入
-- 欄位映射
-- 去重
-- 衝突確認
-- 對帳
+- 檔案匯入（CSV / Excel；Top 5 台股銀行 / 券商）✅
+- 欄位映射（宣告式 `CsvParserConfigs` / `ExcelParserConfigs`，取代原本規劃的 service）✅
+- 去重（`ImportConflictDetector` + `ImportMatchKey`）✅
+- 衝突確認（每列 Skip / Overwrite / Add anyway 處置）✅
+- 對帳 ⏳（v0.8+）
 
 ### 主要模型
-- `ImportBatch`
-- `ImportRule`
-- `ImportPreviewItem`
-- `ImportConflict`
+- `ImportBatch` ✅
+- `ImportPreviewRow` ✅（取代原規劃的 `ImportPreviewItem`）
+- `ImportConflict` ✅
+- `ImportRule` ⏳ v0.8+
 
 ### 主要服務
-- `ImportPreviewService`
-- `ImportMappingService`
-- `ImportDeduplicationService`
-- `ImportCommitWorkflowService`
-- `ReconciliationService`
+- `ImportConflictDetector` ✅（取代原規劃的 `ImportDeduplicationService`）
+- `ImportApplyService` ✅（取代原規劃的 `ImportCommitWorkflowService`）
+- `ImportFormatDetector` + `ImportParserFactory` ✅（取代原規劃的 `ImportPreviewService` / `ImportMappingService`）
+- `ReconciliationService` ⏳
 
 ---
 

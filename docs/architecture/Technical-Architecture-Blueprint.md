@@ -404,44 +404,44 @@ UI 可以繼續用自然語意：
 
 ## 1. 匯入管線（Import Pipeline）
 
-> 現況：核心端已開始落地的是：
-> - `ImportBatch`
-> - `ImportConflict`
-> - `ImportPreviewRow`
-> - `ImportSourceKind`
-> - `IImportFormatDetector`
-> - `IImportParser`
+> 現況（v0.7.0）：CSV / Excel 匯入 MVP 已落地，覆蓋台股 Top 5 銀行（國泰世華 / 玉山 / 中信 / 台新 / 富邦）與 Top 5 券商（元大 / 富邦 / 凱基 / 永豐金 / 群益）。
 >
-> 下列 `ImportRule`、preview flow、dedupe / reconciliation service 仍屬目標架構。
+> - Core：`ImportBatch`、`ImportConflict`、`ImportPreviewRow`、`ImportSourceKind`、`ImportFileType`、`ImportFormat`、`ImportApplyOptions` / `ImportApplyResult`、`IImportFormatDetector` / `IImportParser` / `IImportConflictDetector` / `IImportApplyService`
+> - Application：`ImportConflictDetector`、`ImportApplyService`、`ImportMatchKey`
+> - Infrastructure：`ImportFormatDetector`、`ConfigurableCsvParser` / `ConfigurableExcelParser`（由 `CsvParserConfigs` / `ExcelParserConfigs` 宣告式驅動）、`ImportParserFactory`
+> - WPF：`Features/Import/ImportView` + `ImportViewModel`（拖放、自動偵測、預覽、Resolution 下拉、現金帳戶選擇）
+>
+> 仍待後續版本：`ImportRule`（自動分類規則）、PDF / OCR 匯入、`ReconciliationService`、欄位映射 UI。
 
 ### Core
-- `ImportSourceKind`
-- `ImportBatch`
-- `ImportRule`
-- `ImportPreviewRow`
-- `ImportConflict`
+- `ImportSourceKind` / `ImportFileType` / `ImportFormat` ✅
+- `ImportBatch` ✅
+- `ImportPreviewRow` ✅
+- `ImportConflict` / `ImportConflictResolution` ✅
+- `ImportApplyOptions` / `ImportApplyResult` ✅
+- `ImportRule` ⏳ v0.8+
 
 ### Application
-- `ImportPreviewService`
-- `ImportMappingService`
-- `ImportDeduplicationService`
-- `ImportCommitWorkflowService`
-- `ReconciliationService`
+- `ImportConflictDetector` ✅（取代原規劃的 `ImportDeduplicationService`）
+- `ImportApplyService` ✅（取代原規劃的 `ImportCommitWorkflowService`）
+- `ImportMatchKey` ✅
+- `ImportPreviewService` / `ImportMappingService` ⏳（目前由 ViewModel + parser config 直接驅動，預覽流程不需要獨立 service）
+- `ReconciliationService` ⏳
 
 ### Infrastructure
-- `IImportFormatDetector` 實作
-- `IImportParser` 實作
-- CSV parser
-- Excel parser
-- PDF parser
-- OCR service adapter
-- file watcher / file store
+- `IImportFormatDetector` 實作（`ImportFormatDetector`）✅
+- `IImportParser` 實作（`ConfigurableCsvParser` / `ConfigurableExcelParser`）✅
+- CSV parser ✅（CsvHelper 33.0.1）
+- Excel parser ✅（ClosedXML 0.105.0）
+- PDF parser ⏳
+- OCR service adapter ⏳
+- file watcher / file store ⏳
 
 ### WPF
-- 匯入精靈
-- 欄位映射 UI
-- 衝突確認 UI
-- 對帳介面
+- `Features/Import` 主流程 UI ✅（drop zone + 偵測 chip + 預覽 grid + Resolution 下拉 + 現金帳戶選擇 + Apply）
+- 欄位映射 UI ⏳（v0.7 採宣告式 config 取代）
+- 衝突確認 UI ✅（每列 Resolution 下拉）
+- 對帳介面 ⏳
 
 ---
 

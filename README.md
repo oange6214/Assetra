@@ -10,8 +10,9 @@
 - **淨資產趨勢**：30 / 90 / 180 / 365 / All 預設區間 + 自訂日期範圍
 - **財務目標（MVP）**：目標金額、進度、期限追蹤
 - **預算 / 週期性交易**：分類預算、訂閱與固定支出自動產生
+- **對帳單匯入（v0.7.0）**：CSV / Excel 拖放，自動偵測台股 Top 5 銀行 / 券商格式，重複交易標記與處置
 
-目前開發主線里程碑：`v0.6.0`
+目前開發主線里程碑：`v0.7.0`
 
 > 註：這裡描述的是目前 `master` 的開發目標與功能敘事，不等同於 GitHub Releases 上已正式發佈的版本號。
 
@@ -24,7 +25,7 @@
 - `Assetra.Infrastructure` — SQLite 持久層、HTTP 客戶端、報價排程
 - `Assetra.WPF` — MVVM UI（依 bounded context 切 `Features/`）
 
-主要 bounded contexts：`Portfolio` / `Budgeting` / `Recurring` / `Goals` / `Reports` / `Alerts` / `Loans` / `Platform`，詳見 [Bounded Contexts](docs/architecture/Bounded-Contexts.md)。
+主要 bounded contexts：`Portfolio` / `Budgeting` / `Recurring` / `Goals` / `Reports` / `Alerts` / `Loans` / `Import` / `Platform`，詳見 [Bounded Contexts](docs/architecture/Bounded-Contexts.md)。
 
 相關文件：
 
@@ -35,7 +36,6 @@
 - [Bounded Contexts](docs/architecture/Bounded-Contexts.md)
 - [Feature Blueprint and Roadmap](docs/planning/Assetra-Feature-Blueprint-and-Roadmap.md)
 - [Implementation Roadmap](docs/planning/Implementation-Roadmap.md)
-- [Next Sprint (v0.6.0)](docs/planning/Next-Sprint-v0.6.0.md)
 - [Changelog](docs/releases/CHANGELOG.md)
 - [Fugle API Key Setup](docs/guides/Fugle-API-Key-Setup.md)
 
