@@ -5,4 +5,5 @@ public sealed record ImportApplyResult(
     int RowsApplied,
     int RowsSkipped,
     int RowsOverwritten,
-    IReadOnlyList<string> Warnings);
+    IReadOnlyList<string> Warnings,
+    Guid? HistoryId = null);

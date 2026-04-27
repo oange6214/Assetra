@@ -1,5 +1,6 @@
 using Assetra.Application.Import;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Import;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Import;
 using Moq;
@@ -152,6 +153,88 @@ public class ImportApplyServiceTests
     }
 
     [Fact]
+    public async Task OverwritesConflict_RemovesBeforeAdd()
+    {
+        var calls = new List<string>();
+        var existingId = Guid.NewGuid();
+
+        var repo = new Mock<ITradeRepository>();
+        repo.Setup(r => r.AddAsync(It.IsAny<Trade>()))
+            .Callback<Trade>(_ => calls.Add("Add"))
+            .Returns(Task.CompletedTask);
+        repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>()))
+            .Callback<Guid>(_ => calls.Add("Remove"))
+            .Returns(Task.CompletedTask);
+
+        var row = new ImportPreviewRow(1, new DateOnly(2026, 4, 27), 1500m, "薪資", null);
+        var batch = BankBatch(row) with
+        {
+            Conflicts = new[] { new ImportConflict(row, existingId, null, ImportConflictResolution.Overwrite) },
+        };
+
+        await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+
+        Assert.Equal(new[] { "Remove", "Add" }, calls);
+    }
+
+    [Fact]
+    public async Task OverwriteConflict_WithNullExistingTradeId_AddsWithoutRemove()
+    {
+        var added = new List<Trade>();
+        var repo = new Mock<ITradeRepository>();
+        var removeCalls = 0;
+        repo.Setup(r => r.AddAsync(It.IsAny<Trade>()))
+            .Callback<Trade>(added.Add)
+            .Returns(Task.CompletedTask);
+        repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>()))
+            .Callback(() => removeCalls++)
+            .Returns(Task.CompletedTask);
+
+        var row = new ImportPreviewRow(1, new DateOnly(2026, 4, 27), 1500m, "薪資", null);
+        var batch = BankBatch(row) with
+        {
+            Conflicts = new[] { new ImportConflict(row, ExistingTradeId: null, null, ImportConflictResolution.Overwrite) },
+        };
+
+        var result = await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+
+        Assert.Equal(0, removeCalls);
+        Assert.Equal(1, result.RowsApplied);
+        Assert.Equal(0, result.RowsOverwritten);
+        Assert.Single(added);
+    }
+
+    [Fact]
+    public async Task Apply_MixedResolutions_ProducesCorrectCounts()
+    {
+        var added = new List<Trade>();
+        var repo = NewRepo(added);
+        repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
+
+        var skipRow = new ImportPreviewRow(1, new DateOnly(2026, 4, 25), 100m, "A", null);
+        var overwriteRow = new ImportPreviewRow(2, new DateOnly(2026, 4, 26), 200m, "B", null);
+        var newRow = new ImportPreviewRow(3, new DateOnly(2026, 4, 27), 300m, "C", null);
+
+        var batch = new ImportBatch(
+            Guid.NewGuid(), "mixed.csv", ImportFileType.Csv, ImportFormat.CathayUnitedBank,
+            DateTimeOffset.UtcNow,
+            new[] { skipRow, overwriteRow, newRow },
+            new[]
+            {
+                new ImportConflict(skipRow, Guid.NewGuid(), null, ImportConflictResolution.Skip),
+                new ImportConflict(overwriteRow, Guid.NewGuid(), null, ImportConflictResolution.Overwrite),
+            });
+
+        var result = await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+
+        Assert.Equal(3, result.RowsConsidered);
+        Assert.Equal(2, result.RowsApplied);
+        Assert.Equal(1, result.RowsSkipped);
+        Assert.Equal(1, result.RowsOverwritten);
+        Assert.Equal(2, added.Count);
+    }
+
+    [Fact]
     public async Task BrokerRow_MissingSymbol_AddsWarningAndSkips()
     {
         var added = new List<Trade>();
@@ -166,6 +249,79 @@ public class ImportApplyServiceTests
         Assert.Equal(1, result.RowsSkipped);
         Assert.Single(result.Warnings);
         Assert.Empty(added);
+    }
+
+    [Fact]
+    public async Task History_NotWritten_WhenRepositoryNotInjected()
+    {
+        var repo = NewRepo(new List<Trade>());
+        var batch = BankBatch(new ImportPreviewRow(1, new DateOnly(2026, 4, 27), 100m, "A", null));
+
+        var result = await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+
+        Assert.Null(result.HistoryId);
+    }
+
+    [Fact]
+    public async Task History_WritesAddedAndSkippedAndOverwrittenEntries()
+    {
+        var added = new List<Trade>();
+        var existingId = Guid.NewGuid();
+        var existingTrade = new Trade(
+            existingId, "", "", "舊", TradeType.Income, new DateTime(2026, 4, 26),
+            0m, 1, null, null, CashAmount: 99m);
+
+        var repo = new Mock<ITradeRepository>();
+        repo.Setup(r => r.AddAsync(It.IsAny<Trade>()))
+            .Callback<Trade>(added.Add)
+            .Returns(Task.CompletedTask);
+        repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
+        repo.Setup(r => r.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingTrade);
+
+        var skipRow = new ImportPreviewRow(1, new DateOnly(2026, 4, 25), 100m, "A", null);
+        var overwriteRow = new ImportPreviewRow(2, new DateOnly(2026, 4, 26), 200m, "B", null);
+        var newRow = new ImportPreviewRow(3, new DateOnly(2026, 4, 27), 300m, "C", null);
+        var batch = new ImportBatch(
+            Guid.NewGuid(), "mixed.csv", ImportFileType.Csv, ImportFormat.CathayUnitedBank,
+            DateTimeOffset.UtcNow,
+            new[] { skipRow, overwriteRow, newRow },
+            new[]
+            {
+                new ImportConflict(skipRow, Guid.NewGuid(), null, ImportConflictResolution.Skip),
+                new ImportConflict(overwriteRow, existingId, null, ImportConflictResolution.Overwrite),
+            });
+
+        ImportBatchHistory? saved = null;
+        var historyRepo = new Mock<IImportBatchHistoryRepository>();
+        historyRepo.Setup(r => r.SaveAsync(It.IsAny<ImportBatchHistory>(), It.IsAny<CancellationToken>()))
+            .Callback<ImportBatchHistory, CancellationToken>((h, _) => saved = h)
+            .Returns(Task.CompletedTask);
+
+        var svc = new ImportApplyService(repo.Object, new ImportRowMapper(), historyRepo.Object);
+        var result = await svc.ApplyAsync(batch, new ImportApplyOptions());
+
+        Assert.NotNull(result.HistoryId);
+        Assert.NotNull(saved);
+        Assert.Equal(result.HistoryId, saved!.Id);
+        Assert.Equal(batch.Id, saved.BatchId);
+        Assert.Equal(3, saved.Entries.Count);
+
+        var skipEntry = saved.Entries.Single(e => e.RowIndex == 1);
+        Assert.Equal(ImportBatchAction.Skipped, skipEntry.Action);
+        Assert.Null(skipEntry.NewTradeId);
+        Assert.Null(skipEntry.OverwrittenTradeJson);
+
+        var overwriteEntry = saved.Entries.Single(e => e.RowIndex == 2);
+        Assert.Equal(ImportBatchAction.Overwritten, overwriteEntry.Action);
+        Assert.NotNull(overwriteEntry.NewTradeId);
+        Assert.NotNull(overwriteEntry.OverwrittenTradeJson);
+        Assert.Contains(existingId.ToString(), overwriteEntry.OverwrittenTradeJson);
+
+        var addEntry = saved.Entries.Single(e => e.RowIndex == 3);
+        Assert.Equal(ImportBatchAction.Added, addEntry.Action);
+        Assert.NotNull(addEntry.NewTradeId);
+        Assert.Null(addEntry.OverwrittenTradeJson);
     }
 
     private static Mock<ITradeRepository> NewRepo(List<Trade> sink)

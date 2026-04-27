@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Import;
 using Assetra.Core.Models;
@@ -8,15 +9,34 @@ namespace Assetra.Application.Import;
 /// <summary>
 /// 將通過預覽的 <see cref="ImportBatch"/> 轉換為 <see cref="Trade"/> 並寫入資料庫。
 /// 衝突列依各自的 <see cref="ImportConflictResolution"/> 處理：
-/// Skip 跳過、AddAnyway 仍建立、Overwrite 視為以新覆蓋舊（先刪後建）。
+/// Skip 跳過、AddAnyway 仍建立、Overwrite 視為以新覆蓋舊（先讀 snapshot → 刪 → 建）。
+/// 套用結束後若有注入 <see cref="IImportBatchHistoryRepository"/>，會留下 batch history 供 rollback。
 /// </summary>
 public sealed class ImportApplyService : IImportApplyService
 {
-    private readonly ITradeRepository _trades;
+    internal static readonly JsonSerializerOptions SnapshotJsonOptions = new()
+    {
+        WriteIndented = false,
+        PropertyNamingPolicy = null,
+    };
 
-    public ImportApplyService(ITradeRepository trades)
+    private readonly ITradeRepository _trades;
+    private readonly IImportRowMapper _mapper;
+    private readonly IImportBatchHistoryRepository? _history;
+
+    public ImportApplyService(
+        ITradeRepository trades,
+        IImportRowMapper mapper,
+        IImportBatchHistoryRepository? history = null)
     {
         _trades = trades ?? throw new ArgumentNullException(nameof(trades));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _history = history;
+    }
+
+    /// <summary>沿用 v0.7 行為的便捷建構子，內部使用預設 <see cref="ImportRowMapper"/>，不寫 history。</summary>
+    public ImportApplyService(ITradeRepository trades) : this(trades, new ImportRowMapper(), null)
+    {
     }
 
     public async Task<ImportApplyResult> ApplyAsync(
@@ -29,6 +49,7 @@ public sealed class ImportApplyService : IImportApplyService
 
         var conflictByRowIndex = batch.Conflicts.ToDictionary(c => c.Row.RowIndex);
         var warnings = new List<string>();
+        var entries = new List<ImportBatchEntry>();
 
         int applied = 0, skipped = 0, overwritten = 0;
 
@@ -36,33 +57,64 @@ public sealed class ImportApplyService : IImportApplyService
         {
             ct.ThrowIfCancellationRequested();
 
-            var resolution = conflictByRowIndex.TryGetValue(row.RowIndex, out var conflict)
-                ? conflict.Resolution
-                : ImportConflictResolution.AddAnyway;
+            var hasConflict = conflictByRowIndex.TryGetValue(row.RowIndex, out var conflict);
+            var resolution = hasConflict ? conflict!.Resolution : ImportConflictResolution.AddAnyway;
 
-            if (conflictByRowIndex.ContainsKey(row.RowIndex)
-                && resolution == ImportConflictResolution.Skip)
+            if (hasConflict && resolution == ImportConflictResolution.Skip)
             {
                 skipped++;
+                entries.Add(new ImportBatchEntry(row.RowIndex, ImportBatchAction.Skipped, null, null));
                 continue;
             }
 
+            string? overwrittenJson = null;
             if (resolution == ImportConflictResolution.Overwrite
                 && conflict?.ExistingTradeId is { } existingId)
             {
+                var existing = await _trades.GetByIdAsync(existingId, ct).ConfigureAwait(false);
+                if (existing is not null)
+                {
+                    overwrittenJson = JsonSerializer.Serialize(existing, SnapshotJsonOptions);
+                }
                 await _trades.RemoveAsync(existingId).ConfigureAwait(false);
                 overwritten++;
             }
 
-            var trade = MapToTrade(row, batch.SourceKind, options, warnings);
+            var trade = _mapper.Map(row, batch.SourceKind, options, warnings);
             if (trade is null)
             {
                 skipped++;
+                entries.Add(new ImportBatchEntry(row.RowIndex, ImportBatchAction.Skipped, null, null));
                 continue;
             }
 
             await _trades.AddAsync(trade).ConfigureAwait(false);
             applied++;
+
+            entries.Add(new ImportBatchEntry(
+                RowIndex: row.RowIndex,
+                Action: overwrittenJson is not null ? ImportBatchAction.Overwritten : ImportBatchAction.Added,
+                NewTradeId: trade.Id,
+                OverwrittenTradeJson: overwrittenJson));
+        }
+
+        Guid? historyId = null;
+        if (_history is not null)
+        {
+            historyId = Guid.NewGuid();
+            var history = new ImportBatchHistory(
+                Id: historyId.Value,
+                BatchId: batch.Id,
+                FileName: batch.FileName,
+                Format: batch.Format,
+                AppliedAt: DateTimeOffset.UtcNow,
+                RowsApplied: applied,
+                RowsSkipped: skipped,
+                RowsOverwritten: overwritten,
+                IsRolledBack: false,
+                RolledBackAt: null,
+                Entries: entries);
+            await _history.SaveAsync(history, ct).ConfigureAwait(false);
         }
 
         return new ImportApplyResult(
@@ -70,107 +122,7 @@ public sealed class ImportApplyService : IImportApplyService
             RowsApplied: applied,
             RowsSkipped: skipped,
             RowsOverwritten: overwritten,
-            Warnings: warnings);
-    }
-
-    private static Trade? MapToTrade(
-        ImportPreviewRow row,
-        ImportSourceKind kind,
-        ImportApplyOptions options,
-        List<string> warnings)
-    {
-        var date = row.Date.ToDateTime(TimeOnly.MinValue);
-        var note = ComposeNote(row, kind, options);
-
-        return kind switch
-        {
-            ImportSourceKind.BankStatement => MapBankRow(row, date, note, options),
-            ImportSourceKind.BrokerStatement => MapBrokerRow(row, date, note, options, warnings),
-            _ => null,
-        };
-    }
-
-    private static Trade MapBankRow(ImportPreviewRow row, DateTime date, string note, ImportApplyOptions options)
-    {
-        var type = row.Amount >= 0 ? TradeType.Income : TradeType.Withdrawal;
-        return new Trade(
-            Id: Guid.NewGuid(),
-            Symbol: string.Empty,
-            Exchange: string.Empty,
-            Name: string.Empty,
-            Type: type,
-            TradeDate: date,
-            Price: 0m,
-            Quantity: 1,
-            RealizedPnl: null,
-            RealizedPnlPct: null,
-            CashAmount: Math.Abs(row.Amount),
-            CashAccountId: options.CashAccountId,
-            Note: note);
-    }
-
-    private static Trade? MapBrokerRow(
-        ImportPreviewRow row,
-        DateTime date,
-        string note,
-        ImportApplyOptions options,
-        List<string> warnings)
-    {
-        if (string.IsNullOrWhiteSpace(row.Symbol) || row.Quantity is not { } qty || qty <= 0m)
-        {
-            warnings.Add($"Row {row.RowIndex}: missing symbol or quantity, skipped.");
-            return null;
-        }
-
-        var quantityInt = (int)Math.Round(qty);
-        var isSell = IsSell(row.Counterparty);
-        var price = ResolveBrokerUnitPrice(row, quantityInt, isSell);
-
-        return new Trade(
-            Id: Guid.NewGuid(),
-            Symbol: row.Symbol!.Trim(),
-            Exchange: options.Exchange,
-            Name: row.Symbol!.Trim(),
-            Type: isSell ? TradeType.Sell : TradeType.Buy,
-            TradeDate: date,
-            Price: Math.Abs(price),
-            Quantity: quantityInt,
-            RealizedPnl: null,
-            RealizedPnlPct: null,
-            Commission: row.Commission,
-            CashAccountId: options.CashAccountId,
-            Note: note);
-    }
-
-    private static decimal ResolveBrokerUnitPrice(ImportPreviewRow row, int quantity, bool isSell)
-    {
-        if (row.UnitPrice is { } explicitPrice && explicitPrice > 0m)
-            return explicitPrice;
-
-        var commission = row.Commission ?? 0m;
-        var grossTradeAmount = isSell
-            ? row.Amount + commission
-            : row.Amount - commission;
-
-        if (quantity <= 0) return 0m;
-        return grossTradeAmount / quantity;
-    }
-
-    private static bool IsSell(string? directionText) =>
-        (directionText ?? string.Empty).Contains("賣", StringComparison.Ordinal)
-        || (directionText ?? string.Empty).Contains("Sell", StringComparison.OrdinalIgnoreCase);
-
-    private static string ComposeNote(ImportPreviewRow row, ImportSourceKind kind, ImportApplyOptions options)
-    {
-        var parts = new List<string>();
-        if (!string.IsNullOrWhiteSpace(row.Counterparty)) parts.Add(row.Counterparty!.Trim());
-        if (!string.IsNullOrWhiteSpace(row.Memo)) parts.Add(row.Memo!.Trim());
-        if (parts.Count == 0)
-        {
-            parts.Add(kind == ImportSourceKind.BankStatement
-                ? (row.Amount >= 0 ? options.DefaultIncomeNote : options.DefaultExpenseNote)
-                : options.DefaultIncomeNote);
-        }
-        return string.Join(" / ", parts);
+            Warnings: warnings,
+            HistoryId: historyId);
     }
 }

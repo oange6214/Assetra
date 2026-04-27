@@ -17,6 +17,9 @@ public interface ITradeRepository
     /// </summary>
     Task<IReadOnlyList<Trade>> GetByLoanLabelAsync(string loanLabel);
 
+    /// <summary>依 Id 取單筆交易；不存在回傳 <see langword="null"/>。</summary>
+    Task<Trade?> GetByIdAsync(Guid id, CancellationToken ct = default);
+
     Task AddAsync(Trade trade);
     Task UpdateAsync(Trade trade);
     Task RemoveAsync(Guid id);

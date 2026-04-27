@@ -108,6 +108,19 @@ public sealed class TradeSqliteRepository : ITradeRepository
         return results;
     }
 
+    public async Task<Trade?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"SELECT {SelectClause} FROM trade WHERE id = $id;";
+        cmd.Parameters.AddWithValue("$id", id.ToString());
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        if (await reader.ReadAsync(ct).ConfigureAwait(false))
+            return MapTrade(reader);
+        return null;
+    }
+
     public async Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId)
     {
         await using var conn = new SqliteConnection(_connectionString);

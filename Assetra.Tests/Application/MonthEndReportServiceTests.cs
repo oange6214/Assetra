@@ -194,6 +194,8 @@ public class MonthEndReportServiceTests
             Task.FromResult<IReadOnlyList<Trade>>(Store.Where(t => t.LoanLabel == loanLabel).ToList());
         public Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId) =>
             Task.FromResult<IReadOnlyList<Trade>>(Store.Where(t => t.CashAccountId == cashAccountId).ToList());
+        public Task<Trade?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+            Task.FromResult<Trade?>(Store.FirstOrDefault(t => t.Id == id));
         public Task AddAsync(Trade t) { Store.Add(t); return Task.CompletedTask; }
         public Task UpdateAsync(Trade t) => Task.CompletedTask;
         public Task RemoveAsync(Guid id) => Task.CompletedTask;
