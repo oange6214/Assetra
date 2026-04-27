@@ -165,7 +165,7 @@
                 <Border.Width>
                     <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.44|420|620">
                         <Binding ElementName="Root" Path="ActualWidth" />
-                        <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="DataContext.Settings.UiScale" />
+                        <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                     </MultiBinding>
                 </Border.Width>
                 <Grid>
@@ -537,7 +537,7 @@
                 <Border.Width>
                     <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.44|420|620">
                         <Binding ElementName="Root" Path="ActualWidth" />
-                        <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="DataContext.Settings.UiScale" />
+                        <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                     </MultiBinding>
                 </Border.Width>
                 <Grid>
@@ -880,8 +880,8 @@
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppDown}"
                                                 Text="{Binding SelectedLiabilityRow.RemainingFromSchedule, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue='—'}" />
-                                            </StackPanel>
-                                        </Border>
+                                        </StackPanel>
+                                    </Border>
                                 </WrapPanel>
 
                                 <!--  Empty state  -->
@@ -903,9 +903,7 @@
                                     </TextBlock.Style>
                                 </TextBlock>
 
-                                <ItemsControl
-                                    ItemsSource="{Binding SelectedLiabilityRow.ScheduleEntries}"
-                                    Visibility="{Binding SelectedLiabilityRow.HasSchedule, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                                <ItemsControl ItemsSource="{Binding SelectedLiabilityRow.ScheduleEntries}" Visibility="{Binding SelectedLiabilityRow.HasSchedule, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Border
@@ -928,13 +926,13 @@
                                                 <StackPanel>
                                                     <DockPanel LastChildFill="True">
                                                         <Border
-                                                            DockPanel.Dock="Left"
                                                             Margin="0,0,10,0"
                                                             Padding="8,3"
                                                             Background="{DynamicResource AppBackground}"
                                                             BorderBrush="{DynamicResource AppBorder}"
                                                             BorderThickness="1"
-                                                            CornerRadius="{StaticResource RadiusSm}">
+                                                            CornerRadius="{StaticResource RadiusSm}"
+                                                            DockPanel.Dock="Left">
                                                             <TextBlock
                                                                 FontFamily="{StaticResource FontTabular}"
                                                                 FontSize="{StaticResource FontSizeXs}"
@@ -1109,7 +1107,7 @@
                 <Border.Width>
                     <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.44|420|620">
                         <Binding ElementName="Root" Path="ActualWidth" />
-                        <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="DataContext.Settings.UiScale" />
+                        <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                     </MultiBinding>
                 </Border.Width>
                 <Grid>

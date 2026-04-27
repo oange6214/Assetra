@@ -33,7 +33,7 @@
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="0,0,0,1">
             <StackPanel>
-                <WrapPanel ItemWidth="320" ItemHeight="Auto">
+                <WrapPanel ItemHeight="Auto" ItemWidth="320">
                     <!--  Card 1: Emergency fund months + progress  -->
                     <Border
                         MinHeight="80"
@@ -277,44 +277,42 @@
                         <DataGridTemplateColumn.Header>
                             <TextBlock Text="{DynamicResource Common.Name}" />
                         </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Grid VerticalAlignment="Center">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid VerticalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding Name}"
-                                        TextTrimming="CharacterEllipsis" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontFamily="{StaticResource FontTabular}"
-                                        FontSize="{StaticResource FontSizeXs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{Binding Currency}" />
-                                </StackPanel>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding Name}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            FontFamily="{StaticResource FontTabular}"
+                                            FontSize="{StaticResource FontSizeXs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{Binding Currency}" />
+                                    </StackPanel>
 
-                                <Border
-                                    Grid.Column="1"
-                                    Margin="10,0,0,0"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    ToolTip="{DynamicResource Portfolio.Cash.DefaultHint}"
-                                    Style="{StaticResource PortfolioDefaultBadge}"
-                                    Visibility="{Binding IsDefault, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <TextBlock
-                                        Style="{StaticResource PortfolioBadgeText}"
-                                        Text="{DynamicResource Portfolio.Cash.Default}" />
-                                </Border>
-                            </Grid>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                                    <Border
+                                        Grid.Column="1"
+                                        Margin="10,0,0,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource PortfolioDefaultBadge}"
+                                        ToolTip="{DynamicResource Portfolio.Cash.DefaultHint}"
+                                        Visibility="{Binding IsDefault, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Style="{StaticResource PortfolioBadgeText}" Text="{DynamicResource Portfolio.Cash.Default}" />
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
                     <!--  市值 (原「餘額」— 與投資/負債分頁統一)  -->
                     <DataGridTemplateColumn Width="200" SortMemberPath="Balance">

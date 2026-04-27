@@ -86,22 +86,22 @@
                         <TextBlock
                             Margin="0,4,0,0"
                             HorizontalAlignment="Right"
+                            d:Visibility="Visible"
                             FontFamily="{StaticResource FontTabular}"
                             FontSize="{StaticResource FontSizeLg}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="--"
-                            d:Visibility="Visible"
                             Visibility="{Binding HasDayPnl, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
 
                         <!--  Amount  -->
                         <TextBlock
                             Margin="0,4,0,0"
                             HorizontalAlignment="Right"
+                            d:Visibility="Collapsed"
                             FontFamily="{StaticResource FontTabular}"
                             FontSize="{StaticResource FontSizeLg}"
                             FontWeight="SemiBold"
-                            d:Visibility="Collapsed"
                             Text="{Binding DayPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
                             Visibility="{Binding HasDayPnl, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock.Style>

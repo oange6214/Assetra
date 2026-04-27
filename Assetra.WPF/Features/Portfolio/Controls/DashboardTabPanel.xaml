@@ -2,10 +2,10 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.DashboardTabPanel"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ctrl="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ctrl="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     d:DataContext="{d:DesignInstance Type={x:Type vm:DashboardViewModel},
                                      IsDesignTimeCreatable=False}"

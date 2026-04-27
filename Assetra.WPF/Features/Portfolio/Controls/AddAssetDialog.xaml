@@ -1,5 +1,4 @@
 <UserControl
-    x:Name="Root"
     x:Class="Assetra.WPF.Features.Portfolio.Controls.AddAssetDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
+    x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
                                      IsDesignTimeCreatable=False}"
     Visibility="{Binding AddAssetDialog.IsAddDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}"
@@ -28,7 +28,7 @@
             <Border.Width>
                 <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.62|400|560">
                     <Binding ElementName="Root" Path="ActualWidth" />
-                    <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="DataContext.Settings.UiScale" />
+                    <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                 </MultiBinding>
             </Border.Width>
             <Grid>
@@ -144,8 +144,13 @@
                             CommandParameter="creditCard:信用卡"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4B3;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F4B3;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.CreditCard}" />
                             </StackPanel>
@@ -163,8 +168,13 @@
                             CommandParameter="creditCard:0% 分期"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4C5;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F4C5;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.Installment}" />
                             </StackPanel>
@@ -182,8 +192,13 @@
                             CommandParameter="creditCard:預借現金"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F9FE;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F9FE;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.CashAdvance}" />
                             </StackPanel>
@@ -201,8 +216,13 @@
                             CommandParameter="loan:房貸"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F3E0;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F3E0;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.Mortgage}" />
                             </StackPanel>
@@ -220,8 +240,13 @@
                             CommandParameter="loan:車貸"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F697;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F697;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.CarLoan}" />
                             </StackPanel>
@@ -239,8 +264,13 @@
                             CommandParameter="loan:學貸"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F393;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F393;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.StudentLoan}" />
                             </StackPanel>
@@ -258,8 +288,13 @@
                             CommandParameter="loan:信貸"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4B0;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F4B0;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.PersonalLoan}" />
                             </StackPanel>
@@ -277,8 +312,13 @@
                             CommandParameter="loan:親友借款"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F465;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F465;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.FriendLoan}" />
                             </StackPanel>
@@ -296,8 +336,13 @@
                             CommandParameter="loan"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x2795;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x2795;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.Custom}" />
                             </StackPanel>
@@ -308,110 +353,209 @@
                         Grid.Row="1"
                         Columns="3"
                         Visibility="{Binding AddAssetDialog.IsAccountDialogMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Button Margin="0,0,4,8" Padding="14,16"
-                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:現金"
+                        <Button
+                            Margin="0,0,4,8"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="cash:現金"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4B5;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F4B5;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.Cash}" />
                             </StackPanel>
                         </Button>
-                        <Button Margin="4,0,4,8" Padding="14,16"
-                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:銀行活存"
+                        <Button
+                            Margin="4,0,4,8"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="cash:銀行活存"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F3E6;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F3E6;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.Bank}" />
                             </StackPanel>
                         </Button>
-                        <Button Margin="4,0,0,8" Padding="14,16"
-                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:數位活存"
+                        <Button
+                            Margin="4,0,0,8"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="cash:數位活存"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4F1;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F4F1;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.Digital}" />
                             </StackPanel>
                         </Button>
-                        <Button Margin="0,0,4,8" Padding="14,16"
-                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:定存"
+                        <Button
+                            Margin="0,0,4,8"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="cash:定存"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F512;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F512;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.TimeDeposit}" />
                             </StackPanel>
                         </Button>
-                        <Button Margin="4,0,4,8" Padding="14,16"
-                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:外幣活存"
+                        <Button
+                            Margin="4,0,4,8"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="cash:外幣活存"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4B1;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F4B1;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.Foreign}" />
                             </StackPanel>
                         </Button>
-                        <Button Margin="4,0,0,8" Padding="14,16"
-                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:交割戶"
+                        <Button
+                            Margin="4,0,0,8"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="cash:交割戶"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4C8;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F4C8;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.Brokerage}" />
                             </StackPanel>
                         </Button>
-                        <Button Margin="0,0,4,0" Padding="14,16"
-                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:電子支付"
+                        <Button
+                            Margin="0,0,4,0"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="cash:電子支付"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F4F2;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F4F2;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.EWallet}" />
                             </StackPanel>
                         </Button>
-                        <Button Margin="4,0,4,0" Padding="14,16"
-                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash:儲值卡"
+                        <Button
+                            Margin="4,0,4,0"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="cash:儲值卡"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x1F381;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x1F381;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.PrepaidCard}" />
                             </StackPanel>
                         </Button>
-                        <Button Margin="4,0,0,0" Padding="14,16"
-                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                            Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}" CommandParameter="cash"
+                        <Button
+                            Margin="4,0,0,0"
+                            Padding="14,16"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
+                            CommandParameter="cash"
                             Style="{StaticResource BtnGhost}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock Margin="0,0,0,6" FontSize="{StaticResource FontSize2xl}" Text="&#x2795;" />
-                                <TextBlock FontSize="{StaticResource FontSizeBase}" FontWeight="SemiBold"
+                                <TextBlock
+                                    Margin="0,0,0,6"
+                                    FontSize="{StaticResource FontSize2xl}"
+                                    Text="&#x2795;" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.Custom}" />
                             </StackPanel>
@@ -426,24 +570,30 @@
                     VerticalScrollBarVisibility="Auto"
                     Visibility="{Binding AddAssetDialog.IsFormStep, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid>
-                        <assetSections:AccountCreateSection
-                            DataContext="{Binding AddAssetDialog}">
+                        <assetSections:AccountCreateSection DataContext="{Binding AddAssetDialog}">
                             <assetSections:AccountCreateSection.Visibility>
-                                <Binding ElementName="Root" Path="DataContext.AddAssetDialog.AddTypeIsAccount" Converter="{StaticResource BooleanToVisibilityConverter}" />
+                                <Binding
+                                    Converter="{StaticResource BooleanToVisibilityConverter}"
+                                    ElementName="Root"
+                                    Path="DataContext.AddAssetDialog.AddTypeIsAccount" />
                             </assetSections:AccountCreateSection.Visibility>
                         </assetSections:AccountCreateSection>
 
-                        <assetSections:LoanCreateSection
-                            DataContext="{Binding AddAssetDialog}">
+                        <assetSections:LoanCreateSection DataContext="{Binding AddAssetDialog}">
                             <assetSections:LoanCreateSection.Visibility>
-                                <Binding ElementName="Root" Path="DataContext.AddAssetDialog.AddTypeIsLoan" Converter="{StaticResource BooleanToVisibilityConverter}" />
+                                <Binding
+                                    Converter="{StaticResource BooleanToVisibilityConverter}"
+                                    ElementName="Root"
+                                    Path="DataContext.AddAssetDialog.AddTypeIsLoan" />
                             </assetSections:LoanCreateSection.Visibility>
                         </assetSections:LoanCreateSection>
 
-                        <assetSections:CreditCardCreateSection
-                            DataContext="{Binding AddAssetDialog}">
+                        <assetSections:CreditCardCreateSection DataContext="{Binding AddAssetDialog}">
                             <assetSections:CreditCardCreateSection.Visibility>
-                                <Binding ElementName="Root" Path="DataContext.AddAssetDialog.AddTypeIsCreditCard" Converter="{StaticResource BooleanToVisibilityConverter}" />
+                                <Binding
+                                    Converter="{StaticResource BooleanToVisibilityConverter}"
+                                    ElementName="Root"
+                                    Path="DataContext.AddAssetDialog.AddTypeIsCreditCard" />
                             </assetSections:CreditCardCreateSection.Visibility>
                         </assetSections:CreditCardCreateSection>
                     </Grid>

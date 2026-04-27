@@ -8,11 +8,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
+    x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:AllocationViewModel},
                                      IsDesignTimeCreatable=False}"
     d:DesignHeight="776"
     d:DesignWidth="1100"
-    x:Name="Root"
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
 
@@ -65,7 +65,7 @@
                                 <DataTrigger.Binding>
                                     <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1260">
                                         <Binding ElementName="Root" Path="ActualWidth" />
-                                        <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="DataContext.Settings.UiScale" />
+                                        <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                                     </MultiBinding>
                                 </DataTrigger.Binding>
                                 <Setter Property="Visibility" Value="Collapsed" />
@@ -253,166 +253,164 @@
 
                     <DataGrid.Columns>
 
-                    <!--  資產 (Symbol + Name)  -->
-                    <DataGridTemplateColumn
-                        Width="*"
-                        MinWidth="100"
-                        SortMemberPath="Symbol">
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Allocation.Col.Asset}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                                <StackPanel Margin="8,0" VerticalAlignment="Center">
-                                    <DockPanel>
-                                        <Border
-                                            Width="10"
-                                            Height="10"
-                                            Margin="0,0,6,0"
-                                            VerticalAlignment="Center"
-                                            Background="{Binding ColorBrush}"
-                                            CornerRadius="2" />
+                        <!--  資產 (Symbol + Name)  -->
+                        <DataGridTemplateColumn
+                            Width="*"
+                            MinWidth="100"
+                            SortMemberPath="Symbol">
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock Text="{DynamicResource Allocation.Col.Asset}" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+                                    <StackPanel Margin="8,0" VerticalAlignment="Center">
+                                        <DockPanel>
+                                            <Border
+                                                Width="10"
+                                                Height="10"
+                                                Margin="0,0,6,0"
+                                                VerticalAlignment="Center"
+                                                Background="{Binding ColorBrush}"
+                                                CornerRadius="2" />
+                                            <TextBlock
+                                                FontSize="{StaticResource FontSizeSm}"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding Symbol}" />
+                                        </DockPanel>
                                         <TextBlock
-                                            FontSize="{StaticResource FontSizeSm}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding Symbol}" />
-                                    </DockPanel>
+                                            Margin="16,1,0,0"
+                                            FontSize="{StaticResource FontSizeXs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{Binding Name}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!--  現價  -->
+                        <DataGridTemplateColumn Width="80" SortMemberPath="CurrentPrice">
+                            <DataGridTemplateColumn.HeaderStyle>
+                                <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                                    <Setter Property="HorizontalContentAlignment" Value="Right" />
+                                </Style>
+                            </DataGridTemplateColumn.HeaderStyle>
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock Text="{DynamicResource Allocation.Col.Price}" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
                                     <TextBlock
-                                        Margin="16,1,0,0"
-                                        FontSize="{StaticResource FontSizeXs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{Binding Name}"
-                                        TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <!--  現價  -->
-                    <DataGridTemplateColumn Width="80" SortMemberPath="CurrentPrice">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Allocation.Col.Price}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                                <TextBlock
-                                    Margin="0,0,8,0"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    FontFamily="{StaticResource FontTabular}"
-                                    FontSize="{StaticResource FontSizeXs}"
-                                    Foreground="{DynamicResource AppTextSecondary}"
-                                    Text="{Binding CurrentPrice, StringFormat='NT\${0:N0}'}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <!--  市值 + allocation bar  -->
-                    <DataGridTemplateColumn Width="140" SortMemberPath="MarketValue">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Allocation.Col.Value}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                                <TextBlock
-                                    Margin="0,0,8,0"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    FontFamily="{StaticResource FontTabular}"
-                                    FontSize="{StaticResource FontSizeSm}"
-                                    FontWeight="SemiBold"
-                                    Foreground="{DynamicResource AppTextPrimary}"
-                                    Text="{Binding MarketValue, StringFormat='NT\${0:N0}'}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <!--  實際比例%  -->
-                    <DataGridTemplateColumn Width="72" SortMemberPath="ActualPercent">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Allocation.Col.ActualPct}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                                <TextBlock
-                                    Margin="0,0,8,0"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    FontFamily="{StaticResource FontTabular}"
-                                    FontSize="{StaticResource FontSizeSm}"
-                                    FontWeight="SemiBold"
-                                    Foreground="{DynamicResource AppTextPrimary}"
-                                    Text="{Binding ActualPercentDisplay}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <!--  淨損益  -->
-                    <DataGridTemplateColumn Width="130" SortMemberPath="Pnl">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Allocation.Col.TotalPnl}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                                <StackPanel
-                                    Margin="0,0,8,0"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center">
-                                    <TextBlock
+                                        Margin="0,0,8,0"
                                         HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{StaticResource FontTabular}"
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{Binding CurrentPrice, StringFormat='NT\${0:N0}'}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!--  市值 + allocation bar  -->
+                        <DataGridTemplateColumn Width="140" SortMemberPath="MarketValue">
+                            <DataGridTemplateColumn.HeaderStyle>
+                                <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                                    <Setter Property="HorizontalContentAlignment" Value="Right" />
+                                </Style>
+                            </DataGridTemplateColumn.HeaderStyle>
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock Text="{DynamicResource Allocation.Col.Value}" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+                                    <TextBlock
+                                        Margin="0,0,8,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
                                         FontFamily="{StaticResource FontTabular}"
                                         FontSize="{StaticResource FontSizeSm}"
-                                        FontWeight="SemiBold">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsPnlPositive}" Value="True">
-                                                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                        <Run Text="{Binding PnlDisplay, Mode=OneWay}" />
-                                    </TextBlock>
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding MarketValue, StringFormat='NT\${0:N0}'}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!--  實際比例%  -->
+                        <DataGridTemplateColumn Width="72" SortMemberPath="ActualPercent">
+                            <DataGridTemplateColumn.HeaderStyle>
+                                <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                                    <Setter Property="HorizontalContentAlignment" Value="Right" />
+                                </Style>
+                            </DataGridTemplateColumn.HeaderStyle>
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock Text="{DynamicResource Allocation.Col.ActualPct}" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
                                     <TextBlock
+                                        Margin="0,0,8,0"
                                         HorizontalAlignment="Right"
-                                        FontSize="{StaticResource FontSizeXs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{Binding PnlPercentDisplay}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                                        VerticalAlignment="Center"
+                                        FontFamily="{StaticResource FontTabular}"
+                                        FontSize="{StaticResource FontSizeSm}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding ActualPercentDisplay}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!--  淨損益  -->
+                        <DataGridTemplateColumn Width="130" SortMemberPath="Pnl">
+                            <DataGridTemplateColumn.HeaderStyle>
+                                <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                                    <Setter Property="HorizontalContentAlignment" Value="Right" />
+                                </Style>
+                            </DataGridTemplateColumn.HeaderStyle>
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock Text="{DynamicResource Allocation.Col.TotalPnl}" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+                                    <StackPanel
+                                        Margin="0,0,8,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center">
+                                        <TextBlock
+                                            HorizontalAlignment="Right"
+                                            FontFamily="{StaticResource FontTabular}"
+                                            FontSize="{StaticResource FontSizeSm}"
+                                            FontWeight="SemiBold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsPnlPositive}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                            <Run Text="{Binding PnlDisplay, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <TextBlock
+                                            HorizontalAlignment="Right"
+                                            FontSize="{StaticResource FontSizeXs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{Binding PnlPercentDisplay}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
 
-            <ScrollViewer
-                VerticalScrollBarVisibility="Auto"
-                HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="16">
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
@@ -422,7 +420,7 @@
                                     <DataTrigger.Binding>
                                         <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1260">
                                             <Binding ElementName="Root" Path="ActualWidth" />
-                                            <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="DataContext.Settings.UiScale" />
+                                            <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                                         </MultiBinding>
                                     </DataTrigger.Binding>
                                     <Setter Property="Visibility" Value="Visible" />
@@ -521,8 +519,8 @@
                                     <StackPanel>
                                         <DockPanel LastChildFill="True">
                                             <TextBlock
-                                                DockPanel.Dock="Left"
                                                 Margin="0,0,6,0"
+                                                DockPanel.Dock="Left"
                                                 FontFamily="{StaticResource FontTabular}"
                                                 FontSize="{StaticResource FontSizeSm}"
                                                 FontWeight="SemiBold"

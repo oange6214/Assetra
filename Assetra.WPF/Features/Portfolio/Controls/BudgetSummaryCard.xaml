@@ -24,8 +24,8 @@
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Dashboard.Budget.Title}" />
                 <TextBlock
-                    DockPanel.Dock="Right"
                     HorizontalAlignment="Right"
+                    DockPanel.Dock="Right"
                     FontSize="{StaticResource FontSizeSm}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{Binding PeriodDisplay}" />
@@ -133,8 +133,8 @@
                             <TextBlock
                                 Grid.Column="1"
                                 Margin="8,0,0,0"
-                                FontSize="{StaticResource FontSizeSm}"
                                 FontFamily="{StaticResource FontTabular}"
+                                FontSize="{StaticResource FontSizeSm}"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{Binding Spent, StringFormat=NT\{0:N0\}}" />
                             <TextBlock
