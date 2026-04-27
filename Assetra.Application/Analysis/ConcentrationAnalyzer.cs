@@ -23,7 +23,7 @@ public sealed class ConcentrationAnalyzer : IConcentrationAnalyzer
     public async Task<IReadOnlyList<ConcentrationBucket>> AnalyzeAsync(int topN = 5, CancellationToken ct = default)
     {
         if (topN < 1) throw new ArgumentOutOfRangeException(nameof(topN));
-        var (buckets, total) = await BuildBucketsAsync().ConfigureAwait(false);
+        var (buckets, total) = await BuildBucketsAsync(ct).ConfigureAwait(false);
         if (buckets.Count == 0 || total == 0m) return Array.Empty<ConcentrationBucket>();
 
         var ordered = buckets.OrderByDescending(b => b.MarketValue).ToList();
@@ -40,7 +40,7 @@ public sealed class ConcentrationAnalyzer : IConcentrationAnalyzer
 
     public async Task<decimal?> ComputeHhiAsync(CancellationToken ct = default)
     {
-        var (buckets, total) = await BuildBucketsAsync().ConfigureAwait(false);
+        var (buckets, total) = await BuildBucketsAsync(ct).ConfigureAwait(false);
         if (buckets.Count == 0 || total == 0m) return null;
         var hhi = 0m;
         foreach (var b in buckets)
@@ -51,9 +51,11 @@ public sealed class ConcentrationAnalyzer : IConcentrationAnalyzer
         return hhi;
     }
 
-    private async Task<(List<ConcentrationBucket> buckets, decimal total)> BuildBucketsAsync()
+    private async Task<(List<ConcentrationBucket> buckets, decimal total)> BuildBucketsAsync(CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         var entries = await _portfolio.GetEntriesAsync().ConfigureAwait(false);
+        ct.ThrowIfCancellationRequested();
         var snapshots = await _positions.GetAllPositionSnapshotsAsync().ConfigureAwait(false);
 
         var buckets = new List<ConcentrationBucket>();

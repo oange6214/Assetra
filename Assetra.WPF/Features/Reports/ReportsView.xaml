@@ -372,9 +372,18 @@
                         <ui:Button Command="{Binding ExportIncomeCsvCommand}" Content="{DynamicResource Reports.Export.Csv}" />
                     </StackPanel>
                     <StackPanel Grid.Row="1" DataContext="{Binding IncomeStatement}">
-                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Income.Total, StringFormat='Income Total: {0:N2}'}" />
-                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Expense.Total, StringFormat='Expense Total: {0:N2}'}" />
-                        <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding Net, StringFormat='Net: {0:N2}'}" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Income.Total}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Income.Total, StringFormat=': {0:N2}'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Expense.Total}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Expense.Total, StringFormat=': {0:N2}'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{DynamicResource Reports.Net}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding Net, StringFormat=': {0:N2}'}" />
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </Expander>
@@ -390,10 +399,22 @@
                         <ui:Button Command="{Binding ExportBalanceCsvCommand}" Content="{DynamicResource Reports.Export.Csv}" />
                     </StackPanel>
                     <StackPanel Grid.Row="1" DataContext="{Binding BalanceSheet}">
-                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding AsOf, StringFormat='As Of: {0}'}" />
-                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Assets.Total, StringFormat='Assets: {0:N2}'}" />
-                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Liabilities.Total, StringFormat='Liabilities: {0:N2}'}" />
-                        <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding NetWorth, StringFormat='Net Worth: {0:N2}'}" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Balance.AsOf}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding AsOf, StringFormat=': {0}'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Balance.Assets}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Assets.Total, StringFormat=': {0:N2}'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Balance.Liabilities}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Liabilities.Total, StringFormat=': {0:N2}'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{DynamicResource Reports.Balance.NetWorth}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding NetWorth, StringFormat=': {0:N2}'}" />
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </Expander>
@@ -409,21 +430,48 @@
                         <ui:Button Command="{Binding ExportCashFlowCsvCommand}" Content="{DynamicResource Reports.Export.Csv}" />
                     </StackPanel>
                     <StackPanel Grid.Row="1" DataContext="{Binding CashFlowStatement}">
-                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Operating.Total, StringFormat='Operating: {0:N2}'}" />
-                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Investing.Total, StringFormat='Investing: {0:N2}'}" />
-                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Financing.Total, StringFormat='Financing: {0:N2}'}" />
-                        <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding NetChange, StringFormat='Net Change: {0:N2}'}" />
-                        <TextBlock FontFamily="{StaticResource FontTabular}" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding OpeningCash, StringFormat='Opening Cash: {0:N2}'}" />
-                        <TextBlock FontFamily="{StaticResource FontTabular}" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding ClosingCash, StringFormat='Closing Cash: {0:N2}'}" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.CashFlow.Operating}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Operating.Total, StringFormat=': {0:N2}'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.CashFlow.Investing}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Investing.Total, StringFormat=': {0:N2}'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.CashFlow.Financing}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Financing.Total, StringFormat=': {0:N2}'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{DynamicResource Reports.CashFlow.NetChange}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding NetChange, StringFormat=': {0:N2}'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.CashFlow.Opening}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding OpeningCash, StringFormat=': {0:N2}'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.CashFlow.Closing}" />
+                            <TextBlock FontFamily="{StaticResource FontTabular}" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding ClosingCash, StringFormat=': {0:N2}'}" />
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </Expander>
 
             <Expander Header="{DynamicResource Reports.Performance.Title}" IsExpanded="False" Margin="0,8,0,0">
                 <StackPanel Margin="12" DataContext="{Binding Performance}">
-                    <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Mwr, StringFormat='MWR (XIRR): {0:P2}', TargetNullValue='MWR (XIRR): —'}" />
-                    <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding BenchmarkTwr, StringFormat='Benchmark (0050.TW): {0:P2}', TargetNullValue='Benchmark: —'}" />
-                    <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding AlphaOverBenchmark, StringFormat='Alpha: {0:P2}', TargetNullValue='Alpha: —'}" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Performance.Mwr}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Mwr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Performance.Benchmark}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding BenchmarkTwr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{DynamicResource Reports.Performance.Alpha}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding AlphaOverBenchmark, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                    </StackPanel>
                     <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding Attribution}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -443,11 +491,23 @@
 
             <Expander Header="{DynamicResource Reports.Risk.Title}" IsExpanded="False" Margin="0,8,0,0">
                 <StackPanel Margin="12" DataContext="{Binding Risk}">
-                    <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding AnnualizedVolatility, StringFormat='Annualized Volatility: {0:P2}', TargetNullValue='Annualized Volatility: —'}" />
-                    <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding MaxDrawdown, StringFormat='Max Drawdown: {0:P2}', TargetNullValue='Max Drawdown: —'}" />
-                    <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding SharpeRatio, StringFormat='Sharpe Ratio: {0:F2}', TargetNullValue='Sharpe Ratio: —'}" />
-                    <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Hhi, StringFormat='Concentration HHI: {0:F3}', TargetNullValue='Concentration HHI: —'}" />
-                    <TextBlock Margin="0,4,0,0" FontWeight="SemiBold" Foreground="#D9534F" Text="{DynamicResource Reports.Risk.ConcentrationWarning}" Visibility="{Binding HasConcentrationWarning, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Risk.AnnualizedVolatility}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding AnnualizedVolatility, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Risk.MaxDrawdown}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding MaxDrawdown, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Risk.SharpeRatio}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding SharpeRatio, StringFormat=': {0:F2}', TargetNullValue=': —'}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Risk.Hhi}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Hhi, StringFormat=': {0:F3}', TargetNullValue=': —'}" />
+                    </StackPanel>
+                    <TextBlock Margin="0,4,0,0" FontWeight="SemiBold" Foreground="{DynamicResource AppDanger}" Text="{DynamicResource Reports.Risk.ConcentrationWarning}" Visibility="{Binding HasConcentrationWarning, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <TextBlock Margin="0,8,0,4" FontWeight="SemiBold" Text="{DynamicResource Reports.Risk.TopHoldings}" />
                     <ItemsControl ItemsSource="{Binding TopHoldings}">
                         <ItemsControl.ItemTemplate>

@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.13.1 - 2026-04-28
+
+針對 v0.13.0 release 後 code review 發現的本地化債務與文件落差做 cleanup；無新功能、無行為改變。
+
+### 修正
+
+- **i18n（HIGH）**：補上 Reports / Risk / Performance Expander 內所有原本 hardcode 在 `StringFormat` 的英文 label（25+ keys）；改寫為 horizontal StackPanel + DynamicResource 模式。
+- **i18n（HIGH）**：Portfolio / Allocation / Rebalance / Loan / DateRangePicker / PortfolioView 「債券 ETF」徽章 + tooltip 等先前漏進 Languages 的 zh-TW 字串補進 Languages，新增對應 en-US 翻譯。
+- **i18n（HIGH）**：`ReportsViewModel.ExportStatus` 訊息原為 hardcode 字串，改走 `_localization.Get(key, fallback)`，並加入對應 `Reports.Export.Status.*` keys。
+- **Theme（MED）**：Risk Expander 集中度警示文字 `Foreground="#D9534F"` 改用 `{DynamicResource AppDanger}`，跟隨 theme 切換。
+- **CancellationToken（MED）**：`ConcentrationAnalyzer` 的 `ct` 參數改為 propagate 至 `BuildBucketsAsync`，呼叫 repo 前後 `ThrowIfCancellationRequested`。
+- **Docs（HIGH/MED）**：`Bounded-Contexts.md` 第 5 節舊 Analysis Context 描述（與第 8 節重複）改為指向 #8 的 placeholder；`Next-Sprint-v0.13.0.md` F5 `ConcentrationAlertRule` 標註 descoped、F3 risk-free rate 註明 `IAppSettingsService` 推遲到 v0.14。
+
+### 內部變更
+
+- 新增 ~30 個 Languages keys（zh-TW + en-US）。
+- 無 schema、interface、DI 變更；行為與 v0.13.0 一致。
+- 因專案內存有未提交的 Recurring/Categories WIP（與此 cleanup 無關），test project 在本地 build 失敗；本 release 僅驗證 `Assetra.WPF` 主專案 build 全綠，`dotnet test` 待 WIP 收斂後再驗證。
+
 ## v0.13.0 - 2026-04-28
 
 風險分析：在 Analysis Context 加入波動率、最大回撤、Sharpe ratio 與持股集中度（HHI），於 Reports 頁新增「Risk Metrics」Expander 並提供集中度警示。

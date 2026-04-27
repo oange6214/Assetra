@@ -1248,13 +1248,13 @@
                                     Padding="8,2"
                                     Background="#374151"
                                     CornerRadius="{StaticResource RadiusSm}"
-                                    ToolTip="債券 ETF — 證交稅免徵（延長至 2026 底）"
+                                    ToolTip="{DynamicResource Portfolio.AssetType.BondEtf.Tooltip}"
                                     Visibility="{Binding SelectedPositionRow.IsBondEtf, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
                                     <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextOnAccent}"
-                                        Text="債券 ETF" />
+                                        Text="{DynamicResource Portfolio.AssetType.BondEtf}" />
                                 </Border>
                             </StackPanel>
                         </StackPanel>

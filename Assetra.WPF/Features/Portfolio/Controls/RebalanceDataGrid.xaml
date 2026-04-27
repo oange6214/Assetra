@@ -95,7 +95,7 @@
                                         <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
-                                            Text="實際 / 目標" />
+                                            Text="{DynamicResource Portfolio.Allocation.Header.ActualVsTarget}" />
                                         <TextBlock
                                             FontFamily="{StaticResource FontTabular}"
                                             FontSize="{StaticResource FontSizeSm}"
@@ -187,7 +187,7 @@
                                         <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
-                                            Text="偏差" />
+                                            Text="{DynamicResource Portfolio.Allocation.Header.Deviation}" />
                                         <TextBlock
                                             FontFamily="{StaticResource FontTabular}"
                                             FontSize="{StaticResource FontSizeSm}"
@@ -220,7 +220,7 @@
                                         <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
-                                            Text="建議操作" />
+                                            Text="{DynamicResource Portfolio.Allocation.Header.Action}" />
                                         <TextBlock
                                             FontFamily="{StaticResource FontTabular}"
                                             FontSize="{StaticResource FontSizeSm}"

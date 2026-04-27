@@ -137,7 +137,7 @@
                                                         <TextBlock
                                                             DockPanel.Dock="Left"
                                                             FontSize="{StaticResource FontSizeXs}"
-                                                            Text="市值" />
+                                                            Text="{DynamicResource Portfolio.Allocation.Header.MarketValue}" />
                                                         <TextBlock
                                                             HorizontalAlignment="Right"
                                                             FontFamily="{StaticResource FontTabular}"
@@ -149,7 +149,7 @@
                                                         <TextBlock
                                                             DockPanel.Dock="Left"
                                                             FontSize="{StaticResource FontSizeXs}"
-                                                            Text="實際比例" />
+                                                            Text="{DynamicResource Portfolio.Allocation.Header.ActualWeight}" />
                                                         <TextBlock
                                                             HorizontalAlignment="Right"
                                                             FontFamily="{StaticResource FontTabular}"
@@ -161,7 +161,7 @@
                                                         <TextBlock
                                                             DockPanel.Dock="Left"
                                                             FontSize="{StaticResource FontSizeXs}"
-                                                            Text="損益" />
+                                                            Text="{DynamicResource Portfolio.Allocation.Header.Pnl}" />
                                                         <TextBlock
                                                             HorizontalAlignment="Right"
                                                             FontFamily="{StaticResource FontTabular}"
@@ -173,7 +173,7 @@
                                                         <TextBlock
                                                             DockPanel.Dock="Left"
                                                             FontSize="{StaticResource FontSizeXs}"
-                                                            Text="損益率" />
+                                                            Text="{DynamicResource Portfolio.Allocation.Header.PnlRate}" />
                                                         <TextBlock
                                                             HorizontalAlignment="Right"
                                                             FontFamily="{StaticResource FontTabular}"
@@ -552,7 +552,7 @@
                                                     <TextBlock
                                                         FontSize="{StaticResource FontSizeXs}"
                                                         Foreground="{DynamicResource AppTextMuted}"
-                                                        Text="現價" />
+                                                        Text="{DynamicResource Portfolio.Allocation.Header.CurrentPrice}" />
                                                     <TextBlock
                                                         FontFamily="{StaticResource FontTabular}"
                                                         FontSize="{StaticResource FontSizeSm}"
@@ -572,7 +572,7 @@
                                                     <TextBlock
                                                         FontSize="{StaticResource FontSizeXs}"
                                                         Foreground="{DynamicResource AppTextMuted}"
-                                                        Text="實際 / 目標" />
+                                                        Text="{DynamicResource Portfolio.Allocation.Header.ActualVsTarget}" />
                                                     <TextBlock
                                                         FontFamily="{StaticResource FontTabular}"
                                                         FontSize="{StaticResource FontSizeSm}"
@@ -595,7 +595,7 @@
                                                     <TextBlock
                                                         FontSize="{StaticResource FontSizeXs}"
                                                         Foreground="{DynamicResource AppTextMuted}"
-                                                        Text="偏差" />
+                                                        Text="{DynamicResource Portfolio.Allocation.Header.Deviation}" />
                                                     <TextBlock
                                                         FontFamily="{StaticResource FontTabular}"
                                                         FontSize="{StaticResource FontSizeSm}"
@@ -628,7 +628,7 @@
                                                     <TextBlock
                                                         FontSize="{StaticResource FontSizeXs}"
                                                         Foreground="{DynamicResource AppTextMuted}"
-                                                        Text="建議操作" />
+                                                        Text="{DynamicResource Portfolio.Allocation.Header.Action}" />
                                                     <TextBlock
                                                         FontFamily="{StaticResource FontTabular}"
                                                         FontSize="{StaticResource FontSizeSm}"

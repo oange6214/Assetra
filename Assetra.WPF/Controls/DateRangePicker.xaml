@@ -207,7 +207,7 @@
                             Height="30"
                             Padding="12,0"
                             Click="Reset_Click"
-                            Content="重設"
+                            Content="{DynamicResource DateRangePicker.Reset}"
                             FontSize="{StaticResource FontSizeSm}"
                             Style="{StaticResource BtnGhost}" />
                     </Grid>

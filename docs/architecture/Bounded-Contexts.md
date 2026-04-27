@@ -105,27 +105,7 @@
 
 ## 5. Analysis Context
 
-### 責任
-- 淨資產趨勢
-- 投資績效
-- 風險分析
-- 報表計算
-
-### 主要模型
-- `NetWorthSnapshot`
-- `PerformanceSnapshot`
-- `RiskMetrics`
-- `TaxSummary`
-
-### 主要服務
-- `NetWorthTrendQueryService`
-- `PerformanceAnalysisService`
-- `RiskAnalysisService`
-- `TaxSummaryService`
-
-### 原則
-- 主要提供計算與 projection
-- 不直接處理 UI 或資料庫細節
+> 計畫 / 實作整合於下方第 8 節（v0.12.0 + v0.13.0 已落地）。本節保留 placeholder 以維持原 numbering；新功能（淨資產趨勢延伸、稅務）見 Roadmap Phase 3。
 
 ---
 

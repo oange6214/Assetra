@@ -10,9 +10,9 @@
 | D1 | `RiskMetrics` / `DrawdownPoint` / `ConcentrationBucket` DTO | Analysis | S |
 | F1 | `VolatilityCalculator` —— 日報酬 std dev × √252 | Analysis | S |
 | F2 | `DrawdownCalculator` —— Max drawdown + drawdown 時序 | Analysis | M |
-| F3 | `SharpeRatioCalculator` —— `(TWR − rf) / vol`，rf 從 `IAppSettingsService` | Analysis | S |
+| F3 | `SharpeRatioCalculator` —— `(TWR − rf) / vol`，rf 暫以常數 0.02（descope: `IAppSettingsService` 推遲到 v0.14） | Analysis | S |
 | F4 | `ConcentrationAnalyzer` —— Top-N 持倉佔比 + HHI | Analysis | M |
-| F5 | `ConcentrationAlertRule` —— 超閾值時生 Alert | Analysis / Alerts | S |
+| ~~F5~~ | ~~`ConcentrationAlertRule`~~ **descoped** —— 改用 `RiskMetrics.HasConcentrationWarning` 計算屬性，避免擴張既有 price-target AlertRule 框架 | — | — |
 | F6 | Reports「Risk」Expander + DI | WPF / Reporting | M |
 
 ## 二、缺口全景
@@ -37,8 +37,9 @@
   - public static `Compute(values)` + `MaxDrawdown(values)` 便利方法
 
 - **F3 SharpeRatioCalculator**
-  - 依賴 `ITimeWeightedReturnCalculator`、`IVolatilityCalculator`、`IAppSettingsService`（取 risk-free rate, 預設 0.02）
-  - `Sharpe = (TWR − rf) / σ`；σ = 0 或 null → null
+  - 純計算 service：`Compute(annualizedReturn, annualizedVolatility, riskFreeRate)`
+  - `Sharpe = (return − rf) / σ`；σ = 0 或 null → null
+  - rf 由呼叫端傳入；目前 `ReportsViewModel.LoadRiskAsync` hardcode `0.02m`，待 v0.14（外幣/設定擴充）改走 `IAppSettingsService`
 
 - **F4 ConcentrationAnalyzer**
   - 依賴 `IPortfolioRepository.GetEntriesAsync()` 取目前所有 PortfolioEntry
@@ -46,9 +47,10 @@
   - 輸出 Top 5 + 「Others」一筆
   - HHI = Σ w_i² ；單一持倉 100% → 1.0
 
-- **F5 ConcentrationAlertRule**
-  - 既有 `IAlertRuleService` 加一條規則：若任一持倉權重 > 30% 或 HHI > 0.30，產 Alert
-  - 與 v0.x 既有 alert 框架共用 schema
+- ~~**F5 ConcentrationAlertRule**~~ **descoped**
+  - 原計畫於 `IAlertRuleService` 加規則；實際既有 `AlertRule` 為 price-target 專用（`AlertCondition.Above/Below`），擴張會牽動 schema
+  - 改在 `RiskMetrics` 加 `HasConcentrationWarning` 計算屬性（>30% 單一部位 或 HHI >0.30），UI 直接綁
+  - 若未來真的要走通用 Alert：建議重構 AlertRule 為 polymorphic 規則框架後再做
 
 - **F6 Reports Risk Expander**
   - `ReportsView.xaml` 新增第 5 個 Expander，標題 `Reports.Risk.Title`

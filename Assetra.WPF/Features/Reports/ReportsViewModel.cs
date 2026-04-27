@@ -265,7 +265,11 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     private async Task ExportAsync(string target, string formatStr)
     {
-        if (_exportService is null) { ExportStatus = "Export service not available."; return; }
+        if (_exportService is null)
+        {
+            ExportStatus = GetString("Reports.Export.Status.Unavailable", "匯出服務目前不可用。");
+            return;
+        }
         var format = formatStr == "pdf" ? ExportFormat.Pdf : ExportFormat.Csv;
         var ext = format == ExportFormat.Pdf ? "pdf" : "csv";
         var dlg = new Microsoft.Win32.SaveFileDialog
@@ -289,14 +293,18 @@ public sealed partial class ReportsViewModel : ObservableObject
                     await _exportService.ExportAsync(CashFlowStatement, format, dlg.FileName).ConfigureAwait(true);
                     break;
                 default:
-                    ExportStatus = "No data to export.";
+                    ExportStatus = GetString("Reports.Export.Status.Empty", "目前沒有可匯出的資料。");
                     return;
             }
-            ExportStatus = $"Exported: {dlg.FileName}";
+            ExportStatus = string.Format(
+                GetString("Reports.Export.Status.Success", "已匯出：{0}"),
+                dlg.FileName);
         }
         catch (Exception ex)
         {
-            ExportStatus = $"Export failed: {ex.Message}";
+            ExportStatus = string.Format(
+                GetString("Reports.Export.Status.Failed", "匯出失敗：{0}"),
+                ex.Message);
         }
     }
 
@@ -341,6 +349,9 @@ public sealed partial class ReportsViewModel : ObservableObject
         OnPropertyChanged(nameof(OverBudgetRows));
         OnPropertyChanged(nameof(UpcomingRows));
     }
+
+    private string GetString(string key, string fallback) =>
+        _localization?.Get(key, fallback) ?? fallback;
 
     public sealed record OverBudgetRowViewModel(
         CategorySpendSummary Summary,
