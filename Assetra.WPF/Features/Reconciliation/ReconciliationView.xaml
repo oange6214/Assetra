@@ -1,0 +1,203 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Reconciliation.ReconciliationView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Reconciliation"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:ReconciliationViewModel},
+                                     IsDesignTimeCreatable=False}"
+    d:DesignHeight="600"
+    d:DesignWidth="1000"
+    Background="{DynamicResource AppBackground}"
+    mc:Ignorable="d">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--  Header  -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock
+                FontFamily="{StaticResource FontTabular}"
+                FontSize="{DynamicResource FontSizeXl}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource Reconciliation.Title}" />
+            <TextBlock
+                Margin="0,4,0,0"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{DynamicResource Reconciliation.Subtitle}" />
+        </StackPanel>
+
+        <!--  Toolbar  -->
+        <Border
+            Grid.Row="1"
+            Margin="0,0,0,12"
+            Padding="12"
+            Background="{DynamicResource AppSurface}"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="1"
+            CornerRadius="8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel
+                    Grid.Column="0"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center">
+                    <TextBlock
+                        Margin="0,0,8,0"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Reconciliation.Session}" />
+                    <ComboBox
+                        MinWidth="280"
+                        DisplayMemberPath="PeriodStart"
+                        ItemsSource="{Binding Sessions}"
+                        SelectedItem="{Binding SelectedSession, Mode=TwoWay}" />
+                </StackPanel>
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="16,0,0,0"
+                    VerticalAlignment="Center"
+                    FontFamily="{StaticResource FontTabular}"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{Binding SummaryDisplay}" />
+
+                <StackPanel
+                    Grid.Column="2"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center">
+                    <ui:Button
+                        Margin="0,0,8,0"
+                        Command="{Binding RecomputeCommand}"
+                        Content="{DynamicResource Reconciliation.Recompute}" />
+                    <ui:Button
+                        Appearance="Primary"
+                        Command="{Binding SignOffCommand}"
+                        Content="{DynamicResource Reconciliation.SignOff}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!--  Diffs DataGrid  -->
+        <Border
+            Grid.Row="2"
+            Background="{DynamicResource AppSurface}"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="1"
+            CornerRadius="8">
+            <DataGrid
+                AutoGenerateColumns="False"
+                Background="Transparent"
+                BorderThickness="0"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                CanUserReorderColumns="False"
+                GridLinesVisibility="Horizontal"
+                HeadersVisibility="Column"
+                IsReadOnly="True"
+                ItemsSource="{Binding Diffs}"
+                SelectionMode="Single">
+                <DataGrid.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Margin="8,8,0,4"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding Name}" />
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                </DataGrid.GroupStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Width="120"
+                        Binding="{Binding KindDisplay}">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{DynamicResource Reconciliation.Col.Kind}" />
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding DateDisplay}">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{DynamicResource Reconciliation.Col.Date}" />
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn
+                        Width="120"
+                        Binding="{Binding AmountDisplay}">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{DynamicResource Reconciliation.Col.Amount}" />
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding CounterpartyDisplay}">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{DynamicResource Reconciliation.Col.Counterparty}" />
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn
+                        Width="120"
+                        Binding="{Binding ResolutionDisplay}">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{DynamicResource Reconciliation.Col.Resolution}" />
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                    <DataGridTemplateColumn Width="280">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="{DynamicResource Reconciliation.Col.Actions}" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type vm:ReconciliationDiffRowViewModel}">
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    IsEnabled="{Binding IsPending}">
+                                    <ui:Button
+                                        Margin="0,0,4,0"
+                                        Padding="8,2,8,2"
+                                        Command="{Binding DataContext.MarkResolvedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Content="{DynamicResource Reconciliation.Action.MarkResolved}" />
+                                    <ui:Button
+                                        Margin="0,0,4,0"
+                                        Padding="8,2,8,2"
+                                        Command="{Binding DataContext.IgnoreCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Content="{DynamicResource Reconciliation.Action.Ignore}" />
+                                    <ui:Button
+                                        Padding="8,2,8,2"
+                                        Command="{Binding DataContext.DeleteTradeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Content="{DynamicResource Reconciliation.Action.DeleteTrade}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!--  Status footer  -->
+        <TextBlock
+            Grid.Row="3"
+            Margin="0,8,0,0"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{Binding StatusMessage}" />
+    </Grid>
+</UserControl>

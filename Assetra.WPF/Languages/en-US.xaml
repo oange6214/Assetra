@@ -29,6 +29,7 @@
     <sys:String x:Key="Nav.Settings">Settings</sys:String>
 
     <!--  Import feature  -->
+    <sys:String x:Key="Import.Tab.Import">Import</sys:String>
     <sys:String x:Key="Import.Title">Import Statement</sys:String>
     <sys:String x:Key="Import.Subtitle">CSV and Excel files from supported banks and brokers. Format auto-detected; duplicates flagged.</sys:String>
     <sys:String x:Key="Import.DropZone.Title">Drop a file here, or click to choose</sys:String>
@@ -688,6 +689,7 @@
     <sys:String x:Key="Categories.Field.Icon">Icon</sys:String>
     <sys:String x:Key="Categories.Field.Name">Name</sys:String>
     <sys:String x:Key="Categories.Field.Color">Color</sys:String>
+    <sys:String x:Key="Categories.Field.CurrentIcon">Current icon</sys:String>
     <sys:String x:Key="Categories.Field.Preview">Preview</sys:String>
     <sys:String x:Key="Categories.PreviewPlaceholder">Name preview</sys:String>
     <sys:String x:Key="Categories.Tab.Rules">Auto-categorization rules</sys:String>
@@ -854,4 +856,21 @@
     <sys:String x:Key="Goals.Error.TargetAmountInvalid">Please enter a target amount greater than 0</sys:String>
     <sys:String x:Key="Goals.Deadline.DaysRemaining">{0}d left</sys:String>
     <sys:String x:Key="Goals.Deadline.Overdue">Overdue</sys:String>
+
+    <!--  Reconciliation feature (v0.9.0)  -->
+    <sys:String x:Key="Reconciliation.Tab">Reconcile</sys:String>
+    <sys:String x:Key="Reconciliation.Title">Reconciliation Workbench</sys:String>
+    <sys:String x:Key="Reconciliation.Subtitle">Compare statement rows against your trades, resolve each diff, then sign off.</sys:String>
+    <sys:String x:Key="Reconciliation.Session">Session</sys:String>
+    <sys:String x:Key="Reconciliation.Recompute">Recompute</sys:String>
+    <sys:String x:Key="Reconciliation.SignOff">Sign Off</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Kind">Kind</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Date">Date</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Amount">Amount</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Counterparty">Counterparty</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Resolution">Resolution</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Actions">Actions</sys:String>
+    <sys:String x:Key="Reconciliation.Action.MarkResolved">Mark Resolved</sys:String>
+    <sys:String x:Key="Reconciliation.Action.Ignore">Ignore</sys:String>
+    <sys:String x:Key="Reconciliation.Action.DeleteTrade">Delete Trade</sys:String>
 </ResourceDictionary>

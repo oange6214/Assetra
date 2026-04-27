@@ -73,7 +73,9 @@ public sealed class ImportApplyService : IImportApplyService
             if (hasConflict && resolution == ImportConflictResolution.Skip)
             {
                 skipped++;
-                entries.Add(new ImportBatchEntry(row.RowIndex, ImportBatchAction.Skipped, null, null));
+                entries.Add(new ImportBatchEntry(
+                    row.RowIndex, ImportBatchAction.Skipped, null, null,
+                    PreviewRowJson: JsonSerializer.Serialize(row, SnapshotJsonOptions)));
                 continue;
             }
 
@@ -94,7 +96,9 @@ public sealed class ImportApplyService : IImportApplyService
             if (trade is null)
             {
                 skipped++;
-                entries.Add(new ImportBatchEntry(row.RowIndex, ImportBatchAction.Skipped, null, null));
+                entries.Add(new ImportBatchEntry(
+                    row.RowIndex, ImportBatchAction.Skipped, null, null,
+                    PreviewRowJson: JsonSerializer.Serialize(row, SnapshotJsonOptions)));
                 continue;
             }
 
@@ -105,7 +109,8 @@ public sealed class ImportApplyService : IImportApplyService
                 RowIndex: row.RowIndex,
                 Action: overwrittenJson is not null ? ImportBatchAction.Overwritten : ImportBatchAction.Added,
                 NewTradeId: trade.Id,
-                OverwrittenTradeJson: overwrittenJson));
+                OverwrittenTradeJson: overwrittenJson,
+                PreviewRowJson: JsonSerializer.Serialize(row, SnapshotJsonOptions)));
         }
 
         Guid? historyId = null;

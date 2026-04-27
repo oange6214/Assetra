@@ -13,6 +13,7 @@
     xmlns:trends="clr-namespace:Assetra.WPF.Features.Trends"
     xmlns:goals="clr-namespace:Assetra.WPF.Features.Goals"
     xmlns:import="clr-namespace:Assetra.WPF.Features.Import"
+    xmlns:reconciliation="clr-namespace:Assetra.WPF.Features.Reconciliation"
     xmlns:settings="clr-namespace:Assetra.WPF.Features.Settings"
     xmlns:shell="clr-namespace:Assetra.WPF.Shell"
     xmlns:snackbar="clr-namespace:Assetra.WPF.Features.Snackbar"
@@ -229,9 +230,16 @@
                     <alerts:AlertsView DataContext="{Binding Alerts}" Visibility="{Binding DataContext.NavRail.IsAlertsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </Grid>
 
-                <!--  匯入  -->
-                <Grid d:Visibility="Collapsed">
-                    <import:ImportView DataContext="{Binding Import}" Visibility="{Binding DataContext.NavRail.IsImportActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <!--  匯入 + 對帳  -->
+                <Grid d:Visibility="Collapsed" Visibility="{Binding DataContext.NavRail.IsImportActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TabControl Background="Transparent" BorderThickness="0">
+                        <TabItem Header="{DynamicResource Import.Tab.Import}">
+                            <import:ImportView DataContext="{Binding Import}" />
+                        </TabItem>
+                        <TabItem Header="{DynamicResource Reconciliation.Tab}">
+                            <reconciliation:ReconciliationView DataContext="{Binding Reconciliation}" />
+                        </TabItem>
+                    </TabControl>
                 </Grid>
 
                 <!--  設定  -->

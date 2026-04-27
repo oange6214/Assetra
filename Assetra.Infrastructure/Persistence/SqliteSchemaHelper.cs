@@ -32,6 +32,10 @@ internal static class SqliteSchemaHelper
         "budget_template_item",
         "recurring_transaction",
         "pending_recurring_entry",
+        "import_batch_history",
+        "import_batch_entry",
+        "reconciliation_session",
+        "reconciliation_diff",
     };
 
     /// <summary>

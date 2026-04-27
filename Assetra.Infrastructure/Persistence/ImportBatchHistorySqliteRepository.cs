@@ -55,9 +55,9 @@ public sealed class ImportBatchHistorySqliteRepository : IImportBatchHistoryRepo
             cmd.Transaction = tx;
             cmd.CommandText = """
                 INSERT INTO import_batch_entry
-                    (id, history_id, row_index, action, new_trade_id, overwritten_trade_json)
+                    (id, history_id, row_index, action, new_trade_id, overwritten_trade_json, preview_row_json)
                 VALUES
-                    ($id, $history_id, $row_index, $action, $new_trade_id, $json);
+                    ($id, $history_id, $row_index, $action, $new_trade_id, $json, $row_json);
                 """;
             cmd.Parameters.AddWithValue("$id", Guid.NewGuid().ToString());
             cmd.Parameters.AddWithValue("$history_id", history.Id.ToString());
@@ -67,6 +67,8 @@ public sealed class ImportBatchHistorySqliteRepository : IImportBatchHistoryRepo
                 entry.NewTradeId?.ToString() ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("$json",
                 entry.OverwrittenTradeJson ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("$row_json",
+                entry.PreviewRowJson ?? (object)DBNull.Value);
             await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
         }
 
@@ -127,7 +129,7 @@ public sealed class ImportBatchHistorySqliteRepository : IImportBatchHistoryRepo
         await using (var cmd = conn.CreateCommand())
         {
             cmd.CommandText = """
-                SELECT row_index, action, new_trade_id, overwritten_trade_json
+                SELECT row_index, action, new_trade_id, overwritten_trade_json, preview_row_json
                 FROM import_batch_entry
                 WHERE history_id = $hid
                 ORDER BY row_index;
@@ -140,11 +142,36 @@ public sealed class ImportBatchHistorySqliteRepository : IImportBatchHistoryRepo
                     RowIndex: reader.GetInt32(0),
                     Action: (ImportBatchAction)reader.GetInt32(1),
                     NewTradeId: reader.IsDBNull(2) ? null : Guid.Parse(reader.GetString(2)),
-                    OverwrittenTradeJson: reader.IsDBNull(3) ? null : reader.GetString(3)));
+                    OverwrittenTradeJson: reader.IsDBNull(3) ? null : reader.GetString(3),
+                    PreviewRowJson: reader.IsDBNull(4) ? null : reader.GetString(4)));
             }
         }
 
         return header with { Entries = entries };
+    }
+
+    public async Task<IReadOnlyList<ImportPreviewRow>> GetPreviewRowsAsync(Guid historyId, CancellationToken ct = default)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT preview_row_json
+            FROM import_batch_entry
+            WHERE history_id = $hid AND preview_row_json IS NOT NULL
+            ORDER BY row_index;
+            """;
+        cmd.Parameters.AddWithValue("$hid", historyId.ToString());
+
+        var rows = new List<ImportPreviewRow>();
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
+        {
+            var json = reader.GetString(0);
+            var row = System.Text.Json.JsonSerializer.Deserialize<ImportPreviewRow>(json);
+            if (row is not null) rows.Add(row);
+        }
+        return rows;
     }
 
     public async Task MarkRolledBackAsync(Guid id, DateTimeOffset rolledBackAt, CancellationToken ct = default)

@@ -52,6 +52,18 @@
 - [x] 統一手動 + 匯入自動分類規則（v0.8.0：擴充 `AutoCategorizationRule` 加上 `MatchField` / `MatchType` / `AppliesTo`，取代原規劃的獨立 `ImportRule`）
 - [x] 匯入歷史 + rollback（v0.8.0：`ImportBatchHistory` + `ImportRollbackService`）
 
+### 6. Reconciliation 子系統  *(MVP 完成 — v0.9.0)*
+
+- [x] 建立 `ReconciliationSession` / `ReconciliationDiff`（含 Status / Kind / Resolution enum）
+- [x] 建立 `IReconciliationSessionRepository` + `ReconciliationSessionSqliteRepository`（含 `ReconciliationSchemaMigrator`、statement_rows_json 欄）
+- [x] 建立 `IReconciliationMatcher` + `DefaultReconciliationMatcher`（日期 ±1 天、金額容忍 0.005、sign-aware）
+- [x] 建立 `IReconciliationService` + `ReconciliationService`（`ComputeDiffs` / `EnsureLegalTransition` 暴露為 public static 供測試）
+- [x] `ImportBatchEntry` 加 `PreviewRowJson` 並由 `ImportApplyService` 寫入；新增 `IImportBatchHistoryRepository.GetPreviewRowsAsync`
+- [x] Reconciliation Tab UI（Import 頁 TabControl；MVP Actions = Mark Resolved / Ignore / Delete Trade）
+- [ ] 「新建 Session」對話框（v0.10+）
+- [ ] Created / OverwrittenFromStatement 在 UI 上的執行路徑（待 `ImportRowMapper` 整合，v0.10+）
+- [ ] DataGrid Kind 分組與即時餘額對帳面板（v0.10+）
+
 ## Phase 2：投資分析與專業化
 
 ### 1. 投資績效分析

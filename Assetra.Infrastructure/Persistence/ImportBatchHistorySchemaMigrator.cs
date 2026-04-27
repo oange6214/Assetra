@@ -44,6 +44,15 @@ internal static class ImportBatchHistorySchemaMigrator
                     ON import_batch_entry (history_id);
                 """;
             cmd.ExecuteNonQuery();
+
+            SqliteSchemaHelper.MigrateAddColumn(
+                conn, tx,
+                table: "import_batch_entry",
+                column: "preview_row_json",
+                typeDef: "TEXT",
+                allowedColumns: new(StringComparer.OrdinalIgnoreCase) { "preview_row_json" },
+                allowedTypeDefs: new(StringComparer.OrdinalIgnoreCase) { "TEXT" });
+
             tx.Commit();
         }
         catch

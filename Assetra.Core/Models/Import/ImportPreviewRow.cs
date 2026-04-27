@@ -12,6 +12,11 @@ namespace Assetra.Core.Models.Import;
 /// <see cref="Symbol"/> 為標的，<see cref="Quantity"/> 為股數；
 /// 若來源有提供，<see cref="UnitPrice"/> 與 <see cref="Commission"/> 會保留原始成交資訊。
 /// </para>
+/// <para>
+/// 跨 Bounded Context 共用：本型別原屬 Importing context，自 v0.9 起亦由 Reconciliation context
+/// 直接使用為「對帳單原始列」（statement row），避免重複定義 <c>StatementRow</c>。
+/// 修改此型別時須同時考量兩個 context 的相容性。
+/// </para>
 /// </summary>
 public sealed record ImportPreviewRow(
     int RowIndex,

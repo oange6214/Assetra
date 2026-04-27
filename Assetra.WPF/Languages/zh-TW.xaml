@@ -29,6 +29,7 @@
     <sys:String x:Key="Nav.Settings">設定</sys:String>
 
     <!--  Import feature  -->
+    <sys:String x:Key="Import.Tab.Import">匯入</sys:String>
     <sys:String x:Key="Import.Title">匯入對帳單</sys:String>
     <sys:String x:Key="Import.Subtitle">支援銀行 / 券商 CSV 與 Excel 檔案，自動偵測格式並標記重複交易。</sys:String>
     <sys:String x:Key="Import.DropZone.Title">拖放檔案到此處，或選擇檔案</sys:String>
@@ -690,6 +691,7 @@
     <sys:String x:Key="Categories.Field.Icon">圖示</sys:String>
     <sys:String x:Key="Categories.Field.Name">名稱</sys:String>
     <sys:String x:Key="Categories.Field.Color">顏色</sys:String>
+    <sys:String x:Key="Categories.Field.CurrentIcon">目前圖示</sys:String>
     <sys:String x:Key="Categories.Field.Preview">預覽</sys:String>
     <sys:String x:Key="Categories.PreviewPlaceholder">尚未輸入名稱</sys:String>
     <sys:String x:Key="Categories.Tab.Rules">自動分類規則</sys:String>
@@ -856,4 +858,21 @@
     <sys:String x:Key="Goals.Error.TargetAmountInvalid">請輸入大於 0 的目標金額</sys:String>
     <sys:String x:Key="Goals.Deadline.DaysRemaining">剩 {0} 天</sys:String>
     <sys:String x:Key="Goals.Deadline.Overdue">已逾期</sys:String>
+
+    <!--  Reconciliation feature (v0.9.0)  -->
+    <sys:String x:Key="Reconciliation.Tab">對帳</sys:String>
+    <sys:String x:Key="Reconciliation.Title">對帳工作台</sys:String>
+    <sys:String x:Key="Reconciliation.Subtitle">比對對帳單與帳上交易的差異，逐項處置後簽收作業。</sys:String>
+    <sys:String x:Key="Reconciliation.Session">對帳作業</sys:String>
+    <sys:String x:Key="Reconciliation.Recompute">重新比對</sys:String>
+    <sys:String x:Key="Reconciliation.SignOff">儲存簽收</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Kind">類型</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Date">日期</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Amount">金額</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Counterparty">對方</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Resolution">處置</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Actions">動作</sys:String>
+    <sys:String x:Key="Reconciliation.Action.MarkResolved">標記已解</sys:String>
+    <sys:String x:Key="Reconciliation.Action.Ignore">忽略</sys:String>
+    <sys:String x:Key="Reconciliation.Action.DeleteTrade">刪除交易</sys:String>
 </ResourceDictionary>

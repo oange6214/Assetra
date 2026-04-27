@@ -1,5 +1,30 @@
 # Changelog
 
+## v0.9.0 - 2026-04-28
+
+新增 Reconciliation bounded context：把對帳單預覽列與已匯入的 Trade 比對，找出 Missing / Extra / AmountMismatch 三類差異，並提供逐筆裁決與簽核流程。
+
+### 重點
+
+- **Reconciliation 領域模型（F1）** — 新增 `ReconciliationSession`（帳戶 + 期間 + 來源批次 + 狀態）與 `ReconciliationDiff`（Kind = Missing / Extra / AmountMismatch；Resolution = Pending / Created / Deleted / MarkedResolved / Ignored / OverwrittenFromStatement），並建立 `IReconciliationSessionRepository` + `ReconciliationSessionSqliteRepository`，以 `statement_rows_json` 將整批對帳單列存於 session row、diff 內 `statement_row_json` 保留個別列 snapshot 供後續比對與顯示。
+- **Diff 比對演算法（F2）** — `ReconciliationService.ComputeDiffs` 以 `IReconciliationMatcher`（預設 `DefaultReconciliationMatcher`：日期 ±1 天、金額容忍 0.005，sign-aware）雙向配對對帳單列與 trade；金額完全相等 → 不產 diff，差異在容忍度內但不相等 → AmountMismatch。`EnsureLegalTransition` 強制 Kind × Resolution 合法表，杜絕 UI 端錯置裁決。
+- **Reconciliation Tab（F3）** — Import 頁改為 TabControl，新增 Reconciliation 分頁；toolbar 內含 Session 下拉、Recompute、SignOff，DataGrid 顯示 Kind / Date / Amount / Counterparty / Resolution / Actions（MVP 動作集：Mark Resolved / Ignore / Delete Trade），底部顯示 Pending / Resolved / Total 計數。
+- **D1 — 跨 context 共用準備** — `ImportPreviewRow` 標註可被 Reconciliation 沿用；`ImportBatchEntry` 新增 `PreviewRowJson` 並由 `ImportApplyService` 寫入，使 `IImportBatchHistoryRepository.GetPreviewRowsAsync` 能成為對帳單來源。
+
+### 內部變更
+
+- 新增 `Assetra.Core/Models/Reconciliation/`、`Assetra.Core/Interfaces/Reconciliation/`、`Assetra.Core/DomainServices/Reconciliation/`、`Assetra.Application/Reconciliation/`、`Assetra.Infrastructure/Persistence/Reconciliation*`、`Assetra.WPF/Features/Reconciliation/`。
+- `AppBootstrapper` 加入 `AddReconciliationContext`；`SqliteSchemaHelper.KnownTables` 補上 `import_batch_history` / `import_batch_entry` / `reconciliation_session` / `reconciliation_diff`；`ImportBatchHistorySchemaMigrator` 以 `MigrateAddColumn` 新增 `preview_row_json` 欄。
+- `ReconciliationService` 暴露 `public static ComputeDiffs(...,matcher)` 與 `public static EnsureLegalTransition(...)` 供 unit test 直接驅動，避免測試需要實例化 service。
+- `Languages/zh-TW.xaml` / `en-US.xaml` 新增 `Import.Tab.Import` 與 14 組 `Reconciliation.*` 鍵（Tab / Title / Subtitle / Session / Recompute / SignOff / 6 個 Col.*、3 個 Action.*）。
+- 421 → 444 筆測試全綠（新增 7 筆 `DefaultReconciliationMatcher` + 16 筆 `ReconciliationService`，含 Kind × Resolution 合法表 Theory）。
+
+### 暫不納入（後續 sprint）
+
+- `Created` / `OverwrittenFromStatement` 兩種 Resolution 在 UI 上的執行路徑（需先打通 `ImportRowMapper` 與 trade 寫入，目前服務端可接受、UI 暫未提供按鈕）。
+- 「新建 Reconciliation Session」對話框（目前由程式碼路徑 `CreateAsync` 建立；UI 只能載入既有 session）。
+- 即時餘額對帳面板與 DataGrid Kind 分組。
+
 ## v0.8.0 - 2026-04-27
 
 收尾 Import Governance Phase 2：把匯入端與手動端的自動分類規則整合為單一規則系統，加入批次歷史與 rollback。
