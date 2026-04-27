@@ -92,6 +92,22 @@ public sealed partial class ReportsViewModel : ObservableObject
     public IReadOnlyList<UpcomingRecurringItem> Upcoming =>
         Report?.Upcoming ?? [];
 
+    public IReadOnlyList<OverBudgetRowViewModel> OverBudgetRows =>
+        OverBudgetCategories
+            .Select(row => new OverBudgetRowViewModel(
+                row,
+                FormatAmount(row.Spent),
+                row.BudgetAmount.HasValue ? $"/ {FormatAmount(row.BudgetAmount.Value)}" : string.Empty))
+            .ToArray();
+
+    public IReadOnlyList<UpcomingRowViewModel> UpcomingRows =>
+        Upcoming
+            .Select(row => new UpcomingRowViewModel(
+                row.Name,
+                row.DueDate,
+                FormatAmount(row.Amount)))
+            .ToArray();
+
     [RelayCommand]
     private async Task LoadAsync()
     {
@@ -151,5 +167,21 @@ public sealed partial class ReportsViewModel : ObservableObject
         OnPropertyChanged(nameof(IncomeDeltaDisplay));
         OnPropertyChanged(nameof(ExpenseDeltaDisplay));
         OnPropertyChanged(nameof(NetDeltaDisplay));
+        OnPropertyChanged(nameof(OverBudgetRows));
+        OnPropertyChanged(nameof(UpcomingRows));
     }
+
+    public sealed record OverBudgetRowViewModel(
+        CategorySpendSummary Summary,
+        string SpentDisplay,
+        string BudgetDisplay)
+    {
+        public string CategoryName => Summary.CategoryName;
+        public decimal? OveragePercent => Summary.OveragePercent;
+    }
+
+    public sealed record UpcomingRowViewModel(
+        string Name,
+        DateTime DueDate,
+        string AmountDisplay);
 }
