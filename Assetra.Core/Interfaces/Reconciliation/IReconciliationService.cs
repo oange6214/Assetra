@@ -19,6 +19,7 @@ public interface IReconciliationService
         IReadOnlyList<ImportPreviewRow> statementRows,
         Guid? sourceBatchId,
         string? note,
+        decimal? statementEndingBalance = null,
         CancellationToken ct = default);
 
     /// <summary>
@@ -37,6 +38,19 @@ public interface IReconciliationService
         Guid diffId,
         ReconciliationDiffResolution resolution,
         string? note,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// v0.10 起：對 <see cref="ReconciliationDiffResolution.Created"/> /
+    /// <see cref="ReconciliationDiffResolution.OverwrittenFromStatement"/> 提供完整執行路徑，
+    /// 內部透過 <see cref="Assetra.Core.Interfaces.Import.IImportRowApplier"/> 把 statement row 寫入為 trade。
+    /// </summary>
+    Task ApplyResolutionAsync(
+        Guid diffId,
+        ReconciliationDiffResolution resolution,
+        string? note,
+        Assetra.Core.Models.Import.ImportSourceKind? sourceKind,
+        Assetra.Core.Models.Import.ImportApplyOptions? options,
         CancellationToken ct = default);
 
     /// <summary>簽收：所有 diff 均已 Resolved/Ignored 才允許，否則拋例外；session 進入 <see cref="ReconciliationStatus.Resolved"/>。</summary>

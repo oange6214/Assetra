@@ -16,6 +16,10 @@ internal static class ImportServiceCollectionExtensions
         services.AddSingleton<ImportParserFactory>();
         services.AddSingleton<IImportConflictDetector, ImportConflictDetector>();
         services.AddSingleton<IImportRowMapper, ImportRowMapper>();
+        services.AddSingleton<IImportRowApplier>(sp => new DefaultImportRowApplier(
+            sp.GetRequiredService<ITradeRepository>(),
+            sp.GetRequiredService<IImportRowMapper>(),
+            sp.GetService<IAutoCategorizationRuleRepository>()));
         services.AddSingleton<IImportBatchHistoryRepository>(_ => new ImportBatchHistorySqliteRepository(dbPath));
         services.AddSingleton<IImportApplyService>(sp => new ImportApplyService(
             sp.GetRequiredService<ITradeRepository>(),

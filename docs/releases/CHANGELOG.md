@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.10.0 - 2026-04-28
+
+Reconciliation Phase 2：補上 v0.9.0 暫緩的「新建 Session UI／Created／OverwrittenFromStatement 執行路徑／餘額對帳面板／Kind 分組」。
+
+### 重點
+
+- **D1 共用 IImportRowApplier** — 從 `ImportApplyService` 抽出 `IImportRowApplier`（Core 介面）與 `DefaultImportRowApplier`（Application 實作），讓 Reconciliation 在「Created」處置時不必另寫 trade-from-row 邏輯，直接共用 ImportRowMapper + AutoCategorizationRule snapshot。
+- **D1-2 期末餘額欄位** — `ReconciliationSession` 新增 `StatementEndingBalance` 欄；SQLite 透過 `SqliteSchemaHelper.MigrateAddColumn` 加 `statement_ending_balance REAL`，向下相容既有 session 列為 NULL。
+- **F1 新建 Session 面板** — `ReconciliationView.xaml` 新增可摺疊新建面板（Account 下拉、起訖期間、來源切換 = 既有匯入批次 vs 上傳新檔、期末餘額），ViewModel 端整合 `IImportBatchHistoryRepository` / `IImportFormatDetector` / `ImportParserFactory` 兩種來源路徑。
+- **F2 Created / OverwrittenFromStatement** — `IReconciliationService.ApplyResolutionAsync` 新增 `(sourceKind, options)` overload；Created → 透過 IImportRowApplier 把 statement row 寫入為 trade，OverwrittenFromStatement → `_trades.GetByIdAsync` + `with { CashAmount = srow.Amount }` 後 Update。動作按鈕視 Kind 動態顯示。
+- **F3 Kind 分組 + 餘額面板** — DataGrid 改綁 `GroupedDiffs` ICollectionView（PropertyGroupDescription on KindDisplay）；右側面板顯示 `Statement Sum / Trades Sum / Δ / Ending balance` 簡化餘額對帳。
+
+### 內部變更
+
+- `Assetra.Core/Interfaces/Import/IImportRowApplier.cs`、`Assetra.Application/Import/DefaultImportRowApplier.cs`、`Assetra.WPF/Infrastructure/ImportServiceCollectionExtensions.cs` 註冊。
+- `ReconciliationServiceCollectionExtensions.cs` 注入 `ITradeRepository` / `IReconciliationMatcher` / `IImportBatchHistoryRepository` / `IImportFormatDetector` / `ImportParserFactory` 至 ViewModel。
+- `ReconciliationDiffRowViewModel` 暴露 `IsMissing` / `IsExtra` / `IsAmountMismatch` 供 XAML 動作按鈕 visibility binding。
+- `Languages/*.xaml` 新增 14 組 `Reconciliation.NewSession.*` / `Reconciliation.Action.CreateTrade` / `Reconciliation.Action.Overwrite` / `Reconciliation.Balance.Title` 鍵。
+- 444 → 444 筆測試全綠（既有測試相容；本 sprint 主為 UI/連線改動，暫未新增 unit test）。
+
 ## v0.9.0 - 2026-04-28
 
 新增 Reconciliation bounded context：把對帳單預覽列與已匯入的 Trade 比對，找出 Missing / Extra / AmountMismatch 三類差異，並提供逐筆裁決與簽核流程。

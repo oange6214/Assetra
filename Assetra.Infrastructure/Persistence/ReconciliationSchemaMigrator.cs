@@ -4,6 +4,16 @@ namespace Assetra.Infrastructure.Persistence;
 
 internal static class ReconciliationSchemaMigrator
 {
+    private static readonly HashSet<string> AllowedColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "statement_ending_balance",
+    };
+
+    private static readonly HashSet<string> AllowedTypeDefs = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "REAL",
+    };
+
     public static void EnsureInitialized(string connectionString)
     {
         using var conn = new SqliteConnection(connectionString);
@@ -45,6 +55,10 @@ internal static class ReconciliationSchemaMigrator
                     ON reconciliation_diff (session_id);
                 """;
             cmd.ExecuteNonQuery();
+
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "reconciliation_session",
+                "statement_ending_balance", "REAL", AllowedColumns, AllowedTypeDefs);
+
             tx.Commit();
         }
         catch

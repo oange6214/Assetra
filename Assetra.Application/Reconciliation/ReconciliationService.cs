@@ -1,4 +1,5 @@
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Import;
 using Assetra.Core.Interfaces.Reconciliation;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Import;
@@ -19,12 +20,14 @@ public sealed class ReconciliationService : IReconciliationService
     private readonly IReconciliationSessionRepository _sessions;
     private readonly ITradeRepository _trades;
     private readonly IReconciliationMatcher _matcher;
+    private readonly IImportRowApplier? _applier;
     private readonly TimeProvider _clock;
 
     public ReconciliationService(
         IReconciliationSessionRepository sessions,
         ITradeRepository trades,
         IReconciliationMatcher matcher,
+        IImportRowApplier? applier = null,
         TimeProvider? clock = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
@@ -33,6 +36,7 @@ public sealed class ReconciliationService : IReconciliationService
         _sessions = sessions;
         _trades = trades;
         _matcher = matcher;
+        _applier = applier;
         _clock = clock ?? TimeProvider.System;
     }
 
@@ -43,6 +47,7 @@ public sealed class ReconciliationService : IReconciliationService
         IReadOnlyList<ImportPreviewRow> statementRows,
         Guid? sourceBatchId,
         string? note,
+        decimal? statementEndingBalance = null,
         CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(statementRows);
@@ -57,7 +62,8 @@ public sealed class ReconciliationService : IReconciliationService
             SourceBatchId: sourceBatchId,
             CreatedAt: _clock.GetUtcNow(),
             Status: ReconciliationStatus.Open,
-            Note: note);
+            Note: note,
+            StatementEndingBalance: statementEndingBalance);
 
         var trades = await LoadTradesAsync(accountId, periodStart, periodEnd, ct).ConfigureAwait(false);
         var diffs = ComputeDiffs(session.Id, statementRows, trades);
@@ -79,10 +85,26 @@ public sealed class ReconciliationService : IReconciliationService
         return diffs;
     }
 
+    public Task ApplyResolutionAsync(
+        Guid diffId,
+        ReconciliationDiffResolution resolution,
+        string? note,
+        CancellationToken ct = default)
+        => ApplyResolutionAsync(diffId, resolution, note, sourceKind: null, options: null, ct);
+
+    /// <summary>
+    /// v0.10 擴充版：對 <see cref="ReconciliationDiffResolution.Created"/> 與
+    /// <see cref="ReconciliationDiffResolution.OverwrittenFromStatement"/>，
+    /// 服務會自行透過 <see cref="IImportRowApplier"/> 把 statement row 寫入為 trade（Created）
+    /// 或更新既有 trade 的金額（Overwritten）。
+    /// 上層 UI 應傳入 <paramref name="sourceKind"/> 與 <paramref name="options"/>（含 CashAccountId）。
+    /// </summary>
     public async Task ApplyResolutionAsync(
         Guid diffId,
         ReconciliationDiffResolution resolution,
         string? note,
+        ImportSourceKind? sourceKind,
+        ImportApplyOptions? options,
         CancellationToken ct = default)
     {
         var diff = await FindDiffAsync(diffId, ct).ConfigureAwait(false);
@@ -93,8 +115,24 @@ public sealed class ReconciliationService : IReconciliationService
             case ReconciliationDiffResolution.Deleted when diff.TradeId is { } tid:
                 await _trades.RemoveAsync(tid).ConfigureAwait(false);
                 break;
-            // Created / OverwrittenFromStatement 涉及 trade 物件構造，由上層呼叫者
-            // 透過 ImportRowMapper 完成 trade 寫入後再呼叫此方法標記狀態。
+
+            case ReconciliationDiffResolution.Created when diff.StatementRow is { } row:
+                if (_applier is null || sourceKind is null || options is null)
+                    throw new InvalidOperationException(
+                        "Created resolution requires IImportRowApplier registration plus sourceKind/options.");
+                var newId = await _applier.ApplyAsync(row, sourceKind.Value, options, warnings: null, ct).ConfigureAwait(false);
+                if (newId is null)
+                    throw new InvalidOperationException("Mapper rejected the statement row; cannot create trade.");
+                break;
+
+            case ReconciliationDiffResolution.OverwrittenFromStatement
+                when diff.StatementRow is { } srow && diff.TradeId is { } existingTid:
+                var existing = await _trades.GetByIdAsync(existingTid, ct).ConfigureAwait(false);
+                if (existing is null)
+                    throw new InvalidOperationException($"Trade {existingTid} not found.");
+                var updated = existing with { CashAmount = srow.Amount };
+                await _trades.UpdateAsync(updated).ConfigureAwait(false);
+                break;
         }
 
         await _sessions.UpdateDiffResolutionAsync(

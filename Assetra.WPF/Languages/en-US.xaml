@@ -873,4 +873,17 @@
     <sys:String x:Key="Reconciliation.Action.MarkResolved">Mark Resolved</sys:String>
     <sys:String x:Key="Reconciliation.Action.Ignore">Ignore</sys:String>
     <sys:String x:Key="Reconciliation.Action.DeleteTrade">Delete Trade</sys:String>
+    <sys:String x:Key="Reconciliation.Action.CreateTrade">Create Trade</sys:String>
+    <sys:String x:Key="Reconciliation.Action.Overwrite">Overwrite Amount</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession">New Session</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Account">Account</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Period">Period</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Source">Source</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Source.ExistingBatch">Existing import batch</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Source.Upload">Upload new file</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Browse">Browse…</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.EndingBalance">Ending balance (statement)</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Create">Create</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Cancel">Cancel</sys:String>
+    <sys:String x:Key="Reconciliation.Balance.Title">Balance Reconciliation</sys:String>
 </ResourceDictionary>

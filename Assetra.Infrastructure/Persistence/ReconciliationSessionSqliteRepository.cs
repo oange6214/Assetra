@@ -23,7 +23,7 @@ public sealed class ReconciliationSessionSqliteRepository : IReconciliationSessi
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT id, account_id, period_start, period_end, source_batch_id, created_at, status, note
+            SELECT id, account_id, period_start, period_end, source_batch_id, created_at, status, note, statement_ending_balance
             FROM reconciliation_session
             ORDER BY created_at DESC;
             """;
@@ -43,7 +43,7 @@ public sealed class ReconciliationSessionSqliteRepository : IReconciliationSessi
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT id, account_id, period_start, period_end, source_batch_id, created_at, status, note
+            SELECT id, account_id, period_start, period_end, source_batch_id, created_at, status, note, statement_ending_balance
             FROM reconciliation_session
             WHERE id = $id;
             """;
@@ -71,12 +71,13 @@ public sealed class ReconciliationSessionSqliteRepository : IReconciliationSessi
             cmd.Transaction = tx;
             cmd.CommandText = """
                 INSERT INTO reconciliation_session
-                    (id, account_id, period_start, period_end, source_batch_id, created_at, status, note, statement_rows_json)
+                    (id, account_id, period_start, period_end, source_batch_id, created_at, status, note, statement_rows_json, statement_ending_balance)
                 VALUES
-                    ($id, $account, $ps, $pe, $batch, $created, $status, $note, $rows);
+                    ($id, $account, $ps, $pe, $batch, $created, $status, $note, $rows, $bal);
                 """;
             BindSession(cmd, session);
             cmd.Parameters.AddWithValue("$rows", JsonSerializer.Serialize(statementRows, JsonOptions));
+            cmd.Parameters.AddWithValue("$bal", session.StatementEndingBalance ?? (object)DBNull.Value);
             await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
         }
 
@@ -236,7 +237,8 @@ public sealed class ReconciliationSessionSqliteRepository : IReconciliationSessi
         SourceBatchId: reader.IsDBNull(4) ? null : Guid.Parse(reader.GetString(4)),
         CreatedAt: DateTimeOffset.Parse(reader.GetString(5)),
         Status: (ReconciliationStatus)reader.GetInt32(6),
-        Note: reader.IsDBNull(7) ? null : reader.GetString(7));
+        Note: reader.IsDBNull(7) ? null : reader.GetString(7),
+        StatementEndingBalance: reader.IsDBNull(8) ? null : reader.GetDecimal(8));
 
     private static ReconciliationDiff ReadDiff(SqliteDataReader reader) => new(
         Id: Guid.Parse(reader.GetString(0)),

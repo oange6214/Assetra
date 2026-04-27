@@ -875,4 +875,17 @@
     <sys:String x:Key="Reconciliation.Action.MarkResolved">標記已解</sys:String>
     <sys:String x:Key="Reconciliation.Action.Ignore">忽略</sys:String>
     <sys:String x:Key="Reconciliation.Action.DeleteTrade">刪除交易</sys:String>
+    <sys:String x:Key="Reconciliation.Action.CreateTrade">建立交易</sys:String>
+    <sys:String x:Key="Reconciliation.Action.Overwrite">覆寫金額</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession">新增對帳</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Account">帳戶</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Period">期間</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Source">來源</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Source.ExistingBatch">既有匯入批次</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Source.Upload">上傳新檔</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Browse">選擇檔案…</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.EndingBalance">期末餘額（對帳單）</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Create">建立</sys:String>
+    <sys:String x:Key="Reconciliation.NewSession.Cancel">取消</sys:String>
+    <sys:String x:Key="Reconciliation.Balance.Title">餘額對帳</sys:String>
 </ResourceDictionary>

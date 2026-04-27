@@ -41,6 +41,10 @@ public partial class ReconciliationDiffRowViewModel : ObservableObject
     public bool IsPending => Resolution == ReconciliationDiffResolution.Pending;
     public bool IsResolved => Resolution != ReconciliationDiffResolution.Pending;
 
+    public bool IsMissing => Kind == ReconciliationDiffKind.Missing;
+    public bool IsExtra => Kind == ReconciliationDiffKind.Extra;
+    public bool IsAmountMismatch => Kind == ReconciliationDiffKind.AmountMismatch;
+
     public string ResolutionDisplay => Resolution.ToString();
 
     public void Refresh(ReconciliationDiff updated)

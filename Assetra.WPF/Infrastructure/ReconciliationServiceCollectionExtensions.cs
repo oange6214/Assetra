@@ -1,7 +1,9 @@
 using Assetra.Application.Reconciliation;
 using Assetra.Core.DomainServices.Reconciliation;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Import;
 using Assetra.Core.Interfaces.Reconciliation;
+using Assetra.Infrastructure.Import;
 using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Reconciliation;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,8 +19,17 @@ internal static class ReconciliationServiceCollectionExtensions
         services.AddSingleton<IReconciliationService>(sp => new ReconciliationService(
             sp.GetRequiredService<IReconciliationSessionRepository>(),
             sp.GetRequiredService<ITradeRepository>(),
-            sp.GetRequiredService<IReconciliationMatcher>()));
-        services.AddSingleton<ReconciliationViewModel>();
+            sp.GetRequiredService<IReconciliationMatcher>(),
+            sp.GetService<IImportRowApplier>()));
+        services.AddSingleton<ReconciliationViewModel>(sp => new ReconciliationViewModel(
+            sp.GetRequiredService<IReconciliationService>(),
+            sp.GetRequiredService<IReconciliationSessionRepository>(),
+            sp.GetRequiredService<IAssetRepository>(),
+            sp.GetRequiredService<ITradeRepository>(),
+            sp.GetRequiredService<IReconciliationMatcher>(),
+            sp.GetService<IImportBatchHistoryRepository>(),
+            sp.GetService<IImportFormatDetector>(),
+            sp.GetService<ImportParserFactory>()));
         return services;
     }
 }
