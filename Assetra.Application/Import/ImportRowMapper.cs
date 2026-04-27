@@ -6,10 +6,22 @@ namespace Assetra.Application.Import;
 
 /// <summary>
 /// 預設 mapper：依 <see cref="ImportSourceKind"/> 將 <see cref="ImportPreviewRow"/> 轉成 <see cref="Trade"/>。
-/// 行為與 v0.7 內嵌於 <see cref="ImportApplyService"/> 的私有 helper 一致。
+/// 行為與 v0.7 內嵌於 <see cref="ImportApplyService"/> 的私有 helper 一致；
+/// v0.8 新增可選 <see cref="IImportRuleEngine"/>：若注入且命中規則，會把 <see cref="Trade.CategoryId"/> 帶入。
 /// </summary>
 public sealed class ImportRowMapper : IImportRowMapper
 {
+    private readonly IImportRuleEngine? _ruleEngine;
+
+    public ImportRowMapper()
+    {
+    }
+
+    public ImportRowMapper(IImportRuleEngine? ruleEngine)
+    {
+        _ruleEngine = ruleEngine;
+    }
+
     public Trade? Map(ImportPreviewRow row, ImportSourceKind kind, ImportApplyOptions options, IList<string> warnings)
     {
         ArgumentNullException.ThrowIfNull(row);
@@ -19,12 +31,21 @@ public sealed class ImportRowMapper : IImportRowMapper
         var date = row.Date.ToDateTime(TimeOnly.MinValue);
         var note = ComposeNote(row, kind, options);
 
-        return kind switch
+        var trade = kind switch
         {
             ImportSourceKind.BankStatement => MapBankRow(row, date, note, options),
             ImportSourceKind.BrokerStatement => MapBrokerRow(row, date, note, options, warnings),
             _ => null,
         };
+
+        if (trade is null) return null;
+        if (_ruleEngine is not null
+            && _ruleEngine.TryResolveCategory(row, out var categoryId)
+            && categoryId is { } cid)
+        {
+            trade = trade with { CategoryId = cid };
+        }
+        return trade;
     }
 
     private static Trade MapBankRow(ImportPreviewRow row, DateTime date, string note, ImportApplyOptions options)
