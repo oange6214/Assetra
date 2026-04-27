@@ -36,6 +36,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!--  ── Header ──  -->
@@ -299,5 +300,71 @@
                 Content="{DynamicResource Import.Button.Apply}"
                 ToolTip="{DynamicResource Import.Apply.Tooltip}" />
         </Grid>
+
+        <!--  ── History ──  -->
+        <Border
+            Grid.Row="5"
+            Margin="0,16,0,0"
+            Padding="16,12,16,12"
+            Background="{DynamicResource AppCardBackground}"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="1"
+            CornerRadius="8"
+            Visibility="{Binding HasHistory, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel>
+                <TextBlock
+                    Margin="0,0,0,8"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    Text="{DynamicResource Import.History.Title}" />
+                <ItemsControl ItemsSource="{Binding History}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:ImportHistoryRowViewModel}">
+                            <Grid Margin="0,4,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="160" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="160" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{Binding AppliedAtDisplay}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding FileName}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    Margin="0,0,16,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{Binding FormatLabel}" />
+                                <TextBlock
+                                    Grid.Column="3"
+                                    Margin="0,0,12,0"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{StaticResource FontTabular}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{Binding CountsDisplay}" />
+                                <ui:Button
+                                    Grid.Column="4"
+                                    Padding="10,4,10,4"
+                                    Appearance="Secondary"
+                                    Command="{Binding DataContext.RollbackCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    Content="{DynamicResource Import.Button.Rollback}"
+                                    IsEnabled="{Binding CanRollback}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

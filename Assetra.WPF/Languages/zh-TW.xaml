@@ -46,6 +46,10 @@
     <sys:String x:Key="Import.Col.Counterparty">對方/摘要</sys:String>
     <sys:String x:Key="Import.Col.Memo">備註</sys:String>
     <sys:String x:Key="Import.Col.Resolution">處理方式</sys:String>
+    <sys:String x:Key="Import.History.Title">最近匯入</sys:String>
+    <sys:String x:Key="Import.Button.Rollback">撤銷</sys:String>
+    <sys:String x:Key="Import.Rollback.Success">已撤銷 {0}：刪除 {1} 筆、還原 {2} 筆。</sys:String>
+    <sys:String x:Key="Import.Rollback.PartialFailure">撤銷部分失敗（{0} 筆錯誤）。第一筆原因：{1}</sys:String>
     <sys:String x:Key="Nav.GoBack">上一頁</sys:String>
     <sys:String x:Key="Nav.GoForward">下一頁</sys:String>
 

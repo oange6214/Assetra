@@ -25,10 +25,14 @@ public sealed partial class ImportViewModel : ObservableObject
         ("Excel", "*.xlsx;*.xls"),
     ];
 
+    private const int HistoryListLimit = 20;
+
     private readonly IImportFormatDetector _detector;
     private readonly ImportParserFactory _parserFactory;
     private readonly IImportConflictDetector _conflictDetector;
     private readonly IImportApplyService _applyService;
+    private readonly IImportBatchHistoryRepository _historyRepo;
+    private readonly IImportRollbackService _rollbackService;
     private readonly IAssetRepository _assets;
     private readonly ISnackbarService _snackbar;
     private readonly ILocalizationService? _localization;
@@ -37,6 +41,7 @@ public sealed partial class ImportViewModel : ObservableObject
 
     public ObservableCollection<ImportRowViewModel> Rows { get; } = [];
     public ObservableCollection<CashAccountOption> CashAccountOptions { get; } = [];
+    public ObservableCollection<ImportHistoryRowViewModel> History { get; } = [];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasFile))]
@@ -82,12 +87,15 @@ public sealed partial class ImportViewModel : ObservableObject
     public bool HasNoRows => !HasRows;
     public int ConflictCount => _currentBatch?.ConflictCount ?? 0;
     public int NewRowCount => _currentBatch?.NewRowCount ?? 0;
+    public bool HasHistory => History.Count > 0;
 
     public ImportViewModel(
         IImportFormatDetector detector,
         ImportParserFactory parserFactory,
         IImportConflictDetector conflictDetector,
         IImportApplyService applyService,
+        IImportBatchHistoryRepository historyRepo,
+        IImportRollbackService rollbackService,
         IAssetRepository assets,
         ISnackbarService snackbar,
         ILocalizationService? localization = null)
@@ -96,6 +104,8 @@ public sealed partial class ImportViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(parserFactory);
         ArgumentNullException.ThrowIfNull(conflictDetector);
         ArgumentNullException.ThrowIfNull(applyService);
+        ArgumentNullException.ThrowIfNull(historyRepo);
+        ArgumentNullException.ThrowIfNull(rollbackService);
         ArgumentNullException.ThrowIfNull(assets);
         ArgumentNullException.ThrowIfNull(snackbar);
 
@@ -103,9 +113,13 @@ public sealed partial class ImportViewModel : ObservableObject
         _parserFactory = parserFactory;
         _conflictDetector = conflictDetector;
         _applyService = applyService;
+        _historyRepo = historyRepo;
+        _rollbackService = rollbackService;
         _assets = assets;
         _snackbar = snackbar;
         _localization = localization;
+
+        History.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasHistory));
     }
 
     [RelayCommand]
@@ -119,10 +133,57 @@ public sealed partial class ImportViewModel : ObservableObject
                 CashAccountOptions.Add(new CashAccountOption(item.Id, item.Name));
             if (SelectedCashAccount is null && CashAccountOptions.Count > 0)
                 SelectedCashAccount = CashAccountOptions[0];
+
+            await RefreshHistoryAsync().ConfigureAwait(true);
         }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
+        }
+    }
+
+    private async Task RefreshHistoryAsync()
+    {
+        var list = await _historyRepo.GetRecentAsync(HistoryListLimit).ConfigureAwait(true);
+        History.Clear();
+        foreach (var h in list)
+            History.Add(new ImportHistoryRowViewModel(h));
+        OnPropertyChanged(nameof(HasHistory));
+    }
+
+    [RelayCommand]
+    private async Task RollbackAsync(ImportHistoryRowViewModel? row)
+    {
+        if (row is null || row.IsRolledBack || IsWorking) return;
+
+        IsWorking = true;
+        try
+        {
+            var result = await _rollbackService.RollbackAsync(row.Id).ConfigureAwait(true);
+            if (result.IsFullyReverted)
+            {
+                row.MarkRolledBack();
+                _snackbar.Success(string.Format(
+                    L("Import.Rollback.Success", "Rolled back {0}: -{1} reverted, {2} restored."),
+                    row.FileName, result.Reverted, result.Restored));
+            }
+            else
+            {
+                var reason = result.Failures.Count > 0 ? result.Failures[0].Reason : "unknown";
+                _snackbar.Warning(string.Format(
+                    L("Import.Rollback.PartialFailure",
+                        "Rollback partially failed ({0} failures). First reason: {1}"),
+                    result.Failures.Count, reason));
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+            _snackbar.Error(ex.Message);
+        }
+        finally
+        {
+            IsWorking = false;
         }
     }
 
@@ -283,6 +344,7 @@ public sealed partial class ImportViewModel : ObservableObject
                 _snackbar.Warning(string.Join(' ', result.Warnings));
 
             Clear();
+            await RefreshHistoryAsync().ConfigureAwait(true);
         }
         catch (Exception ex)
         {

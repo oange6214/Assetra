@@ -46,6 +46,10 @@
     <sys:String x:Key="Import.Col.Counterparty">Counterparty</sys:String>
     <sys:String x:Key="Import.Col.Memo">Memo</sys:String>
     <sys:String x:Key="Import.Col.Resolution">Resolution</sys:String>
+    <sys:String x:Key="Import.History.Title">Recent imports</sys:String>
+    <sys:String x:Key="Import.Button.Rollback">Roll back</sys:String>
+    <sys:String x:Key="Import.Rollback.Success">Rolled back {0}: -{1} reverted, {2} restored.</sys:String>
+    <sys:String x:Key="Import.Rollback.PartialFailure">Rollback partially failed ({0} failures). First reason: {1}</sys:String>
     <sys:String x:Key="Nav.GoBack">Go back</sys:String>
     <sys:String x:Key="Nav.GoForward">Go forward</sys:String>
 
