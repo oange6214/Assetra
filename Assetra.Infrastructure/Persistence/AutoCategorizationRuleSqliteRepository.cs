@@ -15,7 +15,8 @@ public sealed class AutoCategorizationRuleSqliteRepository : IAutoCategorization
     }
 
     private const string SelectClause =
-        "id, keyword_pattern, category_id, priority, is_enabled, match_case_sensitive";
+        "id, keyword_pattern, category_id, priority, is_enabled, match_case_sensitive, " +
+        "name, match_field, match_type, applies_to";
 
     private static AutoCategorizationRule Map(SqliteDataReader r) => new(
         Id: Guid.Parse(r.GetString(0)),
@@ -23,7 +24,11 @@ public sealed class AutoCategorizationRuleSqliteRepository : IAutoCategorization
         CategoryId: Guid.Parse(r.GetString(2)),
         Priority: r.GetInt32(3),
         IsEnabled: r.GetInt32(4) != 0,
-        MatchCaseSensitive: r.GetInt32(5) != 0);
+        MatchCaseSensitive: r.GetInt32(5) != 0,
+        Name: r.IsDBNull(6) ? null : r.GetString(6),
+        MatchField: (AutoCategorizationMatchField)r.GetInt32(7),
+        MatchType: (AutoCategorizationMatchType)r.GetInt32(8),
+        AppliesTo: (AutoCategorizationScope)r.GetInt32(9));
 
     public async Task<IReadOnlyList<AutoCategorizationRule>> GetAllAsync(CancellationToken ct = default)
     {
@@ -60,9 +65,12 @@ public sealed class AutoCategorizationRuleSqliteRepository : IAutoCategorization
         cmd.CommandText = """
             INSERT OR IGNORE INTO auto_categorization_rule
                 (id, keyword_pattern, category_id, priority, is_enabled,
-                 match_case_sensitive, created_at, updated_at)
+                 match_case_sensitive, created_at, updated_at,
+                 name, match_field, match_type, applies_to)
             VALUES
-                ($id, $kw, $cat, $pri, $en, $cs, $now, $now);
+                ($id, $kw, $cat, $pri, $en,
+                 $cs, $now, $now,
+                 $name, $field, $type, $scope);
             """;
         Bind(cmd, rule);
         cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
@@ -82,6 +90,10 @@ public sealed class AutoCategorizationRuleSqliteRepository : IAutoCategorization
                 priority             = $pri,
                 is_enabled           = $en,
                 match_case_sensitive = $cs,
+                name                 = $name,
+                match_field          = $field,
+                match_type           = $type,
+                applies_to           = $scope,
                 updated_at           = $now
             WHERE id = $id;
             """;
@@ -108,5 +120,9 @@ public sealed class AutoCategorizationRuleSqliteRepository : IAutoCategorization
         cmd.Parameters.AddWithValue("$pri", r.Priority);
         cmd.Parameters.AddWithValue("$en", r.IsEnabled ? 1 : 0);
         cmd.Parameters.AddWithValue("$cs", r.MatchCaseSensitive ? 1 : 0);
+        cmd.Parameters.AddWithValue("$name", (object?)r.Name ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$field", (int)r.MatchField);
+        cmd.Parameters.AddWithValue("$type", (int)r.MatchType);
+        cmd.Parameters.AddWithValue("$scope", (int)r.AppliesTo);
     }
 }

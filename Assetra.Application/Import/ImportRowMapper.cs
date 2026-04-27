@@ -1,3 +1,4 @@
+using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces.Import;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Import;
@@ -6,11 +7,17 @@ namespace Assetra.Application.Import;
 
 /// <summary>
 /// 預設 mapper：依 <see cref="ImportSourceKind"/> 將 <see cref="ImportPreviewRow"/> 轉成 <see cref="Trade"/>。
-/// 行為與 v0.7 內嵌於 <see cref="ImportApplyService"/> 的私有 helper 一致。
+/// v0.8 起若呼叫者傳入 <c>rules</c>，會用 <see cref="AutoCategorizationEngine"/> 對 row 的 Counterparty / Memo
+/// 做比對，命中時帶入 <see cref="Trade.CategoryId"/>。傳 null/empty 等同 v0.7 行為。
 /// </summary>
 public sealed class ImportRowMapper : IImportRowMapper
 {
-    public Trade? Map(ImportPreviewRow row, ImportSourceKind kind, ImportApplyOptions options, IList<string> warnings)
+    public Trade? Map(
+        ImportPreviewRow row,
+        ImportSourceKind kind,
+        ImportApplyOptions options,
+        IList<string> warnings,
+        IReadOnlyList<AutoCategorizationRule>? rules = null)
     {
         ArgumentNullException.ThrowIfNull(row);
         ArgumentNullException.ThrowIfNull(options);
@@ -19,12 +26,24 @@ public sealed class ImportRowMapper : IImportRowMapper
         var date = row.Date.ToDateTime(TimeOnly.MinValue);
         var note = ComposeNote(row, kind, options);
 
-        return kind switch
+        var trade = kind switch
         {
             ImportSourceKind.BankStatement => MapBankRow(row, date, note, options),
             ImportSourceKind.BrokerStatement => MapBrokerRow(row, date, note, options, warnings),
             _ => null,
         };
+
+        if (trade is not null && rules is { Count: > 0 } && trade.CategoryId is null)
+        {
+            var ctx = new AutoCategorizationContext(
+                Note: null,
+                Counterparty: row.Counterparty,
+                Memo: row.Memo,
+                Source: AutoCategorizationScope.Import);
+            var matched = AutoCategorizationEngine.Match(ctx, rules);
+            if (matched is not null) trade = trade with { CategoryId = matched };
+        }
+        return trade;
     }
 
     private static Trade MapBankRow(ImportPreviewRow row, DateTime date, string note, ImportApplyOptions options)

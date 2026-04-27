@@ -12,5 +12,10 @@ public interface IImportRowMapper
     /// <summary>
     /// 回傳 mapping 結果。若回傳 <see langword="null"/>，呼叫者應將該列計入 skipped 並記錄 warning。
     /// </summary>
-    Trade? Map(ImportPreviewRow row, ImportSourceKind kind, ImportApplyOptions options, IList<string> warnings);
+    Trade? Map(
+        ImportPreviewRow row,
+        ImportSourceKind kind,
+        ImportApplyOptions options,
+        IList<string> warnings,
+        IReadOnlyList<AutoCategorizationRule>? rules = null);
 }

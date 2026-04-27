@@ -324,6 +324,62 @@ public class ImportApplyServiceTests
         Assert.Null(addEntry.OverwrittenTradeJson);
     }
 
+    [Fact]
+    public async Task AutoCategorization_AssignsCategoryFromCounterparty()
+    {
+        var added = new List<Trade>();
+        var repo = NewRepo(added);
+        var foodCat = Guid.NewGuid();
+        var rules = new[]
+        {
+            new AutoCategorizationRule(
+                Id: Guid.NewGuid(),
+                KeywordPattern: "Starbucks",
+                CategoryId: foodCat,
+                MatchField: AutoCategorizationMatchField.Counterparty,
+                AppliesTo: AutoCategorizationScope.Import),
+        };
+        var ruleRepo = new Mock<IAutoCategorizationRuleRepository>();
+        ruleRepo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(rules);
+
+        var batch = BankBatch(
+            new ImportPreviewRow(1, new DateOnly(2026, 4, 27), -150m, "Starbucks Taipei", null));
+
+        var svc = new ImportApplyService(repo.Object, new ImportRowMapper(), null, ruleRepo.Object);
+        await svc.ApplyAsync(batch, new ImportApplyOptions());
+
+        Assert.Single(added);
+        Assert.Equal(foodCat, added[0].CategoryId);
+    }
+
+    [Fact]
+    public async Task AutoCategorization_NoMatch_LeavesCategoryNull()
+    {
+        var added = new List<Trade>();
+        var repo = NewRepo(added);
+        var rules = new[]
+        {
+            new AutoCategorizationRule(
+                Id: Guid.NewGuid(),
+                KeywordPattern: "Starbucks",
+                CategoryId: Guid.NewGuid(),
+                AppliesTo: AutoCategorizationScope.Import),
+        };
+        var ruleRepo = new Mock<IAutoCategorizationRuleRepository>();
+        ruleRepo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(rules);
+
+        var batch = BankBatch(
+            new ImportPreviewRow(1, new DateOnly(2026, 4, 27), -150m, "Mister Donut", null));
+
+        var svc = new ImportApplyService(repo.Object, new ImportRowMapper(), null, ruleRepo.Object);
+        await svc.ApplyAsync(batch, new ImportApplyOptions());
+
+        Assert.Single(added);
+        Assert.Null(added[0].CategoryId);
+    }
+
     private static Mock<ITradeRepository> NewRepo(List<Trade> sink)
     {
         var mock = new Mock<ITradeRepository>();

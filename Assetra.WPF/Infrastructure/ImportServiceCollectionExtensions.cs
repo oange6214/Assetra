@@ -1,4 +1,5 @@
 using Assetra.Application.Import;
+using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Import;
 using Assetra.Infrastructure.Import;
 using Assetra.Infrastructure.Persistence;
@@ -16,7 +17,11 @@ internal static class ImportServiceCollectionExtensions
         services.AddSingleton<IImportConflictDetector, ImportConflictDetector>();
         services.AddSingleton<IImportRowMapper, ImportRowMapper>();
         services.AddSingleton<IImportBatchHistoryRepository>(_ => new ImportBatchHistorySqliteRepository(dbPath));
-        services.AddSingleton<IImportApplyService, ImportApplyService>();
+        services.AddSingleton<IImportApplyService>(sp => new ImportApplyService(
+            sp.GetRequiredService<ITradeRepository>(),
+            sp.GetRequiredService<IImportRowMapper>(),
+            sp.GetService<IImportBatchHistoryRepository>(),
+            sp.GetService<IAutoCategorizationRuleRepository>()));
         services.AddSingleton<IImportRollbackService, ImportRollbackService>();
         services.AddSingleton<ImportViewModel>();
         return services;

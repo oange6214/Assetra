@@ -3,6 +3,7 @@ using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Import;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Import;
+using Assetra.Core.DomainServices;
 
 namespace Assetra.Application.Import;
 
@@ -23,19 +24,22 @@ public sealed class ImportApplyService : IImportApplyService
     private readonly ITradeRepository _trades;
     private readonly IImportRowMapper _mapper;
     private readonly IImportBatchHistoryRepository? _history;
+    private readonly IAutoCategorizationRuleRepository? _rules;
 
     public ImportApplyService(
         ITradeRepository trades,
         IImportRowMapper mapper,
-        IImportBatchHistoryRepository? history = null)
+        IImportBatchHistoryRepository? history = null,
+        IAutoCategorizationRuleRepository? rules = null)
     {
         _trades = trades ?? throw new ArgumentNullException(nameof(trades));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _history = history;
+        _rules = rules;
     }
 
-    /// <summary>沿用 v0.7 行為的便捷建構子，內部使用預設 <see cref="ImportRowMapper"/>，不寫 history。</summary>
-    public ImportApplyService(ITradeRepository trades) : this(trades, new ImportRowMapper(), null)
+    /// <summary>沿用 v0.7 行為的便捷建構子，內部使用預設 <see cref="ImportRowMapper"/>，不寫 history、不套規則。</summary>
+    public ImportApplyService(ITradeRepository trades) : this(trades, new ImportRowMapper(), null, null)
     {
     }
 
@@ -50,6 +54,12 @@ public sealed class ImportApplyService : IImportApplyService
         var conflictByRowIndex = batch.Conflicts.ToDictionary(c => c.Row.RowIndex);
         var warnings = new List<string>();
         var entries = new List<ImportBatchEntry>();
+
+        IReadOnlyList<AutoCategorizationRule>? ruleSnapshot = null;
+        if (_rules is not null)
+        {
+            ruleSnapshot = await _rules.GetAllAsync(ct).ConfigureAwait(false);
+        }
 
         int applied = 0, skipped = 0, overwritten = 0;
 
@@ -80,7 +90,7 @@ public sealed class ImportApplyService : IImportApplyService
                 overwritten++;
             }
 
-            var trade = _mapper.Map(row, batch.SourceKind, options, warnings);
+            var trade = _mapper.Map(row, batch.SourceKind, options, warnings, ruleSnapshot);
             if (trade is null)
             {
                 skipped++;
