@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.13.0 - 2026-04-28
+
+風險分析：在 Analysis Context 加入波動率、最大回撤、Sharpe ratio 與持股集中度（HHI），於 Reports 頁新增「Risk Metrics」Expander 並提供集中度警示。
+
+### 重點
+
+- **D1 Risk DTO 與介面** — `Assetra.Core/Models/Analysis/`：`DrawdownPoint`、`ConcentrationBucket`、`RiskMetrics`（含 `HasConcentrationWarning` 計算屬性，>30% 單一部位或 HHI >0.30 觸發）；`Assetra.Core/Interfaces/Analysis/` 四個 service 介面。
+- **F1 VolatilityCalculator** — 由日 value 序列算日報酬，sample std × √252 得年化波動率；少於 2 筆報酬回 null。
+- **F2 DrawdownCalculator** — running peak，dd = (peak − value) / peak；輸出 `DrawdownPoint` 序列 + `ComputeMaxDrawdown` 取最大值。
+- **F3 SharpeRatioCalculator** — `(annualizedReturn − riskFreeRate) / annualizedVolatility`；vol = 0 或缺值回 null。預設 rf = 0.02。
+- **F4 ConcentrationAnalyzer** — Top-N + Others bucket（label 為 `Symbol DisplayName`），權重以 `PositionSnapshot.TotalCost` 為 cost-basis proxy（無同步 quote service）；HHI = Σ wᵢ²。
+- **F5 集中度警示** — 改以 `RiskMetrics.HasConcentrationWarning` flag 表達（>30% 單一部位或 HHI >0.30），不擴張現有 price-target 為主的 `AlertRule` 框架；UI 直接綁該 flag。
+- **WPF Risk Tab** — `ReportsView` 新增第 5 個 Expander（Volatility / MaxDD / Sharpe / HHI + 警示 + Top Holdings ItemsControl）；`ReportsViewModel` 注入 5 個可選 dep（4 service + `IPortfolioSnapshotRepository`），`LoadAsync` 之後呼 `LoadRiskAsync`。
+
+### 內部變更
+
+- 新增 4 個 Analysis service 至 `AnalysisServiceCollectionExtensions.cs`。
+- `Languages/zh-TW.xaml` / `en-US.xaml` 新增 `Reports.Risk.Title` / `Reports.Risk.ConcentrationWarning` / `Reports.Risk.TopHoldings`。
+- 466 → 478 筆測試全綠（新增 3 筆 Volatility + 3 筆 Drawdown + 3 筆 Sharpe + 3 筆 Concentration）。
+
 ## v0.12.0 - 2026-04-28
 
 投資績效分析：在 v0.11 報表 infra 上新增 Analysis bounded context，提供 XIRR / TWR / MWR、benchmark 對比與損益歸因，於 Reports 頁多一張「Performance」報表。

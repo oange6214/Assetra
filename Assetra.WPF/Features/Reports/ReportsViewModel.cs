@@ -26,9 +26,17 @@ public sealed partial class ReportsViewModel : ObservableObject
     private readonly IMoneyWeightedReturnCalculator? _mwrCalculator;
     private readonly IPnlAttributionService? _attribution;
     private readonly IBenchmarkComparisonService? _benchmark;
+    private readonly IVolatilityCalculator? _volatility;
+    private readonly IDrawdownCalculator? _drawdown;
+    private readonly ISharpeRatioCalculator? _sharpe;
+    private readonly IConcentrationAnalyzer? _concentration;
+    private readonly IPortfolioSnapshotRepository? _snapshots;
 
     [ObservableProperty]
     private PerformanceResult? _performance;
+
+    [ObservableProperty]
+    private RiskMetrics? _risk;
 
     [ObservableProperty]
     private IncomeStatement? _incomeStatement;
@@ -81,7 +89,12 @@ public sealed partial class ReportsViewModel : ObservableObject
         IReportExportService? exportService = null,
         IMoneyWeightedReturnCalculator? mwrCalculator = null,
         IPnlAttributionService? attribution = null,
-        IBenchmarkComparisonService? benchmark = null)
+        IBenchmarkComparisonService? benchmark = null,
+        IVolatilityCalculator? volatility = null,
+        IDrawdownCalculator? drawdown = null,
+        ISharpeRatioCalculator? sharpe = null,
+        IConcentrationAnalyzer? concentration = null,
+        IPortfolioSnapshotRepository? snapshots = null)
     {
         ArgumentNullException.ThrowIfNull(service);
         _service = service;
@@ -94,6 +107,11 @@ public sealed partial class ReportsViewModel : ObservableObject
         _mwrCalculator = mwrCalculator;
         _attribution = attribution;
         _benchmark = benchmark;
+        _volatility = volatility;
+        _drawdown = drawdown;
+        _sharpe = sharpe;
+        _concentration = concentration;
+        _snapshots = snapshots;
 
         var today = DateTime.Today;
         _year = today.Year;
@@ -180,6 +198,34 @@ public sealed partial class ReportsViewModel : ObservableObject
         if (_cashFlowService is not null)
             CashFlowStatement = await _cashFlowService.GenerateAsync(period).ConfigureAwait(true);
         await LoadPerformanceAsync().ConfigureAwait(true);
+        await LoadRiskAsync().ConfigureAwait(true);
+    }
+
+    private async Task LoadRiskAsync()
+    {
+        var perfPeriod = PerformancePeriod.Month(Year, Month);
+
+        IReadOnlyList<(DateOnly Date, decimal Value)> series = Array.Empty<(DateOnly, decimal)>();
+        if (_snapshots is not null)
+        {
+            var raw = await _snapshots.GetSnapshotsAsync(perfPeriod.Start, perfPeriod.End).ConfigureAwait(true);
+            series = raw.Select(s => (s.SnapshotDate, s.MarketValue)).ToList();
+        }
+
+        var vol = _volatility?.ComputeAnnualized(series);
+        var mdd = _drawdown?.ComputeMaxDrawdown(series);
+        var twr = Performance?.Twr ?? Performance?.Mwr;
+        var sharpe = _sharpe?.Compute(twr, vol, riskFreeRate: 0.02m);
+
+        IReadOnlyList<ConcentrationBucket> top = Array.Empty<ConcentrationBucket>();
+        decimal? hhi = null;
+        if (_concentration is not null)
+        {
+            top = await _concentration.AnalyzeAsync().ConfigureAwait(true);
+            hhi = await _concentration.ComputeHhiAsync().ConfigureAwait(true);
+        }
+
+        Risk = new RiskMetrics(vol, mdd, sharpe, hhi, top);
     }
 
     private async Task LoadPerformanceAsync()

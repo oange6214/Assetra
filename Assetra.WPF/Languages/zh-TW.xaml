@@ -892,6 +892,9 @@
     <sys:String x:Key="Reports.BalanceSheet.Title">資產負債表</sys:String>
     <sys:String x:Key="Reports.CashFlow.Title">現金流量表</sys:String>
     <sys:String x:Key="Reports.Performance.Title">投資績效</sys:String>
+    <sys:String x:Key="Reports.Risk.Title">風險指標</sys:String>
+    <sys:String x:Key="Reports.Risk.ConcentrationWarning">⚠ 持股集中度過高（單一部位 &gt; 30% 或 HHI &gt; 0.30）</sys:String>
+    <sys:String x:Key="Reports.Risk.TopHoldings">前五大持股</sys:String>
     <sys:String x:Key="Reports.Export.Pdf">匯出 PDF</sys:String>
     <sys:String x:Key="Reports.Export.Csv">匯出 CSV</sys:String>
 </ResourceDictionary>

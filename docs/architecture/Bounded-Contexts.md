@@ -211,20 +211,25 @@
 
 ---
 
-## 8. Analysis Context  *(MVP 完成 — v0.12.0)*
+## 8. Analysis Context  *(MVP 完成 — v0.12.0；Risk 擴充 — v0.13.0)*
 
-> 投資績效分析。XIRR / TWR / MWR / benchmark / P&L attribution，輸出至 Reports 頁的 Performance 區塊。
+> 投資績效與風險分析。XIRR / TWR / MWR / benchmark / P&L attribution + 年化波動率 / 最大回撤 / Sharpe / HHI，輸出至 Reports 頁的 Performance 與 Risk 區塊。
 
 ### 責任
 - 投資績效計算
 - benchmark 對比
 - 損益歸因
+- 風險指標（波動率、回撤、Sharpe）
+- 持股集中度（HHI、Top-N、警示 flag）
 
 ### 主要模型
 - `CashFlow`
 - `PerformancePeriod`
 - `PerformanceResult`
 - `AttributionBucket`
+- `DrawdownPoint`
+- `ConcentrationBucket`
+- `RiskMetrics`
 
 ### 主要服務
 - `XirrCalculator`
@@ -232,6 +237,10 @@
 - `MoneyWeightedReturnCalculator`
 - `BenchmarkComparisonService`
 - `PnlAttributionService`
+- `VolatilityCalculator`
+- `DrawdownCalculator`
+- `SharpeRatioCalculator`
+- `ConcentrationAnalyzer`
 
 ---
 

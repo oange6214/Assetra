@@ -84,10 +84,10 @@
 - 擴充美股 / ETF quote & history pipeline
 - 擴充投資 UI 與交易流程
 
-### 4. 風險分析
-- 建立波動度 / 最大回撤 / Sharpe Ratio 計算
-- 建立集中度分析
-- 加入集中度警示
+### 4. 風險分析  *(完成 — v0.13.0)*
+- [x] 建立波動度 / 最大回撤 / Sharpe Ratio 計算
+- [x] 建立集中度分析（HHI + Top-N）
+- [x] 加入集中度警示（`RiskMetrics.HasConcentrationWarning`）
 
 ## Phase 3：自動化與治理進階
 

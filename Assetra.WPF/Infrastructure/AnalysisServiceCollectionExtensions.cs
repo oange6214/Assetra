@@ -13,6 +13,10 @@ internal static class AnalysisServiceCollectionExtensions
         services.AddSingleton<IMoneyWeightedReturnCalculator, MoneyWeightedReturnCalculator>();
         services.AddSingleton<IBenchmarkComparisonService, BenchmarkComparisonService>();
         services.AddSingleton<IPnlAttributionService, PnlAttributionService>();
+        services.AddSingleton<IVolatilityCalculator, VolatilityCalculator>();
+        services.AddSingleton<IDrawdownCalculator, DrawdownCalculator>();
+        services.AddSingleton<ISharpeRatioCalculator, SharpeRatioCalculator>();
+        services.AddSingleton<IConcentrationAnalyzer, ConcentrationAnalyzer>();
         return services;
     }
 }

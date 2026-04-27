@@ -890,6 +890,9 @@
     <sys:String x:Key="Reports.BalanceSheet.Title">Balance Sheet</sys:String>
     <sys:String x:Key="Reports.CashFlow.Title">Cash Flow Statement</sys:String>
     <sys:String x:Key="Reports.Performance.Title">Performance</sys:String>
+    <sys:String x:Key="Reports.Risk.Title">Risk Metrics</sys:String>
+    <sys:String x:Key="Reports.Risk.ConcentrationWarning">⚠ High concentration risk (single position &gt; 30% or HHI &gt; 0.30)</sys:String>
+    <sys:String x:Key="Reports.Risk.TopHoldings">Top Holdings</sys:String>
     <sys:String x:Key="Reports.Export.Pdf">Export PDF</sys:String>
     <sys:String x:Key="Reports.Export.Csv">Export CSV</sys:String>
 </ResourceDictionary>

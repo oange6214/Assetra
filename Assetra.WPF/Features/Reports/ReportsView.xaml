@@ -440,6 +440,31 @@
                     </ItemsControl>
                 </StackPanel>
             </Expander>
+
+            <Expander Header="{DynamicResource Reports.Risk.Title}" IsExpanded="False" Margin="0,8,0,0">
+                <StackPanel Margin="12" DataContext="{Binding Risk}">
+                    <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding AnnualizedVolatility, StringFormat='Annualized Volatility: {0:P2}', TargetNullValue='Annualized Volatility: —'}" />
+                    <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding MaxDrawdown, StringFormat='Max Drawdown: {0:P2}', TargetNullValue='Max Drawdown: —'}" />
+                    <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding SharpeRatio, StringFormat='Sharpe Ratio: {0:F2}', TargetNullValue='Sharpe Ratio: —'}" />
+                    <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Hhi, StringFormat='Concentration HHI: {0:F3}', TargetNullValue='Concentration HHI: —'}" />
+                    <TextBlock Margin="0,4,0,0" FontWeight="SemiBold" Foreground="#D9534F" Text="{DynamicResource Reports.Risk.ConcentrationWarning}" Visibility="{Binding HasConcentrationWarning, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock Margin="0,8,0,4" FontWeight="SemiBold" Text="{DynamicResource Reports.Risk.TopHoldings}" />
+                    <ItemsControl ItemsSource="{Binding TopHoldings}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,2,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="200" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" FontFamily="{StaticResource FontTabular}" Text="{Binding Label}" />
+                                    <TextBlock Grid.Column="1" FontFamily="{StaticResource FontTabular}" HorizontalAlignment="Right" Text="{Binding Weight, StringFormat='{}{0:P2}'}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Expander>
         </StackPanel>
 
         <TextBlock
