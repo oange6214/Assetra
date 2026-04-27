@@ -889,6 +889,7 @@
     <sys:String x:Key="Reports.IncomeStatement.Title">Income Statement</sys:String>
     <sys:String x:Key="Reports.BalanceSheet.Title">Balance Sheet</sys:String>
     <sys:String x:Key="Reports.CashFlow.Title">Cash Flow Statement</sys:String>
+    <sys:String x:Key="Reports.Performance.Title">Performance</sys:String>
     <sys:String x:Key="Reports.Export.Pdf">Export PDF</sys:String>
     <sys:String x:Key="Reports.Export.Csv">Export CSV</sys:String>
 </ResourceDictionary>

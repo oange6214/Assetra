@@ -1,7 +1,9 @@
 using Assetra.Application.Reports.Services;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Interfaces.Reports;
 using Assetra.Core.Models;
+using Assetra.Core.Models.Analysis;
 using Assetra.Core.Models.Reports;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -21,6 +23,12 @@ public sealed partial class ReportsViewModel : ObservableObject
     private readonly IBalanceSheetService? _balanceService;
     private readonly ICashFlowStatementService? _cashFlowService;
     private readonly IReportExportService? _exportService;
+    private readonly IMoneyWeightedReturnCalculator? _mwrCalculator;
+    private readonly IPnlAttributionService? _attribution;
+    private readonly IBenchmarkComparisonService? _benchmark;
+
+    [ObservableProperty]
+    private PerformanceResult? _performance;
 
     [ObservableProperty]
     private IncomeStatement? _incomeStatement;
@@ -70,7 +78,10 @@ public sealed partial class ReportsViewModel : ObservableObject
         IIncomeStatementService? incomeService = null,
         IBalanceSheetService? balanceService = null,
         ICashFlowStatementService? cashFlowService = null,
-        IReportExportService? exportService = null)
+        IReportExportService? exportService = null,
+        IMoneyWeightedReturnCalculator? mwrCalculator = null,
+        IPnlAttributionService? attribution = null,
+        IBenchmarkComparisonService? benchmark = null)
     {
         ArgumentNullException.ThrowIfNull(service);
         _service = service;
@@ -80,6 +91,9 @@ public sealed partial class ReportsViewModel : ObservableObject
         _balanceService = balanceService;
         _cashFlowService = cashFlowService;
         _exportService = exportService;
+        _mwrCalculator = mwrCalculator;
+        _attribution = attribution;
+        _benchmark = benchmark;
 
         var today = DateTime.Today;
         _year = today.Year;
@@ -165,6 +179,24 @@ public sealed partial class ReportsViewModel : ObservableObject
             BalanceSheet = await _balanceService.GenerateAsync(period.End).ConfigureAwait(true);
         if (_cashFlowService is not null)
             CashFlowStatement = await _cashFlowService.GenerateAsync(period).ConfigureAwait(true);
+        await LoadPerformanceAsync().ConfigureAwait(true);
+    }
+
+    private async Task LoadPerformanceAsync()
+    {
+        if (_mwrCalculator is null && _attribution is null) return;
+        var perfPeriod = PerformancePeriod.Month(Year, Month);
+        var mwr = _mwrCalculator is null ? null : await _mwrCalculator.ComputeAsync(perfPeriod).ConfigureAwait(true);
+        var buckets = _attribution is null
+            ? (IReadOnlyList<AttributionBucket>)Array.Empty<AttributionBucket>()
+            : await _attribution.ComputeAsync(perfPeriod).ConfigureAwait(true);
+        decimal? bench = null;
+        if (_benchmark is not null)
+        {
+            try { bench = await _benchmark.ComputeBenchmarkTwrAsync("0050.TW", perfPeriod).ConfigureAwait(true); }
+            catch { bench = null; }
+        }
+        Performance = new PerformanceResult(perfPeriod, Xirr: mwr, Twr: null, Mwr: mwr, BenchmarkTwr: bench, Attribution: buckets);
     }
 
     [RelayCommand]

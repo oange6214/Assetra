@@ -418,6 +418,28 @@
                     </StackPanel>
                 </Grid>
             </Expander>
+
+            <Expander Header="{DynamicResource Reports.Performance.Title}" IsExpanded="False" Margin="0,8,0,0">
+                <StackPanel Margin="12" DataContext="{Binding Performance}">
+                    <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Mwr, StringFormat='MWR (XIRR): {0:P2}', TargetNullValue='MWR (XIRR): —'}" />
+                    <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding BenchmarkTwr, StringFormat='Benchmark (0050.TW): {0:P2}', TargetNullValue='Benchmark: —'}" />
+                    <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding AlphaOverBenchmark, StringFormat='Alpha: {0:P2}', TargetNullValue='Alpha: —'}" />
+                    <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding Attribution}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,2,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="160" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" FontFamily="{StaticResource FontTabular}" Text="{Binding Label}" />
+                                    <TextBlock Grid.Column="1" FontFamily="{StaticResource FontTabular}" HorizontalAlignment="Right" Text="{Binding Amount, StringFormat='{}{0:N2}'}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Expander>
         </StackPanel>
 
         <TextBlock

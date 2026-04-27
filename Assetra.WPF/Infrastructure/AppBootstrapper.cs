@@ -24,6 +24,7 @@ internal static class AppBootstrapper
             .AddBudgetContext(paths.DbPath)
             .AddRecurringContext(paths.DbPath)
             .AddReportsContext()
+            .AddAnalysisContext()
             .AddGoalsContext(paths.DbPath)
             .AddAlertsContext(paths.DbPath)
             .AddLoansContext(paths.DbPath)

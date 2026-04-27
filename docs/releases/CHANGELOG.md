@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.12.0 - 2026-04-28
+
+投資績效分析：在 v0.11 報表 infra 上新增 Analysis bounded context，提供 XIRR / TWR / MWR、benchmark 對比與損益歸因，於 Reports 頁多一張「Performance」報表。
+
+### 重點
+
+- **D1 Analysis DTO 與介面** — `Assetra.Core/Models/Analysis/`：`CashFlow`、`PerformancePeriod`（Month/Year 工廠）、`PerformanceResult`（含 Alpha 計算）、`AttributionBucket`；`Assetra.Core/Interfaces/Analysis/` 五個 service 介面。
+- **F1 XirrCalculator** — Newton-Raphson（max 100 iter, tol 1e-7）+ Bisection fallback（[-0.99, 10.0]）；要求至少一筆正、一筆負流，否則回 null。
+- **F2 TimeWeightedReturnCalculator** — 在每筆外部 cash flow 切 sub-period，幾何鏈接 `Π(1 + R_i) − 1`，分離資金進出對報酬率的扭曲。
+- **F3 MoneyWeightedReturnCalculator** — 對 portfolio：trade journal Buy/Sell/CashDividend → cash flow，加入起 / 終 `PortfolioDailySnapshot.MarketValue` 為合成 flow，呼 XIRR；亦支援單一 `PortfolioEntryId`。
+- **F4 BenchmarkComparisonService** — 透過 `IStockHistoryProvider` 拉同期 benchmark（預設 0050.TW）收盤價，計算 `(endPx − startPx) / startPx`。
+- **F5 PnlAttributionService** — 拆解期間損益為四桶：Realized（Sell.RealizedPnl）、Dividend（CashDividend.CashAmount）、Commission（負）、Unrealized Δ（end−start MarketValue 扣除淨投入）。
+- **WPF Performance Tab** — `ReportsView` 新增第 4 個 Expander，顯示 MWR / Benchmark / Alpha + Attribution rows；`ReportsViewModel` 注入 3 個可選 Analysis service，`LoadAsync` 自動載入。
+
+### 內部變更
+
+- 新增 `Assetra.Application/Analysis/`（5 個 service）+ `Assetra.WPF/Infrastructure/AnalysisServiceCollectionExtensions.cs`，於 `AppBootstrapper` 加 `AddAnalysisContext()`。
+- `Languages/zh-TW.xaml` / `en-US.xaml` 新增 `Reports.Performance.Title`。
+- 455 → 466 筆測試全綠（新增 5 筆 XIRR + 3 筆 TWR + 3 筆 PnlAttribution）。
+
 ## v0.11.0 - 2026-04-28
 
 Reports MVP：以 Trade Journal 為單一事實源，提供月度損益表 / 資產負債表 / 現金流量表三大報表，並支援 PDF（QuestPDF Community）+ CSV 匯出。

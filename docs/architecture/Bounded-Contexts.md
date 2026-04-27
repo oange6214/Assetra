@@ -211,7 +211,31 @@
 
 ---
 
-## 8. Platform Context
+## 8. Analysis Context  *(MVP 完成 — v0.12.0)*
+
+> 投資績效分析。XIRR / TWR / MWR / benchmark / P&L attribution，輸出至 Reports 頁的 Performance 區塊。
+
+### 責任
+- 投資績效計算
+- benchmark 對比
+- 損益歸因
+
+### 主要模型
+- `CashFlow`
+- `PerformancePeriod`
+- `PerformanceResult`
+- `AttributionBucket`
+
+### 主要服務
+- `XirrCalculator`
+- `TimeWeightedReturnCalculator`
+- `MoneyWeightedReturnCalculator`
+- `BenchmarkComparisonService`
+- `PnlAttributionService`
+
+---
+
+## 9. Platform Context
 
 ### 責任
 - 設定

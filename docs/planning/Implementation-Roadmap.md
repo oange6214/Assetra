@@ -66,11 +66,11 @@
 
 ## Phase 2：投資分析與專業化
 
-### 1. 投資績效分析
-- 建立 XIRR 計算器
-- 建立 TWR / MWR 計算器
-- 建立 benchmark 對比 service
-- 建立損益歸因模型
+### 1. 投資績效分析  *(MVP 完成 — v0.12.0)*
+- [x] 建立 XIRR 計算器（`XirrCalculator`，Newton-Raphson + bisection fallback）
+- [x] 建立 TWR / MWR 計算器（`TimeWeightedReturnCalculator` / `MoneyWeightedReturnCalculator`）
+- [x] 建立 benchmark 對比 service（`BenchmarkComparisonService`，預設 0050.TW）
+- [x] 建立損益歸因模型（`PnlAttributionService`，Realized / Dividend / Commission / Unrealized Δ）
 
 ### 2. 報表系統  *(MVP 完成 — v0.11.0)*
 - [x] 建立損益表 service（`IncomeStatementService`，含 Prior period 對照）
