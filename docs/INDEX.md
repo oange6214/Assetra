@@ -64,3 +64,5 @@
 ## Archive
 - `archive/superpowers/`
   - 歷史設計與規劃草稿，保留作為參考，不作為目前正式架構文件。
+- `archive/sprints/`
+  - 已完成的 sprint plan（例如 v0.6.0），保留作為紀錄。
