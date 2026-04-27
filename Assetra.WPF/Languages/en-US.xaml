@@ -886,4 +886,9 @@
     <sys:String x:Key="Reconciliation.NewSession.Create">Create</sys:String>
     <sys:String x:Key="Reconciliation.NewSession.Cancel">Cancel</sys:String>
     <sys:String x:Key="Reconciliation.Balance.Title">Balance Reconciliation</sys:String>
+    <sys:String x:Key="Reports.IncomeStatement.Title">Income Statement</sys:String>
+    <sys:String x:Key="Reports.BalanceSheet.Title">Balance Sheet</sys:String>
+    <sys:String x:Key="Reports.CashFlow.Title">Cash Flow Statement</sys:String>
+    <sys:String x:Key="Reports.Export.Pdf">Export PDF</sys:String>
+    <sys:String x:Key="Reports.Export.Csv">Export CSV</sys:String>
 </ResourceDictionary>

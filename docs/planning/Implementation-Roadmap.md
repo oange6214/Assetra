@@ -60,9 +60,9 @@
 - [x] 建立 `IReconciliationService` + `ReconciliationService`（`ComputeDiffs` / `EnsureLegalTransition` 暴露為 public static 供測試）
 - [x] `ImportBatchEntry` 加 `PreviewRowJson` 並由 `ImportApplyService` 寫入；新增 `IImportBatchHistoryRepository.GetPreviewRowsAsync`
 - [x] Reconciliation Tab UI（Import 頁 TabControl；MVP Actions = Mark Resolved / Ignore / Delete Trade）
-- [ ] 「新建 Session」對話框（v0.10+）
-- [ ] Created / OverwrittenFromStatement 在 UI 上的執行路徑（待 `ImportRowMapper` 整合，v0.10+）
-- [ ] DataGrid Kind 分組與即時餘額對帳面板（v0.10+）
+- [x] 「新建 Session」對話框（v0.10.0）
+- [x] Created / OverwrittenFromStatement 在 UI 上的執行路徑（v0.10.0；共用 `IImportRowApplier`）
+- [x] DataGrid Kind 分組與即時餘額對帳面板（v0.10.0）
 
 ## Phase 2：投資分析與專業化
 
@@ -72,11 +72,11 @@
 - 建立 benchmark 對比 service
 - 建立損益歸因模型
 
-### 2. 報表系統
-- 建立資產負債表 service
-- 建立現金流量表 service
-- 建立損益表 service
-- 建立 PDF / CSV export
+### 2. 報表系統  *(MVP 完成 — v0.11.0)*
+- [x] 建立損益表 service（`IncomeStatementService`，含 Prior period 對照）
+- [x] 建立資產負債表 service（`BalanceSheetService`，cash + investments + liabilities）
+- [x] 建立現金流量表 service（`CashFlowStatementService`，Operating / Investing / Financing）
+- [x] 建立 PDF / CSV export（`ReportExportService`，QuestPDF Community + 手寫 CSV）
 
 ### 3. 外幣與美股
 - 建立外幣帳戶模型

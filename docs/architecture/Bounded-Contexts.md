@@ -187,9 +187,9 @@
 
 ---
 
-## 7. Reporting Context  *(部分實作)*
+## 7. Reporting Context  *(MVP 完成)*
 
-> 已有 `Assetra.Application/Reports/` 與 `MonthEndReportService`，但 PDF / CSV 匯出尚未實作。
+> v0.11.0 完成三大報表（Income / Balance Sheet / Cash Flow）+ PDF (QuestPDF Community) / CSV 匯出，Trade journal 為單一事實源。
 
 
 ### 責任

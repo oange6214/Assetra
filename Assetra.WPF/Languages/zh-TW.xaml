@@ -888,4 +888,9 @@
     <sys:String x:Key="Reconciliation.NewSession.Create">建立</sys:String>
     <sys:String x:Key="Reconciliation.NewSession.Cancel">取消</sys:String>
     <sys:String x:Key="Reconciliation.Balance.Title">餘額對帳</sys:String>
+    <sys:String x:Key="Reports.IncomeStatement.Title">損益表</sys:String>
+    <sys:String x:Key="Reports.BalanceSheet.Title">資產負債表</sys:String>
+    <sys:String x:Key="Reports.CashFlow.Title">現金流量表</sys:String>
+    <sys:String x:Key="Reports.Export.Pdf">匯出 PDF</sys:String>
+    <sys:String x:Key="Reports.Export.Csv">匯出 CSV</sys:String>
 </ResourceDictionary>

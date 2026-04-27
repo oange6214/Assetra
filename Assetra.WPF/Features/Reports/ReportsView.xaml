@@ -21,6 +21,10 @@
             <!--  metric cards  -->
             <RowDefinition Height="*" />
             <!--  detail lists  -->
+            <RowDefinition Height="Auto" />
+            <!--  statements  -->
+            <RowDefinition Height="Auto" />
+            <!--  export status  -->
         </Grid.RowDefinitions>
 
         <!--  ── Header: month picker ──  -->
@@ -354,5 +358,72 @@
                 </DockPanel>
             </Border>
         </Grid>
+
+        <!--  ── Statements (Income / Balance / CashFlow) ──  -->
+        <StackPanel Grid.Row="3" Margin="0,16,0,0">
+            <Expander Header="{DynamicResource Reports.IncomeStatement.Title}" IsExpanded="False" Margin="0,0,0,8">
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
+                        <ui:Button Margin="0,0,8,0" Command="{Binding ExportIncomePdfCommand}" Content="{DynamicResource Reports.Export.Pdf}" />
+                        <ui:Button Command="{Binding ExportIncomeCsvCommand}" Content="{DynamicResource Reports.Export.Csv}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" DataContext="{Binding IncomeStatement}">
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Income.Total, StringFormat='Income Total: {0:N2}'}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Expense.Total, StringFormat='Expense Total: {0:N2}'}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding Net, StringFormat='Net: {0:N2}'}" />
+                    </StackPanel>
+                </Grid>
+            </Expander>
+
+            <Expander Header="{DynamicResource Reports.BalanceSheet.Title}" IsExpanded="False" Margin="0,0,0,8">
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
+                        <ui:Button Margin="0,0,8,0" Command="{Binding ExportBalancePdfCommand}" Content="{DynamicResource Reports.Export.Pdf}" />
+                        <ui:Button Command="{Binding ExportBalanceCsvCommand}" Content="{DynamicResource Reports.Export.Csv}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" DataContext="{Binding BalanceSheet}">
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding AsOf, StringFormat='As Of: {0}'}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Assets.Total, StringFormat='Assets: {0:N2}'}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Liabilities.Total, StringFormat='Liabilities: {0:N2}'}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding NetWorth, StringFormat='Net Worth: {0:N2}'}" />
+                    </StackPanel>
+                </Grid>
+            </Expander>
+
+            <Expander Header="{DynamicResource Reports.CashFlow.Title}" IsExpanded="False">
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
+                        <ui:Button Margin="0,0,8,0" Command="{Binding ExportCashFlowPdfCommand}" Content="{DynamicResource Reports.Export.Pdf}" />
+                        <ui:Button Command="{Binding ExportCashFlowCsvCommand}" Content="{DynamicResource Reports.Export.Csv}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" DataContext="{Binding CashFlowStatement}">
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Operating.Total, StringFormat='Operating: {0:N2}'}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Investing.Total, StringFormat='Investing: {0:N2}'}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Financing.Total, StringFormat='Financing: {0:N2}'}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding NetChange, StringFormat='Net Change: {0:N2}'}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding OpeningCash, StringFormat='Opening Cash: {0:N2}'}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding ClosingCash, StringFormat='Closing Cash: {0:N2}'}" />
+                    </StackPanel>
+                </Grid>
+            </Expander>
+        </StackPanel>
+
+        <TextBlock
+            Grid.Row="4"
+            Margin="0,8,0,0"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{Binding ExportStatus}" />
     </Grid>
 </UserControl>

@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.11.0 - 2026-04-28
+
+Reports MVP：以 Trade Journal 為單一事實源，提供月度損益表 / 資產負債表 / 現金流量表三大報表，並支援 PDF（QuestPDF Community）+ CSV 匯出。
+
+### 重點
+
+- **D1 報表 DTO 與介面** — 新增 `Assetra.Core/Models/Reports/`：`ReportPeriod`（Month/Year 工廠 + `Prior()` 等長前期窗）、`StatementRow`、`StatementSection`、`IncomeStatement` / `BalanceSheet` / `CashFlowStatement`、`ExportFormat`；以及 `Assetra.Core/Interfaces/Reports/` 四個 service 介面。
+- **F1 IncomeStatementService** — 以 `Trade.Date` ∈ Period 過濾，依 `CategoryId` 聚合 Income/Expense rows（與 `ICategoryRepository` 對照取 Label，未分類顯示 `(Uncategorized)`），輸出 Income/Expense Section + Net；可選 `includePrior` 遞迴生成等長前期數據作 MoM/YoY 對照。
+- **F2 BalanceSheetService** — Cash 端依 `TradeType.PrimaryCashDelta(t)` 累積（Income/Sell/CashDividend/Deposit/LoanBorrow → +；Withdrawal/Buy/Repay → −），按 `CashAccountId` 分列；可選帶入最新 `PortfolioDailySnapshot.MarketValue` 為 Investments；Liabilities 以 `LiabilityAssetId`（信用卡）+ `LoanLabel`（貸款）兩類聚合。AsOf 截止日嚴格過濾。
+- **F3 CashFlowStatementService** — Operating（Income / Withdrawal / Deposit / CashDividend）、Investing（Buy / Sell）、Financing（LoanBorrow / Repay / 信用卡刷卡 / 還款）三段；Opening cash 由 pre-period trades 累積、Closing = Opening + NetChange，建構式即保證恆等。
+- **F4 ReportExportService** — 共用 QuestPDF `IDocument` 模板（標題、副標、Section grouping、Grand Total、page footer）+ 自寫 CSV（無新增 CsvHelper 依賴），單一進入點 `ExportAsync(payload, format, path)`。QuestPDF Community License 由 `Interlocked.Exchange` 一次性設定。
+- **WPF Reports 頁** — `ReportsViewModel` 注入四個 service，`LoadAsync` 同時載入三大報表並暴露 `IncomeStatement` / `BalanceSheet` / `CashFlowStatement` 觀察屬性；`ReportsView.xaml` 三個 Expander 顯示資料 + 6 個 Export 命令（PDF/CSV ×3）走 `SaveFileDialog`。
+
+### 內部變更
+
+- `Assetra.Application/Reports/Statements/`、`Assetra.Application/Reports/ReportExportService.cs`。
+- `Assetra.WPF/Infrastructure/ReportsServiceCollectionExtensions.cs` 註冊四個介面為 Singleton。
+- `Languages/zh-TW.xaml` / `en-US.xaml` 新增 `Reports.IncomeStatement.Title` / `Reports.BalanceSheet.Title` / `Reports.CashFlow.Title` / `Reports.Export.Pdf` / `Reports.Export.Csv`。
+- 444 → 455 筆測試全綠（新增 4 筆 `ReportPeriod` + 3 筆 `IncomeStatementService` + 2 筆 `BalanceSheetService` + 2 筆 `CashFlowStatementService`）。
+
 ## v0.10.0 - 2026-04-28
 
 Reconciliation Phase 2：補上 v0.9.0 暫緩的「新建 Session UI／Created／OverwrittenFromStatement 執行路徑／餘額對帳面板／Kind 分組」。

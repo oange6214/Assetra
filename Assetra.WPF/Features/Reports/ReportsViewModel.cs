@@ -1,6 +1,8 @@
 using Assetra.Application.Reports.Services;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Reports;
 using Assetra.Core.Models;
+using Assetra.Core.Models.Reports;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -15,6 +17,22 @@ public sealed partial class ReportsViewModel : ObservableObject
     private readonly MonthEndReportService _service;
     private readonly ICurrencyService? _currency;
     private readonly ILocalizationService? _localization;
+    private readonly IIncomeStatementService? _incomeService;
+    private readonly IBalanceSheetService? _balanceService;
+    private readonly ICashFlowStatementService? _cashFlowService;
+    private readonly IReportExportService? _exportService;
+
+    [ObservableProperty]
+    private IncomeStatement? _incomeStatement;
+
+    [ObservableProperty]
+    private BalanceSheet? _balanceSheet;
+
+    [ObservableProperty]
+    private CashFlowStatement? _cashFlowStatement;
+
+    [ObservableProperty]
+    private string? _exportStatus;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MonthHeader))]
@@ -48,12 +66,20 @@ public sealed partial class ReportsViewModel : ObservableObject
     public ReportsViewModel(
         MonthEndReportService service,
         ICurrencyService? currency = null,
-        ILocalizationService? localization = null)
+        ILocalizationService? localization = null,
+        IIncomeStatementService? incomeService = null,
+        IBalanceSheetService? balanceService = null,
+        ICashFlowStatementService? cashFlowService = null,
+        IReportExportService? exportService = null)
     {
         ArgumentNullException.ThrowIfNull(service);
         _service = service;
         _currency = currency;
         _localization = localization;
+        _incomeService = incomeService;
+        _balanceService = balanceService;
+        _cashFlowService = cashFlowService;
+        _exportService = exportService;
 
         var today = DateTime.Today;
         _year = today.Year;
@@ -117,6 +143,7 @@ public sealed partial class ReportsViewModel : ObservableObject
         try
         {
             Report = await _service.BuildAsync(Year, Month).ConfigureAwait(true);
+            await LoadStatementsAsync().ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -126,6 +153,72 @@ public sealed partial class ReportsViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    private async Task LoadStatementsAsync()
+    {
+        var period = ReportPeriod.Month(Year, Month);
+        if (_incomeService is not null)
+            IncomeStatement = await _incomeService.GenerateAsync(period).ConfigureAwait(true);
+        if (_balanceService is not null)
+            BalanceSheet = await _balanceService.GenerateAsync(period.End).ConfigureAwait(true);
+        if (_cashFlowService is not null)
+            CashFlowStatement = await _cashFlowService.GenerateAsync(period).ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private Task ExportIncomePdfAsync() => ExportAsync("IncomeStatement", "pdf");
+
+    [RelayCommand]
+    private Task ExportIncomeCsvAsync() => ExportAsync("IncomeStatement", "csv");
+
+    [RelayCommand]
+    private Task ExportBalancePdfAsync() => ExportAsync("BalanceSheet", "pdf");
+
+    [RelayCommand]
+    private Task ExportBalanceCsvAsync() => ExportAsync("BalanceSheet", "csv");
+
+    [RelayCommand]
+    private Task ExportCashFlowPdfAsync() => ExportAsync("CashFlow", "pdf");
+
+    [RelayCommand]
+    private Task ExportCashFlowCsvAsync() => ExportAsync("CashFlow", "csv");
+
+    private async Task ExportAsync(string target, string formatStr)
+    {
+        if (_exportService is null) { ExportStatus = "Export service not available."; return; }
+        var format = formatStr == "pdf" ? ExportFormat.Pdf : ExportFormat.Csv;
+        var ext = format == ExportFormat.Pdf ? "pdf" : "csv";
+        var dlg = new Microsoft.Win32.SaveFileDialog
+        {
+            FileName = $"{target}_{Year:D4}-{Month:D2}.{ext}",
+            DefaultExt = ext,
+            Filter = format == ExportFormat.Pdf ? "PDF (*.pdf)|*.pdf" : "CSV (*.csv)|*.csv",
+        };
+        if (dlg.ShowDialog() != true) return;
+        try
+        {
+            switch (target)
+            {
+                case "IncomeStatement" when IncomeStatement is not null:
+                    await _exportService.ExportAsync(IncomeStatement, format, dlg.FileName).ConfigureAwait(true);
+                    break;
+                case "BalanceSheet" when BalanceSheet is not null:
+                    await _exportService.ExportAsync(BalanceSheet, format, dlg.FileName).ConfigureAwait(true);
+                    break;
+                case "CashFlow" when CashFlowStatement is not null:
+                    await _exportService.ExportAsync(CashFlowStatement, format, dlg.FileName).ConfigureAwait(true);
+                    break;
+                default:
+                    ExportStatus = "No data to export.";
+                    return;
+            }
+            ExportStatus = $"Exported: {dlg.FileName}";
+        }
+        catch (Exception ex)
+        {
+            ExportStatus = $"Export failed: {ex.Message}";
         }
     }
 
