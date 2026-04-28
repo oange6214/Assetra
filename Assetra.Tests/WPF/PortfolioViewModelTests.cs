@@ -227,8 +227,8 @@ public class PortfolioViewModelTests
         var repo = new Mock<IPortfolioRepository>();
         repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(() => created1.ToList());
         repo.Setup(r => r.FindOrCreatePortfolioEntryAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<AssetType>(), It.IsAny<CancellationToken>()))
-            .Callback((string sym, string exch, string? n, AssetType at, CancellationToken _) =>
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<AssetType>(), It.IsAny<string?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Callback((string sym, string exch, string? n, AssetType at, string? cur, bool etf, CancellationToken _) =>
                 created1.Add(new PortfolioEntry(entryId1, sym, exch, at, n ?? string.Empty)))
             .ReturnsAsync(entryId1);
         repo.Setup(r => r.UnarchiveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
@@ -260,8 +260,8 @@ public class PortfolioViewModelTests
         var repo = new Mock<IPortfolioRepository>();
         repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(() => created2.ToList());
         repo.Setup(r => r.FindOrCreatePortfolioEntryAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<AssetType>(), It.IsAny<CancellationToken>()))
-            .Callback((string sym, string exch, string? n, AssetType at, CancellationToken _) =>
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<AssetType>(), It.IsAny<string?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Callback((string sym, string exch, string? n, AssetType at, string? cur, bool etf, CancellationToken _) =>
                 created2.Add(new PortfolioEntry(entryId2, sym, exch, at, n ?? string.Empty)))
             .ReturnsAsync(entryId2);
         repo.Setup(r => r.UnarchiveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);

@@ -43,6 +43,44 @@ public class YahooFinanceHistoryProviderTests
     }
 
     [Fact]
+    public void ParseResponse_DefaultsToTaipeiTimezone_WhenExchangeOmitted()
+    {
+        // 1700000000 = 2023-11-14 22:13:20 UTC → Taipei +8 → 2023-11-15
+        var result = YahooFinanceHistoryProvider.ParseResponse(SampleJson);
+        Assert.Equal(new DateOnly(2023, 11, 15), result[0].Date);
+    }
+
+    [Fact]
+    public void ParseResponse_NyseExchange_UsesNewYorkTimezone()
+    {
+        // 1700000000 = 2023-11-14 22:13:20 UTC → New York EST (-5) → 2023-11-14 17:13:20 → 2023-11-14
+        var result = YahooFinanceHistoryProvider.ParseResponse(SampleJson, "NYSE");
+        Assert.Equal(new DateOnly(2023, 11, 14), result[0].Date);
+    }
+
+    [Fact]
+    public void ParseResponse_NasdaqExchange_UsesNewYorkTimezone()
+    {
+        var result = YahooFinanceHistoryProvider.ParseResponse(SampleJson, "NASDAQ");
+        Assert.Equal(new DateOnly(2023, 11, 14), result[0].Date);
+    }
+
+    [Fact]
+    public void ParseResponse_TseExchange_UsesTokyoTimezone()
+    {
+        // Tokyo +9 → 2023-11-15 07:13:20 → 2023-11-15
+        var result = YahooFinanceHistoryProvider.ParseResponse(SampleJson, "TSE");
+        Assert.Equal(new DateOnly(2023, 11, 15), result[0].Date);
+    }
+
+    [Fact]
+    public void ParseResponse_UnknownExchange_FallsBackToTaipei()
+    {
+        var result = YahooFinanceHistoryProvider.ParseResponse(SampleJson, "BOGUS");
+        Assert.Equal(new DateOnly(2023, 11, 15), result[0].Date);
+    }
+
+    [Fact]
     public void ParseResponse_SkipsNullCloseEntries()
     {
         var json = """

@@ -7,4 +7,5 @@ public sealed record PortfolioEntry(
     AssetType AssetType = AssetType.Stock,
     string DisplayName = "",
     string Currency = "TWD",
-    bool IsActive = true);
+    bool IsActive = true,
+    bool IsEtf = false);

@@ -6,7 +6,7 @@ internal static class PortfolioSchemaMigrator
 {
     private static readonly HashSet<string> AllowedColumns = new(StringComparer.OrdinalIgnoreCase)
     {
-        "asset_type", "created_at", "updated_at", "display_name", "currency", "is_active",
+        "asset_type", "created_at", "updated_at", "display_name", "currency", "is_active", "is_etf",
     };
 
     private static readonly HashSet<string> AllowedLegacyDropColumns = new(StringComparer.OrdinalIgnoreCase)
@@ -20,6 +20,7 @@ internal static class PortfolioSchemaMigrator
         "TEXT NOT NULL DEFAULT ''",
         "TEXT NOT NULL DEFAULT 'TWD'",
         "INTEGER NOT NULL DEFAULT 1",
+        "INTEGER NOT NULL DEFAULT 0",
     };
 
     public static void EnsureInitialized(string connectionString)
@@ -56,6 +57,8 @@ internal static class PortfolioSchemaMigrator
                 "currency", "TEXT NOT NULL DEFAULT 'TWD'", AllowedColumns, AllowedTypeDefs);
             SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio",
                 "is_active", "INTEGER NOT NULL DEFAULT 1", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio",
+                "is_etf", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
 
             DeduplicateEntries(conn, tx);
             EnsureUniqueIndex(conn, tx);

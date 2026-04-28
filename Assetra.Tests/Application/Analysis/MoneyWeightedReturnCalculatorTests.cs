@@ -200,7 +200,7 @@ public class MoneyWeightedReturnCalculatorTests
         public Task UpdateAsync(PortfolioEntry entry, CancellationToken ct = default) => Task.CompletedTask;
         public Task UpdateMetadataAsync(Guid id, string displayName, string currency, CancellationToken ct = default) => Task.CompletedTask;
         public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
-        public Task<Guid> FindOrCreatePortfolioEntryAsync(string symbol, string exchange, string? displayName, AssetType assetType, CancellationToken ct = default) => Task.FromResult(Guid.Empty);
+        public Task<Guid> FindOrCreatePortfolioEntryAsync(string symbol, string exchange, string? displayName, AssetType assetType, string? currency = null, bool isEtf = false, CancellationToken ct = default) => Task.FromResult(Guid.Empty);
         public Task ArchiveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
         public Task UnarchiveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
         public Task<int> HasTradeReferencesAsync(Guid id, CancellationToken ct = default) => Task.FromResult(0);

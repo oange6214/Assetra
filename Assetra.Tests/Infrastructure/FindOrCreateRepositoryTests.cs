@@ -78,6 +78,26 @@ public sealed class FindOrCreateRepositoryTests : IDisposable
     }
 
     [Fact]
+    public async Task FindOrCreatePortfolioEntryAsync_PersistsExplicitCurrency()
+    {
+        var repo = new PortfolioSqliteRepository(_dbPath);
+        var id = await repo.FindOrCreatePortfolioEntryAsync("AAPL", "NASDAQ", "Apple", AssetType.Stock, currency: "USD");
+
+        var entry = (await repo.GetEntriesAsync()).Single(e => e.Id == id);
+        Assert.Equal("USD", entry.Currency);
+    }
+
+    [Fact]
+    public async Task FindOrCreatePortfolioEntryAsync_NullCurrency_DefaultsToTwd()
+    {
+        var repo = new PortfolioSqliteRepository(_dbPath);
+        var id = await repo.FindOrCreatePortfolioEntryAsync("2330", "TWSE", "TSMC", AssetType.Stock);
+
+        var entry = (await repo.GetEntriesAsync()).Single(e => e.Id == id);
+        Assert.Equal("TWD", entry.Currency);
+    }
+
+    [Fact]
     public async Task FindOrCreatePortfolioEntryAsync_SameSymbolDifferentExchange_CreatesTwo()
     {
         var repo = new PortfolioSqliteRepository(_dbPath);

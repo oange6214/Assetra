@@ -7,10 +7,33 @@ namespace Assetra.Infrastructure.History;
 internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
 {
     private readonly HttpClient _http;
-    private static readonly TimeZoneInfo TaipeiTz =
-        TimeZoneInfo.FindSystemTimeZoneById("Taipei Standard Time");
+    private static readonly TimeZoneInfo TaipeiTz = ResolveTimeZoneOrTaipei("Asia/Taipei");
 
     public YahooFinanceHistoryProvider(HttpClient http) => _http = http;
+
+    /// <summary>
+    /// Resolves an IANA tz id to a <see cref="TimeZoneInfo"/>. .NET 6+ accepts IANA on all platforms via ICU,
+    /// but older Windows hosts may map only the Windows ids ("Taipei Standard Time"). Try the IANA id, then
+    /// the legacy Windows id, then fall back to UTC so we never throw at runtime.
+    /// </summary>
+    internal static TimeZoneInfo ResolveTimeZoneOrTaipei(string ianaOrWindowsId)
+    {
+        try { return TimeZoneInfo.FindSystemTimeZoneById(ianaOrWindowsId); }
+        catch (TimeZoneNotFoundException) { }
+        catch (InvalidTimeZoneException) { }
+        if (ianaOrWindowsId == "Asia/Taipei")
+        {
+            try { return TimeZoneInfo.FindSystemTimeZoneById("Taipei Standard Time"); }
+            catch { return TimeZoneInfo.Utc; }
+        }
+        return TimeZoneInfo.Utc;
+    }
+
+    private static TimeZoneInfo ResolveExchangeTimeZone(string? exchange)
+    {
+        var ex = StockExchangeRegistry.TryGet(exchange);
+        return ex is null ? TaipeiTz : ResolveTimeZoneOrTaipei(ex.TimeZone);
+    }
 
     public async Task<IReadOnlyList<OhlcvPoint>> GetHistoryAsync(
         string symbol, string exchange, ChartPeriod period, CancellationToken ct = default)
@@ -36,7 +59,7 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
                 return [];
 
             var json = await response.Content.ReadAsStringAsync(ct);
-            return ParseResponse(json);
+            return ParseResponse(json, exchange);
         }
         catch
         {
@@ -44,7 +67,12 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
         }
     }
 
-    internal static IReadOnlyList<OhlcvPoint> ParseResponse(string json)
+    /// <summary>
+    /// Parses a Yahoo Finance v8 chart response. The session-close timestamp returned by Yahoo is interpreted in
+    /// the exchange's local timezone (resolved via <see cref="StockExchangeRegistry"/>). For an unknown exchange
+    /// — or the legacy single-arg overload — Taipei is used to preserve v0.15.1 behaviour.
+    /// </summary>
+    internal static IReadOnlyList<OhlcvPoint> ParseResponse(string json, string? exchange = null)
     {
         using var doc = JsonDocument.Parse(json);
         var chart = doc.RootElement.GetProperty("chart");
@@ -55,6 +83,7 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
             return [];
 
         var result = resultEl[0];
+        var tz = ResolveExchangeTimeZone(exchange);
 
         var timestamps = result.GetProperty("timestamp").EnumerateArray().ToList();
         var quote = result.GetProperty("indicators").GetProperty("quote")[0];
@@ -70,9 +99,9 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
             if (closes[i].ValueKind == JsonValueKind.Null)
                 continue;
             var dt = DateTimeOffset.FromUnixTimeSeconds(timestamps[i].GetInt64());
-            var taipeiDate = TimeZoneInfo.ConvertTime(dt, TaipeiTz);
+            var local = TimeZoneInfo.ConvertTime(dt, tz);
             points.Add(new OhlcvPoint(
-                DateOnly.FromDateTime(taipeiDate.Date),
+                DateOnly.FromDateTime(local.Date),
                 opens[i].ValueKind == JsonValueKind.Null ? 0m : opens[i].GetDecimal(),
                 highs[i].ValueKind == JsonValueKind.Null ? 0m : highs[i].GetDecimal(),
                 lows[i].ValueKind == JsonValueKind.Null ? 0m : lows[i].GetDecimal(),

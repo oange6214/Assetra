@@ -13,6 +13,8 @@ public interface IPortfolioRepository
     Task<Guid> FindOrCreatePortfolioEntryAsync(
         string symbol, string exchange,
         string? displayName, AssetType assetType,
+        string? currency = null,
+        bool isEtf = false,
         CancellationToken ct = default);
     Task ArchiveAsync(Guid id, CancellationToken ct = default);
     Task UnarchiveAsync(Guid id, CancellationToken ct = default);

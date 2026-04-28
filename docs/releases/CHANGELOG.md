@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.15.2 - 2026-04-28
+
+收尾 v0.15.1 延後的跨市場處理：Yahoo history exchange-aware timezone、`PortfolioEntry.IsEtf` 持久化、`AddAssetWorkflowService` 自動帶入幣別 + ETF 旗標。`StockPickerView` 因 view 尚未存在故仍延後（需待 UI scaffolding）。
+
+### 新增
+
+- **Exchange-aware timezone**（`Assetra.Infrastructure/History/YahooFinanceHistoryProvider.cs`）：`ParseResponse(json, exchange)` 透過 `StockExchangeRegistry.TryGet(exchange).TimeZone` 解析 IANA tz id（NY / Tokyo / HK / Taipei）；舊單參數呼叫退化為 Taipei，與 v0.15.1 行為一致。`ResolveTimeZoneOrTaipei` 容錯：IANA → Windows id 後備 → UTC。
+- **PortfolioEntry.IsEtf**（`Assetra.Core/Models/PortfolioEntry.cs`）：record 新增 `bool IsEtf = false` 欄位（positional optional，向後相容）。
+- **Schema migration**（`Assetra.Infrastructure/Persistence/PortfolioSchemaMigrator.cs`）：`portfolio.is_etf INTEGER NOT NULL DEFAULT 0` 透過既有 `MigrateAddColumn` allowlist 機制加入，舊 DB 自動 backfill。
+- **FindOrCreatePortfolioEntryAsync** 新增 `string? currency = null` / `bool isEtf = false` 參數（`IPortfolioRepository`）；`PortfolioSqliteRepository` 之 INSERT 改 bind `$cur` / `$etf`，`null` currency 退回 `"TWD"`。
+
+### 變更（接線）
+
+- **AddAssetWorkflowService.EnsureStockEntryAsync**：透過 `StockExchangeRegistry.ResolveDefaultCurrency(exchange)` 自動帶入幣別、透過 `IStockSearchService.IsEtf(symbol)` 設定 ETF 旗標；建立的 `PortfolioEntry` 同步攜帶兩者。
+
+### 已知範圍限制
+
+仍延後（需 UI scaffolding，本 sprint 不在範圍內）：
+- `StockPickerView` Exchange filter / 顯示（view 尚未實作）。
+- ETF metadata 細項（追蹤指數、配息頻率）：暫無資料來源。
+
+### 測試
+
+- 新增 5 個 `YahooFinanceHistoryProviderTests`：default/Taipei、NYSE、NASDAQ、TSE、unknown exchange fallback；證明 NY +5 → 2023-11-14，Taipei +8 → 2023-11-15。
+- 新增 2 個 `FindOrCreateRepositoryTests`：明確 currency 持久化、null currency 預設 TWD。
+- 570/570 tests 綠（v0.14.2 為 563；本 sprint +7）。`ImportBatchHistorySqliteRepositoryTests.MarkRolledBack_UpdatesFlagAndTimestamp` 並行 run 偶發 fail，獨立 run 穩定通過 — 屬 pre-existing SQLite + xUnit parallelism 議題。
+
 ## v0.14.2 - 2026-04-28
 
 收尾 v0.14.1 延後的 snapshot 多幣別處理。`PortfolioDailySnapshot` 新增 `Currency` 欄位，`MoneyWeightedReturnCalculator` 在計算 IRR 前依 base currency 轉換 snapshot market value，與 trade flows 採同一保守策略（缺 FX → 回傳 null）。

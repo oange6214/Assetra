@@ -19,13 +19,14 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT id, symbol, exchange, asset_type, display_name, currency, is_active FROM portfolio ORDER BY rowid;";
+        cmd.CommandText = "SELECT id, symbol, exchange, asset_type, display_name, currency, is_active, is_etf FROM portfolio ORDER BY rowid;";
         var results = new List<PortfolioEntry>();
         await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
         while (await reader.ReadAsync(ct).ConfigureAwait(false))
         {
             var assetType = Enum.TryParse<AssetType>(reader.GetString(3), out var t) ? t : AssetType.Stock;
             var isActive = reader.IsDBNull(6) ? true : reader.GetInt64(6) != 0;
+            var isEtf = !reader.IsDBNull(7) && reader.GetInt64(7) != 0;
             results.Add(new PortfolioEntry(
                 Guid.Parse(reader.GetString(0)),
                 reader.GetString(1),
@@ -33,7 +34,8 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
                 assetType,
                 reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
                 reader.IsDBNull(5) ? "TWD" : reader.GetString(5),
-                isActive));
+                isActive,
+                isEtf));
         }
         return results;
     }
@@ -45,8 +47,8 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            INSERT OR IGNORE INTO portfolio (id, symbol, exchange, asset_type, display_name, currency, created_at, updated_at, is_active)
-            VALUES ($id, $sym, $ex, $at, $dn, $cur, $created_at, $updated_at, $ia);
+            INSERT OR IGNORE INTO portfolio (id, symbol, exchange, asset_type, display_name, currency, created_at, updated_at, is_active, is_etf)
+            VALUES ($id, $sym, $ex, $at, $dn, $cur, $created_at, $updated_at, $ia, $etf);
             """;
         cmd.Parameters.AddWithValue("$id", entry.Id.ToString());
         cmd.Parameters.AddWithValue("$sym", entry.Symbol);
@@ -58,6 +60,7 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
         cmd.Parameters.AddWithValue("$created_at", now);
         cmd.Parameters.AddWithValue("$updated_at", now);
         cmd.Parameters.AddWithValue("$ia", entry.IsActive ? 1 : 0);
+        cmd.Parameters.AddWithValue("$etf", entry.IsEtf ? 1 : 0);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -108,12 +111,13 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT id, symbol, exchange, asset_type, display_name, currency, is_active FROM portfolio WHERE is_active = 1 ORDER BY rowid;";
+        cmd.CommandText = "SELECT id, symbol, exchange, asset_type, display_name, currency, is_active, is_etf FROM portfolio WHERE is_active = 1 ORDER BY rowid;";
         var results = new List<PortfolioEntry>();
         await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
         while (await reader.ReadAsync(ct).ConfigureAwait(false))
         {
             var assetType = Enum.TryParse<AssetType>(reader.GetString(3), out var t) ? t : AssetType.Stock;
+            var isEtf = !reader.IsDBNull(7) && reader.GetInt64(7) != 0;
             results.Add(new PortfolioEntry(
                 Guid.Parse(reader.GetString(0)),
                 reader.GetString(1),
@@ -121,17 +125,21 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
                 assetType,
                 reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
                 reader.IsDBNull(5) ? "TWD" : reader.GetString(5),
-                IsActive: true));
+                IsActive: true,
+                IsEtf: isEtf));
         }
         return results;
     }
 
     public async Task<Guid> FindOrCreatePortfolioEntryAsync(
         string symbol, string exchange, string? displayName, AssetType assetType,
+        string? currency = null,
+        bool isEtf = false,
         CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(symbol);
         ArgumentException.ThrowIfNullOrWhiteSpace(exchange);
+        var resolvedCurrency = string.IsNullOrWhiteSpace(currency) ? "TWD" : currency.Trim().ToUpperInvariant();
 
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
@@ -151,13 +159,15 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
         try
         {
             await using var ins = conn.CreateCommand();
-            ins.CommandText = @"INSERT INTO portfolio(id, symbol, exchange, asset_type, created_at, updated_at, display_name, currency, is_active)
-                                VALUES($id, $s, $e, $t, datetime('now'), datetime('now'), $dn, 'TWD', 1)";
+            ins.CommandText = @"INSERT INTO portfolio(id, symbol, exchange, asset_type, created_at, updated_at, display_name, currency, is_active, is_etf)
+                                VALUES($id, $s, $e, $t, datetime('now'), datetime('now'), $dn, $cur, 1, $etf)";
             ins.Parameters.AddWithValue("$id", id.ToString());
             ins.Parameters.AddWithValue("$s", symbol);
             ins.Parameters.AddWithValue("$e", exchange);
             ins.Parameters.AddWithValue("$t", assetType.ToString());
             ins.Parameters.AddWithValue("$dn", (object?)displayName ?? "");
+            ins.Parameters.AddWithValue("$cur", resolvedCurrency);
+            ins.Parameters.AddWithValue("$etf", isEtf ? 1 : 0);
             await ins.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
             return id;
         }

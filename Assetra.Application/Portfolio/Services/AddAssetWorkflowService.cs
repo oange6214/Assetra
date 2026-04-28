@@ -107,11 +107,13 @@ public sealed class AddAssetWorkflowService : IAddAssetWorkflowService
         var exchange = request.Exchange ?? _searchService.GetExchange(symbol) ?? InferExchange(symbol);
         var name = request.Name ?? _searchService.GetName(symbol) ?? string.Empty;
 
+        var currency = StockExchangeRegistry.ResolveDefaultCurrency(exchange);
+        var isEtf = _searchService.IsEtf(symbol);
         var entryId = await _portfolioRepository!
-            .FindOrCreatePortfolioEntryAsync(symbol, exchange, name, AssetType.Stock, ct)
+            .FindOrCreatePortfolioEntryAsync(symbol, exchange, name, AssetType.Stock, currency, isEtf, ct)
             .ConfigureAwait(false);
         await _portfolioRepository.UnarchiveAsync(entryId).ConfigureAwait(false);
-        return new PortfolioEntry(entryId, symbol, exchange, AssetType.Stock, name);
+        return new PortfolioEntry(entryId, symbol, exchange, AssetType.Stock, name, currency, IsActive: true, IsEtf: isEtf);
     }
 
     public async Task<StockBuyResult> ExecuteStockBuyAsync(
