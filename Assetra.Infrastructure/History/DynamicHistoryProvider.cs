@@ -30,6 +30,11 @@ internal sealed class DynamicHistoryProvider : IStockHistoryProvider
     public Task<IReadOnlyList<OhlcvPoint>> GetHistoryAsync(
         string symbol, string exchange, ChartPeriod period, CancellationToken ct = default)
     {
+        // v0.15.1: foreign venues (NYSE/NASDAQ/AMEX/HKEX/TSE) bypass user-selected provider —
+        // TWSE/TPEX/FinMind/Fugle clients only know Taiwan symbols, so route to Yahoo unconditionally.
+        if (YahooSymbolMapper.IsForeignExchange(exchange))
+            return _yahoo.GetHistoryAsync(symbol, exchange, period, ct);
+
         IStockHistoryProvider active = _settings.Current.HistoryProvider switch
         {
             "fugle" => _fugle,

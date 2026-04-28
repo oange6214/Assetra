@@ -17,7 +17,7 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
     {
         try
         {
-            var yahooSymbol = exchange == "TPEX" ? $"{symbol}.TWO" : $"{symbol}.TW";
+            var yahooSymbol = YahooSymbolMapper.ToYahooSymbol(symbol, exchange);
             var range = period switch
             {
                 ChartPeriod.OneMonth => "1mo",

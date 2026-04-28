@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.15.1 - 2026-04-28
+
+收尾 v0.15.0 延後的跨市場 quote / history 路由：以既有 Yahoo Finance provider 支援美股 / HK / 日股，並抽出純函式 `YahooSymbolMapper` 統一處理交易所 → ticker suffix 轉換。零外部 API key 成本。
+
+### 新增
+
+- **YahooSymbolMapper**（`Assetra.Infrastructure/History/`）：純函式 `ToYahooSymbol(symbol, exchange)` 與 `IsForeignExchange(exchange)`。對應規則：TWSE→`.TW`、TPEX→`.TWO`、HKEX→`.HK`、TSE→`.T`、NYSE/NASDAQ/AMEX→bare symbol、未知→bare symbol（caller-validated）。case / whitespace tolerant。
+
+### 變更
+
+- **YahooFinanceHistoryProvider**：原本 inline 的 `exchange == "TPEX" ? .TWO : .TW` 改委派給 `YahooSymbolMapper`，自然支援 NYSE / NASDAQ / AMEX / HKEX / TSE。
+- **DynamicHistoryProvider**：在 dispatch 之前先檢查 `IsForeignExchange`，若是非台灣交易所一律繞過使用者選的 provider 直接走 Yahoo（TWSE / TPEX / FinMind / Fugle clients 只懂台股 symbol，硬發會 404 或 schema mismatch）。台股流程不受影響。
+
+### 已知範圍限制
+
+延後到 v0.15.2+：
+- `YahooFinanceHistoryProvider` 的日期 timezone 仍以 Taipei 計算（美股交易日因時差可能位移一天）— 待加入 exchange-aware timezone 後修正。
+- `PortfolioEntry` ETF metadata（`IsEtf` / 追蹤指數 / 配息頻率）。
+- 跨市場選股 UI：StockPickerView 加 Exchange filter / 顯示。
+- `AddAssetWorkflowService` 套用 `StockExchangeRegistry.ResolveDefaultCurrency` 自動帶入幣別。
+
+### 測試
+
+- 新增 `YahooSymbolMapperTests`（4 個方法 / 17 個 Theory rows）：known exchange suffix × 7、case + whitespace tolerance × 3、unknown / null / blank fallback × 3、`IsForeignExchange` 真值表 × 9（含 BRK.B 帶 dot 的 edge case）。
+- 537/537 tests 綠（v0.15.0 為 514；本 sprint +23 含 Theory 展開）。
+
 ## v0.15.0 - 2026-04-28
 
 美股 / ETF Pipeline 的最小可用基礎：建立 `StockExchange` registry 與 `AssetType.Etf`。本 sprint 聚焦在 zero-cost 的領域層擴充，避開需要外部 API key 的整合（US quote / history HTTP providers）。
