@@ -301,22 +301,21 @@ UI 可以繼續用自然語意：
 這一塊建議作為獨立子系統，而不是只新增幾個交易類型。
 
 ### Core
-- `BudgetCategory`
-- `BudgetPlan`
+- `ExpenseCategory`
+- `Budget`
+- `BudgetTemplate`
 - `BudgetPeriod`
-- `BudgetRule`
-- `RecurringExpenseRule`
+- `AutoCategorizationRule`
+- `RecurringTransaction`
 
 ### Application
-- `BudgetPlanningService`
-- `BudgetTrackingService`
-- `RecurringTransactionWorkflowService`
-- `BudgetSummaryQueryService`
+- `MonthlyBudgetSummaryService`
+- `RecurringTransactionScheduler`
 
 ### Infrastructure
 - `BudgetSqliteRepository`
-- recurring transaction scheduler
-- import rule persistence
+- recurring transaction persistence
+- category / auto-categorization persistence
 
 ### WPF
 - 預算頁

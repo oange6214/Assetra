@@ -89,8 +89,8 @@ Assetra 的定位應逐步從「投資追蹤工具」擴展成：
 
 ### H. 報告與輸出
 
-> 現況：已完成的是月結報告 MVP。
-> 三大正式報表與 PDF / CSV 匯出仍屬後續擴充。
+> 現況：已完成的是報表子系統第一階段，包含月結報告、損益表、資產負債表、現金流量表，以及 PDF / CSV 匯出。
+> 後續仍可擴充更多期間摘要、進階分析視圖與其他輸出格式。
 - 月 / 季 / 年度財務報表 PDF
 - 三大報表：損益表、資產負債表、現金流量表
 - 自訂期間摘要
@@ -113,7 +113,7 @@ Assetra 的定位應逐步從「投資追蹤工具」擴展成：
 
 > 現況（v0.7.0）：CSV / Excel 匯入 MVP 完成，覆蓋台股 Top 5 銀行 / 券商。preview + dedupe + conflict resolution + apply 全鏈路可用；歷史紀錄、回滾、對帳尚未完成。
 - 匯入欄位映射規則 ✅（以宣告式 `CsvParserConfigs` / `ExcelParserConfigs` 提供，新增格式只需改 config）
-- 匯入去重與重複交易偵測 ✅（`ImportConflictDetector` + `ImportMatchKey`，date | abs(amount) | symbol）
+- 匯入去重與重複交易偵測 ✅（`ImportConflictDetector` + `ImportMatchKey`；銀行資料以日期 / 金額為主，券商資料另納入方向 / 數量 / 單價以避免不同成交誤判）
 - 手動確認與修正流程 ✅（每列 Skip / Overwrite / Add anyway 下拉，搭配現金帳戶必選）
 - 匯入歷史紀錄與回滾 ⏳ v0.8+
 - 對帳機制（帳戶 / 信用卡 / 證券）⏳ v0.8+

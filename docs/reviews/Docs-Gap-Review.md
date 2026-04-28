@@ -105,15 +105,18 @@
 - `MonthEndReport`
 - `MonthEndReportService`
 - `ReportsView / ReportsViewModel`
+- `IncomeStatementService`
+- `BalanceSheetService`
+- `CashFlowStatementService`
+- `ReportExportService`
 
 尚未實作的是：
-- 資產負債表
-- 現金流量表
-- 損益表
-- 報表匯出 pipeline
+- 更完整的自訂期間摘要
+- 更多匯出格式與報表版型
+- 更進階的分析/視覺化延伸
 
 #### 判定
-**目前是月結報告 MVP，不是完整 Reports 子系統。**
+**目前 Reports 子系統已基礎落地，不再只是月結報告 MVP；但仍有高階分析與更多輸出能力可擴充。**
 
 ---
 
