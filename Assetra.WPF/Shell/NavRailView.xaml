@@ -26,6 +26,9 @@
             <Border Height="6" DockPanel.Dock="Top" />
 
             <!--  ── Main section buttons ──  -->
+            <ScrollViewer
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <!--  Portfolio  -->
                 <RadioButton
@@ -144,6 +147,78 @@
                     </RadioButton.ToolTip>
                 </RadioButton>
 
+                <!--  Real estate  -->
+                <RadioButton
+                    Content="{DynamicResource RealEstate.Title}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=RealEstate}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE80F;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource RealEstate.Title}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
+                <!--  Insurance  -->
+                <RadioButton
+                    Content="{DynamicResource Insurance.Title}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Insurance}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE8BA;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource Insurance.Title}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
+                <!--  Retirement  -->
+                <RadioButton
+                    Content="{DynamicResource Retirement.Title}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Retirement}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE825;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource Retirement.Title}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
+                <!--  Physical assets  -->
+                <RadioButton
+                    Content="{DynamicResource PhysicalAsset.Title}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=PhysicalAsset}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE8B7;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource PhysicalAsset.Title}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
+                <!--  FIRE calculator  -->
+                <RadioButton
+                    Content="{DynamicResource Fire.Title}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Fire}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE7C1;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource Fire.Title}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
+                <!--  Monte Carlo simulation  -->
+                <RadioButton
+                    Content="{DynamicResource MonteCarlo.Title}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=MonteCarlo}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE9D2;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource MonteCarlo.Title}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
+
                 <!--  警示 with triggered-count badge  -->
                 <Grid>
                     <RadioButton
@@ -177,8 +252,20 @@
                     </Border>
                 </Grid>
 
+                <!--  Settings  -->
+                <RadioButton
+                    Content="{DynamicResource Nav.Settings}"
+                    GroupName="NavSections"
+                    IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Settings}"
+                    Style="{StaticResource NavRailBtn}"
+                    Tag="&#xE713;">
+                    <RadioButton.ToolTip>
+                        <ToolTip Content="{DynamicResource Nav.Settings}" Style="{DynamicResource NavRailToolTip}" />
+                    </RadioButton.ToolTip>
+                </RadioButton>
 
             </StackPanel>
+            </ScrollViewer>
 
         </DockPanel>
     </Border>

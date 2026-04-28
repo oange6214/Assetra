@@ -5,13 +5,19 @@ using Assetra.Core.Models;
 using Assetra.WPF.Features.Alerts;
 using Assetra.WPF.Features.Categories;
 using Assetra.WPF.Features.FinancialOverview;
+using Assetra.WPF.Features.Fire;
 using Assetra.WPF.Features.Goals;
 using Assetra.WPF.Features.Import;
+using Assetra.WPF.Features.Insurance;
+using Assetra.WPF.Features.MonteCarlo;
+using Assetra.WPF.Features.PhysicalAsset;
 using Assetra.WPF.Features.Reconciliation;
 using Assetra.WPF.Features.Recurring;
 using Assetra.WPF.Features.Reports;
 using Assetra.WPF.Features.Portfolio.Controls;
 using Assetra.WPF.Features.Portfolio;
+using Assetra.WPF.Features.RealEstate;
+using Assetra.WPF.Features.Retirement;
 using Assetra.WPF.Features.Settings;
 using Assetra.WPF.Features.Snackbar;
 using Assetra.WPF.Features.StatusBar;
@@ -40,6 +46,12 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public GoalsViewModel Goals { get; }
     public ImportViewModel Import { get; }
     public ReconciliationViewModel Reconciliation { get; }
+    public RealEstateViewModel RealEstate { get; }
+    public InsurancePolicyViewModel Insurance { get; }
+    public RetirementViewModel Retirement { get; }
+    public PhysicalAssetViewModel PhysicalAsset { get; }
+    public FireViewModel Fire { get; }
+    public MonteCarloViewModel MonteCarlo { get; }
     public SettingsViewModel Settings { get; }
     public SnackbarViewModel Snackbar { get; }
 
@@ -136,6 +148,12 @@ public partial class MainViewModel : ObservableObject, IDisposable
         GoalsViewModel goals,
         ImportViewModel import,
         ReconciliationViewModel reconciliation,
+        RealEstateViewModel realEstate,
+        InsurancePolicyViewModel insurance,
+        RetirementViewModel retirement,
+        PhysicalAssetViewModel physicalAsset,
+        FireViewModel fire,
+        MonteCarloViewModel monteCarlo,
         SettingsViewModel settings,
         SnackbarViewModel snackbar,
         IThemeService themeService,
@@ -154,6 +172,12 @@ public partial class MainViewModel : ObservableObject, IDisposable
         Goals = goals;
         Import = import;
         Reconciliation = reconciliation;
+        RealEstate = realEstate;
+        Insurance = insurance;
+        Retirement = retirement;
+        PhysicalAsset = physicalAsset;
+        Fire = fire;
+        MonteCarlo = monteCarlo;
         Settings = settings;
         Snackbar = snackbar;
         _themeService = themeService;

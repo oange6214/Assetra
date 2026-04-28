@@ -5,11 +5,17 @@
     xmlns:alerts="clr-namespace:Assetra.WPF.Features.Alerts"
     xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
     xmlns:financialoverview="clr-namespace:Assetra.WPF.Features.FinancialOverview"
+    xmlns:fire="clr-namespace:Assetra.WPF.Features.Fire"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:insurance="clr-namespace:Assetra.WPF.Features.Insurance"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:montecarlo="clr-namespace:Assetra.WPF.Features.MonteCarlo"
+    xmlns:physicalasset="clr-namespace:Assetra.WPF.Features.PhysicalAsset"
     xmlns:portfolio="clr-namespace:Assetra.WPF.Features.Portfolio"
+    xmlns:realestate="clr-namespace:Assetra.WPF.Features.RealEstate"
     xmlns:recurring="clr-namespace:Assetra.WPF.Features.Recurring"
     xmlns:reports="clr-namespace:Assetra.WPF.Features.Reports"
+    xmlns:retirement="clr-namespace:Assetra.WPF.Features.Retirement"
     xmlns:trends="clr-namespace:Assetra.WPF.Features.Trends"
     xmlns:goals="clr-namespace:Assetra.WPF.Features.Goals"
     xmlns:import="clr-namespace:Assetra.WPF.Features.Import"
@@ -29,6 +35,79 @@
     Icon="pack://application:,,,/Assetra.WPF;component/Assets/windows/assetra-app.ico"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
+
+    <ui:FluentWindow.Resources>
+        <DataTemplate x:Key="PortfolioContentTemplate">
+            <portfolio:PortfolioView DataContext="{Binding Portfolio}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="FinancialOverviewContentTemplate">
+            <financialoverview:FinancialOverviewView DataContext="{Binding FinancialOverview}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="CategoriesContentTemplate">
+            <categories:CategoriesView DataContext="{Binding Categories}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="RecurringContentTemplate">
+            <recurring:RecurringView DataContext="{Binding Recurring}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="GoalsContentTemplate">
+            <goals:GoalsView DataContext="{Binding Goals}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="TrendsContentTemplate">
+            <trends:TrendsView DataContext="{Binding Portfolio.History}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="ReportsContentTemplate">
+            <reports:ReportsView DataContext="{Binding Reports}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="AlertsContentTemplate">
+            <alerts:AlertsView DataContext="{Binding Alerts}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="ImportContentTemplate">
+            <TabControl Background="Transparent" BorderThickness="0">
+                <TabItem Header="{DynamicResource Import.Tab.Import}">
+                    <import:ImportView DataContext="{Binding Import}" />
+                </TabItem>
+                <TabItem Header="{DynamicResource Reconciliation.Tab}">
+                    <reconciliation:ReconciliationView DataContext="{Binding Reconciliation}" />
+                </TabItem>
+            </TabControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="RealEstateContentTemplate">
+            <realestate:RealEstateView DataContext="{Binding RealEstate}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="InsuranceContentTemplate">
+            <insurance:InsurancePolicyView DataContext="{Binding Insurance}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="RetirementContentTemplate">
+            <retirement:RetirementView DataContext="{Binding Retirement}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="PhysicalAssetContentTemplate">
+            <physicalasset:PhysicalAssetView DataContext="{Binding PhysicalAsset}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="FireContentTemplate">
+            <fire:FireView DataContext="{Binding Fire}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="MonteCarloContentTemplate">
+            <montecarlo:MonteCarloView DataContext="{Binding MonteCarlo}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="SettingsContentTemplate">
+            <settings:SettingsView DataContext="{Binding Settings}" />
+        </DataTemplate>
+    </ui:FluentWindow.Resources>
 
     <!--  Keyboard shortcuts  -->
     <ui:FluentWindow.InputBindings>
@@ -187,67 +266,64 @@
             <!--  ── Left NavRail ──  -->
             <shell:NavRailView Grid.Column="0" />
 
-            <!--  ── Content area (each feature view takes full width) ──  -->
-            <Grid Grid.Column="1">
-
-                <!--  投資組合 (Portfolio)  -->
-                <Grid>
-                    <portfolio:PortfolioView DataContext="{Binding Portfolio}" Visibility="{Binding DataContext.NavRail.IsPortfolioActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-                <!--  財務總覽 / 配置  -->
-                <Grid d:Visibility="Collapsed">
-                    <financialoverview:FinancialOverviewView DataContext="{Binding FinancialOverview}" Visibility="{Binding DataContext.NavRail.IsFinancialOverviewActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-                <!--  收支分類  -->
-                <Grid d:Visibility="Collapsed">
-                    <categories:CategoriesView DataContext="{Binding Categories}" Visibility="{Binding DataContext.NavRail.IsCategoriesActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-                <!--  訂閱與待確認  -->
-                <Grid d:Visibility="Collapsed">
-                    <recurring:RecurringView DataContext="{Binding Recurring}" Visibility="{Binding DataContext.NavRail.IsRecurringActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-                <!--  財務目標  -->
-                <Grid d:Visibility="Collapsed">
-                    <goals:GoalsView DataContext="{Binding Goals}" Visibility="{Binding DataContext.NavRail.IsGoalsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-                <!--  淨資產趨勢  -->
-                <Grid d:Visibility="Collapsed">
-                    <trends:TrendsView DataContext="{Binding Portfolio.History}" Visibility="{Binding DataContext.NavRail.IsTrendsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-                <!--  月結報告  -->
-                <Grid d:Visibility="Collapsed">
-                    <reports:ReportsView DataContext="{Binding Reports}" Visibility="{Binding DataContext.NavRail.IsReportsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-                <!--  警示  -->
-                <Grid d:Visibility="Collapsed">
-                    <alerts:AlertsView DataContext="{Binding Alerts}" Visibility="{Binding DataContext.NavRail.IsAlertsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-                <!--  匯入 + 對帳  -->
-                <Grid d:Visibility="Collapsed" Visibility="{Binding DataContext.NavRail.IsImportActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TabControl Background="Transparent" BorderThickness="0">
-                        <TabItem Header="{DynamicResource Import.Tab.Import}">
-                            <import:ImportView DataContext="{Binding Import}" />
-                        </TabItem>
-                        <TabItem Header="{DynamicResource Reconciliation.Tab}">
-                            <reconciliation:ReconciliationView DataContext="{Binding Reconciliation}" />
-                        </TabItem>
-                    </TabControl>
-                </Grid>
-
-                <!--  設定  -->
-                <Grid d:Visibility="Collapsed">
-                    <settings:SettingsView DataContext="{Binding Settings}" Visibility="{Binding DataContext.NavRail.IsSettingsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-
-            </Grid>
+            <!--  ── Content area (active feature view takes full width) ──  -->
+            <ContentControl Grid.Column="1" Content="{Binding}">
+                <ContentControl.Style>
+                    <Style TargetType="{x:Type ContentControl}">
+                        <Setter Property="ContentTemplate" Value="{StaticResource PortfolioContentTemplate}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Portfolio}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource PortfolioContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.FinancialOverview}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource FinancialOverviewContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Categories}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource CategoriesContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Recurring}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource RecurringContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Goals}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource GoalsContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Trends}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource TrendsContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Reports}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource ReportsContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Alerts}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource AlertsContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Import}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource ImportContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.RealEstate}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource RealEstateContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Insurance}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource InsuranceContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Retirement}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource RetirementContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.PhysicalAsset}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource PhysicalAssetContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Fire}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource FireContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.MonteCarlo}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource MonteCarloContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Settings}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource SettingsContentTemplate}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
         </Grid>
 
         <!--  Search backdrop — sits above content, behind the popup HWnd  -->

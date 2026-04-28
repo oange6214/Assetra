@@ -57,6 +57,21 @@
 - `RecurringViewModel` and `CategoriesViewModel` (expense categories / budgets) wire into the `Recurring` and `Budget` application contexts respectively.
 - `DashboardViewModel` composes net-worth and budget summaries from `Portfolio` and `Budget` query services.
 
+## WPF Shell Navigation
+
+- `NavSection` is the source of truth for top-level shell destinations.
+- `NavRailView` exposes one navigation button per visible `NavSection`.
+- `MainViewModel` owns the top-level feature ViewModels consumed by shell content templates.
+- `MainWindow` renders the active destination through one `ContentControl` and `DataTemplate` switching keyed by `NavRail.ActiveSection`.
+- When adding a top-level feature page, update all four shell surfaces together:
+  - `NavSection`
+  - `NavRailView.xaml`
+  - `MainViewModel`
+  - `MainWindow.xaml` content template
+- Use `Features/<Context>/<Context>View.xaml` for top-level pages.
+- Use `Controls/` for page-local reusable UI and `SubViewModels/` for page-local state objects.
+- Dialog and overlay controls should stay page-local unless another context genuinely reuses them.
+
 ## Multi-Asset Entities (v0.23–v0.24)
 
 All new multi-asset entities (`RealEstate`, `InsurancePolicy`, `RetirementAccount`, `PhysicalAsset`) must:
