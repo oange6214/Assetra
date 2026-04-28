@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.16.0 - 2026-04-28
+
+Goals 子系統最小可用骨架：建立 `GoalMilestone` 領域模型 + `GoalPlanningService` 純函式計算器。本 sprint 聚焦於零依賴的領域 / 計算層，避開 schema migration 與 UI 重構。
+
+### 新增
+
+- **D1 GoalMilestone**（`Assetra.Core/Models/GoalMilestone.cs`）：record 含 `Id` / `GoalId` / `TargetDate` / `TargetAmount` / `Label` / `IsAchieved`。對應到既有 `FinancialGoal`，支援把單一目標拆成多個中繼里程碑。
+- **F1 GoalPlanningService**（`Assetra.Application/Goals/`）：純函式計算器，無 I/O。
+  - `RequiredMonthlyContribution(currentAmount, targetAmount, annualReturnRate, months, contributionAtBeginningOfPeriod)`：年金未來值反解 PMT，0% 報酬率退化為均分；複利後 PV ≥ target 回 0；月數 ≤ 0 且未達標回 null（無法在期限內達成）。
+  - `MonthsToReachTarget(currentAmount, targetAmount, annualReturnRate, monthlyContribution, contributionAtBeginningOfPeriod)`：iterative simulation（最多 1200 個月 / 100 年），永遠無法達成回 null。
+
+### 已知範圍限制
+
+延後到 v0.16.1+：
+- `GoalFundingRule` 模型（定期撥款規則：金額 / 頻率 / 來源帳戶）。
+- Milestone / FundingRule 的 SQLite 持久化（schema migration + repository）。
+- `GoalProgressQueryService`：聚合 cash + investment 計算每個 Goal 已撥款 / 進度比例（含 v0.14 多幣別接線）。
+- `GoalsView` UI 擴充：milestone timeline、funding rule 編輯、progress bar 動畫。
+- 與 `RecurringTransaction` 整合（`GoalFundingRule` → 實體化為 `RecurringTransaction`）。
+
+### 測試
+
+- 新增 14 個測試：`GoalPlanningServiceTests`(12) + `GoalMilestoneTests`(2)。涵蓋 0% / 正報酬率 / 期初 vs 期末撥款 / 已超過目標 / 期限已過已達標或未達標 / round-trip（PMT → 月數）。
+- 551/551 tests 綠（v0.15.1 為 537；本 sprint +14）。
+- 備註：`StockraImportServiceTests.ImportAsync_SkipsTable_WhenTargetAlreadyHasRows` 在某次 run 偶發 fail（同 v0.15.0 已記錄的 SQLite + xUnit parallelism flake）；獨立 / 後續執行穩定通過。屬 pre-existing 議題。
+
 ## v0.15.1 - 2026-04-28
 
 收尾 v0.15.0 延後的跨市場 quote / history 路由：以既有 Yahoo Finance provider 支援美股 / HK / 日股，並抽出純函式 `YahooSymbolMapper` 統一處理交易所 → ticker suffix 轉換。零外部 API key 成本。
