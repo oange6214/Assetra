@@ -19,6 +19,7 @@ public sealed class ImportApplyService : IImportApplyService
     {
         WriteIndented = false,
         PropertyNamingPolicy = null,
+        MaxDepth = 16,
     };
 
     private readonly ITradeRepository _trades;

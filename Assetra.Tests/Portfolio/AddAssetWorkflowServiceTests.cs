@@ -19,7 +19,7 @@ public sealed class AddAssetWorkflowServiceTests
 
         PortfolioEntry? addedEntry = null;
         portfolioRepo.Setup(r => r.AddAsync(It.IsAny<PortfolioEntry>()))
-            .Callback<PortfolioEntry>(e => addedEntry = e)
+            .Callback<PortfolioEntry, CancellationToken>((e, _) => addedEntry = e)
             .Returns(Task.CompletedTask);
 
         var service = new AddAssetWorkflowService(

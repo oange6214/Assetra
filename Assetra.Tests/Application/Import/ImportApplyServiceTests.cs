@@ -132,10 +132,10 @@ public class ImportApplyServiceTests
 
         var repo = new Mock<ITradeRepository>();
         repo.Setup(r => r.AddAsync(It.IsAny<Trade>()))
-            .Callback<Trade>(added.Add)
+            .Callback<Trade, CancellationToken>((t, _) => added.Add(t))
             .Returns(Task.CompletedTask);
         repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>()))
-            .Callback<Guid>(id => removedId = id)
+            .Callback<Guid, CancellationToken>((id, _) => removedId = id)
             .Returns(Task.CompletedTask);
 
         var row = new ImportPreviewRow(1, new DateOnly(2026, 4, 27), 1500m, "薪資", null);
@@ -160,10 +160,10 @@ public class ImportApplyServiceTests
 
         var repo = new Mock<ITradeRepository>();
         repo.Setup(r => r.AddAsync(It.IsAny<Trade>()))
-            .Callback<Trade>(_ => calls.Add("Add"))
+            .Callback<Trade, CancellationToken>((_, _) => calls.Add("Add"))
             .Returns(Task.CompletedTask);
         repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>()))
-            .Callback<Guid>(_ => calls.Add("Remove"))
+            .Callback<Guid, CancellationToken>((_, _) => calls.Add("Remove"))
             .Returns(Task.CompletedTask);
 
         var row = new ImportPreviewRow(1, new DateOnly(2026, 4, 27), 1500m, "薪資", null);
@@ -184,7 +184,7 @@ public class ImportApplyServiceTests
         var repo = new Mock<ITradeRepository>();
         var removeCalls = 0;
         repo.Setup(r => r.AddAsync(It.IsAny<Trade>()))
-            .Callback<Trade>(added.Add)
+            .Callback<Trade, CancellationToken>((t, _) => added.Add(t))
             .Returns(Task.CompletedTask);
         repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>()))
             .Callback(() => removeCalls++)
@@ -273,7 +273,7 @@ public class ImportApplyServiceTests
 
         var repo = new Mock<ITradeRepository>();
         repo.Setup(r => r.AddAsync(It.IsAny<Trade>()))
-            .Callback<Trade>(added.Add)
+            .Callback<Trade, CancellationToken>((t, _) => added.Add(t))
             .Returns(Task.CompletedTask);
         repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
         repo.Setup(r => r.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
@@ -384,7 +384,7 @@ public class ImportApplyServiceTests
     {
         var mock = new Mock<ITradeRepository>();
         mock.Setup(r => r.AddAsync(It.IsAny<Trade>()))
-            .Callback<Trade>(sink.Add)
+            .Callback<Trade, CancellationToken>((t, _) => sink.Add(t))
             .Returns(Task.CompletedTask);
         return mock;
     }

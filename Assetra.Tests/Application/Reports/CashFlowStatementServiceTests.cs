@@ -58,15 +58,27 @@ public class CashFlowStatementServiceTests
     private sealed class FakeTradeRepo : ITradeRepository
     {
         public List<Trade> Store { get; } = new();
-        public Task<IReadOnlyList<Trade>> GetAllAsync() => Task.FromResult<IReadOnlyList<Trade>>(Store.ToList());
-        public Task<IReadOnlyList<Trade>> GetByLoanLabelAsync(string l) => Task.FromResult<IReadOnlyList<Trade>>([]);
-        public Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid id) => Task.FromResult<IReadOnlyList<Trade>>([]);
+        public Task<IReadOnlyList<Trade>> GetAllAsync(CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Trade>>(Store.ToList());
+        public Task<IReadOnlyList<Trade>> GetByLoanLabelAsync(string l, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Trade>>([]);
+        public Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid id, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Trade>>([]);
         public Task<Trade?> GetByIdAsync(Guid id, CancellationToken ct = default) => Task.FromResult<Trade?>(null);
-        public Task AddAsync(Trade t) { Store.Add(t); return Task.CompletedTask; }
-        public Task UpdateAsync(Trade t) => Task.CompletedTask;
-        public Task RemoveAsync(Guid id) => Task.CompletedTask;
-        public Task RemoveChildrenAsync(Guid id) => Task.CompletedTask;
+        public Task AddAsync(Trade t, CancellationToken ct = default) { Store.Add(t); return Task.CompletedTask; }
+        public Task UpdateAsync(Trade t, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveChildrenAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
         public Task RemoveByAccountIdAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
         public Task RemoveByLiabilityAsync(Guid? id, string? l, CancellationToken ct = default) => Task.CompletedTask;
+        public Task ApplyAtomicAsync(IReadOnlyList<TradeMutation> mutations, CancellationToken ct = default)
+        {
+            foreach (var m in mutations)
+            {
+                switch (m)
+                {
+                    case AddTradeMutation add: Store.Add(add.Trade); break;
+                    case RemoveTradeMutation rem: Store.RemoveAll(t => t.Id == rem.Id); break;
+                }
+            }
+            return Task.CompletedTask;
+        }
     }
 }

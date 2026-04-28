@@ -226,16 +226,28 @@ public sealed class CategoriesViewModelTests
     {
         public List<Trade> Store { get; set; } = [];
 
-        public Task<IReadOnlyList<Trade>> GetAllAsync() => Task.FromResult<IReadOnlyList<Trade>>(Store.ToList());
-        public Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId) => Task.FromResult<IReadOnlyList<Trade>>([]);
-        public Task<IReadOnlyList<Trade>> GetByLoanLabelAsync(string loanLabel) => Task.FromResult<IReadOnlyList<Trade>>([]);
+        public Task<IReadOnlyList<Trade>> GetAllAsync(CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Trade>>(Store.ToList());
+        public Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Trade>>([]);
+        public Task<IReadOnlyList<Trade>> GetByLoanLabelAsync(string loanLabel, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Trade>>([]);
         public Task<Trade?> GetByIdAsync(Guid id, CancellationToken ct = default) => Task.FromResult<Trade?>(null);
-        public Task AddAsync(Trade trade) => Task.CompletedTask;
-        public Task UpdateAsync(Trade trade) => Task.CompletedTask;
-        public Task RemoveAsync(Guid id) => Task.CompletedTask;
-        public Task RemoveChildrenAsync(Guid parentId) => Task.CompletedTask;
+        public Task AddAsync(Trade trade, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UpdateAsync(Trade trade, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveChildrenAsync(Guid parentId, CancellationToken ct = default) => Task.CompletedTask;
         public Task RemoveByAccountIdAsync(Guid accountId, CancellationToken ct = default) => Task.CompletedTask;
         public Task RemoveByLiabilityAsync(Guid? liabilityAssetId, string? loanLabel, CancellationToken ct = default) => Task.CompletedTask;
+        public Task ApplyAtomicAsync(IReadOnlyList<TradeMutation> mutations, CancellationToken ct = default)
+        {
+            foreach (var m in mutations)
+            {
+                switch (m)
+                {
+                    case AddTradeMutation add: Store.Add(add.Trade); break;
+                    case RemoveTradeMutation rem: Store.RemoveAll(t => t.Id == rem.Id); break;
+                }
+            }
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakeRecurringRepo : IRecurringTransactionRepository

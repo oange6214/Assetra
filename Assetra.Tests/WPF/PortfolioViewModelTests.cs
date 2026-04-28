@@ -96,8 +96,8 @@ public class PortfolioViewModelTests
         repo.Setup(r => r.AddAsync(It.IsAny<PortfolioEntry>())).Returns(Task.CompletedTask);
         repo.Setup(r => r.UpdateAsync(It.IsAny<PortfolioEntry>())).Returns(Task.CompletedTask);
         repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
-        repo.Setup(r => r.ArchiveAsync(It.IsAny<Guid>()))
-            .Callback<Guid>(id =>
+        repo.Setup(r => r.ArchiveAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .Callback<Guid, CancellationToken>((id, _) =>
             {
                 var idx = mutableEntries.FindIndex(e => e.Id == id);
                 if (idx >= 0)
@@ -431,33 +431,45 @@ public class PortfolioViewModelTests
     private sealed class FakeTradeRepo : ITradeRepository
     {
         public List<Trade> Store { get; } = new();
-        public Task<IReadOnlyList<Trade>> GetAllAsync() =>
+        public Task<IReadOnlyList<Trade>> GetAllAsync(CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<Trade>>(Store.ToList());
-        public Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId) =>
+        public Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId, CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<Trade>>(
                 Store.Where(t => t.CashAccountId == cashAccountId
                               || t.ToCashAccountId == cashAccountId).ToList());
-        public Task<IReadOnlyList<Trade>> GetByLoanLabelAsync(string loanLabel) =>
+        public Task<IReadOnlyList<Trade>> GetByLoanLabelAsync(string loanLabel, CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<Trade>>(
                 Store.Where(t => t.LoanLabel == loanLabel).ToList());
         public Task<Trade?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
             Task.FromResult<Trade?>(Store.FirstOrDefault(t => t.Id == id));
-        public Task AddAsync(Trade t) { Store.Add(t); return Task.CompletedTask; }
-        public Task UpdateAsync(Trade t)
+        public Task AddAsync(Trade t, CancellationToken ct = default) { Store.Add(t); return Task.CompletedTask; }
+        public Task UpdateAsync(Trade t, CancellationToken ct = default)
         {
             var i = Store.FindIndex(x => x.Id == t.Id);
             if (i >= 0)
                 Store[i] = t;
             return Task.CompletedTask;
         }
-        public Task RemoveAsync(Guid id) { Store.RemoveAll(x => x.Id == id); return Task.CompletedTask; }
-        public Task RemoveChildrenAsync(Guid parentId) { Store.RemoveAll(x => x.ParentTradeId == parentId); return Task.CompletedTask; }
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) { Store.RemoveAll(x => x.Id == id); return Task.CompletedTask; }
+        public Task RemoveChildrenAsync(Guid parentId, CancellationToken ct = default) { Store.RemoveAll(x => x.ParentTradeId == parentId); return Task.CompletedTask; }
         public Task RemoveByAccountIdAsync(Guid accountId, CancellationToken ct = default) { Store.RemoveAll(x => x.CashAccountId == accountId || x.ToCashAccountId == accountId); return Task.CompletedTask; }
         public Task RemoveByLiabilityAsync(Guid? liabilityAssetId, string? loanLabel, CancellationToken ct = default)
         {
             Store.RemoveAll(x =>
                 (liabilityAssetId.HasValue && x.LiabilityAssetId == liabilityAssetId.Value) ||
                 (!string.IsNullOrEmpty(loanLabel) && x.LoanLabel == loanLabel));
+            return Task.CompletedTask;
+        }
+        public Task ApplyAtomicAsync(IReadOnlyList<TradeMutation> mutations, CancellationToken ct = default)
+        {
+            foreach (var m in mutations)
+            {
+                switch (m)
+                {
+                    case AddTradeMutation add: Store.Add(add.Trade); break;
+                    case RemoveTradeMutation rem: Store.RemoveAll(t => t.Id == rem.Id); break;
+                }
+            }
             return Task.CompletedTask;
         }
     }

@@ -62,15 +62,15 @@ public class ConcentrationAnalyzerTests
     private sealed class FakePortfolioRepo : IPortfolioRepository
     {
         public List<PortfolioEntry> Entries { get; } = new();
-        public Task<IReadOnlyList<PortfolioEntry>> GetEntriesAsync() => Task.FromResult<IReadOnlyList<PortfolioEntry>>(Entries.ToList());
-        public Task<IReadOnlyList<PortfolioEntry>> GetActiveAsync() => Task.FromResult<IReadOnlyList<PortfolioEntry>>(Entries.Where(e => e.IsActive).ToList());
-        public Task AddAsync(PortfolioEntry entry) { Entries.Add(entry); return Task.CompletedTask; }
-        public Task UpdateAsync(PortfolioEntry entry) => Task.CompletedTask;
-        public Task UpdateMetadataAsync(Guid id, string displayName, string currency) => Task.CompletedTask;
-        public Task RemoveAsync(Guid id) => Task.CompletedTask;
+        public Task<IReadOnlyList<PortfolioEntry>> GetEntriesAsync(CancellationToken ct = default) => Task.FromResult<IReadOnlyList<PortfolioEntry>>(Entries.ToList());
+        public Task<IReadOnlyList<PortfolioEntry>> GetActiveAsync(CancellationToken ct = default) => Task.FromResult<IReadOnlyList<PortfolioEntry>>(Entries.Where(e => e.IsActive).ToList());
+        public Task AddAsync(PortfolioEntry entry, CancellationToken ct = default) { Entries.Add(entry); return Task.CompletedTask; }
+        public Task UpdateAsync(PortfolioEntry entry, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UpdateMetadataAsync(Guid id, string displayName, string currency, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
         public Task<Guid> FindOrCreatePortfolioEntryAsync(string symbol, string exchange, string? displayName, AssetType assetType, CancellationToken ct = default) => Task.FromResult(Guid.Empty);
-        public Task ArchiveAsync(Guid id) => Task.CompletedTask;
-        public Task UnarchiveAsync(Guid id) => Task.CompletedTask;
+        public Task ArchiveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UnarchiveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
         public Task<int> HasTradeReferencesAsync(Guid id, CancellationToken ct = default) => Task.FromResult(0);
     }
 

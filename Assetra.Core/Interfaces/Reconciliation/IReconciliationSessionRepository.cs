@@ -25,6 +25,9 @@ public interface IReconciliationSessionRepository
 
     Task<IReadOnlyList<ReconciliationDiff>> GetDiffsAsync(Guid sessionId, CancellationToken ct = default);
 
+    /// <summary>單筆 diff 查詢；查無資料回傳 <see langword="null"/>。</summary>
+    Task<ReconciliationDiff?> GetDiffByIdAsync(Guid diffId, CancellationToken ct = default);
+
     /// <summary>覆寫 session 的所有 diffs（重新比對時使用）。</summary>
     Task ReplaceDiffsAsync(Guid sessionId, IReadOnlyList<ReconciliationDiff> diffs, CancellationToken ct = default);
 

@@ -14,15 +14,15 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
         PortfolioSchemaMigrator.EnsureInitialized(_connectionString);
     }
 
-    public async Task<IReadOnlyList<PortfolioEntry>> GetEntriesAsync()
+    public async Task<IReadOnlyList<PortfolioEntry>> GetEntriesAsync(CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = "SELECT id, symbol, exchange, asset_type, display_name, currency, is_active FROM portfolio ORDER BY rowid;";
         var results = new List<PortfolioEntry>();
-        await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
         {
             var assetType = Enum.TryParse<AssetType>(reader.GetString(3), out var t) ? t : AssetType.Stock;
             var isActive = reader.IsDBNull(6) ? true : reader.GetInt64(6) != 0;
@@ -38,11 +38,11 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
         return results;
     }
 
-    public async Task AddAsync(PortfolioEntry entry)
+    public async Task AddAsync(PortfolioEntry entry, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(entry);
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             INSERT OR IGNORE INTO portfolio (id, symbol, exchange, asset_type, display_name, currency, created_at, updated_at, is_active)
@@ -58,14 +58,14 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
         cmd.Parameters.AddWithValue("$created_at", now);
         cmd.Parameters.AddWithValue("$updated_at", now);
         cmd.Parameters.AddWithValue("$ia", entry.IsActive ? 1 : 0);
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task UpdateAsync(PortfolioEntry entry)
+    public async Task UpdateAsync(PortfolioEntry entry, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(entry);
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             UPDATE portfolio SET asset_type=$at, updated_at=$updated_at
@@ -74,13 +74,13 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
         cmd.Parameters.AddWithValue("$id", entry.Id.ToString());
         cmd.Parameters.AddWithValue("$at", entry.AssetType.ToString());
         cmd.Parameters.AddWithValue("$updated_at", DateTime.UtcNow.ToString("o"));
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task UpdateMetadataAsync(Guid id, string displayName, string currency)
+    public async Task UpdateMetadataAsync(Guid id, string displayName, string currency, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             UPDATE portfolio SET display_name=$dn, currency=$cur, updated_at=$updated_at
@@ -90,28 +90,28 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
         cmd.Parameters.AddWithValue("$dn", displayName);
         cmd.Parameters.AddWithValue("$cur", currency);
         cmd.Parameters.AddWithValue("$updated_at", DateTime.UtcNow.ToString("o"));
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task RemoveAsync(Guid id)
+    public async Task RemoveAsync(Guid id, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = "DELETE FROM portfolio WHERE id = $id;";
         cmd.Parameters.AddWithValue("$id", id.ToString());
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<PortfolioEntry>> GetActiveAsync()
+    public async Task<IReadOnlyList<PortfolioEntry>> GetActiveAsync(CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = "SELECT id, symbol, exchange, asset_type, display_name, currency, is_active FROM portfolio WHERE is_active = 1 ORDER BY rowid;";
         var results = new List<PortfolioEntry>();
-        await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
         {
             var assetType = Enum.TryParse<AssetType>(reader.GetString(3), out var t) ? t : AssetType.Stock;
             results.Add(new PortfolioEntry(
@@ -174,24 +174,24 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository
         }
     }
 
-    public async Task ArchiveAsync(Guid id)
+    public async Task ArchiveAsync(Guid id, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = "UPDATE portfolio SET is_active = 0, updated_at = datetime('now') WHERE id = $id";
         cmd.Parameters.AddWithValue("$id", id.ToString());
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task UnarchiveAsync(Guid id)
+    public async Task UnarchiveAsync(Guid id, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = "UPDATE portfolio SET is_active = 1, updated_at = datetime('now') WHERE id = $id";
         cmd.Parameters.AddWithValue("$id", id.ToString());
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
     public async Task<int> HasTradeReferencesAsync(Guid id, CancellationToken ct = default)

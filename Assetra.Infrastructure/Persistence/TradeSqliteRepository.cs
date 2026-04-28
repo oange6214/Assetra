@@ -95,15 +95,15 @@ public sealed class TradeSqliteRepository : ITradeRepository
 
     // ─── Queries ─────────────────────────────────────────────────────────
 
-    public async Task<IReadOnlyList<Trade>> GetAllAsync()
+    public async Task<IReadOnlyList<Trade>> GetAllAsync(CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = $"SELECT {SelectClause} FROM trade ORDER BY trade_date DESC, rowid DESC;";
         var results = new List<Trade>();
-        await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
-        while (await reader.ReadAsync().ConfigureAwait(false))
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
             results.Add(MapTrade(reader));
         return results;
     }
@@ -121,10 +121,10 @@ public sealed class TradeSqliteRepository : ITradeRepository
         return null;
     }
 
-    public async Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId)
+    public async Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         // Include Transfer records where this account is the destination
         cmd.CommandText =
@@ -133,17 +133,17 @@ public sealed class TradeSqliteRepository : ITradeRepository
             "ORDER BY trade_date DESC, rowid DESC;";
         cmd.Parameters.AddWithValue("$acct", cashAccountId.ToString());
         var results = new List<Trade>();
-        await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
-        while (await reader.ReadAsync().ConfigureAwait(false))
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
             results.Add(MapTrade(reader));
         return results;
     }
 
-    public async Task<IReadOnlyList<Trade>> GetByLoanLabelAsync(string loanLabel)
+    public async Task<IReadOnlyList<Trade>> GetByLoanLabelAsync(string loanLabel, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(loanLabel);
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText =
             $"SELECT {SelectClause} FROM trade " +
@@ -151,19 +151,19 @@ public sealed class TradeSqliteRepository : ITradeRepository
             "ORDER BY trade_date DESC, rowid DESC;";
         cmd.Parameters.AddWithValue("$loan_label", loanLabel);
         var results = new List<Trade>();
-        await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
-        while (await reader.ReadAsync().ConfigureAwait(false))
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
             results.Add(MapTrade(reader));
         return results;
     }
 
     // ─── Mutations ───────────────────────────────────────────────────────
 
-    public async Task AddAsync(Trade trade)
+    public async Task AddAsync(Trade trade, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(trade);
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             INSERT OR IGNORE INTO trade
@@ -187,14 +187,14 @@ public sealed class TradeSqliteRepository : ITradeRepository
         var now = DateTime.UtcNow.ToString("o");
         cmd.Parameters.AddWithValue("$created_at", now);
         cmd.Parameters.AddWithValue("$updated_at", now);
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task UpdateAsync(Trade trade)
+    public async Task UpdateAsync(Trade trade, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(trade);
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             UPDATE trade SET
@@ -215,27 +215,27 @@ public sealed class TradeSqliteRepository : ITradeRepository
             """;
         BindTradeParams(cmd, trade);
         cmd.Parameters.AddWithValue("$updated_at", DateTime.UtcNow.ToString("o"));
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task RemoveAsync(Guid id)
+    public async Task RemoveAsync(Guid id, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = "DELETE FROM trade WHERE id = $id;";
         cmd.Parameters.AddWithValue("$id", id.ToString());
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task RemoveChildrenAsync(Guid parentId)
+    public async Task RemoveChildrenAsync(Guid parentId, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = "DELETE FROM trade WHERE parent_trade_id = $pid;";
         cmd.Parameters.AddWithValue("$pid", parentId.ToString());
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
     public async Task RemoveByAccountIdAsync(Guid accountId, CancellationToken ct = default)
@@ -270,6 +270,80 @@ public sealed class TradeSqliteRepository : ITradeRepository
         }
 
         cmd.CommandText = "DELETE FROM trade WHERE " + string.Join(" OR ", clauses) + ";";
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task ApplyAtomicAsync(IReadOnlyList<TradeMutation> mutations, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(mutations);
+        if (mutations.Count == 0) return;
+
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
+
+        try
+        {
+            foreach (var m in mutations)
+            {
+                ct.ThrowIfCancellationRequested();
+                switch (m)
+                {
+                    case AddTradeMutation add:
+                        await ExecAddAsync(conn, tx, add.Trade, ct).ConfigureAwait(false);
+                        break;
+                    case RemoveTradeMutation rem:
+                        await ExecRemoveAsync(conn, tx, rem.Id, ct).ConfigureAwait(false);
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Unknown mutation type: {m.GetType().Name}");
+                }
+            }
+            await tx.CommitAsync(ct).ConfigureAwait(false);
+        }
+        catch
+        {
+            await tx.RollbackAsync(CancellationToken.None).ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    private static async Task ExecAddAsync(SqliteConnection conn, SqliteTransaction tx, Trade trade, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(trade);
+        await using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            INSERT OR IGNORE INTO trade
+                (id, symbol, exchange, name, trade_type, trade_date, price, quantity,
+                 realized_pnl, realized_pnl_pct, cash_amount, cash_account_id, note,
+                 portfolio_entry_id, commission, commission_discount,
+                 loan_label, principal, interest_paid, to_cash_account_id,
+                 liability_asset_id,
+                 parent_trade_id, category_id, recurring_source_id,
+                 created_at, updated_at)
+            VALUES
+                ($id, $sym, $ex, $name, $type, $date, $price, $qty,
+                 $rpnl, $rpct, $cash, $acct, $note,
+                 $pentry, $comm, $comm_d,
+                 $loan_label, $princ, $int, $to_acct,
+                 $liability_asset_id,
+                 $parent_id, $category_id, $recurring_source_id,
+                 $created_at, $updated_at);
+            """;
+        BindTradeParams(cmd, trade);
+        var now = DateTime.UtcNow.ToString("o");
+        cmd.Parameters.AddWithValue("$created_at", now);
+        cmd.Parameters.AddWithValue("$updated_at", now);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+    }
+
+    private static async Task ExecRemoveAsync(SqliteConnection conn, SqliteTransaction tx, Guid id, CancellationToken ct)
+    {
+        await using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "DELETE FROM trade WHERE id = $id;";
+        cmd.Parameters.AddWithValue("$id", id.ToString());
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 }

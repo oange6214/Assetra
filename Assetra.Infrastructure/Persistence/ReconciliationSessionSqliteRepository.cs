@@ -145,6 +145,23 @@ public sealed class ReconciliationSessionSqliteRepository : IReconciliationSessi
         return diffs;
     }
 
+    public async Task<ReconciliationDiff?> GetDiffByIdAsync(Guid diffId, CancellationToken ct = default)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT id, session_id, kind, statement_row_json, trade_id, resolution, resolved_at, note
+            FROM reconciliation_diff
+            WHERE id = $id
+            LIMIT 1;
+            """;
+        cmd.Parameters.AddWithValue("$id", diffId.ToString());
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        if (!await reader.ReadAsync(ct).ConfigureAwait(false)) return null;
+        return ReadDiff(reader);
+    }
+
     public async Task ReplaceDiffsAsync(
         Guid sessionId,
         IReadOnlyList<ReconciliationDiff> diffs,

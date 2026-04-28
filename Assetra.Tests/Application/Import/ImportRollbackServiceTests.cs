@@ -91,7 +91,7 @@ public class ImportRollbackServiceTests
     public async Task Rollback_DoesNotMarkRolledBack_WhenFailuresOccur()
     {
         var trades = new Mock<ITradeRepository>();
-        trades.Setup(t => t.RemoveAsync(It.IsAny<Guid>()))
+        trades.Setup(t => t.ApplyAtomicAsync(It.IsAny<IReadOnlyList<TradeMutation>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("fk constraint"));
         var historyRepo = NewHistoryRepo(History(
             new ImportBatchEntry(1, ImportBatchAction.Added, Guid.NewGuid(), null)));
@@ -140,11 +140,18 @@ public class ImportRollbackServiceTests
     private static Mock<ITradeRepository> NewTradeRepo(List<Guid>? removed = null, List<Trade>? added = null)
     {
         var mock = new Mock<ITradeRepository>();
-        mock.Setup(t => t.RemoveAsync(It.IsAny<Guid>()))
-            .Callback<Guid>(id => removed?.Add(id))
-            .Returns(Task.CompletedTask);
-        mock.Setup(t => t.AddAsync(It.IsAny<Trade>()))
-            .Callback<Trade>(t => added?.Add(t))
+        mock.Setup(t => t.ApplyAtomicAsync(It.IsAny<IReadOnlyList<TradeMutation>>(), It.IsAny<CancellationToken>()))
+            .Callback<IReadOnlyList<TradeMutation>, CancellationToken>((mutations, _) =>
+            {
+                foreach (var m in mutations)
+                {
+                    switch (m)
+                    {
+                        case AddTradeMutation a: added?.Add(a.Trade); break;
+                        case RemoveTradeMutation r: removed?.Add(r.Id); break;
+                    }
+                }
+            })
             .Returns(Task.CompletedTask);
         return mock;
     }

@@ -14,7 +14,7 @@ public sealed class PositionMetadataWorkflowServiceTests
         var repo = new Mock<IPortfolioRepository>();
         var updated = new List<Guid>();
         repo.Setup(r => r.UpdateMetadataAsync(It.IsAny<Guid>(), "TSMC", "USD"))
-            .Callback<Guid, string, string>((id, _, _) => updated.Add(id))
+            .Callback<Guid, string, string, CancellationToken>((id, _, _, _) => updated.Add(id))
             .Returns(Task.CompletedTask);
 
         var service = new PositionMetadataWorkflowService(repo.Object);

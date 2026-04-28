@@ -31,7 +31,7 @@ public sealed class TradeMetadataWorkflowServiceTests
 
         Trade? updatedTrade = null;
         tradeRepo.Setup(r => r.UpdateAsync(It.IsAny<Trade>()))
-            .Callback<Trade>(t => updatedTrade = t)
+            .Callback<Trade, CancellationToken>((t, _) => updatedTrade = t)
             .Returns(Task.CompletedTask);
 
         var service = new TradeMetadataWorkflowService(tradeRepo.Object);

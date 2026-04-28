@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.13.3 - 2026-04-28
+
+針對 v0.13.2 後 code review 發現的 HIGH / MEDIUM / LOW 違規做 hardening；無新功能、行為大致等價，但 cancellation 一致、import rollback 具原子性、JSON snapshot 更安全。
+
+### 修正
+
+- **CancellationToken（HIGH）**：`ITradeRepository` / `IPortfolioRepository` / `IAlertRepository` 各方法補上 `CancellationToken ct = default` 參數，並由對應 SQLite 實作 propagate 到 `OpenAsync` / `ExecuteNonQueryAsync` / `ReadAsync`；callers / fakes / Moq `.Callback<T>` 同步更新。
+- **Atomic rollback（HIGH）**：新增 `ITradeRepository.ApplyAtomicAsync(IReadOnlyList<TradeMutation>, ct)` 在單一 SQLite transaction 套用整批 add / remove；`ImportRollbackService` 改為兩段式：planning 收集 pre-flight failures（snapshot 缺失 / 反序列化錯誤 / 空 Guid），確認無 failure 後才透過 atomic apply 執行，任一筆失敗整批 rollback，不再有半套用狀態。
+- **JSON snapshot guard（MED）**：`ImportApplyService.SnapshotJsonOptions` 增加 `MaxDepth = 16`；`ImportRollbackService` 在反序列化 snapshot 時 catch `JsonException`、檢查 null 與 `Trade.Id == Guid.Empty`，違規即列為 pre-flight failure。
+- **GetDiffByIdAsync（LOW）**：`IReconciliationSessionRepository` 新增 `GetDiffByIdAsync`；`ReconciliationService.FindDiffAsync` 由 O(N×M) session 全掃改為單筆 SQL `WHERE id = $id LIMIT 1`。
+
+### 內部變更
+
+- 新增 `Assetra.Core/Models/TradeMutation.cs`：`abstract record TradeMutation` + `AddTradeMutation` / `RemoveTradeMutation`。
+- 9 個 `FakeTradeRepo` 測試替身補上 `ApplyAtomicAsync`；`ImportRollbackServiceTests` 改透過 `ApplyAtomicAsync` 捕捉 mutations。
+- 480/480 tests 綠。
+
 ## v0.13.2 - 2026-04-28
 
 針對 v0.13.1 後 code review 發現的 CRITICAL / HIGH 違規做 quick fix；無新功能、行為等價，但訊號乾淨且 benchmark 可配置。

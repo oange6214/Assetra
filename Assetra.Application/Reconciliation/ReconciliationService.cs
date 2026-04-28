@@ -150,15 +150,9 @@ public sealed class ReconciliationService : IReconciliationService
 
     private async Task<ReconciliationDiff> FindDiffAsync(Guid diffId, CancellationToken ct)
     {
-        // No direct GetById; iterate sessions until found. Cost is bounded by Open sessions.
-        var sessions = await _sessions.GetAllAsync(ct).ConfigureAwait(false);
-        foreach (var s in sessions)
-        {
-            var diffs = await _sessions.GetDiffsAsync(s.Id, ct).ConfigureAwait(false);
-            var match = diffs.FirstOrDefault(d => d.Id == diffId);
-            if (match is not null) return match;
-        }
-        throw new InvalidOperationException($"Diff {diffId} not found.");
+        var match = await _sessions.GetDiffByIdAsync(diffId, ct).ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"Diff {diffId} not found.");
+        return match;
     }
 
     private async Task<IReadOnlyList<Trade>> LoadTradesAsync(

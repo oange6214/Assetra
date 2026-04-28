@@ -14,15 +14,15 @@ public sealed class AlertSqliteRepository : IAlertRepository
         AlertSchemaMigrator.EnsureInitialized(_connectionString);
     }
 
-    public async Task<IReadOnlyList<AlertRule>> GetRulesAsync()
+    public async Task<IReadOnlyList<AlertRule>> GetRulesAsync(CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = "SELECT id, symbol, exchange, condition, target_price, is_triggered, trigger_time FROM alert ORDER BY rowid;";
         var results = new List<AlertRule>();
-        await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
         {
             var triggerTimeStr = reader.IsDBNull(6) ? null : reader.GetString(6);
             results.Add(new AlertRule(
@@ -37,10 +37,10 @@ public sealed class AlertSqliteRepository : IAlertRepository
         return results;
     }
 
-    public async Task AddAsync(AlertRule rule)
+    public async Task AddAsync(AlertRule rule, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             INSERT OR IGNORE INTO alert (id, symbol, exchange, condition, target_price, is_triggered, trigger_time, created_at, updated_at)
@@ -56,23 +56,23 @@ public sealed class AlertSqliteRepository : IAlertRepository
         var now = DateTime.UtcNow.ToString("o");
         cmd.Parameters.AddWithValue("$created_at", now);
         cmd.Parameters.AddWithValue("$updated_at", now);
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task RemoveAsync(Guid id)
+    public async Task RemoveAsync(Guid id, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = "DELETE FROM alert WHERE id = $id;";
         cmd.Parameters.AddWithValue("$id", id.ToString());
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task UpdateAsync(AlertRule rule)
+    public async Task UpdateAsync(AlertRule rule, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             UPDATE alert SET
@@ -89,6 +89,6 @@ public sealed class AlertSqliteRepository : IAlertRepository
         cmd.Parameters.AddWithValue("$tt", rule.TriggerTime?.ToString("O") ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("$id", rule.Id.ToString());
         cmd.Parameters.AddWithValue("$updated_at", DateTime.UtcNow.ToString("o"));
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 }
