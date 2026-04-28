@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.16.1 - 2026-04-28
+
+收尾 v0.16.0 延後的 Goals 子系統：補上 `GoalFundingRule` 模型、milestone / funding rule 的 SQLite 持久化、`GoalProgressQueryService` 純函式進度計算。`GoalsView` UI 擴充（milestone timeline、progress bar 動畫）與 RecurringTransaction 整合需 UI 設計與 cross-feature scheduler 改造，仍延後。
+
+### 新增
+
+- **D1 GoalFundingRule**（`Assetra.Core/Models/GoalFundingRule.cs`）：record 含 `Id` / `GoalId` / `Amount` / `Frequency`（沿用 `RecurrenceFrequency`）/ `SourceCashAccountId` / `StartDate` / `EndDate` / `IsEnabled`。設計為與 `RecurringTransaction` 平行，可由後續 sprint 之 scheduler 物化。
+- **D1 GoalProgress**（`Assetra.Core/Models/GoalProgress.cs`）：`GoalId` / `TargetAmount` / `AccumulatedFunding` / `CurrentAmount` / `ProgressPercent` / `IsAchieved`。
+- **F1 持久化**（`Assetra.Infrastructure/Persistence/`）：
+  - `GoalSchemaMigrator` 加入 `goal_milestone(id, goal_id, target_date, target_amount, label, is_achieved)` 與 `goal_funding_rule(id, goal_id, amount, frequency, source_cash_account_id, start_date, end_date, is_enabled)` 兩張表（含 `goal_id` index 與 `ON DELETE CASCADE`）。
+  - `GoalMilestoneSqliteRepository` / `GoalFundingRuleSqliteRepository`：CRUD + `GetByGoalAsync`（依 target_date / start_date 排序）；FundingRule 額外提供 `GetAllAsync` 給未來 scheduler。
+  - `IGoalMilestoneRepository` / `IGoalFundingRuleRepository` 介面定義於 `Assetra.Core/Interfaces/`。
+- **F2 GoalProgressQueryService**（`Assetra.Application/Goals/`）：純函式 `Compute(goal, fundingRules, currentAmount, asOf)`。對每條 enabled rule 依 frequency 計算 `[startDate, min(endDate, asOf)]` 之間的撥款次數 × amount → `AccumulatedFunding`。`ProgressPercent` 優先以 caller 提供之 `currentAmount`（通常從 `BalanceSheet` 取淨資產）為準；caller 傳 null 時退回 `AccumulatedFunding`。
+
+### 已知範圍限制
+
+仍延後（需 UI 設計或 scheduler 改造）：
+- `GoalsView` UI：milestone timeline、funding rule 編輯對話框、progress bar 動畫。
+- `GoalFundingRule` ↔ `RecurringTransaction` 整合：將 enabled rule 物化為 RecurringTransaction 並由 `RecurringTransactionScheduler` 消費；需設計同步策略（manual sync vs auto-mirror）。
+- 多幣別接線：目前 `currentAmount` 由 caller 提供，假設已轉為 base currency；後續可在 ViewModel 層接 `IMultiCurrencyValuationService`。
+
+### 測試
+
+- 新增 14 個 `GoalProgressQueryServiceTests`：no rules、Daily/Weekly/BiWeekly/Monthly/Quarterly/Yearly 累計、disabled rule / 其他 goal / 起始日未到 / 結束日已過 過濾、currentAmount 覆寫、達成上限、100% capping、負金額忽略。
+- 新增 7 個 `GoalAuxiliaryRepositoryTests`：milestone CRUD round-trip、funding rule CRUD round-trip、null source/end-date 處理、disable 持久化、`GetAllAsync` 跨 goal。
+- 591/591 tests 綠（v0.15.2 為 570；本 sprint +21）。
+
 ## v0.15.2 - 2026-04-28
 
 收尾 v0.15.1 延後的跨市場處理：Yahoo history exchange-aware timezone、`PortfolioEntry.IsEtf` 持久化、`AddAssetWorkflowService` 自動帶入幣別 + ETF 旗標。`StockPickerView` 因 view 尚未存在故仍延後（需待 UI scaffolding）。
