@@ -7,4 +7,5 @@ public enum AssetType
     PreciousMetal,
     Bond,
     Crypto,
+    Etf,
 }

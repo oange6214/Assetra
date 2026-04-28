@@ -1,5 +1,30 @@
 # Changelog
 
+## v0.15.0 - 2026-04-28
+
+美股 / ETF Pipeline 的最小可用基礎：建立 `StockExchange` registry 與 `AssetType.Etf`。本 sprint 聚焦在 zero-cost 的領域層擴充，避開需要外部 API key 的整合（US quote / history HTTP providers）。
+
+### 新增
+
+- **D1 StockExchange 領域模型**：`Assetra.Core/Models/StockExchange.cs`，record 含 `Code` / `DisplayName` / `DefaultCurrency` / `Country` / `TimeZone(IANA)`。
+- **D1 StockExchangeRegistry**：靜態 lookup，內建七個交易所常數 — TWSE / TPEX（TWD）、NYSE / NASDAQ / AMEX（USD）、HKEX（HKD）、TSE（JPY）。提供 case-insensitive `TryGet(code)` 與 `ResolveDefaultCurrency(code, fallback)`，後者可作為新增 `PortfolioEntry` 時自動帶入幣別的依據（與 v0.14.0 多幣別 base currency 相容）。
+- **AssetType.Etf**：enum 末尾新增 `Etf = 5`（保留前面值順序穩定，DB 已存值不受影響）。
+
+### 已知範圍限制
+
+延後到 v0.15.1+：
+- US 股票 / ETF quote + history HTTP providers（需外部 API key — Yahoo Finance / Alpha Vantage 之一）
+- `DynamicHistoryProvider` 由「使用者選 provider」改為「依 exchange 自動 routing」
+- `PortfolioEntry` 加 `IsEtf` 或 ETF metadata（追蹤指數 / 配息頻率）
+- 跨市場選股 UI（StockPickerView 加 Exchange filter）
+- AddAssetWorkflowService 套用 `StockExchangeRegistry.ResolveDefaultCurrency` 自動帶入幣別
+
+### 測試
+
+- 新增 6 個測試（StockExchangeRegistryTests）：already-known × 7 (Theory)、case-insensitive、unknown / blank fallback × 4、`ResolveDefaultCurrency` 行為、`Known.Count == 7`。
+- 514/514 tests 綠（v0.14.1 為 499；本 sprint +6，另計 +9 從 Theory rows）。
+- 備註：`TradeSqliteRepositoryInitializeTests.Initialize_LegacyLiabilityAccountTablePresent_BackfillRunsSuccessfully` 在某些並行 run 偶發 fail（SQLite + xUnit parallelism）；獨立執行穩定通過。屬 pre-existing 議題，非本 sprint 引入。
+
 ## v0.14.1 - 2026-04-28
 
 收尾 v0.14.0 延後的 Performance / Risk 跨幣別接線：MWR 與 Concentration 改吃 base currency；XIRR 本身保持貨幣中立（純粹接受已轉換的 cash flow）。
