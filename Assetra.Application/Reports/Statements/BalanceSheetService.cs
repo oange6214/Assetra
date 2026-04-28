@@ -1,4 +1,5 @@
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Interfaces.Reports;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Reports;
@@ -14,17 +15,23 @@ public sealed class BalanceSheetService : IBalanceSheetService
     private readonly IAssetRepository _assets;
     private readonly ITradeRepository _trades;
     private readonly IPortfolioSnapshotRepository? _snapshots;
+    private readonly IMultiCurrencyValuationService? _fx;
+    private readonly string? _baseCurrency;
 
     public BalanceSheetService(
         IAssetRepository assets,
         ITradeRepository trades,
-        IPortfolioSnapshotRepository? snapshots = null)
+        IPortfolioSnapshotRepository? snapshots = null,
+        IMultiCurrencyValuationService? fx = null,
+        string? baseCurrency = null)
     {
         ArgumentNullException.ThrowIfNull(assets);
         ArgumentNullException.ThrowIfNull(trades);
         _assets = assets;
         _trades = trades;
         _snapshots = snapshots;
+        _fx = fx;
+        _baseCurrency = string.IsNullOrWhiteSpace(baseCurrency) ? null : baseCurrency;
     }
 
     public async Task<BalanceSheet> GenerateAsync(DateOnly asOf, CancellationToken ct = default)
@@ -40,8 +47,9 @@ public sealed class BalanceSheetService : IBalanceSheetService
         foreach (var item in cashAssets.Where(a => a.IsActive))
         {
             var bal = ComputeCashBalance(item.Id, tradesUntil);
-            if (bal != 0m)
-                assetRows.Add(new StatementRow(item.Name, bal, "Cash"));
+            if (bal == 0m) continue;
+            var converted = await ConvertOrSelfAsync(bal, item.Currency, asOf, ct).ConfigureAwait(false);
+            assetRows.Add(new StatementRow(item.Name, converted, "Cash"));
         }
 
         // 投資市值 (snapshot 優先)
@@ -58,8 +66,9 @@ public sealed class BalanceSheetService : IBalanceSheetService
         foreach (var item in liabilityAssets.Where(a => a.IsActive))
         {
             var bal = ComputeLiabilityBalance(item, tradesUntil);
-            if (bal != 0m)
-                liabilityRows.Add(new StatementRow(item.Name, bal, item.IsCreditCard ? "Credit Card" : "Loan"));
+            if (bal == 0m) continue;
+            var converted = await ConvertOrSelfAsync(bal, item.Currency, asOf, ct).ConfigureAwait(false);
+            liabilityRows.Add(new StatementRow(item.Name, converted, item.IsCreditCard ? "Credit Card" : "Loan"));
         }
         var liabilityTotal = liabilityRows.Sum(r => r.Amount);
 
@@ -68,6 +77,19 @@ public sealed class BalanceSheetService : IBalanceSheetService
             Assets: new StatementSection("Assets", assetRows, assetTotal),
             Liabilities: new StatementSection("Liabilities", liabilityRows, liabilityTotal),
             NetWorth: assetTotal - liabilityTotal);
+    }
+
+    /// <summary>
+    /// 若 FX 服務 + base currency 已設定且來源幣別不同，換算為 base currency；否則直接回傳。
+    /// 換算失敗（缺匯率）時保留原值，避免 silent zero。
+    /// </summary>
+    private async Task<decimal> ConvertOrSelfAsync(decimal amount, string fromCcy, DateOnly asOf, CancellationToken ct)
+    {
+        if (_fx is null || _baseCurrency is null) return amount;
+        if (string.IsNullOrWhiteSpace(fromCcy)) return amount;
+        if (string.Equals(fromCcy, _baseCurrency, StringComparison.OrdinalIgnoreCase)) return amount;
+        var converted = await _fx.ConvertAsync(amount, fromCcy, _baseCurrency, asOf, ct).ConfigureAwait(false);
+        return converted ?? amount;
     }
 
     private static decimal ComputeCashBalance(Guid accountId, IEnumerable<Trade> trades)

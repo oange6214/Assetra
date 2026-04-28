@@ -179,6 +179,20 @@
                                 ItemsSource="{Binding SupportedCurrencies}"
                                 SelectedItem="{Binding PrimaryCurrency}" />
             </StackPanel>
+
+            <StackPanel>
+              <TextBlock
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Settings.BaseCurrency}" />
+              <ComboBox
+                                MinWidth="220"
+                                MaxWidth="320"
+                                Margin="0,8,0,0"
+                                HorizontalAlignment="Stretch"
+                                ItemsSource="{Binding SupportedCurrencies}"
+                                SelectedItem="{Binding BaseCurrency}"
+                                ToolTip="{DynamicResource Settings.BaseCurrency.Tooltip}" />
+            </StackPanel>
           </StackPanel>
         </Border>
 

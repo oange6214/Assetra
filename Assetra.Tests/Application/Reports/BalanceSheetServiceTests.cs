@@ -1,5 +1,6 @@
 using Assetra.Application.Reports.Statements;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Models;
 using Xunit;
 
@@ -41,6 +42,58 @@ public class BalanceSheetServiceTests
         var bs = await svc.GenerateAsync(new DateOnly(2026, 4, 30));
 
         Assert.Equal(1000m, bs.Assets.Total);
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ConvertsForeignCurrencyToBaseCurrency()
+    {
+        var usdBankId = Guid.NewGuid();
+        var assets = new FakeAssetRepo();
+        assets.Store.Add(new AssetItem(usdBankId, "USD Bank", FinancialType.Asset, null, "USD", new DateOnly(2026, 1, 1)));
+
+        var trades = new FakeTradeRepo();
+        trades.Store.Add(MakeIncome(new DateTime(2026, 4, 1), 1000m, usdBankId));
+
+        var fx = new StubFx(new Dictionary<(string, string), decimal>
+        {
+            { ("USD", "TWD"), 32m },
+        });
+        var svc = new BalanceSheetService(assets, trades, snapshots: null, fx: fx, baseCurrency: "TWD");
+        var bs = await svc.GenerateAsync(new DateOnly(2026, 4, 30));
+
+        Assert.Equal(32000m, bs.Assets.Total);
+        Assert.Equal(32000m, bs.NetWorth);
+    }
+
+    [Fact]
+    public async Task GenerateAsync_NoFxRate_KeepsOriginalAmount()
+    {
+        var usdBankId = Guid.NewGuid();
+        var assets = new FakeAssetRepo();
+        assets.Store.Add(new AssetItem(usdBankId, "USD Bank", FinancialType.Asset, null, "USD", new DateOnly(2026, 1, 1)));
+
+        var trades = new FakeTradeRepo();
+        trades.Store.Add(MakeIncome(new DateTime(2026, 4, 1), 1000m, usdBankId));
+
+        var fx = new StubFx(new Dictionary<(string, string), decimal>());
+        var svc = new BalanceSheetService(assets, trades, snapshots: null, fx: fx, baseCurrency: "TWD");
+        var bs = await svc.GenerateAsync(new DateOnly(2026, 4, 30));
+
+        Assert.Equal(1000m, bs.Assets.Total);
+    }
+
+    private sealed class StubFx : IMultiCurrencyValuationService
+    {
+        private readonly Dictionary<(string, string), decimal> _rates;
+        public StubFx(Dictionary<(string, string), decimal> rates) { _rates = rates; }
+        public Task<decimal?> ConvertAsync(decimal amount, string from, string to, DateOnly asOf, CancellationToken ct = default)
+        {
+            if (string.Equals(from, to, StringComparison.OrdinalIgnoreCase))
+                return Task.FromResult<decimal?>(amount);
+            if (_rates.TryGetValue((from.ToUpperInvariant(), to.ToUpperInvariant()), out var rate))
+                return Task.FromResult<decimal?>(amount * rate);
+            return Task.FromResult<decimal?>(null);
+        }
     }
 
     private static Trade MakeIncome(DateTime when, decimal amount, Guid accountId) => new(

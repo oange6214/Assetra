@@ -663,6 +663,8 @@
     <sys:String x:Key="Settings.ColorScheme.International">International (green up / red down)</sys:String>
     <sys:String x:Key="Settings.Section.Language">Language</sys:String>
     <sys:String x:Key="Settings.PrimaryCurrency">Primary currency</sys:String>
+    <sys:String x:Key="Settings.BaseCurrency">Base currency</sys:String>
+    <sys:String x:Key="Settings.BaseCurrency.Tooltip">Currency used for cross-currency totals and report valuation. Independent of "Primary currency" (display).</sys:String>
     <sys:String x:Key="Settings.Section.Data">Data</sys:String>
     <sys:String x:Key="Settings.Version">Version</sys:String>
     <sys:String x:Key="Settings.FugleApiKey">Fugle API Key</sys:String>

@@ -78,6 +78,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isDarkTheme;
     [ObservableProperty] private double _uiScale = 1.0;
     [ObservableProperty] private string _primaryCurrency = "TWD";
+    [ObservableProperty] private string _baseCurrency = "TWD";
     [ObservableProperty] private string _quoteProvider = "official";
     [ObservableProperty] private string _historyProvider = "twse";
     [ObservableProperty] private string _fugleApiKey = string.Empty;
@@ -145,6 +146,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             PrimaryCurrency = string.IsNullOrWhiteSpace(s.PreferredCurrency)
                 ? "TWD"
                 : s.PreferredCurrency;
+            BaseCurrency = string.IsNullOrWhiteSpace(s.BaseCurrency) ? "TWD" : s.BaseCurrency;
             QuoteProvider = string.IsNullOrWhiteSpace(s.QuoteProvider) ? "official" : s.QuoteProvider;
             HistoryProvider = string.IsNullOrWhiteSpace(s.HistoryProvider) ? "twse" : s.HistoryProvider;
             FugleApiKey = s.FugleApiKey ?? string.Empty;
@@ -237,6 +239,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             TaiwanColorScheme = UseTaiwanColors,
             UiScale = UiScale,
             PreferredCurrency = PrimaryCurrency,
+            BaseCurrency = BaseCurrency,
             QuoteProvider = QuoteProvider,
             HistoryProvider = HistoryProvider,
             FugleApiKey = FugleApiKey.Trim(),

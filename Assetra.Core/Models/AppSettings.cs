@@ -37,4 +37,9 @@ public sealed record AppSettings(
     /// <summary>首次啟動歡迎橫幅已關閉。false = 顯示，true = 已忽略。</summary>
     bool HasShownWelcomeBanner = false,
     /// <summary>績效報表使用的市場基準代號（例：0050.TW）。空字串表示停用 benchmark 比較。</summary>
-    string BenchmarkSymbol = "0050.TW");
+    string BenchmarkSymbol = "0050.TW",
+    /// <summary>
+    /// 估值基準幣別（ISO 4217）。所有跨幣別加總、Performance / Risk / Reports 計算統一換算為此幣別。
+    /// 不同於 <see cref="PreferredCurrency"/>（顯示用）：BaseCurrency 是 *valuation* 基準。
+    /// </summary>
+    string BaseCurrency = "TWD");

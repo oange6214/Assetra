@@ -665,6 +665,8 @@
     <sys:String x:Key="Settings.ColorScheme.International">國際（綠漲紅跌）</sys:String>
     <sys:String x:Key="Settings.Section.Language">語言</sys:String>
     <sys:String x:Key="Settings.PrimaryCurrency">主要貨幣</sys:String>
+    <sys:String x:Key="Settings.BaseCurrency">估值基準幣別</sys:String>
+    <sys:String x:Key="Settings.BaseCurrency.Tooltip">用於跨幣別資產合計與報表估值的基準幣別。與「主要貨幣」（顯示用）獨立。</sys:String>
     <sys:String x:Key="Settings.Section.Data">資料</sys:String>
     <sys:String x:Key="Settings.Version">版本</sys:String>
     <sys:String x:Key="Settings.FugleApiKey">Fugle API Key</sys:String>

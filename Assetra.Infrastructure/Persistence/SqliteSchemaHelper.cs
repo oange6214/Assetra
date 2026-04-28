@@ -36,6 +36,7 @@ internal static class SqliteSchemaHelper
         "import_batch_entry",
         "reconciliation_session",
         "reconciliation_diff",
+        "fx_rate",
     };
 
     /// <summary>

@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.14.0 - 2026-04-28
+
+外幣基礎建設：建立 FX 匯率域模型、SQLite 持久化、估值服務，並將 BalanceSheet 接上「估值基準幣別」轉換。完成 Roadmap-v0.14-to-v1.0 的 v0.14.0 sprint。
+
+### 新增
+
+- **D1 領域模型**：`Assetra.Core/Models/Currency.cs`（ISO 4217 record + TWD/USD/JPY/HKD/EUR/CNY/GBP 常量 + `Known` / `FromCode`），`FxRate.cs`（`1 unit From = Rate units To` + `Inverse()`）。
+- **D1 介面**：`IFxRateProvider`（`GetRateAsync` / `GetHistoricalSeriesAsync`）、`IFxRateRepository`（`UpsertAsync` / `UpsertManyAsync` / `GetAsync` / `GetRangeAsync`）、`Analysis.IMultiCurrencyValuationService`（`ConvertAsync`）。
+- **F1 持久化**：`FxRateSchemaMigrator` 建表 `fx_rate(from_ccy, to_ccy, as_of_date, rate)` 複合主鍵 + `as_of_date` 索引；`FxRateSqliteRepository` 走 `ON CONFLICT DO UPDATE` upsert，`GetAsync` 以 `as_of_date <= $d ORDER BY DESC LIMIT 1` 取最近一筆。
+- **F1 Provider**：`StaticFxRateProvider` 同幣別捷徑回 1.0、直接命中回 rate、否則嘗試反向倒數補齊。
+- **F2 估值服務**：`MultiCurrencyValuationService` 同幣別回原值、缺匯率回 null、不靜默歸零。
+- **F3 BalanceSheet 接線**：`BalanceSheetService` 建構子新增可選 `IMultiCurrencyValuationService` + `string? baseCurrency`；現金與負債列依 `item.Currency` 透過 `ConvertOrSelfAsync` 換算為 base currency；FX 未配置或匯率缺失時優雅退回原幣值（不靜默歸零）。
+- **F4 Settings**：`AppSettings` 新增 `BaseCurrency = "TWD"` 欄位；`SettingsViewModel` + `SettingsView.xaml` 加上「估值基準幣別」下拉與 tooltip；`Languages/{zh-TW,en-US}.xaml` 補 `Settings.BaseCurrency` / `Settings.BaseCurrency.Tooltip` keys。
+- **DI**：`Assetra.WPF/Infrastructure/FxServiceCollectionExtensions.AddFxContext(dbPath)` 註冊 IFxRateRepository / IFxRateProvider / IMultiCurrencyValuationService；`AppBootstrapper` 接入；`ReportsServiceCollectionExtensions` 將 fx + baseCurrency 注入 `IBalanceSheetService` factory。
+
+### 已知範圍限制
+
+- **XIRR / MWR / Concentration 跨幣別 wiring 延後到 v0.14.1**：完整接線需擴充 `CashFlow` record 攜帶幣別並更新所有相關測試（影響 480+ tests）；本 sprint 聚焦在交付可用的 FX 基礎並以 BalanceSheet 為首個對接點。
+
+### 測試
+
+- 新增 14 個測試：`StaticFxRateProviderTests`(4) + `MultiCurrencyValuationServiceTests`(4) + `FxRateSqliteRepositoryTests`(4) + BalanceSheet 跨幣別 (2)。
+- 494/494 tests 綠（v0.13.4 為 480；本 sprint +14）。
+
 ## v0.13.4 - 2026-04-28
 
 針對 v0.13.3 後 code review 剩下的 MEDIUM 違規做 cleanup；無新功能、行為等價，但邊界更乾淨、檔案更易維護。
