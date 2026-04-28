@@ -49,12 +49,24 @@ internal sealed class DbInitializerService : IHostedService
         {
             Directory.CreateDirectory(dataDir);
             await DbMigrator.ApplyPragmasAsync(dbPath).ConfigureAwait(false);
-            await DbMigrator.MigrateAsync(dataDir, _portfolio, _alerts)
+            var report = await DbMigrator.MigrateAsync(dataDir, _portfolio, _alerts)
                 .ConfigureAwait(false);
+            if (report.HasFailures)
+            {
+                _logger.LogWarning("JSON→SQLite migration finished with {Count} failure(s): {Detail}",
+                    report.Failures.Count, string.Join("; ", report.Failures));
+                _snackbar.Warning($"資料遷移有 {report.Failures.Count} 項失敗，請見 log");
+            }
+            else if (report.TotalImported > 0)
+            {
+                _logger.LogInformation("JSON→SQLite migrated {Total} record(s) (portfolio={P}, alerts={A})",
+                    report.TotalImported, report.PortfolioImported, report.AlertsImported);
+            }
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Database migration failed; existing data is not affected");
+            _snackbar.Warning("資料庫遷移失敗，現有資料不受影響");
         }
 
         // ── Step 2: Migrate legacy Transfer pairs → native TradeType.Transfer ──

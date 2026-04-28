@@ -37,25 +37,30 @@ public sealed class BalanceSheetService : IBalanceSheetService
     public async Task<BalanceSheet> GenerateAsync(DateOnly asOf, CancellationToken ct = default)
     {
         var asOfDt = asOf.ToDateTime(TimeOnly.MaxValue);
-        var allTrades = await _trades.GetAllAsync().ConfigureAwait(false);
+        var allTrades = await _trades.GetAllAsync(ct).ConfigureAwait(false);
         var tradesUntil = allTrades.Where(t => t.TradeDate <= asOfDt).ToList();
 
         var cashAssets = await _assets.GetItemsByTypeAsync(FinancialType.Asset).ConfigureAwait(false);
         var liabilityAssets = await _assets.GetItemsByTypeAsync(FinancialType.Liability).ConfigureAwait(false);
+
+        // Pre-resolve FX factor (foreign 1 unit → base) once per distinct currency.
+        // Avoids N+1 ConvertAsync calls when many accounts share a currency.
+        var fxFactors = await ResolveFxFactorsAsync(
+            cashAssets.Concat(liabilityAssets).Where(a => a.IsActive).Select(a => a.Currency),
+            asOf, ct).ConfigureAwait(false);
 
         var assetRows = new List<StatementRow>();
         foreach (var item in cashAssets.Where(a => a.IsActive))
         {
             var bal = ComputeCashBalance(item.Id, tradesUntil);
             if (bal == 0m) continue;
-            var converted = await ConvertOrSelfAsync(bal, item.Currency, asOf, ct).ConfigureAwait(false);
-            assetRows.Add(new StatementRow(item.Name, converted, "Cash"));
+            assetRows.Add(new StatementRow(item.Name, ConvertWithCache(bal, item.Currency, fxFactors), "Cash"));
         }
 
         // 投資市值 (snapshot 優先)
         if (_snapshots is not null)
         {
-            var snap = await _snapshots.GetSnapshotAsync(asOf).ConfigureAwait(false);
+            var snap = await _snapshots.GetSnapshotAsync(asOf, ct).ConfigureAwait(false);
             if (snap is not null && snap.MarketValue != 0m)
                 assetRows.Add(new StatementRow("Portfolio", snap.MarketValue, "Investments"));
         }
@@ -67,8 +72,7 @@ public sealed class BalanceSheetService : IBalanceSheetService
         {
             var bal = ComputeLiabilityBalance(item, tradesUntil);
             if (bal == 0m) continue;
-            var converted = await ConvertOrSelfAsync(bal, item.Currency, asOf, ct).ConfigureAwait(false);
-            liabilityRows.Add(new StatementRow(item.Name, converted, item.IsCreditCard ? "Credit Card" : "Loan"));
+            liabilityRows.Add(new StatementRow(item.Name, ConvertWithCache(bal, item.Currency, fxFactors), item.IsCreditCard ? "Credit Card" : "Loan"));
         }
         var liabilityTotal = liabilityRows.Sum(r => r.Amount);
 
@@ -80,16 +84,35 @@ public sealed class BalanceSheetService : IBalanceSheetService
     }
 
     /// <summary>
-    /// 若 FX 服務 + base currency 已設定且來源幣別不同，換算為 base currency；否則直接回傳。
-    /// 換算失敗（缺匯率）時保留原值，避免 silent zero。
+    /// 預先計算每個外幣（非 base / 非空）對 base currency 的 1 單位換算因子，避免 row-level N+1 ConvertAsync。
+    /// 缺匯率以 null 標記，套用時 fallback 為原值。
     /// </summary>
-    private async Task<decimal> ConvertOrSelfAsync(decimal amount, string fromCcy, DateOnly asOf, CancellationToken ct)
+    private async Task<Dictionary<string, decimal?>> ResolveFxFactorsAsync(
+        IEnumerable<string> currencies, DateOnly asOf, CancellationToken ct)
+    {
+        var result = new Dictionary<string, decimal?>(StringComparer.OrdinalIgnoreCase);
+        if (_fx is null || _baseCurrency is null) return result;
+
+        var distinct = currencies
+            .Where(c => !string.IsNullOrWhiteSpace(c)
+                        && !string.Equals(c, _baseCurrency, StringComparison.OrdinalIgnoreCase))
+            .Select(c => c.ToUpperInvariant())
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var ccy in distinct)
+        {
+            ct.ThrowIfCancellationRequested();
+            result[ccy] = await _fx.ConvertAsync(1m, ccy, _baseCurrency, asOf, ct).ConfigureAwait(false);
+        }
+        return result;
+    }
+
+    private decimal ConvertWithCache(decimal amount, string fromCcy, Dictionary<string, decimal?> factors)
     {
         if (_fx is null || _baseCurrency is null) return amount;
         if (string.IsNullOrWhiteSpace(fromCcy)) return amount;
         if (string.Equals(fromCcy, _baseCurrency, StringComparison.OrdinalIgnoreCase)) return amount;
-        var converted = await _fx.ConvertAsync(amount, fromCcy, _baseCurrency, asOf, ct).ConfigureAwait(false);
-        return converted ?? amount;
+        return factors.TryGetValue(fromCcy, out var factor) && factor is { } f ? amount * f : amount;
     }
 
     private static decimal ComputeCashBalance(Guid accountId, IEnumerable<Trade> trades)

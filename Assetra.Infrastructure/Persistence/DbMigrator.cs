@@ -42,60 +42,88 @@ public static class DbMigrator
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
     }
 
-    public static async Task MigrateAsync(
+    public static async Task<MigrationReport> MigrateAsync(
         string dataDir,
         IPortfolioRepository portfolio,
         IAlertRepository alerts)
     {
-        await MigratePortfolioAsync(dataDir, portfolio).ConfigureAwait(false);
-        await MigrateAlertsAsync(dataDir, alerts).ConfigureAwait(false);
+        var failures = new List<string>();
+        var portfolioImported = await MigratePortfolioAsync(dataDir, portfolio, failures).ConfigureAwait(false);
+        var alertsImported = await MigrateAlertsAsync(dataDir, alerts, failures).ConfigureAwait(false);
+        return new MigrationReport(portfolioImported, alertsImported, failures);
     }
 
-    private static async Task MigratePortfolioAsync(string dataDir, IPortfolioRepository repo)
+    private static async Task<int> MigratePortfolioAsync(string dataDir, IPortfolioRepository repo, List<string> failures)
     {
         if ((await repo.GetEntriesAsync()).Count > 0)
-            return;
+            return 0;
         var path = Path.Combine(dataDir, "portfolio.json");
         if (!File.Exists(path))
-            return;
+            return 0;
         try
         {
             var json = await File.ReadAllTextAsync(path);
             var data = JsonSerializer.Deserialize<PortfolioData>(json, JsonOpts);
             if (data?.Entries is null)
-                return;
+                return 0;
+            int n = 0;
             foreach (var e in data.Entries)
+            {
                 await repo.AddAsync(e).ConfigureAwait(false);
+                n++;
+            }
+            return n;
         }
         catch (Exception ex)
         {
             _log.LogWarning(ex, "Portfolio JSON migration failed — skipping import from {Path}", path);
+            failures.Add($"Portfolio: {ex.Message}");
+            return 0;
         }
     }
 
-    private static async Task MigrateAlertsAsync(string dataDir, IAlertRepository repo)
+    private static async Task<int> MigrateAlertsAsync(string dataDir, IAlertRepository repo, List<string> failures)
     {
         if ((await repo.GetRulesAsync()).Count > 0)
-            return;
+            return 0;
         var path = Path.Combine(dataDir, "alerts.json");
         if (!File.Exists(path))
-            return;
+            return 0;
         try
         {
             var json = await File.ReadAllTextAsync(path);
             var data = JsonSerializer.Deserialize<AlertData>(json, JsonOpts);
             if (data?.Rules is null)
-                return;
+                return 0;
+            int n = 0;
             foreach (var r in data.Rules)
+            {
                 await repo.AddAsync(r).ConfigureAwait(false);
+                n++;
+            }
+            return n;
         }
         catch (Exception ex)
         {
             _log.LogWarning(ex, "Alerts JSON migration failed — skipping import from {Path}", path);
+            failures.Add($"Alerts: {ex.Message}");
+            return 0;
         }
     }
 
     // DTOs matching the JSON file structure from *JsonRepository classes
     private record PortfolioData(List<PortfolioEntry>? Entries);
     private record AlertData(List<AlertRule>? Rules);
+}
+
+/// <summary>
+/// JSON→SQLite 一次性遷移結果。Failures 為空時代表所有 JSON 來源（若存在）都成功匯入。
+/// </summary>
+public sealed record MigrationReport(
+    int PortfolioImported,
+    int AlertsImported,
+    IReadOnlyList<string> Failures)
+{
+    public bool HasFailures => Failures.Count > 0;
+    public int TotalImported => PortfolioImported + AlertsImported;
 }

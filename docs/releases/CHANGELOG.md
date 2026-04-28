@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.17.3 - 2026-04-28
+
+Pre-v0.17 refactor 稽核 Group B — 兩項中型修整：FX N+1、JSON→SQLite 遷移結果可見性。
+
+### 變更
+
+- **`BalanceSheetService` FX 換算 N+1 收斂**：從每 row `_fx.ConvertAsync(amount, ccy, base, asOf)` 改為先 `ResolveFxFactorsAsync` 取得每個 distinct 外幣對 base 的 1 單位 factor，row-level 用 `ConvertWithCache` in-memory 乘算。多帳戶共用同幣別時的重複 FX provider 呼叫降為每幣別一次。同步補上 `GetAllAsync(ct)` / `GetSnapshotAsync(asOf, ct)` 的 ct 傳遞。
+- **`DbMigrator.MigrateAsync` 結果回報**：原本失敗只寫 `LogWarning` 後 silently 返回，呼叫端無從察覺。改為回傳 `MigrationReport(PortfolioImported, AlertsImported, Failures)`；`DbInitializerService` 在 `HasFailures` 時透過 snackbar 提示「資料遷移有 N 項失敗」、整批失敗時提示「資料庫遷移失敗，現有資料不受影響」、成功時 LogInformation 紀錄匯入筆數。
+
+### 測試
+
+- 612/612 tests 綠（無新測，行為等價：FX 換算結果一致；MigrateAsync return type 變更為 record，呼叫端僅 WPF 一處）。
+
 ## v0.17.2 - 2026-04-28
 
 Pre-v0.17 refactor audit Group A — 5 個 quick-win 加固，集中在 `CancellationToken` 傳播一致性與 broad-catch 收斂。無新功能、無 schema 變更，行為等價。
