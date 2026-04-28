@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.17.0 - 2026-04-28
+
+趨勢圖增強的領域層骨架：建立 `PortfolioEvent` 模型 + `PortfolioEventDetectionService` 純函式偵測器。schema migration、堆疊圖 schema 擴充、TrendsView UI annotation 留待 v0.17.1+。
+
+### 新增
+
+- **D1 PortfolioEvent**（`Assetra.Core/Models/PortfolioEvent.cs`）：record 含 `Id` / `Date` / `Kind` / `Label` / `Description` / `Amount` / `Symbol`。`PortfolioEventKind` enum 涵蓋 `LargeTrade` / `FirstDividend` / `YearlyExtreme` / `MarketEvent` / `UserNote`。
+- **F1 PortfolioEventDetectionService**（`Assetra.Application/Analysis/`）：純函式 `Detect(trades, largeTradeThreshold)`，從 trade journal 推導事件序列。
+  - `LargeTrade`：Buy / Sell 之 `Price × Quantity ≥ threshold`（預設 100,000）。
+  - `FirstDividend`：每個 Symbol 的第一筆 `CashDividend`（case-insensitive symbol 比對）。
+  - 結果依日期 ascending 排序。
+
+### 已知範圍限制
+
+延後到 v0.17.1+：
+- SQLite schema：`portfolio_event` 表 + repository（目前 service 為 in-memory 計算，需 caller 傳入 trades）。
+- `PortfolioDailySnapshot` 擴充 `cash_value / equity_value / liability_value` 三欄（堆疊圖前置）。
+- `TrendsView` UI：折線圖 hover annotation、Line / Stacked Area 切換、event 編輯對話框。
+- `YearlyExtreme` 偵測（需要 daily snapshot 序列，非僅 trade list）。
+- `MarketEvent` / `UserNote` 為使用者手動加註，需 UI + persistence。
+
+### 測試
+
+- 新增 9 個測試（`PortfolioEventDetectionServiceTests`）：empty / 單筆 large buy / below threshold / large sell / first dividend / 多 symbol 各自首筆 / 排序 / 負 threshold 拋例外 / null trades 拋例外。
+- 560/560 tests 綠（v0.16.0 為 551；本 sprint +9）。
+
 ## v0.16.0 - 2026-04-28
 
 Goals 子系統最小可用骨架：建立 `GoalMilestone` 領域模型 + `GoalPlanningService` 純函式計算器。本 sprint 聚焦於零依賴的領域 / 計算層，避開 schema migration 與 UI 重構。
