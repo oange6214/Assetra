@@ -4,6 +4,8 @@ namespace Assetra.Core.Models;
 /// 投資組合每日快照。<see cref="Currency"/> 為 v0.14.2 新增 — 標示
 /// <see cref="TotalCost"/> / <see cref="MarketValue"/> / <see cref="Pnl"/> 是以何種幣別記錄；
 /// 舊資料 / 預設值為 "TWD"。下游分析（例如 MWR）若 base currency 不同，需透過 FX 轉換。
+/// v0.17.1 新增 <see cref="CashValue"/> / <see cref="EquityValue"/> / <see cref="LiabilityValue"/>
+/// 三欄做為堆疊圖前置；舊資料為 null（向後相容）。
 /// </summary>
 public sealed record PortfolioDailySnapshot(
     DateOnly SnapshotDate,
@@ -11,4 +13,7 @@ public sealed record PortfolioDailySnapshot(
     decimal MarketValue,
     decimal Pnl,
     int PositionCount,
-    string Currency = "TWD");
+    string Currency = "TWD",
+    decimal? CashValue = null,
+    decimal? EquityValue = null,
+    decimal? LiabilityValue = null);

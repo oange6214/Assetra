@@ -13,12 +13,15 @@ internal static class PortfolioSnapshotSchemaMigrator
         {
             create.CommandText = """
                 CREATE TABLE IF NOT EXISTS portfolio_daily_snapshot (
-                    snapshot_date  TEXT NOT NULL PRIMARY KEY,
-                    total_cost     REAL NOT NULL,
-                    market_value   REAL NOT NULL,
-                    pnl            REAL NOT NULL,
-                    position_count INTEGER NOT NULL,
-                    currency       TEXT NOT NULL DEFAULT 'TWD'
+                    snapshot_date    TEXT NOT NULL PRIMARY KEY,
+                    total_cost       REAL NOT NULL,
+                    market_value     REAL NOT NULL,
+                    pnl              REAL NOT NULL,
+                    position_count   INTEGER NOT NULL,
+                    currency         TEXT NOT NULL DEFAULT 'TWD',
+                    cash_value       REAL,
+                    equity_value     REAL,
+                    liability_value  REAL
                 );
                 """;
             create.ExecuteNonQuery();
@@ -31,6 +34,19 @@ internal static class PortfolioSnapshotSchemaMigrator
             alter.CommandText = "ALTER TABLE portfolio_daily_snapshot ADD COLUMN currency TEXT NOT NULL DEFAULT 'TWD';";
             alter.ExecuteNonQuery();
         }
+
+        // v0.17.1: add stacked-chart breakdown columns; nullable for backward compat.
+        EnsureColumn(conn, "portfolio_daily_snapshot", "cash_value", "REAL");
+        EnsureColumn(conn, "portfolio_daily_snapshot", "equity_value", "REAL");
+        EnsureColumn(conn, "portfolio_daily_snapshot", "liability_value", "REAL");
+    }
+
+    private static void EnsureColumn(SqliteConnection conn, string table, string column, string typeDecl)
+    {
+        if (ColumnExists(conn, table, column)) return;
+        using var alter = conn.CreateCommand();
+        alter.CommandText = $"ALTER TABLE {table} ADD COLUMN {column} {typeDecl};";
+        alter.ExecuteNonQuery();
     }
 
     private static bool ColumnExists(SqliteConnection conn, string table, string column)

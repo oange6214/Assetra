@@ -14,7 +14,8 @@ public sealed class PortfolioSnapshotSqliteRepository : IPortfolioSnapshotReposi
         PortfolioSnapshotSchemaMigrator.EnsureInitialized(_connectionString);
     }
 
-    private const string SelectColumns = "snapshot_date, total_cost, market_value, pnl, position_count, currency";
+    private const string SelectColumns =
+        "snapshot_date, total_cost, market_value, pnl, position_count, currency, cash_value, equity_value, liability_value";
 
     public async Task<IReadOnlyList<PortfolioDailySnapshot>> GetSnapshotsAsync(
         DateOnly? from = null, DateOnly? to = null)
@@ -66,8 +67,9 @@ public sealed class PortfolioSnapshotSqliteRepository : IPortfolioSnapshotReposi
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             INSERT OR REPLACE INTO portfolio_daily_snapshot
-                (snapshot_date, total_cost, market_value, pnl, position_count, currency)
-            VALUES ($d, $tc, $mv, $pnl, $pc, $ccy);
+                (snapshot_date, total_cost, market_value, pnl, position_count, currency,
+                 cash_value, equity_value, liability_value)
+            VALUES ($d, $tc, $mv, $pnl, $pc, $ccy, $cash, $eq, $liab);
             """;
         cmd.Parameters.AddWithValue("$d", snapshot.SnapshotDate.ToString("yyyy-MM-dd"));
         cmd.Parameters.AddWithValue("$tc", (double)snapshot.TotalCost);
@@ -75,6 +77,9 @@ public sealed class PortfolioSnapshotSqliteRepository : IPortfolioSnapshotReposi
         cmd.Parameters.AddWithValue("$pnl", (double)snapshot.Pnl);
         cmd.Parameters.AddWithValue("$pc", snapshot.PositionCount);
         cmd.Parameters.AddWithValue("$ccy", string.IsNullOrWhiteSpace(snapshot.Currency) ? "TWD" : snapshot.Currency);
+        cmd.Parameters.AddWithValue("$cash", snapshot.CashValue.HasValue ? (double)snapshot.CashValue.Value : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("$eq", snapshot.EquityValue.HasValue ? (double)snapshot.EquityValue.Value : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("$liab", snapshot.LiabilityValue.HasValue ? (double)snapshot.LiabilityValue.Value : (object)DBNull.Value);
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
     }
 
@@ -85,5 +90,8 @@ public sealed class PortfolioSnapshotSqliteRepository : IPortfolioSnapshotReposi
             (decimal)reader.GetDouble(2),
             (decimal)reader.GetDouble(3),
             reader.GetInt32(4),
-            reader.IsDBNull(5) ? "TWD" : reader.GetString(5));
+            reader.IsDBNull(5) ? "TWD" : reader.GetString(5),
+            reader.IsDBNull(6) ? null : (decimal)reader.GetDouble(6),
+            reader.IsDBNull(7) ? null : (decimal)reader.GetDouble(7),
+            reader.IsDBNull(8) ? null : (decimal)reader.GetDouble(8));
 }

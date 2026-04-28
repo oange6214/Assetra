@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.17.1 - 2026-04-28
+
+收尾 v0.17.0 延後的 PortfolioEvent 持久化、堆疊圖前置欄位、`YearlyExtreme` 偵測。`TrendsView` UI annotation / Line ↔ Stacked Area 切換 / event 編輯對話框需 UI 設計，仍延後。
+
+### 新增
+
+- **F1 PortfolioEvent 持久化**（`Assetra.Infrastructure/Persistence/`）：
+  - `PortfolioEventSchemaMigrator`：`portfolio_event(id, event_date, kind, label, description, amount, symbol)` + `idx_portfolio_event_date`。
+  - `PortfolioEventSqliteRepository`：CRUD + `GetRangeAsync(from, to)`；nullable `description / amount / symbol` 經 `DBNull` round-trip；`kind` 以字串持久化、parse 失敗 fallback 為 `UserNote`。
+  - `IPortfolioEventRepository` 介面定義於 `Assetra.Core/Interfaces/`。
+- **D1 PortfolioDailySnapshot 堆疊圖欄位**（`Assetra.Core/Models/PortfolioDailySnapshot.cs`）：新增 `decimal? CashValue` / `EquityValue` / `LiabilityValue` positional optional 欄位（向後相容；舊資料為 null）。
+- **Schema migration**（`Assetra.Infrastructure/Persistence/PortfolioSnapshotSchemaMigrator.cs`）：透過 `EnsureColumn` helper 新增 `cash_value / equity_value / liability_value REAL` 三欄；CREATE 同步擴充。
+- **F2 YearlyExtreme 偵測**（`Assetra.Application/Analysis/PortfolioEventDetectionService.cs`）：新增 `DetectYearlyExtremes(snapshots)` 純函式，依 `SnapshotDate.Year` 分組，取每年 `MarketValue` 最大 / 最小日，產出 `YearlyExtreme` 事件對。
+
+### 已知範圍限制
+
+仍延後（需 UI 設計）：
+- `TrendsView` UI：折線圖 hover annotation、Line / Stacked Area 切換、event 編輯對話框（含 `MarketEvent` / `UserNote` 手動加註）。
+- 堆疊圖 viewmodel：將 cash / equity / liability 三層拉到 chart series（需 `BalanceSheet` ↔ snapshot writer 的接線）。
+
+### 測試
+
+- 新增 5 個 `PortfolioEventSqliteRepositoryTests`：add/get round-trip、nullable round-trip、`GetRangeAsync` filter、update、remove。
+- 新增 2 個 `PortfolioSnapshotBreakdownTests`：upsert 帶 cash/equity/liability round-trip、null breakdown round-trip。
+- 新增 4 個 `PortfolioEventDetectionServiceTests`（YearlyExtreme 區段）：empty / 單一年度高低 / 跨年度分組 / null 拋例外。
+- 602/602 tests 綠（v0.16.1 為 591；本 sprint +11）。
+
 ## v0.16.1 - 2026-04-28
 
 收尾 v0.16.0 延後的 Goals 子系統：補上 `GoalFundingRule` 模型、milestone / funding rule 的 SQLite 持久化、`GoalProgressQueryService` 純函式進度計算。`GoalsView` UI 擴充（milestone timeline、progress bar 動畫）與 RecurringTransaction 整合需 UI 設計與 cross-feature scheduler 改造，仍延後。

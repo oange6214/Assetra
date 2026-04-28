@@ -120,4 +120,64 @@ public class PortfolioEventDetectionServiceTests
         Assert.Throws<ArgumentNullException>(() =>
             PortfolioEventDetectionService.Detect(null!));
     }
+
+    private static PortfolioDailySnapshot Snap(DateOnly d, decimal mv) =>
+        new(d, 0m, mv, 0m, 0);
+
+    [Fact]
+    public void DetectYearlyExtremes_EmptyList_ReturnsEmpty()
+    {
+        var events = PortfolioEventDetectionService.DetectYearlyExtremes(Array.Empty<PortfolioDailySnapshot>());
+        Assert.Empty(events);
+    }
+
+    [Fact]
+    public void DetectYearlyExtremes_SingleYear_EmitsHighAndLow()
+    {
+        var snaps = new[]
+        {
+            Snap(new DateOnly(2026, 3, 1), 1_000_000m),
+            Snap(new DateOnly(2026, 6, 15), 1_500_000m),
+            Snap(new DateOnly(2026, 9, 30), 800_000m),
+            Snap(new DateOnly(2026, 12, 20), 1_200_000m),
+        };
+
+        var events = PortfolioEventDetectionService.DetectYearlyExtremes(snaps);
+
+        Assert.Equal(2, events.Count);
+        var high = events.Single(e => e.Label.Contains("新高"));
+        var low = events.Single(e => e.Label.Contains("新低"));
+        Assert.Equal(new DateOnly(2026, 6, 15), high.Date);
+        Assert.Equal(1_500_000m, high.Amount);
+        Assert.Equal(new DateOnly(2026, 9, 30), low.Date);
+        Assert.Equal(800_000m, low.Amount);
+        Assert.Equal(PortfolioEventKind.YearlyExtreme, high.Kind);
+    }
+
+    [Fact]
+    public void DetectYearlyExtremes_MultipleYears_GroupsByYear()
+    {
+        var snaps = new[]
+        {
+            Snap(new DateOnly(2025, 3, 1), 500_000m),
+            Snap(new DateOnly(2025, 9, 1), 700_000m),
+            Snap(new DateOnly(2026, 3, 1), 1_000_000m),
+            Snap(new DateOnly(2026, 9, 1), 1_500_000m),
+        };
+
+        var events = PortfolioEventDetectionService.DetectYearlyExtremes(snaps);
+
+        Assert.Equal(4, events.Count);
+        Assert.Contains(events, e => e.Label == "2025 年度新高" && e.Amount == 700_000m);
+        Assert.Contains(events, e => e.Label == "2025 年度新低" && e.Amount == 500_000m);
+        Assert.Contains(events, e => e.Label == "2026 年度新高" && e.Amount == 1_500_000m);
+        Assert.Contains(events, e => e.Label == "2026 年度新低" && e.Amount == 1_000_000m);
+    }
+
+    [Fact]
+    public void DetectYearlyExtremes_NullInput_Throws()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            PortfolioEventDetectionService.DetectYearlyExtremes(null!));
+    }
 }
