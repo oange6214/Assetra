@@ -39,6 +39,17 @@
     <sys:String x:Key="Import.Button.Apply">Apply</sys:String>
     <sys:String x:Key="Import.Apply.Tooltip">Select a cash account before applying</sys:String>
     <sys:String x:Key="Import.Detected.Prefix">Detected format:</sys:String>
+    <sys:String x:Key="Import.Format.Generic">Generic</sys:String>
+    <sys:String x:Key="Import.Format.CathayUnitedBank">Cathay United Bank</sys:String>
+    <sys:String x:Key="Import.Format.EsunBank">E.SUN Bank</sys:String>
+    <sys:String x:Key="Import.Format.CtbcBank">CTBC Bank</sys:String>
+    <sys:String x:Key="Import.Format.TaishinBank">Taishin Bank</sys:String>
+    <sys:String x:Key="Import.Format.FubonBank">Fubon Bank</sys:String>
+    <sys:String x:Key="Import.Format.YuantaSecurities">Yuanta Securities</sys:String>
+    <sys:String x:Key="Import.Format.FubonSecurities">Fubon Securities</sys:String>
+    <sys:String x:Key="Import.Format.KgiSecurities">KGI Securities</sys:String>
+    <sys:String x:Key="Import.Format.SinoPacSecurities">SinoPac Securities</sys:String>
+    <sys:String x:Key="Import.Format.CapitalSecurities">Capital Securities</sys:String>
     <sys:String x:Key="Import.CashAccount.Label">Cash account</sys:String>
     <sys:String x:Key="Import.Empty">Choose a file to begin.</sys:String>
     <sys:String x:Key="Import.Pick.Title">Choose statement file</sys:String>

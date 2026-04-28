@@ -81,7 +81,15 @@ public sealed partial class ImportViewModel : ObservableObject
         ? string.Empty
         : Path.GetFileName(SelectedFilePath);
     public bool HasDetectedFormat => DetectedFormat.HasValue;
-    public string DetectedFormatLabel => DetectedFormat?.ToString() ?? string.Empty;
+    public string DetectedFormatLabel
+    {
+        get
+        {
+            if (!DetectedFormat.HasValue) return string.Empty;
+            var key = $"Import.Format.{DetectedFormat.Value}";
+            return _localization?.Get(key, DetectedFormat.Value.ToString()) ?? DetectedFormat.Value.ToString();
+        }
+    }
     public bool IsBusy => IsWorking;
     public bool HasRows => RowCount > 0;
     public bool HasNoRows => !HasRows;

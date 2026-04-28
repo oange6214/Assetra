@@ -109,24 +109,22 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Border
+            <StackPanel
                 Grid.Column="0"
-                Padding="12,6"
                 VerticalAlignment="Center"
-                Background="{DynamicResource AppAccentSubtle}"
-                CornerRadius="999"
+                Orientation="Horizontal"
                 Visibility="{Binding HasDetectedFormat, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Import.Detected.Prefix}" />
-                    <TextBlock
-                        Margin="6,0,0,0"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{Binding DetectedFormatLabel}" />
-                </StackPanel>
-            </Border>
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Import.Detected.Prefix}" />
+                <TextBlock
+                    Margin="6,0,0,0"
+                    VerticalAlignment="Center"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    Text="{Binding DetectedFormatLabel}" />
+            </StackPanel>
 
             <StackPanel
                 Grid.Column="2"

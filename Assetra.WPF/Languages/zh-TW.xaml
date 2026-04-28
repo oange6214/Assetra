@@ -39,6 +39,17 @@
     <sys:String x:Key="Import.Button.Apply">套用</sys:String>
     <sys:String x:Key="Import.Apply.Tooltip">需先選擇現金帳戶才能套用</sys:String>
     <sys:String x:Key="Import.Detected.Prefix">偵測到的格式：</sys:String>
+    <sys:String x:Key="Import.Format.Generic">通用</sys:String>
+    <sys:String x:Key="Import.Format.CathayUnitedBank">國泰世華銀行</sys:String>
+    <sys:String x:Key="Import.Format.EsunBank">玉山銀行</sys:String>
+    <sys:String x:Key="Import.Format.CtbcBank">中國信託銀行</sys:String>
+    <sys:String x:Key="Import.Format.TaishinBank">台新銀行</sys:String>
+    <sys:String x:Key="Import.Format.FubonBank">富邦銀行</sys:String>
+    <sys:String x:Key="Import.Format.YuantaSecurities">元大證券</sys:String>
+    <sys:String x:Key="Import.Format.FubonSecurities">富邦證券</sys:String>
+    <sys:String x:Key="Import.Format.KgiSecurities">凱基證券</sys:String>
+    <sys:String x:Key="Import.Format.SinoPacSecurities">永豐金證券</sys:String>
+    <sys:String x:Key="Import.Format.CapitalSecurities">群益證券</sys:String>
     <sys:String x:Key="Import.CashAccount.Label">現金帳戶</sys:String>
     <sys:String x:Key="Import.Empty">請先選擇要匯入的檔案。</sys:String>
     <sys:String x:Key="Import.Pick.Title">選擇對帳單檔案</sys:String>
