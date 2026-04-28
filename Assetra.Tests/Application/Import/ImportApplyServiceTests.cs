@@ -18,7 +18,7 @@ public class ImportApplyServiceTests
         var batch = BankBatch(
             new ImportPreviewRow(1, new DateOnly(2026, 4, 27), 1500m, "薪資", "四月"));
 
-        var result = await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+        var result = await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions());
 
         Assert.Equal(1, result.RowsApplied);
         Assert.Single(added);
@@ -35,7 +35,7 @@ public class ImportApplyServiceTests
         var batch = BankBatch(
             new ImportPreviewRow(1, new DateOnly(2026, 4, 26), -250m, "Starbucks", "Latte"));
 
-        await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+        await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions());
 
         Assert.Equal(TradeType.Withdrawal, added[0].Type);
         Assert.Equal(250m, added[0].CashAmount);
@@ -50,7 +50,7 @@ public class ImportApplyServiceTests
             new ImportPreviewRow(1, new DateOnly(2026, 4, 26), 910000m, "買進", null,
                 Symbol: "2330", Quantity: 1000m));
 
-        await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions(Exchange: "TWSE"));
+        await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions(Exchange: "TWSE"));
 
         Assert.Single(added);
         Assert.Equal(TradeType.Buy, added[0].Type);
@@ -68,7 +68,7 @@ public class ImportApplyServiceTests
             new ImportPreviewRow(1, new DateOnly(2026, 4, 26), 910425m, "買進", null,
                 Symbol: "2330", Quantity: 1000m, UnitPrice: 910m, Commission: 425m));
 
-        await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions(Exchange: "TWSE"));
+        await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions(Exchange: "TWSE"));
 
         Assert.Single(added);
         Assert.Equal(910m, added[0].Price);
@@ -84,7 +84,7 @@ public class ImportApplyServiceTests
             new ImportPreviewRow(1, new DateOnly(2026, 4, 26), 910425m, "買進", null,
                 Symbol: "2330", Quantity: 1000m, Commission: 425m));
 
-        await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions(Exchange: "TWSE"));
+        await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions(Exchange: "TWSE"));
 
         Assert.Single(added);
         Assert.Equal(910m, added[0].Price);
@@ -100,7 +100,7 @@ public class ImportApplyServiceTests
             new ImportPreviewRow(1, new DateOnly(2026, 4, 26), 910000m, "賣出", null,
                 Symbol: "2330", Quantity: 1000m));
 
-        await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+        await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions());
 
         Assert.Equal(TradeType.Sell, added[0].Type);
     }
@@ -116,7 +116,7 @@ public class ImportApplyServiceTests
             Conflicts = new[] { new ImportConflict(row, Guid.NewGuid(), null, ImportConflictResolution.Skip) },
         };
 
-        var result = await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+        var result = await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions());
 
         Assert.Equal(0, result.RowsApplied);
         Assert.Equal(1, result.RowsSkipped);
@@ -144,7 +144,7 @@ public class ImportApplyServiceTests
             Conflicts = new[] { new ImportConflict(row, existingId, null, ImportConflictResolution.Overwrite) },
         };
 
-        var result = await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+        var result = await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions());
 
         Assert.Equal(1, result.RowsApplied);
         Assert.Equal(1, result.RowsOverwritten);
@@ -172,7 +172,7 @@ public class ImportApplyServiceTests
             Conflicts = new[] { new ImportConflict(row, existingId, null, ImportConflictResolution.Overwrite) },
         };
 
-        await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+        await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions());
 
         Assert.Equal(new[] { "Remove", "Add" }, calls);
     }
@@ -196,7 +196,7 @@ public class ImportApplyServiceTests
             Conflicts = new[] { new ImportConflict(row, ExistingTradeId: null, null, ImportConflictResolution.Overwrite) },
         };
 
-        var result = await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+        var result = await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions());
 
         Assert.Equal(0, removeCalls);
         Assert.Equal(1, result.RowsApplied);
@@ -225,7 +225,7 @@ public class ImportApplyServiceTests
                 new ImportConflict(overwriteRow, Guid.NewGuid(), null, ImportConflictResolution.Overwrite),
             });
 
-        var result = await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+        var result = await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions());
 
         Assert.Equal(3, result.RowsConsidered);
         Assert.Equal(2, result.RowsApplied);
@@ -243,7 +243,7 @@ public class ImportApplyServiceTests
             new ImportPreviewRow(1, new DateOnly(2026, 4, 26), 910000m, "買進", null,
                 Symbol: null, Quantity: 1000m));
 
-        var result = await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+        var result = await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions());
 
         Assert.Equal(0, result.RowsApplied);
         Assert.Equal(1, result.RowsSkipped);
@@ -257,7 +257,7 @@ public class ImportApplyServiceTests
         var repo = NewRepo(new List<Trade>());
         var batch = BankBatch(new ImportPreviewRow(1, new DateOnly(2026, 4, 27), 100m, "A", null));
 
-        var result = await new ImportApplyService(repo.Object).ApplyAsync(batch, new ImportApplyOptions());
+        var result = await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions());
 
         Assert.Null(result.HistoryId);
     }

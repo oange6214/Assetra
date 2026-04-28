@@ -39,11 +39,6 @@ public sealed class ImportApplyService : IImportApplyService
         _rules = rules;
     }
 
-    /// <summary>沿用 v0.7 行為的便捷建構子，內部使用預設 <see cref="ImportRowMapper"/>，不寫 history、不套規則。</summary>
-    public ImportApplyService(ITradeRepository trades) : this(trades, new ImportRowMapper(), null, null)
-    {
-    }
-
     public async Task<ImportApplyResult> ApplyAsync(
         ImportBatch batch,
         ImportApplyOptions options,
@@ -89,7 +84,7 @@ public sealed class ImportApplyService : IImportApplyService
                 {
                     overwrittenJson = JsonSerializer.Serialize(existing, SnapshotJsonOptions);
                 }
-                await _trades.RemoveAsync(existingId).ConfigureAwait(false);
+                await _trades.RemoveAsync(existingId, ct).ConfigureAwait(false);
                 overwritten++;
             }
 
@@ -103,7 +98,7 @@ public sealed class ImportApplyService : IImportApplyService
                 continue;
             }
 
-            await _trades.AddAsync(trade).ConfigureAwait(false);
+            await _trades.AddAsync(trade, ct).ConfigureAwait(false);
             applied++;
 
             entries.Add(new ImportBatchEntry(

@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.13.4 - 2026-04-28
+
+針對 v0.13.3 後 code review 剩下的 MEDIUM 違規做 cleanup；無新功能、行為等價，但邊界更乾淨、檔案更易維護。
+
+### 修正
+
+- **Obsolete API（MED #9）**：移除 `ImportApplyService` 的單參數便捷建構子（v0.7 留下、生產 DI 已不使用），13 處測試呼叫改為顯式傳入 `new ImportRowMapper()`；同時補上 `RemoveAsync` / `AddAsync` 漏傳的 `CancellationToken`。
+- **Schema migrator whitelist（MED #7）**：`AutoCategorizationRuleSchemaMigrator.EnsureColumn` 原本將 `column` / `typeAndDefault` 直接內插到 `ALTER TABLE` SQL，無 allowlist 防護；改走 `SqliteSchemaHelper.MigrateAddColumn` 並新增 `AllowedColumns` / `AllowedTypeDefs`。`PortfolioSchemaMigrator.DropLegacyColumns` 改走新增的 `SqliteSchemaHelper.MigrateDropColumn`，本地 `ColumnExists` 改用 helper 版本（`PRAGMA table_info({table})` 不再裸內插）。
+- **Oversize VM（MED #6）**：`PortfolioViewModel`（1905 行）拆為 main + `Filtering` / `Reload` / `Detail` / `NullServices` 4 個 partial（main 降至 1108 行）；`TransactionDialogViewModel`（1827 行）拆為 main + `Categories` / `Confirm` 2 個 partial（main 降至 1194 行）。`CommunityToolkit.Mvvm` 的 source generator 對 partial class 仍正確生成。
+
+### 內部變更
+
+- 新增 `SqliteSchemaHelper.MigrateDropColumn`（with table allowlist + per-call column allowlist）。
+- 480/480 tests 綠。
+
 ## v0.13.3 - 2026-04-28
 
 針對 v0.13.2 後 code review 發現的 HIGH / MEDIUM / LOW 違規做 hardening；無新功能、行為大致等價，但 cancellation 一致、import rollback 具原子性、JSON snapshot 更安全。

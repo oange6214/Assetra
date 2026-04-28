@@ -9,6 +9,11 @@ internal static class PortfolioSchemaMigrator
         "asset_type", "created_at", "updated_at", "display_name", "currency", "is_active",
     };
 
+    private static readonly HashSet<string> AllowedLegacyDropColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "buy_price", "quantity", "buy_date",
+    };
+
     private static readonly HashSet<string> AllowedTypeDefs = new(StringComparer.OrdinalIgnoreCase)
     {
         "TEXT NOT NULL DEFAULT 'Stock'",
@@ -55,7 +60,7 @@ internal static class PortfolioSchemaMigrator
             DeduplicateEntries(conn, tx);
             EnsureUniqueIndex(conn, tx);
 
-            if (ColumnExists(conn, tx, "portfolio", "buy_price"))
+            if (SqliteSchemaHelper.ColumnExists(conn, "portfolio", "buy_price", tx))
                 VerifyProjectionMatchesStoredState(conn, tx);
 
             DropLegacyColumns(conn, tx);
@@ -157,14 +162,9 @@ internal static class PortfolioSchemaMigrator
 
     private static void DropLegacyColumns(SqliteConnection conn, SqliteTransaction tx)
     {
-        foreach (var col in new[] { "buy_price", "quantity", "buy_date" })
+        foreach (var col in AllowedLegacyDropColumns)
         {
-            if (!ColumnExists(conn, tx, "portfolio", col))
-                continue;
-            using var drop = conn.CreateCommand();
-            drop.Transaction = tx;
-            drop.CommandText = $"ALTER TABLE portfolio DROP COLUMN {col}";
-            drop.ExecuteNonQuery();
+            SqliteSchemaHelper.MigrateDropColumn(conn, tx, "portfolio", col, AllowedLegacyDropColumns);
         }
     }
 
@@ -231,17 +231,4 @@ internal static class PortfolioSchemaMigrator
             $"[Wave 9 verification] {matches} entries matched, {mismatches} mismatches.");
     }
 
-    private static bool ColumnExists(SqliteConnection conn, SqliteTransaction tx, string table, string column)
-    {
-        using var cmd = conn.CreateCommand();
-        cmd.Transaction = tx;
-        cmd.CommandText = $"PRAGMA table_info({table})";
-        using var r = cmd.ExecuteReader();
-        while (r.Read())
-        {
-            if (string.Equals(r.GetString(1), column, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-        return false;
-    }
 }

@@ -4,6 +4,18 @@ namespace Assetra.Infrastructure.Persistence;
 
 internal static class AutoCategorizationRuleSchemaMigrator
 {
+    private static readonly HashSet<string> AllowedColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "name", "match_field", "match_type", "applies_to",
+    };
+
+    private static readonly HashSet<string> AllowedTypeDefs = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "TEXT",
+        "INTEGER NOT NULL DEFAULT 3",
+        "INTEGER NOT NULL DEFAULT 0",
+    };
+
     public static void EnsureInitialized(string connectionString)
     {
         using var conn = new SqliteConnection(connectionString);
@@ -31,10 +43,14 @@ internal static class AutoCategorizationRuleSchemaMigrator
                 cmd.ExecuteNonQuery();
             }
 
-            EnsureColumn(conn, tx, "name", "TEXT");
-            EnsureColumn(conn, tx, "match_field", "INTEGER NOT NULL DEFAULT 3");   // AnyText
-            EnsureColumn(conn, tx, "match_type", "INTEGER NOT NULL DEFAULT 0");    // Contains
-            EnsureColumn(conn, tx, "applies_to", "INTEGER NOT NULL DEFAULT 3");    // Both
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "auto_categorization_rule",
+                "name", "TEXT", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "auto_categorization_rule",
+                "match_field", "INTEGER NOT NULL DEFAULT 3", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "auto_categorization_rule",
+                "match_type", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "auto_categorization_rule",
+                "applies_to", "INTEGER NOT NULL DEFAULT 3", AllowedColumns, AllowedTypeDefs);
 
             tx.Commit();
         }
@@ -45,17 +61,4 @@ internal static class AutoCategorizationRuleSchemaMigrator
         }
     }
 
-    private static void EnsureColumn(SqliteConnection conn, SqliteTransaction tx, string column, string typeAndDefault)
-    {
-        using var probe = conn.CreateCommand();
-        probe.Transaction = tx;
-        probe.CommandText = $"SELECT 1 FROM pragma_table_info('auto_categorization_rule') WHERE name = '{column}';";
-        var exists = probe.ExecuteScalar();
-        if (exists is not null) return;
-
-        using var alter = conn.CreateCommand();
-        alter.Transaction = tx;
-        alter.CommandText = $"ALTER TABLE auto_categorization_rule ADD COLUMN {column} {typeAndDefault};";
-        alter.ExecuteNonQuery();
-    }
 }

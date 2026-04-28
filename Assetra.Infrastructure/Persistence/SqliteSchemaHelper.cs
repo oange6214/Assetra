@@ -70,6 +70,32 @@ internal static class SqliteSchemaHelper
     /// </summary>
     /// <param name="allowedColumns">Caller's per-table allowlist for safe column names.</param>
     /// <param name="allowedTypeDefs">Caller's per-table allowlist for safe column type definitions.</param>
+    /// <summary>
+    /// Idempotent helper — drops <paramref name="column"/> from <paramref name="table"/>
+    /// only if it exists. <paramref name="table"/> is allowlist-validated; <paramref name="column"/>
+    /// is checked against <paramref name="allowedColumns"/>.
+    /// </summary>
+    public static void MigrateDropColumn(
+        SqliteConnection conn,
+        SqliteTransaction tx,
+        string table,
+        string column,
+        HashSet<string> allowedColumns)
+    {
+        if (!KnownTables.Contains(table))
+            throw new ArgumentException($"Unknown table: {table}");
+        if (!allowedColumns.Contains(column))
+            throw new ArgumentException($"Column '{column}' not in allowlist for table '{table}'.");
+
+        if (!ColumnExists(conn, table, column, tx))
+            return;
+
+        using var drop = conn.CreateCommand();
+        drop.Transaction = tx;
+        drop.CommandText = $"ALTER TABLE {table} DROP COLUMN {column};";
+        drop.ExecuteNonQuery();
+    }
+
     public static void MigrateAddColumn(
         SqliteConnection conn,
         SqliteTransaction tx,
