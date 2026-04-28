@@ -25,13 +25,14 @@ public sealed class PositionDeletionWorkflowService : IPositionDeletionWorkflowS
         if (request.EntryIds.Count == 0)
             return;
 
-        var entryIds = request.EntryIds.ToHashSet();
-        var allTrades = await _tradeRepository.GetAllAsync().ConfigureAwait(false);
-        foreach (var trade in allTrades.Where(t => t.PortfolioEntryId.HasValue && entryIds.Contains(t.PortfolioEntryId.Value)))
+        var matched = await _tradeRepository
+            .GetByPortfolioEntryIdsAsync(request.EntryIds, ct)
+            .ConfigureAwait(false);
+        foreach (var trade in matched)
         {
             ct.ThrowIfCancellationRequested();
-            await _tradeRepository.RemoveChildrenAsync(trade.Id).ConfigureAwait(false);
-            await _tradeRepository.RemoveAsync(trade.Id).ConfigureAwait(false);
+            await _tradeRepository.RemoveChildrenAsync(trade.Id, ct).ConfigureAwait(false);
+            await _tradeRepository.RemoveAsync(trade.Id, ct).ConfigureAwait(false);
         }
 
         foreach (var entryId in request.EntryIds)

@@ -287,6 +287,43 @@ public sealed class AssetSqliteRepository : IAssetRepository
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyDictionary<Guid, AssetEvent>> GetLatestValuationsAsync(
+        IEnumerable<Guid> assetIds, CancellationToken ct = default)
+    {
+        var idList = assetIds.Distinct().ToList();
+        var result = new Dictionary<Guid, AssetEvent>();
+        if (idList.Count == 0) return result;
+
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+
+        // Per asset_id, pick the row with the largest (event_date, rowid).
+        // SQLite supports correlated MAX-tuple via ROW_NUMBER() in CTE.
+        var inClause = string.Join(",", idList.Select((_, i) => $"$id{i}"));
+        cmd.CommandText = $"""
+            WITH ranked AS (
+                SELECT id, asset_id, event_type, event_date, amount, quantity,
+                       note, cash_account_id, created_at,
+                       ROW_NUMBER() OVER (PARTITION BY asset_id ORDER BY event_date DESC, rowid DESC) AS rn
+                FROM asset_event
+                WHERE event_type='Valuation' AND asset_id IN ({inClause})
+            )
+            SELECT id, asset_id, event_type, event_date, amount, quantity, note, cash_account_id, created_at
+            FROM ranked WHERE rn = 1;
+            """;
+        for (int i = 0; i < idList.Count; i++)
+            cmd.Parameters.AddWithValue($"$id{i}", idList[i].ToString());
+
+        await using var r = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        while (await r.ReadAsync(ct).ConfigureAwait(false))
+        {
+            var evt = MapEvent(r);
+            result[evt.AssetId] = evt;
+        }
+        return result;
+    }
+
     public async Task<AssetEvent?> GetLatestValuationAsync(Guid assetId)
     {
         await using var conn = new SqliteConnection(_connectionString);

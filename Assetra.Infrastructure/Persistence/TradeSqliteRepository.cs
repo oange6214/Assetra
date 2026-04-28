@@ -108,6 +108,25 @@ public sealed class TradeSqliteRepository : ITradeRepository
         return results;
     }
 
+    public async Task<IReadOnlyList<Trade>> GetByPortfolioEntryIdsAsync(
+        IReadOnlyCollection<Guid> entryIds, CancellationToken ct = default)
+    {
+        if (entryIds.Count == 0) return Array.Empty<Trade>();
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        var idList = entryIds.Distinct().ToList();
+        var placeholders = string.Join(",", idList.Select((_, i) => $"$p{i}"));
+        cmd.CommandText = $"SELECT {SelectClause} FROM trade WHERE portfolio_entry_id IN ({placeholders}) ORDER BY trade_date DESC, rowid DESC;";
+        for (int i = 0; i < idList.Count; i++)
+            cmd.Parameters.AddWithValue($"$p{i}", idList[i].ToString());
+        var results = new List<Trade>();
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
+            results.Add(MapTrade(reader));
+        return results;
+    }
+
     public async Task<IReadOnlyList<Trade>> GetByPeriodAsync(DateTime from, DateTime to, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);

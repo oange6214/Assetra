@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.17.5 - 2026-04-28
+
+第三輪 pre-v0.17 refactor 稽核：N+1 與 load-then-filter 收斂。新增兩個批次／區間查詢方法（皆 default interface implementation 相容既有 fakes，SQLite 提供 SQL pushdown override），把 Application 層三處 GetAllAsync-then-filter 改為 SQL-level 過濾。
+
+### 變更
+
+- **`IAssetRepository.GetLatestValuationsAsync(IEnumerable<Guid>, ct)` 批次方法**：新增 default implementation（fallback 為逐筆 `GetLatestValuationAsync`）；`AssetSqliteRepository` override 為 `ROW_NUMBER() OVER (PARTITION BY asset_id ORDER BY event_date DESC, rowid DESC)` CTE，單一 SQL 取得所有 asset 的最新 Valuation event。
+- **`FinancialOverviewQueryService` 收斂 N+1**：原本對每個 non-cash asset item 在 foreach 內各跑一次 `GetLatestValuationAsync` (含獨立 connection / SQL round-trip)，改為先 `GetLatestValuationsAsync` 取得 lookup dictionary，foreach 內 `ResolveAssetValue` 同步查表。
+- **`ITradeRepository.GetByPortfolioEntryIdsAsync(entryIds, ct)`**：新增介面方法 + default impl + `TradeSqliteRepository` SQL `IN ($p0, $p1, ...)` override。
+- **`PositionDeletionWorkflowService.DeleteAsync`**：原本 `GetAllAsync` + in-memory `Where(t => entryIds.Contains(...))`，改為 `GetByPortfolioEntryIdsAsync(request.EntryIds, ct)`；`RemoveChildrenAsync` / `RemoveAsync` 也順便補上 ct。
+- **`MonthlyBudgetSummaryService.BuildAsync`**：原本 `GetAllAsync` + Year/Month 過濾，改為 `GetByPeriodAsync(monthStart, monthEnd, ct)`，UTC 邊界與 SQL `trade_date BETWEEN` 對齊。
+- **`IncomeStatementService.GenerateAsync`**：原本 `GetAllAsync(ct)`，改為 `GetByPeriodAsync(prior.Start, period.End, ct)`，只撈當期 + Prior 等長度比較區間，避免拉全表。
+
+### 校驗（已確認、未動）
+
+- **`CashFlowStatementService`** / **`BalanceSheetService`** 仍保留 `GetAllAsync`：兩者需要「期間以前」的累計現金流 / 資產負債，無法用 `GetByPeriodAsync` 替代；需另行考慮 `GetUpToAsync(asOf)` 但屬延後優化。
+- **#5 ConfigureAwait on `await using cmd`** 明確跳過：`SqliteCommand` 的 `DisposeAsync` 在 in-memory native handle 下實質為同步，加 `.ConfigureAwait(false)` 須改寫為兩行扔掉強型別 `cmd` 變數，機械性 churn 大於收益。
+- **#3 TradeDeletionWorkflow Sell**, **#7 ImportConflictDetector**：個人財務資料規模下，per-symbol portfolio entry 比對 / per-trade key 建立屬 micro-optimization，新增介面方法擴張 API surface 不划算。
+
+### 測試
+
+- 612/612 tests 綠。批次 valuation / SQL `IN` query 邏輯由現有 `AssetSqliteRepositoryTests` (latest valuation roundtrip) 與 `MonthlyBudgetSummaryServiceTests` (period filter) 間接覆蓋。
+
 ## v0.17.4 - 2026-04-28
 
 Pre-v0.17 refactor 稽核 Group C 的 code-quality 部分。VM 拆分 (#7 TransactionDialogViewModel 1194 行 / #8 PortfolioViewModel 1108 行) 無 UI 測試基礎設施下風險過高，以「明確延後」處理而非草率重構，避免 binding regression。

@@ -18,6 +18,19 @@ public interface ITradeRepository
     }
 
     /// <summary>
+    /// 取出 <see cref="Trade.PortfolioEntryId"/> 屬於 <paramref name="entryIds"/> 集合的交易。
+    /// 預設實作 fallback 為 <see cref="GetAllAsync"/> + in-memory filter；SQLite 應 override 為 SQL <c>IN</c>。
+    /// </summary>
+    async Task<IReadOnlyList<Trade>> GetByPortfolioEntryIdsAsync(
+        IReadOnlyCollection<Guid> entryIds, CancellationToken ct = default)
+    {
+        if (entryIds.Count == 0) return Array.Empty<Trade>();
+        var set = entryIds.ToHashSet();
+        var all = await GetAllAsync(ct).ConfigureAwait(false);
+        return all.Where(t => t.PortfolioEntryId.HasValue && set.Contains(t.PortfolioEntryId.Value)).ToList();
+    }
+
+    /// <summary>
     /// 指定現金帳戶的交易記錄（含作為轉入目標的 Transfer）。
     /// </summary>
     Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId, CancellationToken ct = default);

@@ -29,13 +29,19 @@ public sealed class FinancialOverviewQueryService : IFinancialOverviewQueryServi
         var cashBalances = await _balanceQueryService.GetAllCashBalancesAsync().ConfigureAwait(false);
         var liabilitySnapshots = await _balanceQueryService.GetAllLiabilitySnapshotsAsync().ConfigureAwait(false);
 
+        // Batch valuation lookup for all non-cash asset items in one SQL round-trip.
+        var nonCashAssetIds = items
+            .Where(i => i.Type == FinancialType.Asset && !cashBalances.ContainsKey(i.Id))
+            .Select(i => i.Id);
+        var valuations = await _assetRepository.GetLatestValuationsAsync(nonCashAssetIds, ct).ConfigureAwait(false);
+
         var assetGroups = new List<FinancialOverviewGroup>();
         foreach (var group in groups.Where(g => g.Type == FinancialType.Asset).OrderBy(g => g.SortOrder))
         {
             var groupItems = new List<FinancialOverviewGroupItem>();
             foreach (var item in items.Where(i => i.GroupId == group.Id))
             {
-                var value = await ResolveAssetValueAsync(item, cashBalances).ConfigureAwait(false);
+                var value = ResolveAssetValue(item, cashBalances, valuations);
                 groupItems.Add(new FinancialOverviewGroupItem(item.Id, item.Name, item.Currency, value));
             }
 
@@ -49,7 +55,7 @@ public sealed class FinancialOverviewQueryService : IFinancialOverviewQueryServi
         var ungroupedAssets = new List<FinancialOverviewGroupItem>();
         foreach (var item in items.Where(i => i.Type == FinancialType.Asset && i.GroupId is null))
         {
-            var value = await ResolveAssetValueAsync(item, cashBalances).ConfigureAwait(false);
+            var value = ResolveAssetValue(item, cashBalances, valuations);
             ungroupedAssets.Add(new FinancialOverviewGroupItem(item.Id, item.Name, item.Currency, value));
         }
         if (ungroupedAssets.Count > 0)
@@ -99,15 +105,14 @@ public sealed class FinancialOverviewQueryService : IFinancialOverviewQueryServi
             liabilityGroups.Sum(g => g.Subtotal));
     }
 
-    private async Task<decimal> ResolveAssetValueAsync(
+    private static decimal ResolveAssetValue(
         AssetItem item,
-        IReadOnlyDictionary<Guid, decimal> cashBalances)
+        IReadOnlyDictionary<Guid, decimal> cashBalances,
+        IReadOnlyDictionary<Guid, AssetEvent> valuations)
     {
         if (cashBalances.TryGetValue(item.Id, out var balance))
             return balance;
-
-        var evt = await _assetRepository.GetLatestValuationAsync(item.Id).ConfigureAwait(false);
-        return evt?.Amount ?? 0m;
+        return valuations.TryGetValue(item.Id, out var evt) ? evt.Amount ?? 0m : 0m;
     }
 
     private static string GetInvestmentIcon(AssetType assetType) => assetType switch
