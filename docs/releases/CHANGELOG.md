@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.14.1 - 2026-04-28
+
+收尾 v0.14.0 延後的 Performance / Risk 跨幣別接線：MWR 與 Concentration 改吃 base currency；XIRR 本身保持貨幣中立（純粹接受已轉換的 cash flow）。
+
+### 新增
+
+- **CashFlow 擴充**：`Assetra.Core/Models/Analysis/CashFlow.cs` 加上可選 `string? Currency = null`（null/empty 視為已是 base currency）。為 record 預設參數，現有 callers 不受影響。
+- **MultiCurrencyCashFlowConverter**（`Assetra.Application/Fx/`）：將一組帶幣別的 `CashFlow` 統一轉為 base currency；任一筆缺匯率即整批回 null（避免靜默丟資料導致誤導性 IRR）。
+
+### 變更（接線）
+
+- **MWR**：`MoneyWeightedReturnCalculator` 增加可選 `IPortfolioRepository? portfolio` / `IMultiCurrencyValuationService? fx` / `IAppSettingsService? settings`。配置齊全時，依 trade 的 `PortfolioEntry.Currency` 對每筆 flow 標幣別、用 trade date 為 `asOf` 透過 FX 換算為 `BaseCurrency` 後再丟 XIRR；缺匯率回 null。Snapshot 的 `MarketValue` 視為已是 base currency（snapshot 本身的多幣別處理留待後續 sprint 一併處理）。
+- **Concentration**：`ConcentrationAnalyzer` 增加可選 `IMultiCurrencyValuationService? fx` / `IAppSettingsService? settings`。配置齊全時，每個 entry 的 `TotalCost` 依 `entry.Currency` 換算為 base currency 後再進入 bucket 聚合；缺匯率該 bucket 跳過（避免分母混幣）。
+- 兩者在未配置 FX/baseCurrency 時行為與 v0.13.x 完全一致（degraded mode）。
+
+### 測試
+
+- 新增 5 個測試：`MoneyWeightedReturnCalculatorTests`(3) + Concentration 跨幣別 (2)。
+- 499/499 tests 綠（v0.14.0 為 494；本 sprint +5）。
+
 ## v0.14.0 - 2026-04-28
 
 外幣基礎建設：建立 FX 匯率域模型、SQLite 持久化、估值服務，並將 BalanceSheet 接上「估值基準幣別」轉換。完成 Roadmap-v0.14-to-v1.0 的 v0.14.0 sprint。

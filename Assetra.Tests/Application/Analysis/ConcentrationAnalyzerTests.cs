@@ -1,5 +1,6 @@
 using Assetra.Application.Analysis;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Models;
 using Xunit;
 
@@ -43,6 +44,78 @@ public class ConcentrationAnalyzerTests
         var hhi = await svc.ComputeHhiAsync();
         Assert.NotNull(hhi);
         Assert.True(hhi!.Value > 0.9m);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_CrossCurrency_ConvertsCostBeforeAggregation()
+    {
+        var port = new FakePortfolioRepo();
+        var query = new FakePositionQuery();
+
+        var twId = Guid.NewGuid();
+        var usId = Guid.NewGuid();
+        port.Entries.Add(new PortfolioEntry(twId, "2330", "TW", AssetType.Stock, "TSMC", "TWD"));
+        port.Entries.Add(new PortfolioEntry(usId, "AAPL", "NASDAQ", AssetType.Stock, "Apple", "USD"));
+        query.Snapshots[twId] = new PositionSnapshot(twId, 1m, 32_000m, 32_000m, 0m, null);
+        query.Snapshots[usId] = new PositionSnapshot(usId, 1m, 1_000m, 1_000m, 0m, null);
+
+        var fx = new StubFx(("USD", "TWD", 32m));
+        var settings = new StubSettings("TWD");
+
+        var svc = new ConcentrationAnalyzer(port, query, fx, settings);
+        var result = await svc.AnalyzeAsync(topN: 5);
+
+        Assert.Equal(2, result.Count);
+        Assert.InRange((double)result.Sum(r => r.Weight), 0.999, 1.001);
+        // After conversion both legs are 32000 TWD → 50/50
+        Assert.InRange((double)result[0].Weight, 0.499, 0.501);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_CrossCurrency_MissingRate_SkipsBucket()
+    {
+        var port = new FakePortfolioRepo();
+        var query = new FakePositionQuery();
+
+        var twId = Guid.NewGuid();
+        var jpId = Guid.NewGuid();
+        port.Entries.Add(new PortfolioEntry(twId, "2330", "TW", AssetType.Stock, "TSMC", "TWD"));
+        port.Entries.Add(new PortfolioEntry(jpId, "7203", "TSE", AssetType.Stock, "Toyota", "JPY"));
+        query.Snapshots[twId] = new PositionSnapshot(twId, 1m, 1000m, 1000m, 0m, null);
+        query.Snapshots[jpId] = new PositionSnapshot(jpId, 1m, 5000m, 5000m, 0m, null);
+
+        var fx = new StubFx(); // no rates
+        var settings = new StubSettings("TWD");
+
+        var svc = new ConcentrationAnalyzer(port, query, fx, settings);
+        var result = await svc.AnalyzeAsync(topN: 5);
+
+        Assert.Single(result);
+        Assert.StartsWith("2330", result[0].Label);
+    }
+
+    private sealed class StubFx : IMultiCurrencyValuationService
+    {
+        private readonly Dictionary<(string, string), decimal> _rates;
+        public StubFx(params (string From, string To, decimal Rate)[] rates)
+        {
+            _rates = rates.ToDictionary(r => (r.From.ToUpperInvariant(), r.To.ToUpperInvariant()), r => r.Rate);
+        }
+        public Task<decimal?> ConvertAsync(decimal amount, string from, string to, DateOnly asOf, CancellationToken ct = default)
+        {
+            if (string.Equals(from, to, StringComparison.OrdinalIgnoreCase)) return Task.FromResult<decimal?>(amount);
+            if (_rates.TryGetValue((from.ToUpperInvariant(), to.ToUpperInvariant()), out var r))
+                return Task.FromResult<decimal?>(amount * r);
+            return Task.FromResult<decimal?>(null);
+        }
+    }
+
+    private sealed class StubSettings : IAppSettingsService
+    {
+        public StubSettings(string baseCcy) { Current = new AppSettings { BaseCurrency = baseCcy }; }
+        public AppSettings Current { get; private set; }
+        public Task SaveAsync(AppSettings settings) { Current = settings; return Task.CompletedTask; }
+        public event Action? Changed { add { } remove { } }
     }
 
     private static (FakePortfolioRepo, FakePositionQuery) BuildFixture(
