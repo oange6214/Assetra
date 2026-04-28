@@ -368,6 +368,44 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public bool TxTypeIsBuy => TxType == "buy";
     public bool TxTypeIsSell => TxType == "sell";
 
+    public string TxCashAccountLabel => TxType switch
+    {
+        "deposit" => L("Portfolio.Tx.DepositAccount", "存入帳戶"),
+        "withdrawal" => L("Portfolio.Tx.WithdrawalAccount", "扣款帳戶"),
+        "income" => L("Portfolio.Tx.IncomeAccount", "入帳帳戶"),
+        "cashDiv" => L("Portfolio.Tx.DividendDepositAccount", "股利入帳帳戶"),
+        "buy" => L("Portfolio.Tx.PaymentAccount", "扣款帳戶"),
+        "sell" => L("Portfolio.Tx.ProceedsAccount", "入帳帳戶"),
+        "loanBorrow" => L("Portfolio.Tx.LoanDisbursementAccount", "撥款帳戶"),
+        "loanRepay" => L("Portfolio.Tx.PaymentAccount", "扣款帳戶"),
+        "creditCardPayment" => L("Portfolio.Tx.CreditCardPaymentAccount", "扣款帳戶"),
+        _ => L("Portfolio.Tx.CashAccount", "帳戶")
+    };
+
+    public string TxUseCashAccountLabel => TxType switch
+    {
+        "buy" or "withdrawal" or "loanRepay" => L("Portfolio.Tx.UseDeductCashAccount", "從帳戶扣款"),
+        "sell" or "deposit" or "income" or "cashDiv" or "loanBorrow" => L("Portfolio.Tx.UseDepositCashAccount", "存入帳戶"),
+        _ => L("Portfolio.Tx.UseLoanCashAccount", "連動帳戶")
+    };
+
+    public string TxCashFlowHint => TxType switch
+    {
+        "deposit" => L("Portfolio.Tx.DepositHint", "適合把外部資金存入自己的帳戶，會增加該帳戶餘額。"),
+        "withdrawal" => L("Portfolio.Tx.WithdrawalHint", "適合提款、轉帳給別人或支付現金支出；只會扣款帳戶，不會建立轉入帳戶。"),
+        _ => string.Empty
+    };
+
+    public string TxTransferHint =>
+        L("Portfolio.Tx.TransferHint", "只用在自己的帳戶間移轉；來源扣款、目標入帳，總資產不變。轉給別人請用「提款 / 對外轉出」。");
+
+    public string TxCreditCardHint => TxType switch
+    {
+        "creditCardCharge" => L("Portfolio.Tx.CreditCardChargeHint", "信用卡消費會增加信用卡負債，支出與淨資產影響會記在消費日。"),
+        "creditCardPayment" => L("Portfolio.Tx.CreditCardPaymentHint", "信用卡繳款會扣現金帳戶並降低信用卡負債；若消費已先記錄，繳款當下淨資產通常不變。"),
+        _ => string.Empty
+    };
+
     // Buy sub-type predicates
     public bool TxBuyIsStock => TxTypeIsBuy && TxBuyAssetType == "stock";
     public bool TxBuyIsNonStock => TxTypeIsBuy && TxBuyAssetType is "fund" or "metal" or "bond";
@@ -605,6 +643,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(TxBuyIsStock));
         OnPropertyChanged(nameof(TxBuyIsNonStock));
         OnPropertyChanged(nameof(TxBuyIsCrypto));
+        OnPropertyChanged(nameof(TxCashAccountLabel));
+        OnPropertyChanged(nameof(TxUseCashAccountLabel));
+        OnPropertyChanged(nameof(TxCashFlowHint));
+        OnPropertyChanged(nameof(TxTransferHint));
+        OnPropertyChanged(nameof(TxCreditCardHint));
         TxError = string.Empty;
         UpdateSellTxPreview();
         if (TxTypeIsLoanRepay)

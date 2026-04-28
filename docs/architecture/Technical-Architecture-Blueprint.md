@@ -606,9 +606,148 @@ Assets/
 
 ---
 
+## 十三、多元資產架構（v0.23–v0.24）
+
+### 1. Folder 結構
+
+```
+Assetra.Core/Models/MultiAsset/
+  RealEstate.cs
+  RentalIncomeRecord.cs
+  InsurancePolicy.cs
+  InsurancePremiumRecord.cs
+  RetirementAccount.cs
+  RetirementContribution.cs
+  PhysicalAsset.cs
+
+Assetra.Core/Interfaces/MultiAsset/
+  IRealEstateRepository.cs
+  IInsurancePolicyRepository.cs
+  IRetirementAccountRepository.cs
+  IPhysicalAssetRepository.cs
+
+Assetra.Application/MultiAsset/
+  RealEstateValuationService.cs
+  InsuranceCashValueCalculator.cs
+  RetirementProjectionService.cs
+  PhysicalAssetValuationService.cs
+
+Assetra.Infrastructure/Persistence/MultiAsset/
+  RealEstateSqliteRepository.cs
+  InsurancePolicySqliteRepository.cs
+  RetirementAccountSqliteRepository.cs
+  PhysicalAssetSqliteRepository.cs
+```
+
+### 2. Entity 版本規範
+
+所有多元資產 entity 一律包含 `EntityVersion`，與現有 sync 架構對齊：
+
+```csharp
+record RealEstate(
+    Guid Id,
+    string Name,
+    // ... 業務欄位 ...
+    EntityVersion Version   // sync 所需
+);
+```
+
+### 3. BalanceSheet 擴充
+
+`BalanceSheetService` 新增資產聚合：
+
+```
+資產端
+  ├─ 投資部位（既有）
+  ├─ 現金帳戶（既有）
+  ├─ 不動產淨值（RealEstate.CurrentValue - 房貸餘額）← 新增
+  ├─ 保單現金價值（InsurancePolicy.CashValue）← 新增
+  ├─ 退休專戶（RetirementAccount.Balance）← 新增
+  └─ 實物資產（PhysicalAsset.CurrentValue）← 新增
+
+負債端
+  └─ 貸款 / 信用卡（既有）
+```
+
+### 4. Reporting 新增行項
+
+| 報表 | 新增行項 | 來源 |
+|---|---|---|
+| BalanceSheet | 不動產淨值、保單現金價值、退休專戶、實物資產 | MultiAsset repos |
+| IncomeStatement | 租金收入、保費支出 | RentalIncomeRecord、InsurancePremiumRecord |
+
+### 5. Sync 整合
+
+v0.23–v0.24 的新 entity 需在 `CompositeLocalChangeQueue` 新增 routing key：
+
+```csharp
+// 新增 4 個 entity type
+"RealEstate"         → IRealEstateRepository
+"InsurancePolicy"    → IInsurancePolicyRepository
+"RetirementAccount"  → IRetirementAccountRepository
+"PhysicalAsset"      → IPhysicalAssetRepository
+```
+
+---
+
+## 十四、情境模擬架構（v0.25–v0.26）
+
+### 1. 設計原則：純計算層
+
+Simulation context **不持久化**。所有計算結果為 transient：
+
+```
+輸入（來自 UI）
+  → FireScenario / MonteCarloScenario（record，純資料）
+  → FireCalculator / MonteCarloSimulator（stateless service）
+  → FireResult / MonteCarloResult（回傳給 UI）
+  → UI 顯示圖表（不寫入 DB）
+```
+
+### 2. Folder 結構
+
+```
+Assetra.Core/Models/Simulation/
+  FireScenario.cs
+  FireResult.cs
+  WithdrawalProjection.cs
+  MonteCarloScenario.cs
+  MonteCarloResult.cs
+  RateDistribution.cs
+
+Assetra.Application/Simulation/
+  FireCalculator.cs
+  SustainabilityAnalyzer.cs
+  MonteCarloSimulator.cs
+  StochasticRateProvider.cs
+```
+
+### 3. Monte Carlo 亂數策略
+
+使用 `Random.Shared` + Box-Muller 轉換產生常態分布樣本，**不引入外部統計套件**：
+
+```csharp
+static double NextGaussian(double mean, double stdDev)
+{
+    double u1 = 1.0 - Random.Shared.NextDouble();
+    double u2 = 1.0 - Random.Shared.NextDouble();
+    double z  = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
+    return mean + stdDev * z;
+}
+```
+
+### 4. Fan Chart 視覺化
+
+使用現有 `LiveChartsCore.SkiaSharpView.WPF`（已有）：
+- 三條 `LineSeries`：P10（下緣）/ P50（中線）/ P90（上緣）
+- `AreaSeries` 填滿 P10–P90 區間（半透明）
+- X 軸：年份；Y 軸：資產餘額（base currency）
+
+---
+
 ## 十二、總結
 
-Assetra 截至 v0.21.1 已具備：
+Assetra 截至 v0.21.3 已具備：
 
 - 投資 / 帳戶 / 負債 / 交易記錄 / 提醒 / 配置分析
 - 收支 / 預算 / Recurring / Goals 完整子系統
@@ -621,7 +760,7 @@ Assetra 截至 v0.21.1 已具備：
 
 Phase 4 架構重點：
 
-1. LLM adapter 整合（AI 財務助理）— query intent routing 不穿透 domain layer
-2. 多元資產模型（RealEstate / InsurancePolicy / RetirementAccount / PhysicalAsset）— 繼承現有 Asset / Portfolio 邊界
-3. 情境模擬計算引擎（FIRE / Monte Carlo）— 純計算層，不新增 persistence
-4. Web API 抽出（`Assetra.Api`）— PWA / 行動端前置，WPF 與 PWA 共用 `Assetra.Core` 介面
+1. **LLM adapter 整合**（AI 財務助理，v0.22）— query intent routing 不穿透 domain layer
+2. **多元資產模型**（v0.23–v0.24）— 獨立 MultiAsset context，BalanceSheet / Reporting 接入，全 entity 加 EntityVersion
+3. **情境模擬計算引擎**（v0.25–v0.26）— 純計算層，無 persistence，Box-Muller Monte Carlo，LiveChartsCore fan chart
+4. **Web API 抽出**（v0.27，`Assetra.Api`）— PWA / 行動端前置，WPF 與 PWA 共用 `Assetra.Core` 介面

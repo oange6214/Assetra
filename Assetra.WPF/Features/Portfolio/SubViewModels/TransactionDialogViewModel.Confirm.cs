@@ -510,6 +510,18 @@ public partial class TransactionDialogViewModel
         { TxError = "請選擇信用卡"; return; }
         if (!ParseHelpers.TryParseDecimal(TxAmount, out var amount) || amount <= 0)
         { TxError = "金額無效"; return; }
+        if (TxCreditCard.Balance <= 0)
+        {
+            TxError = L("Portfolio.Tx.CreditCardPayment.NoBalance",
+                "這張信用卡目前沒有未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款 / 對外轉出」。");
+            return;
+        }
+        if (amount > TxCreditCard.Balance)
+        {
+            TxError = L("Portfolio.Tx.CreditCardPayment.ExceedsBalance",
+                "繳款金額不可超過目前未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款 / 對外轉出」。");
+            return;
+        }
         var cashAccId = await ResolveCashAccountIdAsync();
         if (cashAccId is null)
         {

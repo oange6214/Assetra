@@ -6,7 +6,7 @@ internal sealed class PortfolioTradeDialogController
 {
     public TradeDialogCreateState CreateOpenState(CashAccountRowViewModel? defaultCashAccount) =>
         new(
-            TxDate: DateTime.Today,
+            TxDate: DateTime.Now,
             TxCashAccount: defaultCashAccount,
             TxUseCashAccount: true,
             TxBuyAssetType: "stock",
@@ -14,7 +14,7 @@ internal sealed class PortfolioTradeDialogController
             TxDivInputMode: "perShare",
             TxCommissionDiscount: "1.0",
             TxLoanStartDate: DateTime.Today,
-            AddBuyDate: DateTime.Today);
+            AddBuyDate: DateTime.Now);
 
     public TradeDialogEditState CreateEditState(
         TradeRowViewModel row,

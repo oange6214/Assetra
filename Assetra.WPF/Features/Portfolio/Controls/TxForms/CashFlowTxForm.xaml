@@ -13,6 +13,13 @@
     <!--  ======== 存入/提款欄位 ========  -->
     <StackPanel Visibility="{Binding TxTypeIsCashFlow, Converter={StaticResource BooleanToVisibilityConverter}}">
         <TextBlock
+            Margin="0,0,0,12"
+            FontSize="{StaticResource FontSizeXs}"
+            Foreground="{DynamicResource AppTextMuted}"
+            Text="{Binding TxCashFlowHint}"
+            TextWrapping="Wrap" />
+
+        <TextBlock
             Margin="0,0,0,4"
             FontSize="{StaticResource FontSizeXs}"
             FontWeight="SemiBold"
@@ -33,7 +40,7 @@
             FontSize="{StaticResource FontSizeXs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.CashAccount}" />
+            Text="{Binding TxCashAccountLabel}" />
         <ComboBox
             Margin="0,0,0,4"
             DisplayMemberPath="Name"

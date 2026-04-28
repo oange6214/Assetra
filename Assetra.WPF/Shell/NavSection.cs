@@ -11,5 +11,11 @@ public enum NavSection
     Goals,              // 財務目標
     Alerts,
     Import,             // 匯入銀行/券商對帳單
+    RealEstate,         // 不動產（v0.23）
+    Insurance,          // 保險保單（v0.23）
+    Retirement,         // 退休專戶（v0.24）
+    PhysicalAsset,      // 實物資產（v0.24）
+    Fire,               // FIRE 計算機（v0.25）
+    MonteCarlo,         // Monte Carlo 模擬（v0.26）
     Settings,
 }

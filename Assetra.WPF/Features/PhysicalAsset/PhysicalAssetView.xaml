@@ -1,0 +1,141 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.PhysicalAsset.PhysicalAssetView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.PhysicalAsset"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:PhysicalAssetViewModel}, IsDesignTimeCreatable=False}"
+    d:DesignHeight="800"
+    d:DesignWidth="1200"
+    Background="{DynamicResource AppBackground}"
+    mc:Ignorable="d">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,16" Orientation="Horizontal">
+            <TextBlock
+                FontSize="{DynamicResource FontSizeXl}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource PhysicalAsset.Title}" />
+            <TextBlock Margin="16,0,0,0" VerticalAlignment="Bottom"
+                       Foreground="{DynamicResource AppTextSecondary}">
+                <Run Text="{DynamicResource PhysicalAsset.TotalValue}" />
+                <Run Text="{Binding TotalCurrentValue, StringFormat=N0}" />
+            </TextBlock>
+            <TextBlock Margin="16,0,0,0" VerticalAlignment="Bottom"
+                       Foreground="{DynamicResource AppTextSecondary}">
+                <Run Text="{DynamicResource PhysicalAsset.TotalGain}" />
+                <Run Text="{Binding TotalUnrealizedGain, StringFormat=N0}" />
+            </TextBlock>
+        </StackPanel>
+
+        <TextBlock Grid.Row="1" Margin="0,0,0,8"
+                   Foreground="{DynamicResource AppDanger}"
+                   Text="{Binding ErrorMessage}"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+
+        <Border Grid.Row="2"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="8">
+            <DataGrid AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                      GridLinesVisibility="Horizontal" HeadersVisibility="Column" IsReadOnly="True"
+                      ItemsSource="{Binding Assets}" RowBackground="Transparent" SelectionMode="Single">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Width="*" Binding="{Binding Name}" Header="{DynamicResource PhysicalAsset.Column.Name}" />
+                    <DataGridTextColumn Width="120" Binding="{Binding Category}" Header="{DynamicResource PhysicalAsset.Column.Category}" />
+                    <DataGridTextColumn Width="120" Binding="{Binding AcquisitionCost, StringFormat=N0}" Header="{DynamicResource PhysicalAsset.Column.Cost}" />
+                    <DataGridTextColumn Width="120" Binding="{Binding CurrentValue, StringFormat=N0}" Header="{DynamicResource PhysicalAsset.Column.CurrentValue}" />
+                    <DataGridTextColumn Width="120" Binding="{Binding UnrealizedGain, StringFormat=N0}" Header="{DynamicResource PhysicalAsset.Column.Gain}" />
+                    <DataGridTextColumn Width="100" Binding="{Binding UnrealizedGainRate, StringFormat=P2}" Header="{DynamicResource PhysicalAsset.Column.GainRate}" />
+                    <DataGridTextColumn Width="80" Binding="{Binding Currency}" Header="{DynamicResource PhysicalAsset.Column.Currency}" />
+                    <DataGridTemplateColumn Width="120" Header="{DynamicResource Common.Actions}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Margin="0,0,4,0"
+                                            Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Content="{DynamicResource Common.Edit}"
+                                            Style="{StaticResource SmallButtonStyle}" />
+                                    <Button Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Content="{DynamicResource Common.Delete}"
+                                            Style="{StaticResource SmallDangerButtonStyle}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <Border Grid.Row="3" Margin="0,16,0,0" Padding="16"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1" CornerRadius="8">
+            <StackPanel>
+                <TextBlock Margin="0,0,0,12" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource PhysicalAsset.Form.Title}" />
+                <UniformGrid Columns="4" Rows="2">
+                    <StackPanel Margin="0,0,8,8">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource PhysicalAsset.Form.Name}" />
+                        <TextBox Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,8,8">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource PhysicalAsset.Form.Category}" />
+                        <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding FormCategory}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,8,8">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource PhysicalAsset.Form.Description}" />
+                        <TextBox Text="{Binding FormDescription, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,8">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource PhysicalAsset.Form.Cost}" />
+                        <TextBox Text="{Binding FormAcquisitionCost, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,8,0">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource PhysicalAsset.Form.AcquisitionDate}" />
+                        <DatePicker SelectedDate="{Binding FormAcquisitionDate}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,8,0">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource PhysicalAsset.Form.CurrentValue}" />
+                        <TextBox Text="{Binding FormCurrentValue, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,8,0">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource PhysicalAsset.Form.ValuationMethod}" />
+                        <TextBox Text="{Binding FormValuationMethod, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource PhysicalAsset.Form.Currency}" />
+                        <TextBox Text="{Binding FormCurrency, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </UniformGrid>
+                <StackPanel Margin="0,8,0,0">
+                    <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource PhysicalAsset.Form.Notes}" />
+                    <TextBox Text="{Binding FormNotes, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppDanger}" Text="{Binding FormError}"
+                           Visibility="{Binding FormError, Converter={StaticResource NullToVisibilityConverter}}" />
+
+                <StackPanel Margin="0,12,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button Margin="0,0,8,0"
+                            Command="{Binding CancelEditCommand}"
+                            Content="{DynamicResource Common.Cancel}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    <Button Command="{Binding SaveCommand}" Content="{DynamicResource Common.Save}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

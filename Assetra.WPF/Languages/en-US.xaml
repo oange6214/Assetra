@@ -401,6 +401,13 @@
     <sys:String x:Key="Portfolio.Tx.Amount">Amount (TWD)</sys:String>
     <sys:String x:Key="Portfolio.Tx.Note">Description</sys:String>
     <sys:String x:Key="Portfolio.Tx.CashAccount">Account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DepositAccount">Deposit account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.WithdrawalAccount">Payment account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.IncomeAccount">Receiving account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DividendDepositAccount">Dividend account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.PaymentAccount">Payment account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.ProceedsAccount">Proceeds account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.LoanDisbursementAccount">Disbursement account</sys:String>
     <sys:String x:Key="Portfolio.Tx.NoCashLink">No Linkage</sys:String>
     <sys:String x:Key="Portfolio.Tx.Stock">Stock</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivPerShare">Dividend / Share</sys:String>
@@ -432,6 +439,12 @@
     <sys:String x:Key="Portfolio.Tx.TransferTargetAccount">Destination account</sys:String>
     <sys:String x:Key="Portfolio.Tx.TransferTargetAmount">Receive amount</sys:String>
     <sys:String x:Key="Portfolio.Tx.TransferImpliedRate">Implied rate</sys:String>
+    <sys:String x:Key="Portfolio.Tx.WithdrawalAction">Withdrawal / External transfer</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferAction">Account transfer</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CashGroupHint">Use “Withdrawal / External transfer” for paying someone, cash payments, or ATM withdrawals. Use “Account transfer” only between your own accounts.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DepositHint">Use this when outside money enters one of your accounts; it increases that account balance.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.WithdrawalHint">Use this for ATM withdrawals, transfers to other people, or cash payments. It only deducts from the selected account and does not create a destination account.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferHint">Use only for moving money between your own accounts. The source is deducted, the destination is credited, and net worth stays unchanged. For sending money to someone else, use “Withdrawal / External transfer”.</sys:String>
     <sys:String x:Key="Portfolio.Filter.Deposit">Deposit</sys:String>
     <sys:String x:Key="Portfolio.Filter.Withdrawal">Withdrawal</sys:String>
     <sys:String x:Key="Portfolio.Filter.Transfer">Transfer</sys:String>
@@ -468,8 +481,14 @@
     <sys:String x:Key="Portfolio.Tx.DivModeTotal">Total dividend</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivTotalAmount">Total dividend amount</sys:String>
     <sys:String x:Key="Portfolio.Tx.UseLoanCashAccount">Deduct from / deposit to account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.UseDeductCashAccount">Deduct from account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.UseDepositCashAccount">Deposit to account</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCard">Credit card</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCardPaymentAccount">Payment account</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardChargeHint">A card charge increases credit-card liability; the expense and net-worth impact are recorded on the charge date.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardPaymentHint">A card payment deducts from cash and reduces credit-card liability. If the charge was already recorded, net worth usually does not change on payment.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.NoBalance">This card has no outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdrawal / External transfer”.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.ExceedsBalance">Payment cannot exceed the current outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdrawal / External transfer”.</sys:String>
     <sys:String x:Key="Portfolio.Tx.EditTitle">Edit Record</sys:String>
     <sys:String x:Key="Portfolio.Tx.MetaOnlyHint">Only date and note can be changed for this trade. To correct amount or quantity, delete and re-create; stock positions can also be edited directly on the Investment tab.</sys:String>
     <sys:String x:Key="Portfolio.Tx.Buy">Buy</sys:String>
@@ -1021,4 +1040,125 @@
     <sys:String x:Key="Portfolio.AssetType.BondEtf.Tooltip">Bond ETF — securities transaction tax exempt (extended to end of 2026)</sys:String>
     <sys:String x:Key="Portfolio.Loan.RateHint">Fill in annual rate &amp; periods to auto-generate amortization schedule</sys:String>
     <sys:String x:Key="DateRangePicker.Reset">Reset</sys:String>
+
+    <!--  RealEstate  -->
+    <sys:String x:Key="RealEstate.Title">Real Estate</sys:String>
+    <sys:String x:Key="RealEstate.TotalEquity">Total Equity: </sys:String>
+    <sys:String x:Key="RealEstate.Column.Name">Name</sys:String>
+    <sys:String x:Key="RealEstate.Column.Address">Address</sys:String>
+    <sys:String x:Key="RealEstate.Column.CurrentValue">Current Value</sys:String>
+    <sys:String x:Key="RealEstate.Column.Mortgage">Mortgage Balance</sys:String>
+    <sys:String x:Key="RealEstate.Column.Equity">Equity</sys:String>
+    <sys:String x:Key="RealEstate.Column.Currency">Currency</sys:String>
+    <sys:String x:Key="RealEstate.Form.Title">Add / Edit Property</sys:String>
+    <sys:String x:Key="RealEstate.Form.Name">Name</sys:String>
+    <sys:String x:Key="RealEstate.Form.Address">Address</sys:String>
+    <sys:String x:Key="RealEstate.Form.PurchasePrice">Purchase Price</sys:String>
+    <sys:String x:Key="RealEstate.Form.CurrentValue">Current Value</sys:String>
+    <sys:String x:Key="RealEstate.Form.MortgageBalance">Mortgage Balance</sys:String>
+    <sys:String x:Key="RealEstate.Form.Currency">Currency</sys:String>
+    <sys:String x:Key="RealEstate.Form.IsRental">Rental Property</sys:String>
+    <sys:String x:Key="RealEstate.Form.Notes">Notes</sys:String>
+
+    <!--  Insurance  -->
+    <sys:String x:Key="Insurance.Title">Insurance Policies</sys:String>
+    <sys:String x:Key="Insurance.TotalCashValue">Total Cash Value: </sys:String>
+    <sys:String x:Key="Insurance.Column.Name">Policy Name</sys:String>
+    <sys:String x:Key="Insurance.Column.PolicyNumber">Policy Number</sys:String>
+    <sys:String x:Key="Insurance.Column.Type">Type</sys:String>
+    <sys:String x:Key="Insurance.Column.Insurer">Insurer</sys:String>
+    <sys:String x:Key="Insurance.Column.CashValue">Cash Value</sys:String>
+    <sys:String x:Key="Insurance.Column.AnnualPremium">Annual Premium</sys:String>
+    <sys:String x:Key="Insurance.Column.Currency">Currency</sys:String>
+    <sys:String x:Key="Insurance.Form.Title">Add / Edit Policy</sys:String>
+    <sys:String x:Key="Insurance.Form.Name">Policy Name</sys:String>
+    <sys:String x:Key="Insurance.Form.PolicyNumber">Policy Number</sys:String>
+    <sys:String x:Key="Insurance.Form.Insurer">Insurer</sys:String>
+    <sys:String x:Key="Insurance.Form.Type">Type</sys:String>
+    <sys:String x:Key="Insurance.Form.FaceValue">Face Value</sys:String>
+    <sys:String x:Key="Insurance.Form.CashValue">Cash Value</sys:String>
+    <sys:String x:Key="Insurance.Form.AnnualPremium">Annual Premium</sys:String>
+    <sys:String x:Key="Insurance.Form.Currency">Currency</sys:String>
+
+    <!-- v0.24 Retirement -->
+    <sys:String x:Key="Retirement.Title">Retirement Accounts</sys:String>
+    <sys:String x:Key="Retirement.TotalBalance">Total Balance:</sys:String>
+    <sys:String x:Key="Retirement.Column.Name">Name</sys:String>
+    <sys:String x:Key="Retirement.Column.AccountType">Type</sys:String>
+    <sys:String x:Key="Retirement.Column.Provider">Provider</sys:String>
+    <sys:String x:Key="Retirement.Column.Balance">Balance</sys:String>
+    <sys:String x:Key="Retirement.Column.YearsOfService">Years</sys:String>
+    <sys:String x:Key="Retirement.Column.WithdrawalAge">Withdrawal Age</sys:String>
+    <sys:String x:Key="Retirement.Column.LatestContribution">Latest Year Contribution</sys:String>
+    <sys:String x:Key="Retirement.Column.Currency">Currency</sys:String>
+    <sys:String x:Key="Retirement.Action.Project">Project</sys:String>
+    <sys:String x:Key="Retirement.Form.Title">Add / Edit Retirement Account</sys:String>
+    <sys:String x:Key="Retirement.Form.Name">Name</sys:String>
+    <sys:String x:Key="Retirement.Form.AccountType">Type</sys:String>
+    <sys:String x:Key="Retirement.Form.Provider">Provider</sys:String>
+    <sys:String x:Key="Retirement.Form.Balance">Current Balance</sys:String>
+    <sys:String x:Key="Retirement.Form.EmployeeRate">Employee Rate</sys:String>
+    <sys:String x:Key="Retirement.Form.EmployerRate">Employer Rate</sys:String>
+    <sys:String x:Key="Retirement.Form.YearsOfService">Years of Service</sys:String>
+    <sys:String x:Key="Retirement.Form.WithdrawalAge">Legal Withdrawal Age</sys:String>
+    <sys:String x:Key="Retirement.Form.OpenedDate">Opened Date</sys:String>
+    <sys:String x:Key="Retirement.Form.Currency">Currency</sys:String>
+    <sys:String x:Key="Retirement.Form.Notes">Notes</sys:String>
+    <sys:String x:Key="Retirement.Projection.Title">Retirement Projection</sys:String>
+    <sys:String x:Key="Retirement.Projection.CurrentAge">Current Age</sys:String>
+    <sys:String x:Key="Retirement.Projection.AnnualReturn">Annual Return Rate</sys:String>
+    <sys:String x:Key="Retirement.Projection.AnnualContribution">Annual Contribution</sys:String>
+
+    <!-- v0.24 Physical Asset -->
+    <sys:String x:Key="PhysicalAsset.Title">Physical Assets</sys:String>
+    <sys:String x:Key="PhysicalAsset.TotalValue">Total Value:</sys:String>
+    <sys:String x:Key="PhysicalAsset.TotalGain">Unrealized Gain:</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.Name">Name</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.Category">Category</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.Cost">Cost</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.CurrentValue">Current Value</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.Gain">Unrealized Gain</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.GainRate">Return Rate</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.Currency">Currency</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Title">Add / Edit Physical Asset</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Name">Name</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Category">Category</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Description">Description</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Cost">Acquisition Cost</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.AcquisitionDate">Acquisition Date</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.CurrentValue">Current Value</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.ValuationMethod">Valuation Method</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Currency">Currency</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Notes">Notes</sys:String>
+
+    <!-- v0.25 FIRE Calculator -->
+    <sys:String x:Key="Fire.Title">FIRE Calculator</sys:String>
+    <sys:String x:Key="Fire.Input.NetWorth">Current Net Worth</sys:String>
+    <sys:String x:Key="Fire.Input.AnnualExpenses">Annual Expenses</sys:String>
+    <sys:String x:Key="Fire.Input.AnnualSavings">Annual Savings</sys:String>
+    <sys:String x:Key="Fire.Input.Return">Expected Annual Return</sys:String>
+    <sys:String x:Key="Fire.Input.WithdrawalRate">Withdrawal Rate</sys:String>
+    <sys:String x:Key="Fire.Calculate">Calculate</sys:String>
+    <sys:String x:Key="Fire.Result.FireNumber">FIRE Number</sys:String>
+    <sys:String x:Key="Fire.Result.YearsToFire">Years to FIRE</sys:String>
+    <sys:String x:Key="Fire.Result.Projected">Net Worth at FIRE</sys:String>
+    <sys:String x:Key="Fire.Path.Year">Year</sys:String>
+    <sys:String x:Key="Fire.Path.NetWorth">Net Worth</sys:String>
+
+    <!--  Monte Carlo  -->
+    <sys:String x:Key="MonteCarlo.Title">Monte Carlo Retirement Simulation</sys:String>
+    <sys:String x:Key="MonteCarlo.Input.Initial">Initial Balance</sys:String>
+    <sys:String x:Key="MonteCarlo.Input.Withdrawal">Annual Withdrawal</sys:String>
+    <sys:String x:Key="MonteCarlo.Input.Mean">Mean Return</sys:String>
+    <sys:String x:Key="MonteCarlo.Input.StdDev">Std Dev</sys:String>
+    <sys:String x:Key="MonteCarlo.Input.Years">Years</sys:String>
+    <sys:String x:Key="MonteCarlo.Input.Count">Simulations</sys:String>
+    <sys:String x:Key="MonteCarlo.Run">Run Simulation</sys:String>
+    <sys:String x:Key="MonteCarlo.Running">Running…</sys:String>
+    <sys:String x:Key="MonteCarlo.Result.SuccessRate">Success Rate</sys:String>
+    <sys:String x:Key="MonteCarlo.Result.P10">P10 Ending Balance</sys:String>
+    <sys:String x:Key="MonteCarlo.Result.Median">Median Ending Balance</sys:String>
+    <sys:String x:Key="MonteCarlo.Result.P90">P90 Ending Balance</sys:String>
+    <sys:String x:Key="MonteCarlo.Path.Year">Year</sys:String>
+    <sys:String x:Key="MonteCarlo.Path.Median">Median Balance</sys:String>
 </ResourceDictionary>

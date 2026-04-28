@@ -146,13 +146,17 @@ public sealed class AddAssetWorkflowService : IAddAssetWorkflowService
             request.Quantity,
             preview.CostPerShare)).ConfigureAwait(false);
 
+        var tradeDate = request.BuyDate.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(request.BuyDate, DateTimeKind.Local).ToUniversalTime()
+            : request.BuyDate.ToUniversalTime();
+
         var trade = new Trade(
             Id: Guid.NewGuid(),
             Symbol: symbol,
             Exchange: exchange,
             Name: name,
             Type: TradeType.Buy,
-            TradeDate: request.BuyDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
+            TradeDate: tradeDate,
             Price: request.Price,
             Quantity: request.Quantity,
             RealizedPnl: null,

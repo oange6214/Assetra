@@ -465,7 +465,7 @@
             <!--  從現金帳戶扣款 — checkbox + dropdown (一致 with 借款/還款 / Transfer)  -->
             <CheckBox
                 Margin="0,0,0,4"
-                Content="{DynamicResource Portfolio.Tx.UseLoanCashAccount}"
+                Content="{Binding TxUseCashAccountLabel}"
                 FontSize="{StaticResource FontSizeXs}"
                 Foreground="{DynamicResource AppTextSecondary}"
                 IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
@@ -475,7 +475,7 @@
                     FontSize="{StaticResource FontSizeXs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{DynamicResource Portfolio.Tx.LoanCashAccount}" />
+                    Text="{Binding TxCashAccountLabel}" />
                 <ComboBox
                     Margin="0,0,0,4"
                     DisplayMemberPath="Name"

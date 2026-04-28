@@ -164,6 +164,43 @@
 
 ---
 
+## 九、Phase 4（v0.23–v0.26）文件準備清單
+
+> 更新日期：2026-04-28。在開始 v0.23.0 實作前，確認下列文件已就緒。
+
+### 實作前必須完成（HIGH）
+
+| 文件 | 項目 | 狀態 |
+|---|---|---|
+| `Bounded-Contexts.md` | 新增 §13 多元資產（RealEstate / Insurance / Retirement / Physical） | ✅ 已完成 |
+| `Bounded-Contexts.md` | 新增 §14 模擬（FIRE / Monte Carlo） | ✅ 已完成 |
+| `Bounded-Contexts.md` | 更新 Context 關係圖 | ✅ 已完成 |
+| `Roadmap-v0.14-to-v1.0.md` | v0.23.0 完整 task breakdown（含 UI / Reporting / Sync） | ✅ 已完成 |
+| `Roadmap-v0.14-to-v1.0.md` | v0.24.0 完整 task breakdown | ✅ 已完成 |
+| `Roadmap-v0.14-to-v1.0.md` | v0.25.0 完整 task breakdown（FIRE） | ✅ 已完成 |
+| `Roadmap-v0.14-to-v1.0.md` | v0.26.0 完整 task breakdown（Monte Carlo） | ✅ 已完成 |
+| `Technical-Architecture-Blueprint.md` | §十三 多元資產 folder 結構 + EntityVersion 規範 + BalanceSheet 擴充 | ✅ 已完成 |
+| `Technical-Architecture-Blueprint.md` | §十四 Simulation 架構（純計算、Box-Muller、fan chart） | ✅ 已完成 |
+
+### 同步更新（MEDIUM）
+
+| 文件 | 項目 | 狀態 |
+|---|---|---|
+| `Architecture.md` | Application context 清單加 MultiAsset / Simulation | ✅ 已完成 |
+| `CHANGELOG.md` | v0.23–v0.26 sprint 模板（規劃中） | ✅ 已完成 |
+
+### 實作完成後補（實作各 sprint 後）
+
+| 文件 | 項目 |
+|---|---|
+| `Bounded-Contexts.md` | §13 / §14 從「規劃中」改為「完成」並補主要服務名稱 |
+| `CHANGELOG.md` | 各 sprint 實際出貨日期、測試數字、Git tag |
+| `Assetra-Feature-Blueprint-and-Roadmap.md` | 已實作模組表補上 v0.23–v0.26 |
+| `Technical-Architecture-Blueprint.md` | §十三 / §十四 更新為實際落地的 class 名稱 |
+| `README.md` | Features 列表補上多元資產 + 情境模擬 |
+
+---
+
 ## 五、最容易造成誤解的地方
 
 ### 1. `README` 版本敘事

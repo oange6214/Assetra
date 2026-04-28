@@ -74,6 +74,12 @@ public partial class NavRailViewModel : ObservableObject
         OnPropertyChanged(nameof(IsGoalsActive));
         OnPropertyChanged(nameof(IsAlertsActive));
         OnPropertyChanged(nameof(IsImportActive));
+        OnPropertyChanged(nameof(IsRealEstateActive));
+        OnPropertyChanged(nameof(IsInsuranceActive));
+        OnPropertyChanged(nameof(IsRetirementActive));
+        OnPropertyChanged(nameof(IsPhysicalAssetActive));
+        OnPropertyChanged(nameof(IsFireActive));
+        OnPropertyChanged(nameof(IsMonteCarloActive));
         OnPropertyChanged(nameof(IsSettingsActive));
     }
 
@@ -88,5 +94,11 @@ public partial class NavRailViewModel : ObservableObject
     public bool IsGoalsActive             => ActiveSection == NavSection.Goals;
     public bool IsAlertsActive            => ActiveSection == NavSection.Alerts;
     public bool IsImportActive            => ActiveSection == NavSection.Import;
+    public bool IsRealEstateActive        => ActiveSection == NavSection.RealEstate;
+    public bool IsInsuranceActive         => ActiveSection == NavSection.Insurance;
+    public bool IsRetirementActive        => ActiveSection == NavSection.Retirement;
+    public bool IsPhysicalAssetActive     => ActiveSection == NavSection.PhysicalAsset;
+    public bool IsFireActive              => ActiveSection == NavSection.Fire;
+    public bool IsMonteCarloActive        => ActiveSection == NavSection.MonteCarlo;
     public bool IsSettingsActive          => ActiveSection == NavSection.Settings;
 }

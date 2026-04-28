@@ -506,7 +506,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
             symbol,
             price,
             qty,
-            DateOnly.FromDateTime(AddBuyDate),
+            AddBuyDate,
             cashAccId,
             GetTxCommissionDiscountValue(),
             manualFee));

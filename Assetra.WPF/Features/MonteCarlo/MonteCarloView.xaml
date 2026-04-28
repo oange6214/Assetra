@@ -1,0 +1,117 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.MonteCarlo.MonteCarloView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.MonteCarlo"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:MonteCarloViewModel}, IsDesignTimeCreatable=False}"
+    d:DesignHeight="700"
+    d:DesignWidth="1100"
+    Background="{DynamicResource AppBackground}"
+    mc:Ignorable="d">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Margin="0,0,0,16"
+                   FontSize="{DynamicResource FontSizeXl}"
+                   FontWeight="SemiBold"
+                   Foreground="{DynamicResource AppTextPrimary}"
+                   Text="{DynamicResource MonteCarlo.Title}" />
+
+        <Border Grid.Row="1" Padding="16"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1" CornerRadius="8">
+            <StackPanel>
+                <UniformGrid Columns="6" Rows="1">
+                    <StackPanel Margin="0,0,8,0">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Input.Initial}" />
+                        <TextBox Text="{Binding InitialBalance, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,8,0">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Input.Withdrawal}" />
+                        <TextBox Text="{Binding AnnualWithdrawal, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,8,0">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Input.Mean}" />
+                        <TextBox Text="{Binding MeanReturn, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,8,0">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Input.StdDev}" />
+                        <TextBox Text="{Binding StdDev, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,8,0">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Input.Years}" />
+                        <TextBox Text="{Binding Years, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Input.Count}" />
+                        <TextBox Text="{Binding SimulationCount, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </UniformGrid>
+                <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppDanger}" Text="{Binding ErrorMessage}"
+                           Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+                <StackPanel Margin="0,12,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Margin="0,0,8,0"
+                               Foreground="{DynamicResource AppTextSecondary}"
+                               Text="{DynamicResource MonteCarlo.Running}"
+                               Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    <Button Command="{Binding RunCommand}" Content="{DynamicResource MonteCarlo.Run}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Margin="0,16,0,0" Padding="16"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1" CornerRadius="8">
+            <UniformGrid Columns="4">
+                <StackPanel>
+                    <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Result.SuccessRate}" />
+                    <TextBlock FontSize="{DynamicResource FontSizeLg}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{Binding SuccessRate, StringFormat=P1}" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Result.P10}" />
+                    <TextBlock FontSize="{DynamicResource FontSizeLg}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{Binding P10Ending, StringFormat=N0}" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Result.Median}" />
+                    <TextBlock FontSize="{DynamicResource FontSizeLg}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{Binding MedianEnding, StringFormat=N0}" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Result.P90}" />
+                    <TextBlock FontSize="{DynamicResource FontSizeLg}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{Binding P90Ending, StringFormat=N0}" />
+                </StackPanel>
+            </UniformGrid>
+        </Border>
+
+        <Border Grid.Row="3" Margin="0,16,0,0"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1" CornerRadius="8">
+            <DataGrid AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                      GridLinesVisibility="Horizontal" HeadersVisibility="Column" IsReadOnly="True"
+                      ItemsSource="{Binding MedianPath}" RowBackground="Transparent" SelectionMode="Single">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Width="100" Binding="{Binding Year}" Header="{DynamicResource MonteCarlo.Path.Year}" />
+                    <DataGridTextColumn Width="*" Binding="{Binding Balance, StringFormat=N0}" Header="{DynamicResource MonteCarlo.Path.Median}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

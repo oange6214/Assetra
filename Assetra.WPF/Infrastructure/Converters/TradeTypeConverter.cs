@@ -26,6 +26,7 @@ public sealed class TradeTypeConverter : IValueConverter
             [TradeType.LoanRepay] = "Portfolio.TradeType.LoanRepay",
             [TradeType.CreditCardCharge] = "Portfolio.TradeType.CreditCardCharge",
             [TradeType.CreditCardPayment] = "Portfolio.TradeType.CreditCardPayment",
+            [TradeType.Transfer] = "Portfolio.TradeType.Transfer",
         };
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

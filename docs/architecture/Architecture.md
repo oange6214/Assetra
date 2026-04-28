@@ -18,6 +18,8 @@
     - `Import/` + `Reconciliation/` — full import pipeline (CSV / Excel / PDF / OCR), AutoCategorizationRule, batch history + rollback, reconciliation sessions. *(v0.7–v0.19)*
     - `Sync/` — `SyncOrchestrator`, `CompositeLocalChangeQueue`, `LastWriteWinsResolver`, `InMemorySyncMetadataStore`. *(v0.20–v0.21)*
     - `Fx/` — `IFxRateProvider`, `StaticFxRateProvider`, `MultiCurrencyValuationService`. *(v0.14)*
+    - `MultiAsset/` — `RealEstateValuationService`, `InsuranceCashValueCalculator`, `RetirementProjectionService`, `PhysicalAssetValuationService`. *(v0.23–v0.24, 規劃中)*
+    - `Simulation/` — `FireCalculator`, `SustainabilityAnalyzer`, `MonteCarloSimulator`, `StochasticRateProvider`（純計算，無持久化）. *(v0.25–v0.26, 規劃中)*
   - Each context exposes query services, workflow services, and summary services as needed.
 - `Assetra.Infrastructure`
   - SQLite repositories, external market-data clients, schedulers, migration helpers.
@@ -54,6 +56,20 @@
 - `FinancialOverviewViewModel` reads through an application query service instead of composing repository calls directly in the ViewModel.
 - `RecurringViewModel` and `CategoriesViewModel` (expense categories / budgets) wire into the `Recurring` and `Budget` application contexts respectively.
 - `DashboardViewModel` composes net-worth and budget summaries from `Portfolio` and `Budget` query services.
+
+## Multi-Asset Entities (v0.23–v0.24)
+
+All new multi-asset entities (`RealEstate`, `InsurancePolicy`, `RetirementAccount`, `PhysicalAsset`) must:
+- Include `EntityVersion` for sync readiness
+- Register in `CompositeLocalChangeQueue` entity routing
+- Feed `BalanceSheetService` aggregation (asset-side line items)
+
+## Simulation Context (v0.25–v0.26)
+
+`Simulation/` context is **calculation-only**:
+- No persistence — results are transient
+- Input from existing Portfolio / Budgeting / MultiAsset query services
+- Output directly to ViewModel for chart rendering (LiveChartsCore)
 
 ## Guardrails
 

@@ -257,34 +257,178 @@
 
 ---
 
-### v0.23.0 / v0.24.0 — 多元資產
+### v0.23.0 — 多元資產（不動產 + 保險）
 
-#### v0.23.0：不動產 + 保險
+**目標**：讓 BalanceSheet 完整反映不動產與保險資產，`ConcentrationAnalyzer` 納入新資產類別。
 
-- `RealEstate`：地址、類型、購入價、估值、貸款連結
-- `InsurancePolicy`：保單類型、年繳保費、保額、現金價值（人壽/儲蓄險）
-- 接入 BalanceSheet（資產端 + 負債端）
+#### Tasks
 
-#### v0.24.0：退休 + 實物資產
+- **D1 RealEstate 模型**
+  - `Assetra.Core/Models/MultiAsset/RealEstate.cs`：`record(Id, Name, Address, Category, PurchasePrice, CurrentValue, ValuationMethod, MortgageLoanId?, Currency, EntityVersion)`
+  - `Assetra.Core/Models/MultiAsset/RentalIncomeRecord.cs`：`record(RealEstateId, YearMonth, Amount, AccountId)`
+  - SQLite schema：`real_estate`、`rental_income_record` 表
 
-- `RetirementAccount`：勞退、勞保、自提、雇提
-- `PhysicalAsset`：黃金、藝術品、收藏品（estimated value + acquisition）
+- **D2 InsurancePolicy 模型**
+  - `Assetra.Core/Models/MultiAsset/InsurancePolicy.cs`：`record(Id, Name, Category, AnnualPremium, CoverageAmount, StartDate, EndDate, CashValue, EntityVersion)`
+  - `Assetra.Core/Models/MultiAsset/InsurancePremiumRecord.cs`：`record(PolicyId, Year, Amount, AccountId)`
+  - SQLite schema：`insurance_policy`、`insurance_premium_record` 表
+
+- **F1 Repository 與 Service**
+  - `IRealEstateRepository` / `RealEstateSqliteRepository`
+  - `IInsurancePolicyRepository` / `InsurancePolicySqliteRepository`
+  - `RealEstateValuationService`（目前估值、貸款餘額淨值）
+  - `InsuranceCashValueCalculator`
+
+- **F2 Reporting 接入**
+  - `BalanceSheetService`：資產端新增「不動產淨值」、「保單現金價值」行項
+  - `IncomeStatementService`：收入端新增「租金收入」；費用端新增「保費支出」
+
+- **F3 Analysis 接入**
+  - `ConcentrationAnalyzer`：新增 `RealEstateWeight` / `InsuranceWeight` 佔淨值比例
+  - 集中度警示門檻可設定
+
+- **F4 UI**
+  - `Features/MultiAsset/RealEstateView`：CRUD + 貸款關聯 + 租金收入列表
+  - `Features/MultiAsset/InsuranceView`：CRUD + 保費記錄 + 現金價值曲線
+  - 儀表板新增「多元資產」摘要卡片
+  - `Languages/*.xaml`：新增對應 key
+
+- **F5 Sync 整合**
+  - `RealEstate` / `InsurancePolicy` 加入 `CompositeLocalChangeQueue` entity routing
+
+#### 測試（~14 筆）
+- RealEstate CRUD × 3、InsurancePolicy CRUD × 3、BalanceSheet 接入 × 3、ConcentrationAnalyzer 新類別 × 3、Sync routing × 2
+
+#### 文件
+- CHANGELOG v0.23.0
+- Bounded-Contexts §13a / §13b 確認
+- Roadmap 勾選
 
 ---
 
-### v0.25.0 / v0.26.0 — 情境模擬
+### v0.24.0 — 多元資產（退休 + 實物資產）
 
-#### v0.25.0：FIRE 計算機
+**目標**：補齊退休專戶與實物資產，BalanceSheet 完整涵蓋所有資產類別。
 
-- 輸入：目前淨資產、月儲蓄、預期報酬率、目標年支出、通膨
-- 輸出：FIRE 達成年數 + 達成時資產
-- 4% 法則 / SWR 模擬：給定退休資產，模擬 30 年提領可持續性
+#### Tasks
 
-#### v0.26.0：Monte Carlo
+- **D1 RetirementAccount 模型**
+  - `Assetra.Core/Models/MultiAsset/RetirementAccount.cs`：`record(Id, Name, Category, Balance, EmployeeContribution, EmployerContribution, YearsOfService, LegalWithdrawalAge, Currency, EntityVersion)`
+  - `Assetra.Core/Models/MultiAsset/RetirementContribution.cs`：`record(AccountId, Year, EmployeeAmount, EmployerAmount)`
+  - SQLite schema：`retirement_account`、`retirement_contribution` 表
 
-- 利率 / 通膨 / 薪資成長率為 stochastic 變數
-- 1000+ 次模擬 → 成功率分布
-- UI：fan chart（10/50/90 percentile 帶狀區）
+- **D2 PhysicalAsset 模型**
+  - `Assetra.Core/Models/MultiAsset/PhysicalAsset.cs`：`record(Id, Name, Category, AcquisitionCost, CurrentValue, ValuationMethod, AcquiredDate, Currency, EntityVersion)`
+  - SQLite schema：`physical_asset` 表
+
+- **F1 Repository 與 Service**
+  - `IRetirementAccountRepository` / `RetirementAccountSqliteRepository`
+  - `IPhysicalAssetRepository` / `PhysicalAssetSqliteRepository`
+  - `RetirementProjectionService`（預估退休時餘額，複利計算）
+  - `PhysicalAssetValuationService`
+
+- **F2 Reporting 接入**
+  - `BalanceSheetService`：資產端新增「退休專戶」、「實物資產」行項
+  - 淨資產計算完整涵蓋所有 6 類資產
+
+- **F3 Goals 接入**
+  - `GoalProgressQueryService`：可指定「退休專戶餘額」作為 Goal 進度來源
+
+- **F4 Analysis 接入**
+  - `ConcentrationAnalyzer`：新增 `RetirementWeight` / `PhysicalAssetWeight`
+
+- **F5 UI**
+  - `Features/MultiAsset/RetirementView`：CRUD + 提撥記錄 + 預估餘額圖
+  - `Features/MultiAsset/PhysicalAssetView`：CRUD + 估值歷史
+  - 儀表板多元資產卡片補齊退休 + 實物
+
+- **F6 Sync 整合**
+  - `RetirementAccount` / `PhysicalAsset` 加入 entity routing
+
+#### 測試（~12 筆）
+- RetirementAccount CRUD × 3、PhysicalAsset CRUD × 2、RetirementProjection × 2、BalanceSheet 完整 6 類 × 3、Goals 接入 × 2
+
+#### 文件
+- CHANGELOG v0.24.0
+- Bounded-Contexts §13c / §13d 確認
+
+---
+
+### v0.25.0 — 情境模擬（FIRE 計算機）
+
+**目標**：讓使用者輸入財務假設，立即得到「幾歲能 FIRE」與「退休後能撐幾年」的試算結果。
+
+#### Tasks
+
+- **D1 模型（純計算，無持久化）**
+  - `Assetra.Core/Models/Simulation/FireScenario.cs`：`record(CurrentNetWorth, MonthlySavings, AnnualReturnRate, AnnualExpenseInRetirement, InflationRate, CurrentAge)`
+  - `Assetra.Core/Models/Simulation/FireResult.cs`：`record(YearsToFire, FireAge, ProjectedWealthAtFire, SustainabilityPercent)`
+  - `Assetra.Core/Models/Simulation/WithdrawalProjection.cs`：`record(Year, StartBalance, Withdrawal, Return, EndBalance, Depleted)`
+
+- **F1 FireCalculator**
+  - `Assetra.Application/Simulation/FireCalculator.cs`
+  - 確定性試算：每年累積儲蓄 + 複利，直到淨值 ≥ 年支出 / SWR
+  - 支援 4% 法則（SWR = 0.04）或自訂提領率
+  - 輸出 `FireResult`
+
+- **F2 SustainabilityAnalyzer**
+  - `Assetra.Application/Simulation/SustainabilityAnalyzer.cs`
+  - 給定退休資產 + 年支出 + 通膨 + 報酬率，逐年模擬 30 年提領
+  - 輸出：`WithdrawalProjection[]`（每年餘額）+ 是否在 30 年內耗盡
+
+- **F3 UI**
+  - `Features/Simulation/FireView`
+  - 輸入表單：目前淨資產（從 Portfolio 自動帶入）、月儲蓄、預期報酬率、目標年支出、通膨率
+  - 輸出：FIRE 達成年數 / 年齡、達成時資產、30 年提領曲線圖（LineChart）
+  - 警示：若 30 年內資產耗盡，顯示「不可持續」提示
+
+- **F4 Goals 整合**
+  - `FireResult.FireAge` 可直接作為退休 Goal 的預測達成日
+
+#### 測試（~10 筆）
+- FireCalculator 基本試算 × 3、SWR 邊界 × 2、SustainabilityAnalyzer × 3、Goals 整合 × 2
+
+#### 文件
+- CHANGELOG v0.25.0
+- Bounded-Contexts §14a 確認
+
+---
+
+### v0.26.0 — 情境模擬（Monte Carlo）
+
+**目標**：加入隨機變數，輸出財務走勢的機率分布，讓試算從「單一線」變成「扇形區間」。
+
+#### Tasks
+
+- **D1 模型（純計算，無持久化）**
+  - `Assetra.Core/Models/Simulation/MonteCarloScenario.cs`：`record(FireScenario Base, int Simulations, RateDistribution ReturnDist, RateDistribution InflationDist)`
+  - `Assetra.Core/Models/Simulation/RateDistribution.cs`：`record(double Mean, double StdDev)`（常態分布參數）
+  - `Assetra.Core/Models/Simulation/MonteCarloResult.cs`：`record(double SuccessRate, decimal[] P10, decimal[] P50, decimal[] P90, int MedianDepletionYear?)`
+
+- **F1 MonteCarloSimulator**
+  - `Assetra.Application/Simulation/MonteCarloSimulator.cs`
+  - 執行 N 次（預設 1000）獨立試算，每次從常態分布取樣報酬率 + 通膨率
+  - 統計各年 10/50/90 百分位餘額
+  - 成功率 = 30 年後仍有餘額的比例
+  - 使用 `Random.Shared` + Box-Muller 轉換（不依賴外部套件）
+
+- **F2 StochasticRateProvider**
+  - `Assetra.Application/Simulation/StochasticRateProvider.cs`
+  - 提供歷史報酬率分布預設值（台灣大盤、S&P 500、保守債券）
+
+- **F3 UI**
+  - `Features/Simulation/MonteCarloView`
+  - 繼承 FireView 的輸入，加上「報酬率標準差」、「模擬次數」設定
+  - Fan chart：三條帶（P10 / P50 / P90）疊加在確定性試算線上
+  - 成功率大字顯示：「在 1000 次模擬中，XX% 的情境下 30 年後仍有餘額」
+  - 使用 LiveChartsCore（已有）實作 fan chart
+
+#### 測試（~8 筆）
+- MonteCarloSimulator 統計特性 × 3、RateDistribution 邊界 × 2、SuccessRate 計算 × 2、UI 資料綁定 × 1
+
+#### 文件
+- CHANGELOG v0.26.0
+- Bounded-Contexts §14b 確認
 
 ---
 

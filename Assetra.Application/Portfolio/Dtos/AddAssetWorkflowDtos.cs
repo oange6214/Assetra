@@ -29,7 +29,7 @@ public sealed record StockBuyRequest(
     string Symbol,
     decimal Price,
     int Quantity,
-    DateOnly BuyDate,
+    DateTime BuyDate,
     Guid? CashAccountId,
     decimal CommissionDiscount,
     decimal? ManualFee = null,

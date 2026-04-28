@@ -1,4 +1,5 @@
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.MultiAsset;
 using Assetra.Core.Interfaces.Reports;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Reports;
@@ -8,23 +9,31 @@ namespace Assetra.Application.Reports.Statements;
 /// <summary>
 /// 損益表服務：依 ReportPeriod 取期間 trade，把 Income / Expense 兩類依分類聚合。
 /// 同步計算等長度上一期（Prior）做 MoM/YoY 對照。
+/// v0.23：加入租金收入（RentalIncome 區段）與保費支出（InsurancePremium 區段）。
 /// </summary>
 public sealed class IncomeStatementService : IIncomeStatementService
 {
     private readonly ITradeRepository _trades;
     private readonly ICategoryRepository? _categories;
+    private readonly IRentalIncomeRecordRepository? _rentalRecords;
+    private readonly IInsurancePremiumRecordRepository? _premiumRecords;
 
-    public IncomeStatementService(ITradeRepository trades, ICategoryRepository? categories = null)
+    public IncomeStatementService(
+        ITradeRepository trades,
+        ICategoryRepository? categories = null,
+        IRentalIncomeRecordRepository? rentalRecords = null,
+        IInsurancePremiumRecordRepository? premiumRecords = null)
     {
         ArgumentNullException.ThrowIfNull(trades);
         _trades = trades;
         _categories = categories;
+        _rentalRecords = rentalRecords;
+        _premiumRecords = premiumRecords;
     }
 
     public async Task<IncomeStatement> GenerateAsync(ReportPeriod period, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(period);
-        // Fetch only what the report needs: current period + prior period (for MoM/YoY).
         var prior = period.Prior();
         var from = prior.Start.ToDateTime(TimeOnly.MinValue);
         var to = period.End.ToDateTime(TimeOnly.MaxValue);
@@ -33,36 +42,74 @@ public sealed class IncomeStatementService : IIncomeStatementService
             ? new List<ExpenseCategory>()
             : (await _categories.GetAllAsync(ct).ConfigureAwait(false)).ToList();
 
-        return Build(period, trades, categories, includePrior: true);
+        var rentalRows = await BuildRentalRowsAsync(period, ct).ConfigureAwait(false);
+        var premiumRows = await BuildPremiumRowsAsync(period, ct).ConfigureAwait(false);
+
+        return Build(period, trades, categories, rentalRows, premiumRows, includePrior: true);
     }
 
     private IncomeStatement Build(
         ReportPeriod period,
         IReadOnlyList<Trade> allTrades,
         IReadOnlyList<ExpenseCategory> categories,
+        IReadOnlyList<StatementRow> rentalRows,
+        IReadOnlyList<StatementRow> premiumRows,
         bool includePrior)
     {
         var inPeriod = allTrades.Where(t => period.Contains(t.TradeDate)).ToList();
 
-        var income = BuildSection(
+        var incomeSection = BuildSection(
             title: "Income",
             trades: inPeriod.Where(t => t.Type == TradeType.Income),
             categories: categories,
             categoryKind: CategoryKind.Income);
 
-        var expense = BuildSection(
+        // Merge rental income rows into income section
+        var incomeRows = incomeSection.Rows.ToList();
+        incomeRows.AddRange(rentalRows);
+        var income = new StatementSection("Income", incomeRows, incomeRows.Sum(r => r.Amount));
+
+        var expenseSection = BuildSection(
             title: "Expense",
             trades: inPeriod.Where(t => IsExpense(t)),
             categories: categories,
             categoryKind: CategoryKind.Expense);
 
+        // Merge premium rows into expense section
+        var expenseRows = expenseSection.Rows.ToList();
+        expenseRows.AddRange(premiumRows);
+        var expense = new StatementSection("Expense", expenseRows, expenseRows.Sum(r => r.Amount));
+
         var net = income.Total - expense.Total;
 
         IncomeStatement? prior = null;
         if (includePrior)
-            prior = Build(period.Prior(), allTrades, categories, includePrior: false);
+            prior = Build(period.Prior(), allTrades, categories,
+                Array.Empty<StatementRow>(), Array.Empty<StatementRow>(), includePrior: false);
 
         return new IncomeStatement(period, income, expense, net, prior);
+    }
+
+    private async Task<IReadOnlyList<StatementRow>> BuildRentalRowsAsync(
+        ReportPeriod period, CancellationToken ct)
+    {
+        if (_rentalRecords is null) return Array.Empty<StatementRow>();
+        var records = await _rentalRecords
+            .GetByPeriodAsync(period.Start, period.End, ct).ConfigureAwait(false);
+        if (records.Count == 0) return Array.Empty<StatementRow>();
+        var total = records.Sum(r => r.NetIncome);
+        return new[] { new StatementRow("Rental Income", Math.Max(total, 0m), "Real Estate") };
+    }
+
+    private async Task<IReadOnlyList<StatementRow>> BuildPremiumRowsAsync(
+        ReportPeriod period, CancellationToken ct)
+    {
+        if (_premiumRecords is null) return Array.Empty<StatementRow>();
+        var records = await _premiumRecords
+            .GetByPeriodAsync(period.Start, period.End, ct).ConfigureAwait(false);
+        if (records.Count == 0) return Array.Empty<StatementRow>();
+        var total = records.Sum(r => r.Amount);
+        return new[] { new StatementRow("Insurance Premiums", total, "Insurance") };
     }
 
     private static bool IsExpense(Trade t)

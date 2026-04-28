@@ -1,9 +1,9 @@
 using System.Net.Http;
 using System.Reactive.Concurrency;
 using Assetra.Application.Portfolio.Contracts;
+using Assetra.Application.Sync;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Sync;
-using Assetra.Application.Sync;
 using Assetra.Infrastructure;
 using Assetra.Infrastructure.FinMind;
 using Assetra.Infrastructure.History;
@@ -153,6 +153,10 @@ internal static class ServiceCollectionExtensions
                 [PortfolioSyncMapper.EntityType] = sp.GetRequiredService<PortfolioLocalChangeQueue>(),
                 [AutoCategorizationRuleSyncMapper.EntityType] = sp.GetRequiredService<AutoCategorizationRuleLocalChangeQueue>(),
                 [RecurringTransactionSyncMapper.EntityType] = sp.GetRequiredService<RecurringTransactionLocalChangeQueue>(),
+                [RealEstateSyncMapper.EntityType] = sp.GetRequiredService<RealEstateLocalChangeQueue>(),
+                [InsurancePolicySyncMapper.EntityType] = sp.GetRequiredService<InsurancePolicyLocalChangeQueue>(),
+                [RetirementAccountSyncMapper.EntityType] = sp.GetRequiredService<RetirementAccountLocalChangeQueue>(),
+                [PhysicalAssetSyncMapper.EntityType] = sp.GetRequiredService<PhysicalAssetLocalChangeQueue>(),
             };
             return new CompositeLocalChangeQueue(map);
         });

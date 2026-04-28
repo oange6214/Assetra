@@ -1,7 +1,9 @@
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Analysis;
+using Assetra.Core.Interfaces.MultiAsset;
 using Assetra.Core.Interfaces.Reports;
 using Assetra.Core.Models;
+using Assetra.Core.Models.MultiAsset;
 using Assetra.Core.Models.Reports;
 
 namespace Assetra.Application.Reports.Statements;
@@ -9,6 +11,8 @@ namespace Assetra.Application.Reports.Statements;
 /// <summary>
 /// 資產負債表：以 trade journal 為單一真實來源（current balance），
 /// 投資市值優先取 <see cref="IPortfolioSnapshotRepository"/> 該日 snapshot；無 snapshot 則退而僅以 cash + 負債計。
+/// v0.23：加入不動產（RealEstate equity）與保險（InsurancePolicy cash value）資產行項。
+/// v0.24：加入退休專戶（RetirementAccount balance）與實物資產（PhysicalAsset current value）資產行項。
 /// </summary>
 public sealed class BalanceSheetService : IBalanceSheetService
 {
@@ -17,13 +21,21 @@ public sealed class BalanceSheetService : IBalanceSheetService
     private readonly IPortfolioSnapshotRepository? _snapshots;
     private readonly IMultiCurrencyValuationService? _fx;
     private readonly IAppSettingsService? _settings;
+    private readonly IRealEstateRepository? _realEstate;
+    private readonly IInsurancePolicyRepository? _insurancePolicies;
+    private readonly IRetirementAccountRepository? _retirementAccounts;
+    private readonly IPhysicalAssetRepository? _physicalAssets;
 
     public BalanceSheetService(
         IAssetRepository assets,
         ITradeRepository trades,
         IPortfolioSnapshotRepository? snapshots = null,
         IMultiCurrencyValuationService? fx = null,
-        IAppSettingsService? settings = null)
+        IAppSettingsService? settings = null,
+        IRealEstateRepository? realEstate = null,
+        IInsurancePolicyRepository? insurancePolicies = null,
+        IRetirementAccountRepository? retirementAccounts = null,
+        IPhysicalAssetRepository? physicalAssets = null)
     {
         ArgumentNullException.ThrowIfNull(assets);
         ArgumentNullException.ThrowIfNull(trades);
@@ -32,6 +44,10 @@ public sealed class BalanceSheetService : IBalanceSheetService
         _snapshots = snapshots;
         _fx = fx;
         _settings = settings;
+        _realEstate = realEstate;
+        _insurancePolicies = insurancePolicies;
+        _retirementAccounts = retirementAccounts;
+        _physicalAssets = physicalAssets;
     }
 
     public async Task<BalanceSheet> GenerateAsync(DateOnly asOf, CancellationToken ct = default)
@@ -77,6 +93,11 @@ public sealed class BalanceSheetService : IBalanceSheetService
                 "Investments"));
         }
 
+        await AppendRealEstateRowsAsync(assetRows, asOf, baseCurrency, fxFactors, ct).ConfigureAwait(false);
+        await AppendInsuranceRowsAsync(assetRows, baseCurrency, fxFactors, ct).ConfigureAwait(false);
+        await AppendRetirementRowsAsync(assetRows, baseCurrency, fxFactors, ct).ConfigureAwait(false);
+        await AppendPhysicalAssetRowsAsync(assetRows, baseCurrency, fxFactors, ct).ConfigureAwait(false);
+
         var assetTotal = assetRows.Sum(r => r.Amount);
 
         var liabilityRows = new List<StatementRow>();
@@ -93,6 +114,80 @@ public sealed class BalanceSheetService : IBalanceSheetService
             Assets: new StatementSection("Assets", assetRows, assetTotal),
             Liabilities: new StatementSection("Liabilities", liabilityRows, liabilityTotal),
             NetWorth: assetTotal - liabilityTotal);
+    }
+
+    private async Task AppendRealEstateRowsAsync(
+        List<StatementRow> rows,
+        DateOnly asOf,
+        string? baseCurrency,
+        Dictionary<string, decimal?> fxFactors,
+        CancellationToken ct)
+    {
+        if (_realEstate is null) return;
+        var all = await _realEstate.GetAllAsync(ct).ConfigureAwait(false);
+        foreach (var prop in all.Where(p => p.Status == RealEstateStatus.Active))
+        {
+            var equity = prop.Equity;
+            if (equity == 0m) continue;
+            rows.Add(new StatementRow(
+                prop.Name,
+                ConvertWithCache(equity, prop.Currency, baseCurrency, fxFactors),
+                "Real Estate"));
+        }
+    }
+
+    private async Task AppendRetirementRowsAsync(
+        List<StatementRow> rows,
+        string? baseCurrency,
+        Dictionary<string, decimal?> fxFactors,
+        CancellationToken ct)
+    {
+        if (_retirementAccounts is null) return;
+        var all = await _retirementAccounts.GetAllAsync(ct).ConfigureAwait(false);
+        foreach (var account in all.Where(a => a.Status == RetirementAccountStatus.Active))
+        {
+            if (account.Balance == 0m) continue;
+            rows.Add(new StatementRow(
+                account.Name,
+                ConvertWithCache(account.Balance, account.Currency, baseCurrency, fxFactors),
+                "Retirement"));
+        }
+    }
+
+    private async Task AppendPhysicalAssetRowsAsync(
+        List<StatementRow> rows,
+        string? baseCurrency,
+        Dictionary<string, decimal?> fxFactors,
+        CancellationToken ct)
+    {
+        if (_physicalAssets is null) return;
+        var all = await _physicalAssets.GetAllAsync(ct).ConfigureAwait(false);
+        foreach (var asset in all.Where(a => a.Status == PhysicalAssetStatus.Active))
+        {
+            if (asset.CurrentValue == 0m) continue;
+            rows.Add(new StatementRow(
+                asset.Name,
+                ConvertWithCache(asset.CurrentValue, asset.Currency, baseCurrency, fxFactors),
+                "Physical Asset"));
+        }
+    }
+
+    private async Task AppendInsuranceRowsAsync(
+        List<StatementRow> rows,
+        string? baseCurrency,
+        Dictionary<string, decimal?> fxFactors,
+        CancellationToken ct)
+    {
+        if (_insurancePolicies is null) return;
+        var all = await _insurancePolicies.GetAllAsync(ct).ConfigureAwait(false);
+        foreach (var policy in all.Where(p => p.Status == InsurancePolicyStatus.Active))
+        {
+            if (policy.CurrentCashValue == 0m) continue;
+            rows.Add(new StatementRow(
+                policy.Name,
+                ConvertWithCache(policy.CurrentCashValue, policy.Currency, baseCurrency, fxFactors),
+                "Insurance"));
+        }
     }
 
     /// <summary>

@@ -383,16 +383,22 @@
                                                                 IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=deposit, Mode=TwoWay}"
                                                                 Style="{StaticResource SegmentBtn}" />
                                                             <RadioButton
-                                                                Content="{DynamicResource Portfolio.TradeType.Withdrawal}"
+                                                                Content="{DynamicResource Portfolio.Tx.WithdrawalAction}"
                                                                 GroupName="TxType"
                                                                 IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=withdrawal, Mode=TwoWay}"
                                                                 Style="{StaticResource SegmentBtn}" />
                                                             <RadioButton
-                                                                Content="{DynamicResource Portfolio.TradeType.Transfer}"
+                                                                Content="{DynamicResource Portfolio.Tx.TransferAction}"
                                                                 GroupName="TxType"
                                                                 IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=transfer, Mode=TwoWay}"
                                                                 Style="{StaticResource SegmentBtn}" />
                                                         </WrapPanel>
+                                                        <TextBlock
+                                                            Margin="0,6,0,0"
+                                                            FontSize="{StaticResource FontSizeXs}"
+                                                            Foreground="{DynamicResource AppTextMuted}"
+                                                            Text="{DynamicResource Portfolio.Tx.CashGroupHint}"
+                                                            TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
 

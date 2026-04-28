@@ -402,6 +402,13 @@
     <sys:String x:Key="Portfolio.Tx.Amount">金額（元）</sys:String>
     <sys:String x:Key="Portfolio.Tx.Note">說明</sys:String>
     <sys:String x:Key="Portfolio.Tx.CashAccount">存入 / 扣款帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DepositAccount">存入帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Tx.WithdrawalAccount">扣款帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Tx.IncomeAccount">入帳帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DividendDepositAccount">股利入帳帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Tx.PaymentAccount">扣款帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Tx.ProceedsAccount">入帳帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Tx.LoanDisbursementAccount">撥款帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tx.NoCashLink">不連動</sys:String>
     <sys:String x:Key="Portfolio.Tx.Stock">股票</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivPerShare">每股股利（元）</sys:String>
@@ -433,6 +440,12 @@
     <sys:String x:Key="Portfolio.Tx.TransferTargetAccount">轉入帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tx.TransferTargetAmount">轉入金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.TransferImpliedRate">隱含匯率</sys:String>
+    <sys:String x:Key="Portfolio.Tx.WithdrawalAction">提款 / 對外轉出</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferAction">帳戶間轉帳</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CashGroupHint">轉給別人、付款、提款請用「提款 / 對外轉出」；自己的帳戶互轉才用「帳戶間轉帳」。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DepositHint">適合把外部資金存入自己的帳戶，會增加該帳戶餘額。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.WithdrawalHint">適合提款、轉帳給別人或支付現金支出；只會扣款帳戶，不會建立轉入帳戶。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferHint">只用在自己的帳戶間移轉；來源扣款、目標入帳，總資產不變。轉給別人請用「提款 / 對外轉出」。</sys:String>
     <sys:String x:Key="Portfolio.Filter.Deposit">存入</sys:String>
     <sys:String x:Key="Portfolio.Filter.Withdrawal">提款</sys:String>
     <sys:String x:Key="Portfolio.Filter.Transfer">轉帳</sys:String>
@@ -469,8 +482,14 @@
     <sys:String x:Key="Portfolio.Tx.DivModeTotal">總股息金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivTotalAmount">總股息金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.UseLoanCashAccount">從帳戶扣款 / 存入帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Tx.UseDeductCashAccount">從帳戶扣款</sys:String>
+    <sys:String x:Key="Portfolio.Tx.UseDepositCashAccount">存入帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCard">信用卡</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCardPaymentAccount">扣款帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardChargeHint">信用卡消費會增加信用卡負債，支出與淨資產影響會記在消費日。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardPaymentHint">信用卡繳款會扣現金帳戶並降低信用卡負債；若消費已先記錄，繳款當下淨資產通常不變。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.NoBalance">這張信用卡目前沒有未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款 / 對外轉出」。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.ExceedsBalance">繳款金額不可超過目前未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款 / 對外轉出」。</sys:String>
     <sys:String x:Key="Portfolio.Tx.EditTitle">編輯紀錄</sys:String>
     <sys:String x:Key="Portfolio.Tx.MetaOnlyHint">此交易僅能修改日期與備註。若要更正金額或股數，請刪除後重新建立；股票部位也可在「投資」分頁直接編輯。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Buy">買入</sys:String>
@@ -1023,4 +1042,125 @@
     <sys:String x:Key="Portfolio.AssetType.BondEtf.Tooltip">債券 ETF — 證交稅免徵（延長至 2026 底）</sys:String>
     <sys:String x:Key="Portfolio.Loan.RateHint">填寫年利率與期數可自動產生攤還表</sys:String>
     <sys:String x:Key="DateRangePicker.Reset">重設</sys:String>
+
+    <!--  RealEstate  -->
+    <sys:String x:Key="RealEstate.Title">不動產</sys:String>
+    <sys:String x:Key="RealEstate.TotalEquity">總淨值：</sys:String>
+    <sys:String x:Key="RealEstate.Column.Name">名稱</sys:String>
+    <sys:String x:Key="RealEstate.Column.Address">地址</sys:String>
+    <sys:String x:Key="RealEstate.Column.CurrentValue">目前市值</sys:String>
+    <sys:String x:Key="RealEstate.Column.Mortgage">房貸餘額</sys:String>
+    <sys:String x:Key="RealEstate.Column.Equity">淨值</sys:String>
+    <sys:String x:Key="RealEstate.Column.Currency">幣別</sys:String>
+    <sys:String x:Key="RealEstate.Form.Title">新增 / 編輯不動產</sys:String>
+    <sys:String x:Key="RealEstate.Form.Name">名稱</sys:String>
+    <sys:String x:Key="RealEstate.Form.Address">地址</sys:String>
+    <sys:String x:Key="RealEstate.Form.PurchasePrice">購入金額</sys:String>
+    <sys:String x:Key="RealEstate.Form.CurrentValue">目前市值</sys:String>
+    <sys:String x:Key="RealEstate.Form.MortgageBalance">房貸餘額</sys:String>
+    <sys:String x:Key="RealEstate.Form.Currency">幣別</sys:String>
+    <sys:String x:Key="RealEstate.Form.IsRental">出租中</sys:String>
+    <sys:String x:Key="RealEstate.Form.Notes">備註</sys:String>
+
+    <!--  Insurance  -->
+    <sys:String x:Key="Insurance.Title">保險保單</sys:String>
+    <sys:String x:Key="Insurance.TotalCashValue">總現金價值：</sys:String>
+    <sys:String x:Key="Insurance.Column.Name">保單名稱</sys:String>
+    <sys:String x:Key="Insurance.Column.PolicyNumber">保單號碼</sys:String>
+    <sys:String x:Key="Insurance.Column.Type">險種</sys:String>
+    <sys:String x:Key="Insurance.Column.Insurer">保險公司</sys:String>
+    <sys:String x:Key="Insurance.Column.CashValue">現金價值</sys:String>
+    <sys:String x:Key="Insurance.Column.AnnualPremium">年繳保費</sys:String>
+    <sys:String x:Key="Insurance.Column.Currency">幣別</sys:String>
+    <sys:String x:Key="Insurance.Form.Title">新增 / 編輯保單</sys:String>
+    <sys:String x:Key="Insurance.Form.Name">保單名稱</sys:String>
+    <sys:String x:Key="Insurance.Form.PolicyNumber">保單號碼</sys:String>
+    <sys:String x:Key="Insurance.Form.Insurer">保險公司</sys:String>
+    <sys:String x:Key="Insurance.Form.Type">險種</sys:String>
+    <sys:String x:Key="Insurance.Form.FaceValue">保額</sys:String>
+    <sys:String x:Key="Insurance.Form.CashValue">現金價值</sys:String>
+    <sys:String x:Key="Insurance.Form.AnnualPremium">年繳保費</sys:String>
+    <sys:String x:Key="Insurance.Form.Currency">幣別</sys:String>
+
+    <!-- v0.24 退休專戶 -->
+    <sys:String x:Key="Retirement.Title">退休專戶</sys:String>
+    <sys:String x:Key="Retirement.TotalBalance">總餘額：</sys:String>
+    <sys:String x:Key="Retirement.Column.Name">名稱</sys:String>
+    <sys:String x:Key="Retirement.Column.AccountType">類型</sys:String>
+    <sys:String x:Key="Retirement.Column.Provider">提供機構</sys:String>
+    <sys:String x:Key="Retirement.Column.Balance">餘額</sys:String>
+    <sys:String x:Key="Retirement.Column.YearsOfService">年資</sys:String>
+    <sys:String x:Key="Retirement.Column.WithdrawalAge">提領年齡</sys:String>
+    <sys:String x:Key="Retirement.Column.LatestContribution">近一年提撥</sys:String>
+    <sys:String x:Key="Retirement.Column.Currency">幣別</sys:String>
+    <sys:String x:Key="Retirement.Action.Project">試算</sys:String>
+    <sys:String x:Key="Retirement.Form.Title">新增 / 編輯退休專戶</sys:String>
+    <sys:String x:Key="Retirement.Form.Name">名稱</sys:String>
+    <sys:String x:Key="Retirement.Form.AccountType">類型</sys:String>
+    <sys:String x:Key="Retirement.Form.Provider">提供機構</sys:String>
+    <sys:String x:Key="Retirement.Form.Balance">目前餘額</sys:String>
+    <sys:String x:Key="Retirement.Form.EmployeeRate">員工提撥率</sys:String>
+    <sys:String x:Key="Retirement.Form.EmployerRate">雇主提撥率</sys:String>
+    <sys:String x:Key="Retirement.Form.YearsOfService">年資</sys:String>
+    <sys:String x:Key="Retirement.Form.WithdrawalAge">法定提領年齡</sys:String>
+    <sys:String x:Key="Retirement.Form.OpenedDate">開戶日期</sys:String>
+    <sys:String x:Key="Retirement.Form.Currency">幣別</sys:String>
+    <sys:String x:Key="Retirement.Form.Notes">備註</sys:String>
+    <sys:String x:Key="Retirement.Projection.Title">退休金試算</sys:String>
+    <sys:String x:Key="Retirement.Projection.CurrentAge">目前年齡</sys:String>
+    <sys:String x:Key="Retirement.Projection.AnnualReturn">年化報酬率</sys:String>
+    <sys:String x:Key="Retirement.Projection.AnnualContribution">每年提撥</sys:String>
+
+    <!-- v0.24 實物資產 -->
+    <sys:String x:Key="PhysicalAsset.Title">實物資產</sys:String>
+    <sys:String x:Key="PhysicalAsset.TotalValue">總市值：</sys:String>
+    <sys:String x:Key="PhysicalAsset.TotalGain">未實現損益：</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.Name">名稱</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.Category">類別</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.Cost">購入成本</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.CurrentValue">目前市值</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.Gain">未實現損益</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.GainRate">報酬率</sys:String>
+    <sys:String x:Key="PhysicalAsset.Column.Currency">幣別</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Title">新增 / 編輯實物資產</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Name">名稱</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Category">類別</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Description">描述</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Cost">購入成本</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.AcquisitionDate">取得日期</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.CurrentValue">目前市值</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.ValuationMethod">估值方法</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Currency">幣別</sys:String>
+    <sys:String x:Key="PhysicalAsset.Form.Notes">備註</sys:String>
+
+    <!-- v0.25 FIRE 計算機 -->
+    <sys:String x:Key="Fire.Title">FIRE 計算機</sys:String>
+    <sys:String x:Key="Fire.Input.NetWorth">目前淨資產</sys:String>
+    <sys:String x:Key="Fire.Input.AnnualExpenses">年支出</sys:String>
+    <sys:String x:Key="Fire.Input.AnnualSavings">年儲蓄</sys:String>
+    <sys:String x:Key="Fire.Input.Return">預期年化報酬率</sys:String>
+    <sys:String x:Key="Fire.Input.WithdrawalRate">安全提領率</sys:String>
+    <sys:String x:Key="Fire.Calculate">計算</sys:String>
+    <sys:String x:Key="Fire.Result.FireNumber">FIRE 目標金額</sys:String>
+    <sys:String x:Key="Fire.Result.YearsToFire">所需年數</sys:String>
+    <sys:String x:Key="Fire.Result.Projected">達標時淨資產</sys:String>
+    <sys:String x:Key="Fire.Path.Year">年度</sys:String>
+    <sys:String x:Key="Fire.Path.NetWorth">淨資產</sys:String>
+
+    <!-- v0.26 Monte Carlo -->
+    <sys:String x:Key="MonteCarlo.Title">Monte Carlo 退休模擬</sys:String>
+    <sys:String x:Key="MonteCarlo.Input.Initial">起始餘額</sys:String>
+    <sys:String x:Key="MonteCarlo.Input.Withdrawal">年提領</sys:String>
+    <sys:String x:Key="MonteCarlo.Input.Mean">平均報酬率</sys:String>
+    <sys:String x:Key="MonteCarlo.Input.StdDev">標準差</sys:String>
+    <sys:String x:Key="MonteCarlo.Input.Years">年數</sys:String>
+    <sys:String x:Key="MonteCarlo.Input.Count">模擬次數</sys:String>
+    <sys:String x:Key="MonteCarlo.Run">執行模擬</sys:String>
+    <sys:String x:Key="MonteCarlo.Running">執行中…</sys:String>
+    <sys:String x:Key="MonteCarlo.Result.SuccessRate">成功率</sys:String>
+    <sys:String x:Key="MonteCarlo.Result.P10">10 百分位餘額</sys:String>
+    <sys:String x:Key="MonteCarlo.Result.Median">中位數餘額</sys:String>
+    <sys:String x:Key="MonteCarlo.Result.P90">90 百分位餘額</sys:String>
+    <sys:String x:Key="MonteCarlo.Path.Year">年度</sys:String>
+    <sys:String x:Key="MonteCarlo.Path.Median">中位數餘額</sys:String>
 </ResourceDictionary>

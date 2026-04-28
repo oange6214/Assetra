@@ -465,9 +465,11 @@
                                             CornerRadius="{StaticResource RadiusSm}"
                                             DockPanel.Dock="Right">
                                             <TextBlock
+                                                HorizontalAlignment="Center"
                                                 FontSize="{StaticResource FontSizeXs}"
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppTextOnAccent}"
+                                                TextAlignment="Center"
                                                 Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
                                         </Border>
                                         <TextBlock
@@ -642,7 +644,7 @@
 
                     <!--  買/賣  -->
                     <DataGridTemplateColumn
-                        Width="85"
+                        Width="112"
                         CanUserSort="True"
                         SortMemberPath="Type">
                         <DataGridTemplateColumn.Header>
@@ -652,7 +654,8 @@
                             <DataTemplate>
                                 <Border
                                     Margin="4,4"
-                                    Padding="5,1"
+                                    MinWidth="64"
+                                    Padding="7,1"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                     Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
@@ -662,6 +665,8 @@
                                         FontSize="{StaticResource FontSizeXs}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextOnAccent}"
+                                        HorizontalAlignment="Center"
+                                        TextAlignment="Center"
                                         Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
                                 </Border>
                             </DataTemplate>

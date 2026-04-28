@@ -12,6 +12,20 @@
 
     <!--  ======== 轉帳欄位 ========  -->
     <StackPanel Visibility="{Binding TxTypeIsTransfer, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Border
+            Margin="0,0,0,12"
+            Padding="10,8"
+            Background="{DynamicResource AppBackground}"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="1"
+            CornerRadius="{StaticResource RadiusSm}">
+            <TextBlock
+                FontSize="{StaticResource FontSizeXs}"
+                Foreground="{DynamicResource AppTextMuted}"
+                Text="{Binding TxTransferHint}"
+                TextWrapping="Wrap" />
+        </Border>
+
         <TextBlock
             Margin="0,0,0,4"
             FontSize="{StaticResource FontSizeXs}"
