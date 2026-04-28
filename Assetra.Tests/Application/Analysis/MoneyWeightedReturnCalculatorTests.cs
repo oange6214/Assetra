@@ -209,11 +209,11 @@ public class MoneyWeightedReturnCalculatorTests
     private sealed class FakeSnapshotRepo : IPortfolioSnapshotRepository
     {
         public Dictionary<DateOnly, PortfolioDailySnapshot> Store { get; } = new();
-        public Task<IReadOnlyList<PortfolioDailySnapshot>> GetSnapshotsAsync(DateOnly? from = null, DateOnly? to = null) =>
+        public Task<IReadOnlyList<PortfolioDailySnapshot>> GetSnapshotsAsync(DateOnly? from = null, DateOnly? to = null, CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<PortfolioDailySnapshot>>(Store.Values.OrderBy(s => s.SnapshotDate).ToList());
-        public Task<PortfolioDailySnapshot?> GetSnapshotAsync(DateOnly date) =>
+        public Task<PortfolioDailySnapshot?> GetSnapshotAsync(DateOnly date, CancellationToken ct = default) =>
             Task.FromResult(Store.TryGetValue(date, out var s) ? s : null);
-        public Task UpsertAsync(PortfolioDailySnapshot snapshot)
+        public Task UpsertAsync(PortfolioDailySnapshot snapshot, CancellationToken ct = default)
         {
             Store[snapshot.SnapshotDate] = snapshot;
             return Task.CompletedTask;

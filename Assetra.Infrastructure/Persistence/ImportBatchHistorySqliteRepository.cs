@@ -51,6 +51,7 @@ public sealed class ImportBatchHistorySqliteRepository : IImportBatchHistoryRepo
 
         foreach (var entry in history.Entries)
         {
+            ct.ThrowIfCancellationRequested();
             await using var cmd = conn.CreateCommand();
             cmd.Transaction = tx;
             cmd.CommandText = """

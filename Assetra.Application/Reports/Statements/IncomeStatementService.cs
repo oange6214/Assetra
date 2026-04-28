@@ -24,7 +24,7 @@ public sealed class IncomeStatementService : IIncomeStatementService
     public async Task<IncomeStatement> GenerateAsync(ReportPeriod period, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(period);
-        var trades = await _trades.GetAllAsync().ConfigureAwait(false);
+        var trades = await _trades.GetAllAsync(ct).ConfigureAwait(false);
         var categories = _categories is null
             ? new List<ExpenseCategory>()
             : (await _categories.GetAllAsync(ct).ConfigureAwait(false)).ToList();

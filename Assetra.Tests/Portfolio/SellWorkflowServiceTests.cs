@@ -26,8 +26,8 @@ public sealed class SellWorkflowServiceTests
         tradeRepo.Setup(r => r.AddAsync(It.IsAny<Trade>()))
             .Callback<Trade, CancellationToken>((t, _) => savedTrade = t)
             .Returns(Task.CompletedTask);
-        logRepo.Setup(r => r.LogAsync(It.IsAny<PortfolioPositionLog>()))
-            .Callback<PortfolioPositionLog>(l => savedLog = l)
+        logRepo.Setup(r => r.LogAsync(It.IsAny<PortfolioPositionLog>(), It.IsAny<CancellationToken>()))
+            .Callback<PortfolioPositionLog, CancellationToken>((l, _) => savedLog = l)
             .Returns(Task.CompletedTask);
         portfolioRepo.Setup(r => r.ArchiveAsync(It.IsAny<Guid>()))
             .Callback<Guid, CancellationToken>((id, _) => archivedIds.Add(id))

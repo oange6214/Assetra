@@ -18,10 +18,10 @@ public sealed class PortfolioSnapshotSqliteRepository : IPortfolioSnapshotReposi
         "snapshot_date, total_cost, market_value, pnl, position_count, currency, cash_value, equity_value, liability_value";
 
     public async Task<IReadOnlyList<PortfolioDailySnapshot>> GetSnapshotsAsync(
-        DateOnly? from = null, DateOnly? to = null)
+        DateOnly? from = null, DateOnly? to = null, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
 
         var clauses = new List<string>();
@@ -40,30 +40,30 @@ public sealed class PortfolioSnapshotSqliteRepository : IPortfolioSnapshotReposi
         cmd.CommandText = $"SELECT {SelectColumns} FROM portfolio_daily_snapshot{where} ORDER BY snapshot_date;";
 
         var results = new List<PortfolioDailySnapshot>();
-        await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
             results.Add(Read(reader));
         return results;
     }
 
-    public async Task<PortfolioDailySnapshot?> GetSnapshotAsync(DateOnly date)
+    public async Task<PortfolioDailySnapshot?> GetSnapshotAsync(DateOnly date, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = $"SELECT {SelectColumns} FROM portfolio_daily_snapshot WHERE snapshot_date = $d;";
         cmd.Parameters.AddWithValue("$d", date.ToString("yyyy-MM-dd"));
 
-        await using var reader = await cmd.ExecuteReaderAsync();
-        if (!await reader.ReadAsync())
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        if (!await reader.ReadAsync(ct).ConfigureAwait(false))
             return null;
         return Read(reader);
     }
 
-    public async Task UpsertAsync(PortfolioDailySnapshot snapshot)
+    public async Task UpsertAsync(PortfolioDailySnapshot snapshot, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             INSERT OR REPLACE INTO portfolio_daily_snapshot
@@ -80,7 +80,7 @@ public sealed class PortfolioSnapshotSqliteRepository : IPortfolioSnapshotReposi
         cmd.Parameters.AddWithValue("$cash", snapshot.CashValue.HasValue ? (double)snapshot.CashValue.Value : (object)DBNull.Value);
         cmd.Parameters.AddWithValue("$eq", snapshot.EquityValue.HasValue ? (double)snapshot.EquityValue.Value : (object)DBNull.Value);
         cmd.Parameters.AddWithValue("$liab", snapshot.LiabilityValue.HasValue ? (double)snapshot.LiabilityValue.Value : (object)DBNull.Value);
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
     private static PortfolioDailySnapshot Read(SqliteDataReader reader) =>

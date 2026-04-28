@@ -41,12 +41,12 @@ public sealed class PortfolioBackfillService
     /// </summary>
     public async Task<int> BackfillAsync(CancellationToken ct = default)
     {
-        var logs = await _logRepo.GetAllAsync();
+        var logs = await _logRepo.GetAllAsync(ct).ConfigureAwait(false);
         if (logs.Count == 0)
             return 0;
 
         // Dates we already have
-        var existing = (await _snapshotRepo.GetSnapshotsAsync())
+        var existing = (await _snapshotRepo.GetSnapshotsAsync(ct: ct).ConfigureAwait(false))
             .Select(s => s.SnapshotDate)
             .ToHashSet();
 
@@ -124,7 +124,7 @@ public sealed class PortfolioBackfillService
 
             try
             {
-                await _snapshotRepo.UpsertAsync(snapshot).ConfigureAwait(false);
+                await _snapshotRepo.UpsertAsync(snapshot, ct).ConfigureAwait(false);
                 written++;
             }
             catch (Exception ex)

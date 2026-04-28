@@ -112,11 +112,7 @@ public sealed class ImportRollbackService : IImportRollbackService
         {
             await _trades.ApplyAtomicAsync(mutations, ct).ConfigureAwait(false);
         }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is System.Data.Common.DbException or System.Text.Json.JsonException or InvalidOperationException)
         {
             failures.Add(new ImportRollbackFailure(-1, $"Atomic rollback failed: {ex.Message}"));
             return new ImportRollbackResult(historyId, 0, 0, skipped, failures);

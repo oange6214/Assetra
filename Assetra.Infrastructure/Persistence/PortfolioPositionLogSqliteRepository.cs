@@ -14,10 +14,10 @@ public sealed class PortfolioPositionLogSqliteRepository : IPortfolioPositionLog
         PortfolioPositionLogSchemaMigrator.EnsureInitialized(_connectionString);
     }
 
-    public async Task LogAsync(PortfolioPositionLog entry)
+    public async Task LogAsync(PortfolioPositionLog entry, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             INSERT INTO portfolio_position_log
@@ -25,14 +25,14 @@ public sealed class PortfolioPositionLogSqliteRepository : IPortfolioPositionLog
             VALUES ($lid, $ld, $pid, $sym, $exc, $qty, $bp);
             """;
         BindEntry(cmd, entry);
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task LogBatchAsync(IEnumerable<PortfolioPositionLog> entries)
+    public async Task LogBatchAsync(IEnumerable<PortfolioPositionLog> entries, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
-        await using var tx = await conn.BeginTransactionAsync();
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var tx = await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.Transaction = (SqliteTransaction)tx;
         cmd.CommandText = """
@@ -40,7 +40,6 @@ public sealed class PortfolioPositionLogSqliteRepository : IPortfolioPositionLog
                 (log_id, log_date, position_id, symbol, exchange, quantity, buy_price)
             VALUES ($lid, $ld, $pid, $sym, $exc, $qty, $bp);
             """;
-        // Add parameters once; rebind values per row
         cmd.Parameters.Add("$lid", SqliteType.Text);
         cmd.Parameters.Add("$ld", SqliteType.Text);
         cmd.Parameters.Add("$pid", SqliteType.Text);
@@ -51,6 +50,7 @@ public sealed class PortfolioPositionLogSqliteRepository : IPortfolioPositionLog
 
         foreach (var e in entries)
         {
+            ct.ThrowIfCancellationRequested();
             cmd.Parameters["$lid"].Value = e.LogId.ToString();
             cmd.Parameters["$ld"].Value = e.LogDate.ToString("yyyy-MM-dd");
             cmd.Parameters["$pid"].Value = e.PositionId.ToString();
@@ -58,15 +58,15 @@ public sealed class PortfolioPositionLogSqliteRepository : IPortfolioPositionLog
             cmd.Parameters["$exc"].Value = e.Exchange;
             cmd.Parameters["$qty"].Value = e.Quantity;
             cmd.Parameters["$bp"].Value = (double)e.BuyPrice;
-            await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+            await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
         }
-        await tx.CommitAsync().ConfigureAwait(false);
+        await tx.CommitAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<PortfolioPositionLog>> GetAllAsync()
+    public async Task<IReadOnlyList<PortfolioPositionLog>> GetAllAsync(CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT log_id, log_date, position_id, symbol, exchange, quantity, buy_price
@@ -74,8 +74,8 @@ public sealed class PortfolioPositionLogSqliteRepository : IPortfolioPositionLog
             ORDER  BY log_date;
             """;
         var results = new List<PortfolioPositionLog>();
-        await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
             results.Add(new PortfolioPositionLog(
                 Guid.Parse(reader.GetString(0)),
                 DateOnly.Parse(reader.GetString(1)),
@@ -87,17 +87,15 @@ public sealed class PortfolioPositionLogSqliteRepository : IPortfolioPositionLog
         return results;
     }
 
-    public async Task<bool> HasAnyAsync()
+    public async Task<bool> HasAnyAsync(CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync().ConfigureAwait(false);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = "SELECT COUNT(1) FROM portfolio_position_log LIMIT 1;";
-        var count = (long)(await cmd.ExecuteScalarAsync() ?? 0L);
+        var count = (long)(await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false) ?? 0L);
         return count > 0;
     }
-
-    // helpers
 
     private static void BindEntry(SqliteCommand cmd, PortfolioPositionLog e)
     {

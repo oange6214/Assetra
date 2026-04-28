@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.17.2 - 2026-04-28
+
+Pre-v0.17 refactor audit Group A — 5 個 quick-win 加固，集中在 `CancellationToken` 傳播一致性與 broad-catch 收斂。無新功能、無 schema 變更，行為等價。
+
+### 變更
+
+- **CancellationToken 傳播完整性**（`Assetra.Core/Interfaces/IPortfolioPositionLogRepository.cs`、`IPortfolioSnapshotRepository.cs` + Sqlite 實作）：兩個 repository 介面所有方法補上 `CancellationToken ct = default`；`PortfolioPositionLogSqliteRepository` / `PortfolioSnapshotSqliteRepository` 全面 propagate ct 到 `OpenAsync` / `ExecuteNonQueryAsync` / `ReadAsync` / `BeginTransactionAsync` / `CommitAsync`；`LogBatchAsync` foreach 內加 `ct.ThrowIfCancellationRequested()`。
+- **`PortfolioBackfillService.BackfillAsync`**：`_logRepo.GetAllAsync(ct)` / `_snapshotRepo.GetSnapshotsAsync(ct: ct)` / `_snapshotRepo.UpsertAsync(snapshot, ct)` 三處補上 ct，與 v0.13.3 ct 傳播標準對齊。
+- **`IncomeStatementService.GenerateAsync`**：`_trades.GetAllAsync(ct)` 補上 ct（先前漏傳）。
+- **`ImportBatchHistorySqliteRepository.SaveAsync`**：foreach entry loop 內加 `ct.ThrowIfCancellationRequested()`，避免大量 entry 時無法中斷。
+- **`ImportRollbackService.RollbackAsync`**：`ApplyAtomicAsync` 之 broad `catch (Exception)` 收斂為 `when (ex is DbException or JsonException or InvalidOperationException)`，`OperationCanceledException` 自然向上 propagate；Application layer 不參考 `Microsoft.Data.Sqlite`，故用 `System.Data.Common.DbException` 作為基底。
+
+### 測試
+
+- 612/612 tests 綠（與 v0.10.1 同數）。
+- `FakeSnapshotRepo`（`PnlAttributionServiceTests` / `MoneyWeightedReturnCalculatorTests`）介面方法補上 ct 參數。
+- `SellWorkflowServiceTests`：`logRepo.LogAsync` Moq Setup 改為 2-arg 形式（含 `It.IsAny<CancellationToken>()`）。
+
 ## v0.10.1 - 2026-04-28
 
 收尾 v0.10.0 release note 自承的測試缺口（line: 「本 sprint 主為 UI/連線改動，暫未新增 unit test」）。對 `ApplyResolutionAsync(diffId, resolution, note, sourceKind, options, ct)` overload 補上 service-level 單元測試，覆蓋 v0.10.0 新增的 Created / OverwrittenFromStatement 兩條會動到 trade 的執行路徑，以及 Deleted / MarkedResolved / Ignored 的副作用契約。
