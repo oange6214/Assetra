@@ -466,6 +466,14 @@
             <Expander Header="{DynamicResource Reports.Performance.Title}" IsExpanded="False" Margin="0,8,0,0">
                 <StackPanel Margin="12" DataContext="{Binding Performance}">
                     <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Performance.Xirr}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Xirr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Performance.Twr}" />
+                        <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Twr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
                         <TextBlock FontFamily="{StaticResource FontTabular}" Text="{DynamicResource Reports.Performance.Mwr}" />
                         <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Mwr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
                     </StackPanel>

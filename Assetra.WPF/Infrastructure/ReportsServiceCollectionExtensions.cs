@@ -18,7 +18,7 @@ internal static class ReportsServiceCollectionExtensions
             sp.GetRequiredService<ITradeRepository>(),
             sp.GetService<IPortfolioSnapshotRepository>(),
             sp.GetService<IMultiCurrencyValuationService>(),
-            sp.GetService<IAppSettingsService>()?.Current.BaseCurrency));
+            sp.GetService<IAppSettingsService>()));
         services.AddSingleton<ICashFlowStatementService, CashFlowStatementService>();
         services.AddSingleton<IReportExportService, ReportExportService>();
         services.AddSingleton<Assetra.WPF.Features.Reports.ReportsViewModel>();

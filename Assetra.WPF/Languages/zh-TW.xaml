@@ -87,6 +87,7 @@
     <sys:String x:Key="Common.Price">現價</sys:String>
     <sys:String x:Key="Common.Cancel">取消</sys:String>
     <sys:String x:Key="Common.Save">儲存</sys:String>
+    <sys:String x:Key="Common.Browse">瀏覽…</sys:String>
     <sys:String x:Key="Common.CreatedDate">建立日期</sys:String>
     <sys:String x:Key="Common.Confirm">確認</sys:String>
     <sys:String x:Key="Common.Close">關閉</sys:String>
@@ -670,6 +671,30 @@
     <sys:String x:Key="Settings.Section.Data">資料</sys:String>
     <sys:String x:Key="Settings.Version">版本</sys:String>
     <sys:String x:Key="Settings.FugleApiKey">Fugle API Key</sys:String>
+    <sys:String x:Key="Settings.Section.Ocr">OCR（PDF 對帳單匯入）</sys:String>
+    <sys:String x:Key="Settings.Ocr.TessdataPath">Tesseract tessdata 路徑</sys:String>
+    <sys:String x:Key="Settings.Ocr.TessdataPath.Hint">指向包含 .traineddata 檔案的資料夾。空白 = 不啟用 OCR，圖片頁 PDF 會被略過。</sys:String>
+    <sys:String x:Key="Settings.Ocr.Language">語言代碼</sys:String>
+    <sys:String x:Key="Settings.Ocr.Language.Hint">Tesseract 語言代碼，例：eng、chi_tra、chi_tra+eng。</sys:String>
+    <sys:String x:Key="Settings.Section.Sync">雲端同步</sys:String>
+    <sys:String x:Key="Settings.Sync.Enabled">啟用雲端同步</sys:String>
+    <sys:String x:Key="Settings.Sync.BackendUrl">後端 URL</sys:String>
+    <sys:String x:Key="Settings.Sync.BackendUrl.Hint">您的 Cloudflare Worker / 自架後端基底位址，例：https://sync.example.com</sys:String>
+    <sys:String x:Key="Settings.Sync.AuthToken">認證 Token（選填）</sys:String>
+    <sys:String x:Key="Settings.Sync.Passphrase">密語</sys:String>
+    <sys:String x:Key="Settings.Sync.Passphrase.Hint">用於衍生 AES-256 加密金鑰；不會儲存到本地。所有裝置須使用同一組密語才能互通。</sys:String>
+    <sys:String x:Key="Settings.Sync.SyncNow">立即同步</sys:String>
+    <sys:String x:Key="Settings.Sync.LastSync">上次同步</sys:String>
+    <sys:String x:Key="Settings.Sync.LastResult">上次結果</sys:String>
+    <sys:String x:Key="Settings.Sync.DeviceId">裝置 ID</sys:String>
+    <sys:String x:Key="Settings.Sync.IntervalMinutes">背景同步間隔（分鐘）</sys:String>
+    <sys:String x:Key="Settings.Sync.IntervalMinutes.Hint">0 = 停用背景同步。需勾選下方「記住密語」才能啟用。</sys:String>
+    <sys:String x:Key="Settings.Sync.CachePassphrase">手動同步成功後，於記憶體保留密語</sys:String>
+    <sys:String x:Key="Settings.Sync.CachePassphrase.Hint">僅存記憶體——應用程式關閉即清除。背景定時同步需勾選此項才能無人值守執行。</sys:String>
+    <sys:String x:Key="Settings.Sync.Conflicts">需手動處理的衝突</sys:String>
+    <sys:String x:Key="Settings.Sync.Conflicts.Reload">重新載入</sys:String>
+    <sys:String x:Key="Settings.Sync.Conflicts.KeepLocal">保留本機</sys:String>
+    <sys:String x:Key="Settings.Sync.Conflicts.UseRemote">採用雲端</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">盤中</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">休市</sys:String>
 
@@ -929,6 +954,16 @@
     <sys:String x:Key="Reconciliation.NewSession.EndingBalance">期末餘額（對帳單）</sys:String>
     <sys:String x:Key="Reconciliation.NewSession.Create">建立</sys:String>
     <sys:String x:Key="Reconciliation.NewSession.Cancel">取消</sys:String>
+    <sys:String x:Key="Reconciliation.Summary">待處理：{0} / 已處理：{1} / 總數：{2}</sys:String>
+    <sys:String x:Key="Reconciliation.Balance.Summary">對帳單：{0} / 帳上交易：{1} / 差額：{2}&#x0a;對帳單期末餘額：{3}</sys:String>
+    <sys:String x:Key="Reconciliation.Status.Recomputed">已重新比對。</sys:String>
+    <sys:String x:Key="Reconciliation.Status.SignedOff">已完成簽收。</sys:String>
+    <sys:String x:Key="Reconciliation.Status.CreatedSession">已建立對帳作業（{0} 列）。</sys:String>
+    <sys:String x:Key="Reconciliation.Error.AccountRequired">請先選擇帳戶。</sys:String>
+    <sys:String x:Key="Reconciliation.Error.PeriodInvalid">結束日期必須晚於或等於開始日期。</sys:String>
+    <sys:String x:Key="Reconciliation.Error.BatchRequired">請選擇既有匯入批次。</sys:String>
+    <sys:String x:Key="Reconciliation.Error.FileOrServiceRequired">請先選擇檔案，或確認匯入服務可用。</sys:String>
+    <sys:String x:Key="Reconciliation.Error.UnsupportedFileType">目前不支援這個檔案類型。</sys:String>
     <sys:String x:Key="Reconciliation.Balance.Title">餘額對帳</sys:String>
     <sys:String x:Key="Reports.IncomeStatement.Title">損益表</sys:String>
     <sys:String x:Key="Reports.BalanceSheet.Title">資產負債表</sys:String>
@@ -956,7 +991,9 @@
     <sys:String x:Key="Reports.CashFlow.NetChange">淨變動</sys:String>
     <sys:String x:Key="Reports.CashFlow.Opening">期初現金</sys:String>
     <sys:String x:Key="Reports.CashFlow.Closing">期末現金</sys:String>
-    <sys:String x:Key="Reports.Performance.Mwr">資金加權報酬率（XIRR）</sys:String>
+    <sys:String x:Key="Reports.Performance.Xirr">XIRR</sys:String>
+    <sys:String x:Key="Reports.Performance.Twr">時間加權報酬率</sys:String>
+    <sys:String x:Key="Reports.Performance.Mwr">資金加權報酬率</sys:String>
     <sys:String x:Key="Reports.Performance.Benchmark">指標（0050.TW）</sys:String>
     <sys:String x:Key="Reports.Performance.Alpha">超額報酬</sys:String>
     <sys:String x:Key="Reports.Risk.AnnualizedVolatility">年化波動率</sys:String>

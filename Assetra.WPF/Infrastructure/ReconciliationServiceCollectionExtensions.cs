@@ -29,7 +29,9 @@ internal static class ReconciliationServiceCollectionExtensions
             sp.GetRequiredService<IReconciliationMatcher>(),
             sp.GetService<IImportBatchHistoryRepository>(),
             sp.GetService<IImportFormatDetector>(),
-            sp.GetService<ImportParserFactory>()));
+            sp.GetService<ImportParserFactory>(),
+            sp.GetService<ILocalizationService>(),
+            sp.GetService<ICurrencyService>()));
         return services;
     }
 }

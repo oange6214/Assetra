@@ -1,4 +1,5 @@
 using System.Net.Http;
+using Assetra.Application.Fx;
 using Assetra.Application.Reports.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Analysis;
@@ -24,6 +25,11 @@ public sealed partial class ReportsViewModel : ObservableObject
     private readonly IBalanceSheetService? _balanceService;
     private readonly ICashFlowStatementService? _cashFlowService;
     private readonly IReportExportService? _exportService;
+    private readonly ITradeRepository? _trades;
+    private readonly IPortfolioRepository? _portfolio;
+    private readonly IMultiCurrencyValuationService? _fx;
+    private readonly IXirrCalculator? _xirrCalculator;
+    private readonly ITimeWeightedReturnCalculator? _twrCalculator;
     private readonly IMoneyWeightedReturnCalculator? _mwrCalculator;
     private readonly IPnlAttributionService? _attribution;
     private readonly IBenchmarkComparisonService? _benchmark;
@@ -89,6 +95,11 @@ public sealed partial class ReportsViewModel : ObservableObject
         IBalanceSheetService? balanceService = null,
         ICashFlowStatementService? cashFlowService = null,
         IReportExportService? exportService = null,
+        ITradeRepository? trades = null,
+        IPortfolioRepository? portfolio = null,
+        IMultiCurrencyValuationService? fx = null,
+        IXirrCalculator? xirrCalculator = null,
+        ITimeWeightedReturnCalculator? twrCalculator = null,
         IMoneyWeightedReturnCalculator? mwrCalculator = null,
         IPnlAttributionService? attribution = null,
         IBenchmarkComparisonService? benchmark = null,
@@ -107,6 +118,11 @@ public sealed partial class ReportsViewModel : ObservableObject
         _balanceService = balanceService;
         _cashFlowService = cashFlowService;
         _exportService = exportService;
+        _trades = trades;
+        _portfolio = portfolio;
+        _fx = fx;
+        _xirrCalculator = xirrCalculator;
+        _twrCalculator = twrCalculator;
         _mwrCalculator = mwrCalculator;
         _attribution = attribution;
         _benchmark = benchmark;
@@ -125,6 +141,8 @@ public sealed partial class ReportsViewModel : ObservableObject
             _currency.CurrencyChanged += OnCurrencyChanged;
         if (_localization is not null)
             _localization.LanguageChanged += OnLanguageChanged;
+        if (_appSettings is not null)
+            _appSettings.Changed += OnSettingsChanged;
     }
 
     public string MonthHeader => $"{Year}-{Month:D2}";
@@ -234,8 +252,10 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     private async Task LoadPerformanceAsync()
     {
-        if (_mwrCalculator is null && _attribution is null) return;
+        if (_mwrCalculator is null && _attribution is null && _twrCalculator is null && _xirrCalculator is null) return;
         var perfPeriod = PerformancePeriod.Month(Year, Month);
+        var xirr = await ComputeXirrAsync(perfPeriod).ConfigureAwait(true);
+        var twr = await ComputeTwrAsync(perfPeriod).ConfigureAwait(true);
         var mwr = _mwrCalculator is null ? null : await _mwrCalculator.ComputeAsync(perfPeriod).ConfigureAwait(true);
         var buckets = _attribution is null
             ? (IReadOnlyList<AttributionBucket>)Array.Empty<AttributionBucket>()
@@ -254,7 +274,7 @@ public sealed partial class ReportsViewModel : ObservableObject
                 bench = null;
             }
         }
-        Performance = new PerformanceResult(perfPeriod, Xirr: mwr, Twr: null, Mwr: mwr, BenchmarkTwr: bench, Attribution: buckets);
+        Performance = new PerformanceResult(perfPeriod, Xirr: xirr, Twr: twr, Mwr: mwr, BenchmarkTwr: bench, Attribution: buckets);
     }
 
     [RelayCommand]
@@ -350,6 +370,12 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     private void OnLanguageChanged(object? sender, EventArgs e) => RaiseDisplayStrings();
 
+    private void OnSettingsChanged()
+    {
+        if (HasReport)
+            _ = LoadAsync();
+    }
+
     private void RaiseDisplayStrings()
     {
         OnPropertyChanged(nameof(IncomeDisplay));
@@ -364,6 +390,126 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     private string GetString(string key, string fallback) =>
         _localization?.Get(key, fallback) ?? fallback;
+
+    private async Task<decimal?> ComputeXirrAsync(PerformancePeriod period)
+    {
+        if (_xirrCalculator is null || _trades is null || _snapshots is null)
+            return null;
+
+        var entryCurrencyMap = await BuildEntryCurrencyMapAsync().ConfigureAwait(true);
+        var flows = BuildPerformanceFlows(await _trades.GetAllAsync().ConfigureAwait(true), period, entryCurrencyMap);
+        flows = await ConvertFlowsToBaseAsync(flows).ConfigureAwait(true);
+        if (flows is null) return null;
+
+        var startSnap = await _snapshots.GetSnapshotAsync(period.Start).ConfigureAwait(true);
+        var endSnap = await _snapshots.GetSnapshotAsync(period.End).ConfigureAwait(true);
+        var startMv = await ConvertSnapshotMarketValueAsync(startSnap).ConfigureAwait(true);
+        if (startSnap is not null && startMv is null) return null;
+        var endMv = await ConvertSnapshotMarketValueAsync(endSnap).ConfigureAwait(true);
+        if (endSnap is not null && endMv is null) return null;
+
+        var withSynthetic = new List<CashFlow>(flows);
+        if (startMv is > 0m)
+            withSynthetic.Insert(0, new CashFlow(period.Start, -startMv.Value, GetBaseCurrency()));
+        if (endMv is > 0m)
+            withSynthetic.Add(new CashFlow(period.End, endMv.Value, GetBaseCurrency()));
+
+        return _xirrCalculator.Compute(withSynthetic);
+    }
+
+    private async Task<decimal?> ComputeTwrAsync(PerformancePeriod period)
+    {
+        if (_twrCalculator is null || _trades is null || _snapshots is null)
+            return null;
+
+        var rawSnapshots = await _snapshots.GetSnapshotsAsync(period.Start, period.End).ConfigureAwait(true);
+        var valuations = new List<(DateOnly Date, decimal Value)>(rawSnapshots.Count);
+        foreach (var snap in rawSnapshots.OrderBy(s => s.SnapshotDate))
+        {
+            var converted = await ConvertSnapshotMarketValueAsync(snap).ConfigureAwait(true);
+            if (converted is null) return null;
+            valuations.Add((snap.SnapshotDate, converted.Value));
+        }
+
+        if (valuations.Count < 2) return null;
+
+        var entryCurrencyMap = await BuildEntryCurrencyMapAsync().ConfigureAwait(true);
+        var flows = BuildPerformanceFlows(await _trades.GetAllAsync().ConfigureAwait(true), period, entryCurrencyMap);
+        flows = await ConvertFlowsToBaseAsync(flows).ConfigureAwait(true);
+        if (flows is null) return null;
+
+        return _twrCalculator.Compute(valuations, flows);
+    }
+
+    private async Task<IReadOnlyDictionary<Guid, string>> BuildEntryCurrencyMapAsync()
+    {
+        if (_portfolio is null) return new Dictionary<Guid, string>();
+        var entries = await _portfolio.GetEntriesAsync().ConfigureAwait(true);
+        return entries.ToDictionary(
+            e => e.Id,
+            e => string.IsNullOrWhiteSpace(e.Currency) ? string.Empty : e.Currency);
+    }
+
+    private async Task<List<CashFlow>?> ConvertFlowsToBaseAsync(List<CashFlow> flows)
+    {
+        var baseCurrency = GetBaseCurrency();
+        if (_fx is null || string.IsNullOrWhiteSpace(baseCurrency)) return flows;
+        var converted = await MultiCurrencyCashFlowConverter.ConvertAllAsync(flows, baseCurrency, _fx).ConfigureAwait(true);
+        return converted is null ? null : converted.ToList();
+    }
+
+    private async Task<decimal?> ConvertSnapshotMarketValueAsync(PortfolioDailySnapshot? snap)
+    {
+        if (snap is null) return null;
+
+        var baseCurrency = GetBaseCurrency();
+        if (_fx is null || string.IsNullOrWhiteSpace(baseCurrency)) return snap.MarketValue;
+
+        var snapshotCurrency = string.IsNullOrWhiteSpace(snap.Currency) ? "TWD" : snap.Currency;
+        if (string.Equals(snapshotCurrency, baseCurrency, StringComparison.OrdinalIgnoreCase))
+            return snap.MarketValue;
+
+        return await _fx.ConvertAsync(snap.MarketValue, snapshotCurrency, baseCurrency, snap.SnapshotDate).ConfigureAwait(true);
+    }
+
+    private string? GetBaseCurrency()
+    {
+        var baseCurrency = _appSettings?.Current.BaseCurrency;
+        return string.IsNullOrWhiteSpace(baseCurrency) ? null : baseCurrency;
+    }
+
+    private static List<CashFlow> BuildPerformanceFlows(
+        IReadOnlyList<Trade> trades,
+        PerformancePeriod period,
+        IReadOnlyDictionary<Guid, string> entryCurrency)
+    {
+        var flows = new List<CashFlow>();
+        foreach (var trade in trades)
+        {
+            var date = DateOnly.FromDateTime(trade.TradeDate);
+            if (date < period.Start || date > period.End) continue;
+
+            var amount = trade.Type switch
+            {
+                TradeType.Buy => -((decimal)trade.Quantity * trade.Price + (trade.Commission ?? 0m)),
+                TradeType.Sell => (decimal)trade.Quantity * trade.Price - (trade.Commission ?? 0m),
+                TradeType.CashDividend => trade.CashAmount ?? (decimal)trade.Quantity * trade.Price,
+                _ => 0m,
+            };
+            if (amount == 0m) continue;
+
+            string? currency = null;
+            if (trade.PortfolioEntryId is { } entryId
+                && entryCurrency.TryGetValue(entryId, out var entryCcy)
+                && !string.IsNullOrWhiteSpace(entryCcy))
+            {
+                currency = entryCcy;
+            }
+
+            flows.Add(new CashFlow(date, amount, currency));
+        }
+        return flows;
+    }
 
     public sealed record OverBudgetRowViewModel(
         CategorySpendSummary Summary,

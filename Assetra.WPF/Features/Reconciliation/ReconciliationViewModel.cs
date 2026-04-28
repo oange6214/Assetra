@@ -31,6 +31,8 @@ public partial class ReconciliationViewModel : ObservableObject
     private readonly IImportBatchHistoryRepository? _history;
     private readonly IImportFormatDetector? _detector;
     private readonly ImportParserFactory? _parserFactory;
+    private readonly ILocalizationService? _localization;
+    private readonly ICurrencyService? _currency;
 
     public ObservableCollection<ReconciliationSession> Sessions { get; } = new();
     public ObservableCollection<ReconciliationDiffRowViewModel> Diffs { get; } = new();
@@ -100,7 +102,9 @@ public partial class ReconciliationViewModel : ObservableObject
         IReconciliationMatcher matcher,
         IImportBatchHistoryRepository? history = null,
         IImportFormatDetector? detector = null,
-        ImportParserFactory? parserFactory = null)
+        ImportParserFactory? parserFactory = null,
+        ILocalizationService? localization = null,
+        ICurrencyService? currency = null)
     {
         ArgumentNullException.ThrowIfNull(service);
         ArgumentNullException.ThrowIfNull(sessions);
@@ -115,9 +119,16 @@ public partial class ReconciliationViewModel : ObservableObject
         _history = history;
         _detector = detector;
         _parserFactory = parserFactory;
+        _localization = localization;
+        _currency = currency;
 
         GroupedDiffs = CollectionViewSource.GetDefaultView(Diffs);
         GroupedDiffs.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ReconciliationDiffRowViewModel.KindDisplay)));
+
+        if (_localization is not null)
+            _localization.LanguageChanged += OnLanguageChanged;
+        if (_currency is not null)
+            _currency.CurrencyChanged += OnCurrencyChanged;
     }
 
     public string SummaryDisplay
@@ -130,8 +141,7 @@ public partial class ReconciliationViewModel : ObservableObject
                 if (d.IsPending) pending++; else resolved++;
             }
             return string.Format(
-                CultureInfo.InvariantCulture,
-                "Pending: {0} / Resolved: {1} / Total: {2}",
+                GetString("Reconciliation.Summary", "待處理：{0} / 已處理：{1} / 總數：{2}"),
                 pending, resolved, Diffs.Count);
         }
     }
@@ -204,13 +214,17 @@ public partial class ReconciliationViewModel : ObservableObject
             var tradeSum = trades.Sum(t => _matcher.SignedAmount(t));
             var delta = stmtSum - tradeSum;
             var endingDisplay = SelectedSession.StatementEndingBalance is { } eb
-                ? eb.ToString("N2", CultureInfo.InvariantCulture)
+                ? FormatAmount(eb)
                 : "—";
 
             BalancePanelDisplay = string.Format(
-                CultureInfo.InvariantCulture,
-                "Statement: {0:N2} / Trades: {1:N2} / Δ: {2:N2}\nEnding (statement): {3}",
-                stmtSum, tradeSum, delta, endingDisplay);
+                GetString(
+                    "Reconciliation.Balance.Summary",
+                    "對帳單：{0} / 帳上交易：{1} / 差額：{2}\n對帳單期末餘額：{3}"),
+                FormatAmount(stmtSum),
+                FormatAmount(tradeSum),
+                FormatSigned(delta),
+                endingDisplay);
         }
         catch (Exception ex)
         {
@@ -227,7 +241,7 @@ public partial class ReconciliationViewModel : ObservableObject
         {
             await _service.RecomputeAsync(SelectedSession.Id).ConfigureAwait(true);
             await ReloadDiffsAsync().ConfigureAwait(true);
-            StatusMessage = "Recomputed.";
+            StatusMessage = GetString("Reconciliation.Status.Recomputed", "已重新比對。");
         }
         catch (Exception ex)
         {
@@ -246,7 +260,7 @@ public partial class ReconciliationViewModel : ObservableObject
         try
         {
             await _service.SignOffAsync(SelectedSession.Id, note: null).ConfigureAwait(true);
-            StatusMessage = "Signed off.";
+            StatusMessage = GetString("Reconciliation.Status.SignedOff", "已完成簽收。");
             await LoadAsync().ConfigureAwait(true);
         }
         catch (Exception ex)
@@ -348,12 +362,12 @@ public partial class ReconciliationViewModel : ObservableObject
     {
         if (NewSessionAccount is null)
         {
-            StatusMessage = "Pick an account first.";
+            StatusMessage = GetString("Reconciliation.Error.AccountRequired", "請先選擇帳戶。");
             return;
         }
         if (NewPeriodEnd < NewPeriodStart)
         {
-            StatusMessage = "Period end must be >= start.";
+            StatusMessage = GetString("Reconciliation.Error.PeriodInvalid", "結束日期必須晚於或等於開始日期。");
             return;
         }
 
@@ -367,7 +381,7 @@ public partial class ReconciliationViewModel : ObservableObject
             {
                 if (SelectedBatch is null || _history is null)
                 {
-                    StatusMessage = "Pick an existing batch.";
+                    StatusMessage = GetString("Reconciliation.Error.BatchRequired", "請選擇既有匯入批次。");
                     return;
                 }
                 rows = await _history.GetPreviewRowsAsync(SelectedBatch.Id).ConfigureAwait(true);
@@ -377,13 +391,13 @@ public partial class ReconciliationViewModel : ObservableObject
             {
                 if (string.IsNullOrEmpty(UploadedFilePath) || _detector is null || _parserFactory is null)
                 {
-                    StatusMessage = "Pick a file or import services not available.";
+                    StatusMessage = GetString("Reconciliation.Error.FileOrServiceRequired", "請先選擇檔案，或確認匯入服務可用。");
                     return;
                 }
                 var fileType = ResolveFileType(UploadedFilePath);
                 if (fileType is null)
                 {
-                    StatusMessage = "Unsupported file type.";
+                    StatusMessage = GetString("Reconciliation.Error.UnsupportedFileType", "目前不支援這個檔案類型。");
                     return;
                 }
                 ImportFormat? format;
@@ -411,7 +425,9 @@ public partial class ReconciliationViewModel : ObservableObject
             IsNewSessionPanelOpen = false;
             UploadedFilePath = null;
             StatementEndingBalance = null;
-            StatusMessage = $"Created session ({rows.Count} rows).";
+            StatusMessage = string.Format(
+                GetString("Reconciliation.Status.CreatedSession", "已建立對帳作業（{0} 列）。"),
+                rows.Count);
         }
         catch (Exception ex)
         {
@@ -422,6 +438,26 @@ public partial class ReconciliationViewModel : ObservableObject
             IsBusy = false;
         }
     }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        OnPropertyChanged(nameof(SummaryDisplay));
+        _ = RecomputeBalancePanelAsync();
+    }
+
+    private void OnCurrencyChanged()
+    {
+        _ = RecomputeBalancePanelAsync();
+    }
+
+    private string FormatAmount(decimal value) =>
+        _currency?.FormatAmount(value) ?? value.ToString("N2", CultureInfo.InvariantCulture);
+
+    private string FormatSigned(decimal value) =>
+        _currency?.FormatSigned(value) ?? value.ToString("+0.00;-0.00;0.00", CultureInfo.InvariantCulture);
+
+    private string GetString(string key, string fallback) =>
+        _localization?.Get(key, fallback) ?? fallback;
 
     private static ImportFileType? ResolveFileType(string path) =>
         Path.GetExtension(path).ToLowerInvariant() switch
