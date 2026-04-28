@@ -55,16 +55,24 @@ public sealed class PortfolioLoadService : IPortfolioLoadService
             liabilitySnapshotsTask,
             liabilityAssetsTask).ConfigureAwait(false);
 
-        var liabilityAssets = liabilityAssetsTask.Result
+        var entries = await entriesTask.ConfigureAwait(false);
+        var snapshots = await snapshotsTask.ConfigureAwait(false);
+        var trades = await tradesTask.ConfigureAwait(false);
+        var cashAccounts = await cashAccountsTask.ConfigureAwait(false);
+        var cashBalances = await cashBalancesTask.ConfigureAwait(false);
+        var liabilitySnapshots = await liabilitySnapshotsTask.ConfigureAwait(false);
+        var liabilityAssetItems = await liabilityAssetsTask.ConfigureAwait(false);
+
+        var liabilityAssets = liabilityAssetItems
             .ToDictionary(a => a.Name, StringComparer.Ordinal);
 
         return new PortfolioLoadResult(
-            entriesTask.Result,
-            snapshotsTask.Result,
-            tradesTask.Result,
-            cashAccountsTask.Result,
-            cashBalancesTask.Result,
-            liabilitySnapshotsTask.Result,
+            entries,
+            snapshots,
+            trades,
+            cashAccounts,
+            cashBalances,
+            liabilitySnapshots,
             liabilityAssets);
     }
 }

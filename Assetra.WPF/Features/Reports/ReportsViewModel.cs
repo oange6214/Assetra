@@ -1,3 +1,4 @@
+using System.Net.Http;
 using Assetra.Application.Reports.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Analysis;
@@ -31,6 +32,7 @@ public sealed partial class ReportsViewModel : ObservableObject
     private readonly ISharpeRatioCalculator? _sharpe;
     private readonly IConcentrationAnalyzer? _concentration;
     private readonly IPortfolioSnapshotRepository? _snapshots;
+    private readonly IAppSettingsService? _appSettings;
 
     [ObservableProperty]
     private PerformanceResult? _performance;
@@ -94,7 +96,8 @@ public sealed partial class ReportsViewModel : ObservableObject
         IDrawdownCalculator? drawdown = null,
         ISharpeRatioCalculator? sharpe = null,
         IConcentrationAnalyzer? concentration = null,
-        IPortfolioSnapshotRepository? snapshots = null)
+        IPortfolioSnapshotRepository? snapshots = null,
+        IAppSettingsService? appSettings = null)
     {
         ArgumentNullException.ThrowIfNull(service);
         _service = service;
@@ -112,6 +115,7 @@ public sealed partial class ReportsViewModel : ObservableObject
         _sharpe = sharpe;
         _concentration = concentration;
         _snapshots = snapshots;
+        _appSettings = appSettings;
 
         var today = DateTime.Today;
         _year = today.Year;
@@ -237,10 +241,18 @@ public sealed partial class ReportsViewModel : ObservableObject
             ? (IReadOnlyList<AttributionBucket>)Array.Empty<AttributionBucket>()
             : await _attribution.ComputeAsync(perfPeriod).ConfigureAwait(true);
         decimal? bench = null;
-        if (_benchmark is not null)
+        var benchmarkSymbol = _appSettings?.Current.BenchmarkSymbol ?? "0050.TW";
+        if (_benchmark is not null && !string.IsNullOrWhiteSpace(benchmarkSymbol))
         {
-            try { bench = await _benchmark.ComputeBenchmarkTwrAsync("0050.TW", perfPeriod).ConfigureAwait(true); }
-            catch { bench = null; }
+            try
+            {
+                bench = await _benchmark.ComputeBenchmarkTwrAsync(benchmarkSymbol, perfPeriod).ConfigureAwait(true);
+            }
+            catch (Exception ex) when (ex is HttpRequestException or InvalidOperationException or TaskCanceledException)
+            {
+                System.Diagnostics.Debug.WriteLine($"Benchmark TWR failed for {benchmarkSymbol}: {ex.Message}");
+                bench = null;
+            }
         }
         Performance = new PerformanceResult(perfPeriod, Xirr: mwr, Twr: null, Mwr: mwr, BenchmarkTwr: bench, Attribution: buckets);
     }

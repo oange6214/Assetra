@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.13.2 - 2026-04-28
+
+針對 v0.13.1 後 code review 發現的 CRITICAL / HIGH 違規做 quick fix；無新功能、行為等價，但訊號乾淨且 benchmark 可配置。
+
+### 修正
+
+- **Async（CRITICAL）**：`PortfolioLoadService.LoadAsync` 7 處 `Task.Result` 改為各自 `await ... ConfigureAwait(false)`；移除 CLAUDE.md 禁用模式並降低後續 refactor deadlock 風險。
+- **Error handling（HIGH）**：`ReportsViewModel.LoadPerformanceAsync` 的 benchmark 空 `catch { ... }` 改為帶診斷的 `catch (HttpRequestException or InvalidOperationException or TaskCanceledException)`，並寫入 Debug log；不再吞掉 HTTP / 解析錯誤。
+- **Hardcoded value（HIGH）**：benchmark 代號 `"0050.TW"` 從 `LoadPerformanceAsync` 移出，改由 `AppSettings.BenchmarkSymbol` 提供（預設 `"0050.TW"`）；空字串可關閉 benchmark 比較。`ReportsViewModel` 新增可選 `IAppSettingsService` 注入。
+
+### 內部變更
+
+- `AppSettings` 新增 `string BenchmarkSymbol = "0050.TW"` 欄位（向後相容；既有序列化 JSON 缺欄位時 fallback 到預設）。
+- 480/480 tests 綠。
+
 ## v0.13.1 - 2026-04-28
 
 針對 v0.13.0 release 後 code review 發現的本地化債務與文件落差做 cleanup；無新功能、無行為改變。
