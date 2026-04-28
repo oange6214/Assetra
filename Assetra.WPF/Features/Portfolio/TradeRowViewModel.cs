@@ -133,6 +133,8 @@ public sealed class TradeRowViewModel : ObservableObject
     /// <item><description>CashDividend → +CashAmount（若為 legacy 空值則回退 P×Q）</description></item>
     /// <item><description>Income / Deposit / LoanBorrow → +CashAmount（流入）</description></item>
     /// <item><description>Withdrawal / LoanRepay / Transfer → −CashAmount（流出）</description></item>
+    /// <item><description>CreditCardCharge → −CashAmount（卡帳戶代你支付給商家）</description></item>
+    /// <item><description>CreditCardPayment → +CashAmount（卡帳戶收到還款）</description></item>
     /// <item><description>StockDividend → 0（無現金；欄位以 amount/signed-dash converter 顯示 "—"）</description></item>
     /// </list>
     /// 徽章色 (<see cref="TypeBadgeColor"/>) 仍負責「型態識別」（Buy 綠 / Sell 紅 / 其他灰），
@@ -144,9 +146,10 @@ public sealed class TradeRowViewModel : ObservableObject
         TradeType.Sell => +(Price * Quantity - (Commission ?? 0)),
         TradeType.CashDividend => +(CashAmount ?? (Price * Quantity)),
         TradeType.Income or TradeType.Deposit or TradeType.LoanBorrow => +(CashAmount ?? 0),
-        TradeType.Withdrawal or TradeType.LoanRepay or TradeType.Transfer
-            or TradeType.CreditCardPayment => -(CashAmount ?? 0),
-        TradeType.CreditCardCharge => +(CashAmount ?? 0),
+        TradeType.Withdrawal or TradeType.LoanRepay or TradeType.Transfer => -(CashAmount ?? 0),
+        // 信用卡列以「卡帳戶視角」呈現：消費＝卡幫你付出去（−）；繳款＝你還錢給卡（+）。
+        TradeType.CreditCardCharge => -(CashAmount ?? 0),
+        TradeType.CreditCardPayment => +(CashAmount ?? 0),
         _ => 0,   // StockDividend
     };
 

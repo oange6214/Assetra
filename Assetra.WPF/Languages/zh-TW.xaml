@@ -160,7 +160,7 @@
     <sys:String x:Key="Portfolio.TradeHistory.UnitPrice">單價</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Total">總額</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Commission">手續費</sys:String>
-    <sys:String x:Key="Portfolio.TradeHistory.GrossAmount">成交金額</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.GrossAmount">金額</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Empty">尚無交易紀錄</sys:String>
     <sys:String x:Key="Portfolio.Confirm.Title">確認操作</sys:String>
     <sys:String x:Key="Portfolio.Confirm.Delete">刪除</sys:String>
@@ -440,12 +440,11 @@
     <sys:String x:Key="Portfolio.Tx.TransferTargetAccount">轉入帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tx.TransferTargetAmount">轉入金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.TransferImpliedRate">隱含匯率</sys:String>
-    <sys:String x:Key="Portfolio.Tx.WithdrawalAction">提款 / 對外轉出</sys:String>
-    <sys:String x:Key="Portfolio.Tx.TransferAction">帳戶間轉帳</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CashGroupHint">轉給別人、付款、提款請用「提款 / 對外轉出」；自己的帳戶互轉才用「帳戶間轉帳」。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.DepositHint">適合把外部資金存入自己的帳戶，會增加該帳戶餘額。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.WithdrawalHint">適合提款、轉帳給別人或支付現金支出；只會扣款帳戶，不會建立轉入帳戶。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.TransferHint">只用在自己的帳戶間移轉；來源扣款、目標入帳，總資產不變。轉給別人請用「提款 / 對外轉出」。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.WithdrawalAction">提款</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferAction">轉帳</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DepositHint">把外部資金存入自己的帳戶，會增加該帳戶餘額。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.WithdrawalHint">提款、轉帳給別人或支付現金支出；只扣款帳戶，不建立轉入帳戶。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferHint">自己的帳戶間移轉；來源扣款、目標入帳，總資產不變。轉給別人請用「提款」。</sys:String>
     <sys:String x:Key="Portfolio.Filter.Deposit">存入</sys:String>
     <sys:String x:Key="Portfolio.Filter.Withdrawal">提款</sys:String>
     <sys:String x:Key="Portfolio.Filter.Transfer">轉帳</sys:String>
@@ -488,8 +487,8 @@
     <sys:String x:Key="Portfolio.Tx.CreditCardPaymentAccount">扣款帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCardChargeHint">信用卡消費會增加信用卡負債，支出與淨資產影響會記在消費日。</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCardPaymentHint">信用卡繳款會扣現金帳戶並降低信用卡負債；若消費已先記錄，繳款當下淨資產通常不變。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.NoBalance">這張信用卡目前沒有未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款 / 對外轉出」。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.ExceedsBalance">繳款金額不可超過目前未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款 / 對外轉出」。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.NoBalance">這張信用卡目前沒有未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款」。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.ExceedsBalance">繳款金額不可超過目前未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款」。</sys:String>
     <sys:String x:Key="Portfolio.Tx.EditTitle">編輯紀錄</sys:String>
     <sys:String x:Key="Portfolio.Tx.MetaOnlyHint">此交易僅能修改日期與備註。若要更正金額或股數，請刪除後重新建立；股票部位也可在「投資」分頁直接編輯。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Buy">買入</sys:String>

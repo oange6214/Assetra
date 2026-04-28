@@ -391,13 +391,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     public string TxCashFlowHint => TxType switch
     {
-        "deposit" => L("Portfolio.Tx.DepositHint", "適合把外部資金存入自己的帳戶，會增加該帳戶餘額。"),
-        "withdrawal" => L("Portfolio.Tx.WithdrawalHint", "適合提款、轉帳給別人或支付現金支出；只會扣款帳戶，不會建立轉入帳戶。"),
+        "deposit" => L("Portfolio.Tx.DepositHint", "把外部資金存入自己的帳戶，會增加該帳戶餘額。"),
+        "withdrawal" => L("Portfolio.Tx.WithdrawalHint", "提款、轉帳給別人或支付現金支出；只扣款帳戶，不建立轉入帳戶。"),
         _ => string.Empty
     };
 
     public string TxTransferHint =>
-        L("Portfolio.Tx.TransferHint", "只用在自己的帳戶間移轉；來源扣款、目標入帳，總資產不變。轉給別人請用「提款 / 對外轉出」。");
+        L("Portfolio.Tx.TransferHint", "自己的帳戶間移轉；來源扣款、目標入帳，總資產不變。轉給別人請用「提款」。");
 
     public string TxCreditCardHint => TxType switch
     {

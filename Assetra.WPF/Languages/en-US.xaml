@@ -159,7 +159,7 @@
     <sys:String x:Key="Portfolio.TradeHistory.UnitPrice">Unit Price</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Total">Total</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Commission">Commission</sys:String>
-    <sys:String x:Key="Portfolio.TradeHistory.GrossAmount">Gross Amount</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.GrossAmount">Amount</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Empty">No trades recorded yet</sys:String>
     <sys:String x:Key="Portfolio.Confirm.Title">Confirm</sys:String>
     <sys:String x:Key="Portfolio.Confirm.Delete">Delete</sys:String>
@@ -439,12 +439,11 @@
     <sys:String x:Key="Portfolio.Tx.TransferTargetAccount">Destination account</sys:String>
     <sys:String x:Key="Portfolio.Tx.TransferTargetAmount">Receive amount</sys:String>
     <sys:String x:Key="Portfolio.Tx.TransferImpliedRate">Implied rate</sys:String>
-    <sys:String x:Key="Portfolio.Tx.WithdrawalAction">Withdrawal / External transfer</sys:String>
-    <sys:String x:Key="Portfolio.Tx.TransferAction">Account transfer</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CashGroupHint">Use “Withdrawal / External transfer” for paying someone, cash payments, or ATM withdrawals. Use “Account transfer” only between your own accounts.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.DepositHint">Use this when outside money enters one of your accounts; it increases that account balance.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.WithdrawalHint">Use this for ATM withdrawals, transfers to other people, or cash payments. It only deducts from the selected account and does not create a destination account.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.TransferHint">Use only for moving money between your own accounts. The source is deducted, the destination is credited, and net worth stays unchanged. For sending money to someone else, use “Withdrawal / External transfer”.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.WithdrawalAction">Withdraw</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferAction">Transfer</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DepositHint">Outside money enters one of your accounts; increases that account balance.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.WithdrawalHint">ATM withdrawal, paying someone, or cash spending; only deducts from the selected account.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TransferHint">Move money between your own accounts; source deducted, destination credited, net worth unchanged. Sending to someone else: use “Withdraw”.</sys:String>
     <sys:String x:Key="Portfolio.Filter.Deposit">Deposit</sys:String>
     <sys:String x:Key="Portfolio.Filter.Withdrawal">Withdrawal</sys:String>
     <sys:String x:Key="Portfolio.Filter.Transfer">Transfer</sys:String>
@@ -487,8 +486,8 @@
     <sys:String x:Key="Portfolio.Tx.CreditCardPaymentAccount">Payment account</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCardChargeHint">A card charge increases credit-card liability; the expense and net-worth impact are recorded on the charge date.</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCardPaymentHint">A card payment deducts from cash and reduces credit-card liability. If the charge was already recorded, net worth usually does not change on payment.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.NoBalance">This card has no outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdrawal / External transfer”.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.ExceedsBalance">Payment cannot exceed the current outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdrawal / External transfer”.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.NoBalance">This card has no outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdraw”.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.ExceedsBalance">Payment cannot exceed the current outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdraw”.</sys:String>
     <sys:String x:Key="Portfolio.Tx.EditTitle">Edit Record</sys:String>
     <sys:String x:Key="Portfolio.Tx.MetaOnlyHint">Only date and note can be changed for this trade. To correct amount or quantity, delete and re-create; stock positions can also be edited directly on the Investment tab.</sys:String>
     <sys:String x:Key="Portfolio.Tx.Buy">Buy</sys:String>

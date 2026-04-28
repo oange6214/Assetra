@@ -513,13 +513,13 @@ public partial class TransactionDialogViewModel
         if (TxCreditCard.Balance <= 0)
         {
             TxError = L("Portfolio.Tx.CreditCardPayment.NoBalance",
-                "這張信用卡目前沒有未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款 / 對外轉出」。");
+                "這張信用卡目前沒有未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款」。");
             return;
         }
         if (amount > TxCreditCard.Balance)
         {
             TxError = L("Portfolio.Tx.CreditCardPayment.ExceedsBalance",
-                "繳款金額不可超過目前未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款 / 對外轉出」。");
+                "繳款金額不可超過目前未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款」。");
             return;
         }
         var cashAccId = await ResolveCashAccountIdAsync();
