@@ -17,11 +17,13 @@ internal static class AssetSchemaMigrator
         "loan_annual_rate", "loan_term_months", "loan_start_date", "loan_handling_fee",
         "liability_subtype", "billing_day", "due_day", "credit_limit", "issuer_name",
         "subtype",
+        "version", "last_modified_at", "last_modified_by_device", "is_deleted", "is_pending_push",
     };
 
     private static readonly HashSet<string> AssetAllowedTypeDefs = new(StringComparer.OrdinalIgnoreCase)
     {
         "INTEGER NOT NULL DEFAULT 1",
+        "INTEGER NOT NULL DEFAULT 0",
         "TEXT NOT NULL DEFAULT ''",
         "REAL",
         "INTEGER",
@@ -77,6 +79,8 @@ internal static class AssetSchemaMigrator
 
             SeedSystemGroups(cmd);
             AddAssetMetadataColumns(conn, tx);
+            AddGroupSyncColumns(conn, tx);
+            AddEventSyncColumns(conn, tx);
             EnsureAssetIndexes(conn, tx);
             MigrateLegacyCashAccounts(cmd, conn, tx);
             MigrateLegacyLiabilityAccounts(cmd, conn, tx);
@@ -139,6 +143,46 @@ internal static class AssetSchemaMigrator
             "issuer_name", "TEXT", AssetAllowedColumns, AssetAllowedTypeDefs);
         SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
             "subtype", "TEXT", AssetAllowedColumns, AssetAllowedTypeDefs);
+
+        // Sync metadata (v0.20.8) — stamp version/last_modified, soft delete, pending push.
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+            "version", "INTEGER NOT NULL DEFAULT 0", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+            "last_modified_at", "TEXT NOT NULL DEFAULT ''", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+            "last_modified_by_device", "TEXT NOT NULL DEFAULT ''", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+            "is_deleted", "INTEGER NOT NULL DEFAULT 0", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+            "is_pending_push", "INTEGER NOT NULL DEFAULT 0", AssetAllowedColumns, AssetAllowedTypeDefs);
+    }
+
+    private static void AddGroupSyncColumns(SqliteConnection conn, SqliteTransaction tx)
+    {
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset_group",
+            "version", "INTEGER NOT NULL DEFAULT 0", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset_group",
+            "last_modified_at", "TEXT NOT NULL DEFAULT ''", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset_group",
+            "last_modified_by_device", "TEXT NOT NULL DEFAULT ''", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset_group",
+            "is_deleted", "INTEGER NOT NULL DEFAULT 0", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset_group",
+            "is_pending_push", "INTEGER NOT NULL DEFAULT 0", AssetAllowedColumns, AssetAllowedTypeDefs);
+    }
+
+    private static void AddEventSyncColumns(SqliteConnection conn, SqliteTransaction tx)
+    {
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset_event",
+            "version", "INTEGER NOT NULL DEFAULT 0", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset_event",
+            "last_modified_at", "TEXT NOT NULL DEFAULT ''", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset_event",
+            "last_modified_by_device", "TEXT NOT NULL DEFAULT ''", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset_event",
+            "is_deleted", "INTEGER NOT NULL DEFAULT 0", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset_event",
+            "is_pending_push", "INTEGER NOT NULL DEFAULT 0", AssetAllowedColumns, AssetAllowedTypeDefs);
     }
 
     private static void EnsureAssetIndexes(SqliteConnection conn, SqliteTransaction tx)
@@ -150,6 +194,24 @@ internal static class AssetSchemaMigrator
             ON asset(name, currency) WHERE asset_type = 'Asset'
             """;
         idx.ExecuteNonQuery();
+
+        using var pendingIdx = conn.CreateCommand();
+        pendingIdx.Transaction = tx;
+        pendingIdx.CommandText =
+            "CREATE INDEX IF NOT EXISTS idx_asset_pending ON asset (is_pending_push) WHERE is_pending_push = 1;";
+        pendingIdx.ExecuteNonQuery();
+
+        using var grpPending = conn.CreateCommand();
+        grpPending.Transaction = tx;
+        grpPending.CommandText =
+            "CREATE INDEX IF NOT EXISTS idx_asset_group_pending ON asset_group (is_pending_push) WHERE is_pending_push = 1;";
+        grpPending.ExecuteNonQuery();
+
+        using var evtPending = conn.CreateCommand();
+        evtPending.Transaction = tx;
+        evtPending.CommandText =
+            "CREATE INDEX IF NOT EXISTS idx_asset_event_pending ON asset_event (is_pending_push) WHERE is_pending_push = 1;";
+        evtPending.ExecuteNonQuery();
     }
 
     private static void MigrateLegacyCashAccounts(

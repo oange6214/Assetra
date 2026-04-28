@@ -1,5 +1,7 @@
 # Assetra v0.14 → v1.0 完整 Sprint 規劃
 
+> **版號重編註記（2026-04-28，v0.21.1 修訂）**：v0.14–v0.19 已依 roadmap 出貨；雲端同步原訂 v0.20.0 一個 sprint，實際展開為 v0.20.0–v0.20.12 + v0.21.0（GA chaos test）+ v0.21.1（docs），共占用兩個 minor 區段。**原訂「v0.21.0 — AI 財務助理」確定重編為 v0.22.0，後續 sprint 全部 +1 順延（多元資產 → v0.23/v0.24、情境模擬 → v0.25/v0.26、多端 → v0.27/v0.28）**。出貨對照請見 `docs/releases/CHANGELOG.md`。
+
 > 規劃日期：2026-04-28（v0.13.0 release 後）
 > 涵蓋範圍：Roadmap 上所有未完成項目 — Phase 1 收尾、Phase 2 收尾、Phase 3、Phase 4
 > 排序原則：dependency-aware（前置 schema → service → UI；外幣為多項前置）
@@ -10,23 +12,25 @@
 
 | 版本 | Sprint 主題 | Phase | 估算規模 | 主要產出 |
 |------|------------|-------|---------|----------|
-| **v0.14.0** | 外幣基礎（Currency + FX 換算） | P2.3-A | M | `Currency` VO、`FxRate`、`IFxRateProvider`、`MultiCurrencyValuationService`，既有 Performance/Risk/Reports 接入換算 |
-| **v0.15.0** | 美股 / ETF Pipeline 擴充 | P2.3-B | M | US/ETF quote & history、`StockExchangeRegistry`、投資 UI 跨市場選股、Trade 流程支援多市場 |
-| **v0.16.0** | Goals 完整子系統 | P1.3 | S~M | `GoalMilestone`、`GoalFundingRule`、`GoalPlanningService`、`GoalProgressQueryService` |
-| **v0.17.0** | 趨勢圖增強（事件標註 + 堆疊圖） | P1.4 | S | `PortfolioEvent`、堆疊圖 schema 擴充、`TrendsView` enhancements |
-| **v0.18.0** | 稅務模組 MVP | P3.1 | M | `TaxSummary`、股利所得、海外所得追蹤、報稅匯出（CSV/PDF） |
-| **v0.19.0** | 進階匯入（PDF / OCR） | P3.2 | M~L | 銀行/信用卡 PDF parser、OCR adapter、PDF 匯入流程 UI |
-| **v0.20.0** | 雲端同步（加密 + conflict policy） | P3.4 | L | sync metadata、merge policy、加密同步層；明確避開敏感資料外洩 |
-| **v0.21.0** | AI 財務助理（自然語言查詢） | P3.3 | M | LLM adapter、query intent → service routing、查詢 UI |
-| **v0.22.0** | 多元資產（不動產 + 保險） | P4.1-A | M | `RealEstate`、`InsurancePolicy` 模型 + UI |
-| **v0.23.0** | 多元資產（退休 + 實物資產） | P4.1-B | S | `RetirementAccount`、`PhysicalAsset` |
-| **v0.24.0** | 情境模擬（FIRE + 退休提領） | P4.2-A | M | FIRE 計算機、4% 法則 / SWR 模擬器 |
-| **v0.25.0** | 情境模擬（利率 / 通膨 / 薪資變動） | P4.2-B | S~M | Monte Carlo 走勢模擬 |
-| **v0.26.0** | PWA（瀏覽器端只讀視圖） | P4.3-A | L | 後端 API 抽出、PWA shell |
-| **v0.27.0** | 行動端 + 推播 | P4.3-B | L | Mobile 適配、推播通道 |
+| **v0.14.0** ✅ | 外幣基礎（Currency + FX 換算） | P2.3-A | M | `Currency` VO、`FxRate`、`IFxRateProvider`、`MultiCurrencyValuationService`，既有 Performance/Risk/Reports 接入換算 |
+| **v0.15.0** ✅ | 美股 / ETF Pipeline 擴充 | P2.3-B | M | US/ETF quote & history、`StockExchangeRegistry`、投資 UI 跨市場選股、Trade 流程支援多市場 |
+| **v0.16.0** ✅ | Goals 完整子系統 | P1.3 | S~M | `GoalMilestone`、`GoalFundingRule`、`GoalPlanningService`、`GoalProgressQueryService` |
+| **v0.17.0** ✅ | 趨勢圖增強（事件標註 + 堆疊圖） | P1.4 | S | `PortfolioEvent`、堆疊圖 schema 擴充、`TrendsView` enhancements |
+| **v0.18.0** ✅ | 稅務模組 MVP | P3.1 | M | `TaxSummary`、股利所得、海外所得追蹤、報稅匯出（CSV/PDF） |
+| **v0.19.0** ✅ | 進階匯入（PDF / OCR） | P3.2 | M~L | 銀行/信用卡 PDF parser、OCR adapter、PDF 匯入流程 UI |
+| **v0.20.0–v0.20.12** ✅ | 雲端同步（加密 + conflict policy） | P3.4 | L（實際展開為 13 個 sub-version）| sync metadata、merge policy、加密同步層；8 entity round-trip |
+| **v0.21.0** ✅ | 雲端同步 GA（chaos test）| — | S | HTTP 5xx / cancellation 路徑覆蓋；i18n 複校 no-op；staging 煙霧延後到 v1.0 GA gate |
+| **v0.21.1** ✅ | 雲端同步使用者文件 + 規劃檔整理 | — | XS | `docs/guides/Cloud-Sync-Setup.md`；`docs/planning/` 6 份歷史 sprint 封存 |
+| **v0.22.0** | AI 財務助理（自然語言查詢） | P3.3 | M | LLM adapter、query intent → service routing、查詢 UI |
+| **v0.23.0** | 多元資產（不動產 + 保險） | P4.1-A | M | `RealEstate`、`InsurancePolicy` 模型 + UI |
+| **v0.24.0** | 多元資產（退休 + 實物資產） | P4.1-B | S | `RetirementAccount`、`PhysicalAsset` |
+| **v0.25.0** | 情境模擬（FIRE + 退休提領） | P4.2-A | M | FIRE 計算機、4% 法則 / SWR 模擬器 |
+| **v0.26.0** | 情境模擬（利率 / 通膨 / 薪資變動） | P4.2-B | S~M | Monte Carlo 走勢模擬 |
+| **v0.27.0** | PWA（瀏覽器端只讀視圖） | P4.3-A | L | 後端 API 抽出、PWA shell |
+| **v0.28.0** | 行動端 + 推播 | P4.3-B | L | Mobile 適配、推播通道 |
 | **v1.0.0** | GA 發布（穩定性、文件、效能） | — | M | 大量整合測試、文件全面整理、效能 baseline |
 
-> 備註：v0.21（AI）刻意排在雲端同步之後，是因為 AI 需要穩定資料來源；若不需雲端同步可提前。
+> 備註：v0.22（AI）刻意排在雲端同步之後，是因為 AI 需要穩定資料來源；若不需雲端同步可提前。
 
 ---
 
@@ -157,8 +161,8 @@
 #### Tasks
 
 - **D1 TaxSummary 模型**
-  - `Assetra.Core/Models/Tax/TaxSummary.cs`：`record(Year, DividendIncome, OverseasIncome, RealizedCapitalGain, ...)`
-  - `DividendIncomeRecord` / `OverseasIncomeRecord`
+  - `Assetra.Core/Models/Tax/TaxSummary.cs`：`record(Year, DividendIncomeRecords, OverseasIncomeTotal, RealizedCapitalGain, ...)`（`OverseasIncome` 為 decimal 欄位，無獨立 VO）
+  - `DividendIncomeRecord`（list；無獨立 `OverseasIncomeRecord` 型別）
 
 - **F1 TaxCalculationService**
   - 從 trade journal 抽取 `CashDividend` 聚合為股利所得（國內/海外分流，依 exchange）
@@ -230,7 +234,7 @@
 
 ---
 
-### v0.21.0 — AI 財務助理（自然語言查詢）
+### v0.22.0 — AI 財務助理（自然語言查詢）
 
 #### Tasks
 
@@ -253,30 +257,30 @@
 
 ---
 
-### v0.22.0 / v0.23.0 — 多元資產
+### v0.23.0 / v0.24.0 — 多元資產
 
-#### v0.22.0：不動產 + 保險
+#### v0.23.0：不動產 + 保險
 
 - `RealEstate`：地址、類型、購入價、估值、貸款連結
 - `InsurancePolicy`：保單類型、年繳保費、保額、現金價值（人壽/儲蓄險）
 - 接入 BalanceSheet（資產端 + 負債端）
 
-#### v0.23.0：退休 + 實物資產
+#### v0.24.0：退休 + 實物資產
 
 - `RetirementAccount`：勞退、勞保、自提、雇提
 - `PhysicalAsset`：黃金、藝術品、收藏品（estimated value + acquisition）
 
 ---
 
-### v0.24.0 / v0.25.0 — 情境模擬
+### v0.25.0 / v0.26.0 — 情境模擬
 
-#### v0.24.0：FIRE 計算機
+#### v0.25.0：FIRE 計算機
 
 - 輸入：目前淨資產、月儲蓄、預期報酬率、目標年支出、通膨
 - 輸出：FIRE 達成年數 + 達成時資產
 - 4% 法則 / SWR 模擬：給定退休資產，模擬 30 年提領可持續性
 
-#### v0.25.0：Monte Carlo
+#### v0.26.0：Monte Carlo
 
 - 利率 / 通膨 / 薪資成長率為 stochastic 變數
 - 1000+ 次模擬 → 成功率分布
@@ -284,17 +288,17 @@
 
 ---
 
-### v0.26.0 / v0.27.0 — 多端體驗
+### v0.27.0 / v0.28.0 — 多端體驗
 
 > 重大架構決策：原 WPF Repository 直連 SQLite → 必須先抽出 Web API。
 
-#### v0.26.0：PWA（read-only）
+#### v0.27.0：PWA（read-only）
 
 - ASP.NET Core Web API 專案 `Assetra.Api`
 - WPF + PWA 共用 `Assetra.Core` 介面
 - PWA：dashboard、portfolio overview、reports（read-only）
 
-#### v0.27.0：行動端 + 推播
+#### v0.28.0：行動端 + 推播
 
 - 候選技術：MAUI / React Native / Flutter
 - 推播通道：定期任務、預算超支、異常交易
@@ -333,9 +337,9 @@
 
 ## 四、執行建議
 
-1. **逐個 sprint 順序執行**：v0.14 → v0.27 → v1.0
+1. **逐個 sprint 順序執行**：v0.14 → v0.28 → v1.0
 2. **每完成一個 sprint**：build / test / docs / commit / tag / push
-3. **遇到大規模 schema 改動**（v0.14 多幣別、v0.20 sync、v0.26 API）：先做 spike POC，不行再退回
+3. **遇到大規模 schema 改動**（v0.14 多幣別、v0.20 sync、v0.27 API）：先做 spike POC，不行再退回
 4. **若使用者中途決定停在 MVP**：合理的 stop point 在 **v0.18.0**（核心理財 + 投資 + 稅務完整），v0.19+ 屬「進階自動化 / 多平台」
 
 ---
@@ -349,4 +353,4 @@
 4. Commit + tag + push（master）
 5. 進入下一個 sprint
 
-**預估時程**：v0.14 ~ v1.0 共 14 個 sprint，每 sprint 約 2~5 小時實作（不含外部依賴整合測試）。
+**預估時程**：v0.14 ~ v1.0 共 16 個 sprint（v0.14–v0.21.1 已出貨 8 個；v0.22–v0.28 + v1.0.0 待做 8 個；v0.20.x 內部展開為 13 個 sub-version 不計入），每 sprint 約 2~5 小時實作（不含外部依賴整合測試）。

@@ -50,6 +50,8 @@
 ## Guides
 - [Fugle API Key Setup](guides/Fugle-API-Key-Setup.md)
   - Fugle API key 申請與設定方式。
+- [Cloud Sync Setup](guides/Cloud-Sync-Setup.md)
+  - 雲端同步啟用、加密模型、Conflict 解決與 troubleshooting（v0.20.0–v0.21.0）。
 
 ## Reviews
 - [Responsive UI Review](reviews/Responsive-UI-Review.md)

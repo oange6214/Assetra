@@ -28,7 +28,9 @@ public sealed record ImportPreviewRow(
     decimal? Quantity = null,
     string? Currency = null,
     decimal? UnitPrice = null,
-    decimal? Commission = null)
+    decimal? Commission = null,
+    /// <summary>來源若為 OCR 抽取的 PDF 頁面，0~1 之間的平均信心分數；其他來源 (CSV / Excel / 文字 PDF) 一律為 null。</summary>
+    double? OcrConfidence = null)
 {
     /// <summary>
     /// 去重 hash：日期 + 金額 + 對手方/摘要 + 標的。<br/>

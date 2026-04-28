@@ -36,8 +36,17 @@ public sealed class ImportFormatDetector : IImportFormatDetector
             }
         }
 
-        // 2) 內容指紋
         var ext = Path.GetExtension(fileName).ToLowerInvariant();
+
+        // PDF：目前無 per-bank 指紋，magic-byte 確認後一律 fallback Generic
+        if (ext == ".pdf")
+        {
+            return await IsPdfStreamAsync(content, ct).ConfigureAwait(false)
+                ? ImportFormat.Generic
+                : null;
+        }
+
+        // 2) 內容指紋
         var headerKeywords = ext is ".xlsx" or ".xls"
             ? ReadExcelHeader(content)
             : await ReadCsvHeaderAsync(content, ct).ConfigureAwait(false);
@@ -85,6 +94,26 @@ public sealed class ImportFormatDetector : IImportFormatDetector
 
         if (content.CanSeek) content.Position = origin;
         return bag;
+    }
+
+    private static async Task<bool> IsPdfStreamAsync(Stream content, CancellationToken ct)
+    {
+        var origin = content.CanSeek ? content.Position : 0L;
+        try
+        {
+            var buffer = new byte[5];
+            var read = await content.ReadAsync(buffer.AsMemory(0, 5), ct).ConfigureAwait(false);
+            return read == 5
+                && buffer[0] == (byte)'%'
+                && buffer[1] == (byte)'P'
+                && buffer[2] == (byte)'D'
+                && buffer[3] == (byte)'F'
+                && buffer[4] == (byte)'-';
+        }
+        finally
+        {
+            if (content.CanSeek) content.Position = origin;
+        }
     }
 
     private static HashSet<string> ReadExcelHeader(Stream content)

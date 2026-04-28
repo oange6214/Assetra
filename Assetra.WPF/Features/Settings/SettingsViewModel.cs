@@ -63,6 +63,9 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     private readonly ILocalizationService _localization;
     private readonly ICurrencyService _currencyService;
 
+    public SyncSettingsViewModel Sync { get; }
+    public ConflictResolutionViewModel Conflicts { get; }
+
     private bool _isLoading;
 
     [ObservableProperty] private string _language = "zh-TW";
@@ -84,6 +87,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _fugleApiKey = string.Empty;
     [ObservableProperty] private string _dataSourceSaveStatus = string.Empty;
     [ObservableProperty] private bool _isFugleHelpOpen;
+    [ObservableProperty] private string _ocrTessdataPath = string.Empty;
+    [ObservableProperty] private string _ocrLanguage = "eng";
 
     public ObservableCollection<string> SupportedCurrencies { get; } = [];
 
@@ -113,17 +118,23 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         IAppSettingsService settings,
         IThemeService theme,
         ILocalizationService localization,
-        ICurrencyService currencyService)
+        ICurrencyService currencyService,
+        SyncSettingsViewModel sync,
+        ConflictResolutionViewModel conflicts)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(theme);
         ArgumentNullException.ThrowIfNull(localization);
         ArgumentNullException.ThrowIfNull(currencyService);
+        ArgumentNullException.ThrowIfNull(sync);
+        ArgumentNullException.ThrowIfNull(conflicts);
 
         _settings = settings;
         _theme = theme;
         _localization = localization;
         _currencyService = currencyService;
+        Sync = sync;
+        Conflicts = conflicts;
 
         foreach (var code in _currencyService.SupportedCurrencies)
             SupportedCurrencies.Add(code);
@@ -150,6 +161,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             QuoteProvider = string.IsNullOrWhiteSpace(s.QuoteProvider) ? "official" : s.QuoteProvider;
             HistoryProvider = string.IsNullOrWhiteSpace(s.HistoryProvider) ? "twse" : s.HistoryProvider;
             FugleApiKey = s.FugleApiKey ?? string.Empty;
+            OcrTessdataPath = s.OcrTessdataPath ?? string.Empty;
+            OcrLanguage = string.IsNullOrWhiteSpace(s.OcrLanguage) ? "eng" : s.OcrLanguage;
             DataSourceSaveStatus = string.Empty;
         }
         finally
@@ -220,6 +233,32 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         DataSourceSaveStatus = string.Empty;
     }
 
+    partial void OnOcrTessdataPathChanged(string value)
+    {
+        if (_isLoading)
+            return;
+        _ = SaveAsync();
+    }
+
+    partial void OnOcrLanguageChanged(string value)
+    {
+        if (_isLoading)
+            return;
+        _ = SaveAsync();
+    }
+
+    [RelayCommand]
+    private void BrowseOcrTessdata()
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = "Select tessdata folder",
+            InitialDirectory = Directory.Exists(OcrTessdataPath) ? OcrTessdataPath : string.Empty,
+        };
+        if (dialog.ShowDialog() == true)
+            OcrTessdataPath = dialog.FolderName;
+    }
+
     private void OnThemeChanged(ApplicationTheme theme)
     {
         _isLoading = true;
@@ -243,6 +282,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             QuoteProvider = QuoteProvider,
             HistoryProvider = HistoryProvider,
             FugleApiKey = FugleApiKey.Trim(),
+            OcrTessdataPath = OcrTessdataPath?.Trim() ?? string.Empty,
+            OcrLanguage = string.IsNullOrWhiteSpace(OcrLanguage) ? "eng" : OcrLanguage.Trim(),
         };
         await _settings.SaveAsync(updated);
     }

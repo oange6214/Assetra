@@ -7,6 +7,7 @@ internal static class PortfolioSchemaMigrator
     private static readonly HashSet<string> AllowedColumns = new(StringComparer.OrdinalIgnoreCase)
     {
         "asset_type", "created_at", "updated_at", "display_name", "currency", "is_active", "is_etf",
+        "version", "last_modified_at", "last_modified_by_device", "is_deleted", "is_pending_push",
     };
 
     private static readonly HashSet<string> AllowedLegacyDropColumns = new(StringComparer.OrdinalIgnoreCase)
@@ -60,8 +61,20 @@ internal static class PortfolioSchemaMigrator
             SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio",
                 "is_etf", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
 
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio",
+                "version", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio",
+                "last_modified_at", "TEXT NOT NULL DEFAULT ''", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio",
+                "last_modified_by_device", "TEXT NOT NULL DEFAULT ''", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio",
+                "is_deleted", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio",
+                "is_pending_push", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+
             DeduplicateEntries(conn, tx);
             EnsureUniqueIndex(conn, tx);
+            EnsurePendingPushIndex(conn, tx);
 
             if (SqliteSchemaHelper.ColumnExists(conn, "portfolio", "buy_price", tx))
                 VerifyProjectionMatchesStoredState(conn, tx);
@@ -157,9 +170,35 @@ internal static class PortfolioSchemaMigrator
 
     private static void EnsureUniqueIndex(SqliteConnection conn, SqliteTransaction tx)
     {
+        // Drop any non-partial legacy index so tombstones don't collide on placeholder symbol/exchange.
+        using (var probe = conn.CreateCommand())
+        {
+            probe.Transaction = tx;
+            probe.CommandText =
+                "SELECT sql FROM sqlite_master WHERE type='index' AND name='idx_portfolio_symbol_exchange'";
+            var sqlText = probe.ExecuteScalar() as string;
+            if (sqlText is not null && !sqlText.Contains("WHERE is_deleted", StringComparison.OrdinalIgnoreCase))
+            {
+                using var drop = conn.CreateCommand();
+                drop.Transaction = tx;
+                drop.CommandText = "DROP INDEX idx_portfolio_symbol_exchange";
+                drop.ExecuteNonQuery();
+            }
+        }
+
         using var idx = conn.CreateCommand();
         idx.Transaction = tx;
-        idx.CommandText = "CREATE UNIQUE INDEX IF NOT EXISTS idx_portfolio_symbol_exchange ON portfolio(symbol, exchange)";
+        idx.CommandText =
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_portfolio_symbol_exchange ON portfolio(symbol, exchange) WHERE is_deleted = 0";
+        idx.ExecuteNonQuery();
+    }
+
+    private static void EnsurePendingPushIndex(SqliteConnection conn, SqliteTransaction tx)
+    {
+        using var idx = conn.CreateCommand();
+        idx.Transaction = tx;
+        idx.CommandText =
+            "CREATE INDEX IF NOT EXISTS idx_portfolio_pending ON portfolio (is_pending_push) WHERE is_pending_push = 1";
         idx.ExecuteNonQuery();
     }
 

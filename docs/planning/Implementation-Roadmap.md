@@ -19,16 +19,16 @@
 - [x] 建立 `RecurringTransactionScheduler`
 - [x] 製作 `RecurringView` / `RecurringViewModel`
 
-### 3. Goals 子系統  *(MVP 完成 — v0.6.0；完整子系統未完成)*
+### 3. Goals 子系統  *(完成 — MVP v0.6.0；完整子系統 v0.16.0)*
 
 > Goals = 財務目標（買房頭期款、退休、旅遊基金）。**不要與已完成的 Recurring 混淆**。
 
 - [x] 建立 `FinancialGoal`
-- [ ] 建立 `GoalMilestone`（v0.7+）
-- [ ] 建立 `GoalFundingRule`（v0.7+）
+- [x] 建立 `GoalMilestone`（v0.16.0）
+- [x] 建立 `GoalFundingRule`（v0.16.0）
 - [x] 建立 `GoalSqliteRepository`（含 `GoalSchemaMigrator`）
-- [ ] 新增 `GoalPlanningService`（v0.7+）
-- [ ] 新增 `GoalProgressQueryService`（v0.7+；目前進度由 `FinancialGoal` 衍生屬性 + ViewModel 計算）
+- [x] 新增 `GoalPlanningService`（v0.16.0）
+- [x] 新增 `GoalProgressQueryService`（v0.16.0）
 - [x] 新增 Goals 畫面（`Features/Goals/GoalsView` + `GoalsViewModel`）
 
 ### 4. 淨資產趨勢  *(MVP 完成 — v0.6.0；堆疊圖、事件標註與更完整分析延後)*
@@ -37,9 +37,9 @@
 - [x] `DashboardViewModel` / `DashboardTabPanel` 基本 UI
 - [x] 建立趨勢 query service（沿用 `IPortfolioHistoryQueryService`，由 `PortfolioHistoryViewModel` 篩選）
 - [x] 建立 30 / 90 / 180 / 365 / All 切換 + 自訂日期範圍（`DateRangePicker`）
-- [ ] 加入重大事件標註（v0.7+）
+- [x] 加入重大事件標註（v0.17.0：`PortfolioEvent`）
 - [x] 製作趨勢圖（`Features/Trends/TrendsView`，LiveCharts 折線圖）
-- [ ] 堆疊圖 UI（v0.7+：依資產類別堆疊，需 `PortfolioDailySnapshot` schema 擴充）
+- [x] 堆疊圖 UI（v0.17.0：依資產類別堆疊，`PortfolioDailySnapshot` schema 已擴充）
 
 ### 5. 匯入治理基礎  *(v0.7.0 完成 MVP；v0.8.0 完成 Phase 2：統一規則 + batch history + rollback)*
 - [x] 建立 `ImportBatch`
@@ -78,11 +78,11 @@
 - [x] 建立現金流量表 service（`CashFlowStatementService`，Operating / Investing / Financing）
 - [x] 建立 PDF / CSV export（`ReportExportService`，QuestPDF Community + 手寫 CSV）
 
-### 3. 外幣與美股
-- 建立外幣帳戶模型
-- 建立 FX 換算策略
-- 擴充美股 / ETF quote & history pipeline
-- 擴充投資 UI 與交易流程
+### 3. 外幣與美股  *(完成 — v0.14.0 / v0.15.0)*
+- [x] 建立外幣帳戶模型（v0.14.0：`Currency` VO、`FxRate`、`IFxRateProvider`）
+- [x] 建立 FX 換算策略（v0.14.0：`MultiCurrencyValuationService`）
+- [x] 擴充美股 / ETF quote & history pipeline（v0.15.0：`StockExchangeRegistry`）
+- [x] 擴充投資 UI 與交易流程（v0.15.0：跨市場選股、Trade 多市場）
 
 ### 4. 風險分析  *(完成 — v0.13.0)*
 - [x] 建立波動度 / 最大回撤 / Sharpe Ratio 計算
@@ -91,27 +91,28 @@
 
 ## Phase 3：自動化與治理進階
 
-### 1. 稅務模組
-- 建立 `TaxSummary`
-- 建立股利所得追蹤
-- 建立海外所得追蹤
-- 加入報稅匯出
+### 1. 稅務模組  *(完成 — v0.18.0)*
+- [x] 建立 `TaxSummary`
+- [x] 建立股利所得追蹤
+- [x] 建立海外所得追蹤
+- [x] 加入報稅匯出（CSV / PDF）
 
-### 2. 進階匯入
-- 銀行帳單匯入
-- 信用卡帳單匯入
-- PDF parser
-- OCR adapter
+### 2. 進階匯入  *(完成 — v0.19.0)*
+- [x] 銀行帳單匯入
+- [x] 信用卡帳單匯入
+- [x] PDF parser
+- [x] OCR adapter
 
-### 3. AI 財務助理
-- 先做自然語言查詢
-- 再做摘要與提醒建議
-- 最後才做規劃建議
+### 3. AI 財務助理  *(待做 — v0.22.0；原訂 v0.21.0 但版號被 sync GA 占用)*
+- [ ] 先做自然語言查詢
+- [ ] 再做摘要與提醒建議
+- [ ] 最後才做規劃建議
 
-### 4. 雲端同步
-- 設計 sync metadata
-- 設計 merge / conflict policy
-- 建立加密同步層
+### 4. 雲端同步  *(GA 完成 — v0.20.0 → v0.21.0)*
+- [x] 設計 sync metadata（v0.20.0–v0.20.3）
+- [x] 設計 merge / conflict policy（v0.20.4–v0.20.11，LWW + manual conflict drain）
+- [x] 建立加密同步層（v0.20.x：AES-GCM + PBKDF2 + HttpCloudSyncProvider）
+- [x] GA chaos 測試（v0.21.0：HTTP 5xx / cancellation 路徑覆蓋）
 
 ## Phase 4：差異化與平台擴展
 

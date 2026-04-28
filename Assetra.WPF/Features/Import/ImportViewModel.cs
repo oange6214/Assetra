@@ -20,9 +20,10 @@ public sealed partial class ImportViewModel : ObservableObject
 {
     private static readonly IReadOnlyList<(string Label, string Pattern)> FileFilters =
     [
-        ("CSV / Excel", "*.csv;*.xlsx;*.xls"),
+        ("CSV / Excel / PDF", "*.csv;*.xlsx;*.xls;*.pdf"),
         ("CSV", "*.csv"),
         ("Excel", "*.xlsx;*.xls"),
+        ("PDF", "*.pdf"),
     ];
 
     private const int HistoryListLimit = 20;
@@ -230,7 +231,7 @@ public sealed partial class ImportViewModel : ObservableObject
             if (fileType is null)
             {
                 ErrorMessage = L("Import.Error.UnsupportedExtension",
-                    "Only .csv, .xlsx and .xls files are supported.");
+                    "Only .csv, .xlsx, .xls and .pdf files are supported.");
                 ResetBatch();
                 return;
             }
@@ -370,6 +371,7 @@ public sealed partial class ImportViewModel : ObservableObject
         {
             ".csv" => ImportFileType.Csv,
             ".xlsx" or ".xls" => ImportFileType.Excel,
+            ".pdf" => ImportFileType.Pdf,
             _ => null,
         };
 

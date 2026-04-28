@@ -1,8 +1,10 @@
 # Docs Gap Review
 
-> 日期：2026-04-27  
-> 範圍：`README.md`、`docs/architecture/*`、`docs/planning/*` 與目前 `Assetra` 實作狀態對照  
+> 初稿日期：2026-04-27；最後更新：2026-04-28（v0.21.1）
+> 範圍：`README.md`、`docs/architecture/*`、`docs/planning/*` 與目前 `Assetra` 實作狀態對照
 > 目的：釐清文件是否與現況一致、哪些描述已超前實作、哪些能力仍屬 MVP
+
+> **⚠️ 注意**：本文件 §三「文件超前於實作」與 §四「真正還缺少的能力」多數描述已在 v0.16–v0.21.1 期間出貨並過時。以下各節以刪除線標記已解決的差距；現況以括號補充說明。
 
 ## 一、總結
 
@@ -62,30 +64,11 @@
 
 ## 三、文件超前於實作的地方
 
-### 1. `Goals` 在文件中比實作更成熟
+### ~~1. `Goals` 在文件中比實作更成熟~~ ✅ 已解決（v0.16.0）
 
-#### 文件描述
-在技術藍圖中，`Goals` 被描述成完整子系統，包含：
-- `GoalPlanningService`
-- `GoalProgressQueryService`
-- `GoalFundingWorkflowService`
-- milestone / funding rule 等延伸模型
+~~在技術藍圖中，`Goals` 被描述成完整子系統…~~
 
-#### 實際狀態
-目前實作為：
-- `FinancialGoal`
-- `GoalSqliteRepository`
-- `GoalsView / GoalsViewModel`
-- 基本進度與期限顯示
-
-尚未看到：
-- 獨立 `Assetra.Application/Goals`
-- funding rule
-- milestone
-- 完整 query / workflow service 切分
-
-#### 判定
-**目前是 Goals MVP，不是完整 Goals 子系統。**
+**現況（v0.16.0）**：`GoalMilestone` / `GoalFundingRule` / `GoalPlanningService` / `GoalProgressQueryService` 均已落地。Goals 完整子系統已出貨，不再是 MVP。
 
 ---
 
@@ -120,24 +103,11 @@
 
 ---
 
-### 3. `Trends` 已可用，但仍是第一階段版本
+### ~~3. `Trends` 已可用，但仍是第一階段版本~~ ✅ 已解決（v0.17.0）
 
-#### 文件描述
-文件已將淨資產趨勢列為 v0.6.0 主要成果。
+~~尚未實作：類別堆疊圖、重大事件標註~~
 
-#### 實際狀態
-目前已實作：
-- 折線圖
-- 30 / 90 / 180 / 365 / All
-- 自訂日期範圍
-
-尚未實作：
-- 類別堆疊圖
-- 重大事件標註
-- 更完整分析層
-
-#### 判定
-**目前是 Trends MVP。**
+**現況（v0.17.0）**：`PortfolioEvent` 事件標註與類別堆疊圖均已落地。
 
 ---
 
@@ -156,64 +126,41 @@
 
 ---
 
-## 四、目前真正還缺少的能力
+## 四、出貨狀態總覽（截至 v0.21.1）
 
-以下能力在 docs 中有規劃，但目前尚未完整落地：
+以下為 §四 原記錄的「尚缺」項目，已全數更新為出貨狀態：
 
-### 1. 匯入治理（Importing / Data Governance）  *(v0.7.0：MVP 完成)*
+### 1. 匯入治理 ✅ 完全落地（v0.7.0–v0.19.0）
 
-v0.7.0 完成了 CSV / Excel 匯入 MVP，覆蓋台股 Top 5 銀行（國泰世華 / 玉山 / 中信 / 台新 / 富邦）與 Top 5 券商（元大 / 富邦 / 凱基 / 永豐金 / 群益）。
+- CSV / Excel 主流程、去重、衝突確認、套用全鏈路 ✅（v0.7.0）
+- `AutoCategorizationRule`（手動 + 匯入共用，含 MatchField / MatchType / AppliesTo）✅（v0.8.0）
+- 匯入歷史紀錄與 rollback（`ImportBatchHistory` + `ImportRollbackService`）✅（v0.8.0）
+- Reconciliation 對帳工作台 ✅（v0.9.0–v0.10.0）
+- PDF / OCR 匯入 ✅（v0.19.0）
 
-已落地：
-- Core 模型：`ImportBatch` / `ImportConflict` / `ImportPreviewRow` / `ImportFormat` / `ImportApplyOptions` / `ImportApplyResult`
-- 介面：`IImportFormatDetector` / `IImportParser` / `IImportConflictDetector` / `IImportApplyService`
-- Application：`ImportConflictDetector`、`ImportApplyService`、`ImportMatchKey`
-- Infrastructure：`ImportFormatDetector`、`ConfigurableCsvParser` / `ConfigurableExcelParser`（由 `CsvParserConfigs` / `ExcelParserConfigs` 宣告式驅動，新增格式只需改 config）、`ImportParserFactory`
-- WPF：`Features/Import/ImportView` + `ImportViewModel`（拖放、自動偵測、預覽 grid + 每列 Resolution 下拉、現金帳戶必選 + Apply）
+### 2. ~~投資績效分析~~ ✅ 完全落地（v0.12.0）
 
-仍未完整：
-- `ImportRule`（自動分類 / 自動套用備註）
-- 匯入歷史紀錄與 rollback
-- reconciliation（對帳）
-- PDF / OCR 匯入
+- XIRR / TWR / MWR / benchmark 對比 / PnL 歸因 全部 ✅
 
-判定：
-- **MVP 完成**：CSV / Excel 主流程、去重、衝突確認、套用全鏈路可用
-- **完整 importing 子系統未完成**：對帳、回滾、自動規則、PDF/OCR 仍待後續版本
+### 3. ~~完整報表與匯出~~ ✅ 完全落地（v0.11.0）
 
----
+- 損益表 / 資產負債表 / 現金流量表 + PDF / CSV export 全部 ✅
 
-### 2. 投資績效分析
-尚未看到完整落地：
-- XIRR
-- TWR / MWR
-- benchmark 對比
-- 損益歸因
+### 4. ~~Goals 完整化~~ ✅ 完全落地（v0.16.0）
 
-這仍屬 roadmap 內的未完成功能。
+- milestone / funding rule / GoalPlanningService / GoalProgressQueryService 全部 ✅
 
----
+### 5. 風險 / 稅務 / 雲端同步 ✅ 完全落地
 
-### 3. 完整報表與匯出
-尚缺：
-- 資產負債表
-- 現金流量表
-- 損益表
-- PDF / CSV export
+- 風險分析（波動率 / 最大回撤 / Sharpe / 集中度 HHI）✅（v0.13.0）
+- 稅務模組（TaxSummary / 股利 / 海外所得 / 報稅匯出）✅（v0.18.0）
+- 雲端同步（AES-GCM / 8 entity round-trip / manual conflict drain / GA chaos test）✅（v0.20.0–v0.21.0）
 
----
-
-### 4. Goals 完整化
-尚缺：
-- milestone
-- funding rule
-- 獨立 query / workflow service
-- 更完整的提醒 / 自動指派資金來源
-
----
-
-### 5. 風險 / 稅務 / 多元資產 / 雲端同步
-這些仍多數停留在 roadmap 階段，尚未見完整落地。
+### 尚待開發（Phase 4）
+- AI 財務助理（v0.22.0）
+- 多元資產：不動產 / 保險 / 退休 / 實物（v0.23 / v0.24）
+- 情境模擬：FIRE / Monte Carlo（v0.25 / v0.26）
+- 多端體驗：PWA / 行動端（v0.27 / v0.28）
 
 ---
 

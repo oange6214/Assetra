@@ -167,6 +167,66 @@ public class AssetSqliteRepositoryTests : IDisposable
         Assert.Null(latest);
     }
 
+    [Fact]
+    public async Task Events_GetLatestValuations_EmptyInput_ReturnsEmptyDict()
+    {
+        var repo = new AssetSqliteRepository(_dbPath);
+        var result = await repo.GetLatestValuationsAsync(Array.Empty<Guid>());
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task Events_GetLatestValuations_BatchReturnsLatestPerAsset()
+    {
+        var repo = new AssetSqliteRepository(_dbPath);
+        var a = new AssetItem(Guid.NewGuid(), "資產A", FinancialType.Asset,
+            null, "TWD", DateOnly.FromDateTime(DateTime.Today));
+        var b = new AssetItem(Guid.NewGuid(), "資產B", FinancialType.Asset,
+            null, "TWD", DateOnly.FromDateTime(DateTime.Today));
+        var c = new AssetItem(Guid.NewGuid(), "資產C", FinancialType.Asset,
+            null, "TWD", DateOnly.FromDateTime(DateTime.Today));
+        await repo.AddItemAsync(a);
+        await repo.AddItemAsync(b);
+        await repo.AddItemAsync(c);
+
+        // a has two valuations — newer wins
+        await repo.AddEventAsync(new AssetEvent(Guid.NewGuid(), a.Id, AssetEventType.Valuation,
+            DateTime.UtcNow.AddDays(-10), 100m, null, null, null, DateTime.UtcNow));
+        await repo.AddEventAsync(new AssetEvent(Guid.NewGuid(), a.Id, AssetEventType.Valuation,
+            DateTime.UtcNow.AddDays(-1), 200m, null, null, null, DateTime.UtcNow));
+
+        // b has one valuation
+        await repo.AddEventAsync(new AssetEvent(Guid.NewGuid(), b.Id, AssetEventType.Valuation,
+            DateTime.UtcNow.AddDays(-5), 555m, null, null, null, DateTime.UtcNow));
+
+        // c has only a Transaction event — should be excluded from result
+        await repo.AddEventAsync(new AssetEvent(Guid.NewGuid(), c.Id, AssetEventType.Transaction,
+            DateTime.UtcNow, 999m, null, null, null, DateTime.UtcNow));
+
+        var result = await repo.GetLatestValuationsAsync(new[] { a.Id, b.Id, c.Id });
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal(200m, result[a.Id].Amount);
+        Assert.Equal(555m, result[b.Id].Amount);
+        Assert.False(result.ContainsKey(c.Id));
+    }
+
+    [Fact]
+    public async Task Events_GetLatestValuations_DistinctsDuplicateInputs()
+    {
+        var repo = new AssetSqliteRepository(_dbPath);
+        var a = new AssetItem(Guid.NewGuid(), "資產", FinancialType.Asset,
+            null, "TWD", DateOnly.FromDateTime(DateTime.Today));
+        await repo.AddItemAsync(a);
+        await repo.AddEventAsync(new AssetEvent(Guid.NewGuid(), a.Id, AssetEventType.Valuation,
+            DateTime.UtcNow, 42m, null, null, null, DateTime.UtcNow));
+
+        var result = await repo.GetLatestValuationsAsync(new[] { a.Id, a.Id, a.Id });
+
+        Assert.Single(result);
+        Assert.Equal(42m, result[a.Id].Amount);
+    }
+
     // ── Wave 7 Migration ─────────────────────────────────────────────────────
 
     [Fact]

@@ -11,7 +11,13 @@
     - `Loans/` — loan amortization and payment workflows.
     - `Budget/` — budget plans, categories, monthly summary (`MonthlyBudgetSummaryService`).
     - `Recurring/` — recurring/subscription transactions (`RecurringTransactionScheduler`, pending entry handling).
-    - `Reports/` — period reports (`MonthEndReportService`).
+    - `Reports/` — three-statement reports (`IncomeStatementService`, `BalanceSheetService`, `CashFlowStatementService`, `ReportExportService`). *(v0.11)*
+    - `Analysis/` — performance (XIRR / TWR / MWR / benchmark / PnL attribution) and risk (volatility / drawdown / Sharpe / concentration). *(v0.12–v0.13)*
+    - `Goals/` — complete goal subsystem (`GoalPlanningService`, `GoalProgressQueryService`, `GoalFundingRule`, `GoalMilestone`). *(v0.16)*
+    - `Tax/` — tax summary, dividend / overseas income tracking, export. *(v0.18)*
+    - `Import/` + `Reconciliation/` — full import pipeline (CSV / Excel / PDF / OCR), AutoCategorizationRule, batch history + rollback, reconciliation sessions. *(v0.7–v0.19)*
+    - `Sync/` — `SyncOrchestrator`, `CompositeLocalChangeQueue`, `LastWriteWinsResolver`, `InMemorySyncMetadataStore`. *(v0.20–v0.21)*
+    - `Fx/` — `IFxRateProvider`, `StaticFxRateProvider`, `MultiCurrencyValuationService`. *(v0.14)*
   - Each context exposes query services, workflow services, and summary services as needed.
 - `Assetra.Infrastructure`
   - SQLite repositories, external market-data clients, schedulers, migration helpers.

@@ -7,13 +7,16 @@ internal static class AutoCategorizationRuleSchemaMigrator
     private static readonly HashSet<string> AllowedColumns = new(StringComparer.OrdinalIgnoreCase)
     {
         "name", "match_field", "match_type", "applies_to",
+        "version", "last_modified_at", "last_modified_by_device", "is_deleted", "is_pending_push",
     };
 
     private static readonly HashSet<string> AllowedTypeDefs = new(StringComparer.OrdinalIgnoreCase)
     {
         "TEXT",
-        "INTEGER NOT NULL DEFAULT 3",
+        "TEXT NOT NULL DEFAULT ''",
         "INTEGER NOT NULL DEFAULT 0",
+        "INTEGER NOT NULL DEFAULT 1",
+        "INTEGER NOT NULL DEFAULT 3",
     };
 
     public static void EnsureInitialized(string connectionString)
@@ -52,6 +55,26 @@ internal static class AutoCategorizationRuleSchemaMigrator
             SqliteSchemaHelper.MigrateAddColumn(conn, tx, "auto_categorization_rule",
                 "applies_to", "INTEGER NOT NULL DEFAULT 3", AllowedColumns, AllowedTypeDefs);
 
+            // v0.20.11: cloud sync columns.
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "auto_categorization_rule",
+                "version", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "auto_categorization_rule",
+                "last_modified_at", "TEXT NOT NULL DEFAULT ''", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "auto_categorization_rule",
+                "last_modified_by_device", "TEXT NOT NULL DEFAULT ''", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "auto_categorization_rule",
+                "is_deleted", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "auto_categorization_rule",
+                "is_pending_push", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+
+            using (var idx = conn.CreateCommand())
+            {
+                idx.Transaction = tx;
+                idx.CommandText =
+                    "CREATE INDEX IF NOT EXISTS idx_auto_rule_pending ON auto_categorization_rule (is_pending_push) WHERE is_pending_push = 1;";
+                idx.ExecuteNonQuery();
+            }
+
             tx.Commit();
         }
         catch
@@ -60,5 +83,4 @@ internal static class AutoCategorizationRuleSchemaMigrator
             throw;
         }
     }
-
 }

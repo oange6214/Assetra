@@ -1,4 +1,5 @@
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Sync;
 using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Categories;
 using Assetra.WPF.Features.Portfolio;
@@ -13,9 +14,26 @@ internal static class BudgetServiceCollectionExtensions
         this IServiceCollection services,
         string dbPath)
     {
-        // Repositories
-        services.AddSingleton<ICategoryRepository>(_ => new CategorySqliteRepository(dbPath));
-        services.AddSingleton<IAutoCategorizationRuleRepository>(_ => new AutoCategorizationRuleSqliteRepository(dbPath));
+        // Repositories — single CategorySqliteRepository instance is shared between
+        // ICategoryRepository (user-facing) and ICategorySyncStore (sync layer).
+        services.AddSingleton<CategorySqliteRepository>(sp =>
+        {
+            var settings = sp.GetRequiredService<IAppSettingsService>();
+            var deviceId = settings.Current.SyncDeviceId is { Length: > 0 } id ? id : "local";
+            return new CategorySqliteRepository(dbPath, deviceId);
+        });
+        services.AddSingleton<ICategoryRepository>(sp => sp.GetRequiredService<CategorySqliteRepository>());
+        services.AddSingleton<ICategorySyncStore>(sp => sp.GetRequiredService<CategorySqliteRepository>());
+
+        // v0.20.11: AutoCategorizationRule shares one instance for repo + sync store.
+        services.AddSingleton<AutoCategorizationRuleSqliteRepository>(sp =>
+        {
+            var settings = sp.GetRequiredService<IAppSettingsService>();
+            var deviceId = settings.Current.SyncDeviceId is { Length: > 0 } id ? id : "local";
+            return new AutoCategorizationRuleSqliteRepository(dbPath, deviceId);
+        });
+        services.AddSingleton<IAutoCategorizationRuleRepository>(sp => sp.GetRequiredService<AutoCategorizationRuleSqliteRepository>());
+        services.AddSingleton<IAutoCategorizationRuleSyncStore>(sp => sp.GetRequiredService<AutoCategorizationRuleSqliteRepository>());
         services.AddSingleton<IBudgetRepository>(_ => new BudgetSqliteRepository(dbPath));
 
         // Application services

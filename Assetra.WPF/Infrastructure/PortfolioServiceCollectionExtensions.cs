@@ -4,6 +4,7 @@ using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Services;
 using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Sync;
 using Assetra.Infrastructure;
 using Assetra.Infrastructure.Http;
 using Assetra.Infrastructure.Persistence;
@@ -23,11 +24,41 @@ internal static class PortfolioServiceCollectionExtensions
         string dbPath)
     {
         // Repositories
-        services.AddSingleton<IPortfolioRepository>(_ => new PortfolioSqliteRepository(dbPath));
+        // Same concrete-singleton pattern (v0.20.9): shared instance between
+        // IPortfolioRepository and IPortfolioSyncStore.
+        services.AddSingleton<PortfolioSqliteRepository>(sp =>
+        {
+            var settings = sp.GetRequiredService<IAppSettingsService>();
+            var deviceId = settings.Current.SyncDeviceId is { Length: > 0 } id ? id : "local";
+            return new PortfolioSqliteRepository(dbPath, deviceId);
+        });
+        services.AddSingleton<IPortfolioRepository>(sp => sp.GetRequiredService<PortfolioSqliteRepository>());
+        services.AddSingleton<IPortfolioSyncStore>(sp => sp.GetRequiredService<PortfolioSqliteRepository>());
         services.AddSingleton<IPortfolioSnapshotRepository>(_ => new PortfolioSnapshotSqliteRepository(dbPath));
         services.AddSingleton<IPortfolioPositionLogRepository>(_ => new PortfolioPositionLogSqliteRepository(dbPath));
-        services.AddSingleton<ITradeRepository>(_ => new TradeSqliteRepository(dbPath));
-        services.AddSingleton<IAssetRepository>(_ => new AssetSqliteRepository(dbPath));
+        // Single TradeSqliteRepository instance shared between ITradeRepository (consumers)
+        // and ITradeSyncStore (sync layer) — same pattern as Category.
+        services.AddSingleton<TradeSqliteRepository>(sp =>
+        {
+            var settings = sp.GetRequiredService<IAppSettingsService>();
+            var deviceId = settings.Current.SyncDeviceId is { Length: > 0 } id ? id : "local";
+            return new TradeSqliteRepository(dbPath, deviceId);
+        });
+        services.AddSingleton<ITradeRepository>(sp => sp.GetRequiredService<TradeSqliteRepository>());
+        services.AddSingleton<ITradeSyncStore>(sp => sp.GetRequiredService<TradeSqliteRepository>());
+
+        // Same concrete-singleton pattern for Asset (v0.20.8): shared instance between
+        // IAssetRepository and IAssetSyncStore.
+        services.AddSingleton<AssetSqliteRepository>(sp =>
+        {
+            var settings = sp.GetRequiredService<IAppSettingsService>();
+            var deviceId = settings.Current.SyncDeviceId is { Length: > 0 } id ? id : "local";
+            return new AssetSqliteRepository(dbPath, deviceId);
+        });
+        services.AddSingleton<IAssetRepository>(sp => sp.GetRequiredService<AssetSqliteRepository>());
+        services.AddSingleton<IAssetSyncStore>(sp => sp.GetRequiredService<AssetSqliteRepository>());
+        services.AddSingleton<IAssetGroupSyncStore>(sp => sp.GetRequiredService<AssetSqliteRepository>());
+        services.AddSingleton<IAssetEventSyncStore>(sp => sp.GetRequiredService<AssetSqliteRepository>());
 
         // Domain / infrastructure services
         services.AddSingleton<PortfolioSnapshotService>();

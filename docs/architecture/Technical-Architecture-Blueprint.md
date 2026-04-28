@@ -3,7 +3,7 @@
 > 本文件描述的是 **中長期目標架構** 與建議演進方向，不代表所有模組都已經完整落地。
 > 目前實作狀態請優先對照：
 > - `docs/planning/Implementation-Roadmap.md`
-> - `docs/planning/Next-Sprint-v0.6.0.md`
+> - `docs/releases/CHANGELOG.md`
 > - 根目錄 `README.md`
 
 ## 一、架構目標
@@ -326,8 +326,7 @@ UI 可以繼續用自然語意：
 
 ## 4. 財務目標子系統（Goals）
 
-> 現況：已落地的是 `Goals MVP`（資料模型、repository、WPF 頁面與基本進度呈現）。
-> 下列 service 切分是建議中的完整形態，尚未全部在 `Application` 層獨立實作。
+> 現況（v0.16.0）：Goals 完整子系統已落地，含 `GoalMilestone` / `GoalFundingRule` / `GoalPlanningService` / `GoalProgressQueryService`。下列模型與 service 均已實作。
 
 ### Core
 - `FinancialGoal`
@@ -403,14 +402,7 @@ UI 可以繼續用自然語意：
 
 ## 1. 匯入管線（Import Pipeline）
 
-> 現況（v0.7.0）：CSV / Excel 匯入 MVP 已落地，覆蓋台股 Top 5 銀行（國泰世華 / 玉山 / 中信 / 台新 / 富邦）與 Top 5 券商（元大 / 富邦 / 凱基 / 永豐金 / 群益）。
->
-> - Core：`ImportBatch`、`ImportConflict`、`ImportPreviewRow`、`ImportSourceKind`、`ImportFileType`、`ImportFormat`、`ImportApplyOptions` / `ImportApplyResult`、`IImportFormatDetector` / `IImportParser` / `IImportConflictDetector` / `IImportApplyService`
-> - Application：`ImportConflictDetector`、`ImportApplyService`、`ImportMatchKey`
-> - Infrastructure：`ImportFormatDetector`、`ConfigurableCsvParser` / `ConfigurableExcelParser`（由 `CsvParserConfigs` / `ExcelParserConfigs` 宣告式驅動）、`ImportParserFactory`
-> - WPF：`Features/Import/ImportView` + `ImportViewModel`（拖放、自動偵測、預覽、Resolution 下拉、現金帳戶選擇）
->
-> 仍待後續版本：`ImportRule`（自動分類規則）、PDF / OCR 匯入、`ReconciliationService`、欄位映射 UI。
+> 現況（v0.19.0）：匯入管線完整落地。CSV / Excel / PDF / OCR 全鏈路可用；`AutoCategorizationRule`（含 MatchField / MatchType / AppliesTo）、`ImportBatchHistory` + rollback、Reconciliation 對帳工作台（v0.9–v0.10）均已出貨。
 
 ### Core
 - `ImportSourceKind` / `ImportFileType` / `ImportFormat` ✅
@@ -464,8 +456,7 @@ UI 可以繼續用自然語意：
 
 ## 七、報表與輸出架構
 
-> 現況：目前已實作的是 `MonthEndReportService + ReportsView` 的月結報告 MVP。
-> 下列資產負債表 / 現金流量表 / 損益表 / 匯出流程，仍屬目標架構。
+> 現況（v0.11.0）：三大報表（損益表 / 資產負債表 / 現金流量表）與 PDF / CSV 匯出（`ReportExportService`）均已落地。
 
 ### Core
 - `ReportPeriod`
@@ -588,47 +579,49 @@ Assets/
 
 ## 十一、推薦演進順序
 
-### Phase 1
+### Phase 1 ✅（v0.6–v0.10）
 - 收支管理子系統
 - 財務目標子系統
 - 淨資產趨勢視覺化
-- 資料治理 / 匯入管線基礎
+- 資料治理 / 匯入管線基礎、對帳工作台
 
-### Phase 2
+### Phase 2 ✅（v0.11–v0.15）
 - 投資績效分析
 - 外幣 / 美股 / FX 擴充
 - 報表輸出
 - 風險分析
 
-### Phase 3
-- 稅務模組
-- OCR / PDF 匯入
-- AI 財務助理
-- 雲端同步
+### Phase 3 ✅（v0.16–v0.21）
+- Goals 完整子系統（v0.16）
+- 趨勢圖增強：事件標註 + 堆疊圖（v0.17）
+- 稅務模組（v0.18）
+- OCR / PDF 匯入（v0.19）
+- 雲端同步 GA（v0.20–v0.21）
 
-### Phase 4
-- 不動產 / 保險 / 退休專戶
-- PWA / 行動端
-- 高階情境模擬與 FIRE 工具
+### Phase 4（進行中：v0.22→）
+- AI 財務助理（v0.22.0）
+- 不動產 / 保險 / 退休專戶（v0.23–v0.24）
+- 高階情境模擬與 FIRE 工具（v0.25–v0.26）
+- PWA / 行動端（v0.27–v0.28）
 
 ---
 
 ## 十二、總結
 
-Assetra 現在已具備：
+Assetra 截至 v0.21.1 已具備：
 
-- 投資
-- 帳戶
-- 負債
-- 交易記錄
-- 提醒
-- 配置分析
+- 投資 / 帳戶 / 負債 / 交易記錄 / 提醒 / 配置分析
+- 收支 / 預算 / Recurring / Goals 完整子系統
+- 匯入治理全鏈路（CSV / Excel / PDF / OCR + 對帳 + rollback）
+- 三大財務報表 + PDF / CSV 匯出
+- 投資績效（XIRR / TWR / MWR / benchmark / PnL）+ 風險分析
+- 外幣 / 美股 / FX 換算
+- 稅務模組
+- 雲端同步（AES-GCM 端到端加密，8 entity GA）
 
-下一步技術架構應該聚焦在：
+Phase 4 架構重點：
 
-1. 建立真正的子系統邊界
-2. 建立共享的分析與報表計算層
-3. 建立可擴充的匯入與資料治理架構
-4. 保持 UI 與核心邏輯解耦
-
-目標不是只加更多功能，而是讓 Assetra 能穩定成長為完整的個人財務平台。
+1. LLM adapter 整合（AI 財務助理）— query intent routing 不穿透 domain layer
+2. 多元資產模型（RealEstate / InsurancePolicy / RetirementAccount / PhysicalAsset）— 繼承現有 Asset / Portfolio 邊界
+3. 情境模擬計算引擎（FIRE / Monte Carlo）— 純計算層，不新增 persistence
+4. Web API 抽出（`Assetra.Api`）— PWA / 行動端前置，WPF 與 PWA 共用 `Assetra.Core` 介面

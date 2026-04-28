@@ -11,11 +11,13 @@ internal static class TradeSchemaMigrator
         "liability_account_id", "principal", "interest_paid", "to_cash_account_id",
         "loan_label", "liability_asset_id", "parent_trade_id",
         "category_id", "recurring_source_id",
+        "version", "last_modified_at", "last_modified_by_device", "is_deleted", "is_pending_push",
     };
 
     private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "REAL", "TEXT", "TEXT NOT NULL DEFAULT ''",
+        "INTEGER NOT NULL DEFAULT 0",
     };
 
     public static void EnsureInitialized(string connectionString)
@@ -67,12 +69,20 @@ internal static class TradeSchemaMigrator
             MigrateAddColumn(conn, tx, "category_id", "TEXT");
             MigrateAddColumn(conn, tx, "recurring_source_id", "TEXT");
 
+            // Sync columns (v0.20.7) — mirror Category schema
+            MigrateAddColumn(conn, tx, "version", "INTEGER NOT NULL DEFAULT 0");
+            MigrateAddColumn(conn, tx, "last_modified_at", "TEXT NOT NULL DEFAULT ''");
+            MigrateAddColumn(conn, tx, "last_modified_by_device", "TEXT NOT NULL DEFAULT ''");
+            MigrateAddColumn(conn, tx, "is_deleted", "INTEGER NOT NULL DEFAULT 0");
+            MigrateAddColumn(conn, tx, "is_pending_push", "INTEGER NOT NULL DEFAULT 0");
+
             cmd.CommandText = """
                 CREATE INDEX IF NOT EXISTS idx_trade_cash_acct ON trade (cash_account_id);
                 CREATE INDEX IF NOT EXISTS idx_trade_loan_label ON trade (loan_label);
                 CREATE INDEX IF NOT EXISTS idx_trade_liability_asset ON trade (liability_asset_id);
                 CREATE INDEX IF NOT EXISTS idx_trade_category ON trade (category_id);
                 CREATE INDEX IF NOT EXISTS idx_trade_recurring_source ON trade (recurring_source_id);
+                CREATE INDEX IF NOT EXISTS idx_trade_pending ON trade (is_pending_push) WHERE is_pending_push = 1;
                 """;
             cmd.ExecuteNonQuery();
 

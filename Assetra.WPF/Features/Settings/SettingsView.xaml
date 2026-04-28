@@ -320,6 +320,271 @@
           </StackPanel>
         </Border>
 
+        <TextBlock
+                    Margin="0,0,0,8"
+                    FontSize="{StaticResource FontSizeMd}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    Text="{DynamicResource Settings.Section.Ocr}" />
+
+        <Border
+                    Margin="0,0,0,24"
+                    Padding="16,12"
+                    Background="{DynamicResource AppSurface}"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource RadiusSm}">
+          <StackPanel>
+            <StackPanel Margin="0,0,0,14">
+              <TextBlock
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Settings.Ocr.TessdataPath}" />
+              <StackPanel Margin="0,8,0,0" MaxWidth="520" Orientation="Horizontal">
+                <TextBox
+                                    MinWidth="320"
+                                    Margin="0,0,8,0"
+                                    Text="{Binding OcrTessdataPath, UpdateSourceTrigger=LostFocus}" />
+                <Button
+                                    Command="{Binding BrowseOcrTessdataCommand}"
+                                    Content="{DynamicResource Common.Browse}"
+                                    Style="{StaticResource BtnGhost}" />
+              </StackPanel>
+              <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Settings.Ocr.TessdataPath.Hint}"
+                                TextWrapping="Wrap" />
+            </StackPanel>
+
+            <StackPanel>
+              <TextBlock
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Settings.Ocr.Language}" />
+              <TextBox
+                                MinWidth="220"
+                                MaxWidth="320"
+                                Margin="0,8,0,0"
+                                HorizontalAlignment="Left"
+                                Text="{Binding OcrLanguage, UpdateSourceTrigger=LostFocus}" />
+              <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Settings.Ocr.Language.Hint}"
+                                TextWrapping="Wrap" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!--  ── 雲端同步 ──  -->
+        <TextBlock
+                    Margin="0,0,0,8"
+                    FontSize="{StaticResource FontSizeMd}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    Text="{DynamicResource Settings.Section.Sync}" />
+
+        <Border
+                    Margin="0,0,0,24"
+                    Padding="16,12"
+                    Background="{DynamicResource AppSurface}"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource RadiusSm}">
+          <StackPanel DataContext="{Binding Sync}">
+            <CheckBox
+                                Margin="0,0,0,12"
+                                Content="{DynamicResource Settings.Sync.Enabled}"
+                                IsChecked="{Binding Enabled}" />
+
+            <StackPanel Margin="0,0,0,12">
+              <TextBlock
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Settings.Sync.BackendUrl}" />
+              <TextBox
+                                MinWidth="320"
+                                Margin="0,8,0,0"
+                                HorizontalAlignment="Left"
+                                Text="{Binding BackendUrl, UpdateSourceTrigger=LostFocus}" />
+              <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Settings.Sync.BackendUrl.Hint}"
+                                TextWrapping="Wrap" />
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,12">
+              <TextBlock
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Settings.Sync.AuthToken}" />
+              <TextBox
+                                MinWidth="320"
+                                Margin="0,8,0,0"
+                                HorizontalAlignment="Left"
+                                Text="{Binding AuthToken, UpdateSourceTrigger=LostFocus}" />
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,12">
+              <TextBlock
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Settings.Sync.Passphrase}" />
+              <PasswordBox
+                                x:Name="SyncPassphraseBox"
+                                MinWidth="320"
+                                Margin="0,8,0,0"
+                                HorizontalAlignment="Left"
+                                PasswordChanged="SyncPassphrase_Changed" />
+              <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Settings.Sync.Passphrase.Hint}"
+                                TextWrapping="Wrap" />
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,12">
+              <TextBlock
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Settings.Sync.IntervalMinutes}" />
+              <TextBox
+                                MinWidth="80"
+                                Margin="0,8,0,0"
+                                HorizontalAlignment="Left"
+                                Text="{Binding IntervalMinutes, UpdateSourceTrigger=LostFocus}" />
+              <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Settings.Sync.IntervalMinutes.Hint}"
+                                TextWrapping="Wrap" />
+            </StackPanel>
+
+            <CheckBox
+                                Margin="0,0,0,12"
+                                Content="{DynamicResource Settings.Sync.CachePassphrase}"
+                                IsChecked="{Binding CachePassphraseForBackground}"
+                                ToolTip="{DynamicResource Settings.Sync.CachePassphrase.Hint}" />
+
+            <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
+              <Button
+                                Margin="0,0,8,0"
+                                Command="{Binding SaveSettingsCommand}"
+                                Content="{DynamicResource Common.Save}"
+                                Style="{StaticResource BtnGhost}" />
+              <Button
+                                Command="{Binding SyncNowCommand}"
+                                Content="{DynamicResource Settings.Sync.SyncNow}"
+                                Style="{StaticResource BtnGhost}" />
+            </StackPanel>
+
+            <TextBlock
+                            Margin="0,4,0,0"
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{Binding StatusMessage}"
+                            TextWrapping="Wrap" />
+
+            <Grid Margin="0,8,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <StackPanel Grid.Column="0">
+                <TextBlock
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Settings.Sync.LastSync}" />
+                <TextBlock
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding LastSyncAt, TargetNullValue='—'}" />
+              </StackPanel>
+              <StackPanel Grid.Column="1">
+                <TextBlock
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Settings.Sync.LastResult}" />
+                <TextBlock Foreground="{DynamicResource AppTextPrimary}">
+                  <Run Text="↓" />
+                  <Run Text="{Binding LastPulled, Mode=OneWay}" />
+                  <Run Text="  ↑" />
+                  <Run Text="{Binding LastPushed, Mode=OneWay}" />
+                  <Run Text="  ⚠" />
+                  <Run Text="{Binding ManualConflicts, Mode=OneWay}" />
+                </TextBlock>
+              </StackPanel>
+            </Grid>
+
+            <TextBlock
+                            Margin="0,8,0,0"
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{DynamicResource AppTextMuted}">
+              <Run Text="{DynamicResource Settings.Sync.DeviceId}" />
+              <Run Text=": " />
+              <Run Text="{Binding DeviceId, Mode=OneWay, TargetNullValue='—'}" />
+            </TextBlock>
+
+            <!-- Conflict resolution panel -->
+            <StackPanel Margin="0,16,0,0" DataContext="{Binding DataContext.Conflicts, RelativeSource={RelativeSource AncestorType=UserControl}}">
+              <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Settings.Sync.Conflicts}" />
+                <Button
+                                    Margin="12,0,0,0"
+                                    Command="{Binding ReloadCommand}"
+                                    Content="{DynamicResource Settings.Sync.Conflicts.Reload}"
+                                    Style="{StaticResource BtnGhost}" />
+              </StackPanel>
+              <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border
+                                            Margin="0,0,0,6"
+                                            Padding="8"
+                                            BorderBrush="{DynamicResource AppBorder}"
+                                            BorderThickness="1"
+                                            CornerRadius="{StaticResource RadiusXs}">
+                      <StackPanel>
+                        <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}">
+                          <Run Text="{Binding EntityType, Mode=OneWay}" />
+                          <Run Text=" / " />
+                          <Run Text="{Binding EntityId, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextPrimary}">
+                          <Run Text="local v" /><Run Text="{Binding LocalVersion, Mode=OneWay}" />
+                          <Run Text=" @ " /><Run Text="{Binding LocalAt, Mode=OneWay}" />
+                          <Run Text=" / remote v" /><Run Text="{Binding RemoteVersion, Mode=OneWay}" />
+                          <Run Text=" @ " /><Run Text="{Binding RemoteAt, Mode=OneWay}" />
+                        </TextBlock>
+                        <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                          <Button
+                                                        Margin="0,0,6,0"
+                                                        Command="{Binding DataContext.KeepLocalCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Content="{DynamicResource Settings.Sync.Conflicts.KeepLocal}"
+                                                        Style="{StaticResource BtnGhost}" />
+                          <Button
+                                                        Command="{Binding DataContext.UseRemoteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Content="{DynamicResource Settings.Sync.Conflicts.UseRemote}"
+                                                        Style="{StaticResource BtnGhost}" />
+                        </StackPanel>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{Binding StatusMessage}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
       </StackPanel>
     </ScrollViewer>
 

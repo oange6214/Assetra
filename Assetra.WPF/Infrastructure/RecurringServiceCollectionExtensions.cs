@@ -1,4 +1,5 @@
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Sync;
 using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Recurring;
 using Assetra.WPF.Features.Snackbar;
@@ -12,7 +13,15 @@ internal static class RecurringServiceCollectionExtensions
         this IServiceCollection services,
         string dbPath)
     {
-        services.AddSingleton<IRecurringTransactionRepository>(_ => new RecurringTransactionSqliteRepository(dbPath));
+        // v0.20.11: RecurringTransaction shares one instance for repo + sync store.
+        services.AddSingleton<RecurringTransactionSqliteRepository>(sp =>
+        {
+            var settings = sp.GetRequiredService<IAppSettingsService>();
+            var deviceId = settings.Current.SyncDeviceId is { Length: > 0 } id ? id : "local";
+            return new RecurringTransactionSqliteRepository(dbPath, deviceId);
+        });
+        services.AddSingleton<IRecurringTransactionRepository>(sp => sp.GetRequiredService<RecurringTransactionSqliteRepository>());
+        services.AddSingleton<IRecurringTransactionSyncStore>(sp => sp.GetRequiredService<RecurringTransactionSqliteRepository>());
         services.AddSingleton<IPendingRecurringEntryRepository>(_ => new PendingRecurringEntrySqliteRepository(dbPath));
         services.AddSingleton<Assetra.Application.Recurring.Services.RecurringTransactionScheduler>();
 

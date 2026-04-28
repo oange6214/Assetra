@@ -1,5 +1,6 @@
 using Moq;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models;
 using Assetra.WPF.Features.Settings;
 using Assetra.WPF.Infrastructure;
@@ -28,9 +29,27 @@ public class SettingsViewModelTests
         _mockCurrency.Setup(c => c.Currency).Returns("TWD");
     }
 
+    private SyncSettingsViewModel CreateSyncVm()
+    {
+        var queue = new Assetra.Application.Sync.CategoryLocalChangeQueue(new Mock<ICategorySyncStore>().Object);
+        var coordinator = new SyncCoordinator(
+            _mockSettings.Object,
+            queue,
+            new Mock<IConflictResolver>().Object,
+            System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"sync-meta-{Guid.NewGuid():N}.json"));
+        return new SyncSettingsViewModel(_mockSettings.Object, coordinator, new SyncPassphraseCache());
+    }
+
+    private ConflictResolutionViewModel CreateConflictsVm()
+    {
+        var queue = new Assetra.Application.Sync.CategoryLocalChangeQueue(new Mock<ICategorySyncStore>().Object);
+        return new ConflictResolutionViewModel(queue, queue);
+    }
+
     private SettingsViewModel CreateVm() =>
         new(_mockSettings.Object, _mockTheme.Object,
-            _mockLocalization.Object, _mockCurrency.Object);
+            _mockLocalization.Object, _mockCurrency.Object,
+            CreateSyncVm(), CreateConflictsVm());
 
     [Fact]
     public void Constructor_DarkTheme_SetsIsDarkThemeTrue()

@@ -32,4 +32,10 @@ public partial class SettingsView : UserControl
         if (DataContext is SettingsViewModel vm)
             await vm.CommitUiScaleAsync();
     }
+
+    private void SyncPassphrase_Changed(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is SettingsViewModel vm && sender is PasswordBox box)
+            vm.Sync.Passphrase = box.Password;
+    }
 }

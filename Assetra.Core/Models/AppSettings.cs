@@ -42,4 +42,26 @@ public sealed record AppSettings(
     /// 估值基準幣別（ISO 4217）。所有跨幣別加總、Performance / Risk / Reports 計算統一換算為此幣別。
     /// 不同於 <see cref="PreferredCurrency"/>（顯示用）：BaseCurrency 是 *valuation* 基準。
     /// </summary>
-    string BaseCurrency = "TWD");
+    string BaseCurrency = "TWD",
+    /// <summary>
+    /// Tesseract tessdata 目錄絕對路徑（包含 .traineddata 檔）。空字串 = 未設定，PDF 圖片頁不會送 OCR。
+    /// </summary>
+    string OcrTessdataPath = "",
+    /// <summary>Tesseract 語言代碼（例：eng / chi_tra / chi_tra+eng）。預設 eng。</summary>
+    string OcrLanguage = "eng",
+    // 雲端同步（v0.20.5+）
+    /// <summary>啟用雲端同步。false = 同步管線不會建立、Sync UI 顯示停用狀態。</summary>
+    bool SyncEnabled = false,
+    /// <summary>本裝置 GUID。首次啟用同步時自動產生並持久化；空字串 = 尚未生成。</summary>
+    string SyncDeviceId = "",
+    /// <summary>雲端後端 base URL（例：<c>https://sync.example.com</c>）。空字串 = 未設定。</summary>
+    string SyncBackendUrl = "",
+    /// <summary>後端 Bearer token；空字串 = 不送 Authorization header（公開 / 測試後端）。</summary>
+    string SyncAuthToken = "",
+    /// <summary>
+    /// PBKDF2 salt（base64 編碼，至少 16 bytes）。首次設密語時生成並持久化；
+    /// 之後同密語才能解出同一把 AES-GCM key。空字串 = 尚未設密語。
+    /// </summary>
+    string SyncPassphraseSalt = "",
+    /// <summary>背景同步間隔（分鐘）。0 = 停用背景同步，僅靠手動觸發。</summary>
+    int SyncIntervalMinutes = 0);

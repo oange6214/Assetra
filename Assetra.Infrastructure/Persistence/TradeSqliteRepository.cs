@@ -1,17 +1,38 @@
 using System.Globalization;
 using Microsoft.Data.Sqlite;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models;
+using Assetra.Core.Models.Sync;
+using Assetra.Infrastructure.Sync;
 
 namespace Assetra.Infrastructure.Persistence;
 
-public sealed class TradeSqliteRepository : ITradeRepository
+/// <summary>
+/// SQLite-backed <see cref="ITradeRepository"/>，同時實作 <see cref="ITradeSyncStore"/>。
+/// 鏡 <see cref="CategorySqliteRepository"/> 的 sync 模式：
+/// <list type="bullet">
+///   <item><see cref="AddAsync"/>：寫入時 stamp version=1、last_modified、is_pending_push=1</item>
+///   <item><see cref="UpdateAsync"/>：bump version、刷新 last_modified、is_pending_push=1</item>
+///   <item><see cref="RemoveAsync"/>：soft delete（保留 row、is_deleted=1、bump version）；同時把
+///         children 的 parent_trade_id 設 NULL，並將指向被刪 row 的 cash_account_id 等不另外處理。</item>
+///   <item>Bulk cascade 路徑（<see cref="RemoveChildrenAsync"/> / <see cref="RemoveByAccountIdAsync"/> /
+///         <see cref="RemoveByLiabilityAsync"/>）v0.20.8 起改為 soft delete，
+///         與 <see cref="RemoveAsync"/> 對齊；cloud 會收到每筆被連動刪除的 trade tombstone。</item>
+/// </list>
+/// </summary>
+public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
 {
     private readonly string _connectionString;
+    private readonly string _deviceId;
+    private readonly TimeProvider _time;
 
-    public TradeSqliteRepository(string dbPath)
+    public TradeSqliteRepository(string dbPath, string deviceId = "local", TimeProvider? time = null)
     {
+        ArgumentException.ThrowIfNullOrEmpty(deviceId);
         _connectionString = $"Data Source={dbPath}";
+        _deviceId = deviceId;
+        _time = time ?? TimeProvider.System;
         TradeSchemaMigrator.EnsureInitialized(_connectionString);
     }
 
@@ -38,6 +59,9 @@ public sealed class TradeSqliteRepository : ITradeRepository
         "commission_discount, loan_label, principal, interest_paid, " +
         "to_cash_account_id, liability_asset_id, parent_trade_id, " +
         "category_id, recurring_source_id";
+
+    private const string SyncSelectClause = SelectClause +
+        ", version, last_modified_at, last_modified_by_device, is_deleted";
 
     private static Trade MapTrade(SqliteDataReader r) => new(
         Id: Guid.Parse(r.GetString(0)),
@@ -93,14 +117,14 @@ public sealed class TradeSqliteRepository : ITradeRepository
         cmd.Parameters.AddWithValue("$recurring_source_id", t.RecurringSourceId.HasValue ? (object)t.RecurringSourceId.Value.ToString() : DBNull.Value);
     }
 
-    // ─── Queries ─────────────────────────────────────────────────────────
+    // ─── Queries (filter is_deleted = 0) ─────────────────────────────────
 
     public async Task<IReadOnlyList<Trade>> GetAllAsync(CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
-        cmd.CommandText = $"SELECT {SelectClause} FROM trade ORDER BY trade_date DESC, rowid DESC;";
+        cmd.CommandText = $"SELECT {SelectClause} FROM trade WHERE is_deleted = 0 ORDER BY trade_date DESC, rowid DESC;";
         var results = new List<Trade>();
         await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
         while (await reader.ReadAsync(ct).ConfigureAwait(false))
@@ -117,7 +141,7 @@ public sealed class TradeSqliteRepository : ITradeRepository
         await using var cmd = conn.CreateCommand();
         var idList = entryIds.Distinct().ToList();
         var placeholders = string.Join(",", idList.Select((_, i) => $"$p{i}"));
-        cmd.CommandText = $"SELECT {SelectClause} FROM trade WHERE portfolio_entry_id IN ({placeholders}) ORDER BY trade_date DESC, rowid DESC;";
+        cmd.CommandText = $"SELECT {SelectClause} FROM trade WHERE is_deleted = 0 AND portfolio_entry_id IN ({placeholders}) ORDER BY trade_date DESC, rowid DESC;";
         for (int i = 0; i < idList.Count; i++)
             cmd.Parameters.AddWithValue($"$p{i}", idList[i].ToString());
         var results = new List<Trade>();
@@ -132,7 +156,7 @@ public sealed class TradeSqliteRepository : ITradeRepository
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
-        cmd.CommandText = $"SELECT {SelectClause} FROM trade WHERE trade_date >= $from AND trade_date <= $to ORDER BY trade_date DESC, rowid DESC;";
+        cmd.CommandText = $"SELECT {SelectClause} FROM trade WHERE is_deleted = 0 AND trade_date >= $from AND trade_date <= $to ORDER BY trade_date DESC, rowid DESC;";
         cmd.Parameters.AddWithValue("$from", from.ToUniversalTime().ToString("o"));
         cmd.Parameters.AddWithValue("$to", to.ToUniversalTime().ToString("o"));
         var results = new List<Trade>();
@@ -147,7 +171,7 @@ public sealed class TradeSqliteRepository : ITradeRepository
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
-        cmd.CommandText = $"SELECT {SelectClause} FROM trade WHERE id = $id;";
+        cmd.CommandText = $"SELECT {SelectClause} FROM trade WHERE id = $id AND is_deleted = 0;";
         cmd.Parameters.AddWithValue("$id", id.ToString());
         await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
         if (await reader.ReadAsync(ct).ConfigureAwait(false))
@@ -160,10 +184,9 @@ public sealed class TradeSqliteRepository : ITradeRepository
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
-        // Include Transfer records where this account is the destination
         cmd.CommandText =
             $"SELECT {SelectClause} FROM trade " +
-            "WHERE cash_account_id = $acct OR to_cash_account_id = $acct " +
+            "WHERE is_deleted = 0 AND (cash_account_id = $acct OR to_cash_account_id = $acct) " +
             "ORDER BY trade_date DESC, rowid DESC;";
         cmd.Parameters.AddWithValue("$acct", cashAccountId.ToString());
         var results = new List<Trade>();
@@ -181,7 +204,7 @@ public sealed class TradeSqliteRepository : ITradeRepository
         await using var cmd = conn.CreateCommand();
         cmd.CommandText =
             $"SELECT {SelectClause} FROM trade " +
-            "WHERE loan_label = $loan_label " +
+            "WHERE is_deleted = 0 AND loan_label = $loan_label " +
             "ORDER BY trade_date DESC, rowid DESC;";
         cmd.Parameters.AddWithValue("$loan_label", loanLabel);
         var results = new List<Trade>();
@@ -199,28 +222,11 @@ public sealed class TradeSqliteRepository : ITradeRepository
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            INSERT OR IGNORE INTO trade
-                (id, symbol, exchange, name, trade_type, trade_date, price, quantity,
-                 realized_pnl, realized_pnl_pct, cash_amount, cash_account_id, note,
-                 portfolio_entry_id, commission, commission_discount,
-                 loan_label, principal, interest_paid, to_cash_account_id,
-                 liability_asset_id,
-                 parent_trade_id, category_id, recurring_source_id,
-                 created_at, updated_at)
-            VALUES
-                ($id, $sym, $ex, $name, $type, $date, $price, $qty,
-                 $rpnl, $rpct, $cash, $acct, $note,
-                 $pentry, $comm, $comm_d,
-                 $loan_label, $princ, $int, $to_acct,
-                 $liability_asset_id,
-                 $parent_id, $category_id, $recurring_source_id,
-                 $created_at, $updated_at);
-            """;
+        cmd.CommandText = InsertSql;
         BindTradeParams(cmd, trade);
-        var now = DateTime.UtcNow.ToString("o");
-        cmd.Parameters.AddWithValue("$created_at", now);
-        cmd.Parameters.AddWithValue("$updated_at", now);
+        var now = _time.GetUtcNow().UtcDateTime.ToString("o");
+        cmd.Parameters.AddWithValue("$now", now);
+        cmd.Parameters.AddWithValue("$device", _deviceId);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -244,31 +250,76 @@ public sealed class TradeSqliteRepository : ITradeRepository
                 parent_trade_id = $parent_id,
                 category_id = $category_id,
                 recurring_source_id = $recurring_source_id,
-                updated_at = $updated_at
+                updated_at = $now,
+                version = version + 1,
+                last_modified_at = $now,
+                last_modified_by_device = $device,
+                is_pending_push = 1
             WHERE id = $id;
             """;
         BindTradeParams(cmd, trade);
-        cmd.Parameters.AddWithValue("$updated_at", DateTime.UtcNow.ToString("o"));
+        cmd.Parameters.AddWithValue("$now", _time.GetUtcNow().UtcDateTime.ToString("o"));
+        cmd.Parameters.AddWithValue("$device", _deviceId);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
     public async Task RemoveAsync(Guid id, CancellationToken ct = default)
     {
+        // Soft delete (tombstone): keep row so deletion can be pushed to remote.
+        // Detach children (set parent_trade_id = NULL) so dangling FKs don't break UI.
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText = "DELETE FROM trade WHERE id = $id;";
-        cmd.Parameters.AddWithValue("$id", id.ToString());
-        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
+
+        await using (var detach = conn.CreateCommand())
+        {
+            detach.Transaction = tx;
+            detach.CommandText = "UPDATE trade SET parent_trade_id = NULL WHERE parent_trade_id = $id;";
+            detach.Parameters.AddWithValue("$id", id.ToString());
+            await detach.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        }
+
+        await using (var del = conn.CreateCommand())
+        {
+            del.Transaction = tx;
+            del.CommandText = """
+                UPDATE trade SET
+                    is_deleted = 1,
+                    version = version + 1,
+                    updated_at = $now,
+                    last_modified_at = $now,
+                    last_modified_by_device = $device,
+                    is_pending_push = 1
+                WHERE id = $id;
+                """;
+            del.Parameters.AddWithValue("$id", id.ToString());
+            del.Parameters.AddWithValue("$now", _time.GetUtcNow().UtcDateTime.ToString("o"));
+            del.Parameters.AddWithValue("$device", _deviceId);
+            await del.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        }
+
+        await tx.CommitAsync(ct).ConfigureAwait(false);
     }
 
+    // v0.20.8: cascade bulk deletes converted to soft delete so cloud receives tombstone events.
     public async Task RemoveChildrenAsync(Guid parentId, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
-        cmd.CommandText = "DELETE FROM trade WHERE parent_trade_id = $pid;";
+        cmd.CommandText = """
+            UPDATE trade SET
+                is_deleted = 1,
+                version = version + 1,
+                updated_at = $now,
+                last_modified_at = $now,
+                last_modified_by_device = $device,
+                is_pending_push = 1
+            WHERE parent_trade_id = $pid AND is_deleted = 0;
+            """;
         cmd.Parameters.AddWithValue("$pid", parentId.ToString());
+        cmd.Parameters.AddWithValue("$now", _time.GetUtcNow().UtcDateTime.ToString("o"));
+        cmd.Parameters.AddWithValue("$device", _deviceId);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -277,8 +328,19 @@ public sealed class TradeSqliteRepository : ITradeRepository
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
-        cmd.CommandText = "DELETE FROM trade WHERE cash_account_id = $id OR to_cash_account_id = $id;";
+        cmd.CommandText = """
+            UPDATE trade SET
+                is_deleted = 1,
+                version = version + 1,
+                updated_at = $now,
+                last_modified_at = $now,
+                last_modified_by_device = $device,
+                is_pending_push = 1
+            WHERE is_deleted = 0 AND (cash_account_id = $id OR to_cash_account_id = $id);
+            """;
         cmd.Parameters.AddWithValue("$id", accountId.ToString());
+        cmd.Parameters.AddWithValue("$now", _time.GetUtcNow().UtcDateTime.ToString("o"));
+        cmd.Parameters.AddWithValue("$device", _deviceId);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -303,7 +365,17 @@ public sealed class TradeSqliteRepository : ITradeRepository
             cmd.Parameters.AddWithValue("$label", loanLabel);
         }
 
-        cmd.CommandText = "DELETE FROM trade WHERE " + string.Join(" OR ", clauses) + ";";
+        cmd.CommandText =
+            "UPDATE trade SET " +
+            "    is_deleted = 1, " +
+            "    version = version + 1, " +
+            "    updated_at = $now, " +
+            "    last_modified_at = $now, " +
+            "    last_modified_by_device = $device, " +
+            "    is_pending_push = 1 " +
+            "WHERE is_deleted = 0 AND (" + string.Join(" OR ", clauses) + ");";
+        cmd.Parameters.AddWithValue("$now", _time.GetUtcNow().UtcDateTime.ToString("o"));
+        cmd.Parameters.AddWithValue("$device", _deviceId);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -342,42 +414,224 @@ public sealed class TradeSqliteRepository : ITradeRepository
         }
     }
 
-    private static async Task ExecAddAsync(SqliteConnection conn, SqliteTransaction tx, Trade trade, CancellationToken ct)
+    private async Task ExecAddAsync(SqliteConnection conn, SqliteTransaction tx, Trade trade, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(trade);
         await using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
-        cmd.CommandText = """
-            INSERT OR IGNORE INTO trade
-                (id, symbol, exchange, name, trade_type, trade_date, price, quantity,
-                 realized_pnl, realized_pnl_pct, cash_amount, cash_account_id, note,
-                 portfolio_entry_id, commission, commission_discount,
-                 loan_label, principal, interest_paid, to_cash_account_id,
-                 liability_asset_id,
-                 parent_trade_id, category_id, recurring_source_id,
-                 created_at, updated_at)
-            VALUES
-                ($id, $sym, $ex, $name, $type, $date, $price, $qty,
-                 $rpnl, $rpct, $cash, $acct, $note,
-                 $pentry, $comm, $comm_d,
-                 $loan_label, $princ, $int, $to_acct,
-                 $liability_asset_id,
-                 $parent_id, $category_id, $recurring_source_id,
-                 $created_at, $updated_at);
-            """;
+        cmd.CommandText = InsertSql;
         BindTradeParams(cmd, trade);
-        var now = DateTime.UtcNow.ToString("o");
-        cmd.Parameters.AddWithValue("$created_at", now);
-        cmd.Parameters.AddWithValue("$updated_at", now);
+        var now = _time.GetUtcNow().UtcDateTime.ToString("o");
+        cmd.Parameters.AddWithValue("$now", now);
+        cmd.Parameters.AddWithValue("$device", _deviceId);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    private static async Task ExecRemoveAsync(SqliteConnection conn, SqliteTransaction tx, Guid id, CancellationToken ct)
+    private async Task ExecRemoveAsync(SqliteConnection conn, SqliteTransaction tx, Guid id, CancellationToken ct)
     {
+        await using (var detach = conn.CreateCommand())
+        {
+            detach.Transaction = tx;
+            detach.CommandText = "UPDATE trade SET parent_trade_id = NULL WHERE parent_trade_id = $id;";
+            detach.Parameters.AddWithValue("$id", id.ToString());
+            await detach.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        }
+
         await using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
-        cmd.CommandText = "DELETE FROM trade WHERE id = $id;";
+        cmd.CommandText = """
+            UPDATE trade SET
+                is_deleted = 1,
+                version = version + 1,
+                updated_at = $now,
+                last_modified_at = $now,
+                last_modified_by_device = $device,
+                is_pending_push = 1
+            WHERE id = $id;
+            """;
         cmd.Parameters.AddWithValue("$id", id.ToString());
+        cmd.Parameters.AddWithValue("$now", _time.GetUtcNow().UtcDateTime.ToString("o"));
+        cmd.Parameters.AddWithValue("$device", _deviceId);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+    }
+
+    private const string InsertSql = """
+        INSERT OR IGNORE INTO trade
+            (id, symbol, exchange, name, trade_type, trade_date, price, quantity,
+             realized_pnl, realized_pnl_pct, cash_amount, cash_account_id, note,
+             portfolio_entry_id, commission, commission_discount,
+             loan_label, principal, interest_paid, to_cash_account_id,
+             liability_asset_id,
+             parent_trade_id, category_id, recurring_source_id,
+             created_at, updated_at,
+             version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
+        VALUES
+            ($id, $sym, $ex, $name, $type, $date, $price, $qty,
+             $rpnl, $rpct, $cash, $acct, $note,
+             $pentry, $comm, $comm_d,
+             $loan_label, $princ, $int, $to_acct,
+             $liability_asset_id,
+             $parent_id, $category_id, $recurring_source_id,
+             $now, $now,
+             1, $now, $device, 0, 1);
+        """;
+
+    // ── ITradeSyncStore ─────────────────────────────────────────────────────
+
+    public async Task<IReadOnlyList<SyncEnvelope>> GetPendingPushAsync(CancellationToken ct = default)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"SELECT {SyncSelectClause} FROM trade WHERE is_pending_push = 1;";
+        var results = new List<SyncEnvelope>();
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
+        {
+            var trade = MapTrade(reader);
+            var version = new EntityVersion(
+                Version: reader.GetInt64(24),
+                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(25)),
+                LastModifiedByDevice: reader.GetString(26));
+            var isDeleted = reader.GetInt32(27) != 0;
+            results.Add(TradeSyncMapper.ToEnvelope(trade, version, isDeleted));
+        }
+        return results;
+    }
+
+    public async Task MarkPushedAsync(IReadOnlyList<Guid> ids, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+        if (ids.Count == 0) return;
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "UPDATE trade SET is_pending_push = 0 WHERE id = $id;";
+        var p = cmd.Parameters.Add("$id", SqliteType.Text);
+        foreach (var id in ids)
+        {
+            p.Value = id.ToString();
+            await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        }
+        await tx.CommitAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task ApplyRemoteAsync(IReadOnlyList<SyncEnvelope> envelopes, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(envelopes);
+        if (envelopes.Count == 0) return;
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
+
+        foreach (var env in envelopes)
+        {
+            if (env.EntityType != TradeSyncMapper.EntityType) continue;
+
+            await using (var probe = conn.CreateCommand())
+            {
+                probe.Transaction = tx;
+                probe.CommandText = "SELECT version FROM trade WHERE id = $id;";
+                probe.Parameters.AddWithValue("$id", env.EntityId.ToString());
+                var existing = await probe.ExecuteScalarAsync(ct).ConfigureAwait(false);
+                if (existing is not null && Convert.ToInt64(existing) >= env.Version.Version)
+                    continue; // never write backwards
+            }
+
+            if (env.Deleted)
+            {
+                // Tombstone insert: provide minimum NOT NULL placeholders for new rows.
+                await using var del = conn.CreateCommand();
+                del.Transaction = tx;
+                del.CommandText = """
+                    INSERT INTO trade
+                        (id, symbol, exchange, name, trade_type, trade_date, price, quantity,
+                         created_at, updated_at,
+                         version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
+                    VALUES
+                        ($id, '', '', '', 'Buy', $now, 0, 0,
+                         $now, $now,
+                         $ver, $modAt, $modBy, 1, 0)
+                    ON CONFLICT(id) DO UPDATE SET
+                        is_deleted = 1,
+                        version = excluded.version,
+                        last_modified_at = excluded.last_modified_at,
+                        last_modified_by_device = excluded.last_modified_by_device,
+                        updated_at = excluded.updated_at,
+                        is_pending_push = 0;
+                    """;
+                del.Parameters.AddWithValue("$id", env.EntityId.ToString());
+                del.Parameters.AddWithValue("$now", _time.GetUtcNow().UtcDateTime.ToString("o"));
+                del.Parameters.AddWithValue("$ver", env.Version.Version);
+                del.Parameters.AddWithValue("$modAt", env.Version.LastModifiedAt.UtcDateTime.ToString("o"));
+                del.Parameters.AddWithValue("$modBy", env.Version.LastModifiedByDevice);
+                await del.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+                continue;
+            }
+
+            var t = TradeSyncMapper.FromPayload(env);
+            await using var up = conn.CreateCommand();
+            up.Transaction = tx;
+            up.CommandText = """
+                INSERT INTO trade
+                    (id, symbol, exchange, name, trade_type, trade_date, price, quantity,
+                     realized_pnl, realized_pnl_pct, cash_amount, cash_account_id, note,
+                     portfolio_entry_id, commission, commission_discount,
+                     loan_label, principal, interest_paid, to_cash_account_id,
+                     liability_asset_id,
+                     parent_trade_id, category_id, recurring_source_id,
+                     created_at, updated_at,
+                     version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
+                VALUES
+                    ($id, $sym, $ex, $name, $type, $date, $price, $qty,
+                     $rpnl, $rpct, $cash, $acct, $note,
+                     $pentry, $comm, $comm_d,
+                     $loan_label, $princ, $int, $to_acct,
+                     $liability_asset_id,
+                     $parent_id, $category_id, $recurring_source_id,
+                     $now, $now,
+                     $ver, $modAt, $modBy, 0, 0)
+                ON CONFLICT(id) DO UPDATE SET
+                    symbol = excluded.symbol,
+                    exchange = excluded.exchange,
+                    name = excluded.name,
+                    trade_type = excluded.trade_type,
+                    trade_date = excluded.trade_date,
+                    price = excluded.price,
+                    quantity = excluded.quantity,
+                    realized_pnl = excluded.realized_pnl,
+                    realized_pnl_pct = excluded.realized_pnl_pct,
+                    cash_amount = excluded.cash_amount,
+                    cash_account_id = excluded.cash_account_id,
+                    note = excluded.note,
+                    portfolio_entry_id = excluded.portfolio_entry_id,
+                    commission = excluded.commission,
+                    commission_discount = excluded.commission_discount,
+                    loan_label = excluded.loan_label,
+                    principal = excluded.principal,
+                    interest_paid = excluded.interest_paid,
+                    to_cash_account_id = excluded.to_cash_account_id,
+                    liability_asset_id = excluded.liability_asset_id,
+                    parent_trade_id = excluded.parent_trade_id,
+                    category_id = excluded.category_id,
+                    recurring_source_id = excluded.recurring_source_id,
+                    updated_at = excluded.updated_at,
+                    version = excluded.version,
+                    last_modified_at = excluded.last_modified_at,
+                    last_modified_by_device = excluded.last_modified_by_device,
+                    is_deleted = 0,
+                    is_pending_push = 0;
+                """;
+            BindTradeParams(up, t);
+            up.Parameters.AddWithValue("$now", _time.GetUtcNow().UtcDateTime.ToString("o"));
+            up.Parameters.AddWithValue("$ver", env.Version.Version);
+            up.Parameters.AddWithValue("$modAt", env.Version.LastModifiedAt.UtcDateTime.ToString("o"));
+            up.Parameters.AddWithValue("$modBy", env.Version.LastModifiedByDevice);
+            await up.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        }
+
+        await tx.CommitAsync(ct).ConfigureAwait(false);
     }
 }

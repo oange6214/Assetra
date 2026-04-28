@@ -2,6 +2,8 @@ using System.Net.Http;
 using System.Reactive.Concurrency;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Sync;
+using Assetra.Application.Sync;
 using Assetra.Infrastructure;
 using Assetra.Infrastructure.FinMind;
 using Assetra.Infrastructure.History;
@@ -9,6 +11,7 @@ using Assetra.Infrastructure.Http;
 using Assetra.Infrastructure.Persistence;
 using Assetra.Infrastructure.Scheduling;
 using Assetra.Infrastructure.Search;
+using Assetra.Infrastructure.Sync;
 using Assetra.WPF.Features.Settings;
 using Assetra.WPF.Features.Snackbar;
 using Assetra.WPF.Features.StatusBar;
@@ -102,6 +105,7 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<NavRailViewModel>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<StatusBarViewModel>();
+        services.AddSingleton<SyncSettingsViewModel>();
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<MainWindow>(sp =>
             new MainWindow(sp.GetRequiredService<MainViewModel>()));
@@ -112,6 +116,58 @@ internal static class ServiceCollectionExtensions
     {
         services.AddHostedService<DbInitializerService>();
         services.AddHostedService<MarketDataHostedService>();
+        return services;
+    }
+
+    public static IServiceCollection AddAssetraSync(
+        this IServiceCollection services,
+        string dataDir)
+    {
+        services.AddSingleton<IConflictResolver>(_ => new LastWriteWinsResolver());
+        services.AddSingleton<CategoryLocalChangeQueue>(sp =>
+            new CategoryLocalChangeQueue(sp.GetRequiredService<ICategorySyncStore>()));
+        services.AddSingleton<TradeLocalChangeQueue>(sp =>
+            new TradeLocalChangeQueue(sp.GetRequiredService<ITradeSyncStore>()));
+        services.AddSingleton<AssetLocalChangeQueue>(sp =>
+            new AssetLocalChangeQueue(sp.GetRequiredService<IAssetSyncStore>()));
+        services.AddSingleton<AssetGroupLocalChangeQueue>(sp =>
+            new AssetGroupLocalChangeQueue(sp.GetRequiredService<IAssetGroupSyncStore>()));
+        services.AddSingleton<AssetEventLocalChangeQueue>(sp =>
+            new AssetEventLocalChangeQueue(sp.GetRequiredService<IAssetEventSyncStore>()));
+        services.AddSingleton<PortfolioLocalChangeQueue>(sp =>
+            new PortfolioLocalChangeQueue(sp.GetRequiredService<IPortfolioSyncStore>()));
+        services.AddSingleton<AutoCategorizationRuleLocalChangeQueue>(sp =>
+            new AutoCategorizationRuleLocalChangeQueue(sp.GetRequiredService<IAutoCategorizationRuleSyncStore>()));
+        services.AddSingleton<RecurringTransactionLocalChangeQueue>(sp =>
+            new RecurringTransactionLocalChangeQueue(sp.GetRequiredService<IRecurringTransactionSyncStore>()));
+
+        services.AddSingleton<CompositeLocalChangeQueue>(sp =>
+        {
+            var map = new Dictionary<string, ILocalChangeQueue>(StringComparer.Ordinal)
+            {
+                [CategorySyncMapper.EntityType] = sp.GetRequiredService<CategoryLocalChangeQueue>(),
+                [TradeSyncMapper.EntityType] = sp.GetRequiredService<TradeLocalChangeQueue>(),
+                [AssetSyncMapper.EntityType] = sp.GetRequiredService<AssetLocalChangeQueue>(),
+                [AssetGroupSyncMapper.EntityType] = sp.GetRequiredService<AssetGroupLocalChangeQueue>(),
+                [AssetEventSyncMapper.EntityType] = sp.GetRequiredService<AssetEventLocalChangeQueue>(),
+                [PortfolioSyncMapper.EntityType] = sp.GetRequiredService<PortfolioLocalChangeQueue>(),
+                [AutoCategorizationRuleSyncMapper.EntityType] = sp.GetRequiredService<AutoCategorizationRuleLocalChangeQueue>(),
+                [RecurringTransactionSyncMapper.EntityType] = sp.GetRequiredService<RecurringTransactionLocalChangeQueue>(),
+            };
+            return new CompositeLocalChangeQueue(map);
+        });
+        services.AddSingleton<ILocalChangeQueue>(sp => sp.GetRequiredService<CompositeLocalChangeQueue>());
+        services.AddSingleton<IManualConflictDrain>(sp => sp.GetRequiredService<CompositeLocalChangeQueue>());
+
+        var metadataPath = System.IO.Path.Combine(dataDir, "sync-meta.json");
+        services.AddSingleton(sp => new SyncCoordinator(
+            sp.GetRequiredService<IAppSettingsService>(),
+            sp.GetRequiredService<ILocalChangeQueue>(),
+            sp.GetRequiredService<IConflictResolver>(),
+            metadataPath));
+        services.AddSingleton<SyncPassphraseCache>();
+        services.AddSingleton<ConflictResolutionViewModel>();
+        services.AddHostedService<BackgroundSyncService>();
         return services;
     }
 }
