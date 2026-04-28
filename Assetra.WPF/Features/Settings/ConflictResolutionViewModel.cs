@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
 using Assetra.Application.Sync;
+using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models.Sync;
+using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -22,6 +24,7 @@ public partial class ConflictResolutionViewModel : ObservableObject
 {
     private readonly IManualConflictDrain _drain;
     private readonly ILocalChangeQueue _queue;
+    private readonly ILocalizationService _loc;
 
     [ObservableProperty]
     private string _statusMessage = string.Empty;
@@ -30,12 +33,16 @@ public partial class ConflictResolutionViewModel : ObservableObject
 
     public bool HasItems => Items.Count > 0;
 
-    public ConflictResolutionViewModel(IManualConflictDrain drain, ILocalChangeQueue queue)
+    public ConflictResolutionViewModel(
+        IManualConflictDrain drain,
+        ILocalChangeQueue queue,
+        ILocalizationService? localization = null)
     {
         ArgumentNullException.ThrowIfNull(drain);
         ArgumentNullException.ThrowIfNull(queue);
         _drain = drain;
         _queue = queue;
+        _loc = localization ?? NullLocalizationService.Instance;
     }
 
     [RelayCommand]
@@ -45,7 +52,9 @@ public partial class ConflictResolutionViewModel : ObservableObject
         foreach (var c in _drain.DrainManualConflicts())
             Items.Add(new ConflictRowViewModel(c));
         OnPropertyChanged(nameof(HasItems));
-        StatusMessage = Items.Count == 0 ? "No pending conflicts." : $"{Items.Count} pending.";
+        StatusMessage = Items.Count == 0
+            ? Text("Settings.Sync.Conflicts.Status.Empty", "No pending conflicts.")
+            : Text("Settings.Sync.Conflicts.Status.Pending", "{0} pending.", Items.Count);
     }
 
     [RelayCommand]
@@ -56,7 +65,7 @@ public partial class ConflictResolutionViewModel : ObservableObject
         // next SyncAsync will push it. Just drop from manual-conflict list.
         Items.Remove(row);
         OnPropertyChanged(nameof(HasItems));
-        StatusMessage = $"Kept local for {row.EntityId}.";
+        StatusMessage = Text("Settings.Sync.Conflicts.Status.KeptLocal", "Kept local for {0}.", row.EntityId);
         return Task.CompletedTask;
     }
 
@@ -67,7 +76,13 @@ public partial class ConflictResolutionViewModel : ObservableObject
         await _queue.ApplyRemoteAsync(new[] { row.Conflict.Remote }).ConfigureAwait(false);
         Items.Remove(row);
         OnPropertyChanged(nameof(HasItems));
-        StatusMessage = $"Adopted remote for {row.EntityId}.";
+        StatusMessage = Text("Settings.Sync.Conflicts.Status.UsedRemote", "Adopted remote for {0}.", row.EntityId);
+    }
+
+    private string Text(string key, string fallback, params object[] args)
+    {
+        var template = _loc.Get(key, fallback);
+        return args.Length == 0 ? template : string.Format(template, args);
     }
 }
 

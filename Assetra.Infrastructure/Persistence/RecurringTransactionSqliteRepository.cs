@@ -20,16 +20,25 @@ public sealed class RecurringTransactionSqliteRepository
     : IRecurringTransactionRepository, IRecurringTransactionSyncStore
 {
     private readonly string _connectionString;
-    private readonly string _deviceId;
+    private readonly Func<string> _deviceIdProvider;
     private readonly TimeProvider _time;
 
     public RecurringTransactionSqliteRepository(
         string dbPath,
         string deviceId = "local",
         TimeProvider? time = null)
+        : this(dbPath, () => deviceId, time)
     {
+    }
+
+    public RecurringTransactionSqliteRepository(
+        string dbPath,
+        Func<string> deviceIdProvider,
+        TimeProvider? time = null)
+    {
+        ArgumentNullException.ThrowIfNull(deviceIdProvider);
         _connectionString = $"Data Source={dbPath}";
-        _deviceId = string.IsNullOrWhiteSpace(deviceId) ? "local" : deviceId;
+        _deviceIdProvider = deviceIdProvider;
         _time = time ?? TimeProvider.System;
         RecurringSchemaMigrator.EnsureInitialized(_connectionString);
     }
@@ -339,10 +348,16 @@ public sealed class RecurringTransactionSqliteRepository
 
     private string NowIso() => _time.GetUtcNow().UtcDateTime.ToString("o", CultureInfo.InvariantCulture);
 
+    private string CurrentDeviceId()
+    {
+        var deviceId = _deviceIdProvider();
+        return string.IsNullOrWhiteSpace(deviceId) ? "local" : deviceId;
+    }
+
     private void StampSync(SqliteCommand cmd)
     {
         cmd.Parameters.AddWithValue("$now", NowIso());
-        cmd.Parameters.AddWithValue("$device", _deviceId);
+        cmd.Parameters.AddWithValue("$device", CurrentDeviceId());
     }
 
     private static void Bind(SqliteCommand cmd, RecurringTransaction r)

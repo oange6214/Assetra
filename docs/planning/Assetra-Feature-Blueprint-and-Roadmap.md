@@ -20,7 +20,7 @@
 | 提醒 | `AlertRule`（基礎） | v0.6.0 |
 | 收支與預算 | 分類管理、月度預算、月結摘要（`MonthlyBudgetSummaryService`） | v0.6.0 |
 | 訂閱 / 固定支出 | 週期管理與自動入帳（`RecurringTransactionScheduler`） | v0.6.0 |
-| 匯入治理 | CSV / Excel preview + dedupe + ImportRule + batch history + rollback | v0.7.0 / v0.8.0 |
+| 匯入治理 | CSV / Excel preview + dedupe + `AutoCategorizationRule` + batch history + rollback | v0.7.0 / v0.8.0 |
 | 對帳子系統 | `ReconciliationSession`、Created / OverwrittenFromStatement、即時餘額 | v0.9.0 / v0.10.0 |
 | 報表 | 損益表、資產負債表、現金流量表、PDF/CSV 匯出 | v0.11.0 |
 | 投資績效 | XIRR / TWR / MWR / Benchmark 對比 / PnL 歸因 | v0.12.0 |
@@ -125,7 +125,7 @@ Assetra 的定位應逐步從「投資追蹤工具」擴展成：
 
 > 現況（v0.19.0）：CSV / Excel / PDF / OCR 全鏈路就位，含批次歷史與回滾、對帳子系統、自動分類規則。
 - 匯入欄位映射規則 ✅（v0.7.0：宣告式 `CsvParserConfigs` / `ExcelParserConfigs`）
-- 匯入去重與重複交易偵測 ✅（v0.7.0：`ImportConflictDetector` + `ImportMatchKey`）
+- 匯入去重與重複交易偵測 ✅（v0.7.0：`ImportConflictDetector` + `ImportMatchKey`；銀行以日期 / 金額 / 交易對象為主，券商交易會納入買賣方向、數量與單價，避免同日同股同額的不同成交被誤判為重複）
 - 手動確認與修正流程 ✅（v0.7.0：每列 Skip / Overwrite / Add anyway 下拉）
 - 匯入歷史紀錄與回滾 ✅（v0.8.0：`ImportBatchHistory` + `ImportRollbackService`）
 - 對帳機制 ✅（v0.9.0–v0.10.0：`ReconciliationSession`、Created / OverwrittenFromStatement）

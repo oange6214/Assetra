@@ -19,8 +19,7 @@ internal static class BudgetServiceCollectionExtensions
         services.AddSingleton<CategorySqliteRepository>(sp =>
         {
             var settings = sp.GetRequiredService<IAppSettingsService>();
-            var deviceId = settings.Current.SyncDeviceId is { Length: > 0 } id ? id : "local";
-            return new CategorySqliteRepository(dbPath, deviceId);
+            return new CategorySqliteRepository(dbPath, () => SyncDeviceIdProvider.Resolve(settings));
         });
         services.AddSingleton<ICategoryRepository>(sp => sp.GetRequiredService<CategorySqliteRepository>());
         services.AddSingleton<ICategorySyncStore>(sp => sp.GetRequiredService<CategorySqliteRepository>());
@@ -29,8 +28,7 @@ internal static class BudgetServiceCollectionExtensions
         services.AddSingleton<AutoCategorizationRuleSqliteRepository>(sp =>
         {
             var settings = sp.GetRequiredService<IAppSettingsService>();
-            var deviceId = settings.Current.SyncDeviceId is { Length: > 0 } id ? id : "local";
-            return new AutoCategorizationRuleSqliteRepository(dbPath, deviceId);
+            return new AutoCategorizationRuleSqliteRepository(dbPath, () => SyncDeviceIdProvider.Resolve(settings));
         });
         services.AddSingleton<IAutoCategorizationRuleRepository>(sp => sp.GetRequiredService<AutoCategorizationRuleSqliteRepository>());
         services.AddSingleton<IAutoCategorizationRuleSyncStore>(sp => sp.GetRequiredService<AutoCategorizationRuleSqliteRepository>());

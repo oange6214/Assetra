@@ -43,11 +43,21 @@ public sealed class BalanceSheetService : IBalanceSheetService
         var cashAssets = await _assets.GetItemsByTypeAsync(FinancialType.Asset).ConfigureAwait(false);
         var liabilityAssets = await _assets.GetItemsByTypeAsync(FinancialType.Liability).ConfigureAwait(false);
         var baseCurrency = GetBaseCurrency();
+        PortfolioDailySnapshot? portfolioSnapshot = null;
+        if (_snapshots is not null)
+            portfolioSnapshot = await _snapshots.GetSnapshotAsync(asOf, ct).ConfigureAwait(false);
+        var portfolioCurrencies = portfolioSnapshot is null
+            ? Enumerable.Empty<string>()
+            : new[] { portfolioSnapshot.Currency };
 
         // Pre-resolve FX factor (foreign 1 unit → base) once per distinct currency.
         // Avoids N+1 ConvertAsync calls when many accounts share a currency.
         var fxFactors = await ResolveFxFactorsAsync(
-            cashAssets.Concat(liabilityAssets).Where(a => a.IsActive).Select(a => a.Currency),
+            cashAssets
+                .Concat(liabilityAssets)
+                .Where(a => a.IsActive)
+                .Select(a => a.Currency)
+                .Concat(portfolioCurrencies),
             asOf, baseCurrency, ct).ConfigureAwait(false);
 
         var assetRows = new List<StatementRow>();
@@ -59,11 +69,12 @@ public sealed class BalanceSheetService : IBalanceSheetService
         }
 
         // 投資市值 (snapshot 優先)
-        if (_snapshots is not null)
+        if (portfolioSnapshot is not null && portfolioSnapshot.MarketValue != 0m)
         {
-            var snap = await _snapshots.GetSnapshotAsync(asOf, ct).ConfigureAwait(false);
-            if (snap is not null && snap.MarketValue != 0m)
-                assetRows.Add(new StatementRow("Portfolio", snap.MarketValue, "Investments"));
+            assetRows.Add(new StatementRow(
+                "Portfolio",
+                ConvertWithCache(portfolioSnapshot.MarketValue, portfolioSnapshot.Currency, baseCurrency, fxFactors),
+                "Investments"));
         }
 
         var assetTotal = assetRows.Sum(r => r.Amount);

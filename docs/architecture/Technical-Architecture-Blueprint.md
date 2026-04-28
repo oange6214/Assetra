@@ -410,7 +410,7 @@ UI 可以繼續用自然語意：
 - `ImportPreviewRow` ✅
 - `ImportConflict` / `ImportConflictResolution` ✅
 - `ImportApplyOptions` / `ImportApplyResult` ✅
-- `ImportRule` ⏳ v0.8+
+- `AutoCategorizationRule` ✅（取代原規劃的 `ImportRule`，統一手動交易與匯入分類規則）
 
 ### Application
 - `ImportConflictDetector` ✅（取代原規劃的 `ImportDeduplicationService`）
@@ -424,8 +424,8 @@ UI 可以繼續用自然語意：
 - `IImportParser` 實作（`ConfigurableCsvParser` / `ConfigurableExcelParser`）✅
 - CSV parser ✅（CsvHelper 33.0.1）
 - Excel parser ✅（ClosedXML 0.105.0）
-- PDF parser ⏳
-- OCR service adapter ⏳
+- PDF parser ✅（`PdfImportParser` + `PdfPigStatementParser`；仍需擴充更多銀行 / 券商模板）
+- OCR service adapter ✅（`TesseractOcrAdapter`；仍需改善使用者設定與格式辨識覆蓋率）
 - file watcher / file store ⏳
 
 ### WPF

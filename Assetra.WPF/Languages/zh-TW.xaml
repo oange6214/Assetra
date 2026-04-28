@@ -691,10 +691,19 @@
     <sys:String x:Key="Settings.Sync.IntervalMinutes.Hint">0 = 停用背景同步。需勾選下方「記住密語」才能啟用。</sys:String>
     <sys:String x:Key="Settings.Sync.CachePassphrase">手動同步成功後，於記憶體保留密語</sys:String>
     <sys:String x:Key="Settings.Sync.CachePassphrase.Hint">僅存記憶體——應用程式關閉即清除。背景定時同步需勾選此項才能無人值守執行。</sys:String>
+    <sys:String x:Key="Settings.Sync.Status.Saved">已儲存。</sys:String>
+    <sys:String x:Key="Settings.Sync.Status.Syncing">同步中...</sys:String>
+    <sys:String x:Key="Settings.Sync.Status.Done">同步完成。</sys:String>
+    <sys:String x:Key="Settings.Sync.Status.DoneWithConflicts">同步完成，仍有 {0} 筆衝突需要手動確認。</sys:String>
+    <sys:String x:Key="Settings.Sync.Status.Failed">同步失敗：{0}</sys:String>
     <sys:String x:Key="Settings.Sync.Conflicts">需手動處理的衝突</sys:String>
     <sys:String x:Key="Settings.Sync.Conflicts.Reload">重新載入</sys:String>
     <sys:String x:Key="Settings.Sync.Conflicts.KeepLocal">保留本機</sys:String>
     <sys:String x:Key="Settings.Sync.Conflicts.UseRemote">採用雲端</sys:String>
+    <sys:String x:Key="Settings.Sync.Conflicts.Status.Empty">目前沒有待處理衝突。</sys:String>
+    <sys:String x:Key="Settings.Sync.Conflicts.Status.Pending">有 {0} 筆衝突待處理。</sys:String>
+    <sys:String x:Key="Settings.Sync.Conflicts.Status.KeptLocal">已保留本機版本：{0}</sys:String>
+    <sys:String x:Key="Settings.Sync.Conflicts.Status.UsedRemote">已採用雲端版本：{0}</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">盤中</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">休市</sys:String>
 

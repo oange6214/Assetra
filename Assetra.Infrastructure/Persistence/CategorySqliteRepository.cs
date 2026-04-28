@@ -16,14 +16,19 @@ namespace Assetra.Infrastructure.Persistence;
 public sealed class CategorySqliteRepository : ICategoryRepository, ICategorySyncStore
 {
     private readonly string _connectionString;
-    private readonly string _deviceId;
+    private readonly Func<string> _deviceIdProvider;
     private readonly TimeProvider _time;
 
     public CategorySqliteRepository(string dbPath, string deviceId = "local", TimeProvider? time = null)
+        : this(dbPath, () => deviceId, time)
     {
-        ArgumentException.ThrowIfNullOrEmpty(deviceId);
+    }
+
+    public CategorySqliteRepository(string dbPath, Func<string> deviceIdProvider, TimeProvider? time = null)
+    {
+        ArgumentNullException.ThrowIfNull(deviceIdProvider);
         _connectionString = $"Data Source={dbPath}";
-        _deviceId = deviceId;
+        _deviceIdProvider = deviceIdProvider;
         _time = time ?? TimeProvider.System;
         CategorySchemaMigrator.EnsureInitialized(_connectionString);
     }
@@ -34,6 +39,12 @@ public sealed class CategorySqliteRepository : ICategoryRepository, ICategorySyn
     private const string SyncSelectClause =
         "id, name, kind, parent_id, icon, color_hex, sort_order, is_archived, " +
         "version, last_modified_at, last_modified_by_device, is_deleted";
+
+    private string CurrentDeviceId()
+    {
+        var deviceId = _deviceIdProvider();
+        return string.IsNullOrWhiteSpace(deviceId) ? "local" : deviceId;
+    }
 
     private static ExpenseCategory Map(SqliteDataReader r) => new(
         Id: Guid.Parse(r.GetString(0)),
@@ -90,7 +101,7 @@ public sealed class CategorySqliteRepository : ICategoryRepository, ICategorySyn
             """;
         Bind(cmd, c);
         cmd.Parameters.AddWithValue("$now", _time.GetUtcNow().UtcDateTime.ToString("o"));
-        cmd.Parameters.AddWithValue("$device", _deviceId);
+        cmd.Parameters.AddWithValue("$device", CurrentDeviceId());
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -118,7 +129,7 @@ public sealed class CategorySqliteRepository : ICategoryRepository, ICategorySyn
             """;
         Bind(cmd, c);
         cmd.Parameters.AddWithValue("$now", _time.GetUtcNow().UtcDateTime.ToString("o"));
-        cmd.Parameters.AddWithValue("$device", _deviceId);
+        cmd.Parameters.AddWithValue("$device", CurrentDeviceId());
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -142,7 +153,7 @@ public sealed class CategorySqliteRepository : ICategoryRepository, ICategorySyn
             """;
         cmd.Parameters.AddWithValue("$id", id.ToString());
         cmd.Parameters.AddWithValue("$now", _time.GetUtcNow().UtcDateTime.ToString("o"));
-        cmd.Parameters.AddWithValue("$device", _deviceId);
+        cmd.Parameters.AddWithValue("$device", CurrentDeviceId());
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 

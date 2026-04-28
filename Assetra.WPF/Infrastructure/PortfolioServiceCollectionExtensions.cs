@@ -29,8 +29,7 @@ internal static class PortfolioServiceCollectionExtensions
         services.AddSingleton<PortfolioSqliteRepository>(sp =>
         {
             var settings = sp.GetRequiredService<IAppSettingsService>();
-            var deviceId = settings.Current.SyncDeviceId is { Length: > 0 } id ? id : "local";
-            return new PortfolioSqliteRepository(dbPath, deviceId);
+            return new PortfolioSqliteRepository(dbPath, () => SyncDeviceIdProvider.Resolve(settings));
         });
         services.AddSingleton<IPortfolioRepository>(sp => sp.GetRequiredService<PortfolioSqliteRepository>());
         services.AddSingleton<IPortfolioSyncStore>(sp => sp.GetRequiredService<PortfolioSqliteRepository>());
@@ -41,8 +40,7 @@ internal static class PortfolioServiceCollectionExtensions
         services.AddSingleton<TradeSqliteRepository>(sp =>
         {
             var settings = sp.GetRequiredService<IAppSettingsService>();
-            var deviceId = settings.Current.SyncDeviceId is { Length: > 0 } id ? id : "local";
-            return new TradeSqliteRepository(dbPath, deviceId);
+            return new TradeSqliteRepository(dbPath, () => SyncDeviceIdProvider.Resolve(settings));
         });
         services.AddSingleton<ITradeRepository>(sp => sp.GetRequiredService<TradeSqliteRepository>());
         services.AddSingleton<ITradeSyncStore>(sp => sp.GetRequiredService<TradeSqliteRepository>());
@@ -52,8 +50,7 @@ internal static class PortfolioServiceCollectionExtensions
         services.AddSingleton<AssetSqliteRepository>(sp =>
         {
             var settings = sp.GetRequiredService<IAppSettingsService>();
-            var deviceId = settings.Current.SyncDeviceId is { Length: > 0 } id ? id : "local";
-            return new AssetSqliteRepository(dbPath, deviceId);
+            return new AssetSqliteRepository(dbPath, () => SyncDeviceIdProvider.Resolve(settings));
         });
         services.AddSingleton<IAssetRepository>(sp => sp.GetRequiredService<AssetSqliteRepository>());
         services.AddSingleton<IAssetSyncStore>(sp => sp.GetRequiredService<AssetSqliteRepository>());

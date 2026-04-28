@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.21.4 - 2026-04-28
+
+Code review hardening：收斂同步、報表換匯與語系化修補，並同步修正 docs 對匯入管線成熟度的描述。
+
+### 變更
+
+- **BalanceSheet 投資市值換匯**：`PortfolioDailySnapshot.MarketValue` 現在會依 snapshot currency 換算至目前 base currency，避免現金 / 負債已換匯但投資市值混幣別加總。
+- **Sync device id stamp**：sync-aware repositories 改為每次 mutation 透過 provider 讀取目前 `SyncDeviceId`，避免首次同步產生 device id 後仍持續寫入 `local`。
+- **Sync / Conflict 狀態語系化**：`SyncSettingsViewModel` 與 `ConflictResolutionViewModel` 的 runtime status 改用 `Settings.Sync.*` resource key，避免繁中 UI 操作後混入英文。
+- **Docs 對齊實作**：Technical Architecture / Feature Roadmap 更新 PDF / OCR parser 已落地、`AutoCategorizationRule` 取代舊 `ImportRule`，並補上券商匯入 match key 會納入方向、數量與單價。
+
+### 測試
+
+- `dotnet build .\Assetra.slnx --no-restore -v minimal` ✅
+- `dotnet test .\Assetra.Tests\Assetra.Tests.csproj --no-build -v minimal` ✅（914/914）
+
+### 後續 sprint 預告
+
+- **v0.22.0**：AI 財務助理。
+
 ## v0.21.3 - 2026-04-28
 
 程式碼 vs Docs 名稱誤記修正（code-gap audit 後修補）。三處 docs 引用了不存在的型別 / 服務名稱：

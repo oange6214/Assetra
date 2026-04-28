@@ -17,8 +17,7 @@ internal static class RecurringServiceCollectionExtensions
         services.AddSingleton<RecurringTransactionSqliteRepository>(sp =>
         {
             var settings = sp.GetRequiredService<IAppSettingsService>();
-            var deviceId = settings.Current.SyncDeviceId is { Length: > 0 } id ? id : "local";
-            return new RecurringTransactionSqliteRepository(dbPath, deviceId);
+            return new RecurringTransactionSqliteRepository(dbPath, () => SyncDeviceIdProvider.Resolve(settings));
         });
         services.AddSingleton<IRecurringTransactionRepository>(sp => sp.GetRequiredService<RecurringTransactionSqliteRepository>());
         services.AddSingleton<IRecurringTransactionSyncStore>(sp => sp.GetRequiredService<RecurringTransactionSqliteRepository>());

@@ -19,14 +19,19 @@ namespace Assetra.Infrastructure.Persistence;
 public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, IAssetGroupSyncStore, IAssetEventSyncStore
 {
     private readonly string _connectionString;
-    private readonly string _deviceId;
+    private readonly Func<string> _deviceIdProvider;
     private readonly TimeProvider _time;
 
     public AssetSqliteRepository(string dbPath, string deviceId = "local", TimeProvider? time = null)
+        : this(dbPath, () => deviceId, time)
     {
-        ArgumentException.ThrowIfNullOrEmpty(deviceId);
+    }
+
+    public AssetSqliteRepository(string dbPath, Func<string> deviceIdProvider, TimeProvider? time = null)
+    {
+        ArgumentNullException.ThrowIfNull(deviceIdProvider);
         _connectionString = $"Data Source={dbPath}";
-        _deviceId = deviceId;
+        _deviceIdProvider = deviceIdProvider;
         _time = time ?? TimeProvider.System;
         AssetSchemaMigrator.EnsureInitialized(_connectionString);
     }
@@ -242,7 +247,7 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
             ins.Parameters.AddWithValue("$c", currency);
             ins.Parameters.AddWithValue("$d", DateOnly.FromDateTime(_time.GetUtcNow().UtcDateTime).ToString("yyyy-MM-dd"));
             ins.Parameters.AddWithValue("$now", now);
-            ins.Parameters.AddWithValue("$device", _deviceId);
+            ins.Parameters.AddWithValue("$device", CurrentDeviceId());
             await ins.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
             return id;
         }
@@ -564,10 +569,16 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
 
     private string NowIso() => _time.GetUtcNow().UtcDateTime.ToString("o");
 
+    private string CurrentDeviceId()
+    {
+        var deviceId = _deviceIdProvider();
+        return string.IsNullOrWhiteSpace(deviceId) ? "local" : deviceId;
+    }
+
     private void StampSyncParams(SqliteCommand cmd)
     {
         cmd.Parameters.AddWithValue("$now", NowIso());
-        cmd.Parameters.AddWithValue("$device", _deviceId);
+        cmd.Parameters.AddWithValue("$device", CurrentDeviceId());
     }
 
     private static AssetGroup MapGroup(SqliteDataReader r) => new(

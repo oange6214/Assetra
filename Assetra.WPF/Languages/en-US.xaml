@@ -689,10 +689,19 @@
     <sys:String x:Key="Settings.Sync.IntervalMinutes.Hint">0 disables background sync. Requires the passphrase cache below to be enabled.</sys:String>
     <sys:String x:Key="Settings.Sync.CachePassphrase">Cache passphrase in memory after manual sync</sys:String>
     <sys:String x:Key="Settings.Sync.CachePassphrase.Hint">Stored in memory only — cleared on app exit. Required for the background timer to run unattended.</sys:String>
+    <sys:String x:Key="Settings.Sync.Status.Saved">Saved.</sys:String>
+    <sys:String x:Key="Settings.Sync.Status.Syncing">Syncing...</sys:String>
+    <sys:String x:Key="Settings.Sync.Status.Done">Done.</sys:String>
+    <sys:String x:Key="Settings.Sync.Status.DoneWithConflicts">Done. {0} conflict(s) need manual review.</sys:String>
+    <sys:String x:Key="Settings.Sync.Status.Failed">Failed: {0}</sys:String>
     <sys:String x:Key="Settings.Sync.Conflicts">Manual conflicts</sys:String>
     <sys:String x:Key="Settings.Sync.Conflicts.Reload">Refresh</sys:String>
     <sys:String x:Key="Settings.Sync.Conflicts.KeepLocal">Keep local</sys:String>
     <sys:String x:Key="Settings.Sync.Conflicts.UseRemote">Use remote</sys:String>
+    <sys:String x:Key="Settings.Sync.Conflicts.Status.Empty">No pending conflicts.</sys:String>
+    <sys:String x:Key="Settings.Sync.Conflicts.Status.Pending">{0} pending.</sys:String>
+    <sys:String x:Key="Settings.Sync.Conflicts.Status.KeptLocal">Kept local for {0}.</sys:String>
+    <sys:String x:Key="Settings.Sync.Conflicts.Status.UsedRemote">Adopted remote for {0}.</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">Market open</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">Market closed</sys:String>
 

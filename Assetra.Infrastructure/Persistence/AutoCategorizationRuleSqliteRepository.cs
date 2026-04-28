@@ -15,14 +15,19 @@ namespace Assetra.Infrastructure.Persistence;
 public sealed class AutoCategorizationRuleSqliteRepository : IAutoCategorizationRuleRepository, IAutoCategorizationRuleSyncStore
 {
     private readonly string _connectionString;
-    private readonly string _deviceId;
+    private readonly Func<string> _deviceIdProvider;
     private readonly TimeProvider _time;
 
     public AutoCategorizationRuleSqliteRepository(string dbPath, string deviceId = "local", TimeProvider? time = null)
+        : this(dbPath, () => deviceId, time)
     {
-        ArgumentException.ThrowIfNullOrEmpty(deviceId);
+    }
+
+    public AutoCategorizationRuleSqliteRepository(string dbPath, Func<string> deviceIdProvider, TimeProvider? time = null)
+    {
+        ArgumentNullException.ThrowIfNull(deviceIdProvider);
         _connectionString = $"Data Source={dbPath}";
-        _deviceId = deviceId;
+        _deviceIdProvider = deviceIdProvider;
         _time = time ?? TimeProvider.System;
         AutoCategorizationRuleSchemaMigrator.EnsureInitialized(_connectionString);
     }
@@ -285,10 +290,16 @@ public sealed class AutoCategorizationRuleSqliteRepository : IAutoCategorization
 
     private string NowIso() => _time.GetUtcNow().UtcDateTime.ToString("o");
 
+    private string CurrentDeviceId()
+    {
+        var deviceId = _deviceIdProvider();
+        return string.IsNullOrWhiteSpace(deviceId) ? "local" : deviceId;
+    }
+
     private void StampSync(SqliteCommand cmd)
     {
         cmd.Parameters.AddWithValue("$now", NowIso());
-        cmd.Parameters.AddWithValue("$device", _deviceId);
+        cmd.Parameters.AddWithValue("$device", CurrentDeviceId());
     }
 
     private static void Bind(SqliteCommand cmd, AutoCategorizationRule r)

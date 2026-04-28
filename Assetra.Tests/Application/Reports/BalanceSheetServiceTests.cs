@@ -58,7 +58,7 @@ public class BalanceSheetServiceTests
         {
             { ("USD", "TWD"), 32m },
         });
-        var svc = new BalanceSheetService(assets, trades, snapshots: null, fx: fx, baseCurrency: "TWD");
+        var svc = new BalanceSheetService(assets, trades, snapshots: null, fx: fx, settings: new FakeSettings("TWD"));
         var bs = await svc.GenerateAsync(new DateOnly(2026, 4, 30));
 
         Assert.Equal(32000m, bs.Assets.Total);
@@ -76,10 +76,34 @@ public class BalanceSheetServiceTests
         trades.Store.Add(MakeIncome(new DateTime(2026, 4, 1), 1000m, usdBankId));
 
         var fx = new StubFx(new Dictionary<(string, string), decimal>());
-        var svc = new BalanceSheetService(assets, trades, snapshots: null, fx: fx, baseCurrency: "TWD");
+        var svc = new BalanceSheetService(assets, trades, snapshots: null, fx: fx, settings: new FakeSettings("TWD"));
         var bs = await svc.GenerateAsync(new DateOnly(2026, 4, 30));
 
         Assert.Equal(1000m, bs.Assets.Total);
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ConvertsPortfolioSnapshotToBaseCurrency()
+    {
+        var assets = new FakeAssetRepo();
+        var trades = new FakeTradeRepo();
+        var snapshots = new FakeSnapshotRepo();
+        snapshots.Store.Add(new PortfolioDailySnapshot(
+            new DateOnly(2026, 4, 30),
+            TotalCost: 900m,
+            MarketValue: 1000m,
+            Pnl: 100m,
+            PositionCount: 1,
+            Currency: "USD"));
+
+        var fx = new StubFx(new Dictionary<(string, string), decimal>
+        {
+            { ("USD", "TWD"), 32m },
+        });
+        var svc = new BalanceSheetService(assets, trades, snapshots, fx, new FakeSettings("TWD"));
+        var bs = await svc.GenerateAsync(new DateOnly(2026, 4, 30));
+
+        Assert.Equal(32000m, bs.Assets.Total);
     }
 
     private sealed class StubFx : IMultiCurrencyValuationService
@@ -93,6 +117,25 @@ public class BalanceSheetServiceTests
             if (_rates.TryGetValue((from.ToUpperInvariant(), to.ToUpperInvariant()), out var rate))
                 return Task.FromResult<decimal?>(amount * rate);
             return Task.FromResult<decimal?>(null);
+        }
+    }
+
+    private sealed class FakeSettings : IAppSettingsService
+    {
+        public FakeSettings(string baseCurrency)
+        {
+            Current = new AppSettings(BaseCurrency: baseCurrency);
+        }
+
+        public AppSettings Current { get; private set; }
+
+        public event Action? Changed;
+
+        public Task SaveAsync(AppSettings settings)
+        {
+            Current = settings;
+            Changed?.Invoke();
+            return Task.CompletedTask;
         }
     }
 
@@ -156,5 +199,29 @@ public class BalanceSheetServiceTests
         public Task AddEventAsync(AssetEvent e) => Task.CompletedTask;
         public Task DeleteEventAsync(Guid id) => Task.CompletedTask;
         public Task<AssetEvent?> GetLatestValuationAsync(Guid id) => Task.FromResult<AssetEvent?>(null);
+    }
+
+    private sealed class FakeSnapshotRepo : IPortfolioSnapshotRepository
+    {
+        public List<PortfolioDailySnapshot> Store { get; } = new();
+
+        public Task<IReadOnlyList<PortfolioDailySnapshot>> GetSnapshotsAsync(
+            DateOnly? from = null,
+            DateOnly? to = null,
+            CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<PortfolioDailySnapshot>>(Store
+                .Where(s => (!from.HasValue || s.SnapshotDate >= from.Value)
+                            && (!to.HasValue || s.SnapshotDate <= to.Value))
+                .ToList());
+
+        public Task<PortfolioDailySnapshot?> GetSnapshotAsync(DateOnly date, CancellationToken ct = default) =>
+            Task.FromResult(Store.FirstOrDefault(s => s.SnapshotDate == date));
+
+        public Task UpsertAsync(PortfolioDailySnapshot snapshot, CancellationToken ct = default)
+        {
+            Store.RemoveAll(s => s.SnapshotDate == snapshot.SnapshotDate);
+            Store.Add(snapshot);
+            return Task.CompletedTask;
+        }
     }
 }
