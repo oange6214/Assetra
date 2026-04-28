@@ -218,6 +218,11 @@ public class RecurringTransactionSchedulerTests
             Store.RemoveAll(e => e.Id == id);
             return Task.CompletedTask;
         }
+        public Task RemoveByRecurringSourceAsync(Guid recurringSourceId, CancellationToken ct = default)
+        {
+            Store.RemoveAll(e => e.RecurringSourceId == recurringSourceId);
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakeTransactionService : ITransactionService

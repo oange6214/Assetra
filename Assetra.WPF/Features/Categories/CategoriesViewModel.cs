@@ -14,6 +14,9 @@ public partial class CategoriesViewModel : ObservableObject
     private readonly ICategoryRepository _repository;
     private readonly IAutoCategorizationRuleRepository _ruleRepository;
     private readonly IBudgetRepository _budgetRepository;
+    private readonly ITradeRepository _tradeRepository;
+    private readonly IRecurringTransactionRepository _recurringRepository;
+    private readonly IPendingRecurringEntryRepository _pendingRecurringRepository;
     private readonly IBudgetRefreshNotifier _budgetRefreshNotifier;
     private readonly ISnackbarService _snackbar;
     private readonly ILocalizationService _localization;
@@ -77,31 +80,7 @@ public partial class CategoriesViewModel : ObservableObject
     public IReadOnlyList<CategoryKind> KindOptions { get; } =
         [CategoryKind.Expense, CategoryKind.Income];
 
-    public IReadOnlyList<CategoryVisualOption> IconOptions { get; } =
-    [
-        new("🍱", "飲食"),
-        new("🚇", "交通"),
-        new("🏠", "居住"),
-        new("💡", "水電"),
-        new("📱", "通訊"),
-        new("🛍️", "購物"),
-        new("🎬", "娛樂"),
-        new("🏥", "醫療"),
-        new("📚", "教育"),
-        new("🛡️", "保險"),
-        new("🔁", "訂閱"),
-        new("💸", "支出"),
-        new("💼", "薪資"),
-        new("🎁", "獎金"),
-        new("🏦", "利息"),
-        new("🧾", "退稅"),
-        new("💰", "收入"),
-        new("📈", "投資"),
-        new("✈️", "旅遊"),
-        new("🏃", "運動"),
-        new("👨‍👩‍👧", "家庭"),
-        new("🐾", "寵物")
-    ];
+    public ObservableCollection<CategoryVisualOption> IconOptions { get; } = [];
 
     public IReadOnlyList<string> ColorOptions { get; } =
     [
@@ -127,6 +106,9 @@ public partial class CategoriesViewModel : ObservableObject
         ICategoryRepository repository,
         IAutoCategorizationRuleRepository ruleRepository,
         IBudgetRepository budgetRepository,
+        ITradeRepository tradeRepository,
+        IRecurringTransactionRepository recurringRepository,
+        IPendingRecurringEntryRepository pendingRecurringRepository,
         IBudgetRefreshNotifier budgetRefreshNotifier,
         ISnackbarService snackbar,
         ILocalizationService localization)
@@ -134,6 +116,9 @@ public partial class CategoriesViewModel : ObservableObject
         _repository = repository;
         _ruleRepository = ruleRepository;
         _budgetRepository = budgetRepository;
+        _tradeRepository = tradeRepository;
+        _recurringRepository = recurringRepository;
+        _pendingRecurringRepository = pendingRecurringRepository;
         _budgetRefreshNotifier = budgetRefreshNotifier;
         _snackbar = snackbar;
         _localization = localization;
@@ -148,11 +133,16 @@ public partial class CategoriesViewModel : ObservableObject
         ExpenseView.SortDescriptions.Add(new SortDescription(nameof(CategoryRowViewModel.SortOrder), ListSortDirection.Ascending));
 
         _localization.LanguageChanged += OnLanguageChanged;
+        RefreshIconOptions();
         ApplyAddDefaults(AddKind);
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
+        RefreshIconOptions();
+        var currentIconLabel = GetString("Categories.Field.CurrentIcon", "目前圖示");
+        foreach (var category in Categories.Where(x => x.IsEditing))
+            category.RefreshEditModeOptions(IconOptions, currentIconLabel);
         foreach (var rule in Rules)
             rule.CategoryDisplay = LookupCategoryDisplay(rule.CategoryId);
         foreach (var budget in Budgets)
@@ -326,9 +316,12 @@ public partial class CategoriesViewModel : ObservableObject
         if (row is null) return;
         var budgetRefs = Budgets.Count(b => b.CategoryId == row.Id);
         var ruleRefs = Rules.Count(r => r.CategoryId == row.Id);
-        if (budgetRefs > 0 || ruleRefs > 0)
+        var tradeRefs = (await _tradeRepository.GetAllAsync().ConfigureAwait(true)).Count(t => t.CategoryId == row.Id);
+        var recurringRefs = (await _recurringRepository.GetAllAsync().ConfigureAwait(true)).Count(r => r.CategoryId == row.Id);
+        var pendingRefs = (await _pendingRecurringRepository.GetAllAsync().ConfigureAwait(true)).Count(e => e.CategoryId == row.Id);
+        if (budgetRefs > 0 || ruleRefs > 0 || tradeRefs > 0 || recurringRefs > 0 || pendingRefs > 0)
         {
-            var message = GetDeleteBlockedMessage(row.Name, budgetRefs, ruleRefs);
+            var message = GetDeleteBlockedMessage(row.Name, budgetRefs, ruleRefs, tradeRefs, recurringRefs, pendingRefs);
             _snackbar.Warning(message);
             return;
         }
@@ -548,39 +541,63 @@ public partial class CategoriesViewModel : ObservableObject
     private static string? NullIfBlank(string? s) =>
         string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 
-    private string GetDeleteBlockedMessage(string categoryName, int budgetRefs, int ruleRefs)
+    private string GetDeleteBlockedMessage(string categoryName, int budgetRefs, int ruleRefs, int tradeRefs, int recurringRefs, int pendingRefs)
     {
-        if (budgetRefs > 0 && ruleRefs > 0)
-        {
-            return string.Format(
-                GetString(
-                    "Categories.Error.DeleteBlockedByBudgetAndRule",
-                    "分類「{0}」仍被 {1} 筆預算與 {2} 筆自動分類規則使用，請先解除關聯後再刪除"),
-                categoryName,
-                budgetRefs,
-                ruleRefs);
-        }
-
+        var parts = new List<string>();
         if (budgetRefs > 0)
-        {
-            return string.Format(
-                GetString(
-                    "Categories.Error.DeleteBlockedByBudget",
-                    "分類「{0}」仍被 {1} 筆預算使用，請先解除關聯後再刪除"),
-                categoryName,
-                budgetRefs);
-        }
+            parts.Add(string.Format(GetString("Categories.Error.Reference.Budget", "{0} 筆預算"), budgetRefs));
+        if (ruleRefs > 0)
+            parts.Add(string.Format(GetString("Categories.Error.Reference.Rule", "{0} 筆自動分類規則"), ruleRefs));
+        if (tradeRefs > 0)
+            parts.Add(string.Format(GetString("Categories.Error.Reference.Trade", "{0} 筆交易"), tradeRefs));
+        if (recurringRefs > 0)
+            parts.Add(string.Format(GetString("Categories.Error.Reference.Recurring", "{0} 筆訂閱排程"), recurringRefs));
+        if (pendingRefs > 0)
+            parts.Add(string.Format(GetString("Categories.Error.Reference.Pending", "{0} 筆待確認排程"), pendingRefs));
 
         return string.Format(
             GetString(
-                "Categories.Error.DeleteBlockedByRule",
-                "分類「{0}」仍被 {1} 筆自動分類規則使用，請先解除關聯後再刪除"),
+                "Categories.Error.DeleteBlockedByReferences",
+                "分類「{0}」仍被以下資料使用：{1}，請先解除關聯後再刪除"),
             categoryName,
-            ruleRefs);
+            string.Join(GetString("Categories.Error.Reference.Separator", "、"), parts));
     }
 
     private string GetString(string key, string fallback) =>
         _localization.Get(key, fallback);
+
+    private void RefreshIconOptions()
+    {
+        IconOptions.Clear();
+        foreach (var option in BuildIconOptions())
+            IconOptions.Add(option);
+    }
+
+    private IReadOnlyList<CategoryVisualOption> BuildIconOptions() =>
+    [
+        new("🍱", GetString("Categories.Icon.Food", "飲食")),
+        new("🚇", GetString("Categories.Icon.Transport", "交通")),
+        new("🏠", GetString("Categories.Icon.Home", "居住")),
+        new("💡", GetString("Categories.Icon.Utilities", "水電")),
+        new("📱", GetString("Categories.Icon.Communication", "通訊")),
+        new("🛍️", GetString("Categories.Icon.Shopping", "購物")),
+        new("🎬", GetString("Categories.Icon.Entertainment", "娛樂")),
+        new("🏥", GetString("Categories.Icon.Medical", "醫療")),
+        new("📚", GetString("Categories.Icon.Education", "教育")),
+        new("🛡️", GetString("Categories.Icon.Insurance", "保險")),
+        new("🔁", GetString("Categories.Icon.Subscription", "訂閱")),
+        new("💸", GetString("Categories.Icon.Expense", "支出")),
+        new("💼", GetString("Categories.Icon.Salary", "薪資")),
+        new("🎁", GetString("Categories.Icon.Bonus", "獎金")),
+        new("🏦", GetString("Categories.Icon.Interest", "利息")),
+        new("🧾", GetString("Categories.Icon.TaxRefund", "退稅")),
+        new("💰", GetString("Categories.Icon.Income", "收入")),
+        new("📈", GetString("Categories.Icon.Investment", "投資")),
+        new("✈️", GetString("Categories.Icon.Travel", "旅遊")),
+        new("🏃", GetString("Categories.Icon.Sports", "運動")),
+        new("👨‍👩‍👧", GetString("Categories.Icon.Family", "家庭")),
+        new("🐾", GetString("Categories.Icon.Pet", "寵物"))
+    ];
 
     private void ApplyAddDefaults(CategoryKind kind)
     {

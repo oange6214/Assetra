@@ -10,4 +10,5 @@ public interface IPendingRecurringEntryRepository
     Task AddAsync(PendingRecurringEntry entry, CancellationToken ct = default);
     Task UpdateAsync(PendingRecurringEntry entry, CancellationToken ct = default);
     Task RemoveAsync(Guid id, CancellationToken ct = default);
+    Task RemoveByRecurringSourceAsync(Guid recurringSourceId, CancellationToken ct = default);
 }

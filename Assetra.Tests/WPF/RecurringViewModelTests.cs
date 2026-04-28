@@ -39,9 +39,62 @@ public sealed class RecurringViewModelTests
         Assert.Empty(recurringRepo.Store);
     }
 
+    [Fact]
+    public async Task DeleteSubscriptionAsync_RemovesPendingEntriesFromSameSource()
+    {
+        var recurringId = Guid.NewGuid();
+        var recurring = new RecurringTransaction(
+            recurringId,
+            "Netflix",
+            TradeType.Withdrawal,
+            390m,
+            null,
+            null,
+            RecurrenceFrequency.Monthly,
+            1,
+            new DateTime(2026, 4, 1),
+            null,
+            AutoGenerationMode.PendingConfirm,
+            null,
+            new DateTime(2026, 5, 1),
+            null,
+            true);
+
+        var recurringRepo = new FakeRecurringRepo { Store = [recurring] };
+        var pendingRepo = new FakePendingRepo
+        {
+            Entries =
+            [
+                new PendingRecurringEntry(Guid.NewGuid(), recurringId, new DateTime(2026, 5, 1), 390m, TradeType.Withdrawal, null, null, null, PendingStatus.Pending, null, null),
+                new PendingRecurringEntry(Guid.NewGuid(), Guid.NewGuid(), new DateTime(2026, 5, 2), 120m, TradeType.Withdrawal, null, null, null, PendingStatus.Pending, null, null)
+            ]
+        };
+        var scheduler = new RecurringTransactionScheduler(
+            recurringRepo,
+            pendingRepo,
+            new FakeTransactionService());
+
+        var vm = new RecurringViewModel(
+            recurringRepo,
+            pendingRepo,
+            scheduler,
+            new FakeSnackbarService(),
+            new FakeLocalizationService());
+
+        await vm.LoadAsync();
+        var row = Assert.Single(vm.Subscriptions);
+
+        await vm.DeleteSubscriptionCommand.ExecuteAsync(row);
+
+        Assert.Empty(vm.Subscriptions);
+        Assert.Single(vm.Pending);
+        Assert.All(vm.Pending, p => Assert.NotEqual(recurringId, p.RecurringSourceId));
+        Assert.Equal(recurringId, pendingRepo.RemovedRecurringSourceId);
+    }
+
     private sealed class FakeRecurringRepo : IRecurringTransactionRepository
     {
-        public List<RecurringTransaction> Store { get; } = [];
+        public List<RecurringTransaction> Store { get; set; } = [];
 
         public Task<IReadOnlyList<RecurringTransaction>> GetAllAsync(CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<RecurringTransaction>>(Store.ToList());
@@ -74,18 +127,43 @@ public sealed class RecurringViewModelTests
 
     private sealed class FakePendingRepo : IPendingRecurringEntryRepository
     {
+        public List<PendingRecurringEntry> Entries { get; set; } = [];
+        public Guid? RemovedRecurringSourceId { get; private set; }
+
         public Task<IReadOnlyList<PendingRecurringEntry>> GetAllAsync(CancellationToken ct = default) =>
-            Task.FromResult<IReadOnlyList<PendingRecurringEntry>>([]);
+            Task.FromResult<IReadOnlyList<PendingRecurringEntry>>(Entries.ToList());
 
         public Task<IReadOnlyList<PendingRecurringEntry>> GetByStatusAsync(PendingStatus status, CancellationToken ct = default) =>
-            Task.FromResult<IReadOnlyList<PendingRecurringEntry>>([]);
+            Task.FromResult<IReadOnlyList<PendingRecurringEntry>>(Entries.Where(x => x.Status == status).ToList());
 
         public Task<PendingRecurringEntry?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
-            Task.FromResult<PendingRecurringEntry?>(null);
+            Task.FromResult<PendingRecurringEntry?>(Entries.FirstOrDefault(x => x.Id == id));
 
-        public Task AddAsync(PendingRecurringEntry entry, CancellationToken ct = default) => Task.CompletedTask;
-        public Task UpdateAsync(PendingRecurringEntry entry, CancellationToken ct = default) => Task.CompletedTask;
-        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+        public Task AddAsync(PendingRecurringEntry entry, CancellationToken ct = default)
+        {
+            Entries.Add(entry);
+            return Task.CompletedTask;
+        }
+
+        public Task UpdateAsync(PendingRecurringEntry entry, CancellationToken ct = default)
+        {
+            var index = Entries.FindIndex(x => x.Id == entry.Id);
+            if (index >= 0) Entries[index] = entry;
+            return Task.CompletedTask;
+        }
+
+        public Task RemoveAsync(Guid id, CancellationToken ct = default)
+        {
+            Entries.RemoveAll(x => x.Id == id);
+            return Task.CompletedTask;
+        }
+
+        public Task RemoveByRecurringSourceAsync(Guid recurringSourceId, CancellationToken ct = default)
+        {
+            RemovedRecurringSourceId = recurringSourceId;
+            Entries.RemoveAll(x => x.RecurringSourceId == recurringSourceId);
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakeTransactionService : ITransactionService

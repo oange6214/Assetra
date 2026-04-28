@@ -169,7 +169,10 @@ public partial class RecurringViewModel : ObservableObject
     private async Task DeleteSubscriptionAsync(RecurringRowViewModel row)
     {
         if (row is null) return;
+        await _pendingRepo.RemoveByRecurringSourceAsync(row.Id).ConfigureAwait(true);
         await _recurringRepo.RemoveAsync(row.Id).ConfigureAwait(true);
+        foreach (var pending in Pending.Where(x => x.RecurringSourceId == row.Id).ToList())
+            Pending.Remove(pending);
         Subscriptions.Remove(row);
         _snackbar.Success(string.Format(
             GetString("Recurring.Toast.Deleted", "已刪除「{0}」"), row.Name));

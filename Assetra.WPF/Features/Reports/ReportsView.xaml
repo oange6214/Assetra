@@ -13,19 +13,24 @@
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
 
-    <Grid Margin="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <!--  header  -->
-            <RowDefinition Height="Auto" />
-            <!--  metric cards  -->
-            <RowDefinition Height="*" />
-            <!--  detail lists  -->
-            <RowDefinition Height="Auto" />
-            <!--  statements  -->
-            <RowDefinition Height="Auto" />
-            <!--  export status  -->
-        </Grid.RowDefinitions>
+    <ScrollViewer
+        Margin="24"
+        VerticalScrollBarVisibility="Auto"
+        HorizontalScrollBarVisibility="Disabled"
+        CanContentScroll="False">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <!--  header  -->
+                <RowDefinition Height="Auto" />
+                <!--  metric cards  -->
+                <RowDefinition Height="Auto" />
+                <!--  detail lists  -->
+                <RowDefinition Height="Auto" />
+                <!--  statements  -->
+                <RowDefinition Height="Auto" />
+                <!--  export status  -->
+            </Grid.RowDefinitions>
 
         <!--  ── Header: month picker ──  -->
         <DockPanel Grid.Row="0" Margin="0,0,0,16">
@@ -381,7 +386,7 @@
                             <TextBlock FontFamily="{StaticResource FontTabular}" Text="{Binding Expense.Total, StringFormat=': {0:N2}'}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{DynamicResource Reports.Net}" />
+                                <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{DynamicResource Reports.Net.Total}" />
                             <TextBlock FontFamily="{StaticResource FontTabular}" FontWeight="SemiBold" Text="{Binding Net, StringFormat=': {0:N2}'}" />
                         </StackPanel>
                     </StackPanel>
@@ -527,10 +532,11 @@
             </Expander>
         </StackPanel>
 
-        <TextBlock
-            Grid.Row="4"
-            Margin="0,8,0,0"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{Binding ExportStatus}" />
-    </Grid>
+            <TextBlock
+                Grid.Row="4"
+                Margin="0,8,0,0"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{Binding ExportStatus}" />
+        </Grid>
+    </ScrollViewer>
 </UserControl>

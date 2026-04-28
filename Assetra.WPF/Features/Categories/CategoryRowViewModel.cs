@@ -67,6 +67,11 @@ public partial class CategoryRowViewModel : ObservableObject
         IsEditing = true;
     }
 
+    public void RefreshEditModeOptions(IReadOnlyList<CategoryVisualOption>? iconOptions = null, string currentIconLabel = "Current")
+    {
+        RefreshEditIconOptions(iconOptions, currentIconLabel);
+    }
+
     public void CancelEditMode()
     {
         EditError = string.Empty;

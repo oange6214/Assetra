@@ -122,6 +122,16 @@ public sealed class PendingRecurringEntrySqliteRepository : IPendingRecurringEnt
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
+    public async Task RemoveByRecurringSourceAsync(Guid recurringSourceId, CancellationToken ct = default)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = "DELETE FROM pending_recurring_entry WHERE recurring_source_id = $src;";
+        cmd.Parameters.AddWithValue("$src", recurringSourceId.ToString());
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+    }
+
     private static void Bind(SqliteCommand cmd, PendingRecurringEntry e)
     {
         cmd.Parameters.AddWithValue("$id", e.Id.ToString());

@@ -32,6 +32,9 @@ internal static class BudgetServiceCollectionExtensions
             sp.GetRequiredService<ICategoryRepository>(),
             sp.GetRequiredService<IAutoCategorizationRuleRepository>(),
             sp.GetRequiredService<IBudgetRepository>(),
+            sp.GetRequiredService<ITradeRepository>(),
+            sp.GetRequiredService<IRecurringTransactionRepository>(),
+            sp.GetRequiredService<IPendingRecurringEntryRepository>(),
             sp.GetRequiredService<IBudgetRefreshNotifier>(),
             sp.GetRequiredService<ISnackbarService>(),
             sp.GetRequiredService<ILocalizationService>()));

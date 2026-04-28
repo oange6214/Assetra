@@ -52,6 +52,9 @@ public sealed class CategoriesViewModelTests
             categoryRepo,
             ruleRepo,
             budgetRepo,
+            new FakeTradeRepo(),
+            new FakeRecurringRepo(),
+            new FakePendingRepo(),
             new BudgetRefreshNotifier(),
             snackbar,
             new FakeLocalizationService());
@@ -64,7 +67,59 @@ public sealed class CategoriesViewModelTests
         Assert.Single(vm.Categories);
         Assert.Empty(categoryRepo.RemovedIds);
         Assert.Equal(
-            "分類「飲食」仍被 1 筆預算與 1 筆自動分類規則使用，請先解除關聯後再刪除",
+            "分類「飲食」仍被以下資料使用：1 筆預算、1 筆自動分類規則，請先解除關聯後再刪除",
+            snackbar.LastWarning);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_BlocksWhenCategoryIsReferencedByTrade()
+    {
+        var categoryId = Guid.NewGuid();
+        var categoryRepo = new FakeCategoryRepo(
+        [
+            new ExpenseCategory(categoryId, "飲食", CategoryKind.Expense, null, "🍜", "#FF8800", 1, false)
+        ]);
+        var snackbar = new FakeSnackbarService();
+        var tradeRepo = new FakeTradeRepo
+        {
+            Store =
+            [
+                new Trade(
+                    Id: Guid.NewGuid(),
+                    Symbol: string.Empty,
+                    Exchange: string.Empty,
+                    Name: string.Empty,
+                    Type: TradeType.Withdrawal,
+                    TradeDate: DateTime.Today,
+                    Price: 0m,
+                    Quantity: 1,
+                    RealizedPnl: null,
+                    RealizedPnlPct: null,
+                    CashAmount: 150m,
+                    CategoryId: categoryId)
+            ]
+        };
+
+        var vm = new CategoriesViewModel(
+            categoryRepo,
+            new FakeRuleRepo([]),
+            new FakeBudgetRepo([]),
+            tradeRepo,
+            new FakeRecurringRepo(),
+            new FakePendingRepo(),
+            new BudgetRefreshNotifier(),
+            snackbar,
+            new FakeLocalizationService());
+
+        await vm.LoadAsync();
+        var row = Assert.Single(vm.Categories);
+
+        await vm.DeleteCommand.ExecuteAsync(row);
+
+        Assert.Single(vm.Categories);
+        Assert.Empty(categoryRepo.RemovedIds);
+        Assert.Equal(
+            "分類「飲食」仍被以下資料使用：1 筆交易，請先解除關聯後再刪除",
             snackbar.LastWarning);
     }
 
@@ -165,6 +220,55 @@ public sealed class CategoriesViewModelTests
         public Task<IReadOnlyList<Budget>> GetByPeriodAsync(int year, int? month, CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<Budget>>(
                 _store.Where(x => x.Year == year && x.Month == month).ToList());
+    }
+
+    private sealed class FakeTradeRepo : ITradeRepository
+    {
+        public List<Trade> Store { get; set; } = [];
+
+        public Task<IReadOnlyList<Trade>> GetAllAsync() => Task.FromResult<IReadOnlyList<Trade>>(Store.ToList());
+        public Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId) => Task.FromResult<IReadOnlyList<Trade>>([]);
+        public Task<IReadOnlyList<Trade>> GetByLoanLabelAsync(string loanLabel) => Task.FromResult<IReadOnlyList<Trade>>([]);
+        public Task<Trade?> GetByIdAsync(Guid id, CancellationToken ct = default) => Task.FromResult<Trade?>(null);
+        public Task AddAsync(Trade trade) => Task.CompletedTask;
+        public Task UpdateAsync(Trade trade) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id) => Task.CompletedTask;
+        public Task RemoveChildrenAsync(Guid parentId) => Task.CompletedTask;
+        public Task RemoveByAccountIdAsync(Guid accountId, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveByLiabilityAsync(Guid? liabilityAssetId, string? loanLabel, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    private sealed class FakeRecurringRepo : IRecurringTransactionRepository
+    {
+        public Task<IReadOnlyList<RecurringTransaction>> GetAllAsync(CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<RecurringTransaction>>([]);
+
+        public Task<RecurringTransaction?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+            Task.FromResult<RecurringTransaction?>(null);
+
+        public Task<IReadOnlyList<RecurringTransaction>> GetActiveAsync(CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<RecurringTransaction>>([]);
+
+        public Task AddAsync(RecurringTransaction recurring, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UpdateAsync(RecurringTransaction recurring, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    private sealed class FakePendingRepo : IPendingRecurringEntryRepository
+    {
+        public Task<IReadOnlyList<PendingRecurringEntry>> GetAllAsync(CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<PendingRecurringEntry>>([]);
+
+        public Task<IReadOnlyList<PendingRecurringEntry>> GetByStatusAsync(PendingStatus status, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<PendingRecurringEntry>>([]);
+
+        public Task<PendingRecurringEntry?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+            Task.FromResult<PendingRecurringEntry?>(null);
+
+        public Task AddAsync(PendingRecurringEntry entry, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UpdateAsync(PendingRecurringEntry entry, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveByRecurringSourceAsync(Guid recurringSourceId, CancellationToken ct = default) => Task.CompletedTask;
     }
 
     private sealed class FakeSnackbarService : ISnackbarService
