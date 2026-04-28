@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.10.1 - 2026-04-28
+
+收尾 v0.10.0 release note 自承的測試缺口（line: 「本 sprint 主為 UI/連線改動，暫未新增 unit test」）。對 `ApplyResolutionAsync(diffId, resolution, note, sourceKind, options, ct)` overload 補上 service-level 單元測試，覆蓋 v0.10.0 新增的 Created / OverwrittenFromStatement 兩條會動到 trade 的執行路徑，以及 Deleted / MarkedResolved / Ignored 的副作用契約。
+
+### 新增
+
+- **單元測試**（`Assetra.Tests/Application/Reconciliation/ApplyResolutionAsyncTests.cs`）— 10 筆 service-level 測試、hand-rolled fakes（`FakeSessions` / `FakeTrades` / `FakeApplier`）：
+  - `Created` 路徑：成功時 applier 收到正確 row + sourceKind，diff 更新；缺 applier / mapper 回 null 各拋例外。
+  - `Deleted` 路徑：trade 被 `RemoveAsync(tid)`，diff 更新。
+  - `OverwrittenFromStatement` 路徑：既有 trade 之 `CashAmount` 更新為 statement row 金額；trade 不存在時拋例外。
+  - `MarkedResolved` / `Ignored` 路徑：不動 trade、不呼 applier，僅更新 diff resolution。
+  - 防呆：illegal kind × resolution 在任何 side effect 前拋例外；未知 diffId 拋例外。
+
+### 測試
+
+- 612/612 tests 綠（v0.17.1 為 602；本 sprint +10）。
+- 無 production code / schema / interface 變更；純粹補測，行為與 v0.10.0 完全等價。
+
 ## v0.17.1 - 2026-04-28
 
 收尾 v0.17.0 延後的 PortfolioEvent 持久化、堆疊圖前置欄位、`YearlyExtreme` 偵測。`TrendsView` UI annotation / Line ↔ Stacked Area 切換 / event 編輯對話框需 UI 設計，仍延後。
