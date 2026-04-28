@@ -80,7 +80,7 @@ public sealed class PortfolioBackfillService
                     symbol, exchange, ChartPeriod.TwoYears, ct);
                 prices[symbol] = history.ToDictionary(h => h.Date, h => h.Close);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException)
             {
                 _logger.LogWarning(ex, "Backfill: could not fetch price history for {Symbol}", symbol);
             }
@@ -127,7 +127,7 @@ public sealed class PortfolioBackfillService
                 await _snapshotRepo.UpsertAsync(snapshot, ct).ConfigureAwait(false);
                 written++;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is System.Data.Common.DbException or InvalidOperationException)
             {
                 _logger.LogWarning(ex, "Backfill: failed to write snapshot for {Date}", date);
             }

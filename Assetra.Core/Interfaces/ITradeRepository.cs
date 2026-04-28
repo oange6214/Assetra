@@ -8,6 +8,16 @@ public interface ITradeRepository
     Task<IReadOnlyList<Trade>> GetAllAsync(CancellationToken ct = default);
 
     /// <summary>
+    /// 取出指定時間區間（含端點）的交易記錄。預設實作以 <see cref="GetAllAsync"/> 全量取出後 in-memory filter；
+    /// SQLite 實作應 override 為 SQL WHERE 條件，避免大資料集全量載入。
+    /// </summary>
+    async Task<IReadOnlyList<Trade>> GetByPeriodAsync(DateTime from, DateTime to, CancellationToken ct = default)
+    {
+        var all = await GetAllAsync(ct).ConfigureAwait(false);
+        return all.Where(t => t.TradeDate >= from && t.TradeDate <= to).ToList();
+    }
+
+    /// <summary>
     /// 指定現金帳戶的交易記錄（含作為轉入目標的 Transfer）。
     /// </summary>
     Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId, CancellationToken ct = default);

@@ -36,17 +36,17 @@ public sealed class AppSettingsService : IAppSettingsService, IDisposable
             var json = JsonSerializer.Serialize(settings, JsonOptions);
             await File.WriteAllTextAsync(FilePath, json).ConfigureAwait(false);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
         {
             _logger?.LogWarning(ex, "Failed to save settings to {Path}", FilePath);
             throw;
         }
         finally { _lock.Release(); }
 
-        // 在鎖之外觸發，避免訂閱者的同步邏輯拖住其他 Save 呼叫
+        // 在鎖之外觸發，避免訂閱者的同步邏輯拖住其他 Save 呼叫；訂閱者異常不向呼叫端外洩
         try
         { Changed?.Invoke(); }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogWarning(ex, "AppSettingsService.Changed subscriber threw");
         }
@@ -64,7 +64,7 @@ public sealed class AppSettingsService : IAppSettingsService, IDisposable
             var json = File.ReadAllText(FilePath);
             return JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to load settings, using defaults: {ex}");
             return new AppSettings();

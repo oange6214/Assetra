@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.17.4 - 2026-04-28
+
+Pre-v0.17 refactor 稽核 Group C 的 code-quality 部分。VM 拆分 (#7 TransactionDialogViewModel 1194 行 / #8 PortfolioViewModel 1108 行) 無 UI 測試基礎設施下風險過高，以「明確延後」處理而非草率重構，避免 binding regression。
+
+### 變更
+
+- **`AppSettingsService` broad catch 收斂**：`SaveAsync` 的 file IO catch 限縮為 `IOException or UnauthorizedAccessException or JsonException`，`Changed` 訂閱者異常以 `when (ex is not OperationCanceledException)` 過濾掉取消；`LoadSettings` 同樣窄化。
+- **`PortfolioBackfillService` swallow 窄化**：價格 fetch catch 改為 `HttpRequestException or TaskCanceledException or InvalidOperationException`；snapshot upsert catch 改為 `DbException or InvalidOperationException`。`OperationCanceledException` 自然向上傳播。
+- **`ITradeRepository.GetByPeriodAsync(from, to, ct)`**：新增區間查詢介面方法，提供 default interface implementation（fallback 為 `GetAllAsync` + in-memory filter，相容所有現有 fakes）。`TradeSqliteRepository` override 為 `WHERE trade_date BETWEEN $from AND $to` SQL 條件，避免大資料集全量載入；`from/to` 以 UTC `"o"` 序列化與 BindTradeParams 一致。
+
+### 延後
+
+- **#7 `TransactionDialogViewModel` 拆分**（1194 行）— 與 dialog XAML 大量 two-way binding 緊耦合，無 UI snapshot test，refactor 風險 > 現階段收益。需先補 dialog smoke test 再做。
+- **#8 `PortfolioViewModel` 進一步拆分**（1108 行）— v0.17 之前已抽出多個 SubViewModel，剩餘耦合與 UI 行為交織；同樣需要 UI 測試保護才適合動。
+
+### 校驗
+
+- **#12 timestamp format consistency**：稽核全部 `Persistence/*.cs` 後確認已一致——`DateOnly` 用 `"yyyy-MM-dd"`、`DateTime`/`DateTimeOffset` 用 `"o"`，無需修改。
+
+### 測試
+
+- 612/612 tests 綠（無新測，default interface implementation 行為與既有路徑等價，SQL override 由 `TradeSqliteRepositoryTests` 覆蓋既有 GetAllAsync 路徑——後續可補 GetByPeriodAsync 邊界測試）。
+
 ## v0.17.3 - 2026-04-28
 
 Pre-v0.17 refactor 稽核 Group B — 兩項中型修整：FX N+1、JSON→SQLite 遷移結果可見性。
