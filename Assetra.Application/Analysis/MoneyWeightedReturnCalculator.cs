@@ -15,8 +15,13 @@ namespace Assetra.Application.Analysis;
 /// <see cref="IMultiCurrencyValuationService"/>, and <see cref="IAppSettingsService"/> are all
 /// available, each trade's flow is tagged with the owning <c>PortfolioEntry.Currency</c> and
 /// converted to <c>AppSettings.BaseCurrency</c> via FX (using the trade date as <c>asOf</c>)
-/// before XIRR. Snapshots' <c>MarketValue</c> are assumed to be already in base currency.
-/// If any rate is missing, the method returns null rather than producing a misleading IRR.
+/// before XIRR. If any rate is missing, the method returns null rather than producing a
+/// misleading IRR.
+/// </para>
+/// <para>
+/// v0.14.2: snapshots are also currency-checked. <see cref="PortfolioDailySnapshot.Currency"/>
+/// is matched against <c>BaseCurrency</c>; mismatched snapshots are converted via FX using the
+/// snapshot's date as <c>asOf</c>. Missing rate → returns null (same conservative policy as flows).
 /// </para>
 /// </summary>
 public sealed class MoneyWeightedReturnCalculator : IMoneyWeightedReturnCalculator
@@ -56,13 +61,37 @@ public sealed class MoneyWeightedReturnCalculator : IMoneyWeightedReturnCalculat
         var startSnap = await _snapshots.GetSnapshotAsync(period.Start).ConfigureAwait(false);
         var endSnap = await _snapshots.GetSnapshotAsync(period.End).ConfigureAwait(false);
 
+        var startMv = await ConvertSnapshotMarketValueAsync(startSnap, ct).ConfigureAwait(false);
+        if (startSnap is not null && startMv is null) return null;
+        var endMv = await ConvertSnapshotMarketValueAsync(endSnap, ct).ConfigureAwait(false);
+        if (endSnap is not null && endMv is null) return null;
+
         var withSynthetic = new List<CashFlow>(flows);
-        if (startSnap is { MarketValue: > 0 })
-            withSynthetic.Insert(0, new CashFlow(period.Start, -startSnap.MarketValue));
-        if (endSnap is { MarketValue: > 0 })
-            withSynthetic.Add(new CashFlow(period.End, endSnap.MarketValue));
+        if (startMv is > 0m)
+            withSynthetic.Insert(0, new CashFlow(period.Start, -startMv.Value));
+        if (endMv is > 0m)
+            withSynthetic.Add(new CashFlow(period.End, endMv.Value));
 
         return _xirr.Compute(withSynthetic);
+    }
+
+    /// <summary>
+    /// Returns snapshot.MarketValue converted to AppSettings.BaseCurrency.
+    /// Returns null when a conversion is required but the FX rate is unavailable;
+    /// caller treats this as "abandon — would produce misleading IRR".
+    /// When no conversion is possible (no FX or no settings), passes through native value.
+    /// </summary>
+    private async Task<decimal?> ConvertSnapshotMarketValueAsync(
+        PortfolioDailySnapshot? snap, CancellationToken ct)
+    {
+        if (snap is null) return null;
+        var baseCcy = _settings?.Current.BaseCurrency;
+        if (_fx is null || string.IsNullOrWhiteSpace(baseCcy)) return snap.MarketValue;
+        var snapCcy = string.IsNullOrWhiteSpace(snap.Currency) ? "TWD" : snap.Currency;
+        if (string.Equals(snapCcy, baseCcy, StringComparison.OrdinalIgnoreCase))
+            return snap.MarketValue;
+        return await _fx.ConvertAsync(snap.MarketValue, snapCcy, baseCcy, snap.SnapshotDate, ct)
+            .ConfigureAwait(false);
     }
 
     public async Task<decimal?> ComputeForEntryAsync(Guid portfolioEntryId, PerformancePeriod period, CancellationToken ct = default)

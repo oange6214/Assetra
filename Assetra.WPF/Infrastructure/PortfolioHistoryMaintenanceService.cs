@@ -21,10 +21,11 @@ public sealed class PortfolioHistoryMaintenanceService : IPortfolioHistoryMainte
         decimal marketValue,
         decimal pnl,
         int positionCount,
+        string currency = "TWD",
         CancellationToken ct = default)
     {
         ct.ThrowIfCancellationRequested();
-        return _snapshotService.TryRecordAsync(totalCost, marketValue, pnl, positionCount);
+        return _snapshotService.TryRecordAsync(totalCost, marketValue, pnl, positionCount, currency);
     }
 
     public Task<int> BackfillAsync(CancellationToken ct = default)

@@ -130,8 +130,10 @@ public partial class PortfolioViewModel
     {
         try
         {
+            var baseCcy = _settingsService?.Current?.BaseCurrency;
             var written = await _historyMaintenanceService.TryRecordSnapshotAsync(
-                TotalCost, TotalMarketValue, TotalPnl, Positions.Count);
+                TotalCost, TotalMarketValue, TotalPnl, Positions.Count,
+                string.IsNullOrWhiteSpace(baseCcy) ? "TWD" : baseCcy);
             if (written)
                 await History.LoadAsync();
         }

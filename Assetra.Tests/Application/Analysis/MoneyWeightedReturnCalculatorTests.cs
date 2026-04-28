@@ -70,6 +70,97 @@ public class MoneyWeightedReturnCalculatorTests
         Assert.Null(irr);
     }
 
+    [Fact]
+    public async Task ComputeAsync_SnapshotInForeignCurrency_ConvertsViaFx()
+    {
+        // Mixed scenario: TWD entry/trades, but legacy USD-tagged snapshots
+        // (simulates: user previously had base=USD, switched to base=TWD).
+        // Since IRR is scale-invariant, this proves the snapshot conversion *path* matters
+        // by mixing the unit of trade flows (TWD) vs snapshots (USD requiring conversion).
+        var entryId = Guid.NewGuid();
+        var port = new FakePortfolioRepo();
+        port.Entries.Add(new PortfolioEntry(entryId, "2330", "TWSE", AssetType.Stock, "TSMC", "TWD"));
+
+        var trades = new FakeTradeRepo();
+        trades.Store.Add(MakeBuy(entryId, new DateTime(2026, 1, 5), 10, 100m));   // -1000 TWD
+        trades.Store.Add(MakeSell(entryId, new DateTime(2026, 4, 5), 10, 110m));  // +1100 TWD
+
+        var snapshots = new FakeSnapshotRepo();
+        snapshots.Store[new DateOnly(2026, 1, 1)] = new PortfolioDailySnapshot(
+            new DateOnly(2026, 1, 1), 30m, 30m, 0m, 1, "USD");
+        snapshots.Store[new DateOnly(2026, 4, 30)] = new PortfolioDailySnapshot(
+            new DateOnly(2026, 4, 30), 30m, 35m, 5m, 1, "USD");
+
+        var fx = new StubFx(("USD", "TWD", 32m));
+        var settings = new StubSettings("TWD");
+
+        var sut = new MoneyWeightedReturnCalculator(
+            trades, snapshots, new XirrCalculator(), port, fx, settings);
+        var period = new PerformancePeriod(new DateOnly(2026, 1, 1), new DateOnly(2026, 4, 30));
+        var irr = await sut.ComputeAsync(period);
+
+        Assert.NotNull(irr);
+
+        // Sanity: different rate → snapshot magnitudes change, trade flows unchanged → different IRR.
+        var fx2 = new StubFx(("USD", "TWD", 16m));
+        var sut2 = new MoneyWeightedReturnCalculator(
+            trades, snapshots, new XirrCalculator(), port, fx2, settings);
+        var irr2 = await sut2.ComputeAsync(period);
+        Assert.NotNull(irr2);
+        Assert.NotEqual(irr!.Value, irr2!.Value);
+    }
+
+    [Fact]
+    public async Task ComputeAsync_SnapshotMissingFxRate_ReturnsNull()
+    {
+        var entryId = Guid.NewGuid();
+        var port = new FakePortfolioRepo();
+        port.Entries.Add(new PortfolioEntry(entryId, "X", "TWSE", AssetType.Stock, "X", "TWD"));
+
+        var trades = new FakeTradeRepo();
+        trades.Store.Add(MakeBuy(entryId, new DateTime(2026, 1, 5), 10, 100m));
+
+        var snapshots = new FakeSnapshotRepo();
+        snapshots.Store[new DateOnly(2026, 1, 1)] = new PortfolioDailySnapshot(
+            new DateOnly(2026, 1, 1), 1000m, 1000m, 0m, 1, "JPY"); // missing rate
+
+        var fx = new StubFx(); // no rates
+        var settings = new StubSettings("TWD");
+
+        var sut = new MoneyWeightedReturnCalculator(
+            trades, snapshots, new XirrCalculator(), port, fx, settings);
+        var period = new PerformancePeriod(new DateOnly(2026, 1, 1), new DateOnly(2026, 4, 30));
+        var irr = await sut.ComputeAsync(period);
+
+        Assert.Null(irr);
+    }
+
+    [Fact]
+    public async Task ComputeAsync_SnapshotMatchesBaseCurrency_NoConversionAttempted()
+    {
+        var entryId = Guid.NewGuid();
+        var trades = new FakeTradeRepo();
+        trades.Store.Add(MakeBuy(entryId, new DateTime(2026, 1, 5), 10, 100m));
+
+        var snapshots = new FakeSnapshotRepo();
+        snapshots.Store[new DateOnly(2026, 1, 1)] = new PortfolioDailySnapshot(
+            new DateOnly(2026, 1, 1), 1000m, 1000m, 0m, 1, "TWD");
+        snapshots.Store[new DateOnly(2026, 4, 30)] = new PortfolioDailySnapshot(
+            new DateOnly(2026, 4, 30), 1000m, 1100m, 100m, 1, "TWD");
+
+        // Even with FX configured, matching currency should not require any rate lookup.
+        var port = new FakePortfolioRepo();
+        var fx = new StubFx(); // empty — would fail if asked to convert
+        var settings = new StubSettings("TWD");
+
+        var sut = new MoneyWeightedReturnCalculator(
+            trades, snapshots, new XirrCalculator(), port, fx, settings);
+        var period = new PerformancePeriod(new DateOnly(2026, 1, 1), new DateOnly(2026, 4, 30));
+        var irr = await sut.ComputeAsync(period);
+
+        Assert.NotNull(irr);
+    }
+
     private static Trade MakeBuy(Guid entryId, DateTime when, int qty, decimal price) => new(
         Guid.NewGuid(), "X", "TW", "X", TradeType.Buy, when, price, qty, null, null,
         PortfolioEntryId: entryId);
@@ -117,10 +208,16 @@ public class MoneyWeightedReturnCalculatorTests
 
     private sealed class FakeSnapshotRepo : IPortfolioSnapshotRepository
     {
+        public Dictionary<DateOnly, PortfolioDailySnapshot> Store { get; } = new();
         public Task<IReadOnlyList<PortfolioDailySnapshot>> GetSnapshotsAsync(DateOnly? from = null, DateOnly? to = null) =>
-            Task.FromResult<IReadOnlyList<PortfolioDailySnapshot>>([]);
-        public Task<PortfolioDailySnapshot?> GetSnapshotAsync(DateOnly date) => Task.FromResult<PortfolioDailySnapshot?>(null);
-        public Task UpsertAsync(PortfolioDailySnapshot snapshot) => Task.CompletedTask;
+            Task.FromResult<IReadOnlyList<PortfolioDailySnapshot>>(Store.Values.OrderBy(s => s.SnapshotDate).ToList());
+        public Task<PortfolioDailySnapshot?> GetSnapshotAsync(DateOnly date) =>
+            Task.FromResult(Store.TryGetValue(date, out var s) ? s : null);
+        public Task UpsertAsync(PortfolioDailySnapshot snapshot)
+        {
+            Store[snapshot.SnapshotDate] = snapshot;
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakeTradeRepo : ITradeRepository

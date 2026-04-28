@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.14.2 - 2026-04-28
+
+收尾 v0.14.1 延後的 snapshot 多幣別處理。`PortfolioDailySnapshot` 新增 `Currency` 欄位，`MoneyWeightedReturnCalculator` 在計算 IRR 前依 base currency 轉換 snapshot market value，與 trade flows 採同一保守策略（缺 FX → 回傳 null）。
+
+### 新增
+
+- **PortfolioDailySnapshot.Currency**（`Assetra.Core/Models/PortfolioDailySnapshot.cs`）：record 新增 `string Currency = "TWD"` positional 參數，向後相容。
+- **Schema migration**（`Assetra.Infrastructure/Persistence/PortfolioSnapshotSchemaMigrator.cs`）：CREATE 加 `currency TEXT NOT NULL DEFAULT 'TWD'`；以 `pragma_table_info` 偵測舊 DB 並 `ALTER TABLE ADD COLUMN`。
+- **MWR snapshot 轉換**（`Assetra.Application/Analysis/MoneyWeightedReturnCalculator.cs`）：`ConvertSnapshotMarketValueAsync` 比對 `snap.Currency` 與 `BaseCurrency`，不一致時走 `IMultiCurrencyValuationService.ConvertAsync`（asOf = snapshot date）；缺 rate → return null。
+- **TryRecordSnapshotAsync** 透傳 `currency` 參數（`IPortfolioHistoryMaintenanceService` / `PortfolioSnapshotService` / WPF 包裝）；`PortfolioViewModel.RecordSnapshotAsync` 從 `AppSettings.BaseCurrency` 取值。
+
+### 測試
+
+- 新增 3 個 `MoneyWeightedReturnCalculatorTests`：snapshot 與 base 同幣（不轉換）/ 異幣經 FX 轉換（不同 rate → 不同 IRR，避開 IRR scale-invariance）/ 缺 rate 回 null。
+- 563/563 tests 綠（v0.17.0 為 560；本 sprint +3）。
+
 ## v0.17.0 - 2026-04-28
 
 趨勢圖增強的領域層骨架：建立 `PortfolioEvent` 模型 + `PortfolioEventDetectionService` 純函式偵測器。schema migration、堆疊圖 schema 擴充、TrendsView UI annotation 留待 v0.17.1+。
