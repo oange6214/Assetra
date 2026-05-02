@@ -598,15 +598,15 @@ Assets/
 - OCR / PDF 匯入（v0.19）
 - 雲端同步 GA（v0.20–v0.21）
 
-### Phase 4（進行中：v0.22→）
+### Phase 4（多元資產 / 情境模擬已 ship — v0.22.0）
+- ✅ 不動產 / 保險 / 退休專戶 / 實物資產（v0.22.0）
+- ✅ 高階情境模擬：FIRE / Monte Carlo（v0.22.0）
 - AI 財務助理（待規劃，v0.23.0+）
-- 不動產 / 保險 / 退休專戶（v0.23–v0.24）
-- 高階情境模擬與 FIRE 工具（v0.25–v0.26）
-- PWA / 行動端（v0.27–v0.28）
+- PWA / 行動端（v0.24.0+ / v0.25.0+）
 
 ---
 
-## 十三、多元資產架構（v0.23–v0.24）
+## 十三、多元資產架構（✅ v0.22.0）
 
 ### 1. Folder 結構
 
@@ -678,7 +678,7 @@ record RealEstate(
 
 ### 5. Sync 整合
 
-v0.23–v0.24 的新 entity 需在 `CompositeLocalChangeQueue` 新增 routing key：
+v0.22.0 已加的多元資產 entity 在 `CompositeLocalChangeQueue` 的 routing key：
 
 ```csharp
 // 新增 4 個 entity type
@@ -690,7 +690,7 @@ v0.23–v0.24 的新 entity 需在 `CompositeLocalChangeQueue` 新增 routing ke
 
 ---
 
-## 十四、情境模擬架構（v0.25–v0.26）
+## 十四、情境模擬架構（✅ v0.22.0）
 
 ### 1. 設計原則：純計算層
 
@@ -760,7 +760,7 @@ Assetra 截至 v0.21.3 已具備：
 
 Phase 4 架構重點：
 
-1. **LLM adapter 整合**（AI 財務助理，v0.22）— query intent routing 不穿透 domain layer
-2. **多元資產模型**（v0.23–v0.24）— 獨立 MultiAsset context，BalanceSheet / Reporting 接入，全 entity 加 EntityVersion
-3. **情境模擬計算引擎**（v0.25–v0.26）— 純計算層，無 persistence，Box-Muller Monte Carlo，LiveChartsCore fan chart
-4. **Web API 抽出**（v0.27，`Assetra.Api`）— PWA / 行動端前置，WPF 與 PWA 共用 `Assetra.Core` 介面
+1. ✅ **多元資產模型**（v0.22.0）— 獨立 MultiAsset context，BalanceSheet / Reporting 接入，全 entity 加 EntityVersion
+2. ✅ **情境模擬計算引擎**（v0.22.0）— 純計算層，無 persistence，Box-Muller Monte Carlo，LiveChartsCore fan chart
+3. **LLM adapter 整合**（AI 財務助理，v0.23.0+）— query intent routing 不穿透 domain layer
+4. **Web API 抽出**（v0.24.0+，`Assetra.Api`）— PWA / 行動端前置，WPF 與 PWA 共用 `Assetra.Core` 介面
