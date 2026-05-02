@@ -47,16 +47,18 @@
 - [Implementation Roadmap](planning/Implementation-Roadmap.md)
   - 以 phase 拆解的實作任務清單。
 - [Roadmap v0.14 to v1.0](planning/Roadmap-v0.14-to-v1.0.md)
-  - v0.14–v1.0 各 sprint 詳細 task breakdown（含 v0.23–v0.26 多元資產與情境模擬）。
+  - v0.14–v1.0 各 sprint 詳細 task breakdown。Phase 4
+    （多元資產 + 情境模擬）已於 **v0.22.0** 一次 ship。
 
-### Preparing for Phase 4 (v0.23–v0.26)
+### Phase 4 已 ship（v0.22.0）
 
-開始多元資產或情境模擬功能前，建議先讀：
+多元資產（不動產 / 保險 / 退休 / 實物資產）+ 情境模擬
+（FIRE / Monte Carlo）合併進 **v0.22.0** release。要了解
+context 與架構決策仍可讀：
 
 1. [Bounded Contexts §13–14](architecture/Bounded-Contexts.md) — MultiAsset / Simulation context 定義
-2. [Technical Architecture Blueprint §十三–十四](architecture/Technical-Architecture-Blueprint.md) — folder 結構、EntityVersion 規範、BalanceSheet 擴充計畫
-3. [Roadmap v0.14 to v1.0](planning/Roadmap-v0.14-to-v1.0.md) — v0.23–v0.26 完整 task breakdown
-4. [Docs Gap Review §九](reviews/Docs-Gap-Review.md) — Phase 4 文件準備清單
+2. [Technical Architecture Blueprint §十三–十四](architecture/Technical-Architecture-Blueprint.md) — folder 結構、EntityVersion 規範、BalanceSheet 擴充
+3. [Changelog v0.22.0](releases/CHANGELOG.md) — 完整變更摘要
 
 ## Guides
 - [Fugle API Key Setup](guides/Fugle-API-Key-Setup.md)

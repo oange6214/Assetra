@@ -1,6 +1,8 @@
 # Assetra v0.14 → v1.0 完整 Sprint 規劃
 
-> **版號重編註記（2026-04-28，v0.21.1 修訂）**：v0.14–v0.19 已依 roadmap 出貨；雲端同步原訂 v0.20.0 一個 sprint，實際展開為 v0.20.0–v0.20.12 + v0.21.0（GA chaos test）+ v0.21.1（docs），共占用兩個 minor 區段。**原訂「v0.21.0 — AI 財務助理」確定重編為 v0.22.0，後續 sprint 全部 +1 順延（多元資產 → v0.23/v0.24、情境模擬 → v0.25/v0.26、多端 → v0.27/v0.28）**。出貨對照請見 `docs/releases/CHANGELOG.md`。
+> **版號重編註記（2026-05-02，v0.22.0 修訂）**：原訂 v0.22 AI 助理 → v0.23/v0.24 多元資產 → v0.25/v0.26 情境模擬 的 4 個 sprint，最終以 **v0.22.0 一次合併出貨**（多元資產 + 情境模擬 + Wpf.Ui-first UX redesign）。AI 助理延後到後續獨立 sprint。
+>
+> **更早的版號重編（2026-04-28）**：v0.14–v0.19 依 roadmap 出貨；雲端同步原訂 v0.20.0 一個 sprint，實際展開為 v0.20.0–v0.20.12 + v0.21.0（GA chaos test）+ v0.21.1–v0.21.4（docs / 修補）。詳細出貨對照請見 `docs/releases/CHANGELOG.md`。
 
 > 規劃日期：2026-04-28（v0.13.0 release 後）
 > 涵蓋範圍：Roadmap 上所有未完成項目 — Phase 1 收尾、Phase 2 收尾、Phase 3、Phase 4
@@ -21,13 +23,10 @@
 | **v0.20.0–v0.20.12** ✅ | 雲端同步（加密 + conflict policy） | P3.4 | L（實際展開為 13 個 sub-version）| sync metadata、merge policy、加密同步層；8 entity round-trip |
 | **v0.21.0** ✅ | 雲端同步 GA（chaos test）| — | S | HTTP 5xx / cancellation 路徑覆蓋；i18n 複校 no-op；staging 煙霧延後到 v1.0 GA gate |
 | **v0.21.1** ✅ | 雲端同步使用者文件 + 規劃檔整理 | — | XS | `docs/guides/Cloud-Sync-Setup.md`；`docs/planning/` 6 份歷史 sprint 封存 |
-| **v0.22.0** | AI 財務助理（自然語言查詢） | P3.3 | M | LLM adapter、query intent → service routing、查詢 UI |
-| **v0.23.0** | 多元資產（不動產 + 保險） | P4.1-A | M | `RealEstate`、`InsurancePolicy` 模型 + UI |
-| **v0.24.0** | 多元資產（退休 + 實物資產） | P4.1-B | S | `RetirementAccount`、`PhysicalAsset` |
-| **v0.25.0** | 情境模擬（FIRE + 退休提領） | P4.2-A | M | FIRE 計算機、4% 法則 / SWR 模擬器 |
-| **v0.26.0** | 情境模擬（利率 / 通膨 / 薪資變動） | P4.2-B | S~M | Monte Carlo 走勢模擬 |
-| **v0.27.0** | PWA（瀏覽器端只讀視圖） | P4.3-A | L | 後端 API 抽出、PWA shell |
-| **v0.28.0** | 行動端 + 推播 | P4.3-B | L | Mobile 適配、推播通道 |
+| **v0.22.0** ✅ | 多元資產 + 情境模擬 + Wpf.Ui UX redesign（合併 sprint） | P4.1+P4.2 | XL | `RealEstate` / `InsurancePolicy` / `RetirementAccount` / `PhysicalAsset` 模型 + UI；`FireCalculator` + `MonteCarloSimulator`；`ui:TextBox`/`ui:Button`/`ui:SymbolIcon` 全 app 遷移；NavRail 漢堡切換；GlobalStyles 清理 -28% |
+| **v0.23.0+** | AI 財務助理（自然語言查詢，從原 v0.22 延後） | P3.3 | M | LLM adapter、query intent → service routing、查詢 UI |
+| **v0.24.0+** | PWA（瀏覽器端只讀視圖） | P4.3-A | L | 後端 API 抽出、PWA shell |
+| **v0.25.0+** | 行動端 + 推播 | P4.3-B | L | Mobile 適配、推播通道 |
 | **v1.0.0** | GA 發布（穩定性、文件、效能） | — | M | 大量整合測試、文件全面整理、效能 baseline |
 
 > 備註：v0.22（AI）刻意排在雲端同步之後，是因為 AI 需要穩定資料來源；若不需雲端同步可提前。

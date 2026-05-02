@@ -18,8 +18,8 @@
     - `Import/` + `Reconciliation/` — full import pipeline (CSV / Excel / PDF / OCR), AutoCategorizationRule, batch history + rollback, reconciliation sessions. *(v0.7–v0.19)*
     - `Sync/` — `SyncOrchestrator`, `CompositeLocalChangeQueue`, `LastWriteWinsResolver`, `InMemorySyncMetadataStore`. *(v0.20–v0.21)*
     - `Fx/` — `IFxRateProvider`, `StaticFxRateProvider`, `MultiCurrencyValuationService`. *(v0.14)*
-    - `MultiAsset/` — `RealEstateValuationService`, `InsuranceCashValueCalculator`, `RetirementProjectionService`, `PhysicalAssetValuationService`. *(v0.23–v0.24, 規劃中)*
-    - `Simulation/` — `FireCalculator`, `SustainabilityAnalyzer`, `MonteCarloSimulator`, `StochasticRateProvider`（純計算，無持久化）. *(v0.25–v0.26, 規劃中)*
+    - `MultiAsset/` — `RealEstateValuationService`, `InsuranceCashValueCalculator`, `RetirementProjectionService`, `PhysicalAssetValuationService`. *(✅ v0.22.0)*
+    - `Simulation/` — `FireCalculator`, `SustainabilityAnalyzer`, `MonteCarloSimulator`, `StochasticRateProvider`（純計算，無持久化）. *(✅ v0.22.0)*
   - Each context exposes query services, workflow services, and summary services as needed.
 - `Assetra.Infrastructure`
   - SQLite repositories, external market-data clients, schedulers, migration helpers.
@@ -72,14 +72,14 @@
 - Use `Controls/` for page-local reusable UI and `SubViewModels/` for page-local state objects.
 - Dialog and overlay controls should stay page-local unless another context genuinely reuses them.
 
-## Multi-Asset Entities (v0.23–v0.24)
+## Multi-Asset Entities (✅ v0.22.0)
 
 All new multi-asset entities (`RealEstate`, `InsurancePolicy`, `RetirementAccount`, `PhysicalAsset`) must:
 - Include `EntityVersion` for sync readiness
 - Register in `CompositeLocalChangeQueue` entity routing
 - Feed `BalanceSheetService` aggregation (asset-side line items)
 
-## Simulation Context (v0.25–v0.26)
+## Simulation Context (✅ v0.22.0)
 
 `Simulation/` context is **calculation-only**:
 - No persistence — results are transient

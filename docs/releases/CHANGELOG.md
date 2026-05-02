@@ -1,48 +1,132 @@
 # Changelog
 
+## v0.22.0 - 2026-05-02
+
+「Phase 4 多元資產 + 情境模擬 + Wpf.Ui-first UX 重塑」整合 release。
+此版本一次收錄 v0.21.4 之後所有未發版的工作（原內部代號
+v0.23–v0.26 sprint），並完成 Wpf.Ui 控件遷移與 UX redesign。
+原本規劃的 v0.22 AI 財務助理延後（仍在 backlog）。
+
+### 多元資產（原 v0.23 + v0.24）
+
+- **不動產**：`RealEstate` 模型、`real_estate` schema、`RentalIncomeRecord`、
+  WPF `RealEstateView`、Sync routing。
+- **保險**：`InsurancePolicy` 模型、`insurance_policy` schema、
+  `InsurancePremiumRecord`、WPF `InsuranceView`、Sync routing。
+- **退休專戶**：`RetirementAccount` + `RetirementContribution`、
+  `RetirementProjectionService`（複利預估）、`BalanceSheetService`
+  新增退休專戶行項、Goals 退休進度整合、WPF `RetirementView`。
+- **實物資產**：`PhysicalAsset` 模型 + WPF `PhysicalAssetView`。
+- **資產面完整 6 類**：BalanceSheet 現可呈現現金 / 投資 / 不動產 /
+  保險 / 退休 / 實物資產的完整淨值組成。
+- **多元資產 hub**：NavRail 新增「多元資產」入口，內含 4 個 sub-tab。
+
+### 情境模擬（原 v0.25 + v0.26）
+
+- **FIRE 計算機**：`FireCalculator`（4% 法則 / 自訂 SWR）、
+  `SustainabilityAnalyzer`（30 年可持續模擬）、WPF `FireView`
+  輸入表單 + 提領曲線圖、Goals FIRE 達成日整合。
+- **Monte Carlo**：`MonteCarloSimulator`（1000+ 次模擬、
+  Box-Muller 常態分布）、`StochasticRateProvider`（大盤 / 保守
+  預設分布）、WPF `MonteCarloView`（fan chart：P10 / P50 / P90
+  + 成功率）。
+
+### UX redesign — Wpf.Ui-first
+
+- **TextBox 全 app 改用 `ui:TextBox`**（156 instances）：高度 /
+  padding / 垂直置中由 framework 處理；自訂 `FormTextBox` style
+  退役。
+- **Button 動作鍵改用 `ui:Button` + `Appearance`**（95 instances）：
+  Primary / Secondary / Danger 取代 BtnPrimary / BtnGhost / BtnDanger
+  顯式 style 引用。
+- **icon 全面改用 `ui:SymbolIcon`**（87 instances）：移除 Segoe
+  MDL2 Assets 字體依賴，glyph code 對映成 Wpf.Ui SymbolRegular
+  enum；NavRail 透過 `Tag="{x:Static ui:SymbolRegular.Xxx24}"`
+  傳遞 symbol。
+- **NavRail 漢堡切換**：56 ↔ 220 px 折疊式 rail，展開時顯示文字
+  label，收合時 tooltip 自動啟用。
+- **共用 form chrome**：新增 `FormCard` / `FormSectionTitle` 樣式，
+  套用到多元資產 4 個 hub view；`FormDatePicker` 高度與字體對齊
+  其他 form control。
+
+### 字體統一
+
+- 整 app 改用單一字體家族 `Segoe UI Variable Text`（CJK fallback
+  到 Microsoft JhengHei UI / YaHei UI）。
+- 數字對齊改用 OpenType `Typography.NumeralAlignment="Tabular"`
+  取代切換到 Consolas，保留 Latin / 數字 / CJK 一致視覺。
+- 移除 `FontTabular` token（轉為 alias 後最終退役）。
+
+### GlobalStyles 清理
+
+- 移除 33 個無人使用的 style（1498 → 1080 行，-28%）：包含
+  Stockra fork 殘留（`NavRailAiBtn`、`PanelToggleBtn`、
+  `IndicatorToggleBtn`、`SettingsRadioBtn`、`ToolbarBorder`
+  等）、未引用的設計 token（`Spacing*`、`InlineGap*`、
+  `CardPadding*`、`RowPadding*`）、migrate 後遺留
+  （`FormTextBox`、`FormPasswordBox`、`BtnLink`、`BtnDanger`、
+  `FontTabular`、`FontDisplay`、`Card`、`MetricLabel`、
+  `TabularText`）。
+
+### 功能性 bug fix
+
+- **借款還款不寫入 DB**：`PortfolioServiceCollectionExtensions`
+  原本 inject `NullLoanMutationWorkflowService`（no-op），導致
+  ConfirmLoanAsync 看似成功但 trade 從未持久化。已換成真服務。
+- **StockScheduler DI**：注入缺少 `IAlertRepository`。
+- **多元資產 hub 重啟後資料不見**：4 個 hub view code-behind
+  新增 `IsVisibleChanged → vm.LoadCommand` hook；App.xaml.cs
+  startup 預載對應 VM。
+- **FinancialOverview 投資 KPI 永遠 0**：訂閱
+  `PortfolioViewModel.PropertyChanged` 的 `TotalMarketValue`，
+  價格抓回後自動 reload snapshot。
+- **silent transaction failures 暴露機制**：`ConfirmTx` 整段
+  switch 包 try/catch，例外丟到 Snackbar + Serilog Error；
+  `TradeSqliteRepository.AddAsync` 在 `INSERT OR IGNORE`
+  affects 0 rows 時拋 `InvalidOperationException`。
+- **AlertSchemaMigrator**：先探 sqlite_master 再嘗試從 legacy
+  table INSERT，避免 fresh install 噴 first-chance「no such
+  table」例外。
+- **AddAssetDialog binding error**：移除錯誤的 ElementName=Root
+  DataContext path。
+- **AllocationView / RebalanceDataGrid TwoWay binding crash**：
+  `<Run Text="{Binding ...}">` 預設 TwoWay，在 NavRail 切頁
+  時對 get-only 的 `ActualPercentDisplay` 拋例外，改加
+  `Mode=OneWay`。
+- **LiveChartsCore 升 2.0.0 → 2.0.2**：解 `CompositionTargetTicker`
+  的 dispose race NRE；無法升的版本則由 `DispatcherUnhandledException`
+  handler 攔截已知 benign NRE。
+
+### 開發模式 noise 抑制（DEBUG only）
+
+- Velopack update check + recovery path 用 `#if !DEBUG` gate，
+  unpackaged 跑 DEBUG 不再噴 `NotInstalledException`
+  first-chance。
+- DispatcherUnhandledException handler 攔 LiveCharts dispose
+  NRE。
+
+### 測試
+
+- 新增 `AlertsViewModelTests` + `NavRailViewModelTests`。
+- `StockSchedulerTests` / `LoanMutationWorkflowServiceTests`
+  / `SellWorkflowServiceTests` / `TransactionDialogViewModelTests`
+  根據新建構簽章調整。
+- `dotnet build Assetra.slnx -c Release` ✅ 0/0
+- `dotnet test Assetra.Tests/Assetra.Tests.csproj` ✅ 968/969
+  （1 個 race-condition flake，獨立跑通過）
+
+### 套件升級
+
+- `LiveChartsCore.SkiaSharpView.WPF`：2.0.0 → 2.0.2
+
+---
+
 ## 規劃中（Upcoming）
 
-### v0.22.0 — AI 財務助理
-### v0.23.0 — 多元資產（不動產 + 保險）
+### v0.23.0+ — AI 財務助理（從原 v0.22 延後）
 
-#### 預計產出
-- `RealEstate` 模型 + `RentalIncomeRecord`
-- `InsurancePolicy` 模型 + `InsurancePremiumRecord`
-- SQLite schema：`real_estate`、`rental_income_record`、`insurance_policy`、`insurance_premium_record`
-- `BalanceSheetService` 新增「不動產淨值」、「保單現金價值」行項
-- `IncomeStatementService` 新增「租金收入」、「保費支出」
-- `ConcentrationAnalyzer` 納入不動產 / 保險佔淨值比例
-- WPF：`RealEstateView`、`InsuranceView`
-- Sync entity routing：RealEstate、InsurancePolicy
-
-### v0.24.0 — 多元資產（退休 + 實物資產）
-
-#### 預計產出
-- `RetirementAccount` 模型 + `RetirementContribution`
-- `PhysicalAsset` 模型
-- `RetirementProjectionService`（複利預估退休餘額）
-- `BalanceSheetService` 新增「退休專戶」、「實物資產」行項（完整 6 類資產）
-- `Goals` 整合：退休目標可讀取退休專戶進度
-- WPF：`RetirementView`、`PhysicalAssetView`
-- Sync entity routing：RetirementAccount、PhysicalAsset
-
-### v0.25.0 — 情境模擬（FIRE 計算機）
-
-#### 預計產出
-- `FireScenario` / `FireResult` / `WithdrawalProjection` 模型（純計算，無持久化）
-- `FireCalculator`（確定性試算，4% 法則 / 自訂 SWR）
-- `SustainabilityAnalyzer`（30 年提領可持續模擬）
-- WPF：`FireView`（輸入表單 + 提領曲線圖）
-- Goals 整合：FIRE 達成日作為退休 Goal 預測到期日
-
-### v0.26.0 — 情境模擬（Monte Carlo）
-
-#### 預計產出
-- `MonteCarloScenario` / `MonteCarloResult` / `RateDistribution` 模型
-- `MonteCarloSimulator`（1000+ 次模擬，Box-Muller 常態分布）
-- `StochasticRateProvider`（大盤 / 保守預設分布）
-- WPF：`MonteCarloView`（fan chart：P10 / P50 / P90 + 成功率）
-- 使用 LiveChartsCore（已有）實作扇形帶狀圖
+原本規劃的 LLM-driven 財務助理功能，因應 multi-asset / FIRE /
+Monte Carlo 一次合併進 v0.22.0，AI 助理延後到下一個獨立 sprint。
 
 ---
 

@@ -157,16 +157,16 @@
 - 雲端同步（AES-GCM / 8 entity round-trip / manual conflict drain / GA chaos test）✅（v0.20.0–v0.21.0）
 
 ### 尚待開發（Phase 4）
-- AI 財務助理（v0.22.0）
-- 多元資產：不動產 / 保險 / 退休 / 實物（v0.23 / v0.24）
-- 情境模擬：FIRE / Monte Carlo（v0.25 / v0.26）
-- 多端體驗：PWA / 行動端（v0.27 / v0.28）
+- AI 財務助理（待規劃，v0.23.0+）
+- 多元資產：不動產 / 保險 / 退休 / 實物 ✅ v0.22.0
+- 情境模擬：FIRE / Monte Carlo ✅ v0.22.0
+- 多端體驗：PWA / 行動端（v0.24.0+ / v0.25.0+）
 
 ---
 
 ## 九、Phase 4（v0.23–v0.26）文件準備清單
 
-> 更新日期：2026-04-28。在開始 v0.23.0 實作前，確認下列文件已就緒。
+> 更新日期：2026-04-28。在開始 v0.22.0 實作前，確認下列文件已就緒。
 
 ### 實作前必須完成（HIGH）
 
@@ -175,10 +175,10 @@
 | `Bounded-Contexts.md` | 新增 §13 多元資產（RealEstate / Insurance / Retirement / Physical） | ✅ 已完成 |
 | `Bounded-Contexts.md` | 新增 §14 模擬（FIRE / Monte Carlo） | ✅ 已完成 |
 | `Bounded-Contexts.md` | 更新 Context 關係圖 | ✅ 已完成 |
-| `Roadmap-v0.14-to-v1.0.md` | v0.23.0 完整 task breakdown（含 UI / Reporting / Sync） | ✅ 已完成 |
-| `Roadmap-v0.14-to-v1.0.md` | v0.24.0 完整 task breakdown | ✅ 已完成 |
-| `Roadmap-v0.14-to-v1.0.md` | v0.25.0 完整 task breakdown（FIRE） | ✅ 已完成 |
-| `Roadmap-v0.14-to-v1.0.md` | v0.26.0 完整 task breakdown（Monte Carlo） | ✅ 已完成 |
+| `Roadmap-v0.14-to-v1.0.md` | v0.22.0 完整 task breakdown（含 UI / Reporting / Sync） | ✅ 已完成 |
+| `Roadmap-v0.14-to-v1.0.md` | v0.22.0 完整 task breakdown | ✅ 已完成 |
+| `Roadmap-v0.14-to-v1.0.md` | v0.22.0 完整 task breakdown（FIRE） | ✅ 已完成 |
+| `Roadmap-v0.14-to-v1.0.md` | v0.22.0 完整 task breakdown（Monte Carlo） | ✅ 已完成 |
 | `Technical-Architecture-Blueprint.md` | §十三 多元資產 folder 結構 + EntityVersion 規範 + BalanceSheet 擴充 | ✅ 已完成 |
 | `Technical-Architecture-Blueprint.md` | §十四 Simulation 架構（純計算、Box-Muller、fan chart） | ✅ 已完成 |
 
