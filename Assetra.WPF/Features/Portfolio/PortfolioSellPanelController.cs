@@ -39,6 +39,7 @@ internal sealed class PortfolioSellPanelController
         string sellPriceInput,
         string manualFeeInput,
         int sellQtyOverride,
+        DateTime tradeDate,
         decimal commissionDiscount,
         bool isSellEtf,
         Guid? cashAccountId)
@@ -49,7 +50,14 @@ internal sealed class PortfolioSellPanelController
         if (!ParseHelpers.TryParseDecimal(sellPriceInput, out var sellPrice) || sellPrice <= 0)
             return new SellPanelSubmitState(null, "賣出價格無效");
 
-        var sellQty = sellQtyOverride > 0 ? sellQtyOverride : (int)row.Quantity;
+        var currentQty = (int)row.Quantity;
+        var sellQty = sellQtyOverride > 0 ? sellQtyOverride : currentQty;
+        if (currentQty <= 0)
+            return new SellPanelSubmitState(null, "持倉數量無效");
+        if (sellQty <= 0)
+            return new SellPanelSubmitState(null, "賣出數量無效");
+        if (sellQty > currentQty)
+            return new SellPanelSubmitState(null, $"賣出數量 ({sellQty:N0}) 超過持倉 ({currentQty:N0}) 股");
 
         decimal sellCommission;
         decimal? sellDiscount;
@@ -79,9 +87,10 @@ internal sealed class PortfolioSellPanelController
                 row.Exchange,
                 row.Name,
                 row.BuyPrice,
-                (int)row.Quantity,
+                currentQty,
                 sellQty,
                 sellPrice,
+                tradeDate,
                 sellCommission,
                 sellDiscount,
                 cashAccountId,

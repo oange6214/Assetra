@@ -158,6 +158,8 @@ internal static class PortfolioServiceCollectionExtensions
                 LiabilityMutation: sp.GetRequiredService<ILiabilityMutationWorkflowService>(),
                 CreditCardMutation: sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
                 CreditCardTransaction: sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
+                LoanPayment: sp.GetRequiredService<ILoanPaymentWorkflowService>(),
+                LoanMutation: sp.GetRequiredService<ILoanMutationWorkflowService>(),
                 CategoryRepository: sp.GetRequiredService<ICategoryRepository>(),
                 AutoCategorizationRuleRepository: sp.GetRequiredService<IAutoCategorizationRuleRepository>(),
                 AddAssetDialog: new AddAssetDialogViewModel(

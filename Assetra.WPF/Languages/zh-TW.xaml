@@ -27,6 +27,10 @@
     <sys:String x:Key="Nav.Alerts.Tooltip">價格警示</sys:String>
     <sys:String x:Key="Nav.Import">匯入</sys:String>
     <sys:String x:Key="Nav.Settings">設定</sys:String>
+    <sys:String x:Key="Nav.Cashflow">收支</sys:String>
+    <sys:String x:Key="Nav.Insights">分析報表</sys:String>
+    <sys:String x:Key="Nav.MultiAsset">多元資產</sys:String>
+    <sys:String x:Key="Nav.Toggle">展開／收合導覽</sys:String>
 
     <!--  Import feature  -->
     <sys:String x:Key="Import.Tab.Import">匯入</sys:String>
@@ -1081,7 +1085,7 @@
     <sys:String x:Key="Insurance.Form.AnnualPremium">年繳保費</sys:String>
     <sys:String x:Key="Insurance.Form.Currency">幣別</sys:String>
 
-    <!-- v0.24 退休專戶 -->
+    <!--  v0.24 退休專戶  -->
     <sys:String x:Key="Retirement.Title">退休專戶</sys:String>
     <sys:String x:Key="Retirement.TotalBalance">總餘額：</sys:String>
     <sys:String x:Key="Retirement.Column.Name">名稱</sys:String>
@@ -1110,7 +1114,7 @@
     <sys:String x:Key="Retirement.Projection.AnnualReturn">年化報酬率</sys:String>
     <sys:String x:Key="Retirement.Projection.AnnualContribution">每年提撥</sys:String>
 
-    <!-- v0.24 實物資產 -->
+    <!--  v0.24 實物資產  -->
     <sys:String x:Key="PhysicalAsset.Title">實物資產</sys:String>
     <sys:String x:Key="PhysicalAsset.TotalValue">總市值：</sys:String>
     <sys:String x:Key="PhysicalAsset.TotalGain">未實現損益：</sys:String>
@@ -1132,7 +1136,7 @@
     <sys:String x:Key="PhysicalAsset.Form.Currency">幣別</sys:String>
     <sys:String x:Key="PhysicalAsset.Form.Notes">備註</sys:String>
 
-    <!-- v0.25 FIRE 計算機 -->
+    <!--  v0.25 FIRE 計算機  -->
     <sys:String x:Key="Fire.Title">FIRE 計算機</sys:String>
     <sys:String x:Key="Fire.Input.NetWorth">目前淨資產</sys:String>
     <sys:String x:Key="Fire.Input.AnnualExpenses">年支出</sys:String>
@@ -1146,7 +1150,7 @@
     <sys:String x:Key="Fire.Path.Year">年度</sys:String>
     <sys:String x:Key="Fire.Path.NetWorth">淨資產</sys:String>
 
-    <!-- v0.26 Monte Carlo -->
+    <!--  v0.26 Monte Carlo  -->
     <sys:String x:Key="MonteCarlo.Title">Monte Carlo 退休模擬</sys:String>
     <sys:String x:Key="MonteCarlo.Input.Initial">起始餘額</sys:String>
     <sys:String x:Key="MonteCarlo.Input.Withdrawal">年提領</sys:String>

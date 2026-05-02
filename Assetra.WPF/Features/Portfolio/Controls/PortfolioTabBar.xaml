@@ -1,7 +1,8 @@
 <UserControl
     x:Class="Assetra.WPF.Features.Portfolio.Controls.PortfolioTabBar"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <Border
         Background="{DynamicResource AppSurface}"
         BorderBrush="{DynamicResource AppBorder}"
@@ -44,27 +45,21 @@
                 IsChecked="{Binding IsTradesTab, Mode=TwoWay}"
                 Style="{StaticResource NavTabBtn}" />
 
-            <Button
+            <ui:Button
                 Height="35"
                 Margin="0,0,12,0"
                 VerticalAlignment="Center"
                 Command="{Binding AddRecordCommand}"
                 DockPanel.Dock="Right"
-                Style="{StaticResource BtnPrimary}">
+                Appearance="Primary">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock
-                        Margin="0,0,4,0"
-                        VerticalAlignment="Center"
-                        FontFamily="Segoe MDL2 Assets"
-                        FontSize="{StaticResource FontSizeXs}"
-                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                        Text="&#xE710;" />
+                    <ui:SymbolIcon Symbol="Add24" Margin="0,0,4,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeXs}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                     <TextBlock
                         VerticalAlignment="Center"
                         Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                         Text="{DynamicResource Portfolio.AddRecord}" />
                 </StackPanel>
-            </Button>
+            </ui:Button>
         </DockPanel>
     </Border>
 </UserControl>

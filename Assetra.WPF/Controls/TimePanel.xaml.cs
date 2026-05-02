@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace Assetra.WPF.Controls;
@@ -64,16 +65,7 @@ public partial class TimePanel : UserControl
 
             var btn = new Button
             {
-                Content = new TextBlock
-                {
-                    Text = label,
-                    FontFamily = (FontFamily)FindResource("FontTabular"),
-                    FontSize = 13,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    Foreground = isSelected
-                        ? Brushes.White
-                        : (Brush)FindResource("AppTextPrimary"),
-                },
+                Content = TabularLabel(label, isSelected),
                 Height = 32,
                 HorizontalContentAlignment = HorizontalAlignment.Center,
                 Tag = ts,
@@ -90,6 +82,27 @@ public partial class TimePanel : UserControl
         // 延遲捲動，讓選取項目出現在可視區域的中間
         if (_selectedButton is not null)
             Dispatcher.BeginInvoke(ScrollSelectedToCenter);
+    }
+
+    /// <summary>
+    /// Build a label TextBlock that uses the app's base font with tabular numeral
+    /// alignment so digit columns line up across slots.
+    /// </summary>
+    private TextBlock TabularLabel(string label, bool isSelected)
+    {
+        var tb = new TextBlock
+        {
+            Text = label,
+            FontFamily = (FontFamily)FindResource("FontBase"),
+            FontSize = 13,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Foreground = isSelected
+                ? Brushes.White
+                : (Brush)FindResource("AppTextPrimary"),
+        };
+        TextOptions.SetTextFormattingMode(tb, TextFormattingMode.Display);
+        Typography.SetNumeralAlignment(tb, FontNumeralAlignment.Tabular);
+        return tb;
     }
 
     // Slot style builder

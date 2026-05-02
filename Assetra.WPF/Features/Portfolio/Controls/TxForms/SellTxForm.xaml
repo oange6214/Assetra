@@ -2,13 +2,13 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.TxForms.SellTxForm"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     x:Name="Root"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel},
-                                     IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel}}"
     mc:Ignorable="d">
 
     <!--  ======== 賣出欄位 ========  -->
@@ -30,10 +30,11 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock
                             Margin="0,0,8,0"
-                            FontFamily="{StaticResource FontTabular}"
+                            FontFamily="{StaticResource FontBase}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppAccent}"
-                            Text="{Binding Symbol}" />
+                            Text="{Binding Symbol}"
+                            Typography.NumeralAlignment="Tabular" />
                         <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{Binding Name}" />
                     </StackPanel>
                 </DataTemplate>
@@ -46,10 +47,10 @@
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.SellQuantity}" />
-        <TextBox
+        <ui:TextBox
             Margin="0,0,0,0"
             IsEnabled="{Binding AreEconomicFieldsEditable}"
-            Style="{StaticResource FormTextBox}"
+
             Text="{Binding TxSellQuantity, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Margin="0,0,0,12"
@@ -63,10 +64,10 @@
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.SellPrice}" />
-        <TextBox
+        <ui:TextBox
             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
             IsEnabled="{Binding AreEconomicFieldsEditable}"
-            Style="{StaticResource FormTextBox}"
+
             Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Margin="0,0,0,12"
@@ -92,10 +93,10 @@
                 <ColumnDefinition Width="80" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <TextBox
+            <ui:TextBox
                 Grid.Column="0"
                 IsEnabled="{Binding AreEconomicFieldsEditable}"
-                Style="{StaticResource FormTextBox}"
+
                 Text="{Binding TxCommissionDiscount, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Grid.Column="1"
@@ -112,11 +113,11 @@
                     <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                 </MultiBinding>
             </StackPanel.Visibility>
-            <TextBox
+            <ui:TextBox
                 Width="96"
                 HorizontalAlignment="Left"
                 IsEnabled="{Binding AreEconomicFieldsEditable}"
-                Style="{StaticResource FormTextBox}"
+
                 Text="{Binding TxCommissionDiscount, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,6,0,0"
@@ -161,10 +162,11 @@
                 <TextBlock
                     Grid.Row="0"
                     Grid.Column="1"
-                    FontFamily="{StaticResource FontTabular}"
+                    FontFamily="{StaticResource FontBase}"
                     FontSize="{StaticResource FontSizeXs}"
                     Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{Binding TxSellGrossAmount, StringFormat={}{0:N0}}" />
+                    Text="{Binding TxSellGrossAmount, StringFormat={}{0:N0}}"
+                    Typography.NumeralAlignment="Tabular" />
                 <TextBlock
                     Grid.Row="1"
                     Grid.Column="0"
@@ -174,10 +176,11 @@
                 <TextBlock
                     Grid.Row="1"
                     Grid.Column="1"
-                    FontFamily="{StaticResource FontTabular}"
+                    FontFamily="{StaticResource FontBase}"
                     FontSize="{StaticResource FontSizeXs}"
                     Foreground="{DynamicResource AppDown}"
-                    Text="{Binding TxSellCommission, StringFormat=-{0:N0}}" />
+                    Text="{Binding TxSellCommission, StringFormat=-{0:N0}}"
+                    Typography.NumeralAlignment="Tabular" />
                 <TextBlock
                     Grid.Row="2"
                     Grid.Column="0"
@@ -204,10 +207,11 @@
                 <TextBlock
                     Grid.Row="2"
                     Grid.Column="1"
-                    FontFamily="{StaticResource FontTabular}"
+                    FontFamily="{StaticResource FontBase}"
                     FontSize="{StaticResource FontSizeXs}"
                     Foreground="{DynamicResource AppDown}"
-                    Text="{Binding TxSellTransactionTax, StringFormat=-{0:N0}}" />
+                    Text="{Binding TxSellTransactionTax, StringFormat=-{0:N0}}"
+                    Typography.NumeralAlignment="Tabular" />
                 <Rectangle
                     Grid.Row="3"
                     Grid.Column="0"
@@ -224,11 +228,12 @@
                 <TextBlock
                     Grid.Row="4"
                     Grid.Column="1"
-                    FontFamily="{StaticResource FontTabular}"
+                    FontFamily="{StaticResource FontBase}"
                     FontSize="{StaticResource FontSizeXs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
-                    Text="{Binding TxSellNetAmount, StringFormat={}{0:N0}}" />
+                    Text="{Binding TxSellNetAmount, StringFormat={}{0:N0}}"
+                    Typography.NumeralAlignment="Tabular" />
             </Grid>
         </Border>
 
@@ -239,9 +244,9 @@
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Fee}" />
-        <TextBox
+        <ui:TextBox
             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-            Style="{StaticResource FormTextBox}"
+
             Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Style="{StaticResource FormFieldError}"

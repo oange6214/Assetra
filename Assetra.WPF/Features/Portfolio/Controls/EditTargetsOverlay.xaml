@@ -2,21 +2,21 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.EditTargetsOverlay"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     x:Name="Root"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:AllocationViewModel},
-                                     IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:AllocationViewModel}}"
     mc:Ignorable="d">
 
-    <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
-    </UserControl.Resources>
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
+  </UserControl.Resources>
 
-    <!--  ── 編輯目標配置 overlay ────────────────────────────────────────  -->
-    <Grid Background="#80000000" Visibility="{Binding IsEditingTargets, Converter={StaticResource BoolToVis}}">
-        <Border
+  <!--  ── 編輯目標配置 overlay ────────────────────────────────────────  -->
+  <Grid Background="#80000000" Visibility="{Binding IsEditingTargets, Converter={StaticResource BoolToVis}}">
+    <Border
             MaxHeight="560"
             Padding="0"
             HorizontalAlignment="Center"
@@ -25,81 +25,81 @@
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
             CornerRadius="{StaticResource RadiusSm}">
-            <Border.Width>
-                <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.52|340|460">
-                    <Binding ElementName="Root" Path="ActualWidth" />
-                    <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                </MultiBinding>
-            </Border.Width>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+      <Border.Width>
+        <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.52|340|460">
+          <Binding ElementName="Root" Path="ActualWidth" />
+          <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
+        </MultiBinding>
+      </Border.Width>
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-                <!--  Title  -->
-                <Border
+        <!--  Title  -->
+        <Border
                     Grid.Row="0"
                     Padding="20,16"
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="0,0,0,1">
-                    <TextBlock
+          <TextBlock
                         FontSize="{StaticResource FontSizeMd}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Allocation.EditTargets.Title}" />
-                </Border>
+        </Border>
 
-                <!--  Per-asset inputs  -->
-                <ScrollViewer
+        <!--  Per-asset inputs  -->
+        <ScrollViewer
                     Grid.Row="1"
                     Padding="20,12"
                     VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding AllocationRows}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                                <Grid Margin="0,0,0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="12" />
-                                        <ColumnDefinition Width="96" />
-                                        <ColumnDefinition Width="20" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                        <TextBlock
+          <ItemsControl ItemsSource="{Binding AllocationRows}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+                <Grid Margin="0,0,0,8">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="96" />
+                    <ColumnDefinition Width="20" />
+                  </Grid.ColumnDefinitions>
+                  <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock
                                             FontSize="{StaticResource FontSizeSm}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{Binding Symbol}" />
-                                        <TextBlock
+                    <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{Binding ActualPercentDisplay}"
                                             TextTrimming="CharacterEllipsis" />
-                                    </StackPanel>
-                                    <TextBox
+                  </StackPanel>
+                  <ui:TextBox
                                         Grid.Column="2"
                                         HorizontalContentAlignment="Right"
-                                        FontFamily="{StaticResource FontTabular}"
-                                        Style="{StaticResource FormTextBox}"
+                                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
+
                                         Text="{Binding EditTargetText, UpdateSourceTrigger=PropertyChanged}" />
-                                    <TextBlock
+                  <TextBlock
                                         Grid.Column="3"
                                         Margin="6,0,0,0"
                                         VerticalAlignment="Center"
                                         FontSize="{StaticResource FontSizeSm}"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="%" />
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
 
-                <!--  Error  -->
-                <TextBlock
+        <!--  Error  -->
+        <TextBlock
                     Grid.Row="2"
                     Margin="20,0,20,4"
                     FontSize="{StaticResource FontSizeXs}"
@@ -108,31 +108,31 @@
                     TextWrapping="Wrap"
                     Visibility="{Binding TargetEditError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-                <!--  Buttons  -->
-                <Border
+        <!--  Buttons  -->
+        <Border
                     Grid.Row="3"
                     Padding="20,12"
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="0,1,0,0">
-                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                        <Button
+          <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+            <ui:Button
                             Height="28"
                             Margin="0,0,8,0"
                             Padding="12,0"
                             Command="{Binding CancelEditTargetsCommand}"
-                            Style="{StaticResource BtnGhost}">
-                            <TextBlock Text="{DynamicResource Common.Cancel}" />
-                        </Button>
-                        <Button
+                            Appearance="Secondary">
+              <TextBlock Text="{DynamicResource Common.Cancel}" />
+            </ui:Button>
+            <ui:Button
                             Height="28"
                             Padding="12,0"
                             Command="{Binding SaveTargetsCommand}"
-                            Style="{StaticResource BtnPrimary}">
-                            <TextBlock Text="{DynamicResource Common.Save}" />
-                        </Button>
-                    </StackPanel>
-                </Border>
-            </Grid>
+                            Appearance="Primary">
+              <TextBlock Text="{DynamicResource Common.Save}" />
+            </ui:Button>
+          </StackPanel>
         </Border>
-    </Grid>
+      </Grid>
+    </Border>
+  </Grid>
 </UserControl>

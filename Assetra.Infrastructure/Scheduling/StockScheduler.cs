@@ -13,6 +13,7 @@ internal sealed class StockScheduler : IStockService
     private readonly ITwseClient _twse;
     private readonly ITpexClient _tpex;
     private readonly IPortfolioRepository _portfolio;
+    private readonly IAlertRepository _alerts;
     private readonly IAppSettingsService _settings;
     private readonly FugleClient _fugle;
     private readonly IScheduler _scheduler;
@@ -26,6 +27,7 @@ internal sealed class StockScheduler : IStockService
 
     public StockScheduler(ITwseClient twse, ITpexClient tpex,
         IPortfolioRepository portfolio,
+        IAlertRepository alerts,
         IAppSettingsService settings,
         FugleClient fugle,
         IScheduler scheduler, TimeSpan? interval = null)
@@ -33,6 +35,7 @@ internal sealed class StockScheduler : IStockService
         _twse = twse;
         _tpex = tpex;
         _portfolio = portfolio;
+        _alerts = alerts;
         _settings = settings;
         _fugle = fugle;
         _scheduler = scheduler;
@@ -58,11 +61,17 @@ internal sealed class StockScheduler : IStockService
 
     private async Task<IReadOnlyList<StockQuote>> FetchAllAsync()
     {
-        var portfolioEntries = await _portfolio.GetEntriesAsync();
+        var portfolioEntries = await _portfolio.GetEntriesAsync().ConfigureAwait(false);
+        var alertRules = await _alerts.GetRulesAsync().ConfigureAwait(false);
 
         var entries = portfolioEntries
             .Select(e => (e.Symbol, e.Exchange))
-            .DistinctBy(e => e.Symbol)
+            .Concat(alertRules
+                .Where(r => !r.IsTriggered)
+                .Select(r => (r.Symbol, r.Exchange)))
+            .Select(e => (Symbol: NormalizeSymbol(e.Symbol), Exchange: NormalizeExchange(e.Exchange)))
+            .Where(e => e.Symbol.Length > 0 && e.Exchange.Length > 0)
+            .DistinctBy(e => (e.Symbol, e.Exchange))
             .ToList();
 
         var twseSymbols = entries.Where(e => e.Exchange == "TWSE").Select(e => e.Symbol).ToList();
@@ -80,7 +89,7 @@ internal sealed class StockScheduler : IStockService
 
             var available = fugleResults.Where(q => q is not null).Cast<StockQuote>().ToList();
             var missingSymbols = entries
-                .Where(e => available.All(q => q.Symbol != e.Symbol))
+                .Where(e => available.All(q => !Matches(q, e.Symbol, e.Exchange)))
                 .ToList();
 
             if (missingSymbols.Count == 0)
@@ -94,6 +103,16 @@ internal sealed class StockScheduler : IStockService
 
         return await FetchOfficialAsync(twseSymbols, tpexSymbols).ConfigureAwait(false);
     }
+
+    private static string NormalizeSymbol(string symbol) =>
+        symbol.Trim().ToUpperInvariant();
+
+    private static string NormalizeExchange(string exchange) =>
+        exchange.Trim().ToUpperInvariant();
+
+    private static bool Matches(StockQuote quote, string symbol, string exchange) =>
+        string.Equals(quote.Symbol, symbol, StringComparison.OrdinalIgnoreCase)
+        && string.Equals(quote.Exchange, exchange, StringComparison.OrdinalIgnoreCase);
 
     private async Task<IReadOnlyList<StockQuote>> FetchOfficialAsync(
         IReadOnlyList<string> twseSymbols,

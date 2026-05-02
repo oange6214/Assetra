@@ -2,6 +2,7 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.PositionsTabPanel"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:controls="clr-namespace:Assetra.WPF.Controls"
     xmlns:conv="clr-namespace:Assetra.WPF.Infrastructure.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,34 +10,33 @@
     xmlns:models="clr-namespace:Assetra.Core.Models;assembly=Assetra.Core"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     x:Name="Root"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
-                                     IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
     mc:Ignorable="d">
-    <UserControl.Resources>
-        <conv:PercentToWidthConverter x:Key="PercentToWidthConverter" />
-    </UserControl.Resources>
+  <UserControl.Resources>
+    <conv:PercentToWidthConverter x:Key="PercentToWidthConverter" />
+  </UserControl.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <!--  Investment summary cards  -->
-            <RowDefinition Height="Auto" />
-            <!--  Text search  -->
-            <RowDefinition Height="*" />
-            <!--  DataGrid (all asset types in one list; sort by Type column to group)  -->
-        </Grid.RowDefinitions>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <!--  Investment summary cards  -->
+      <RowDefinition Height="Auto" />
+      <!--  Text search  -->
+      <RowDefinition Height="*" />
+      <!--  DataGrid (all asset types in one list; sort by Type column to group)  -->
+    </Grid.RowDefinitions>
 
-        <!--  ═══ Row 0: Investment Summary ═══  -->
-        <Border
+    <!--  ═══ Row 0: Investment Summary ═══  -->
+    <Border
             Grid.Row="0"
             Padding="12,8"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="0,0,0,1">
-            <WrapPanel ItemHeight="Auto" ItemWidth="250">
+      <WrapPanel ItemHeight="Auto" ItemWidth="250">
 
-                <!--  Card 1: 總市值  -->
-                <Border
+        <!--  Card 1: 總市值  -->
+        <Border
                     MinHeight="72"
                     Margin="{StaticResource CardMarginLeft}"
                     Padding="12,10"
@@ -44,23 +44,23 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource RadiusSm}">
-                    <StackPanel>
-                        <TextBlock
+          <StackPanel>
+            <TextBlock
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.Position.Summary.MarketValue}" />
-                        <TextBlock
+            <TextBlock
                             Margin="0,4,0,0"
-                            FontFamily="{StaticResource FontTabular}"
+                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                             FontSize="{StaticResource FontSizeLg}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding TotalMarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                    </StackPanel>
-                </Border>
+          </StackPanel>
+        </Border>
 
-                <!--  Card 2: 總付出成本  -->
-                <Border
+        <!--  Card 2: 總付出成本  -->
+        <Border
                     MinHeight="72"
                     Margin="{StaticResource CardMarginCenter}"
                     Padding="12,10"
@@ -68,23 +68,23 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource RadiusSm}">
-                    <StackPanel>
-                        <TextBlock
+          <StackPanel>
+            <TextBlock
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.Position.Summary.TotalCost}" />
-                        <TextBlock
+            <TextBlock
                             Margin="0,4,0,0"
-                            FontFamily="{StaticResource FontTabular}"
+                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                             FontSize="{StaticResource FontSizeLg}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding TotalCost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                    </StackPanel>
-                </Border>
+          </StackPanel>
+        </Border>
 
-                <!--  Card 3: 損益試算  -->
-                <Border
+        <!--  Card 3: 損益試算  -->
+        <Border
                     MinHeight="72"
                     Margin="{StaticResource CardMarginCenter}"
                     Padding="12,10"
@@ -92,51 +92,51 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource RadiusSm}">
-                    <StackPanel>
-                        <TextBlock
+          <StackPanel>
+            <TextBlock
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.Position.Summary.Pnl}" />
-                        <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
-                            <TextBlock
-                                FontFamily="{StaticResource FontTabular}"
+            <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+              <TextBlock
+                                FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                 FontSize="{StaticResource FontSizeLg}"
                                 FontWeight="SemiBold"
                                 Text="{Binding TotalPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsTotalPositive}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                            <TextBlock
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding IsTotalPositive}" Value="True">
+                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+              <TextBlock
                                 Margin="6,0,0,0"
                                 VerticalAlignment="Bottom"
-                                FontFamily="{StaticResource FontTabular}"
+                                FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                 FontSize="{StaticResource FontSizeXs}"
                                 Text="{Binding TotalPnlPercent, StringFormat={}{0:+0.00;-0.00}%}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsTotalPositive}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding IsTotalPositive}" Value="True">
+                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+            </StackPanel>
+          </StackPanel>
+        </Border>
 
-                <!--  Card 4: 今日漲跌  -->
-                <Border
+        <!--  Card 4: 今日漲跌  -->
+        <Border
                     MinHeight="72"
                     Margin="{StaticResource CardMarginRight}"
                     Padding="12,10"
@@ -144,130 +144,130 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource RadiusSm}">
-                    <StackPanel>
-                        <TextBlock
+          <StackPanel>
+            <TextBlock
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.Position.Summary.DayChange}" />
-                        <!--  Shown only when quotes have loaded (HasDayPnl = true)  -->
-                        <StackPanel
+            <!--  Shown only when quotes have loaded (HasDayPnl = true)  -->
+            <StackPanel
                             Margin="0,4,0,0"
                             Orientation="Horizontal"
                             Visibility="{Binding HasDayPnl, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock
-                                FontFamily="{StaticResource FontTabular}"
+              <TextBlock
+                                FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                 FontSize="{StaticResource FontSizeLg}"
                                 FontWeight="SemiBold"
                                 Text="{Binding DayPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                            <TextBlock
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
+                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+              <TextBlock
                                 Margin="6,0,0,0"
                                 VerticalAlignment="Bottom"
-                                FontFamily="{StaticResource FontTabular}"
+                                FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                 FontSize="{StaticResource FontSizeXs}"
                                 Text="{Binding DayPnlPercentDisplay}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </StackPanel>
-                        <!--  Placeholder while quotes are loading  -->
-                        <TextBlock
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
+                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+            </StackPanel>
+            <!--  Placeholder while quotes are loading  -->
+            <TextBlock
                             Margin="0,6,0,0"
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Position.Summary.Loading}"
                             Visibility="{Binding HasDayPnl, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                    </StackPanel>
-                </Border>
-
-            </WrapPanel>
+          </StackPanel>
         </Border>
 
-        <!--  ═══ Row 1: Text search ═══  -->
-        <controls:SearchBox
+      </WrapPanel>
+    </Border>
+
+    <!--  ═══ Row 1: Text search ═══  -->
+    <controls:SearchBox
             Grid.Row="1"
             Placeholder="{DynamicResource Portfolio.Filter.SearchPositions}"
             Text="{Binding FilterText}">
-            <controls:SearchBox.RightContent>
-                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                    <CheckBox
+      <controls:SearchBox.RightContent>
+        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+          <CheckBox
                         Margin="0,0,8,0"
                         VerticalAlignment="Center"
                         IsChecked="{Binding HideEmptyPositions}">
-                        <TextBlock
+            <TextBlock
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.Position.HideEmpty}" />
-                    </CheckBox>
-                    <CheckBox
+          </CheckBox>
+          <CheckBox
                         Margin="0,0,8,0"
                         VerticalAlignment="Center"
                         IsChecked="{Binding ShowArchivedPositions}">
-                        <TextBlock
+            <TextBlock
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.Position.ShowArchived}" />
-                    </CheckBox>
-                </StackPanel>
-            </controls:SearchBox.RightContent>
-        </controls:SearchBox>
+          </CheckBox>
+        </StackPanel>
+      </controls:SearchBox.RightContent>
+    </controls:SearchBox>
 
-        <!--  ═══ Row 2: Positions DataGrid ═══  -->
-        <Grid Grid.Row="2">
-            <!--  Empty state  -->
-            <Border
+    <!--  ═══ Row 2: Positions DataGrid ═══  -->
+    <Grid Grid.Row="2">
+      <!--  Empty state  -->
+      <Border
                 Padding="32"
                 Background="{DynamicResource AppBackground}"
                 Visibility="{Binding HasNoPositions, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+          <TextBlock
                         Margin="0,0,0,12"
                         HorizontalAlignment="Center"
                         FontSize="{StaticResource FontSize3xl}"
                         Opacity="0.45"
                         Text="&#x1F4BC;" />
-                    <TextBlock
+          <TextBlock
                         HorizontalAlignment="Center"
                         FontSize="{StaticResource FontSizeMd}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Portfolio.Empty}" />
-                    <TextBlock
+          <TextBlock
                         Margin="0,6,0,20"
                         HorizontalAlignment="Center"
                         FontSize="{StaticResource FontSizeSm}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Empty.Hint}" />
-                    <Button
+          <ui:Button
                         Height="34"
                         Padding="20,0"
                         HorizontalAlignment="Center"
                         Command="{Binding AddRecordCommand}"
-                        Style="{StaticResource BtnPrimary}">
-                        <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Empty.Cta}" />
-                    </Button>
-                </StackPanel>
-            </Border>
+                        Appearance="Primary">
+            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Empty.Cta}" />
+          </ui:Button>
+        </StackPanel>
+      </Border>
 
-            <ListBox
+      <ListBox
                 Margin="12"
                 Background="Transparent"
                 BorderThickness="0"
@@ -275,95 +275,95 @@
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 SelectedItem="{Binding SelectedPositionRow, Mode=TwoWay}">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="0" />
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ListBoxItem">
-                                    <ContentPresenter />
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-                <ListBox.Style>
-                    <Style TargetType="ListBox">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                        <Style.Triggers>
-                            <DataTrigger Value="True">
-                                <DataTrigger.Binding>
-                                    <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1180">
-                                        <Binding ElementName="Root" Path="ActualWidth" />
-                                        <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                                    </MultiBinding>
-                                </DataTrigger.Binding>
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ListBox.Style>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border
+        <ListBox.ItemContainerStyle>
+          <Style TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+              <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                  <ContentPresenter />
+                </ControlTemplate>
+              </Setter.Value>
+            </Setter>
+          </Style>
+        </ListBox.ItemContainerStyle>
+        <ListBox.Style>
+          <Style TargetType="ListBox">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+              <DataTrigger Value="True">
+                <DataTrigger.Binding>
+                  <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1180">
+                    <Binding ElementName="Root" Path="ActualWidth" />
+                    <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
+                  </MultiBinding>
+                </DataTrigger.Binding>
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </ListBox.Style>
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Border
                             Margin="0,0,0,10"
                             Padding="14,12"
                             CornerRadius="{StaticResource RadiusMd}">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="Background" Value="{DynamicResource AppSurface}" />
-                                    <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
-                                    <Setter Property="BorderThickness" Value="1" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                            <Setter Property="Background" Value="{DynamicResource AppHover}" />
-                                            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderStrong}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                            <Setter Property="Background" Value="{DynamicResource AppSelection}" />
-                                            <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
-                                            <Setter Property="BorderThickness" Value="1.5" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <StackPanel>
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="72" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
+              <Border.Style>
+                <Style TargetType="Border">
+                  <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+                  <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+                  <Setter Property="BorderThickness" Value="1" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                      <Setter Property="Background" Value="{DynamicResource AppHover}" />
+                      <Setter Property="BorderBrush" Value="{DynamicResource AppBorderStrong}" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                      <Setter Property="Background" Value="{DynamicResource AppSelection}" />
+                      <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                      <Setter Property="BorderThickness" Value="1.5" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Border.Style>
+              <StackPanel>
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="72" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
 
-                                    <TextBlock
+                  <TextBlock
                                         Grid.Row="0"
                                         Grid.Column="0"
                                         Margin="0,0,10,0"
                                         VerticalAlignment="Center"
-                                        FontFamily="{StaticResource FontTabular}"
+                                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                         FontSize="{StaticResource FontSizeSm}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Symbol}" />
 
-                                    <Border
+                  <Border
                                         Grid.Row="0"
                                         Grid.Column="1"
                                         Margin="0,0,10,0"
                                         Style="{StaticResource PortfolioAssetTypeBadge}">
-                                        <TextBlock Style="{StaticResource PortfolioBadgeText}" Text="{Binding AssetTypeBadgeLabel}" />
-                                    </Border>
+                    <TextBlock Style="{StaticResource PortfolioBadgeText}" Text="{Binding AssetTypeBadgeLabel}" />
+                  </Border>
 
-                                    <TextBlock
+                  <TextBlock
                                         Grid.Row="1"
                                         Grid.Column="0"
                                         Grid.ColumnSpan="3"
@@ -372,106 +372,106 @@
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="{Binding Name}"
                                         TextTrimming="CharacterEllipsis" />
-                                </Grid>
+                </Grid>
 
-                                <Border
+                <Border
                                     Margin="0,10,0,0"
                                     BorderBrush="{DynamicResource AppBorder}"
                                     BorderThickness="0,1,0,0"
                                     Opacity="0.7" />
 
-                                <UniformGrid
+                <UniformGrid
                                     Margin="0,10,0,0"
                                     Columns="3"
                                     Rows="2">
-                                    <StackPanel Margin="0,0,12,4">
-                                        <TextBlock
+                  <StackPanel Margin="0,0,12,4">
+                    <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{DynamicResource Portfolio.Shares}" />
-                                        <TextBlock
-                                            FontFamily="{StaticResource FontTabular}"
+                    <TextBlock
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}"
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{Binding QuantityDisplay}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,0,12,4">
-                                        <TextBlock
+                  </StackPanel>
+                  <StackPanel Margin="0,0,12,4">
+                    <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{DynamicResource Portfolio.CostPerShare}" />
-                                        <TextBlock
-                                            FontFamily="{StaticResource FontTabular}"
+                    <TextBlock
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{Binding BuyPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,0,0,4">
-                                        <TextBlock
+                  </StackPanel>
+                  <StackPanel Margin="0,0,0,4">
+                    <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{DynamicResource Portfolio.Price}" />
-                                        <TextBlock
-                                            FontFamily="{StaticResource FontTabular}"
+                    <TextBlock
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}"
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{Binding CurrentPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,8,12,0">
-                                        <TextBlock
+                  </StackPanel>
+                  <StackPanel Margin="0,8,12,0">
+                    <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{DynamicResource Common.TotalPnL}" />
-                                        <TextBlock
-                                            FontFamily="{StaticResource FontTabular}"
+                    <TextBlock
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}"
                                             FontWeight="SemiBold"
                                             Text="{Binding Pnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsPnlPositive}" Value="True">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Pnl}" Value="0">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </StackPanel>
-                                    <StackPanel Margin="0,8,12,0">
-                                        <TextBlock
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPnlPositive}" Value="True">
+                              <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Pnl}" Value="0">
+                              <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </StackPanel>
+                  <StackPanel Margin="0,8,12,0">
+                    <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{DynamicResource Portfolio.NetVal}" />
-                                        <TextBlock
-                                            FontFamily="{StaticResource FontTabular}"
+                    <TextBlock
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}"
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{Binding NetValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,8,0,0">
-                                        <TextBlock
+                  </StackPanel>
+                  <StackPanel Margin="0,8,0,0">
+                    <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{DynamicResource Portfolio.PercentOfPortfolio}" />
-                                        <TextBlock
-                                            FontFamily="{StaticResource FontTabular}"
+                    <TextBlock
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{Binding PercentOfPortfolio, StringFormat={}{0:F1}%}" />
-                                    </StackPanel>
-                                </UniformGrid>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                  </StackPanel>
+                </UniformGrid>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
 
-            <DataGrid
+      <DataGrid
                 x:Name="PortfolioGrid"
                 AlternationCount="2"
                 AutoGenerateColumns="False"
@@ -498,67 +498,67 @@
                 SelectionMode="Single"
                 VirtualizingPanel.IsVirtualizing="True"
                 VirtualizingPanel.VirtualizationMode="Recycling">
-                <DataGrid.Style>
-                    <Style TargetType="DataGrid">
-                        <Setter Property="Visibility" Value="Visible" />
-                        <Style.Triggers>
-                            <DataTrigger Value="True">
-                                <DataTrigger.Binding>
-                                    <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1180">
-                                        <Binding ElementName="Root" Path="ActualWidth" />
-                                        <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                                    </MultiBinding>
-                                </DataTrigger.Binding>
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </DataGrid.Style>
+        <DataGrid.Style>
+          <Style TargetType="DataGrid">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Value="True">
+                <DataTrigger.Binding>
+                  <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1180">
+                    <Binding ElementName="Root" Path="ActualWidth" />
+                    <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
+                  </MultiBinding>
+                </DataTrigger.Binding>
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </DataGrid.Style>
 
-                <DataGrid.ColumnHeaderStyle>
-                    <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
-                </DataGrid.ColumnHeaderStyle>
-                <DataGrid.CellStyle>
-                    <Style BasedOn="{StaticResource AppDataGridCell}" TargetType="DataGridCell" />
-                </DataGrid.CellStyle>
-                <DataGrid.RowStyle>
-                    <Style BasedOn="{StaticResource AppDataGridRowSelectable}" TargetType="DataGridRow" />
-                </DataGrid.RowStyle>
+        <DataGrid.ColumnHeaderStyle>
+          <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
+        </DataGrid.ColumnHeaderStyle>
+        <DataGrid.CellStyle>
+          <Style BasedOn="{StaticResource AppDataGridCell}" TargetType="DataGridCell" />
+        </DataGrid.CellStyle>
+        <DataGrid.RowStyle>
+          <Style BasedOn="{StaticResource AppDataGridRowSelectable}" TargetType="DataGridRow" />
+        </DataGrid.RowStyle>
 
-                <DataGrid.Columns>
-                    <!--  資產 — 合併代號 + 類型 badge + 名稱 (以 badge 為對齊錨點)  -->
-                    <DataGridTemplateColumn
+        <DataGrid.Columns>
+          <!--  資產 — 合併代號 + 類型 badge + 名稱 (以 badge 為對齊錨點)  -->
+          <DataGridTemplateColumn
                         Width="*"
                         MinWidth="220"
                         SortMemberPath="Symbol">
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Common.Target}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Grid VerticalAlignment="Center">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="72" />
-                                        <ColumnDefinition Width="42" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock
+            <DataGridTemplateColumn.Header>
+              <TextBlock Text="{DynamicResource Common.Target}" />
+            </DataGridTemplateColumn.Header>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <Grid VerticalAlignment="Center">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="72" />
+                    <ColumnDefinition Width="42" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock
                                         Grid.Column="0"
                                         Margin="0,0,10,0"
                                         VerticalAlignment="Center"
-                                        FontFamily="{StaticResource FontTabular}"
+                                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                         FontSize="{StaticResource FontSizeSm}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Symbol}" />
-                                    <Border
+                  <Border
                                         Grid.Column="1"
                                         Margin="0,0,10,0"
                                         HorizontalAlignment="Center"
                                         Style="{StaticResource PortfolioAssetTypeBadge}">
-                                        <TextBlock Style="{StaticResource PortfolioBadgeText}" Text="{Binding AssetTypeBadgeLabel}" />
-                                    </Border>
-                                    <TextBlock
+                    <TextBlock Style="{StaticResource PortfolioBadgeText}" Text="{Binding AssetTypeBadgeLabel}" />
+                  </Border>
+                  <TextBlock
                                         Grid.Column="2"
                                         VerticalAlignment="Center"
                                         FontFamily="{StaticResource FontBase}"
@@ -566,383 +566,312 @@
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Name}"
                                         TextTrimming="CharacterEllipsis" />
-                                </Grid>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                </Grid>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
 
-                    <!--  股數  -->
-                    <DataGridTemplateColumn Width="150" SortMemberPath="Quantity">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Portfolio.Shares}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <TextBlock
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Center"
-                                        FontFamily="{StaticResource FontTabular}"
-                                        FontSize="{StaticResource FontSizeSm}"
-                                        Text="{Binding QuantityDisplay}">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                                                        <Setter Property="Visibility" Value="Collapsed" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                    <TextBox
-                                        Padding="4,0"
-                                        VerticalContentAlignment="Center"
-                                        Background="{DynamicResource AppSurface}"
-                                        BorderBrush="{DynamicResource AppAccent}"
-                                        BorderThickness="1"
-                                        FocusVisualStyle="{x:Null}"
-                                        FontFamily="{StaticResource FontTabular}"
-                                        FontSize="{StaticResource FontSizeSm}"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding EditQuantity, UpdateSourceTrigger=PropertyChanged}">
-                                        <TextBox.Style>
-                                            <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                                                        <Setter Property="Visibility" Value="Visible" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBox.Style>
-                                    </TextBox>
-                                </Grid>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+          <!--  股數  -->
+          <DataGridTemplateColumn Width="150" SortMemberPath="Quantity">
+            <DataGridTemplateColumn.HeaderStyle>
+              <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                <Setter Property="HorizontalContentAlignment" Value="Right" />
+              </Style>
+            </DataGridTemplateColumn.HeaderStyle>
+            <DataGridTemplateColumn.Header>
+              <TextBlock Text="{DynamicResource Portfolio.Shares}" />
+            </DataGridTemplateColumn.Header>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
+                                    FontSize="{StaticResource FontSizeSm}"
+                                    Text="{Binding QuantityDisplay}" />
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
 
-                    <!--  成本/股（含手續費，可編輯）  -->
-                    <DataGridTemplateColumn Width="120" SortMemberPath="BuyPrice">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Portfolio.CostPerShare}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <TextBlock
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Center"
-                                        FontFamily="{StaticResource FontTabular}"
-                                        FontSize="{StaticResource FontSizeSm}"
-                                        Text="{Binding BuyPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                                                        <Setter Property="Visibility" Value="Collapsed" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                    <TextBox
-                                        Padding="4,0"
-                                        VerticalContentAlignment="Center"
-                                        Background="{DynamicResource AppSurface}"
-                                        BorderBrush="{DynamicResource AppAccent}"
-                                        BorderThickness="1"
-                                        FocusVisualStyle="{x:Null}"
-                                        FontFamily="{StaticResource FontTabular}"
-                                        FontSize="{StaticResource FontSizeSm}"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding EditCostPerShare, UpdateSourceTrigger=PropertyChanged}"
-                                        ToolTip="{DynamicResource Portfolio.EditCostPerShareHint}">
-                                        <TextBox.Style>
-                                            <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                                                        <Setter Property="Visibility" Value="Visible" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBox.Style>
-                                    </TextBox>
-                                </Grid>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+          <!--  成本/股（含手續費）  -->
+          <DataGridTemplateColumn Width="120" SortMemberPath="BuyPrice">
+            <DataGridTemplateColumn.HeaderStyle>
+              <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                <Setter Property="HorizontalContentAlignment" Value="Right" />
+              </Style>
+            </DataGridTemplateColumn.HeaderStyle>
+            <DataGridTemplateColumn.Header>
+              <TextBlock Text="{DynamicResource Portfolio.CostPerShare}" />
+            </DataGridTemplateColumn.Header>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
+                                    FontSize="{StaticResource FontSizeSm}"
+                                    Text="{Binding BuyPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}" />
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
 
-                    <!--  現價（合併今日漲跌% 小字）  -->
-                    <DataGridTemplateColumn Width="120" SortMemberPath="CurrentPrice">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Portfolio.Price}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
-                                        <TextBlock
+          <!--  現價（合併今日漲跌% 小字）  -->
+          <DataGridTemplateColumn Width="120" SortMemberPath="CurrentPrice">
+            <DataGridTemplateColumn.HeaderStyle>
+              <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                <Setter Property="HorizontalContentAlignment" Value="Right" />
+              </Style>
+            </DataGridTemplateColumn.HeaderStyle>
+            <DataGridTemplateColumn.Header>
+              <TextBlock Text="{DynamicResource Portfolio.Price}" />
+            </DataGridTemplateColumn.Header>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <Grid>
+                  <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock
                                             HorizontalAlignment="Right"
-                                            FontFamily="{StaticResource FontTabular}"
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{Binding CurrentPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Visibility" Value="Visible" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding CurrentPrice}" Value="0">
-                                                            <Setter Property="Visibility" Value="Collapsed" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <!--  今日 %（色彩跟漲跌連動）  -->
-                                        <TextBlock
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Visibility" Value="Visible" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding CurrentPrice}" Value="0">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                    <!--  今日 %（色彩跟漲跌連動）  -->
+                    <TextBlock
                                             HorizontalAlignment="Right"
-                                            FontFamily="{StaticResource FontTabular}"
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeXs}"
                                             Text="{Binding DayChangePercent, StringFormat={}{0:+0.00;-0.00;0.00}%}">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsDayChangePositive}" Value="True">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding DayChange}" Value="0">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding PrevClose}" Value="0">
-                                                            <Setter Property="Visibility" Value="Collapsed" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </StackPanel>
-                                    <TextBlock
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDayChangePositive}" Value="True">
+                              <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DayChange}" Value="0">
+                              <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding PrevClose}" Value="0">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </StackPanel>
+                  <TextBlock
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Center"
-                                        FontFamily="{StaticResource FontTabular}"
+                                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                         FontSize="{StaticResource FontSizeSm}"
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="…"
                                         Visibility="{Binding IsLoadingPrice, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                </Grid>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                </Grid>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
 
-                    <!--  淨損益（合併 $ + % 垂直疊合）  -->
-                    <DataGridTemplateColumn Width="200" SortMemberPath="Pnl">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock
+          <!--  淨損益（合併 $ + % 垂直疊合）  -->
+          <DataGridTemplateColumn Width="200" SortMemberPath="Pnl">
+            <DataGridTemplateColumn.HeaderStyle>
+              <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                <Setter Property="HorizontalContentAlignment" Value="Right" />
+              </Style>
+            </DataGridTemplateColumn.HeaderStyle>
+            <DataGridTemplateColumn.Header>
+              <TextBlock
                                 Text="{DynamicResource Common.TotalPnL}"
                                 ToolTip="{DynamicResource Portfolio.PnL.NetTooltip}"
                                 ToolTipService.InitialShowDelay="300"
                                 ToolTipService.ShowDuration="20000" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Grid ToolTip="{DynamicResource Portfolio.PnL.NetTooltip}" ToolTipService.InitialShowDelay="500">
-                                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
-                                        <TextBlock
+            </DataGridTemplateColumn.Header>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <Grid ToolTip="{DynamicResource Portfolio.PnL.NetTooltip}" ToolTipService.InitialShowDelay="500">
+                  <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock
                                             HorizontalAlignment="Right"
-                                            FontFamily="{StaticResource FontTabular}"
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}"
                                             FontWeight="SemiBold"
                                             Text="{Binding Pnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsPnlPositive}" Value="True">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Pnl}" Value="0">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPnlPositive}" Value="True">
+                              <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Pnl}" Value="0">
+                              <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock
                                             HorizontalAlignment="Right"
-                                            FontFamily="{StaticResource FontTabular}"
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeXs}"
                                             Text="{Binding PnlPercent, StringFormat={}{0:+0.00;-0.00;0.00}%}">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsPnlPositive}" Value="True">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Pnl}" Value="0">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </StackPanel>
-                                    <TextBlock
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPnlPositive}" Value="True">
+                              <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Pnl}" Value="0">
+                              <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </StackPanel>
+                  <TextBlock
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Center"
-                                        FontFamily="{StaticResource FontTabular}"
+                                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                         FontSize="{StaticResource FontSizeSm}"
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="…"
                                         Visibility="{Binding IsLoadingPrice, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                </Grid>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                </Grid>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
 
-                    <!--  淨值（主數字）+ 成本（次級小字，合併原「付出成本」欄）  -->
-                    <DataGridTemplateColumn Width="200" SortMemberPath="NetValue">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock
+          <!--  淨值（主數字）+ 成本（次級小字，合併原「付出成本」欄）  -->
+          <DataGridTemplateColumn Width="200" SortMemberPath="NetValue">
+            <DataGridTemplateColumn.HeaderStyle>
+              <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                <Setter Property="HorizontalContentAlignment" Value="Right" />
+              </Style>
+            </DataGridTemplateColumn.HeaderStyle>
+            <DataGridTemplateColumn.Header>
+              <TextBlock
                                 Text="{DynamicResource Portfolio.NetVal}"
                                 ToolTip="{DynamicResource Portfolio.NetVal.Tooltip}"
                                 ToolTipService.InitialShowDelay="300"
                                 ToolTipService.ShowDuration="20000" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Grid ToolTip="{DynamicResource Portfolio.NetVal.Tooltip}" ToolTipService.InitialShowDelay="500">
-                                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
-                                        <TextBlock
+            </DataGridTemplateColumn.Header>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <Grid ToolTip="{DynamicResource Portfolio.NetVal.Tooltip}" ToolTipService.InitialShowDelay="500">
+                  <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock
                                             HorizontalAlignment="Right"
-                                            FontFamily="{StaticResource FontTabular}"
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{Binding NetValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                                        <TextBlock
+                    <TextBlock
                                             HorizontalAlignment="Right"
-                                            FontFamily="{StaticResource FontTabular}"
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{Binding Cost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                                    </StackPanel>
-                                    <TextBlock
+                  </StackPanel>
+                  <TextBlock
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Center"
-                                        FontFamily="{StaticResource FontTabular}"
+                                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                         FontSize="{StaticResource FontSizeSm}"
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="…"
                                         Visibility="{Binding IsLoadingPrice, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                </Grid>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                </Grid>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
 
-                    <!--  佔比% — 持倉佔投資組合淨值的比例；小進度條視覺化  -->
-                    <DataGridTemplateColumn Width="120" SortMemberPath="PercentOfPortfolio">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Portfolio.PercentOfPortfolio}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,0,8,0" VerticalAlignment="Center">
-                                    <TextBlock
+          <!--  佔比% — 持倉佔投資組合淨值的比例；小進度條視覺化  -->
+          <DataGridTemplateColumn Width="120" SortMemberPath="PercentOfPortfolio">
+            <DataGridTemplateColumn.HeaderStyle>
+              <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                <Setter Property="HorizontalContentAlignment" Value="Right" />
+              </Style>
+            </DataGridTemplateColumn.HeaderStyle>
+            <DataGridTemplateColumn.Header>
+              <TextBlock Text="{DynamicResource Portfolio.PercentOfPortfolio}" />
+            </DataGridTemplateColumn.Header>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <StackPanel Margin="0,0,8,0" VerticalAlignment="Center">
+                  <TextBlock
                                         HorizontalAlignment="Right"
-                                        FontFamily="{StaticResource FontTabular}"
+                                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                         FontSize="{StaticResource FontSizeSm}"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="{Binding PercentOfPortfolio, StringFormat={}{0:F1}%}" />
-                                    <Grid Height="3" Margin="0,3,0,0">
-                                        <Border Background="{DynamicResource AppBorder}" CornerRadius="1.5" />
-                                        <Border
+                  <Grid Height="3" Margin="0,3,0,0">
+                    <Border Background="{DynamicResource AppBorder}" CornerRadius="1.5" />
+                    <Border
                                             HorizontalAlignment="Left"
                                             Background="{DynamicResource AppAccent}"
                                             CornerRadius="1.5">
-                                            <Border.Width>
-                                                <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
-                                                    <Binding Path="PercentOfPortfolio" />
-                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
-                                                </MultiBinding>
-                                            </Border.Width>
-                                        </Border>
-                                    </Grid>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
+                      <Border.Width>
+                        <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                          <Binding Path="PercentOfPortfolio" />
+                          <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                        </MultiBinding>
+                      </Border.Width>
+                    </Border>
+                  </Grid>
+                </StackPanel>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+        </DataGrid.Columns>
+      </DataGrid>
 
-            <!--  Empty state  -->
-            <Border Padding="32" Visibility="{Binding HasNoPositions, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock
+      <!--  Empty state  -->
+      <Border Padding="32" Visibility="{Binding HasNoPositions, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+          <TextBlock
                         Margin="0,0,0,12"
                         HorizontalAlignment="Center"
                         FontSize="{StaticResource FontSize3xl}"
                         Opacity="0.45"
                         Text="&#x1F4BC;" />
-                    <TextBlock
+          <TextBlock
                         HorizontalAlignment="Center"
                         FontSize="{StaticResource FontSizeMd}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Portfolio.Empty}" />
-                    <TextBlock
+          <TextBlock
                         Margin="0,6,0,20"
                         HorizontalAlignment="Center"
                         FontSize="{StaticResource FontSizeSm}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Empty.Hint}" />
-                    <Button
+          <ui:Button
                         Height="34"
                         Padding="20,0"
                         HorizontalAlignment="Center"
                         Command="{Binding AddRecordCommand}"
-                        Style="{StaticResource BtnPrimary}">
-                        <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Empty.Cta}" />
-                    </Button>
-                </StackPanel>
-            </Border>
-        </Grid>
+                        Appearance="Primary">
+            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Empty.Cta}" />
+          </ui:Button>
+        </StackPanel>
+      </Border>
     </Grid>
+  </Grid>
 
 </UserControl>

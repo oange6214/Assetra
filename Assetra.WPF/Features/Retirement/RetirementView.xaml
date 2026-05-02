@@ -2,54 +2,64 @@
     x:Class="Assetra.WPF.Features.Retirement.RetirementView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:Assetra.WPF.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Retirement"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:RetirementViewModel}, IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:RetirementViewModel},
+                                     IsDesignTimeCreatable=False}"
     d:DesignHeight="800"
     d:DesignWidth="1200"
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
 
-    <Grid Margin="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+  <UserControl.Resources>
+    <Style BasedOn="{StaticResource FormComboBox}" TargetType="ComboBox" />
+  </UserControl.Resources>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,16" Orientation="Horizontal">
-            <TextBlock
+  <Grid Margin="24">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <StackPanel
+            Grid.Row="0"
+            Margin="0,0,0,16"
+            Orientation="Horizontal">
+      <TextBlock
                 FontSize="{DynamicResource FontSizeXl}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextPrimary}"
                 Text="{DynamicResource Retirement.Title}" />
-            <TextBlock
+      <TextBlock
                 Margin="16,0,0,0"
                 VerticalAlignment="Bottom"
                 FontSize="{DynamicResource FontSizeBase}"
                 Foreground="{DynamicResource AppTextSecondary}">
                 <Run Text="{DynamicResource Retirement.TotalBalance}" />
                 <Run Text="{Binding TotalBalance, StringFormat=N0}" />
-            </TextBlock>
-        </StackPanel>
+      </TextBlock>
+    </StackPanel>
 
-        <TextBlock
+    <TextBlock
             Grid.Row="1"
             Margin="0,0,0,8"
             Foreground="{DynamicResource AppDanger}"
             Text="{Binding ErrorMessage}"
             Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
 
-        <Border
+    <Border
             Grid.Row="2"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
             CornerRadius="8">
-            <DataGrid
+      <DataGrid
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
@@ -59,142 +69,169 @@
                 ItemsSource="{Binding Accounts}"
                 RowBackground="Transparent"
                 SelectionMode="Single">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Width="*" Binding="{Binding Name}" Header="{DynamicResource Retirement.Column.Name}" />
-                    <DataGridTextColumn Width="120" Binding="{Binding AccountType}" Header="{DynamicResource Retirement.Column.AccountType}" />
-                    <DataGridTextColumn Width="*" Binding="{Binding Provider}" Header="{DynamicResource Retirement.Column.Provider}" />
-                    <DataGridTextColumn Width="120" Binding="{Binding Balance, StringFormat=N0}" Header="{DynamicResource Retirement.Column.Balance}" />
-                    <DataGridTextColumn Width="80" Binding="{Binding YearsOfService}" Header="{DynamicResource Retirement.Column.YearsOfService}" />
-                    <DataGridTextColumn Width="80" Binding="{Binding LegalWithdrawalAge}" Header="{DynamicResource Retirement.Column.WithdrawalAge}" />
-                    <DataGridTextColumn Width="120" Binding="{Binding LatestYearContribution, StringFormat=N0}" Header="{DynamicResource Retirement.Column.LatestContribution}" />
-                    <DataGridTextColumn Width="80" Binding="{Binding Currency}" Header="{DynamicResource Retirement.Column.Currency}" />
-                    <DataGridTemplateColumn Width="180" Header="{DynamicResource Common.Actions}">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button
+        <DataGrid.Columns>
+          <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding Name}"
+                        Header="{DynamicResource Retirement.Column.Name}" />
+          <DataGridTextColumn
+                        Width="120"
+                        Binding="{Binding AccountType}"
+                        Header="{DynamicResource Retirement.Column.AccountType}" />
+          <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding Provider}"
+                        Header="{DynamicResource Retirement.Column.Provider}" />
+          <DataGridTextColumn
+                        Width="120"
+                        Binding="{Binding Balance, StringFormat=N0}"
+                        Header="{DynamicResource Retirement.Column.Balance}" />
+          <DataGridTextColumn
+                        Width="80"
+                        Binding="{Binding YearsOfService}"
+                        Header="{DynamicResource Retirement.Column.YearsOfService}" />
+          <DataGridTextColumn
+                        Width="80"
+                        Binding="{Binding LegalWithdrawalAge}"
+                        Header="{DynamicResource Retirement.Column.WithdrawalAge}" />
+          <DataGridTextColumn
+                        Width="120"
+                        Binding="{Binding LatestYearContribution, StringFormat=N0}"
+                        Header="{DynamicResource Retirement.Column.LatestContribution}" />
+          <DataGridTextColumn
+                        Width="80"
+                        Binding="{Binding Currency}"
+                        Header="{DynamicResource Retirement.Column.Currency}" />
+          <DataGridTemplateColumn Width="180" Header="{DynamicResource Common.Actions}">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <StackPanel Orientation="Horizontal">
+                  <Button
                                         Margin="0,0,4,0"
                                         Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
                                         Content="{DynamicResource Common.Edit}"
                                         Style="{StaticResource SmallButtonStyle}" />
-                                    <Button
+                  <Button
                                         Margin="0,0,4,0"
                                         Command="{Binding DataContext.ProjectCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
                                         Content="{DynamicResource Retirement.Action.Project}"
                                         Style="{StaticResource SmallButtonStyle}" />
-                                    <Button
+                  <Button
                                         Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
                                         Content="{DynamicResource Common.Delete}"
                                         Style="{StaticResource SmallDangerButtonStyle}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
+                </StackPanel>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+        </DataGrid.Columns>
+      </DataGrid>
+    </Border>
 
-        <Border
+    <Border
             Grid.Row="3"
             Margin="0,16,0,0"
-            Padding="16"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="8">
-            <StackPanel>
-                <TextBlock Margin="0,0,0,12" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Retirement.Projection.Title}" />
-                <UniformGrid Columns="4" Rows="1">
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Projection.CurrentAge}" />
-                        <TextBox Text="{Binding ProjCurrentAge, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Projection.AnnualReturn}" />
-                        <TextBox Text="{Binding ProjAnnualReturnRate, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Projection.AnnualContribution}" />
-                        <TextBox Text="{Binding ProjAnnualContribution, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <TextBlock VerticalAlignment="Center" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding ProjResult}" TextWrapping="Wrap" />
-                </UniformGrid>
-            </StackPanel>
-        </Border>
+            Style="{StaticResource FormCard}">
+      <StackPanel>
+        <TextBlock Style="{StaticResource FormSectionTitle}" Text="{DynamicResource Retirement.Projection.Title}" />
+        <UniformGrid Columns="4" Rows="1">
+          <StackPanel Margin="0,0,8,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Projection.CurrentAge}" />
+            <ui:TextBox Text="{Binding ProjCurrentAge, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Projection.AnnualReturn}" />
+            <ui:TextBox Text="{Binding ProjAnnualReturnRate, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Projection.AnnualContribution}" />
+            <ui:TextBox Text="{Binding ProjAnnualContribution, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <TextBlock
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding ProjResult}"
+                        TextWrapping="Wrap" />
+        </UniformGrid>
+      </StackPanel>
+    </Border>
 
-        <Border
+    <Border
             Grid.Row="4"
             Margin="0,16,0,0"
-            Padding="16"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="8">
-            <StackPanel>
-                <TextBlock Margin="0,0,0,12" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Retirement.Form.Title}" />
-                <UniformGrid Columns="4" Rows="3">
-                    <StackPanel Margin="0,0,8,8">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Name}" />
-                        <TextBox Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,8">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.AccountType}" />
-                        <ComboBox ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding FormAccountType}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,8">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Provider}" />
-                        <TextBox Text="{Binding FormProvider, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,0,8">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Balance}" />
-                        <TextBox Text="{Binding FormBalance, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,8">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.EmployeeRate}" />
-                        <TextBox Text="{Binding FormEmployeeRate, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,8">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.EmployerRate}" />
-                        <TextBox Text="{Binding FormEmployerRate, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,8">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.YearsOfService}" />
-                        <TextBox Text="{Binding FormYearsOfService, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,0,8">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.WithdrawalAge}" />
-                        <TextBox Text="{Binding FormLegalWithdrawalAge, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.OpenedDate}" />
-                        <DatePicker SelectedDate="{Binding FormOpenedDate}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Currency}" />
-                        <TextBox Text="{Binding FormCurrency, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Notes}" />
-                        <TextBox Text="{Binding FormNotes, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <TextBlock />
-                </UniformGrid>
+            Style="{StaticResource FormCard}">
+      <StackPanel>
+        <TextBlock Style="{StaticResource FormSectionTitle}" Text="{DynamicResource Retirement.Form.Title}" />
+        <UniformGrid Columns="4" Rows="3">
+          <StackPanel Margin="0,0,8,8">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Name}" />
+            <ui:TextBox Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,8">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.AccountType}" />
+            <ComboBox ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding FormAccountType}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,8">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Provider}" />
+            <ui:TextBox Text="{Binding FormProvider, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,0,8">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Balance}" />
+            <ui:TextBox Text="{Binding FormBalance, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,8">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.EmployeeRate}" />
+            <ui:TextBox Text="{Binding FormEmployeeRate, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,8">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.EmployerRate}" />
+            <ui:TextBox Text="{Binding FormEmployerRate, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,8">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.YearsOfService}" />
+            <ui:TextBox Text="{Binding FormYearsOfService, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,0,8">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.WithdrawalAge}" />
+            <ui:TextBox Text="{Binding FormLegalWithdrawalAge, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.OpenedDate}" />
+            <controls:FormDatePicker SelectedDate="{Binding FormOpenedDate, Mode=TwoWay}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Currency}" />
+            <ui:TextBox Text="{Binding FormCurrency, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Notes}" />
+            <ui:TextBox Text="{Binding FormNotes, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <TextBlock />
+        </UniformGrid>
 
-                <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppDanger}" Text="{Binding FormError}"
-                           Visibility="{Binding FormError, Converter={StaticResource NullToVisibilityConverter}}" />
+        <TextBlock
+                    Margin="0,8,0,0"
+                    Foreground="{DynamicResource AppDanger}"
+                    Text="{Binding FormError}"
+                    Visibility="{Binding FormError, Converter={StaticResource NullToVisibilityConverter}}" />
 
-                <StackPanel Margin="0,12,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <Button Margin="0,0,8,0"
-                            Command="{Binding CancelEditCommand}"
-                            Content="{DynamicResource Common.Cancel}"
-                            Style="{StaticResource BtnGhost}"
-                            Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    <Button Command="{Binding SaveCommand}" Content="{DynamicResource Common.Save}" />
-                </StackPanel>
-            </StackPanel>
-        </Border>
-    </Grid>
+        <StackPanel
+                    Margin="0,12,0,0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+          <ui:Button
+                        Margin="0,0,8,0"
+                        Command="{Binding CancelEditCommand}"
+                        Content="{DynamicResource Common.Cancel}"
+                        Appearance="Secondary"
+                        Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}" />
+          <Button Command="{Binding SaveCommand}" Content="{DynamicResource Common.Save}" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+  </Grid>
 </UserControl>

@@ -5,6 +5,18 @@ namespace Assetra.WPF.Shell;
 
 public partial class NavRailViewModel : ObservableObject
 {
+    // ── Expand/collapse (hamburger) ────────────────────────────────────────
+
+    [ObservableProperty]
+    private bool _isExpanded;
+
+    public bool IsCollapsed => !IsExpanded;
+
+    partial void OnIsExpandedChanged(bool value) => OnPropertyChanged(nameof(IsCollapsed));
+
+    [RelayCommand]
+    private void ToggleExpand() => IsExpanded = !IsExpanded;
+
     // ── Navigation history ─────────────────────────────────────────────────
 
     private readonly Stack<NavSection> _backStack = new();
@@ -17,6 +29,12 @@ public partial class NavRailViewModel : ObservableObject
     public NavSection ActiveSection
     {
         get => _activeSection;
+        set => NavigateTo(value);
+    }
+
+    public NavSection SelectedRailSection
+    {
+        get => GetRailSection(_activeSection);
         set => NavigateTo(value);
     }
 
@@ -65,8 +83,12 @@ public partial class NavRailViewModel : ObservableObject
 
     private void NotifyActiveSectionDependents()
     {
+        OnPropertyChanged(nameof(SelectedRailSection));
         OnPropertyChanged(nameof(IsPortfolioActive));
         OnPropertyChanged(nameof(IsFinancialOverviewActive));
+        OnPropertyChanged(nameof(IsCashflowActive));
+        OnPropertyChanged(nameof(IsInsightsActive));
+        OnPropertyChanged(nameof(IsMultiAssetActive));
         OnPropertyChanged(nameof(IsCategoriesActive));
         OnPropertyChanged(nameof(IsRecurringActive));
         OnPropertyChanged(nameof(IsReportsActive));
@@ -83,10 +105,23 @@ public partial class NavRailViewModel : ObservableObject
         OnPropertyChanged(nameof(IsSettingsActive));
     }
 
+    private static NavSection GetRailSection(NavSection section) => section switch
+    {
+        NavSection.Categories or NavSection.Recurring => NavSection.Cashflow,
+        NavSection.Reports or NavSection.Trends or NavSection.Goals or NavSection.Fire or NavSection.MonteCarlo
+            => NavSection.Insights,
+        NavSection.RealEstate or NavSection.Insurance or NavSection.Retirement or NavSection.PhysicalAsset
+            => NavSection.MultiAsset,
+        _ => section,
+    };
+
     // ── Section predicates (used by MainWindow.xaml visibility bindings) ───
 
     public bool IsPortfolioActive         => ActiveSection == NavSection.Portfolio;
     public bool IsFinancialOverviewActive => ActiveSection == NavSection.FinancialOverview;
+    public bool IsCashflowActive          => ActiveSection == NavSection.Cashflow;
+    public bool IsInsightsActive          => ActiveSection == NavSection.Insights;
+    public bool IsMultiAssetActive        => ActiveSection == NavSection.MultiAsset;
     public bool IsCategoriesActive        => ActiveSection == NavSection.Categories;
     public bool IsRecurringActive         => ActiveSection == NavSection.Recurring;
     public bool IsReportsActive           => ActiveSection == NavSection.Reports;

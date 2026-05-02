@@ -7,10 +7,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:system="clr-namespace:System;assembly=mscorlib"
     xmlns:txforms="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     x:Name="Root"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel},
-                                     IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel}}"
     Visibility="{Binding IsTxDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}"
     mc:Ignorable="d">
 
@@ -102,11 +102,7 @@
                             Command="{Binding CloseTxDialogCommand}"
                             DockPanel.Dock="Right"
                             Style="{StaticResource BtnIcon}">
-                            <TextBlock
-                                FontFamily="Segoe MDL2 Assets"
-                                FontSize="12"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Text="&#xE8BB;" />
+                            <ui:SymbolIcon Symbol="Dismiss24" FontSize="12" Foreground="{DynamicResource AppTextMuted}" />
                         </Button>
                     </DockPanel>
                 </Border>
@@ -191,10 +187,11 @@
                                         Grid.Row="2"
                                         Grid.Column="1"
                                         Margin="0,0,0,6"
-                                        FontFamily="{StaticResource FontTabular}"
+                                        FontFamily="{StaticResource FontBase}"
                                         FontSize="{StaticResource FontSizeXs}"
                                         Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding EditSummaryAmount}" />
+                                        Text="{Binding EditSummaryAmount}"
+                                        Typography.NumeralAlignment="Tabular" />
 
                                     <TextBlock
                                         Grid.Row="3"
@@ -206,10 +203,11 @@
                                     <TextBlock
                                         Grid.Row="3"
                                         Grid.Column="1"
-                                        FontFamily="{StaticResource FontTabular}"
+                                        FontFamily="{StaticResource FontBase}"
                                         FontSize="{StaticResource FontSizeXs}"
                                         Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding EditSummaryQuantity}" />
+                                        Text="{Binding EditSummaryQuantity}"
+                                        Typography.NumeralAlignment="Tabular" />
                                 </Grid>
                             </StackPanel>
                         </Border>
@@ -296,9 +294,7 @@
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{DynamicResource Portfolio.Tx.Date}" />
-                                            <controls:FormDatePicker
-                                                DisplayDateEnd="{x:Static system:DateTime.Today}"
-                                                SelectedDate="{Binding TxDate, Mode=TwoWay}" />
+                                            <controls:FormDatePicker DisplayDateEnd="{x:Static system:DateTime.Today}" SelectedDate="{Binding TxDate, Mode=TwoWay}" />
                                         </StackPanel>
                                     </Border>
 
@@ -494,7 +490,7 @@
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{DynamicResource Portfolio.Tx.Note}" />
-                                        <TextBox Style="{StaticResource FormTextBox}" Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
+                                        <ui:TextBox Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
 
                                     <!--  Error  -->
@@ -566,58 +562,58 @@
                             </Grid.Style>
                             <DockPanel>
                                 <!--  刪除按鈕（僅編輯模式）  -->
-                                <Button
+                                <ui:Button
                                     Height="30"
                                     Padding="14,0"
                                     Command="{Binding DeleteTradeCommand}"
                                     DockPanel.Dock="Left"
-                                    Style="{StaticResource BtnDanger}"
+                                    Appearance="Danger"
                                     Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Tx.Delete}" />
-                                </Button>
-                                <Button
+                                </ui:Button>
+                                <ui:Button
                                     Height="30"
                                     Margin="8,0,0,0"
                                     Padding="14,0"
                                     Command="{Binding CreateRevisionCommand}"
                                     DockPanel.Dock="Left"
-                                    Style="{StaticResource BtnGhost}"
+                                    Appearance="Secondary"
                                     Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.CreateRevision}" />
-                                </Button>
+                                </ui:Button>
                                 <!--  取消 / 儲存（靠右）  -->
                                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
                                     <StackPanel Orientation="Horizontal" Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <Button
+                                        <ui:Button
                                             Height="30"
                                             Margin="0,0,8,0"
                                             Padding="14,0"
                                             Command="{Binding KeepBothRecordsCommand}"
-                                            Style="{StaticResource BtnGhost}">
+                                            Appearance="Secondary">
                                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.KeepBoth}" />
-                                        </Button>
-                                        <Button
+                                        </ui:Button>
+                                        <ui:Button
                                             Height="30"
                                             Padding="14,0"
                                             Command="{Binding ReplaceOriginalRecordCommand}"
-                                            Style="{StaticResource BtnPrimary}">
+                                            Appearance="Primary">
                                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.ReplaceAndDelete}" />
-                                        </Button>
+                                        </ui:Button>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                        <Button
+                                        <ui:Button
                                             Height="30"
                                             Margin="0,0,8,0"
                                             Padding="14,0"
                                             Command="{Binding CloseTxDialogCommand}"
-                                            Style="{StaticResource BtnGhost}">
+                                            Appearance="Secondary">
                                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Cancel}" />
-                                        </Button>
-                                        <Button
+                                        </ui:Button>
+                                        <ui:Button
                                             Height="30"
                                             Padding="14,0"
                                             Command="{Binding ConfirmTxCommand}"
-                                            Style="{StaticResource BtnPrimary}">
+                                            Appearance="Primary">
                                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -630,7 +626,7 @@
                                                     </Style>
                                                 </TextBlock.Style>
                                             </TextBlock>
-                                        </Button>
+                                        </ui:Button>
                                     </StackPanel>
                                 </StackPanel>
                             </DockPanel>
@@ -654,57 +650,57 @@
                                 </Style>
                             </StackPanel.Style>
                             <StackPanel Orientation="Horizontal" Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <Button
+                                <ui:Button
                                     Height="30"
                                     Margin="0,0,8,8"
                                     Padding="14,0"
                                     Command="{Binding DeleteTradeCommand}"
-                                    Style="{StaticResource BtnDanger}">
+                                    Appearance="Danger">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Tx.Delete}" />
-                                </Button>
-                                <Button
+                                </ui:Button>
+                                <ui:Button
                                     Height="30"
                                     Margin="0,0,0,8"
                                     Padding="14,0"
                                     Command="{Binding CreateRevisionCommand}"
-                                    Style="{StaticResource BtnGhost}">
+                                    Appearance="Secondary">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.CreateRevision}" />
-                                </Button>
+                                </ui:Button>
                             </StackPanel>
                             <StackPanel Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <Button
+                                <ui:Button
                                     Height="30"
                                     Margin="0,0,0,8"
                                     Padding="14,0"
                                     Command="{Binding ReplaceOriginalRecordCommand}"
-                                    Style="{StaticResource BtnPrimary}">
+                                    Appearance="Primary">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.ReplaceAndDelete}" />
-                                </Button>
-                                <Button
+                                </ui:Button>
+                                <ui:Button
                                     Height="30"
                                     Padding="14,0"
                                     Command="{Binding KeepBothRecordsCommand}"
-                                    Style="{StaticResource BtnGhost}">
+                                    Appearance="Secondary">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.KeepBoth}" />
-                                </Button>
+                                </ui:Button>
                             </StackPanel>
                             <StackPanel
                                 HorizontalAlignment="Right"
                                 Orientation="Horizontal"
                                 Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                <Button
+                                <ui:Button
                                     Height="30"
                                     Margin="0,0,8,0"
                                     Padding="14,0"
                                     Command="{Binding CloseTxDialogCommand}"
-                                    Style="{StaticResource BtnGhost}">
+                                    Appearance="Secondary">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Cancel}" />
-                                </Button>
-                                <Button
+                                </ui:Button>
+                                <ui:Button
                                     Height="30"
                                     Padding="14,0"
                                     Command="{Binding ConfirmTxCommand}"
-                                    Style="{StaticResource BtnPrimary}">
+                                    Appearance="Primary">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
@@ -717,7 +713,7 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                </Button>
+                                </ui:Button>
                             </StackPanel>
                         </StackPanel>
                     </Grid>

@@ -5,8 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:BudgetSummaryCardViewModel},
-                                     IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:BudgetSummaryCardViewModel}}"
     mc:Ignorable="d">
 
     <Border
@@ -133,10 +132,11 @@
                             <TextBlock
                                 Grid.Column="1"
                                 Margin="8,0,0,0"
-                                FontFamily="{StaticResource FontTabular}"
+                                FontFamily="{StaticResource FontBase}"
                                 FontSize="{StaticResource FontSizeSm}"
                                 Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{Binding Spent, StringFormat=NT\{0:N0\}}" />
+                                Text="{Binding Spent, StringFormat=NT\{0:N0\}}"
+                                Typography.NumeralAlignment="Tabular" />
                             <TextBlock
                                 Grid.Column="2"
                                 Margin="8,0,0,0"

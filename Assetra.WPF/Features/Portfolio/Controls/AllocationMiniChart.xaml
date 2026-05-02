@@ -6,8 +6,7 @@
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
-                                     IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
     mc:Ignorable="d">
 
     <Border
@@ -77,20 +76,22 @@
                                 Grid.Column="2"
                                 Margin="0,0,8,0"
                                 VerticalAlignment="Center"
-                                FontFamily="{DynamicResource FontTabular}"
+                                FontFamily="{DynamicResource FontBase}"
                                 FontSize="{StaticResource FontSizeSm}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{Binding Percent, StringFormat={}{0:F1}%}" />
+                                Text="{Binding Percent, StringFormat={}{0:F1}%}"
+                                Typography.NumeralAlignment="Tabular" />
 
                             <!--  Market value  -->
                             <TextBlock
                                 Grid.Column="3"
                                 VerticalAlignment="Center"
-                                FontFamily="{DynamicResource FontTabular}"
+                                FontFamily="{DynamicResource FontBase}"
                                 FontSize="{StaticResource FontSizeXs}"
                                 Foreground="{DynamicResource AppTextMuted}"
-                                Text="{Binding Value, StringFormat='NT\${0:N0}'}" />
+                                Text="{Binding Value, StringFormat='NT\${0:N0}'}"
+                                Typography.NumeralAlignment="Tabular" />
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

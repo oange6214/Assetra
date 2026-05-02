@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
 using Moq;
 using Assetra.Application.Portfolio.Contracts;
+using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Models;
 using Assetra.Infrastructure;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
@@ -270,4 +272,107 @@ public class TransactionDialogViewModelTests
         vm.TxSellGrossAmount = 0m;
         Assert.False(vm.HasTxSellPreview);
     }
+
+    [Fact]
+    public async Task ConfirmAdd_Loan_ConvertsAnnualRatePercentToDecimal()
+    {
+        LoanTransactionRequest? captured = null;
+        var loanMutation = new Mock<ILoanMutationWorkflowService>();
+        loanMutation.Setup(s => s.RecordAsync(
+                It.IsAny<LoanTransactionRequest>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<LoanTransactionRequest, CancellationToken>((request, _) => captured = request)
+            .ReturnsAsync(new LoanMutationResult(null, null));
+
+        var vm = new AddAssetDialogViewModel(
+            Mock.Of<IAddAssetWorkflowService>(),
+            Mock.Of<IAccountUpsertWorkflowService>(),
+            Mock.Of<ITransactionWorkflowService>(),
+            Mock.Of<ICreditCardMutationWorkflowService>(),
+            loanMutationWorkflow: loanMutation.Object);
+
+        vm.AddAssetType = "loan";
+        vm.AddLoanName = "台新 7y A";
+        vm.AddLoanAmount = "1200000";
+        vm.AddLoanAnnualRate = "2";
+        vm.AddLoanTermMonths = "84";
+        vm.AddLoanStartDate = new DateTime(2026, 6, 1);
+
+        await vm.ConfirmAddCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.AddError);
+        Assert.NotNull(captured);
+        Assert.Equal(0.02m, captured!.AmortAnnualRate);
+    }
+
+    [Fact]
+    public async Task ExecuteSellFromTxDialogAsync_PassesTradeDateToWorkflow()
+    {
+        SellWorkflowRequest? captured = null;
+        var workflow = new Mock<ISellWorkflowService>();
+        workflow.Setup(s => s.RecordAsync(
+                It.IsAny<SellWorkflowRequest>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<SellWorkflowRequest, CancellationToken>((request, _) => captured = request)
+            .ReturnsAsync(new SellWorkflowResult(CreateSellTrade(), 9));
+        var vm = new SellPanelViewModel(workflow.Object, new PortfolioSellPanelController());
+        var tradeDate = new DateTime(2026, 5, 1, 16, 0, 0, DateTimeKind.Utc);
+
+        var error = await vm.ExecuteSellFromTxDialogAsync(
+            CreatePositionRow(),
+            "120",
+            tradeDate,
+            null,
+            false,
+            1);
+
+        Assert.Null(error);
+        Assert.NotNull(captured);
+        Assert.Equal(tradeDate, captured!.TradeDate);
+    }
+
+    [Fact]
+    public async Task ExecuteSellFromTxDialogAsync_WhenWorkflowFails_ReturnsError()
+    {
+        var workflow = new Mock<ISellWorkflowService>();
+        workflow.Setup(s => s.RecordAsync(
+                It.IsAny<SellWorkflowRequest>(),
+                It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("db down"));
+        var vm = new SellPanelViewModel(workflow.Object, new PortfolioSellPanelController());
+
+        var error = await vm.ExecuteSellFromTxDialogAsync(
+            CreatePositionRow(),
+            "120",
+            new DateTime(2026, 5, 1, 16, 0, 0, DateTimeKind.Utc),
+            null,
+            false,
+            1);
+
+        Assert.False(string.IsNullOrWhiteSpace(error));
+        Assert.Equal(error, vm.SellPanelError);
+    }
+
+    private static PortfolioRowViewModel CreatePositionRow() => new()
+    {
+        Id = Guid.NewGuid(),
+        Symbol = "2330",
+        Exchange = "TWSE",
+        Name = "台積電",
+        BuyPrice = 100m,
+        Quantity = 10,
+        CurrentPrice = 120m,
+    };
+
+    private static Trade CreateSellTrade() => new(
+        Id: Guid.NewGuid(),
+        Symbol: "2330",
+        Exchange: "TWSE",
+        Name: "台積電",
+        Type: TradeType.Sell,
+        TradeDate: DateTime.UtcNow,
+        Price: 120m,
+        Quantity: 1,
+        RealizedPnl: 20m,
+        RealizedPnlPct: 20m);
 }

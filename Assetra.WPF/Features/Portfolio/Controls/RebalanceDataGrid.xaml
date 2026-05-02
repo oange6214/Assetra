@@ -7,17 +7,16 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     x:Name="Root"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:AllocationViewModel},
-                                     IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:AllocationViewModel}}"
     mc:Ignorable="d">
 
-    <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
-        <conv:PercentToWidthConverter x:Key="PctToWidth" />
-    </UserControl.Resources>
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    <conv:PercentToWidthConverter x:Key="PctToWidth" />
+  </UserControl.Resources>
 
-    <Grid>
-        <ListBox
+  <Grid>
+    <ListBox
             Margin="16,0,16,16"
             Background="Transparent"
             BorderThickness="0"
@@ -25,34 +24,34 @@
             ItemsSource="{Binding AllocationRows}"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
             ScrollViewer.VerticalScrollBarVisibility="Auto">
-            <ListBox.Style>
-                <Style TargetType="ListBox">
-                    <Setter Property="Visibility" Value="Collapsed" />
-                    <Style.Triggers>
-                        <DataTrigger Value="True">
-                            <DataTrigger.Binding>
-                                <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1180">
-                                    <Binding ElementName="Root" Path="ActualWidth" />
-                                    <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                                </MultiBinding>
-                            </DataTrigger.Binding>
-                            <Setter Property="Visibility" Value="Visible" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </ListBox.Style>
-            <ListBox.ItemTemplate>
-                <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                    <Border
+      <ListBox.Style>
+        <Style TargetType="ListBox">
+          <Setter Property="Visibility" Value="Collapsed" />
+          <Style.Triggers>
+            <DataTrigger Value="True">
+              <DataTrigger.Binding>
+                <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1180">
+                  <Binding ElementName="Root" Path="ActualWidth" />
+                  <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
+                </MultiBinding>
+              </DataTrigger.Binding>
+              <Setter Property="Visibility" Value="Visible" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </ListBox.Style>
+      <ListBox.ItemTemplate>
+        <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+          <Border
                         Margin="0,0,0,10"
                         Padding="14,12"
                         Background="{DynamicResource AppSurface}"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="1"
                         CornerRadius="{StaticResource RadiusMd}">
-                        <StackPanel>
-                            <DockPanel LastChildFill="True">
-                                <Border
+            <StackPanel>
+              <DockPanel LastChildFill="True">
+                <Border
                                     Width="10"
                                     Height="10"
                                     Margin="0,4,8,0"
@@ -60,196 +59,196 @@
                                     Background="{Binding ColorBrush}"
                                     CornerRadius="2"
                                     DockPanel.Dock="Left" />
-                                <TextBlock
+                <TextBlock
                                     DockPanel.Dock="Right"
-                                    FontFamily="{StaticResource FontTabular}"
+                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                     FontSize="{StaticResource FontSizeSm}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{Binding MarketValue, StringFormat='NT\${0:N0}'}" />
-                                <StackPanel>
-                                    <TextBlock
-                                        FontFamily="{StaticResource FontTabular}"
+                <StackPanel>
+                  <TextBlock
+                                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                         FontSize="{StaticResource FontSizeSm}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Symbol}" />
-                                    <TextBlock
+                  <TextBlock
                                         Margin="0,2,0,0"
                                         FontSize="{StaticResource FontSizeXs}"
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="{Binding Name}"
                                         TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                            </DockPanel>
+                </StackPanel>
+              </DockPanel>
 
-                            <WrapPanel Margin="0,10,0,0">
-                                <Border
+              <WrapPanel Margin="0,10,0,0">
+                <Border
                                     Margin="0,0,8,8"
                                     Padding="8,6"
                                     Background="{DynamicResource AppBackground}"
                                     BorderBrush="{DynamicResource AppBorder}"
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource RadiusSm}">
-                                    <StackPanel>
-                                        <TextBlock
+                  <StackPanel>
+                    <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{DynamicResource Portfolio.Allocation.Header.ActualVsTarget}" />
-                                        <TextBlock
-                                            FontFamily="{StaticResource FontTabular}"
+                    <TextBlock
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextPrimary}">
-                                            <Run Text="{Binding ActualPercentDisplay}" />
+                                            <Run Text="{Binding ActualPercentDisplay, Mode=OneWay}" />
                                             <Run Text=" / " />
-                                            <Run Text="{Binding TargetPercent, StringFormat={}{0:F1}%}" />
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Border>
-                                <Border
+                                            <Run Text="{Binding TargetPercent, StringFormat={}{0:F1}%, Mode=OneWay}" />
+                    </TextBlock>
+                  </StackPanel>
+                </Border>
+                <Border
                                     Margin="0,0,8,8"
                                     Padding="8,6"
                                     Background="{DynamicResource AppBackground}"
                                     BorderBrush="{DynamicResource AppBorder}"
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource RadiusSm}">
-                                    <StackPanel>
-                                        <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value="實際比例" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="True">
-                                                            <Setter Property="Text" Value="配置變化" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <Grid>
-                                            <StackPanel Orientation="Horizontal">
-                                                <StackPanel.Style>
-                                                    <Style TargetType="StackPanel">
-                                                        <Setter Property="Visibility" Value="Collapsed" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="True">
-                                                                <Setter Property="Visibility" Value="Visible" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </StackPanel.Style>
-                                                <TextBlock
-                                                    FontFamily="{StaticResource FontTabular}"
+                  <StackPanel>
+                    <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Text" Value="實際比例" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="True">
+                              <Setter Property="Text" Value="配置變化" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                    <Grid>
+                      <StackPanel Orientation="Horizontal">
+                        <StackPanel.Style>
+                          <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </StackPanel.Style>
+                        <TextBlock
+                                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                                     FontSize="{StaticResource FontSizeSm}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{Binding ActualPercentDisplay}" />
-                                                <TextBlock
+                        <TextBlock
                                                     Margin="4,0"
                                                     FontSize="{StaticResource FontSizeSm}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="→" />
-                                                <TextBlock
-                                                    FontFamily="{StaticResource FontTabular}"
+                        <TextBlock
+                                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                                     FontSize="{StaticResource FontSizeSm}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{Binding ColorBrush}"
                                                     Text="{Binding AfterPercentDisplay}" />
-                                            </StackPanel>
-                                            <TextBlock
-                                                FontFamily="{StaticResource FontTabular}"
+                      </StackPanel>
+                      <TextBlock
+                                                FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                                 FontSize="{StaticResource FontSizeSm}"
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppTextPrimary}"
                                                 Text="{Binding ActualPercentDisplay}">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Visibility" Value="Visible" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="True">
-                                                                <Setter Property="Visibility" Value="Collapsed" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Grid>
-                                    </StackPanel>
-                                </Border>
-                                <Border
+                        <TextBlock.Style>
+                          <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </TextBlock.Style>
+                      </TextBlock>
+                    </Grid>
+                  </StackPanel>
+                </Border>
+                <Border
                                     Margin="0,0,8,8"
                                     Padding="8,6"
                                     Background="{DynamicResource AppBackground}"
                                     BorderBrush="{DynamicResource AppBorder}"
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource RadiusSm}">
-                                    <StackPanel>
-                                        <TextBlock
+                  <StackPanel>
+                    <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{DynamicResource Portfolio.Allocation.Header.Deviation}" />
-                                        <TextBlock
-                                            FontFamily="{StaticResource FontTabular}"
+                    <TextBlock
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}"
                                             FontWeight="SemiBold"
                                             Text="{Binding DeviationDisplay}">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsBuy}" Value="True">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding IsSell}" Value="True">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Border>
-                                <Border
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsBuy}" Value="True">
+                              <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSell}" Value="True">
+                              <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </StackPanel>
+                </Border>
+                <Border
                                     Margin="0,0,0,8"
                                     Padding="8,6"
                                     Background="{DynamicResource AppBackground}"
                                     BorderBrush="{DynamicResource AppBorder}"
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource RadiusSm}">
-                                    <StackPanel>
-                                        <TextBlock
+                  <StackPanel>
+                    <TextBlock
                                             FontSize="{StaticResource FontSizeXs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{DynamicResource Portfolio.Allocation.Header.Action}" />
-                                        <TextBlock
-                                            FontFamily="{StaticResource FontTabular}"
+                    <TextBlock
+                                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}"
                                             FontWeight="SemiBold"
                                             Text="{Binding BuySellDisplay}">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsBuy}" Value="True">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding IsSell}" Value="True">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Border>
-                            </WrapPanel>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsBuy}" Value="True">
+                              <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSell}" Value="True">
+                              <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </StackPanel>
+                </Border>
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
 
-        <DataGrid
+    <DataGrid
             Margin="16,0,16,16"
             AutoGenerateColumns="False"
             Background="{DynamicResource AppBackground}"
@@ -273,298 +272,298 @@
             SelectionMode="Single"
             VirtualizingPanel.IsVirtualizing="True"
             VirtualizingPanel.VirtualizationMode="Recycling">
-            <DataGrid.Style>
-                <Style TargetType="DataGrid">
-                    <Setter Property="Visibility" Value="Visible" />
-                    <Style.Triggers>
-                        <DataTrigger Value="True">
-                            <DataTrigger.Binding>
-                                <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1180">
-                                    <Binding ElementName="Root" Path="ActualWidth" />
-                                    <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                                </MultiBinding>
-                            </DataTrigger.Binding>
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.Style>
+      <DataGrid.Style>
+        <Style TargetType="DataGrid">
+          <Setter Property="Visibility" Value="Visible" />
+          <Style.Triggers>
+            <DataTrigger Value="True">
+              <DataTrigger.Binding>
+                <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1180">
+                  <Binding ElementName="Root" Path="ActualWidth" />
+                  <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
+                </MultiBinding>
+              </DataTrigger.Binding>
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </DataGrid.Style>
 
-            <DataGrid.ColumnHeaderStyle>
-                <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
-            </DataGrid.ColumnHeaderStyle>
-            <DataGrid.CellStyle>
-                <Style BasedOn="{StaticResource AppDataGridCell}" TargetType="DataGridCell" />
-            </DataGrid.CellStyle>
-            <DataGrid.RowStyle>
-                <Style BasedOn="{StaticResource AppDataGridRow}" TargetType="DataGridRow" />
-            </DataGrid.RowStyle>
+      <DataGrid.ColumnHeaderStyle>
+        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
+      </DataGrid.ColumnHeaderStyle>
+      <DataGrid.CellStyle>
+        <Style BasedOn="{StaticResource AppDataGridCell}" TargetType="DataGridCell" />
+      </DataGrid.CellStyle>
+      <DataGrid.RowStyle>
+        <Style BasedOn="{StaticResource AppDataGridRow}" TargetType="DataGridRow" />
+      </DataGrid.RowStyle>
 
-            <DataGrid.Columns>
+      <DataGrid.Columns>
 
-                <!--  資產  -->
-                <DataGridTemplateColumn
+        <!--  資產  -->
+        <DataGridTemplateColumn
                     Width="*"
                     MinWidth="100"
                     SortMemberPath="Symbol">
-                    <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Allocation.Col.Asset}" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                            <StackPanel Margin="8,0" VerticalAlignment="Center">
-                                <DockPanel>
-                                    <Border
+          <DataGridTemplateColumn.Header>
+            <TextBlock Text="{DynamicResource Allocation.Col.Asset}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+              <StackPanel Margin="8,0" VerticalAlignment="Center">
+                <DockPanel>
+                  <Border
                                         Width="10"
                                         Height="10"
                                         Margin="0,0,6,0"
                                         VerticalAlignment="Center"
                                         Background="{Binding ColorBrush}"
                                         CornerRadius="2" />
-                                    <TextBlock
+                  <TextBlock
                                         FontSize="{StaticResource FontSizeSm}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Symbol}" />
-                                </DockPanel>
-                                <TextBlock
+                </DockPanel>
+                <TextBlock
                                     Margin="16,1,0,0"
                                     FontSize="{StaticResource FontSizeXs}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{Binding Name}"
                                     TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+              </StackPanel>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
 
-                <!--  市值 + allocation bar  -->
-                <DataGridTemplateColumn Width="130" SortMemberPath="MarketValue">
-                    <DataGridTemplateColumn.HeaderStyle>
-                        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                            <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        </Style>
-                    </DataGridTemplateColumn.HeaderStyle>
-                    <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Allocation.Col.ValueTwd}" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                            <StackPanel
+        <!--  市值 + allocation bar  -->
+        <DataGridTemplateColumn Width="130" SortMemberPath="MarketValue">
+          <DataGridTemplateColumn.HeaderStyle>
+            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+              <Setter Property="HorizontalContentAlignment" Value="Right" />
+            </Style>
+          </DataGridTemplateColumn.HeaderStyle>
+          <DataGridTemplateColumn.Header>
+            <TextBlock Text="{DynamicResource Allocation.Col.ValueTwd}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+              <StackPanel
                                 Margin="0,0,8,0"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center">
-                                <TextBlock
+                <TextBlock
                                     HorizontalAlignment="Right"
-                                    FontFamily="{StaticResource FontTabular}"
+                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                     FontSize="{StaticResource FontSizeSm}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{Binding MarketValue, StringFormat='NT\${0:N0}'}" />
-                                <Grid Height="3" Margin="0,3,0,0">
-                                    <Border Background="{DynamicResource AppBorder}" CornerRadius="1.5" />
-                                    <Border
+                <Grid Height="3" Margin="0,3,0,0">
+                  <Border Background="{DynamicResource AppBorder}" CornerRadius="1.5" />
+                  <Border
                                         HorizontalAlignment="Left"
                                         Background="{Binding ColorBrush}"
                                         CornerRadius="1.5">
-                                        <Border.Width>
-                                            <MultiBinding Converter="{StaticResource PctToWidth}">
-                                                <Binding Path="ActualPercent" />
-                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
-                                            </MultiBinding>
-                                        </Border.Width>
-                                    </Border>
-                                </Grid>
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                    <Border.Width>
+                      <MultiBinding Converter="{StaticResource PctToWidth}">
+                        <Binding Path="ActualPercent" />
+                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                      </MultiBinding>
+                    </Border.Width>
+                  </Border>
+                </Grid>
+              </StackPanel>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
 
-                <!--
+        <!--
                     配置：cash-flow → before/after；full → actual%
                     DataGrid 不支援 header 動態切換，兩欄都放，用 Visibility 控制
                 -->
-                <DataGridTemplateColumn
+        <DataGridTemplateColumn
                     Width="120"
                     CanUserSort="False"
                     SortMemberPath="ActualPercent">
-                    <DataGridTemplateColumn.Header>
-                        <TextBlock>
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="{DynamicResource Allocation.Col.ActualPct}" />
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True">
-                                            <Setter Property="Text" Value="{DynamicResource Allocation.Col.AllocChange}" />
-                                            <Setter Property="HorizontalAlignment" Value="Center" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                            <Grid Margin="0,0,8,0" VerticalAlignment="Center">
-                                <!--  Cash-flow: before → after  -->
-                                <StackPanel
+          <DataGridTemplateColumn.Header>
+            <TextBlock>
+              <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Text" Value="{DynamicResource Allocation.Col.ActualPct}" />
+                  <Setter Property="HorizontalAlignment" Value="Right" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True">
+                      <Setter Property="Text" Value="{DynamicResource Allocation.Col.AllocChange}" />
+                      <Setter Property="HorizontalAlignment" Value="Center" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+              <Grid Margin="0,0,8,0" VerticalAlignment="Center">
+                <!--  Cash-flow: before → after  -->
+                <StackPanel
                                     HorizontalAlignment="Center"
                                     Orientation="Horizontal"
                                     Visibility="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BoolToVis}}">
-                                    <TextBlock
-                                        FontFamily="{StaticResource FontTabular}"
+                  <TextBlock
+                                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                         FontSize="{StaticResource FontSizeSm}"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="{Binding ActualPercentDisplay}" />
-                                    <TextBlock
+                  <TextBlock
                                         Margin="4,0"
                                         FontSize="{StaticResource FontSizeSm}"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="→" />
-                                    <TextBlock
-                                        FontFamily="{StaticResource FontTabular}"
+                  <TextBlock
+                                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                         FontSize="{StaticResource FontSizeSm}"
                                         FontWeight="SemiBold"
                                         Foreground="{Binding ColorBrush}"
                                         Text="{Binding AfterPercentDisplay}" />
-                                </StackPanel>
-                                <!--  Full: actual %  -->
-                                <TextBlock
+                </StackPanel>
+                <!--  Full: actual %  -->
+                <TextBlock
                                     HorizontalAlignment="Right"
-                                    FontFamily="{StaticResource FontTabular}"
+                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                     FontSize="{StaticResource FontSizeSm}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{Binding ActualPercentDisplay}"
                                     Visibility="{Binding DataContext.IsFullRebalance, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BoolToVis}}" />
-                            </Grid>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+              </Grid>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
 
-                <!--  目標比例  -->
-                <DataGridTemplateColumn Width="76" SortMemberPath="TargetPercent">
-                    <DataGridTemplateColumn.HeaderStyle>
-                        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                            <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        </Style>
-                    </DataGridTemplateColumn.HeaderStyle>
-                    <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Allocation.Col.TargetPct}" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                            <TextBlock
+        <!--  目標比例  -->
+        <DataGridTemplateColumn Width="76" SortMemberPath="TargetPercent">
+          <DataGridTemplateColumn.HeaderStyle>
+            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+              <Setter Property="HorizontalContentAlignment" Value="Right" />
+            </Style>
+          </DataGridTemplateColumn.HeaderStyle>
+          <DataGridTemplateColumn.Header>
+            <TextBlock Text="{DynamicResource Allocation.Col.TargetPct}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+              <TextBlock
                                 Margin="0,0,8,0"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
-                                FontFamily="{StaticResource FontTabular}"
+                                FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                 FontSize="{StaticResource FontSizeSm}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{Binding TargetPercent, StringFormat='{}{0:F1}%'}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
 
-                <!--  偏差 % + bar  -->
-                <DataGridTemplateColumn Width="120" SortMemberPath="Deviation">
-                    <DataGridTemplateColumn.HeaderStyle>
-                        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                            <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        </Style>
-                    </DataGridTemplateColumn.HeaderStyle>
-                    <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Allocation.Col.Deviation}" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                            <StackPanel Margin="0,0,8,0" VerticalAlignment="Center">
-                                <TextBlock
+        <!--  偏差 % + bar  -->
+        <DataGridTemplateColumn Width="120" SortMemberPath="Deviation">
+          <DataGridTemplateColumn.HeaderStyle>
+            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+              <Setter Property="HorizontalContentAlignment" Value="Right" />
+            </Style>
+          </DataGridTemplateColumn.HeaderStyle>
+          <DataGridTemplateColumn.Header>
+            <TextBlock Text="{DynamicResource Allocation.Col.Deviation}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+              <StackPanel Margin="0,0,8,0" VerticalAlignment="Center">
+                <TextBlock
                                     HorizontalAlignment="Right"
-                                    FontFamily="{StaticResource FontTabular}"
+                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                     FontSize="{StaticResource FontSizeSm}"
                                     FontWeight="SemiBold"
                                     Text="{Binding DeviationDisplay}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsBuy}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsSell}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                                <Grid Height="3" Margin="0,3,0,0">
-                                    <Border Background="{DynamicResource AppBorder}" CornerRadius="1.5" />
-                                    <Border HorizontalAlignment="Left" CornerRadius="1.5">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="{DynamicResource AppUp}" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsSell}" Value="True">
-                                                        <Setter Property="Background" Value="{DynamicResource AppDown}" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <Border.Width>
-                                            <MultiBinding Converter="{StaticResource PctToWidth}">
-                                                <Binding Path="DeviationBarPct" />
-                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
-                                            </MultiBinding>
-                                        </Border.Width>
-                                    </Border>
-                                </Grid>
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBuy}" Value="True">
+                          <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsSell}" Value="True">
+                          <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+                <Grid Height="3" Margin="0,3,0,0">
+                  <Border Background="{DynamicResource AppBorder}" CornerRadius="1.5" />
+                  <Border HorizontalAlignment="Left" CornerRadius="1.5">
+                    <Border.Style>
+                      <Style TargetType="Border">
+                        <Setter Property="Background" Value="{DynamicResource AppUp}" />
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsSell}" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource AppDown}" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </Border.Style>
+                    <Border.Width>
+                      <MultiBinding Converter="{StaticResource PctToWidth}">
+                        <Binding Path="DeviationBarPct" />
+                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                      </MultiBinding>
+                    </Border.Width>
+                  </Border>
+                </Grid>
+              </StackPanel>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
 
-                <!--  建議操作  -->
-                <DataGridTemplateColumn Width="140" SortMemberPath="BuySellAmount">
-                    <DataGridTemplateColumn.HeaderStyle>
-                        <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                            <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        </Style>
-                    </DataGridTemplateColumn.HeaderStyle>
-                    <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{DynamicResource Allocation.Col.Suggestion}" />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                            <TextBlock
+        <!--  建議操作  -->
+        <DataGridTemplateColumn Width="140" SortMemberPath="BuySellAmount">
+          <DataGridTemplateColumn.HeaderStyle>
+            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+              <Setter Property="HorizontalContentAlignment" Value="Right" />
+            </Style>
+          </DataGridTemplateColumn.HeaderStyle>
+          <DataGridTemplateColumn.Header>
+            <TextBlock Text="{DynamicResource Allocation.Col.Suggestion}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+              <TextBlock
                                 Margin="0,0,8,0"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
-                                FontFamily="{StaticResource FontTabular}"
+                                FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                 FontSize="{StaticResource FontSizeSm}"
                                 FontWeight="SemiBold"
                                 Text="{Binding BuySellDisplay}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsBuy}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsSell}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding IsBuy}" Value="True">
+                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                      </DataTrigger>
+                      <DataTrigger Binding="{Binding IsSell}" Value="True">
+                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
 
-            </DataGrid.Columns>
-        </DataGrid>
-    </Grid>
+      </DataGrid.Columns>
+    </DataGrid>
+  </Grid>
 </UserControl>

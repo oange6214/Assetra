@@ -18,6 +18,7 @@
     xmlns:retirement="clr-namespace:Assetra.WPF.Features.Retirement"
     xmlns:trends="clr-namespace:Assetra.WPF.Features.Trends"
     xmlns:goals="clr-namespace:Assetra.WPF.Features.Goals"
+    xmlns:hubs="clr-namespace:Assetra.WPF.Features.Hubs"
     xmlns:import="clr-namespace:Assetra.WPF.Features.Import"
     xmlns:reconciliation="clr-namespace:Assetra.WPF.Features.Reconciliation"
     xmlns:settings="clr-namespace:Assetra.WPF.Features.Settings"
@@ -107,6 +108,19 @@
         <DataTemplate x:Key="SettingsContentTemplate">
             <settings:SettingsView DataContext="{Binding Settings}" />
         </DataTemplate>
+
+        <!--  ── Hub views (Phase 2 IA consolidation) ──  -->
+        <DataTemplate x:Key="CashflowHubContentTemplate">
+            <hubs:CashflowHubView />
+        </DataTemplate>
+
+        <DataTemplate x:Key="InsightsHubContentTemplate">
+            <hubs:InsightsHubView />
+        </DataTemplate>
+
+        <DataTemplate x:Key="MultiAssetHubContentTemplate">
+            <hubs:MultiAssetHubView />
+        </DataTemplate>
     </ui:FluentWindow.Resources>
 
     <!--  Keyboard shortcuts  -->
@@ -177,22 +191,14 @@
                                 Command="{Binding NavRail.GoBackCommand}"
                                 Style="{StaticResource BtnIcon}"
                                 ToolTip="{DynamicResource Nav.GoBack}">
-                                <TextBlock
-                                    FontFamily="Segoe MDL2 Assets"
-                                    FontSize="{StaticResource FontSizeBase}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="&#xE112;" />
+                                <ui:SymbolIcon Symbol="ChevronRight24" FontSize="{StaticResource FontSizeBase}" Foreground="{DynamicResource AppTextMuted}" />
                             </Button>
                             <Button
                                 Margin="2,0,0,0"
                                 Command="{Binding NavRail.GoForwardCommand}"
                                 Style="{StaticResource BtnIcon}"
                                 ToolTip="{DynamicResource Nav.GoForward}">
-                                <TextBlock
-                                    FontFamily="Segoe MDL2 Assets"
-                                    FontSize="{StaticResource FontSizeBase}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="&#xE111;" />
+                                <ui:SymbolIcon Symbol="ChevronLeft24" FontSize="{StaticResource FontSizeBase}" Foreground="{DynamicResource AppTextMuted}" />
                             </Button>
                             <Button
                                 x:Name="SearchIconBtn"
@@ -200,52 +206,106 @@
                                 Command="{Binding ToggleSearchCommand}"
                                 Style="{StaticResource BtnIcon}"
                                 ToolTip="Ctrl+K">
-                                <TextBlock
-                                    FontFamily="Segoe MDL2 Assets"
-                                    FontSize="{StaticResource FontSizeMd}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="&#xE721;" />
+                                <ui:SymbolIcon Symbol="Search24" FontSize="{StaticResource FontSizeMd}" Foreground="{DynamicResource AppTextMuted}" />
                             </Button>
                         </StackPanel>
 
-                        <!--
-                            Right: Theme / Settings
-                            Margin right 8 keeps a small gap before the DWM chrome area.
-                        -->
+                        <!--  Center: Current page title (dynamic per ActiveSection)  -->
+                        <TextBlock
+                            Grid.Column="1"
+                            Margin="16,0,12,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeMd}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            TextTrimming="CharacterEllipsis">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="{DynamicResource Nav.Portfolio}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Portfolio}">
+                                            <Setter Property="Text" Value="{DynamicResource Nav.Portfolio}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.FinancialOverview}">
+                                            <Setter Property="Text" Value="{DynamicResource FinancialOverview.Nav.Label}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Categories}">
+                                            <Setter Property="Text" Value="{DynamicResource Nav.Categories}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Recurring}">
+                                            <Setter Property="Text" Value="{DynamicResource Nav.Recurring}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Goals}">
+                                            <Setter Property="Text" Value="{DynamicResource Nav.Goals}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Trends}">
+                                            <Setter Property="Text" Value="{DynamicResource Nav.Trends}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Reports}">
+                                            <Setter Property="Text" Value="{DynamicResource Nav.Reports}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.RealEstate}">
+                                            <Setter Property="Text" Value="{DynamicResource RealEstate.Title}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Insurance}">
+                                            <Setter Property="Text" Value="{DynamicResource Insurance.Title}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Retirement}">
+                                            <Setter Property="Text" Value="{DynamicResource Retirement.Title}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.PhysicalAsset}">
+                                            <Setter Property="Text" Value="{DynamicResource PhysicalAsset.Title}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Fire}">
+                                            <Setter Property="Text" Value="{DynamicResource Fire.Title}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.MonteCarlo}">
+                                            <Setter Property="Text" Value="{DynamicResource MonteCarlo.Title}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Alerts}">
+                                            <Setter Property="Text" Value="{DynamicResource Nav.Alerts}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Import}">
+                                            <Setter Property="Text" Value="{DynamicResource Nav.Import}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Settings}">
+                                            <Setter Property="Text" Value="{DynamicResource Nav.Settings}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Cashflow}">
+                                            <Setter Property="Text" Value="{DynamicResource Nav.Cashflow}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Insights}">
+                                            <Setter Property="Text" Value="{DynamicResource Nav.Insights}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.MultiAsset}">
+                                            <Setter Property="Text" Value="{DynamicResource Nav.MultiAsset}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!--  Right: Theme toggle (Settings moved to NavRail bottom)  -->
                         <StackPanel
                             Grid.Column="2"
                             Margin="0,0,8,0"
                             Orientation="Horizontal">
                             <Button
-                                Margin="0,0,4,0"
                                 Command="{Binding ToggleThemeCommand}"
                                 Style="{StaticResource BtnIcon}"
                                 ToolTip="{Binding ThemeToggleLabel}">
-                                <TextBlock
-                                    FontFamily="Segoe MDL2 Assets"
-                                    FontSize="{StaticResource FontSizeMd}"
-                                    Foreground="{DynamicResource AppTextMuted}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="&#xE706;" />
+                                <ui:SymbolIcon FontSize="{StaticResource FontSizeMd}" Foreground="{DynamicResource AppTextMuted}">
+                                    <ui:SymbolIcon.Style>
+                                        <Style TargetType="ui:SymbolIcon">
+                                            <Setter Property="Symbol" Value="WeatherSunny24" />
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding CurrentTheme}" Value="Dark">
-                                                    <Setter Property="Text" Value="&#xE793;" />
+                                                    <Setter Property="Symbol" Value="WeatherMoon24" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Button>
-                            <Button
-                                Command="{Binding GoToSettingsCommand}"
-                                Style="{StaticResource BtnIcon}"
-                                ToolTip="{DynamicResource Nav.Settings}">
-                                <TextBlock
-                                    FontFamily="Segoe MDL2 Assets"
-                                    FontSize="{StaticResource FontSizeMd}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="&#xE713;" />
+                                    </ui:SymbolIcon.Style>
+                                </ui:SymbolIcon>
                             </Button>
                         </StackPanel>
 
@@ -320,6 +380,15 @@
                             <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Settings}">
                                 <Setter Property="ContentTemplate" Value="{StaticResource SettingsContentTemplate}" />
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Cashflow}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource CashflowHubContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Insights}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource InsightsHubContentTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.MultiAsset}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource MultiAssetHubContentTemplate}" />
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </ContentControl.Style>
@@ -372,16 +441,8 @@
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,0,0,1">
                         <DockPanel>
-                            <TextBlock
-                                Margin="0,0,10,0"
-                                VerticalAlignment="Center"
-                                DockPanel.Dock="Left"
-                                FontFamily="Segoe MDL2 Assets"
-                                FontSize="{StaticResource FontSizeLg}"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                IsHitTestVisible="False"
-                                Text="&#xE721;" />
-                            <TextBox
+                            <ui:SymbolIcon Symbol="Search24" Margin="0,0,10,0" VerticalAlignment="Center" DockPanel.Dock="Left" FontSize="{StaticResource FontSizeLg}" Foreground="{DynamicResource AppTextMuted}" IsHitTestVisible="False" />
+                            <ui:TextBox
                                 x:Name="SearchPaletteInput"
                                 VerticalContentAlignment="Center"
                                 Background="Transparent"
@@ -415,7 +476,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </TextBox.Style>
-                            </TextBox>
+                            </ui:TextBox>
                         </DockPanel>
                     </Border>
 

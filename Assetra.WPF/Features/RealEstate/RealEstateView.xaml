@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.RealEstate"
     d:DataContext="{d:DesignInstance Type={x:Type vm:RealEstateViewModel}, IsDesignTimeCreatable=False}"
     d:DesignHeight="800"
@@ -114,49 +115,49 @@
         <Border
             Grid.Row="3"
             Margin="0,16,0,0"
-            Padding="16"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="8">
+            Style="{StaticResource FormCard}">
             <StackPanel>
                 <TextBlock
-                    Margin="0,0,0,12"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource AppTextPrimary}"
+                    Style="{StaticResource FormSectionTitle}"
                     Text="{DynamicResource RealEstate.Form.Title}" />
 
                 <UniformGrid Columns="4" Rows="2">
                     <StackPanel Margin="0,0,8,8">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.Name}" />
-                        <TextBox Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBox Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,8,8">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.Address}" />
-                        <TextBox Text="{Binding FormAddress, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBox Text="{Binding FormAddress, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,8,8">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.PurchasePrice}" />
-                        <TextBox Text="{Binding FormPurchasePrice, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBox Text="{Binding FormPurchasePrice, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,0,8">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.CurrentValue}" />
-                        <TextBox Text="{Binding FormCurrentValue, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBox Text="{Binding FormCurrentValue, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,8,0">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.MortgageBalance}" />
-                        <TextBox Text="{Binding FormMortgageBalance, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBox Text="{Binding FormMortgageBalance, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,8,0">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.Currency}" />
-                        <TextBox Text="{Binding FormCurrency, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBox Text="{Binding FormCurrency, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,8,0" VerticalAlignment="Bottom">
-                        <CheckBox Content="{DynamicResource RealEstate.Form.IsRental}" IsChecked="{Binding FormIsRental}" />
+                    <StackPanel Margin="0,0,8,0">
+                        <!--  Spacer matches sibling label height so checkbox aligns with neighbouring TextBox row.  -->
+                        <TextBlock Text=" " Visibility="Hidden" />
+                        <CheckBox
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Center"
+                            Content="{DynamicResource RealEstate.Form.IsRental}"
+                            IsChecked="{Binding FormIsRental}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,0,0">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.Notes}" />
-                        <TextBox Text="{Binding FormNotes, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBox Text="{Binding FormNotes, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </UniformGrid>
 
@@ -167,11 +168,11 @@
                     Visibility="{Binding FormError, Converter={StaticResource NullToVisibilityConverter}}" />
 
                 <StackPanel Margin="0,12,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <Button
+                    <ui:Button
                         Margin="0,0,8,0"
                         Command="{Binding CancelEditCommand}"
                         Content="{DynamicResource Common.Cancel}"
-                        Style="{StaticResource BtnGhost}"
+                        Appearance="Secondary"
                         Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}" />
                     <Button Command="{Binding SaveCommand}" Content="{DynamicResource Common.Save}" />
                 </StackPanel>

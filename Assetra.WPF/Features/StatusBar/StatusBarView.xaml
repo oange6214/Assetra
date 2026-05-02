@@ -43,7 +43,7 @@
             <TextBlock
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                FontFamily="{StaticResource FontTabular}"
+                FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                 FontSize="{StaticResource FontSizeXs}"
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{Binding ClockText}" />

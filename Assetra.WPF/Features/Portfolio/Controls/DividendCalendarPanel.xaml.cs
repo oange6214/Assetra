@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -73,14 +74,17 @@ public partial class DividendCalendarPanel : UserControl
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(0, 0, 6, 0),
                 });
-                row.Children.Add(new TextBlock
+                var totalText = new TextBlock
                 {
                     Text = total.ToString("N0"),
-                    FontFamily = (FontFamily)FindResource("FontTabular"),
+                    FontFamily = (FontFamily)FindResource("FontBase"),
                     FontSize = 12,
                     FontWeight = FontWeights.SemiBold,
                     Foreground = (Brush)FindResource("AppUp"),
-                });
+                };
+                TextOptions.SetTextFormattingMode(totalText, TextFormattingMode.Display);
+                Typography.SetNumeralAlignment(totalText, FontNumeralAlignment.Tabular);
+                row.Children.Add(totalText);
                 stack.Children.Add(row);
 
                 // Click → filter trades to this month's dividends

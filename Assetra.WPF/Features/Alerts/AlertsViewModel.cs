@@ -7,6 +7,7 @@ using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Serilog;
 
 namespace Assetra.WPF.Features.Alerts;
 
@@ -84,7 +85,14 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
 
         _subscription = stockService.QuoteStream
             .ObserveOn(uiScheduler)
-            .Subscribe(CheckAlerts);
+            .Select(quotes => Observable.FromAsync(() => CheckAlertsAsync(quotes))
+                .Catch((Exception ex) =>
+                {
+                    Log.Warning(ex, "Failed to process stock quotes for alerts");
+                    return Observable.Empty<System.Reactive.Unit>();
+                }))
+            .Concat()
+            .Subscribe();
 
         if (currencyService is not null)
             currencyService.CurrencyChanged += OnCurrencyChanged;
@@ -151,6 +159,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         row.TargetPrice = price;
         row.Condition = condition;
         row.IsTriggered = false;
+        row.TriggerTime = null;
         row.TriggeredAt = string.Empty;
         row.IsEditing = false;
 
@@ -172,13 +181,16 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         HasNoRules = Rules.Count == 0;
     }
 
-    private void CheckAlerts(IReadOnlyList<StockQuote> quotes)
+    private async Task CheckAlertsAsync(IReadOnlyList<StockQuote> quotes)
     {
         foreach (var quote in quotes)
         {
-            foreach (var row in Rules.Where(r => r.Symbol == quote.Symbol && !r.IsTriggered))
+            foreach (var row in Rules.Where(r => IsSameQuoteKey(r, quote)))
             {
                 row.CurrentPrice = quote.Price;
+
+                if (row.IsTriggered)
+                    continue;
 
                 bool triggered = row.Condition == AlertCondition.Above
                     ? quote.Price >= row.TargetPrice
@@ -186,9 +198,31 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
 
                 if (triggered)
                 {
+                    var previousTriggerTime = row.TriggerTime;
+                    var previousTriggeredAt = row.TriggeredAt;
+                    var triggerTime = DateTimeOffset.Now;
                     row.IsTriggered = true;
-                    row.TriggeredAt = DateTimeOffset.Now.ToLocalTime().ToString("HH:mm:ss");
-                    _ = _alertService.UpdateAsync(row.ToRule());
+                    row.TriggerTime = triggerTime;
+                    row.TriggeredAt = triggerTime.ToLocalTime().ToString("HH:mm:ss");
+
+                    try
+                    {
+                        await _alertService.UpdateAsync(row.ToRule());
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning(ex,
+                            "Failed to persist triggered alert {Symbol} on {Exchange}",
+                            row.Symbol,
+                            row.Exchange);
+                        row.IsTriggered = false;
+                        row.TriggerTime = previousTriggerTime;
+                        row.TriggeredAt = previousTriggeredAt;
+                        _snackbar.Error(string.Format(
+                            GetString("Alerts.TriggerPersistFailed", "警示已觸發，但狀態儲存失敗：{0}"),
+                            row.Symbol));
+                        continue;
+                    }
 
                     TriggeredCount++;
 
@@ -204,6 +238,10 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         }
     }
 
+    private static bool IsSameQuoteKey(AlertRowViewModel row, StockQuote quote) =>
+        string.Equals(row.Symbol, quote.Symbol, StringComparison.OrdinalIgnoreCase)
+        && string.Equals(row.Exchange, quote.Exchange, StringComparison.OrdinalIgnoreCase);
+
     private AlertRowViewModel ToRow(AlertRule r) => new()
     {
         Id = r.Id,
@@ -213,6 +251,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         Condition = r.Condition,
         TargetPrice = r.TargetPrice,
         IsTriggered = r.IsTriggered,
+        TriggerTime = r.TriggerTime,
         TriggeredAt = r.TriggerTime.HasValue
             ? r.TriggerTime.Value.ToLocalTime().ToString("HH:mm:ss")
             : string.Empty,

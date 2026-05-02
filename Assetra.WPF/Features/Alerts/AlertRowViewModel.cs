@@ -19,8 +19,9 @@ public partial class AlertRowViewModel : ObservableObject
 
     public string ConditionText => Condition == AlertCondition.Above ? "突破" : "跌破";
 
-    [ObservableProperty] private decimal _currentPrice;
+    [ObservableProperty] private decimal? _currentPrice;
     [ObservableProperty] private bool _isTriggered;
+    [ObservableProperty] private DateTimeOffset? _triggerTime;
     [ObservableProperty] private string _triggeredAt = string.Empty;
 
     // Inline edit state
@@ -59,5 +60,5 @@ public partial class AlertRowViewModel : ObservableObject
     public AlertRule ToRule() => new(
         Id, Symbol, Exchange, Condition, TargetPrice,
         IsTriggered,
-        IsTriggered ? DateTimeOffset.Now : null);
+        IsTriggered ? TriggerTime : null);
 }

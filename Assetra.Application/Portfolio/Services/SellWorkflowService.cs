@@ -30,7 +30,9 @@ public sealed class SellWorkflowService : ISellWorkflowService
     {
         ct.ThrowIfCancellationRequested();
 
-        var tradeDate = DateTime.UtcNow;
+        var tradeDate = request.TradeDate.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(request.TradeDate, DateTimeKind.Local).ToUniversalTime()
+            : request.TradeDate.ToUniversalTime();
         var realizedPnl = await _positionQueryService
             .ComputeRealizedPnlAsync(
                 request.PortfolioEntryId,
@@ -69,7 +71,7 @@ public sealed class SellWorkflowService : ISellWorkflowService
 
         await _positionLogRepository.LogAsync(new PortfolioPositionLog(
                 Guid.NewGuid(),
-                DateOnly.FromDateTime(DateTime.Today),
+                DateOnly.FromDateTime(tradeDate.ToLocalTime()),
                 request.PortfolioEntryId,
                 request.Symbol,
                 request.Exchange,

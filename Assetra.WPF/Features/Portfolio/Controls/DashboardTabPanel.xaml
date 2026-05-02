@@ -5,168 +5,168 @@
     xmlns:ctrl="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:DashboardViewModel},
-                                     IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:DashboardViewModel}}"
     mc:Ignorable="d">
 
-    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="20,16,20,20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="12" />
-                <RowDefinition Height="200" />
-                <RowDefinition Height="12" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="12" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+    <Grid Margin="20,16,20,20">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="12" />
+        <RowDefinition Height="200" />
+        <RowDefinition Height="12" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="12" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
 
-            <!--  ═══ Row 0: Hero card + 3 Metric cards ═══  -->
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*" />
-                    <ColumnDefinition Width="8" />
-                    <ColumnDefinition Width="2*" />
-                    <ColumnDefinition Width="8" />
-                    <ColumnDefinition Width="2*" />
-                    <ColumnDefinition Width="8" />
-                    <ColumnDefinition Width="2*" />
-                </Grid.ColumnDefinitions>
+      <!--  ═══ Row 0: Hero card + 3 Metric cards ═══  -->
+      <Grid Grid.Row="0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="3*" />
+          <ColumnDefinition Width="8" />
+          <ColumnDefinition Width="2*" />
+          <ColumnDefinition Width="8" />
+          <ColumnDefinition Width="2*" />
+          <ColumnDefinition Width="8" />
+          <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
 
-                <!--  Hero: Net Worth  -->
-                <Border
+        <!--  Hero: Net Worth  -->
+        <Border
                     Grid.Column="0"
                     Padding="20,16"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource RadiusLg}">
-                    <StackPanel>
-                        <TextBlock
+          <StackPanel>
+            <TextBlock
                             FontSize="{StaticResource FontSizeSm}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Header.NetWorth}" />
-                        <TextBlock
+            <TextBlock
                             Margin="0,4,0,0"
                             FontSize="{StaticResource FontSize2xl}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding NetWorthDisplay}" />
 
-                        <!--  Day P&L (hidden until live prices arrive)  -->
-                        <StackPanel
+            <!--  Day P&L (hidden until live prices arrive)  -->
+            <StackPanel
                             Margin="0,4,0,0"
                             Orientation="Horizontal"
                             Visibility="{Binding HasDayPnl, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock
+              <TextBlock
                                 VerticalAlignment="Center"
                                 FontSize="{StaticResource FontSizeSm}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Portfolio.Header.DailyPnL}" />
-                            <TextBlock
+              <TextBlock
                                 Margin="4,0,0,0"
                                 VerticalAlignment="Center"
                                 FontSize="{StaticResource FontSizeBase}"
                                 FontWeight="SemiBold">
-                                <TextBlock.Style>
-                                    <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
+                <TextBlock.Style>
+                  <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
+                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
                                 <Run Text="{Binding DayPnlDisplay, Mode=OneWay}" />
                                 <Run Text=" " />
                                 <Run Text="{Binding DayPnlPercentDisplay, Mode=OneWay}" />
-                            </TextBlock>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
+              </TextBlock>
+            </StackPanel>
+          </StackPanel>
+        </Border>
 
-                <!--  Metric: 淨損益  -->
-                <Border
+        <!--  Metric: 淨損益  -->
+        <Border
                     Grid.Column="2"
                     Padding="16"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource RadiusLg}">
-                    <StackPanel>
-                        <TextBlock
+          <StackPanel>
+            <TextBlock
                             FontSize="{StaticResource FontSizeSm}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.PnL}" />
-                        <TextBlock
+            <TextBlock
                             Margin="0,6,0,0"
                             FontSize="{StaticResource FontSizeXl}"
                             FontWeight="SemiBold"
                             Text="{Binding TotalPnlDisplay}">
-                            <TextBlock.Style>
-                                <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsTotalPositive}" Value="True">
-                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                        <TextBlock
+              <TextBlock.Style>
+                <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                  <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsTotalPositive}" Value="True">
+                      <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+            <TextBlock
                             Margin="0,2,0,0"
                             FontSize="{StaticResource FontSizeSm}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{Binding TotalPnlPercent, StringFormat={}{0:+0.00;-0.00}%}" />
-                    </StackPanel>
-                </Border>
+          </StackPanel>
+        </Border>
 
-                <!--  Metric: 總資產  -->
-                <Border
+        <!--  Metric: 總資產  -->
+        <Border
                     Grid.Column="4"
                     Padding="16"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource RadiusLg}">
-                    <StackPanel>
-                        <TextBlock
+          <StackPanel>
+            <TextBlock
                             FontSize="{StaticResource FontSizeSm}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.TotalAssets}" />
-                        <TextBlock
+            <TextBlock
                             Margin="0,6,0,0"
                             FontSize="{StaticResource FontSizeXl}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding TotalAssetsDisplay}" />
-                    </StackPanel>
-                </Border>
+          </StackPanel>
+        </Border>
 
-                <!--  Metric: 負債  -->
-                <Border
+        <!--  Metric: 負債  -->
+        <Border
                     Grid.Column="6"
                     Padding="16"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource RadiusLg}">
-                    <StackPanel>
-                        <TextBlock
+          <StackPanel>
+            <TextBlock
                             FontSize="{StaticResource FontSizeSm}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Header.Liabilities}" />
-                        <TextBlock
+            <TextBlock
                             Margin="0,6,0,0"
                             FontSize="{StaticResource FontSizeXl}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppDown}"
                             Text="{Binding TotalLiabilitiesDisplay}" />
-                        <TextBlock
+            <TextBlock
                             Margin="0,2,0,0"
                             FontSize="{StaticResource FontSizeXs}"
                             Foreground="{DynamicResource AppTextMuted}">
@@ -177,32 +177,32 @@
                             <Run Text="{DynamicResource Portfolio.Liability.LeverageRatio}" />
                             <Run Text=" " />
                             <Run Text="{Binding LeverageRatio, StringFormat={}{0:F2}, Mode=OneWay}" />
-                        </TextBlock>
-                    </StackPanel>
-                </Border>
-            </Grid>
+            </TextBlock>
+          </StackPanel>
+        </Border>
+      </Grid>
 
-            <!--  ═══ Row 2: 10-day Trend Chart (full width) ═══  -->
-            <Border
+      <!--  ═══ Row 2: 10-day Trend Chart (full width) ═══  -->
+      <Border
                 Grid.Row="2"
                 Padding="16,12,16,8"
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorderLight}"
                 BorderThickness="1"
                 CornerRadius="{StaticResource RadiusLg}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <TextBlock
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <TextBlock
                         Grid.Row="0"
                         Margin="0,0,0,8"
                         FontSize="{StaticResource FontSizeMd}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Dashboard.TenDayTrend}" />
-                    <lvc:CartesianChart
+          <lvc:CartesianChart
                         Grid.Row="1"
                         Background="Transparent"
                         Series="{Binding TenDaySeries}"
@@ -210,148 +210,146 @@
                         TooltipTextSize="12"
                         XAxes="{Binding TenDayXAxes}"
                         YAxes="{Binding TenDayYAxes}" />
-                </Grid>
-            </Border>
+        </Grid>
+      </Border>
 
-            <!--  ═══ Row 4: Top Holdings (1/2) + Recent Trades (1/2) ═══  -->
-            <Grid Grid.Row="4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="8" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+      <!--  ═══ Row 4: Top Holdings (1/2) + Recent Trades (1/2) ═══  -->
+      <Grid Grid.Row="4">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="8" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-                <!--  Top Holdings  -->
-                <Border
+        <!--  Top Holdings  -->
+        <Border
                     Grid.Column="0"
                     Padding="16,12"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource RadiusLg}">
-                    <StackPanel>
-                        <DockPanel Margin="0,0,0,8">
-                            <TextBlock
+          <StackPanel>
+            <DockPanel Margin="0,0,0,8">
+              <TextBlock
                                 DockPanel.Dock="Left"
                                 FontSize="{StaticResource FontSizeMd}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{DynamicResource Dashboard.TopHoldings}" />
-                            <Button
+              <ui:HyperlinkButton
                                 HorizontalAlignment="Right"
                                 Command="{Binding NavigateToPositionsCommand}"
                                 Content="{DynamicResource Dashboard.ViewDetail}"
-                                DockPanel.Dock="Right"
-                                Style="{StaticResource BtnLink}" />
-                        </DockPanel>
+                                DockPanel.Dock="Right" />
+            </DockPanel>
 
-                        <ItemsControl ItemsSource="{Binding TopPositions}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border
+            <ItemsControl ItemsSource="{Binding TopPositions}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border
                                         Padding="0,6"
                                         BorderBrush="{DynamicResource AppBorderLight}"
                                         BorderThickness="0,0,0,1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
 
-                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                <TextBlock
+                      <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock
                                                     FontSize="{StaticResource FontSizeMd}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{Binding Symbol}" />
-                                                <TextBlock
+                        <TextBlock
                                                     FontSize="{StaticResource FontSizeSm}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{Binding Name}"
                                                     TextTrimming="CharacterEllipsis" />
-                                            </StackPanel>
+                      </StackPanel>
 
-                                            <StackPanel
+                      <StackPanel
                                                 Grid.Column="1"
                                                 HorizontalAlignment="Right"
                                                 VerticalAlignment="Center">
-                                                <TextBlock
+                        <TextBlock
                                                     HorizontalAlignment="Right"
                                                     FontSize="{StaticResource FontSizeSm}"
                                                     Text="{Binding DayChangePercent, StringFormat={}{0:+0.00;-0.00;0.00}%}">
-                                                    <TextBlock.Style>
-                                                        <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsDayChangePositive}" Value="True">
-                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding CurrentPrice}" Value="0">
-                                                                    <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                                <TextBlock
+                          <TextBlock.Style>
+                            <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                              <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsDayChangePositive}" Value="True">
+                                  <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding CurrentPrice}" Value="0">
+                                  <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock
                                                     HorizontalAlignment="Right"
                                                     FontSize="{StaticResource FontSizeMd}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{Binding MarketValue, StringFormat=NT\{0:N0\}}" />
-                                                <TextBlock
+                        <TextBlock
                                                     HorizontalAlignment="Right"
                                                     FontSize="{StaticResource FontSizeSm}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{Binding CurrentPrice, StringFormat=NT\{0:N2\}}" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-                </Border>
+                      </StackPanel>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
 
-                <!--  Recent Trades  -->
-                <Border
+        <!--  Recent Trades  -->
+        <Border
                     Grid.Column="2"
                     Padding="16,12"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource RadiusLg}">
-                    <StackPanel>
-                        <DockPanel Margin="0,0,0,8">
-                            <TextBlock
+          <StackPanel>
+            <DockPanel Margin="0,0,0,8">
+              <TextBlock
                                 DockPanel.Dock="Left"
                                 FontSize="{StaticResource FontSizeMd}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{DynamicResource Dashboard.RecentTrades}" />
-                            <Button
+              <ui:HyperlinkButton
                                 HorizontalAlignment="Right"
                                 Command="{Binding NavigateToTradesCommand}"
                                 Content="{DynamicResource Dashboard.ViewDetail}"
-                                DockPanel.Dock="Right"
-                                Style="{StaticResource BtnLink}" />
-                        </DockPanel>
+                                DockPanel.Dock="Right" />
+            </DockPanel>
 
-                        <ItemsControl ItemsSource="{Binding RecentTrades}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border
+            <ItemsControl ItemsSource="{Binding RecentTrades}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border
                                         Padding="0,6"
                                         BorderBrush="{DynamicResource AppBorderLight}"
                                         BorderThickness="0,0,0,1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="28" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="28" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
 
-                                            <Ellipse
+                      <Ellipse
                                                 Grid.Column="0"
                                                 Width="10"
                                                 Height="10"
@@ -359,51 +357,51 @@
                                                 VerticalAlignment="Center"
                                                 Fill="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}" />
 
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                <TextBlock
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock
                                                     FontSize="{StaticResource FontSizeMd}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{Binding DisplayAsset}"
                                                     TextTrimming="CharacterEllipsis" />
-                                                <TextBlock
+                        <TextBlock
                                                     FontSize="{StaticResource FontSizeSm}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{Binding TradeDateLocal, StringFormat={}{0:MMM dd}}" />
-                                            </StackPanel>
+                      </StackPanel>
 
-                                            <TextBlock
+                      <TextBlock
                                                 Grid.Column="2"
                                                 VerticalAlignment="Center"
                                                 FontSize="{StaticResource FontSizeMd}"
                                                 FontWeight="SemiBold"
                                                 Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}">
-                                                <TextBlock.Style>
-                                                    <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsAmountPositive}" Value="True">
-                                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding TotalAmount}" Value="0">
-                                                                <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-                </Border>
-            </Grid>
+                        <TextBlock.Style>
+                          <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding IsAmountPositive}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                              </DataTrigger>
+                              <DataTrigger Binding="{Binding TotalAmount}" Value="0">
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </TextBlock.Style>
+                      </TextBlock>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </Grid>
 
-            <!--  ═══ Row 6: Budget Summary Card ═══  -->
-            <ctrl:BudgetSummaryCard Grid.Row="6" DataContext="{Binding BudgetSummary}" />
+      <!--  ═══ Row 6: Budget Summary Card ═══  -->
+      <ctrl:BudgetSummaryCard Grid.Row="6" DataContext="{Binding BudgetSummary}" />
 
-        </Grid>
-    </ScrollViewer>
+    </Grid>
+  </ScrollViewer>
 </UserControl>

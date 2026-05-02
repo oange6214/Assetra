@@ -11,6 +11,7 @@ public sealed record SellWorkflowRequest(
     int CurrentQuantity,
     int SellQuantity,
     decimal SellPrice,
+    DateTime TradeDate,
     decimal Commission,
     decimal? CommissionDiscount,
     Guid? CashAccountId,

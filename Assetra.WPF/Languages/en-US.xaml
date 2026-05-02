@@ -27,6 +27,10 @@
     <sys:String x:Key="Nav.Alerts.Tooltip">Price Alerts</sys:String>
     <sys:String x:Key="Nav.Import">Import</sys:String>
     <sys:String x:Key="Nav.Settings">Settings</sys:String>
+    <sys:String x:Key="Nav.Cashflow">Cash Flow</sys:String>
+    <sys:String x:Key="Nav.Insights">Insights</sys:String>
+    <sys:String x:Key="Nav.MultiAsset">Multi-Asset</sys:String>
+    <sys:String x:Key="Nav.Toggle">Expand / collapse menu</sys:String>
 
     <!--  Import feature  -->
     <sys:String x:Key="Import.Tab.Import">Import</sys:String>

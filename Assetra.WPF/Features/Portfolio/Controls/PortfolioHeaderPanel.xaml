@@ -5,8 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel},
-                                     IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
     mc:Ignorable="d">
 
     <Border
@@ -51,11 +50,12 @@
                             Text="{DynamicResource Portfolio.Header.NetWorth}" />
                         <TextBlock
                             Margin="0,4,0,0"
-                            FontFamily="{StaticResource FontTabular}"
+                            FontFamily="{StaticResource FontBase}"
                             FontSize="{StaticResource FontSize2xl}"
                             FontWeight="Bold"
                             Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{Binding NetWorth, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                            Text="{Binding NetWorth, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                            Typography.NumeralAlignment="Tabular" />
                         <!--  總資產 sub-line  -->
                         <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
                             <TextBlock
@@ -64,10 +64,11 @@
                                 Text="{DynamicResource Portfolio.TotalAssets}" />
                             <TextBlock
                                 Margin="6,0,0,0"
-                                FontFamily="{StaticResource FontTabular}"
+                                FontFamily="{StaticResource FontBase}"
                                 FontSize="{StaticResource FontSizeXs}"
                                 Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{Binding TotalAssets, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                                Text="{Binding TotalAssets, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                                Typography.NumeralAlignment="Tabular" />
                         </StackPanel>
                     </StackPanel>
 
@@ -87,11 +88,12 @@
                             Margin="0,4,0,0"
                             HorizontalAlignment="Right"
                             d:Visibility="Visible"
-                            FontFamily="{StaticResource FontTabular}"
+                            FontFamily="{StaticResource FontBase}"
                             FontSize="{StaticResource FontSizeLg}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="--"
+                            Typography.NumeralAlignment="Tabular"
                             Visibility="{Binding HasDayPnl, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
 
                         <!--  Amount  -->
@@ -99,10 +101,11 @@
                             Margin="0,4,0,0"
                             HorizontalAlignment="Right"
                             d:Visibility="Collapsed"
-                            FontFamily="{StaticResource FontTabular}"
+                            FontFamily="{StaticResource FontBase}"
                             FontSize="{StaticResource FontSizeLg}"
                             FontWeight="SemiBold"
                             Text="{Binding DayPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
+                            Typography.NumeralAlignment="Tabular"
                             Visibility="{Binding HasDayPnl, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
@@ -120,9 +123,10 @@
                         <TextBlock
                             Margin="0,2,0,0"
                             HorizontalAlignment="Right"
-                            FontFamily="{StaticResource FontTabular}"
+                            FontFamily="{StaticResource FontBase}"
                             FontSize="{StaticResource FontSizeSm}"
                             Text="{Binding DayPnlPercentDisplay}"
+                            Typography.NumeralAlignment="Tabular"
                             Visibility="{Binding HasDayPnl, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
@@ -157,11 +161,12 @@
                             Text="{DynamicResource Portfolio.Header.MarketValue}" />
                         <TextBlock
                             Margin="0,4,0,0"
-                            FontFamily="{StaticResource FontTabular}"
+                            FontFamily="{StaticResource FontBase}"
                             FontSize="{StaticResource FontSizeLg}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{Binding TotalMarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                            Text="{Binding TotalMarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                            Typography.NumeralAlignment="Tabular" />
                     </StackPanel>
                 </Border>
 
@@ -180,11 +185,12 @@
                             Text="{DynamicResource Portfolio.Header.Cash}" />
                         <TextBlock
                             Margin="0,4,0,0"
-                            FontFamily="{StaticResource FontTabular}"
+                            FontFamily="{StaticResource FontBase}"
                             FontSize="{StaticResource FontSizeLg}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{Binding TotalCash, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                            Text="{Binding TotalCash, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                            Typography.NumeralAlignment="Tabular" />
                     </StackPanel>
                 </Border>
 
@@ -203,10 +209,11 @@
                             Text="{DynamicResource Portfolio.Header.Liabilities}" />
                         <TextBlock
                             Margin="0,4,0,0"
-                            FontFamily="{StaticResource FontTabular}"
+                            FontFamily="{StaticResource FontBase}"
                             FontSize="{StaticResource FontSizeLg}"
                             FontWeight="SemiBold"
-                            Text="{Binding TotalLiabilities, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}">
+                            Text="{Binding TotalLiabilities, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                            Typography.NumeralAlignment="Tabular">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />

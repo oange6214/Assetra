@@ -5,9 +5,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:subvm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
-    d:DataContext="{d:DesignInstance Type={x:Type subvm:AccountDialogViewModel},
-                                     IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type subvm:AccountDialogViewModel}}"
     Visibility="{Binding IsEditAssetDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}"
     mc:Ignorable="d">
 
@@ -46,11 +46,7 @@
                             Command="{Binding CloseEditAssetCommand}"
                             DockPanel.Dock="Right"
                             Style="{StaticResource BtnIcon}">
-                            <TextBlock
-                                FontFamily="Segoe MDL2 Assets"
-                                FontSize="12"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Text="&#xE8BB;" />
+                            <ui:SymbolIcon Symbol="Dismiss24" FontSize="12" Foreground="{DynamicResource AppTextMuted}" />
                         </Button>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock
@@ -101,10 +97,11 @@
                             Background="{DynamicResource AppBorder}"
                             CornerRadius="{StaticResource RadiusSm}">
                             <TextBlock
-                                FontFamily="{StaticResource FontTabular}"
+                                FontFamily="{StaticResource FontBase}"
                                 FontSize="{StaticResource FontSizeSm}"
                                 Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{Binding EditAssetSymbol}" />
+                                Text="{Binding EditAssetSymbol}"
+                                Typography.NumeralAlignment="Tabular" />
                         </Border>
                     </StackPanel>
 
@@ -115,7 +112,7 @@
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Common.Name}" />
-                    <TextBox Style="{StaticResource FormTextBox}" Text="{Binding EditAssetName, UpdateSourceTrigger=PropertyChanged}" />
+                    <ui:TextBox Text="{Binding EditAssetName, UpdateSourceTrigger=PropertyChanged}" />
 
                     <!--  Currency  -->
                     <TextBlock
@@ -156,21 +153,21 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="0,1,0,0">
                     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                        <Button
+                        <ui:Button
                             Height="30"
                             Margin="0,0,8,0"
                             Padding="14,0"
                             Command="{Binding CloseEditAssetCommand}"
-                            Style="{StaticResource BtnGhost}">
+                            Appearance="Secondary">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Common.Cancel}" />
-                        </Button>
-                        <Button
+                        </ui:Button>
+                        <ui:Button
                             Height="30"
                             Padding="14,0"
                             Command="{Binding SaveEditAssetCommand}"
-                            Style="{StaticResource BtnPrimary}">
+                            Appearance="Primary">
                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.EditAsset.Update}" />
-                        </Button>
+                        </ui:Button>
                     </StackPanel>
                 </Border>
 

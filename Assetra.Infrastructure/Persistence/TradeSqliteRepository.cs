@@ -238,7 +238,8 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
         var now = _time.GetUtcNow().UtcDateTime.ToString("o");
         cmd.Parameters.AddWithValue("$now", now);
         cmd.Parameters.AddWithValue("$device", CurrentDeviceId());
-        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        var rows = await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        ThrowIfInsertIgnored(rows, trade);
     }
 
     public async Task UpdateAsync(Trade trade, CancellationToken ct = default)
@@ -435,7 +436,21 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
         var now = _time.GetUtcNow().UtcDateTime.ToString("o");
         cmd.Parameters.AddWithValue("$now", now);
         cmd.Parameters.AddWithValue("$device", CurrentDeviceId());
-        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        var rows = await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        ThrowIfInsertIgnored(rows, trade);
+    }
+
+    private static void ThrowIfInsertIgnored(int rows, Trade trade)
+    {
+        if (rows != 0)
+            return;
+
+        // InsertSql uses INSERT OR IGNORE so constraint violations (UNIQUE / NOT NULL / CHECK)
+        // silently skip the row instead of throwing. Surface that as an error rather than
+        // letting callers believe the trade was persisted.
+        throw new InvalidOperationException(
+            $"Trade insert ignored (likely constraint violation): id={trade.Id}, type={trade.Type}, " +
+            $"symbol='{trade.Symbol}', loanLabel='{trade.LoanLabel}'.");
     }
 
     private async Task ExecRemoveAsync(SqliteConnection conn, SqliteTransaction tx, Guid id, CancellationToken ct)

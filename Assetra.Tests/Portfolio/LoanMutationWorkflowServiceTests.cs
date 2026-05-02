@@ -68,4 +68,54 @@ public sealed class LoanMutationWorkflowServiceTests
         Assert.NotNull(result.ScheduleEntries);
         Assert.True(result.ScheduleEntries!.Count > 0);
     }
+
+    [Fact]
+    public async Task RecordAsync_WhenScheduleInsertFails_RollsBackTradesAndAsset()
+    {
+        var assetRepo = new Mock<IAssetRepository>();
+        var loanRepo = new Mock<ILoanScheduleRepository>();
+        var txService = new Mock<ITransactionService>();
+        AssetItem? addedAsset = null;
+        var recordedTrades = new List<Trade>();
+        var deletedTrades = new List<Trade>();
+
+        assetRepo.Setup(r => r.AddItemAsync(It.IsAny<AssetItem>()))
+            .Callback<AssetItem>(asset => addedAsset = asset)
+            .Returns(Task.CompletedTask);
+        assetRepo.Setup(r => r.DeleteItemAsync(It.IsAny<Guid>()))
+            .Returns(Task.CompletedTask);
+        loanRepo.Setup(r => r.BulkInsertAsync(It.IsAny<IEnumerable<LoanScheduleEntry>>()))
+            .ThrowsAsync(new InvalidOperationException("schedule fail"));
+        loanRepo.Setup(r => r.DeleteByAssetAsync(It.IsAny<Guid>()))
+            .Returns(Task.CompletedTask);
+        txService.Setup(r => r.RecordAsync(It.IsAny<Trade>()))
+            .Callback<Trade>(recordedTrades.Add)
+            .Returns(Task.CompletedTask);
+        txService.Setup(r => r.DeleteAsync(It.IsAny<Trade>()))
+            .Callback<Trade>(deletedTrades.Add)
+            .Returns(Task.CompletedTask);
+
+        var service = new LoanMutationWorkflowService(
+            assetRepo.Object,
+            loanRepo.Object,
+            txService.Object);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.RecordAsync(new LoanTransactionRequest(
+            TradeType.LoanBorrow,
+            120000m,
+            DateTime.UtcNow,
+            "房貸",
+            Guid.NewGuid(),
+            null,
+            600m,
+            AmortAnnualRate: 0.02m,
+            AmortTermMonths: 12,
+            FirstPaymentDate: new DateOnly(2026, 5, 1))));
+
+        Assert.NotNull(addedAsset);
+        Assert.Equal(2, recordedTrades.Count);
+        Assert.Equal(recordedTrades.Select(t => t.Id).Reverse(), deletedTrades.Select(t => t.Id));
+        loanRepo.Verify(r => r.DeleteByAssetAsync(addedAsset!.Id), Times.Once);
+        assetRepo.Verify(r => r.DeleteItemAsync(addedAsset!.Id), Times.Once);
+    }
 }

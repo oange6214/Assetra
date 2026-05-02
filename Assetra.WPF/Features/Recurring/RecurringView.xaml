@@ -3,6 +3,7 @@
     x:Class="Assetra.WPF.Features.Recurring.RecurringView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Recurring"
@@ -84,10 +85,10 @@
               <WrapPanel Orientation="Horizontal">
                 <StackPanel Style="{StaticResource InlineFormField}">
                   <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Recurring.Field.Name}" />
-                  <TextBox
+                  <ui:TextBox
                       Width="240"
                       MinHeight="36"
-                      Style="{StaticResource FormTextBox}"
+
                       ToolTip="{DynamicResource Recurring.NameHint}"
                       Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
@@ -127,10 +128,10 @@
 
                 <StackPanel Style="{StaticResource InlineFormField}">
                   <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Recurring.Field.Amount}" />
-                  <TextBox
+                  <ui:TextBox
                       Width="140"
                       MinHeight="36"
-                      Style="{StaticResource FormTextBox}"
+
                       ToolTip="{DynamicResource Recurring.AmountHint}"
                       Text="{Binding AddAmount, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
@@ -208,13 +209,13 @@
                   BorderBrush="{DynamicResource AppBorder}"
                   BorderThickness="0,1,0,0">
                 <DockPanel LastChildFill="False">
-                  <Button
+                  <ui:Button
                       DockPanel.Dock="Right"
                       MinWidth="120"
                       MinHeight="36"
                       Command="{Binding AddSubscriptionCommand}"
                       Content="{DynamicResource Recurring.Add}"
-                      Style="{StaticResource BtnPrimary}" />
+                      Appearance="Primary" />
                 </DockPanel>
               </Border>
               <TextBlock
@@ -262,7 +263,7 @@
                           Grid.Column="1"
                           Margin="12,0"
                           VerticalAlignment="Center"
-                          FontFamily="{StaticResource FontTabular}"
+                          FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                           FontSize="{StaticResource FontSizeBase}"
                           Foreground="{DynamicResource AppTextPrimary}"
                           Text="{Binding AmountDisplay}" />
@@ -351,7 +352,7 @@
                         Grid.Column="2"
                         Margin="12,0"
                         VerticalAlignment="Center"
-                        FontFamily="{StaticResource FontTabular}"
+                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                         FontSize="{StaticResource FontSizeBase}"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding AmountDisplay}" />

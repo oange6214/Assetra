@@ -55,6 +55,18 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     {
         _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
         _portfolio = portfolio ?? throw new ArgumentNullException(nameof(portfolio));
+
+        // Stock prices arrive asynchronously after Portfolio.LoadAsync() completes.
+        // Subscribing to TotalMarketValue lets FinancialOverview re-snapshot once
+        // the first batch of live prices lands; without this hook the Investments
+        // section freezes at TWD 0 because LoadAsync was called pre-price-fetch.
+        _portfolio.PropertyChanged += OnPortfolioPropertyChanged;
+    }
+
+    private void OnPortfolioPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(Portfolio.PortfolioViewModel.TotalMarketValue))
+            _ = LoadAsync();
     }
 
     [RelayCommand]

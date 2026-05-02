@@ -1,0 +1,32 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Hubs.MultiAssetHubView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:insurance="clr-namespace:Assetra.WPF.Features.Insurance"
+    xmlns:physicalasset="clr-namespace:Assetra.WPF.Features.PhysicalAsset"
+    xmlns:realestate="clr-namespace:Assetra.WPF.Features.RealEstate"
+    xmlns:retirement="clr-namespace:Assetra.WPF.Features.Retirement"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Background="{DynamicResource AppBackground}"
+    mc:Ignorable="d">
+
+    <!--
+        MultiAssetHub — RealEstate / Insurance / Retirement / PhysicalAsset under one nav entry.
+        DataContext = MainViewModel.
+    -->
+    <TabControl Background="Transparent" BorderThickness="0">
+        <TabItem Header="{DynamicResource RealEstate.Title}">
+            <realestate:RealEstateView DataContext="{Binding RealEstate}" />
+        </TabItem>
+        <TabItem Header="{DynamicResource Insurance.Title}">
+            <insurance:InsurancePolicyView DataContext="{Binding Insurance}" />
+        </TabItem>
+        <TabItem Header="{DynamicResource Retirement.Title}">
+            <retirement:RetirementView DataContext="{Binding Retirement}" />
+        </TabItem>
+        <TabItem Header="{DynamicResource PhysicalAsset.Title}">
+            <physicalasset:PhysicalAssetView DataContext="{Binding PhysicalAsset}" />
+        </TabItem>
+    </TabControl>
+</UserControl>

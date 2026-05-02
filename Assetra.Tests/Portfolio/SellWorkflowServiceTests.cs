@@ -39,6 +39,7 @@ public sealed class SellWorkflowServiceTests
             logRepo.Object,
             positionQuery.Object);
         var entryIds = new[] { Guid.NewGuid(), Guid.NewGuid() };
+        var tradeDate = new DateTime(2026, 1, 15, 12, 0, 0, DateTimeKind.Utc);
 
         var result = await service.RecordAsync(new SellWorkflowRequest(
             PortfolioEntryId: Guid.NewGuid(),
@@ -49,6 +50,7 @@ public sealed class SellWorkflowServiceTests
             CurrentQuantity: 1000,
             SellQuantity: 1000,
             SellPrice: 650m,
+            TradeDate: tradeDate,
             Commission: 1200m,
             CommissionDiscount: 0.6m,
             CashAccountId: Guid.NewGuid(),
@@ -56,11 +58,13 @@ public sealed class SellWorkflowServiceTests
 
         Assert.NotNull(savedTrade);
         Assert.Equal(TradeType.Sell, savedTrade!.Type);
+        Assert.Equal(tradeDate, savedTrade.TradeDate);
         Assert.Equal(50_000m, savedTrade.RealizedPnl);
         Assert.Equal(8.3333333333333333333333333300m, savedTrade.RealizedPnlPct);
         Assert.Equal(entryIds, archivedIds);
         Assert.NotNull(savedLog);
         Assert.Equal(0, savedLog!.Quantity);
+        Assert.Equal(DateOnly.FromDateTime(tradeDate.ToLocalTime()), savedLog.LogDate);
         Assert.Equal(0, result.RemainingQuantity);
     }
 }

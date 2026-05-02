@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel}, IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel}}"
     d:DesignHeight="800"
     d:DesignWidth="900"
     Background="{DynamicResource AppBackground}"
@@ -88,17 +88,20 @@
         </Border>
 
         <!--  ── Accordion  ───────────────────────────────────────────────────  -->
-        <ScrollViewer Grid.Row="1" Margin="16,8,16,16" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer
+            Grid.Row="1"
+            Margin="16,8,16,16"
+            VerticalScrollBarVisibility="Auto">
             <StackPanel>
 
                 <!--  資產 Expander  -->
                 <Expander
                     Margin="0,0,0,8"
-                    IsExpanded="True"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
-                    Foreground="{DynamicResource AppTextPrimary}">
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    IsExpanded="True">
                     <Expander.Header>
                         <TextBlock
                             FontSize="{StaticResource FontSizeMd}"
@@ -106,7 +109,7 @@
                             Foreground="{DynamicResource AppUp}"
                             Text="{DynamicResource FinancialOverview.Section.Assets}" />
                     </Expander.Header>
-                    <ItemsControl ItemsSource="{Binding AssetGroups}" Margin="0,4,0,4">
+                    <ItemsControl Margin="0,4,0,4" ItemsSource="{Binding AssetGroups}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:AssetGroupVm}">
                                 <StackPanel Margin="8,4">
@@ -158,11 +161,11 @@
                 <!--  投資 Expander  -->
                 <Expander
                     Margin="0,0,0,8"
-                    IsExpanded="True"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
-                    Foreground="{DynamicResource AppTextPrimary}">
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    IsExpanded="True">
                     <Expander.Header>
                         <TextBlock
                             FontSize="{StaticResource FontSizeMd}"
@@ -170,7 +173,7 @@
                             Foreground="{DynamicResource AppAccent}"
                             Text="{DynamicResource FinancialOverview.Section.Investments}" />
                     </Expander.Header>
-                    <ItemsControl ItemsSource="{Binding InvestGroups}" Margin="0,4,0,4">
+                    <ItemsControl Margin="0,4,0,4" ItemsSource="{Binding InvestGroups}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:AssetGroupVm}">
                                 <StackPanel Margin="8,4">
@@ -222,11 +225,11 @@
                 <!--  負債 Expander  -->
                 <Expander
                     Margin="0,0,0,8"
-                    IsExpanded="True"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
-                    Foreground="{DynamicResource AppTextPrimary}">
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    IsExpanded="True">
                     <Expander.Header>
                         <TextBlock
                             FontSize="{StaticResource FontSizeMd}"
@@ -234,7 +237,7 @@
                             Foreground="{DynamicResource AppDown}"
                             Text="{DynamicResource FinancialOverview.Section.Liabilities}" />
                     </Expander.Header>
-                    <ItemsControl ItemsSource="{Binding LiabGroups}" Margin="0,4,0,4">
+                    <ItemsControl Margin="0,4,0,4" ItemsSource="{Binding LiabGroups}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:AssetGroupVm}">
                                 <StackPanel Margin="8,4">

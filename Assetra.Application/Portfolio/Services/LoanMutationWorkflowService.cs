@@ -77,13 +77,10 @@ public sealed class LoanMutationWorkflowService : ILoanMutationWorkflowService
             Principal: request.Principal,
             InterestPaid: request.InterestPaid);
 
-        ct.ThrowIfCancellationRequested();
-        await _transactionService.RecordAsync(mainTrade).ConfigureAwait(false);
-
+        Trade? feeTrade = null;
         if (request.Fee > 0)
         {
-            ct.ThrowIfCancellationRequested();
-            await _transactionService.RecordAsync(new Trade(
+            feeTrade = new Trade(
                 Id: Guid.NewGuid(),
                 Symbol: string.Empty,
                 Exchange: string.Empty,
@@ -99,15 +96,105 @@ public sealed class LoanMutationWorkflowService : ILoanMutationWorkflowService
                 Note: string.IsNullOrWhiteSpace(request.Note)
                     ? $"{request.LoanLabel} 手續費"
                     : $"{request.LoanLabel} 手續費 — {request.Note}",
-                ParentTradeId: mainTrade.Id)).ConfigureAwait(false);
+                ParentTradeId: mainTrade.Id);
         }
 
-        if (liabilityAsset is not null)
-            await _assetRepository.AddItemAsync(liabilityAsset).ConfigureAwait(false);
+        var writtenTrades = new List<Trade>();
+        var assetAdded = false;
+        var scheduleTouched = false;
 
-        if (scheduleEntries is not null)
-            await _loanScheduleRepository.BulkInsertAsync(scheduleEntries).ConfigureAwait(false);
+        try
+        {
+            ct.ThrowIfCancellationRequested();
+            await _transactionService.RecordAsync(mainTrade).ConfigureAwait(false);
+            writtenTrades.Add(mainTrade);
+
+            if (feeTrade is not null)
+            {
+                ct.ThrowIfCancellationRequested();
+                await _transactionService.RecordAsync(feeTrade).ConfigureAwait(false);
+                writtenTrades.Add(feeTrade);
+            }
+
+            if (liabilityAsset is not null)
+            {
+                await _assetRepository.AddItemAsync(liabilityAsset).ConfigureAwait(false);
+                assetAdded = true;
+            }
+
+            if (scheduleEntries is not null)
+            {
+                scheduleTouched = true;
+                await _loanScheduleRepository.BulkInsertAsync(scheduleEntries).ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                await RollBackLoanArtifactsAsync(liabilityAsset, assetAdded, scheduleTouched, writtenTrades).ConfigureAwait(false);
+            }
+            catch (Exception cleanupEx)
+            {
+                throw new InvalidOperationException(
+                    "貸款交易建立失敗，且回復未完成資料時也失敗。",
+                    new AggregateException(ex, cleanupEx));
+            }
+
+            throw new InvalidOperationException("貸款交易建立失敗，已嘗試回復未完成資料。", ex);
+        }
 
         return new LoanMutationResult(liabilityAsset?.Id, scheduleEntries);
+    }
+
+    private async Task RollBackLoanArtifactsAsync(
+        AssetItem? liabilityAsset,
+        bool assetAdded,
+        bool scheduleTouched,
+        IReadOnlyList<Trade> writtenTrades)
+    {
+        List<Exception>? cleanupErrors = null;
+
+        if (liabilityAsset is not null && scheduleTouched)
+        {
+            AddCleanupError(await TryCleanupAsync(
+                () => _loanScheduleRepository.DeleteByAssetAsync(liabilityAsset.Id)).ConfigureAwait(false));
+        }
+
+        if (liabilityAsset is not null && assetAdded)
+        {
+            AddCleanupError(await TryCleanupAsync(
+                () => _assetRepository.DeleteItemAsync(liabilityAsset.Id)).ConfigureAwait(false));
+        }
+
+        foreach (var trade in writtenTrades.Reverse())
+        {
+            AddCleanupError(await TryCleanupAsync(
+                () => _transactionService.DeleteAsync(trade)).ConfigureAwait(false));
+        }
+
+        if (cleanupErrors is not null)
+            throw new AggregateException("貸款建立失敗後的資料回復也發生錯誤。", cleanupErrors);
+
+        void AddCleanupError(Exception? ex)
+        {
+            if (ex is null)
+                return;
+            cleanupErrors ??= [];
+            cleanupErrors.Add(ex);
+        }
+    }
+
+    private static async Task<Exception?> TryCleanupAsync(Func<Task> cleanup)
+    {
+        try
+        {
+            await cleanup().ConfigureAwait(false);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
     }
 }

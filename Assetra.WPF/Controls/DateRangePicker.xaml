@@ -185,7 +185,7 @@
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            FontFamily="{StaticResource FontTabular}"
+                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                             FontSize="{StaticResource FontSizeSm}"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding StartDateText, UpdateSourceTrigger=LostFocus}" />
@@ -198,18 +198,18 @@
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            FontFamily="{StaticResource FontTabular}"
+                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                             FontSize="{StaticResource FontSizeSm}"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding EndDateText, UpdateSourceTrigger=LostFocus}" />
-                        <Button
+                        <ui:Button
                             Grid.Column="2"
                             Height="30"
                             Padding="12,0"
                             Click="Reset_Click"
                             Content="{DynamicResource DateRangePicker.Reset}"
                             FontSize="{StaticResource FontSizeSm}"
-                            Style="{StaticResource BtnGhost}" />
+                            Appearance="Secondary" />
                     </Grid>
 
                     <!--  兩月並排  -->

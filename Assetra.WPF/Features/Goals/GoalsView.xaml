@@ -8,8 +8,7 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Goals"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:GoalsViewModel},
-                                     IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:GoalsViewModel}}"
     d:DesignHeight="776"
     d:DesignWidth="1100"
     Background="{DynamicResource AppBackground}"
@@ -26,11 +25,12 @@
         <TextBlock
             Grid.Row="0"
             Margin="0,0,0,16"
-            FontFamily="{StaticResource FontTabular}"
+            FontFamily="{StaticResource FontBase}"
             FontSize="{DynamicResource FontSizeXl}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextPrimary}"
-            Text="{DynamicResource Goals.Title}" />
+            Text="{DynamicResource Goals.Title}"
+            Typography.NumeralAlignment="Tabular" />
 
         <!--  Goal list  -->
         <Border
@@ -111,30 +111,35 @@
                                             Margin="0,8,0,8"
                                             Orientation="Horizontal">
                                             <TextBlock
-                                                FontFamily="{StaticResource FontTabular}"
+                                                FontFamily="{StaticResource FontBase}"
                                                 FontSize="{DynamicResource FontSizeSm}"
                                                 Foreground="{DynamicResource AppTextPrimary}"
-                                                Text="{Binding CurrentDisplay}" />
+                                                Text="{Binding CurrentDisplay}"
+                                                Typography.NumeralAlignment="Tabular" />
                                             <TextBlock
                                                 Margin="6,0"
-                                                FontFamily="{StaticResource FontTabular}"
+                                                FontFamily="{StaticResource FontBase}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
-                                                Text="/" />
+                                                Text="/"
+                                                Typography.NumeralAlignment="Tabular" />
                                             <TextBlock
-                                                FontFamily="{StaticResource FontTabular}"
+                                                FontFamily="{StaticResource FontBase}"
                                                 FontSize="{DynamicResource FontSizeSm}"
                                                 Foreground="{DynamicResource AppTextPrimary}"
-                                                Text="{Binding TargetDisplay}" />
+                                                Text="{Binding TargetDisplay}"
+                                                Typography.NumeralAlignment="Tabular" />
                                             <TextBlock
                                                 Margin="16,0,0,0"
-                                                FontFamily="{StaticResource FontTabular}"
+                                                FontFamily="{StaticResource FontBase}"
                                                 Foreground="{DynamicResource AppAccent}"
-                                                Text="{Binding ProgressDisplay}" />
+                                                Text="{Binding ProgressDisplay}"
+                                                Typography.NumeralAlignment="Tabular" />
                                             <TextBlock
                                                 Margin="16,0,0,0"
-                                                FontFamily="{StaticResource FontTabular}"
+                                                FontFamily="{StaticResource FontBase}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
-                                                Text="{Binding DeadlineDisplay}" />
+                                                Text="{Binding DeadlineDisplay}"
+                                                Typography.NumeralAlignment="Tabular" />
                                         </StackPanel>
 
                                         <!--  Progress bar (color by status)  -->
@@ -183,25 +188,25 @@
 
                     <StackPanel Width="260" Margin="0,0,12,12">
                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Name}" />
-                        <TextBox
+                        <ui:TextBox
                             MinHeight="36"
-                            Style="{StaticResource FormTextBox}"
+
                             Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
                     <StackPanel Width="150" Margin="0,0,12,12">
                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Target}" />
-                        <TextBox
+                        <ui:TextBox
                             MinHeight="36"
-                            Style="{StaticResource FormTextBox}"
+
                             Text="{Binding AddTargetAmount, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
                     <StackPanel Width="150" Margin="0,0,12,12">
                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Current}" />
-                        <TextBox
+                        <ui:TextBox
                             MinHeight="36"
-                            Style="{StaticResource FormTextBox}"
+
                             Text="{Binding AddCurrentAmount, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
@@ -212,9 +217,9 @@
 
                     <StackPanel Width="260" Margin="0,0,12,12">
                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Notes}" />
-                        <TextBox
+                        <ui:TextBox
                             MinHeight="36"
-                            Style="{StaticResource FormTextBox}"
+
                             Text="{Binding AddNotes, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </WrapPanel>
@@ -225,22 +230,22 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="0,1,0,0">
                     <DockPanel LastChildFill="False">
-                        <Button
-                            DockPanel.Dock="Right"
+                        <ui:Button
                             MinWidth="96"
                             MinHeight="36"
                             Margin="8,0,0,0"
                             Command="{Binding AddCommand}"
                             Content="{Binding SubmitText}"
-                            Style="{StaticResource BtnPrimary}" />
-
-                        <Button
                             DockPanel.Dock="Right"
+                            Appearance="Primary" />
+
+                        <ui:Button
                             MinWidth="80"
                             MinHeight="36"
                             Command="{Binding CancelEditCommand}"
                             Content="{DynamicResource Goals.Edit.Cancel}"
-                            Style="{StaticResource BtnGhost}"
+                            DockPanel.Dock="Right"
+                            Appearance="Secondary"
                             Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </DockPanel>
                 </Border>

@@ -43,44 +43,60 @@ public partial class TransactionDialogViewModel
         var revisionSourceTradeId = _revisionSourceTradeId;
         _preserveRevisionSourceOnClose = revisionSourceTradeId.HasValue;
 
-        switch (TxType)
+        try
         {
-            case "income":
-                await ConfirmIncomeAsync();
-                break;
-            case "cashDiv":
-                await ConfirmCashDivAsync();
-                break;
-            case "stockDiv":
-                await ConfirmStockDivAsync();
-                break;
-            case "deposit":
-                await ConfirmCashFlowAsync(TradeType.Deposit);
-                break;
-            case "withdrawal":
-                await ConfirmCashFlowAsync(TradeType.Withdrawal);
-                break;
-            case "loanBorrow":
-                await ConfirmLoanAsync(TradeType.LoanBorrow);
-                break;
-            case "loanRepay":
-                await ConfirmLoanAsync(TradeType.LoanRepay);
-                break;
-            case "creditCardCharge":
-                await ConfirmCreditCardChargeAsync();
-                break;
-            case "creditCardPayment":
-                await ConfirmCreditCardPaymentAsync();
-                break;
-            case "transfer":
-                await ConfirmTransferAsync();
-                break;
-            case "buy":
-                await ConfirmBuyAsync();
-                break;
-            case "sell":
-                await ConfirmSellTxAsync();
-                break;
+            switch (TxType)
+            {
+                case "income":
+                    await ConfirmIncomeAsync();
+                    break;
+                case "cashDiv":
+                    await ConfirmCashDivAsync();
+                    break;
+                case "stockDiv":
+                    await ConfirmStockDivAsync();
+                    break;
+                case "deposit":
+                    await ConfirmCashFlowAsync(TradeType.Deposit);
+                    break;
+                case "withdrawal":
+                    await ConfirmCashFlowAsync(TradeType.Withdrawal);
+                    break;
+                case "loanBorrow":
+                    await ConfirmLoanAsync(TradeType.LoanBorrow);
+                    break;
+                case "loanRepay":
+                    await ConfirmLoanAsync(TradeType.LoanRepay);
+                    break;
+                case "creditCardCharge":
+                    await ConfirmCreditCardChargeAsync();
+                    break;
+                case "creditCardPayment":
+                    await ConfirmCreditCardPaymentAsync();
+                    break;
+                case "transfer":
+                    await ConfirmTransferAsync();
+                    break;
+                case "buy":
+                    await ConfirmBuyAsync();
+                    break;
+                case "sell":
+                    await ConfirmSellTxAsync();
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Until now any exception thrown by a Confirm*Async or its downstream
+            // service was swallowed by AsyncRelayCommand and the dialog closed
+            // silently after CloseTxDialog had already run pre-throw — the user saw
+            // "no record, no error".  Surface it loudly so the next failure is
+            // diagnosable from the UI alone.
+            Log.Error(ex, "Confirm transaction failed for TxType={TxType}", TxType);
+            TxError = $"儲存失敗：{ex.Message}";
+            _snackbar?.Error(TxError);
+            EditingTradeId = pendingEditId;
+            return;
         }
 
         _preserveRevisionSourceOnClose = false;
@@ -209,6 +225,7 @@ public partial class TransactionDialogViewModel
         var error = await SellPanel.ExecuteSellFromTxDialogAsync(
             row: TxSellPosition,
             sellPrice: sellPrice.ToString(),
+            tradeDate: DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
             cashAccount: TxUseCashAccount ? TxCashAccount : null,
             isSellEtf: _search.IsEtf(TxSellPosition.Symbol),
             qtyOverride: sellQty);

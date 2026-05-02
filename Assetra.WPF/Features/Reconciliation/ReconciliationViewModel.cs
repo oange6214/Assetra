@@ -66,19 +66,27 @@ public partial class ReconciliationViewModel : ObservableObject
     [ObservableProperty]
     private bool _useExistingBatch = true;
 
-    public bool UseUploadedFile
-    {
-        get => !UseExistingBatch;
-        set
-        {
-            if (UseExistingBatch == !value) return;
-            UseExistingBatch = !value;
-        }
-    }
+    [ObservableProperty]
+    private bool _useUploadedFile;
 
+    // Mutual-exclusion guards: each setter only mutates the other when they're
+    // about to be in the same state. WPF RadioButton group + TwoWay bindings
+    // already write both properties on click; these guards just stop a stack
+    // overflow if the writes arrive out of order.
     partial void OnUseExistingBatchChanged(bool value)
     {
-        OnPropertyChanged(nameof(UseUploadedFile));
+        if (value && UseUploadedFile)
+            UseUploadedFile = false;
+        else if (!value && !UseUploadedFile)
+            UseUploadedFile = true;
+    }
+
+    partial void OnUseUploadedFileChanged(bool value)
+    {
+        if (value && UseExistingBatch)
+            UseExistingBatch = false;
+        else if (!value && !UseExistingBatch)
+            UseExistingBatch = true;
     }
 
     [ObservableProperty]

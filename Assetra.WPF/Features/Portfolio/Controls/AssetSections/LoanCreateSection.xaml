@@ -2,6 +2,7 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.AssetSections.LoanCreateSection"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="Root"
@@ -26,9 +27,9 @@
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Liability.Subtype}" />
-        <TextBox
+        <ui:TextBox
             Margin="0,0,0,10"
-            Style="{StaticResource FormTextBox}"
+
             Text="{Binding AddSubtype, UpdateSourceTrigger=PropertyChanged}"
             ToolTip="{DynamicResource Portfolio.Liability.SubtypeHint}" />
 
@@ -38,9 +39,9 @@
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Loan.Name}" />
-        <TextBox
+        <ui:TextBox
             Margin="0,0,0,10"
-            Style="{StaticResource FormTextBox}"
+
             Text="{Binding AddLoanName, UpdateSourceTrigger=PropertyChanged}" />
 
         <TextBlock
@@ -49,9 +50,9 @@
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Loan.Amount}" />
-        <TextBox
+        <ui:TextBox
             Margin="0,0,0,10"
-            Style="{StaticResource FormTextBox}"
+
             Text="{Binding AddLoanAmount, UpdateSourceTrigger=PropertyChanged}" />
 
         <Grid Margin="0,0,0,10">
@@ -83,7 +84,7 @@
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
-                <TextBox Style="{StaticResource FormTextBox}" Text="{Binding AddLoanAnnualRate, UpdateSourceTrigger=PropertyChanged}" />
+                <ui:TextBox Text="{Binding AddLoanAnnualRate, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
             <StackPanel Grid.Column="2">
                 <TextBlock
@@ -92,7 +93,7 @@
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Loan.TermMonths}" />
-                <TextBox Style="{StaticResource FormTextBox}" Text="{Binding AddLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
+                <ui:TextBox Text="{Binding AddLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
         </Grid>
 
@@ -119,9 +120,9 @@
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
-            <TextBox
+            <ui:TextBox
                 Margin="0,0,0,10"
-                Style="{StaticResource FormTextBox}"
+
                 Text="{Binding AddLoanAnnualRate, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,4"
@@ -129,7 +130,7 @@
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Loan.TermMonths}" />
-            <TextBox Style="{StaticResource FormTextBox}" Text="{Binding AddLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
+            <ui:TextBox Text="{Binding AddLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
 
         <TextBlock
@@ -163,9 +164,9 @@
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Loan.HandlingFee}" />
-        <TextBox
+        <ui:TextBox
             Margin="0,0,0,8"
-            Style="{StaticResource FormTextBox}"
+
             Text="{Binding AddLoanHandlingFee, UpdateSourceTrigger=PropertyChanged}" />
 
         <Border

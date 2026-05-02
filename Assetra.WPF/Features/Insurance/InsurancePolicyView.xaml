@@ -4,55 +4,64 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Insurance"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:InsurancePolicyViewModel}, IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:InsurancePolicyViewModel}}"
     d:DesignHeight="800"
     d:DesignWidth="1200"
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
 
-    <Grid Margin="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+  <UserControl.Resources>
+    <!--  Native WPF ComboBox keeps FormComboBox styling; Wpf.Ui doesn't ship a ComboBox.  -->
+    <Style BasedOn="{StaticResource FormComboBox}" TargetType="ComboBox" />
+  </UserControl.Resources>
 
-        <!--  Header  -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,16" Orientation="Horizontal">
-            <TextBlock
+  <Grid Margin="24">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!--  Header  -->
+    <StackPanel
+            Grid.Row="0"
+            Margin="0,0,0,16"
+            Orientation="Horizontal">
+      <TextBlock
                 FontSize="{DynamicResource FontSizeXl}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextPrimary}"
                 Text="{DynamicResource Insurance.Title}" />
-            <TextBlock
+      <TextBlock
                 Margin="16,0,0,0"
                 VerticalAlignment="Bottom"
                 FontSize="{DynamicResource FontSizeBase}"
                 Foreground="{DynamicResource AppTextSecondary}">
                 <Run Text="{DynamicResource Insurance.TotalCashValue}" />
                 <Run Text="{Binding TotalCashValue, StringFormat=N0}" />
-            </TextBlock>
-        </StackPanel>
+      </TextBlock>
+    </StackPanel>
 
-        <!--  Error  -->
-        <TextBlock
+    <!--  Error  -->
+    <TextBlock
             Grid.Row="1"
             Margin="0,0,0,8"
             Foreground="{DynamicResource AppDanger}"
             Text="{Binding ErrorMessage}"
             Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
 
-        <!--  Policy list  -->
-        <Border
+    <!--  Policy list  -->
+    <Border
             Grid.Row="2"
             Padding="0"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
             CornerRadius="8">
-            <DataGrid
+      <DataGrid
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
@@ -62,125 +71,122 @@
                 ItemsSource="{Binding Policies}"
                 RowBackground="Transparent"
                 SelectionMode="Single">
-                <DataGrid.Columns>
-                    <DataGridTextColumn
+        <DataGrid.Columns>
+          <DataGridTextColumn
                         Width="*"
                         Binding="{Binding Name}"
                         Header="{DynamicResource Insurance.Column.Name}" />
-                    <DataGridTextColumn
+          <DataGridTextColumn
                         Width="120"
                         Binding="{Binding PolicyNumber}"
                         Header="{DynamicResource Insurance.Column.PolicyNumber}" />
-                    <DataGridTextColumn
+          <DataGridTextColumn
                         Width="100"
                         Binding="{Binding Type}"
                         Header="{DynamicResource Insurance.Column.Type}" />
-                    <DataGridTextColumn
+          <DataGridTextColumn
                         Width="150"
                         Binding="{Binding Insurer}"
                         Header="{DynamicResource Insurance.Column.Insurer}" />
-                    <DataGridTextColumn
+          <DataGridTextColumn
                         Width="120"
                         Binding="{Binding CashValue, StringFormat=N0}"
                         Header="{DynamicResource Insurance.Column.CashValue}" />
-                    <DataGridTextColumn
+          <DataGridTextColumn
                         Width="120"
                         Binding="{Binding AnnualPremium, StringFormat=N0}"
                         Header="{DynamicResource Insurance.Column.AnnualPremium}" />
-                    <DataGridTextColumn
+          <DataGridTextColumn
                         Width="80"
                         Binding="{Binding Currency}"
                         Header="{DynamicResource Insurance.Column.Currency}" />
-                    <DataGridTemplateColumn Width="120" Header="{DynamicResource Common.Actions}">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button
+          <DataGridTemplateColumn Width="120" Header="{DynamicResource Common.Actions}">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <StackPanel Orientation="Horizontal">
+                  <Button
                                         Margin="0,0,4,0"
                                         Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
                                         Content="{DynamicResource Common.Edit}"
                                         Style="{StaticResource SmallButtonStyle}" />
-                                    <Button
+                  <Button
                                         Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
                                         Content="{DynamicResource Common.Delete}"
                                         Style="{StaticResource SmallDangerButtonStyle}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
+                </StackPanel>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+        </DataGrid.Columns>
+      </DataGrid>
+    </Border>
 
-        <!--  Add/Edit form  -->
-        <Border
+    <!--  Add/Edit form  -->
+    <Border
             Grid.Row="3"
             Margin="0,16,0,0"
-            Padding="16"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="8">
-            <StackPanel>
-                <TextBlock
-                    Margin="0,0,0,12"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource AppTextPrimary}"
+            Style="{StaticResource FormCard}">
+      <StackPanel>
+        <TextBlock
+                    Style="{StaticResource FormSectionTitle}"
                     Text="{DynamicResource Insurance.Form.Title}" />
 
-                <UniformGrid Columns="4" Rows="2">
-                    <StackPanel Margin="0,0,8,8">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Name}" />
-                        <TextBox Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,8">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.PolicyNumber}" />
-                        <TextBox Text="{Binding FormPolicyNumber, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,8">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Insurer}" />
-                        <TextBox Text="{Binding FormInsurer, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,0,8">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Type}" />
-                        <ComboBox ItemsSource="{Binding InsuranceTypes}" SelectedItem="{Binding FormType}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.FaceValue}" />
-                        <TextBox Text="{Binding FormFaceValue, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.CashValue}" />
-                        <TextBox Text="{Binding FormCurrentCashValue, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.AnnualPremium}" />
-                        <TextBox Text="{Binding FormAnnualPremium, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,0,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Currency}" />
-                        <TextBox Text="{Binding FormCurrency, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                </UniformGrid>
+        <UniformGrid Columns="4" Rows="2">
+          <StackPanel Margin="0,0,8,8">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Name}" />
+            <ui:TextBox Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,8">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.PolicyNumber}" />
+            <ui:TextBox Text="{Binding FormPolicyNumber, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,8">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Insurer}" />
+            <ui:TextBox Text="{Binding FormInsurer, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,0,8">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Type}" />
+            <ComboBox ItemsSource="{Binding InsuranceTypes}" SelectedItem="{Binding FormType}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.FaceValue}" />
+            <ui:TextBox Text="{Binding FormFaceValue, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.CashValue}" />
+            <ui:TextBox Text="{Binding FormCurrentCashValue, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,8,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.AnnualPremium}" />
+            <ui:TextBox Text="{Binding FormAnnualPremium, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Margin="0,0,0,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Currency}" />
+            <ui:TextBox Text="{Binding FormCurrency, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+        </UniformGrid>
 
-                <TextBlock
+        <TextBlock
                     Margin="0,8,0,0"
                     Foreground="{DynamicResource AppDanger}"
                     Text="{Binding FormError}"
                     Visibility="{Binding FormError, Converter={StaticResource NullToVisibilityConverter}}" />
 
-                <StackPanel Margin="0,12,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <Button
+        <StackPanel
+                    Margin="0,12,0,0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+          <ui:Button
                         Margin="0,0,8,0"
                         Command="{Binding CancelEditCommand}"
                         Content="{DynamicResource Common.Cancel}"
-                        Style="{StaticResource BtnGhost}"
+                        Appearance="Secondary"
                         Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    <Button Command="{Binding SaveCommand}" Content="{DynamicResource Common.Save}" />
-                </StackPanel>
-            </StackPanel>
-        </Border>
-    </Grid>
+          <Button Command="{Binding SaveCommand}" Content="{DynamicResource Common.Save}" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+  </Grid>
 </UserControl>

@@ -735,7 +735,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
             SelectedLoanCashAccount?.Id,
             null,
             fee,
-            AmortAnnualRate: annualRate,
+            AmortAnnualRate: annualRate / 100m,
             AmortTermMonths: termMonths,
             FirstPaymentDate: firstPaymentDate,
             Subtype: string.IsNullOrWhiteSpace(AddSubtype) ? null : AddSubtype.Trim()));

@@ -1,0 +1,24 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Hubs.CashflowHubView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
+    xmlns:recurring="clr-namespace:Assetra.WPF.Features.Recurring"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Background="{DynamicResource AppBackground}"
+    mc:Ignorable="d">
+
+    <!--
+        CashflowHub — composes Categories + Recurring under one nav entry.
+        DataContext = MainViewModel.
+    -->
+    <TabControl Background="Transparent" BorderThickness="0">
+        <TabItem Header="{DynamicResource Nav.Categories}">
+            <categories:CategoriesView DataContext="{Binding Categories}" />
+        </TabItem>
+        <TabItem Header="{DynamicResource Nav.Recurring}">
+            <recurring:RecurringView DataContext="{Binding Recurring}" />
+        </TabItem>
+    </TabControl>
+</UserControl>

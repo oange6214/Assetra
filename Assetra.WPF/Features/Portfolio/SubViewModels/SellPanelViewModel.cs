@@ -39,6 +39,9 @@ public partial class SellPanelViewModel : ObservableObject
     /// <summary>Returns the current sell-quantity override (partial sell) from the Tx dialog.</summary>
     public Func<int> GetSellQtyOverride { get; set; } = () => 0;
 
+    /// <summary>Returns the trade date to use when recording the sell.</summary>
+    public Func<DateTime> GetSellTradeDate { get; set; } = () => DateTime.UtcNow;
+
     /// <summary>
     /// Cash account list for the sell-panel cash-account picker.
     /// Wired by the parent VM to its own <c>CashAccounts</c> collection.
@@ -122,6 +125,7 @@ public partial class SellPanelViewModel : ObservableObject
     internal async Task<string?> ExecuteSellFromTxDialogAsync(
         PortfolioRowViewModel row,
         string sellPrice,
+        DateTime tradeDate,
         CashAccountRowViewModel? cashAccount,
         bool isSellEtf,
         int qtyOverride)
@@ -134,15 +138,18 @@ public partial class SellPanelViewModel : ObservableObject
 
         // Temporarily override the qty delegate for this call so ConfirmSell uses the
         // caller-supplied override instead of whatever the field holds between calls.
-        var previousDelegate = GetSellQtyOverride;
+        var previousQtyDelegate = GetSellQtyOverride;
+        var previousTradeDateDelegate = GetSellTradeDate;
         GetSellQtyOverride = () => qtyOverride;
+        GetSellTradeDate = () => tradeDate;
         try
         {
             await ConfirmSell();
         }
         finally
         {
-            GetSellQtyOverride = previousDelegate;
+            GetSellQtyOverride = previousQtyDelegate;
+            GetSellTradeDate = previousTradeDateDelegate;
         }
 
         return string.IsNullOrEmpty(SellPanelError) ? null : SellPanelError;
@@ -165,6 +172,7 @@ public partial class SellPanelViewModel : ObservableObject
             SellPriceInput,
             GetTxFee(),
             GetSellQtyOverride(),
+            GetSellTradeDate(),
             GetTxCommissionDiscountValue(),
             IsSellEtf,
             SellCashAccount?.Id);
@@ -180,7 +188,8 @@ public partial class SellPanelViewModel : ObservableObject
         catch (Exception ex)
         {
             Serilog.Log.Warning(ex, "Failed to record sell trade for {Symbol}", row.Symbol);
-            _snackbar?.Warning(L("Portfolio.Sell.TradeSaveFailed", "賣出已完成，但交易記錄儲存失敗"));
+            SellPanelError = L("Portfolio.Sell.TradeSaveFailed", "賣出交易儲存失敗，請稍後再試");
+            _snackbar?.Warning(SellPanelError);
             return;
         }
 

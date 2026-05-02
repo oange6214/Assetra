@@ -11,8 +11,13 @@ using Assetra.Core.Interfaces;
 using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Alerts;
 using Assetra.WPF.Features.Categories;
+using Assetra.WPF.Features.FinancialOverview;
+using Assetra.WPF.Features.Insurance;
+using Assetra.WPF.Features.PhysicalAsset;
 using Assetra.WPF.Features.Portfolio;
+using Assetra.WPF.Features.RealEstate;
 using Assetra.WPF.Features.Recurring;
+using Assetra.WPF.Features.Retirement;
 using Assetra.WPF.Infrastructure;
 using Assetra.WPF.Infrastructure.Converters;
 using Assetra.WPF.Shell;
@@ -31,16 +36,19 @@ public partial class App : System.Windows.Application
     {
         VelopackApp.Build().Run();
         base.OnStartup(e);
+        DispatcherUnhandledException += OnDispatcherUnhandledException;
         var shouldTryRecoveryUpdate = File.Exists(StartupMarkerPath);
         WriteStartupMarker();
         try
         {
+#if !DEBUG
             if (shouldTryRecoveryUpdate &&
                 await TryApplyRecoveryUpdateAsync().ConfigureAwait(true))
             {
                 Shutdown(0);
                 return;
             }
+#endif
 
             await StartupAsync();
             _startupCompleted = true;
@@ -48,11 +56,13 @@ public partial class App : System.Windows.Application
         }
         catch (Exception ex)
         {
+#if !DEBUG
             if (await TryApplyRecoveryUpdateAsync().ConfigureAwait(true))
             {
                 Shutdown(0);
                 return;
             }
+#endif
 
             MessageBox.Show(
                 $"應用程式啟動失敗：{ex.Message}",
@@ -108,14 +118,53 @@ public partial class App : System.Windows.Application
         var recurringVm = _host.Services.GetRequiredService<RecurringViewModel>();
         await recurringVm.LoadAsync();
 
+        // Pre-load multi-asset hub VMs and FinancialOverview so the dashboards
+        // are populated the first time the user navigates into them — before
+        // this, the singleton VMs were constructed but no LoadAsync ever fired
+        // until a hub view became visible, which left FinancialOverview with an
+        // empty snapshot of Portfolio.Positions.
+        splash.Advance("Splash.MultiAsset");
+        _host.Services.GetRequiredService<RealEstateViewModel>().LoadCommand.Execute(null);
+        _host.Services.GetRequiredService<InsurancePolicyViewModel>().LoadCommand.Execute(null);
+        _host.Services.GetRequiredService<RetirementViewModel>().LoadCommand.Execute(null);
+        _host.Services.GetRequiredService<PhysicalAssetViewModel>().LoadCommand.Execute(null);
+
+        splash.Advance("Splash.FinancialOverview");
+        var financialOverviewVm = _host.Services.GetRequiredService<FinancialOverviewViewModel>();
+        await financialOverviewVm.LoadAsync();
+
         // Show main window, close splash
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
         splash.Close();
 
+#if !DEBUG
         _ = CheckForUpdatesInBackgroundAsync();
+#endif
     }
 
+    /// <summary>
+    /// Swallows known-benign third-party NREs that fire on navigation/page swap.
+    /// Currently filters: <see cref="LiveChartsCore.SkiaSharpView.WPF"/>'s
+    /// <c>CompositionTargetTicker.DisposeTicker</c> double-dispose race
+    /// (library bug present at least up to 2.0.2 — `_canvas` is already null
+    /// when DisposeTicker runs a second time during rapid Loaded/Unloaded
+    /// cycles).  These are non-fatal: the ticker is being torn down anyway.
+    /// </summary>
+    private static void OnDispatcherUnhandledException(
+        object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    {
+        if (e.Exception is NullReferenceException
+            && e.Exception.StackTrace is { } stack
+            && stack.Contains("CompositionTargetTicker", StringComparison.Ordinal))
+        {
+            Serilog.Log.Debug(e.Exception,
+                "Swallowed LiveCharts CompositionTargetTicker dispose NRE (benign)");
+            e.Handled = true;
+        }
+    }
+
+#if !DEBUG
     private static UpdateManager CreateUpdateManager() =>
         new(new GithubSource("https://github.com/oange6214/Assetra", null, false));
 
@@ -169,6 +218,7 @@ public partial class App : System.Windows.Application
 
         return false;
     }
+#endif
 
     protected override void OnExit(ExitEventArgs e)
     {

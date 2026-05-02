@@ -51,6 +51,7 @@ internal static class ServiceCollectionExtensions
             sp.GetRequiredService<ITwseClient>(),
             sp.GetRequiredService<ITpexClient>(),
             sp.GetRequiredService<IPortfolioRepository>(),
+            sp.GetRequiredService<IAlertRepository>(),
             sp.GetRequiredService<IAppSettingsService>(),
             sp.GetRequiredService<FugleClient>(),
             sp.GetRequiredService<IScheduler>()));
