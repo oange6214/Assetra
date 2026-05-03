@@ -212,7 +212,7 @@
                 </StackPanel>
             </Border>
 
-            <DataGrid
+            <ui:DataGrid
                 x:Name="CashGrid"
                 AlternationCount="2"
                 AutoGenerateColumns="False"
@@ -378,7 +378,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
-            </DataGrid>
+            </ui:DataGrid>
         </Grid>
     </Grid>
 </UserControl>

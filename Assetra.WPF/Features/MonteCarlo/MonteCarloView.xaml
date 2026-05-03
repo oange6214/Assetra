@@ -67,7 +67,7 @@
                                Foreground="{DynamicResource AppTextSecondary}"
                                Text="{DynamicResource MonteCarlo.Running}"
                                Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    <Button Command="{Binding RunCommand}" Content="{DynamicResource MonteCarlo.Run}" />
+                    <ui:Button Command="{Binding RunCommand}" Content="{DynamicResource MonteCarlo.Run}" />
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -108,14 +108,14 @@
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1" CornerRadius="8">
-            <DataGrid AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+            <ui:DataGrid AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                       GridLinesVisibility="Horizontal" HeadersVisibility="Column" IsReadOnly="True"
                       ItemsSource="{Binding MedianPath}" RowBackground="Transparent" SelectionMode="Single">
                 <DataGrid.Columns>
                     <DataGridTextColumn Width="100" Binding="{Binding Year}" Header="{DynamicResource MonteCarlo.Path.Year}" />
                     <DataGridTextColumn Width="*" Binding="{Binding Balance, StringFormat=N0}" Header="{DynamicResource MonteCarlo.Path.Median}" />
                 </DataGrid.Columns>
-            </DataGrid>
+            </ui:DataGrid>
         </Border>
     </Grid>
 </UserControl>

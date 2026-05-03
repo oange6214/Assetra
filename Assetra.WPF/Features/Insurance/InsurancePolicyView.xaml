@@ -61,7 +61,7 @@
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
             CornerRadius="8">
-      <DataGrid
+      <ui:DataGrid
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
@@ -120,7 +120,7 @@
             </DataGridTemplateColumn.CellTemplate>
           </DataGridTemplateColumn>
         </DataGrid.Columns>
-      </DataGrid>
+      </ui:DataGrid>
     </Border>
 
     <!--  Add/Edit form  -->
@@ -133,7 +133,7 @@
                     Style="{StaticResource FormSectionTitle}"
                     Text="{DynamicResource Insurance.Form.Title}" />
 
-        <UniformGrid Columns="4" Rows="2">
+        <UniformGrid Columns="4" Rows="3">
           <StackPanel Margin="0,0,8,8">
             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Name}" />
             <ui:TextBox Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
@@ -166,6 +166,18 @@
             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Currency}" />
             <ui:TextBox Text="{Binding FormCurrency, UpdateSourceTrigger=PropertyChanged}" />
           </StackPanel>
+          <StackPanel Margin="0,8,8,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.StartDate}" />
+            <ui:CalendarDatePicker Date="{Binding FormStartDate, Mode=TwoWay}" />
+          </StackPanel>
+          <StackPanel Margin="0,8,8,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.MaturityDate}" />
+            <ui:CalendarDatePicker Date="{Binding FormMaturityDate, Mode=TwoWay}" />
+          </StackPanel>
+          <StackPanel Margin="0,8,0,0">
+            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Notes}" />
+            <ui:TextBox Text="{Binding FormNotes, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
         </UniformGrid>
 
         <TextBlock
@@ -184,7 +196,7 @@
                         Content="{DynamicResource Common.Cancel}"
                         Appearance="Secondary"
                         Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}" />
-          <Button Command="{Binding SaveCommand}" Content="{DynamicResource Common.Save}" />
+          <ui:Button Command="{Binding SaveCommand}" Content="{DynamicResource Common.Save}" />
         </StackPanel>
       </StackPanel>
     </Border>

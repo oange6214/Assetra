@@ -12,6 +12,49 @@
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
     mc:Ignorable="d">
 
+  <UserControl.Resources>
+    <Style x:Key="DividendCalendarToggleButtonStyle" TargetType="ToggleButton">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="6" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ToggleButton">
+            <Border
+                x:Name="Bd"
+                Padding="{TemplateBinding Padding}"
+                Background="{TemplateBinding Background}"
+                BorderBrush="Transparent"
+                BorderThickness="1"
+                CornerRadius="{StaticResource RadiusSm}">
+              <ContentPresenter
+                  x:Name="Icon"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppAccentSubtle}" />
+                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+              </Trigger>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppAccentSubtle}" />
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccentHover}" />
+                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppAccentSubtle}" />
+                <Setter TargetName="Icon" Property="Opacity" Value="0.6" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </UserControl.Resources>
+
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -40,7 +83,7 @@
                         Padding="0"
                         VerticalAlignment="Center"
                         IsChecked="{Binding DivCalendar.IsExpanded, Mode=TwoWay}"
-                        Style="{StaticResource BtnIconToggle}">
+                        Style="{StaticResource DividendCalendarToggleButtonStyle}">
             <ui:SymbolIcon FontSize="10" Foreground="{DynamicResource AppTextMuted}">
               <ui:SymbolIcon.Style>
                 <Style TargetType="ui:SymbolIcon">
@@ -538,7 +581,7 @@
         </ListBox.ItemTemplate>
       </ListBox>
 
-      <DataGrid
+      <ui:DataGrid
                 AlternationCount="2"
                 AutoGenerateColumns="False"
                 Background="{DynamicResource AppBackground}"
@@ -783,7 +826,7 @@
           </DataGridTemplateColumn>
 
         </DataGrid.Columns>
-      </DataGrid>
+      </ui:DataGrid>
 
       <!--  Empty state  -->
       <Border Visibility="{Binding HasNoTrades, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -884,7 +927,7 @@
                                             TextAlignment="Center"
                                             Visibility="{Binding IsEllipsis, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <!--  頁碼按鈕 — 當前頁高亮；Padding=0 避免窄按鈕內容被切  -->
-                    <Button
+                    <ui:Button
                                             Height="30"
                                             MinWidth="30"
                                             Padding="4,0"
@@ -893,22 +936,22 @@
                                             Content="{Binding Number}"
                                             FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}">
-                      <Button.Style>
-                        <Style BasedOn="{StaticResource BtnGhost}" TargetType="Button">
+                      <ui:Button.Style>
+                        <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
+                          <Setter Property="Appearance" Value="Secondary" />
                           <Setter Property="Visibility" Value="Visible" />
                           <Style.Triggers>
                             <DataTrigger Binding="{Binding IsEllipsis}" Value="True">
                               <Setter Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                              <Setter Property="Background" Value="{DynamicResource AppAccent}" />
-                              <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                              <Setter Property="Appearance" Value="Primary" />
                               <Setter Property="FontWeight" Value="SemiBold" />
                             </DataTrigger>
                           </Style.Triggers>
                         </Style>
-                      </Button.Style>
-                    </Button>
+                      </ui:Button.Style>
+                    </ui:Button>
                   </Grid>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
@@ -1022,7 +1065,7 @@
                                             Text="…"
                                             TextAlignment="Center"
                                             Visibility="{Binding IsEllipsis, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <Button
+                    <ui:Button
                                             Height="30"
                                             MinWidth="30"
                                             Padding="4,0"
@@ -1031,22 +1074,22 @@
                                             Content="{Binding Number}"
                                             FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
                                             FontSize="{StaticResource FontSizeSm}">
-                      <Button.Style>
-                        <Style BasedOn="{StaticResource BtnGhost}" TargetType="Button">
+                      <ui:Button.Style>
+                        <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
+                          <Setter Property="Appearance" Value="Secondary" />
                           <Setter Property="Visibility" Value="Visible" />
                           <Style.Triggers>
                             <DataTrigger Binding="{Binding IsEllipsis}" Value="True">
                               <Setter Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                              <Setter Property="Background" Value="{DynamicResource AppAccent}" />
-                              <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                              <Setter Property="Appearance" Value="Primary" />
                               <Setter Property="FontWeight" Value="SemiBold" />
                             </DataTrigger>
                           </Style.Triggers>
                         </Style>
-                      </Button.Style>
-                    </Button>
+                      </ui:Button.Style>
+                    </ui:Button>
                   </Grid>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>

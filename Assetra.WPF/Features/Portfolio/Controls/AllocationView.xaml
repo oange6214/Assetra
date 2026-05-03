@@ -215,7 +215,7 @@
         </Border>
 
         <!--  Right: asset list DataGrid  -->
-        <DataGrid
+        <ui:DataGrid
                     Grid.Column="1"
                     Margin="8,16,16,16"
                     AutoGenerateColumns="False"
@@ -407,7 +407,7 @@
             </DataGridTemplateColumn>
 
           </DataGrid.Columns>
-        </DataGrid>
+        </ui:DataGrid>
       </Grid>
 
       <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">

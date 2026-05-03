@@ -58,8 +58,14 @@
                 </UniformGrid>
                 <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppDanger}" Text="{Binding ErrorMessage}"
                            Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
-                <StackPanel Margin="0,12,0,0" HorizontalAlignment="Right">
-                    <Button Command="{Binding CalculateCommand}" Content="{DynamicResource Fire.Calculate}" />
+                <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppAccent}" Text="{Binding StatusMessage}"
+                           Visibility="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+                <StackPanel Margin="0,12,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
+                    <ui:Button Margin="0,0,8,0"
+                               Command="{Binding SaveToGoalsCommand}"
+                               Content="{DynamicResource Fire.SaveToGoals}"
+                               Appearance="Secondary" />
+                    <ui:Button Command="{Binding CalculateCommand}" Content="{DynamicResource Fire.Calculate}" />
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -94,14 +100,14 @@
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1" CornerRadius="8">
-            <DataGrid AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+            <ui:DataGrid AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                       GridLinesVisibility="Horizontal" HeadersVisibility="Column" IsReadOnly="True"
                       ItemsSource="{Binding WealthPath}" RowBackground="Transparent" SelectionMode="Single">
                 <DataGrid.Columns>
                     <DataGridTextColumn Width="100" Binding="{Binding Year}" Header="{DynamicResource Fire.Path.Year}" />
                     <DataGridTextColumn Width="*" Binding="{Binding NetWorth, StringFormat=N0}" Header="{DynamicResource Fire.Path.NetWorth}" />
                 </DataGrid.Columns>
-            </DataGrid>
+            </ui:DataGrid>
         </Border>
     </Grid>
 </UserControl>
