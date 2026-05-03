@@ -55,14 +55,14 @@
 
             Text="{Binding AddCreditCardIssuer, UpdateSourceTrigger=PropertyChanged}" />
 
-        <Expander Margin="0,0,0,10" IsExpanded="False">
-            <Expander.Header>
+        <ui:CardExpander Margin="0,0,0,10" IsExpanded="False">
+            <ui:CardExpander.Header>
                 <TextBlock
                     FontSize="{StaticResource FontSizeXs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.AssetDialog.Advanced}" />
-            </Expander.Header>
+            </ui:CardExpander.Header>
             <StackPanel Margin="0,8,0,0">
                 <Grid Margin="0,0,0,10">
                     <Grid.Style>
@@ -153,7 +153,7 @@
 
                     Text="{Binding AddCreditCardLimit, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
-        </Expander>
+        </ui:CardExpander>
 
         <TextBlock
             Margin="0,0,0,12"

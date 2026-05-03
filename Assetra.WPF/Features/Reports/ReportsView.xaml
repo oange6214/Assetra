@@ -366,7 +366,7 @@
 
         <!--  ── Statements (Income / Balance / CashFlow) ──  -->
         <StackPanel Grid.Row="3" Margin="0,16,0,0">
-            <Expander Header="{DynamicResource Reports.IncomeStatement.Title}" IsExpanded="False" Margin="0,0,0,8">
+            <ui:CardExpander Header="{DynamicResource Reports.IncomeStatement.Title}" IsExpanded="False" Margin="0,0,0,8">
                 <Grid Margin="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -391,9 +391,9 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
-            </Expander>
+            </ui:CardExpander>
 
-            <Expander Header="{DynamicResource Reports.BalanceSheet.Title}" IsExpanded="False" Margin="0,0,0,8">
+            <ui:CardExpander Header="{DynamicResource Reports.BalanceSheet.Title}" IsExpanded="False" Margin="0,0,0,8">
                 <Grid Margin="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -422,9 +422,9 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
-            </Expander>
+            </ui:CardExpander>
 
-            <Expander Header="{DynamicResource Reports.CashFlow.Title}" IsExpanded="False">
+            <ui:CardExpander Header="{DynamicResource Reports.CashFlow.Title}" IsExpanded="False">
                 <Grid Margin="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -461,9 +461,9 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
-            </Expander>
+            </ui:CardExpander>
 
-            <Expander Header="{DynamicResource Reports.Performance.Title}" IsExpanded="False" Margin="0,8,0,0">
+            <ui:CardExpander Header="{DynamicResource Reports.Performance.Title}" IsExpanded="False" Margin="0,8,0,0">
                 <StackPanel Margin="12" DataContext="{Binding Performance}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Performance.Xirr}" />
@@ -500,9 +500,9 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
-            </Expander>
+            </ui:CardExpander>
 
-            <Expander Header="{DynamicResource Reports.Risk.Title}" IsExpanded="False" Margin="0,8,0,0">
+            <ui:CardExpander Header="{DynamicResource Reports.Risk.Title}" IsExpanded="False" Margin="0,8,0,0">
                 <StackPanel Margin="12" DataContext="{Binding Risk}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Risk.AnnualizedVolatility}" />
@@ -537,7 +537,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
-            </Expander>
+            </ui:CardExpander>
         </StackPanel>
 
             <TextBlock
