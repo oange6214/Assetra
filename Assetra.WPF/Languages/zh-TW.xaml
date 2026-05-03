@@ -29,6 +29,7 @@
     <sys:String x:Key="Nav.Settings">設定</sys:String>
     <sys:String x:Key="Nav.Cashflow">收支</sys:String>
     <sys:String x:Key="Nav.Insights">分析報表</sys:String>
+    <sys:String x:Key="Nav.Planning">規劃</sys:String>
     <sys:String x:Key="Nav.MultiAsset">多元資產</sys:String>
     <sys:String x:Key="Nav.Toggle">展開／收合導覽</sys:String>
 

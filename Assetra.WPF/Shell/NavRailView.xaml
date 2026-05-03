@@ -28,6 +28,22 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
+
+        <!--
+            ── Section header collapse behaviour ──
+            When the rail is in compact mode (IsPaneOpen=False, 56px wide)
+            the localized group labels would overflow the icons-only column.
+            Hide them so only the items themselves render with tooltips.
+        -->
+        <Style TargetType="{x:Type ui:NavigationViewItemHeader}">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=RootNavView, Path=IsPaneOpen}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <!--  ── Section view templates (resolved by ContentControl DataTrigger) ──  -->
         <DataTemplate x:Key="PortfolioContentTemplate">
             <portfolio:PortfolioView DataContext="{Binding Portfolio}" />
@@ -112,12 +128,14 @@
     <ui:NavigationView
         x:Name="RootNavView"
         IsBackButtonVisible="Collapsed"
-        IsPaneToggleVisible="False"
-        OpenPaneLength="220"
+        IsPaneToggleVisible="True"
+        OpenPaneLength="{StaticResource Size.Sidebar.Width}"
+        CompactPaneLength="56"
         PaneDisplayMode="Left">
 
         <ui:NavigationView.MenuItems>
 
+            <!--  ── Top section: dashboards & analytics (no header for primary nav)  -->
             <ui:NavigationViewItem
                 x:Name="NavPortfolio"
                 Click="NavItem_Click"
@@ -137,51 +155,6 @@
                 ToolTip="{DynamicResource FinancialOverview.Nav.Label}">
                 <ui:NavigationViewItem.Icon>
                     <ui:SymbolIcon Symbol="DataPie24" />
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-
-            <!--  ── Group: 收支 ──  -->
-            <ui:NavigationViewItemHeader Text="{DynamicResource Nav.Cashflow}" />
-
-            <ui:NavigationViewItem
-                x:Name="NavCategories"
-                Click="NavItem_Click"
-                Content="{DynamicResource Nav.Categories}"
-                TargetPageTag="Categories"
-                ToolTip="{DynamicResource Nav.Categories}">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="Tag24" />
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-
-            <ui:NavigationViewItem
-                x:Name="NavRecurring"
-                Click="NavItem_Click"
-                Content="{DynamicResource Nav.Recurring}"
-                TargetPageTag="Recurring"
-                ToolTip="{DynamicResource Nav.Recurring}">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="ArrowRepeatAll24" />
-                </ui:NavigationViewItem.Icon>
-                <ui:NavigationViewItem.InfoBadge>
-                    <ui:InfoBadge
-                        Severity="Attention"
-                        Value="{Binding Recurring.PendingCount}"
-                        Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </ui:NavigationViewItem.InfoBadge>
-            </ui:NavigationViewItem>
-
-            <!--  ── Group: 分析 ──  -->
-            <ui:NavigationViewItemHeader Text="{DynamicResource Nav.Insights}" />
-
-            <ui:NavigationViewItem
-                x:Name="NavGoals"
-                Click="NavItem_Click"
-                Content="{DynamicResource Nav.Goals}"
-                TargetPageTag="Goals"
-                ToolTip="{DynamicResource Nav.Goals}">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="Target24" />
                 </ui:NavigationViewItem.Icon>
             </ui:NavigationViewItem>
 
@@ -207,6 +180,20 @@
                 </ui:NavigationViewItem.Icon>
             </ui:NavigationViewItem>
 
+            <!--  ── Group: 規劃 (Planning — goal/projection tools)  -->
+            <ui:NavigationViewItemHeader Text="{DynamicResource Nav.Planning}" />
+
+            <ui:NavigationViewItem
+                x:Name="NavGoals"
+                Click="NavItem_Click"
+                Content="{DynamicResource Nav.Goals}"
+                TargetPageTag="Goals"
+                ToolTip="{DynamicResource Nav.Goals}">
+                <ui:NavigationViewItem.Icon>
+                    <ui:SymbolIcon Symbol="Target24" />
+                </ui:NavigationViewItem.Icon>
+            </ui:NavigationViewItem>
+
             <ui:NavigationViewItem
                 x:Name="NavFire"
                 Click="NavItem_Click"
@@ -229,7 +216,7 @@
                 </ui:NavigationViewItem.Icon>
             </ui:NavigationViewItem>
 
-            <!--  ── Group: 多元資產 ──  -->
+            <!--  ── Group: 多元資產  -->
             <ui:NavigationViewItemHeader Text="{DynamicResource Nav.MultiAsset}" />
 
             <ui:NavigationViewItem
@@ -276,7 +263,44 @@
                 </ui:NavigationViewItem.Icon>
             </ui:NavigationViewItem>
 
-            <ui:NavigationViewItemSeparator />
+        </ui:NavigationView.MenuItems>
+
+        <!--
+            ── Footer (utilities) ──
+            Cashflow management (categories/recurring), alerts, import & settings
+            sit at the bottom of the rail. Pinning these here keeps the upper
+            menu focused on dashboards/analytics/planning while utilities are
+            always one click away regardless of scroll position.
+        -->
+        <ui:NavigationView.FooterMenuItems>
+
+            <ui:NavigationViewItem
+                x:Name="NavCategories"
+                Click="NavItem_Click"
+                Content="{DynamicResource Nav.Categories}"
+                TargetPageTag="Categories"
+                ToolTip="{DynamicResource Nav.Categories}">
+                <ui:NavigationViewItem.Icon>
+                    <ui:SymbolIcon Symbol="Tag24" />
+                </ui:NavigationViewItem.Icon>
+            </ui:NavigationViewItem>
+
+            <ui:NavigationViewItem
+                x:Name="NavRecurring"
+                Click="NavItem_Click"
+                Content="{DynamicResource Nav.Recurring}"
+                TargetPageTag="Recurring"
+                ToolTip="{DynamicResource Nav.Recurring}">
+                <ui:NavigationViewItem.Icon>
+                    <ui:SymbolIcon Symbol="ArrowRepeatAll24" />
+                </ui:NavigationViewItem.Icon>
+                <ui:NavigationViewItem.InfoBadge>
+                    <ui:InfoBadge
+                        Severity="Attention"
+                        Value="{Binding Recurring.PendingCount}"
+                        Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </ui:NavigationViewItem.InfoBadge>
+            </ui:NavigationViewItem>
 
             <ui:NavigationViewItem
                 x:Name="NavAlerts"
@@ -294,10 +318,6 @@
                         Visibility="{Binding Alerts.HasTriggeredAlerts, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </ui:NavigationViewItem.InfoBadge>
             </ui:NavigationViewItem>
-
-        </ui:NavigationView.MenuItems>
-
-        <ui:NavigationView.FooterMenuItems>
 
             <ui:NavigationViewItem
                 x:Name="NavImport"

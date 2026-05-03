@@ -29,6 +29,7 @@
     <sys:String x:Key="Nav.Settings">Settings</sys:String>
     <sys:String x:Key="Nav.Cashflow">Cash Flow</sys:String>
     <sys:String x:Key="Nav.Insights">Insights</sys:String>
+    <sys:String x:Key="Nav.Planning">Planning</sys:String>
     <sys:String x:Key="Nav.MultiAsset">Multi-Asset</sys:String>
     <sys:String x:Key="Nav.Toggle">Expand / collapse menu</sys:String>
 
