@@ -331,7 +331,8 @@
                 <ui:NavigationViewItem
                     x:Name="NavPortfolio"
                     Content="{DynamicResource Nav.Portfolio}"
-                    TargetPageTag="Portfolio">
+                    TargetPageTag="Portfolio"
+                    ToolTip="{DynamicResource Nav.Portfolio}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Briefcase24" />
                     </ui:NavigationViewItem.Icon>
@@ -340,7 +341,8 @@
                 <ui:NavigationViewItem
                     x:Name="NavFinancialOverview"
                     Content="{DynamicResource FinancialOverview.Nav.Label}"
-                    TargetPageTag="FinancialOverview">
+                    TargetPageTag="FinancialOverview"
+                    ToolTip="{DynamicResource FinancialOverview.Nav.Label}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="DataPie24" />
                     </ui:NavigationViewItem.Icon>
@@ -349,7 +351,8 @@
                 <ui:NavigationViewItem
                     x:Name="NavCashflow"
                     Content="{DynamicResource Nav.Cashflow}"
-                    TargetPageTag="Cashflow">
+                    TargetPageTag="Cashflow"
+                    ToolTip="{DynamicResource Nav.Cashflow}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Wallet24" />
                     </ui:NavigationViewItem.Icon>
@@ -364,7 +367,8 @@
                 <ui:NavigationViewItem
                     x:Name="NavInsights"
                     Content="{DynamicResource Nav.Insights}"
-                    TargetPageTag="Insights">
+                    TargetPageTag="Insights"
+                    ToolTip="{DynamicResource Nav.Insights}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Pulse24" />
                     </ui:NavigationViewItem.Icon>
@@ -373,7 +377,8 @@
                 <ui:NavigationViewItem
                     x:Name="NavMultiAsset"
                     Content="{DynamicResource Nav.MultiAsset}"
-                    TargetPageTag="MultiAsset">
+                    TargetPageTag="MultiAsset"
+                    ToolTip="{DynamicResource Nav.MultiAsset}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Home24" />
                     </ui:NavigationViewItem.Icon>
@@ -382,7 +387,8 @@
                 <ui:NavigationViewItem
                     x:Name="NavAlerts"
                     Content="{DynamicResource Nav.Alerts}"
-                    TargetPageTag="Alerts">
+                    TargetPageTag="Alerts"
+                    ToolTip="{DynamicResource Nav.Alerts.Tooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Alert24" />
                     </ui:NavigationViewItem.Icon>
@@ -401,7 +407,8 @@
                 <ui:NavigationViewItem
                     x:Name="NavImport"
                     Content="{DynamicResource Nav.Import}"
-                    TargetPageTag="Import">
+                    TargetPageTag="Import"
+                    ToolTip="{DynamicResource Nav.Import}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="DocumentArrowDown24" />
                     </ui:NavigationViewItem.Icon>
@@ -410,7 +417,8 @@
                 <ui:NavigationViewItem
                     x:Name="NavSettings"
                     Content="{DynamicResource Nav.Settings}"
-                    TargetPageTag="Settings">
+                    TargetPageTag="Settings"
+                    ToolTip="{DynamicResource Nav.Settings}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Settings24" />
                     </ui:NavigationViewItem.Icon>
