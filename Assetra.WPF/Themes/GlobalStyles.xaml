@@ -766,4 +766,132 @@
   </Style>
 
 
+  <!--
+        ══════════════════════════════════════════════════════════
+        TabControl / TabItem (implicit global style)
+        ══════════════════════════════════════════════════════════
+        Modern fintech-style underline indicator: text-only headers
+        with a 2.5 px AppAccent bar under the selected tab. Replaces
+        the dated WPF Aero default (raised tabs with 3D borders).
+
+        Used by: PortfolioView, CategoriesView, RecurringView, the
+        Import/Reconciliation tab pair. No x:Key — applies as the
+        implicit default to all TabControl/TabItem in the app.
+    -->
+
+  <Style TargetType="{x:Type TabControl}">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type TabControl}">
+          <Grid SnapsToDevicePixels="True">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!--  Tab strip  -->
+            <Border
+                            Grid.Row="0"
+                            BorderBrush="{DynamicResource AppBorderLight}"
+                            BorderThickness="0,0,0,1">
+              <TabPanel
+                                x:Name="HeaderPanel"
+                                Margin="0"
+                                Panel.ZIndex="1"
+                                IsItemsHost="True"
+                                KeyboardNavigation.TabIndex="1" />
+            </Border>
+
+            <!--  Selected content  -->
+            <Border
+                            Grid.Row="1"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+              <ContentPresenter
+                                x:Name="PART_SelectedContentHost"
+                                Margin="0"
+                                ContentSource="SelectedContent"
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+            </Border>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="{x:Type TabItem}">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="16,10" />
+    <Setter Property="Margin" Value="0,0,4,0" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
+    <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type TabItem}">
+          <Border
+                        x:Name="Bg"
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        SnapsToDevicePixels="True">
+            <Grid>
+              <ContentPresenter
+                                x:Name="Content"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                ContentSource="Header"
+                                RecognizesAccessKey="True"
+                                TextElement.Foreground="{TemplateBinding Foreground}"
+                                TextElement.FontWeight="{TemplateBinding FontWeight}" />
+              <!--  Bottom underline indicator  -->
+              <Border
+                                x:Name="Indicator"
+                                Height="2.5"
+                                Margin="8,0"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource AppAccent}"
+                                CornerRadius="1.5"
+                                Visibility="Hidden" />
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+              <Setter TargetName="Bg" Property="Background" Value="{DynamicResource AppHover}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
+              <Setter Property="FontWeight" Value="SemiBold" />
+              <Setter TargetName="Indicator" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="IsSelected" Value="True" />
+                <Condition Property="IsMouseOver" Value="True" />
+              </MultiTrigger.Conditions>
+              <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
+              <Setter TargetName="Bg" Property="Background" Value="Transparent" />
+            </MultiTrigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+              <Setter Property="Cursor" Value="Arrow" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
 </ResourceDictionary>
