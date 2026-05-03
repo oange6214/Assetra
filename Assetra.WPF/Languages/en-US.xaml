@@ -92,6 +92,9 @@
     <sys:String x:Key="Common.Price">Price</sys:String>
     <sys:String x:Key="Common.Cancel">Cancel</sys:String>
     <sys:String x:Key="Common.Save">Save</sys:String>
+    <sys:String x:Key="Common.Edit">Edit</sys:String>
+    <sys:String x:Key="Common.Previous">Previous</sys:String>
+    <sys:String x:Key="Common.Next">Next</sys:String>
     <sys:String x:Key="Common.Browse">Browse…</sys:String>
     <sys:String x:Key="Common.CreatedDate">Created</sys:String>
     <sys:String x:Key="Common.Confirm">Confirm</sys:String>

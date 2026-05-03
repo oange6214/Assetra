@@ -72,7 +72,8 @@
                             Command="{Binding AddAssetDialog.CloseAddDialogCommand}"
                             DockPanel.Dock="Right"
                             Padding="0"
-                            Appearance="Transparent">
+                            Appearance="Transparent"
+            ToolTip="{DynamicResource Common.Close}">
               <ui:SymbolIcon Symbol="Dismiss24" FontSize="12" Foreground="{DynamicResource AppTextMuted}" />
             </ui:Button>
             <TextBlock

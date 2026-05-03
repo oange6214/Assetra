@@ -212,7 +212,7 @@
                             Margin="0,0,4,0"
                             Command="{Binding DataContext.BeginEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
-                            ToolTip="{DynamicResource Alerts.Edit}">
+                            ToolTip="{DynamicResource Common.Edit}">
                             <ui:Button.Style>
                                 <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                           <Setter Property="Appearance" Value="Transparent" />
@@ -259,7 +259,7 @@
                             Height="28"
                             Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
-                            ToolTip="{DynamicResource Alerts.Delete}">
+                            ToolTip="{DynamicResource Common.Delete}">
                             <ui:Button.Style>
                                 <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                           <Setter Property="Appearance" Value="Transparent" />
@@ -281,7 +281,7 @@
                             Margin="0,0,4,0"
                             Command="{Binding DataContext.SaveEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
-                            ToolTip="{DynamicResource Alerts.Save}">
+                            ToolTip="{DynamicResource Common.Save}">
                             <ui:Button.Style>
                                 <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                           <Setter Property="Appearance" Value="Transparent" />
@@ -304,7 +304,7 @@
                             Height="28"
                             Command="{Binding DataContext.CancelEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
-                            ToolTip="{DynamicResource Alerts.Cancel}">
+                            ToolTip="{DynamicResource Common.Cancel}">
                             <ui:Button.Style>
                                 <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                           <Setter Property="Appearance" Value="Transparent" />
@@ -877,7 +877,7 @@
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.BeginEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="{DynamicResource Alerts.Edit}">
+                                                        ToolTip="{DynamicResource Common.Edit}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                           <Setter Property="Appearance" Value="Transparent" />
@@ -900,7 +900,7 @@
                                                         Height="28"
                                                         Command="{Binding DataContext.DeleteRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="{DynamicResource Alerts.Delete}">
+                                                        ToolTip="{DynamicResource Common.Delete}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                           <Setter Property="Appearance" Value="Transparent" />
@@ -921,7 +921,7 @@
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.SaveEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="{DynamicResource Alerts.Save}">
+                                                        ToolTip="{DynamicResource Common.Save}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                           <Setter Property="Appearance" Value="Transparent" />
@@ -944,7 +944,7 @@
                                                         Height="28"
                                                         Command="{Binding DataContext.CancelEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="{DynamicResource Alerts.Cancel}">
+                                                        ToolTip="{DynamicResource Common.Cancel}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                           <Setter Property="Appearance" Value="Transparent" />
@@ -1323,7 +1323,7 @@
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.BeginEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="{DynamicResource Alerts.Edit}">
+                                                        ToolTip="{DynamicResource Common.Edit}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                           <Setter Property="Appearance" Value="Transparent" />
@@ -1345,7 +1345,7 @@
                                                         Height="28"
                                                         Command="{Binding DataContext.DeleteBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="{DynamicResource Alerts.Delete}">
+                                                        ToolTip="{DynamicResource Common.Delete}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                           <Setter Property="Appearance" Value="Transparent" />
@@ -1365,7 +1365,7 @@
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.SaveEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="{DynamicResource Alerts.Save}">
+                                                        ToolTip="{DynamicResource Common.Save}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                           <Setter Property="Appearance" Value="Transparent" />
@@ -1387,7 +1387,7 @@
                                                         Height="28"
                                                         Command="{Binding DataContext.CancelEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="{DynamicResource Alerts.Cancel}">
+                                                        ToolTip="{DynamicResource Common.Cancel}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                           <Setter Property="Appearance" Value="Transparent" />

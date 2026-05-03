@@ -57,14 +57,16 @@
                         Height="24"
                         Margin="0,0,4,0"
                         Command="{Binding DivCalendar.PrevYearCommand}"
-                        Appearance="Secondary">
+                        Appearance="Secondary"
+            ToolTip="{DynamicResource Common.Previous}">
                         <ui:SymbolIcon Symbol="ChevronLeft24" FontSize="10" Foreground="{DynamicResource AppTextSecondary}" />
                     </ui:Button>
                     <ui:Button
                         Width="24"
                         Height="24"
                         Command="{Binding DivCalendar.NextYearCommand}"
-                        Appearance="Secondary">
+                        Appearance="Secondary"
+            ToolTip="{DynamicResource Common.Next}">
                         <ui:SymbolIcon Symbol="ChevronRight24" FontSize="10" Foreground="{DynamicResource AppTextSecondary}" />
                     </ui:Button>
                 </StackPanel>

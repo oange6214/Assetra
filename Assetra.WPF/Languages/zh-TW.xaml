@@ -92,6 +92,9 @@
     <sys:String x:Key="Common.Price">現價</sys:String>
     <sys:String x:Key="Common.Cancel">取消</sys:String>
     <sys:String x:Key="Common.Save">儲存</sys:String>
+    <sys:String x:Key="Common.Edit">編輯</sys:String>
+    <sys:String x:Key="Common.Previous">上一頁</sys:String>
+    <sys:String x:Key="Common.Next">下一頁</sys:String>
     <sys:String x:Key="Common.Browse">瀏覽…</sys:String>
     <sys:String x:Key="Common.CreatedDate">建立日期</sys:String>
     <sys:String x:Key="Common.Confirm">確認</sys:String>

@@ -893,7 +893,8 @@
                             Margin="0,0,4,0"
                             Padding="0"
                             Command="{Binding TradeFilter.TradePagePrevCommand}"
-                            Appearance="Secondary">
+                            Appearance="Secondary"
+            ToolTip="{DynamicResource Common.Previous}">
               <ui:SymbolIcon
                                 Width="14"
                                 Height="14"
@@ -960,7 +961,8 @@
                             Margin="4,0,0,0"
                             Padding="0"
                             Command="{Binding TradeFilter.TradePageNextCommand}"
-                            Appearance="Secondary">
+                            Appearance="Secondary"
+            ToolTip="{DynamicResource Common.Next}">
               <ui:SymbolIcon
                                 Width="14"
                                 Height="14"
@@ -1034,7 +1036,8 @@
                             Margin="0,0,4,4"
                             Padding="0"
                             Command="{Binding TradeFilter.TradePagePrevCommand}"
-                            Appearance="Secondary">
+                            Appearance="Secondary"
+            ToolTip="{DynamicResource Common.Previous}">
               <ui:SymbolIcon
                                 Width="14"
                                 Height="14"
@@ -1097,7 +1100,8 @@
                             Margin="4,0,0,4"
                             Padding="0"
                             Command="{Binding TradeFilter.TradePageNextCommand}"
-                            Appearance="Secondary">
+                            Appearance="Secondary"
+            ToolTip="{DynamicResource Common.Next}">
               <ui:SymbolIcon
                                 Width="14"
                                 Height="14"

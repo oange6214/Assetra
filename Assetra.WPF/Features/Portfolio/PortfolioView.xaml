@@ -133,7 +133,8 @@
                                 Command="{Binding CloseCashDetailCommand}"
                                 DockPanel.Dock="Right"
                                 Padding="0"
-                                Appearance="Transparent">
+                                Appearance="Transparent"
+            ToolTip="{DynamicResource Common.Close}">
                 <ui:SymbolIcon Symbol="Dismiss24" FontSize="11" Foreground="{DynamicResource AppTextSecondary}" />
               </ui:Button>
               <!--  Edit pencil → opens shared EditAssetDialog  -->
@@ -145,7 +146,8 @@
                                 CommandParameter="{Binding SelectedCashRow}"
                                 DockPanel.Dock="Right"
                                 Padding="0"
-                                Appearance="Transparent">
+                                Appearance="Transparent"
+            ToolTip="{DynamicResource Common.Edit}">
                 <ui:SymbolIcon Symbol="Edit24" FontSize="12" Foreground="{DynamicResource AppTextPrimary}" />
               </ui:Button>
               <!--  設為預設 / 取消預設 toggle  -->
@@ -360,7 +362,8 @@
                                                             VerticalAlignment="Center"
                                                             Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                             CommandParameter="{Binding}"
-                                                            Appearance="Transparent">
+                                                            Appearance="Transparent"
+            ToolTip="{DynamicResource Common.Edit}">
                               <ui:SymbolIcon Symbol="Edit24" FontSize="11" Foreground="{DynamicResource AppTextMuted}" />
                             </ui:Button>
                           </Grid>
@@ -485,7 +488,8 @@
                                 Command="{Binding CloseLiabilityDetailCommand}"
                                 DockPanel.Dock="Right"
                                 Padding="0"
-                                Appearance="Transparent">
+                                Appearance="Transparent"
+            ToolTip="{DynamicResource Common.Close}">
                 <ui:SymbolIcon Symbol="Dismiss24" FontSize="11" Foreground="{DynamicResource AppTextSecondary}" />
               </ui:Button>
               <TextBlock
@@ -675,7 +679,8 @@
                                                             VerticalAlignment="Center"
                                                             Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                             CommandParameter="{Binding}"
-                                                            Appearance="Transparent">
+                                                            Appearance="Transparent"
+            ToolTip="{DynamicResource Common.Edit}">
                               <ui:SymbolIcon Symbol="Edit24" FontSize="11" Foreground="{DynamicResource AppTextMuted}" />
                             </ui:Button>
                           </Grid>
@@ -1041,7 +1046,8 @@
                                     Command="{Binding ClosePositionDetailCommand}"
                                     DockPanel.Dock="Right"
                                     Padding="0"
-                                    Appearance="Transparent">
+                                    Appearance="Transparent"
+            ToolTip="{DynamicResource Common.Close}">
                   <ui:SymbolIcon Symbol="Dismiss24" FontSize="11" Foreground="{DynamicResource AppTextSecondary}" />
                 </ui:Button>
                 <!--  Edit pencil → opens shared EditAssetDialog  -->
@@ -1053,7 +1059,8 @@
                                     CommandParameter="{Binding SelectedPositionRow}"
                                     DockPanel.Dock="Right"
                                     Padding="0"
-                                    Appearance="Transparent">
+                                    Appearance="Transparent"
+            ToolTip="{DynamicResource Common.Edit}">
                   <ui:SymbolIcon Symbol="Edit24" FontSize="12" Foreground="{DynamicResource AppTextPrimary}" />
                 </ui:Button>
                 <!--  Symbol + Name (left-fill)  -->
@@ -1569,7 +1576,8 @@
                                                             VerticalAlignment="Center"
                                                             Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                             CommandParameter="{Binding}"
-                                                            Appearance="Transparent">
+                                                            Appearance="Transparent"
+            ToolTip="{DynamicResource Common.Edit}">
                               <ui:SymbolIcon Symbol="Edit24" FontSize="11" Foreground="{DynamicResource AppTextMuted}" />
                             </ui:Button>
                           </Grid>
