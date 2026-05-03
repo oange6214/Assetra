@@ -181,15 +181,6 @@
                                         <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Settings}">
                                             <Setter Property="Text" Value="{DynamicResource Nav.Settings}" />
                                         </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Cashflow}">
-                                            <Setter Property="Text" Value="{DynamicResource Nav.Cashflow}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Insights}">
-                                            <Setter Property="Text" Value="{DynamicResource Nav.Insights}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.MultiAsset}">
-                                            <Setter Property="Text" Value="{DynamicResource Nav.MultiAsset}" />
-                                        </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </TextBlock.Style>
