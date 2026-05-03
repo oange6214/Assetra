@@ -20,12 +20,12 @@
         <!--  ── KPI Bar ─────────────────────────────────────────────────────  -->
         <Border
             Grid.Row="0"
-            Margin="16,12,16,0"
+            Margin="24,24,24,0"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
-            CornerRadius="{StaticResource RadiusMd}">
-            <Grid Margin="16,12">
+            CornerRadius="{StaticResource Card.Radius}">
+            <Grid Margin="20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
@@ -90,13 +90,13 @@
         <!--  ── Accordion  ───────────────────────────────────────────────────  -->
         <ScrollViewer
             Grid.Row="1"
-            Margin="16,8,16,16"
+            Margin="24,16,24,24"
             VerticalScrollBarVisibility="Auto">
             <StackPanel>
 
                 <!--  資產 Expander  -->
                 <Expander
-                    Margin="0,0,0,8"
+                    Margin="0,0,0,16"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
@@ -160,7 +160,7 @@
 
                 <!--  投資 Expander  -->
                 <Expander
-                    Margin="0,0,0,8"
+                    Margin="0,0,0,16"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
@@ -224,7 +224,7 @@
 
                 <!--  負債 Expander  -->
                 <Expander
-                    Margin="0,0,0,8"
+                    Margin="0,0,0,16"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"

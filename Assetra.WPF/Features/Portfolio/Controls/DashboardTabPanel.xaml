@@ -12,14 +12,14 @@
     mc:Ignorable="d">
 
   <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-    <Grid Margin="20,16,20,20">
+    <Grid Margin="24">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
-        <RowDefinition Height="12" />
-        <RowDefinition Height="200" />
-        <RowDefinition Height="12" />
+        <RowDefinition Height="16" />
+        <RowDefinition Height="220" />
+        <RowDefinition Height="16" />
         <RowDefinition Height="Auto" />
-        <RowDefinition Height="12" />
+        <RowDefinition Height="16" />
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
 
@@ -27,22 +27,22 @@
       <Grid Grid.Row="0">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="3*" />
-          <ColumnDefinition Width="8" />
+          <ColumnDefinition Width="16" />
           <ColumnDefinition Width="2*" />
-          <ColumnDefinition Width="8" />
+          <ColumnDefinition Width="16" />
           <ColumnDefinition Width="2*" />
-          <ColumnDefinition Width="8" />
+          <ColumnDefinition Width="16" />
           <ColumnDefinition Width="2*" />
         </Grid.ColumnDefinitions>
 
         <!--  Hero: Net Worth  -->
         <Border
                     Grid.Column="0"
-                    Padding="20,16"
+                    Padding="20"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusLg}">
+                    CornerRadius="{StaticResource Card.Radius}">
           <StackPanel>
             <TextBlock
                             FontSize="{StaticResource FontSizeSm}"
@@ -95,7 +95,7 @@
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusLg}">
+                    CornerRadius="{StaticResource Card.Radius}">
           <StackPanel>
             <TextBlock
                             FontSize="{StaticResource FontSizeSm}"
@@ -132,7 +132,7 @@
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusLg}">
+                    CornerRadius="{StaticResource Card.Radius}">
           <StackPanel>
             <TextBlock
                             FontSize="{StaticResource FontSizeSm}"
@@ -154,7 +154,7 @@
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusLg}">
+                    CornerRadius="{StaticResource Card.Radius}">
           <StackPanel>
             <TextBlock
                             FontSize="{StaticResource FontSizeSm}"
@@ -185,11 +185,11 @@
       <!--  ═══ Row 2: 10-day Trend Chart (full width) ═══  -->
       <Border
                 Grid.Row="2"
-                Padding="16,12,16,8"
+                Padding="20"
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorderLight}"
                 BorderThickness="1"
-                CornerRadius="{StaticResource RadiusLg}">
+                CornerRadius="{StaticResource Card.Radius}">
         <Grid>
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -217,18 +217,18 @@
       <Grid Grid.Row="4">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*" />
-          <ColumnDefinition Width="8" />
+          <ColumnDefinition Width="16" />
           <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
         <!--  Top Holdings  -->
         <Border
                     Grid.Column="0"
-                    Padding="16,12"
+                    Padding="20"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusLg}">
+                    CornerRadius="{StaticResource Card.Radius}">
           <StackPanel>
             <DockPanel Margin="0,0,0,8">
               <TextBlock
@@ -315,11 +315,11 @@
         <!--  Recent Trades  -->
         <Border
                     Grid.Column="2"
-                    Padding="16,12"
+                    Padding="20"
                     Background="{DynamicResource AppSurface}"
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusLg}">
+                    CornerRadius="{StaticResource Card.Radius}">
           <StackPanel>
             <DockPanel Margin="0,0,0,8">
               <TextBlock

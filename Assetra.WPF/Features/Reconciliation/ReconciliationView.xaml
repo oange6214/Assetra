@@ -214,7 +214,7 @@
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
-                CornerRadius="{StaticResource RadiusLg}">
+                CornerRadius="{StaticResource Card.Radius}">
                 <ui:DataGrid
                     AutoGenerateColumns="False"
                     Background="Transparent"
