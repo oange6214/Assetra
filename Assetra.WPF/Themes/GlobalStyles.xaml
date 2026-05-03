@@ -4,6 +4,37 @@
     xmlns:models="clr-namespace:Assetra.Core.Models;assembly=Assetra.Core"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
 
+  <!--
+        ════════════════════════════════════════════════════════════════
+        Wpf.Ui Button Appearance contrast fix
+        ════════════════════════════════════════════════════════════════
+        Wpf.Ui 4.x's button.baml only overrides Background for Danger /
+        Caution / Success / Info appearances; Foreground stays at the
+        base style's TextFillColorPrimaryBrush, which is theme-aware
+        (dark in Light theme). On a saturated red/orange/green/blue
+        background that produces unreadable dark-on-saturated text.
+
+        Force white Foreground for those four appearances. Primary stays
+        on its own AccentButtonForeground key (already overridden in
+        the theme dictionaries) so this trigger doesn't affect it.
+    -->
+  <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
+    <Style.Triggers>
+      <Trigger Property="Appearance" Value="Danger">
+        <Setter Property="Foreground" Value="#FFFFFF" />
+      </Trigger>
+      <Trigger Property="Appearance" Value="Caution">
+        <Setter Property="Foreground" Value="#FFFFFF" />
+      </Trigger>
+      <Trigger Property="Appearance" Value="Success">
+        <Setter Property="Foreground" Value="#FFFFFF" />
+      </Trigger>
+      <Trigger Property="Appearance" Value="Info">
+        <Setter Property="Foreground" Value="#FFFFFF" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
   <!--  ── App Logo (DrawingImage — resolution-independent, usable as ui:ImageIcon.Source) ──  -->
   <DrawingImage x:Key="AssetraLogo">
     <DrawingImage.Drawing>
