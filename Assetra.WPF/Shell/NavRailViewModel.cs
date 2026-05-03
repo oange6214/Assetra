@@ -5,18 +5,6 @@ namespace Assetra.WPF.Shell;
 
 public partial class NavRailViewModel : ObservableObject
 {
-    // ── Expand/collapse (hamburger) ────────────────────────────────────────
-
-    [ObservableProperty]
-    private bool _isExpanded;
-
-    public bool IsCollapsed => !IsExpanded;
-
-    partial void OnIsExpandedChanged(bool value) => OnPropertyChanged(nameof(IsCollapsed));
-
-    [RelayCommand]
-    private void ToggleExpand() => IsExpanded = !IsExpanded;
-
     // ── Navigation history ─────────────────────────────────────────────────
 
     private readonly Stack<NavSection> _backStack = new();
