@@ -186,28 +186,28 @@
                             Grid.Column="0"
                             Margin="-4,0,0,0"
                             Orientation="Horizontal">
-                            <Button
+                            <ui:Button
                                 Margin="4,0,0,0"
+                                Appearance="Transparent"
                                 Command="{Binding NavRail.GoBackCommand}"
-                                Style="{StaticResource BtnIcon}"
                                 ToolTip="{DynamicResource Nav.GoBack}">
                                 <ui:SymbolIcon Symbol="ChevronRight24" FontSize="{StaticResource FontSizeBase}" Foreground="{DynamicResource AppTextMuted}" />
-                            </Button>
-                            <Button
+                            </ui:Button>
+                            <ui:Button
                                 Margin="2,0,0,0"
+                                Appearance="Transparent"
                                 Command="{Binding NavRail.GoForwardCommand}"
-                                Style="{StaticResource BtnIcon}"
                                 ToolTip="{DynamicResource Nav.GoForward}">
                                 <ui:SymbolIcon Symbol="ChevronLeft24" FontSize="{StaticResource FontSizeBase}" Foreground="{DynamicResource AppTextMuted}" />
-                            </Button>
-                            <Button
+                            </ui:Button>
+                            <ui:Button
                                 x:Name="SearchIconBtn"
                                 Margin="8,0,0,0"
+                                Appearance="Transparent"
                                 Command="{Binding ToggleSearchCommand}"
-                                Style="{StaticResource BtnIcon}"
                                 ToolTip="Ctrl+K">
                                 <ui:SymbolIcon Symbol="Search24" FontSize="{StaticResource FontSizeMd}" Foreground="{DynamicResource AppTextMuted}" />
-                            </Button>
+                            </ui:Button>
                         </StackPanel>
 
                         <!--  Center: Current page title (dynamic per ActiveSection)  -->
@@ -290,9 +290,9 @@
                             Grid.Column="2"
                             Margin="0,0,8,0"
                             Orientation="Horizontal">
-                            <Button
+                            <ui:Button
+                                Appearance="Transparent"
                                 Command="{Binding ToggleThemeCommand}"
-                                Style="{StaticResource BtnIcon}"
                                 ToolTip="{Binding ThemeToggleLabel}">
                                 <ui:SymbolIcon FontSize="{StaticResource FontSizeMd}" Foreground="{DynamicResource AppTextMuted}">
                                     <ui:SymbolIcon.Style>
@@ -306,7 +306,7 @@
                                         </Style>
                                     </ui:SymbolIcon.Style>
                                 </ui:SymbolIcon>
-                            </Button>
+                            </ui:Button>
                         </StackPanel>
 
                     </Grid>
@@ -314,86 +314,180 @@
             </ui:TitleBar>
         </Border>
 
-        <!--  ── Row 1: Left NavRail | Content area ──  -->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <!--  NavRail — width driven by Border inside  -->
-                <ColumnDefinition Width="*" />
-                <!--  Content  -->
-            </Grid.ColumnDefinitions>
+        <!--  ── Row 1: NavigationView (pane + content) ──  -->
+        <ui:NavigationView
+            x:Name="RootNavView"
+            Grid.Row="1"
+            CompactPaneLength="56"
+            IsBackButtonVisible="Collapsed"
+            IsPaneToggleVisible="True"
+            OpenPaneLength="220"
+            PaneDisplayMode="LeftMinimal"
+            SelectionChanged="RootNavView_SelectionChanged">
 
-            <!--  ── Left NavRail ──  -->
-            <shell:NavRailView Grid.Column="0" />
+            <ui:NavigationView.MenuItems>
 
-            <!--  ── Content area (active feature view takes full width) ──  -->
-            <ContentControl Grid.Column="1" Content="{Binding}">
-                <ContentControl.Style>
-                    <Style TargetType="{x:Type ContentControl}">
-                        <Setter Property="ContentTemplate" Value="{StaticResource PortfolioContentTemplate}" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Portfolio}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource PortfolioContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.FinancialOverview}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource FinancialOverviewContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Categories}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource CategoriesContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Recurring}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource RecurringContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Goals}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource GoalsContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Trends}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource TrendsContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Reports}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource ReportsContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Alerts}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource AlertsContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Import}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource ImportContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.RealEstate}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource RealEstateContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Insurance}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource InsuranceContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Retirement}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource RetirementContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.PhysicalAsset}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource PhysicalAssetContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Fire}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource FireContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.MonteCarlo}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource MonteCarloContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Settings}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource SettingsContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Cashflow}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource CashflowHubContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Insights}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource InsightsHubContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.MultiAsset}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource MultiAssetHubContentTemplate}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ContentControl.Style>
-            </ContentControl>
-        </Grid>
+                <ui:NavigationViewItem
+                    x:Name="NavPortfolio"
+                    Content="{DynamicResource Nav.Portfolio}"
+                    TargetPageTag="Portfolio">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Briefcase24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem
+                    x:Name="NavFinancialOverview"
+                    Content="{DynamicResource FinancialOverview.Nav.Label}"
+                    TargetPageTag="FinancialOverview">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="DataPie24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem
+                    x:Name="NavCashflow"
+                    Content="{DynamicResource Nav.Cashflow}"
+                    TargetPageTag="Cashflow">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Wallet24" />
+                    </ui:NavigationViewItem.Icon>
+                    <ui:NavigationViewItem.InfoBadge>
+                        <ui:InfoBadge
+                            Severity="Attention"
+                            Value="{Binding Recurring.PendingCount}"
+                            Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </ui:NavigationViewItem.InfoBadge>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem
+                    x:Name="NavInsights"
+                    Content="{DynamicResource Nav.Insights}"
+                    TargetPageTag="Insights">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Pulse24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem
+                    x:Name="NavMultiAsset"
+                    Content="{DynamicResource Nav.MultiAsset}"
+                    TargetPageTag="MultiAsset">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Home24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem
+                    x:Name="NavAlerts"
+                    Content="{DynamicResource Nav.Alerts}"
+                    TargetPageTag="Alerts">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Alert24" />
+                    </ui:NavigationViewItem.Icon>
+                    <ui:NavigationViewItem.InfoBadge>
+                        <ui:InfoBadge
+                            Severity="Critical"
+                            Value="{Binding Alerts.TriggeredCount}"
+                            Visibility="{Binding Alerts.HasTriggeredAlerts, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </ui:NavigationViewItem.InfoBadge>
+                </ui:NavigationViewItem>
+
+            </ui:NavigationView.MenuItems>
+
+            <ui:NavigationView.FooterMenuItems>
+
+                <ui:NavigationViewItem
+                    x:Name="NavImport"
+                    Content="{DynamicResource Nav.Import}"
+                    TargetPageTag="Import">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="DocumentArrowDown24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem
+                    x:Name="NavSettings"
+                    Content="{DynamicResource Nav.Settings}"
+                    TargetPageTag="Settings">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Settings24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+            </ui:NavigationView.FooterMenuItems>
+
+            <!--  ── Content area (active feature view) — overlays NavigationView frame ──  -->
+            <ui:NavigationView.ContentOverlay>
+                <ContentControl Content="{Binding}">
+                    <ContentControl.Style>
+                        <Style TargetType="{x:Type ContentControl}">
+                            <Setter Property="ContentTemplate" Value="{StaticResource PortfolioContentTemplate}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Portfolio}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource PortfolioContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.FinancialOverview}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource FinancialOverviewContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Categories}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource CategoriesContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Recurring}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource RecurringContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Goals}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource GoalsContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Trends}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource TrendsContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Reports}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource ReportsContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Alerts}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource AlertsContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Import}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource ImportContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.RealEstate}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource RealEstateContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Insurance}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource InsuranceContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Retirement}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource RetirementContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.PhysicalAsset}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource PhysicalAssetContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Fire}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource FireContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.MonteCarlo}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource MonteCarloContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Settings}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource SettingsContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Cashflow}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource CashflowHubContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Insights}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource InsightsHubContentTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.MultiAsset}">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource MultiAssetHubContentTemplate}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                </ContentControl>
+            </ui:NavigationView.ContentOverlay>
+
+        </ui:NavigationView>
 
         <!--  Search backdrop — sits above content, behind the popup HWnd  -->
         <Border
