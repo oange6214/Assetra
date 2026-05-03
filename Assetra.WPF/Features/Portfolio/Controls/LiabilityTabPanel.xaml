@@ -313,7 +313,7 @@
                             Text="{DynamicResource Portfolio.Liability.Empty}" />
           </StackPanel>
           <ui:Button
-                        Height="34"
+                        Height="36"
                         Margin="0,16,0,0"
                         Padding="20,0"
                         HorizontalAlignment="Center"

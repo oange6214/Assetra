@@ -136,7 +136,7 @@
 
           <!--  清除篩選（有啟用中篩選時才顯示）  -->
           <ui:Button
-                        Height="30"
+                        Height="36"
                         Margin="8,0,0,0"
                         Padding="8,0"
                         VerticalAlignment="Center"
@@ -244,7 +244,7 @@
 
                   <ui:Button
                                         Grid.Row="1"
-                                        Height="30"
+                                        Height="36"
                                         Margin="0,0,0,8"
                                         HorizontalContentAlignment="Center"
                                         Command="{Binding TradeFilter.ClearTradeAssetFiltersCommand}"
@@ -389,7 +389,7 @@
                   <!--  Clear filters 按鈕  -->
                   <ui:Button
                                         Grid.Row="1"
-                                        Height="30"
+                                        Height="36"
                                         Margin="0,0,0,8"
                                         HorizontalContentAlignment="Center"
                                         Command="{Binding TradeFilter.ClearTradeTypeFiltersCommand}"
@@ -889,7 +889,7 @@
             <!--  上一頁 — 用 WPF-UI SymbolIcon (內建 Fluent Icons 字型，不依賴系統字型)  -->
             <ui:Button
                             Width="30"
-                            Height="30"
+                            Height="36"
                             Margin="0,0,4,0"
                             Padding="0"
                             Command="{Binding TradeFilter.TradePagePrevCommand}"
@@ -925,7 +925,7 @@
                                             Visibility="{Binding IsEllipsis, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <!--  頁碼按鈕 — 當前頁高亮；Padding=0 避免窄按鈕內容被切  -->
                     <ui:Button
-                                            Height="30"
+                                            Height="36"
                                             MinWidth="30"
                                             Padding="4,0"
                                             Command="{Binding DataContext.TradeFilter.GoToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -957,7 +957,7 @@
             <!--  下一頁 — SymbolIcon 同上理由  -->
             <ui:Button
                             Width="30"
-                            Height="30"
+                            Height="36"
                             Margin="4,0,0,0"
                             Padding="0"
                             Command="{Binding TradeFilter.TradePageNextCommand}"
@@ -1032,7 +1032,7 @@
           <WrapPanel Margin="0,10,0,0" VerticalAlignment="Center">
             <ui:Button
                             Width="30"
-                            Height="30"
+                            Height="36"
                             Margin="0,0,4,4"
                             Padding="0"
                             Command="{Binding TradeFilter.TradePagePrevCommand}"
@@ -1065,7 +1065,7 @@
                                             TextAlignment="Center"
                                             Visibility="{Binding IsEllipsis, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <ui:Button
-                                            Height="30"
+                                            Height="36"
                                             MinWidth="30"
                                             Padding="4,0"
                                             Command="{Binding DataContext.TradeFilter.GoToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -1096,7 +1096,7 @@
 
             <ui:Button
                             Width="30"
-                            Height="30"
+                            Height="36"
                             Margin="4,0,0,4"
                             Padding="0"
                             Command="{Binding TradeFilter.TradePageNextCommand}"

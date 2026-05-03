@@ -66,7 +66,7 @@
 
       <!--  Floating Add Record button overlaid on the tab header strip  -->
       <ui:Button
-                Height="35"
+                Height="36"
                 Margin="0,4,12,0"
                 Padding="14,0"
                 HorizontalAlignment="Right"
@@ -127,7 +127,7 @@
               <!--  Close  -->
               <ui:Button
                                 Width="30"
-                                Height="30"
+                                Height="36"
                                 Margin="6,0,0,0"
                                 VerticalAlignment="Center"
                                 Command="{Binding CloseCashDetailCommand}"
@@ -140,7 +140,7 @@
               <!--  Edit pencil → opens shared EditAssetDialog  -->
               <ui:Button
                                 Width="30"
-                                Height="30"
+                                Height="36"
                                 VerticalAlignment="Center"
                                 Command="{Binding Account.OpenEditCashCommand}"
                                 CommandParameter="{Binding SelectedCashRow}"
@@ -153,7 +153,7 @@
               <!--  設為預設 / 取消預設 toggle  -->
               <ui:Button
                                 Width="30"
-                                Height="30"
+                                Height="36"
                                 Margin="0,0,4,0"
                                 VerticalAlignment="Center"
                                 Command="{Binding Account.ToggleDefaultCashAccountCommand}"
@@ -355,8 +355,8 @@
                             </Border>
                             <ui:Button
                                                             Grid.Column="2"
-                                                            Width="28"
-                                                            Height="28"
+                                                            Width="32"
+                                                            Height="32"
                                                             Padding="0"
                                                             HorizontalAlignment="Right"
                                                             VerticalAlignment="Center"
@@ -482,7 +482,7 @@
               <!--  Close  -->
               <ui:Button
                                 Width="30"
-                                Height="30"
+                                Height="36"
                                 Margin="6,0,0,0"
                                 VerticalAlignment="Center"
                                 Command="{Binding CloseLiabilityDetailCommand}"
@@ -672,8 +672,8 @@
                             </Border>
                             <ui:Button
                                                             Grid.Column="2"
-                                                            Width="28"
-                                                            Height="28"
+                                                            Width="32"
+                                                            Height="32"
                                                             Padding="0"
                                                             HorizontalAlignment="Right"
                                                             VerticalAlignment="Center"
@@ -1040,7 +1040,7 @@
                 <!--  Close  -->
                 <ui:Button
                                     Width="30"
-                                    Height="30"
+                                    Height="36"
                                     Margin="6,0,0,0"
                                     VerticalAlignment="Center"
                                     Command="{Binding ClosePositionDetailCommand}"
@@ -1053,7 +1053,7 @@
                 <!--  Edit pencil → opens shared EditAssetDialog  -->
                 <ui:Button
                                     Width="30"
-                                    Height="30"
+                                    Height="36"
                                     VerticalAlignment="Center"
                                     Command="{Binding Account.OpenEditPositionCommand}"
                                     CommandParameter="{Binding SelectedPositionRow}"
@@ -1569,8 +1569,8 @@
                             </Border>
                             <ui:Button
                                                             Grid.Column="2"
-                                                            Width="28"
-                                                            Height="28"
+                                                            Width="32"
+                                                            Height="32"
                                                             Padding="0"
                                                             HorizontalAlignment="Right"
                                                             VerticalAlignment="Center"
@@ -1739,7 +1739,7 @@
                         TextWrapping="Wrap" />
           <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
             <ui:Button
-                            Height="30"
+                            Height="36"
                             Margin="0,0,8,0"
                             Padding="14,0"
                             Command="{Binding ConfirmDialogNoCommand}"
@@ -1747,7 +1747,7 @@
               <TextBlock Text="{DynamicResource Common.Cancel}" />
             </ui:Button>
             <ui:Button
-                            Height="30"
+                            Height="36"
                             Padding="14,0"
                             Command="{Binding ConfirmDialogYesCommand}"
                             Appearance="Danger">

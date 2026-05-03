@@ -89,8 +89,8 @@
 
                   <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <ui:Button
-                                            Width="28"
-                                            Height="28"
+                                            Width="32"
+                                            Height="32"
                                             Margin="0,0,4,0"
                                             Command="{Binding BeginEditCommand}"
                                             ToolTip="{DynamicResource Alerts.Edit}">
@@ -109,8 +109,8 @@
                     </ui:Button>
 
                     <ui:Button
-                                            Width="28"
-                                            Height="28"
+                                            Width="32"
+                                            Height="32"
                                             Margin="0,0,4,0"
                                             Command="{Binding DataContext.RemoveRuleCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                             CommandParameter="{Binding Id}"
@@ -130,8 +130,8 @@
                     </ui:Button>
 
                     <ui:Button
-                                            Width="28"
-                                            Height="28"
+                                            Width="32"
+                                            Height="32"
                                             Margin="0,0,4,0"
                                             Command="{Binding DataContext.SaveRuleCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                             CommandParameter="{Binding}"
@@ -151,8 +151,8 @@
                     </ui:Button>
 
                     <ui:Button
-                                            Width="28"
-                                            Height="28"
+                                            Width="32"
+                                            Height="32"
                                             Command="{Binding CancelEditCommand}"
                                             ToolTip="{DynamicResource Alerts.Cancel}">
                       <ui:Button.Style>
@@ -690,8 +690,8 @@
 
                   <!--  View mode: pencil  -->
                   <ui:Button
-                                        Width="24"
-                                        Height="24"
+                                        Width="32"
+                                        Height="32"
                                         Command="{Binding BeginEditCommand}"
                                         FontSize="11"
                                         ToolTip="{DynamicResource Alerts.Edit}">
@@ -715,8 +715,8 @@
 
                   <!--  View mode: delete  -->
                   <ui:Button
-                                        Width="24"
-                                        Height="24"
+                                        Width="32"
+                                        Height="32"
                                         Command="{Binding DataContext.RemoveRuleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding Id}"
                                         ToolTip="{DynamicResource Alerts.Delete}">
@@ -740,8 +740,8 @@
 
                   <!--  Edit mode: save ✓  -->
                   <ui:Button
-                                        Width="24"
-                                        Height="24"
+                                        Width="32"
+                                        Height="32"
                                         Command="{Binding DataContext.SaveRuleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
                                         ToolTip="{DynamicResource Alerts.Save}">
@@ -761,8 +761,8 @@
 
                   <!--  Edit mode: cancel ✕  -->
                   <ui:Button
-                                        Width="24"
-                                        Height="24"
+                                        Width="32"
+                                        Height="32"
                                         Command="{Binding CancelEditCommand}"
                                         ToolTip="{DynamicResource Alerts.Cancel}">
                     <ui:Button.Style>

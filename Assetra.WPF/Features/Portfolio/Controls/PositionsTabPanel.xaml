@@ -257,7 +257,7 @@
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Empty.Hint}" />
           <ui:Button
-                        Height="34"
+                        Height="36"
                         Padding="20,0"
                         HorizontalAlignment="Center"
                         Command="{Binding AddRecordCommand}"
@@ -862,7 +862,7 @@
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Empty.Hint}" />
           <ui:Button
-                        Height="34"
+                        Height="36"
                         Padding="20,0"
                         HorizontalAlignment="Center"
                         Command="{Binding AddRecordCommand}"

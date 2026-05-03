@@ -207,8 +207,8 @@
                         Orientation="Horizontal">
                         <!--  View mode buttons  -->
                         <ui:Button
-                            Width="28"
-                            Height="28"
+                            Width="32"
+                            Height="32"
                             Margin="0,0,4,0"
                             Command="{Binding DataContext.BeginEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
@@ -231,8 +231,8 @@
                         </ui:Button>
 
                         <ui:Button
-                            Width="28"
-                            Height="28"
+                            Width="32"
+                            Height="32"
                             Margin="0,0,4,0"
                             Command="{Binding DataContext.ToggleArchiveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
@@ -255,8 +255,8 @@
                         </ui:Button>
 
                         <ui:Button
-                            Width="28"
-                            Height="28"
+                            Width="32"
+                            Height="32"
                             Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             ToolTip="{DynamicResource Common.Delete}">
@@ -276,8 +276,8 @@
 
                         <!--  Edit mode buttons  -->
                         <ui:Button
-                            Width="28"
-                            Height="28"
+                            Width="32"
+                            Height="32"
                             Margin="0,0,4,0"
                             Command="{Binding DataContext.SaveEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
@@ -300,8 +300,8 @@
                         </ui:Button>
 
                         <ui:Button
-                            Width="28"
-                            Height="28"
+                            Width="32"
+                            Height="32"
                             Command="{Binding DataContext.CancelEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             ToolTip="{DynamicResource Common.Cancel}">
@@ -872,8 +872,8 @@
                                                     VerticalAlignment="Center"
                                                     Orientation="Horizontal">
                                                     <ui:Button
-                                                        Width="28"
-                                                        Height="28"
+                                                        Width="32"
+                                                        Height="32"
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.BeginEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
@@ -896,8 +896,8 @@
                                                     </ui:Button>
 
                                                     <ui:Button
-                                                        Width="28"
-                                                        Height="28"
+                                                        Width="32"
+                                                        Height="32"
                                                         Command="{Binding DataContext.DeleteRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Delete}">
@@ -916,8 +916,8 @@
                                                     </ui:Button>
 
                                                     <ui:Button
-                                                        Width="28"
-                                                        Height="28"
+                                                        Width="32"
+                                                        Height="32"
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.SaveEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
@@ -940,8 +940,8 @@
                                                     </ui:Button>
 
                                                     <ui:Button
-                                                        Width="28"
-                                                        Height="28"
+                                                        Width="32"
+                                                        Height="32"
                                                         Command="{Binding DataContext.CancelEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Cancel}">
@@ -1318,8 +1318,8 @@
                                                     VerticalAlignment="Center"
                                                     Orientation="Horizontal">
                                                     <ui:Button
-                                                        Width="28"
-                                                        Height="28"
+                                                        Width="32"
+                                                        Height="32"
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.BeginEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
@@ -1341,8 +1341,8 @@
                                                             Symbol="Edit24" />
                                                     </ui:Button>
                                                     <ui:Button
-                                                        Width="28"
-                                                        Height="28"
+                                                        Width="32"
+                                                        Height="32"
                                                         Command="{Binding DataContext.DeleteBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Delete}">
@@ -1360,8 +1360,8 @@
                                                         <ui:SymbolIcon FontSize="{StaticResource FontSizeXs}" Symbol="Delete24" Foreground="{DynamicResource AppDanger}" />
                                                     </ui:Button>
                                                     <ui:Button
-                                                        Width="28"
-                                                        Height="28"
+                                                        Width="32"
+                                                        Height="32"
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.SaveEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
@@ -1383,8 +1383,8 @@
                                                             Symbol="Checkmark24" />
                                                     </ui:Button>
                                                     <ui:Button
-                                                        Width="28"
-                                                        Height="28"
+                                                        Width="32"
+                                                        Height="32"
                                                         Command="{Binding DataContext.CancelEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Cancel}">
