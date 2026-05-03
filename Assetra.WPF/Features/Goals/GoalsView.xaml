@@ -13,7 +13,7 @@
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
 
-    <Grid Margin="24">
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -43,13 +43,22 @@
             Grid.Row="1"
             Padding="16">
             <Grid>
-                <TextBlock
+                <StackPanel
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    FontStyle="Italic"
-                    Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{DynamicResource Goals.Empty}"
-                    Visibility="{Binding HasNoGoals, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    Visibility="{Binding HasNoGoals, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ui:SymbolIcon
+                        HorizontalAlignment="Center"
+                        FontSize="48"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Symbol="Target24" />
+                    <TextBlock
+                        Margin="0,12,0,0"
+                        HorizontalAlignment="Center"
+                        FontSize="{DynamicResource FontSizeSm}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Goals.Empty}" />
+                </StackPanel>
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Visibility="{Binding HasGoals, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <ItemsControl ItemsSource="{Binding Goals}">
