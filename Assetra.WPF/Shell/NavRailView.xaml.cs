@@ -8,8 +8,11 @@ namespace Assetra.WPF.Shell;
 public partial class NavRailView : UserControl
 {
     private NavRailViewModel? _navRail;
-    private bool _serviceProviderWired;
-    private bool _suppressSectionWriteBack;
+    // Track active item ourselves: NavigationView only updates its SelectedItem
+    // from its own internal click path (which we bypass to dodge the Frame.Navigate
+    // throw on null TargetPageType). Without this, Activate() calls would stack red
+    // indicator bars instead of switching them.
+    private NavigationViewItem? _activeItem;
 
     public NavRailView()
     {
@@ -22,69 +25,27 @@ public partial class NavRailView : UserControl
         if (_navRail is not null)
             _navRail.PropertyChanged -= OnNavRailPropertyChanged;
 
-        if (e.NewValue is not MainViewModel main)
-        {
-            _navRail = null;
-            return;
-        }
+        _navRail = (e.NewValue as MainViewModel)?.NavRail;
+        if (_navRail is null) return;
 
-        _navRail = main.NavRail;
         _navRail.PropertyChanged += OnNavRailPropertyChanged;
-
-        // Hand the DI provider to NavigationView once so it can resolve Pages
-        // through Wpf.Ui's TargetPageType navigation.
-        if (!_serviceProviderWired)
-        {
-            RootNavView.SetServiceProvider(main.Services);
-            _serviceProviderWired = true;
-        }
-
-        // Initial navigation: route to the Page matching the current ActiveSection.
-        Dispatcher.BeginInvoke(() => NavigateToPageFor(_navRail.SelectedRailSection));
+        Dispatcher.BeginInvoke(() => SyncNavViewSelection(_navRail.SelectedRailSection));
     }
 
     private void OnNavRailPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(NavRailViewModel.SelectedRailSection) || _navRail is null) return;
-        Dispatcher.Invoke(() => NavigateToPageFor(_navRail.SelectedRailSection));
+        Dispatcher.Invoke(() => SyncNavViewSelection(_navRail.SelectedRailSection));
     }
 
-    // SelectionChanged → user clicked a pane item. Wpf.Ui has already navigated
-    // the Frame to TargetPageType; we just need to push the matching NavSection
-    // back into NavRailViewModel so ActiveSection / history / hub-tab bindings
-    // stay in sync.
-    private void RootNavView_SelectionChanged(object sender, RoutedEventArgs e)
+    private void SyncNavViewSelection(NavSection section)
     {
-        if (_navRail is null || _suppressSectionWriteBack) return;
-        if (RootNavView.SelectedItem is not NavigationViewItem item) return;
+        var target = FindNavItem(section);
+        if (target is null || ReferenceEquals(_activeItem, target)) return;
 
-        var section = SectionFor(item);
-        if (section is null) return;
-
-        // Avoid clobbering an already-correct section: if SelectedRailSection
-        // already maps to this pane item, the user is on a leaf within a hub
-        // (e.g. Categories under Cashflow) and shouldn't be reset to the hub.
-        if (_navRail.SelectedRailSection == section.Value) return;
-
-        _navRail.NavigateTo(section.Value);
-    }
-
-    private void NavigateToPageFor(NavSection section)
-    {
-        var item = FindNavItem(section);
-        if (item?.TargetPageType is null) return;
-
-        // Wpf.Ui auto-selects the matching item when we Navigate; suppress the
-        // SelectionChanged write-back so we don't fight ourselves.
-        _suppressSectionWriteBack = true;
-        try
-        {
-            RootNavView.Navigate(item.TargetPageType);
-        }
-        finally
-        {
-            _suppressSectionWriteBack = false;
-        }
+        _activeItem?.Deactivate(RootNavView);
+        target.Activate(RootNavView);
+        _activeItem = target;
     }
 
     private NavigationViewItem? FindNavItem(NavSection section) => section switch
@@ -100,16 +61,16 @@ public partial class NavRailView : UserControl
         _                            => null,
     };
 
-    private NavSection? SectionFor(NavigationViewItem item)
+    // Drive ActiveSection from per-item Click rather than NavigationView.SelectionChanged.
+    // Wpf.Ui's internal click handler tries to navigate the Frame and throws when
+    // TargetPageType is null, which we don't use (DataTemplate routing instead).
+    private void NavItem_Click(object sender, RoutedEventArgs e)
     {
-        if (ReferenceEquals(item, NavPortfolio))         return NavSection.Portfolio;
-        if (ReferenceEquals(item, NavFinancialOverview)) return NavSection.FinancialOverview;
-        if (ReferenceEquals(item, NavCashflow))          return NavSection.Cashflow;
-        if (ReferenceEquals(item, NavInsights))          return NavSection.Insights;
-        if (ReferenceEquals(item, NavMultiAsset))        return NavSection.MultiAsset;
-        if (ReferenceEquals(item, NavAlerts))            return NavSection.Alerts;
-        if (ReferenceEquals(item, NavImport))            return NavSection.Import;
-        if (ReferenceEquals(item, NavSettings))          return NavSection.Settings;
-        return null;
+        if (_navRail is null) return;
+        if (sender is NavigationViewItem { TargetPageTag: { } tag } &&
+            Enum.TryParse<NavSection>(tag, out var section))
+        {
+            _navRail.NavigateTo(section);
+        }
     }
 }

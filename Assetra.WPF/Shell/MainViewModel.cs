@@ -33,10 +33,6 @@ public partial class MainViewModel : ObservableObject, IDisposable
 {
     private readonly CompositeDisposable _disposables = new();
 
-    // Exposed so NavRailView can hand this to ui:NavigationView.SetServiceProvider,
-    // letting Wpf.Ui resolve Page instances from DI on Navigate(typeof(...)).
-    public IServiceProvider Services { get; }
-
     public NavRailViewModel NavRail { get; }
     public StatusBarViewModel StatusBar { get; }
     public PortfolioViewModel Portfolio { get; }
@@ -139,7 +135,6 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     public MainViewModel(
-        IServiceProvider services,
         NavRailViewModel navRail,
         StatusBarViewModel statusBar,
         PortfolioViewModel portfolio,
@@ -164,7 +159,6 @@ public partial class MainViewModel : ObservableObject, IDisposable
         IThemeService themeService,
         IStockSearchService searchService)
     {
-        Services = services;
         NavRail = navRail;
         StatusBar = statusBar;
         Portfolio = portfolio;

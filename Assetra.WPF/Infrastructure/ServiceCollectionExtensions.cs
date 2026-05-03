@@ -110,19 +110,6 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<MainWindow>(sp =>
             new MainWindow(sp.GetRequiredService<MainViewModel>()));
-
-        // Pages consumed by ui:NavigationView via TargetPageType.
-        // Singleton — preserves per-page state (TabControl selection, scroll position)
-        // across navigations, matching the UserControl-singleton pattern this app uses.
-        services.AddSingleton<PortfolioPage>();
-        services.AddSingleton<FinancialOverviewPage>();
-        services.AddSingleton<CashflowHubPage>();
-        services.AddSingleton<InsightsHubPage>();
-        services.AddSingleton<MultiAssetHubPage>();
-        services.AddSingleton<AlertsPage>();
-        services.AddSingleton<ImportPage>();
-        services.AddSingleton<SettingsPage>();
-
         return services;
     }
 
