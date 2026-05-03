@@ -20,11 +20,10 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
 
-        <ui:Card Grid.Row="1" Padding="16">
+        <ui:Card Grid.Row="0" Padding="16">
             <StackPanel>
                 <UniformGrid Columns="6" Rows="1">
                     <StackPanel Margin="0,0,8,0">
@@ -59,12 +58,12 @@
                                Foreground="{DynamicResource AppTextSecondary}"
                                Text="{DynamicResource MonteCarlo.Running}"
                                Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    <ui:Button Command="{Binding RunCommand}" Content="{DynamicResource MonteCarlo.Run}" />
+                    <ui:Button Command="{Binding RunCommand}" Content="{DynamicResource MonteCarlo.Run}" Appearance="Primary" />
                 </StackPanel>
             </StackPanel>
         </ui:Card>
 
-        <ui:Card Grid.Row="2" Margin="0,16,0,0" Padding="16">
+        <ui:Card Grid.Row="1" Margin="0,16,0,0" Padding="16">
             <UniformGrid Columns="4">
                 <StackPanel>
                     <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Result.SuccessRate}" />
@@ -93,10 +92,7 @@
             </UniformGrid>
         </ui:Card>
 
-        <Border Grid.Row="3" Margin="0,16,0,0"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1" CornerRadius="8">
+        <ui:Card Grid.Row="2" Margin="0,16,0,0" Padding="0">
             <ui:DataGrid MaxHeight="500" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                       GridLinesVisibility="Horizontal" HeadersVisibility="Column" IsReadOnly="True"
                       ItemsSource="{Binding MedianPath}" RowBackground="Transparent" SelectionMode="Single">
@@ -105,6 +101,6 @@
                     <DataGridTextColumn Width="*" Binding="{Binding Balance, StringFormat=N0}" Header="{DynamicResource MonteCarlo.Path.Median}" />
                 </DataGrid.Columns>
             </ui:DataGrid>
-        </Border>
+        </ui:Card>
     </Grid>
 </UserControl>
