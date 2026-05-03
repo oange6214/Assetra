@@ -28,6 +28,20 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
+        <!--
+            Hide group headers when the pane is collapsed (56 px). Wpf.Ui 4.x's
+            NavigationViewItemHeader doesn't auto-hide in compact mode and just
+            squeezes its Text into the narrow strip; this style collapses it.
+        -->
+        <Style x:Key="NavGroupHeaderStyle" TargetType="ui:NavigationViewItemHeader">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsPaneOpen, ElementName=RootNavView}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <!--  ── Section view templates (resolved by ContentControl DataTrigger) ──  -->
         <DataTemplate x:Key="PortfolioContentTemplate">
             <portfolio:PortfolioView DataContext="{Binding Portfolio}" />
@@ -144,7 +158,7 @@
             </ui:NavigationViewItem>
 
             <!--  ── Group: 收支 ──  -->
-            <ui:NavigationViewItemHeader Text="{DynamicResource Nav.Cashflow}" />
+            <ui:NavigationViewItemHeader Style="{StaticResource NavGroupHeaderStyle}" Text="{DynamicResource Nav.Cashflow}" />
 
             <ui:NavigationViewItem
                 x:Name="NavCategories"
@@ -175,7 +189,7 @@
             </ui:NavigationViewItem>
 
             <!--  ── Group: 分析 ──  -->
-            <ui:NavigationViewItemHeader Text="{DynamicResource Nav.Insights}" />
+            <ui:NavigationViewItemHeader Style="{StaticResource NavGroupHeaderStyle}" Text="{DynamicResource Nav.Insights}" />
 
             <ui:NavigationViewItem
                 x:Name="NavGoals"
@@ -233,7 +247,7 @@
             </ui:NavigationViewItem>
 
             <!--  ── Group: 多元資產 ──  -->
-            <ui:NavigationViewItemHeader Text="{DynamicResource Nav.MultiAsset}" />
+            <ui:NavigationViewItemHeader Style="{StaticResource NavGroupHeaderStyle}" Text="{DynamicResource Nav.MultiAsset}" />
 
             <ui:NavigationViewItem
                 x:Name="NavRealEstate"
