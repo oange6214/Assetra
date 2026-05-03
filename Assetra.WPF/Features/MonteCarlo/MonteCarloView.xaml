@@ -29,10 +29,7 @@
                    Foreground="{DynamicResource AppTextPrimary}"
                    Text="{DynamicResource MonteCarlo.Title}" />
 
-        <Border Grid.Row="1" Padding="16"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1" CornerRadius="8">
+        <ui:Card Grid.Row="1" Padding="16">
             <StackPanel>
                 <UniformGrid Columns="6" Rows="1">
                     <StackPanel Margin="0,0,8,0">
@@ -70,12 +67,9 @@
                     <ui:Button Command="{Binding RunCommand}" Content="{DynamicResource MonteCarlo.Run}" />
                 </StackPanel>
             </StackPanel>
-        </Border>
+        </ui:Card>
 
-        <Border Grid.Row="2" Margin="0,16,0,0" Padding="16"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1" CornerRadius="8">
+        <ui:Card Grid.Row="2" Margin="0,16,0,0" Padding="16">
             <UniformGrid Columns="4">
                 <StackPanel>
                     <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Result.SuccessRate}" />
@@ -102,7 +96,7 @@
                                Text="{Binding P90Ending, StringFormat=N0}" />
                 </StackPanel>
             </UniformGrid>
-        </Border>
+        </ui:Card>
 
         <Border Grid.Row="3" Margin="0,16,0,0"
                 Background="{DynamicResource AppSurface}"

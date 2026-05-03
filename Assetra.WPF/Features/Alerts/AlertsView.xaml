@@ -791,7 +791,7 @@
       </ui:DataGrid>
 
       <!--  Empty state  -->
-      <Border Padding="32" Visibility="{Binding HasNoRules, Converter={StaticResource BooleanToVisibilityConverter}}">
+      <ui:Card Padding="32" Visibility="{Binding HasNoRules, Converter={StaticResource BooleanToVisibilityConverter}}">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
           <TextBlock
                         Margin="0,0,0,12"
@@ -817,7 +817,7 @@
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource Alerts.Empty.Cta}" />
         </StackPanel>
-      </Border>
+      </ui:Card>
     </Grid>
 
     <!--  ── Add Form ──  -->

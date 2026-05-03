@@ -841,7 +841,7 @@
       </ui:DataGrid>
 
       <!--  Empty state  -->
-      <Border Padding="32" Visibility="{Binding HasNoPositions, Converter={StaticResource BooleanToVisibilityConverter}}">
+      <ui:Card Padding="32" Visibility="{Binding HasNoPositions, Converter={StaticResource BooleanToVisibilityConverter}}">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
           <TextBlock
                         Margin="0,0,0,12"
@@ -870,7 +870,7 @@
             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Empty.Cta}" />
           </ui:Button>
         </StackPanel>
-      </Border>
+      </ui:Card>
     </Grid>
   </Grid>
 

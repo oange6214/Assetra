@@ -29,10 +29,7 @@
                    Foreground="{DynamicResource AppTextPrimary}"
                    Text="{DynamicResource Fire.Title}" />
 
-        <Border Grid.Row="1" Padding="16"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1" CornerRadius="8">
+        <ui:Card Grid.Row="1" Padding="16">
             <StackPanel>
                 <UniformGrid Columns="5" Rows="1">
                     <StackPanel Margin="0,0,8,0">
@@ -68,12 +65,9 @@
                     <ui:Button Command="{Binding CalculateCommand}" Content="{DynamicResource Fire.Calculate}" />
                 </StackPanel>
             </StackPanel>
-        </Border>
+        </ui:Card>
 
-        <Border Grid.Row="2" Margin="0,16,0,0" Padding="16"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1" CornerRadius="8">
+        <ui:Card Grid.Row="2" Margin="0,16,0,0" Padding="16">
             <UniformGrid Columns="3">
                 <StackPanel>
                     <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.FireNumber}" />
@@ -94,7 +88,7 @@
                                Text="{Binding ProjectedNetWorthAtFire, StringFormat=N0}" />
                 </StackPanel>
             </UniformGrid>
-        </Border>
+        </ui:Card>
 
         <Border Grid.Row="3" Margin="0,16,0,0"
                 Background="{DynamicResource AppSurface}"
