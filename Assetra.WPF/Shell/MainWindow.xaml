@@ -320,6 +320,7 @@
             Grid.Row="1"
             CompactPaneLength="56"
             IsBackButtonVisible="Collapsed"
+            IsPaneOpen="False"
             IsPaneToggleVisible="True"
             OpenPaneLength="220"
             PaneDisplayMode="LeftMinimal"
