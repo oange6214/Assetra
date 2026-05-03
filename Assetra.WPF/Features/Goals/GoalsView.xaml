@@ -13,7 +13,7 @@
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
 
-    <Grid Margin="20">
+    <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />

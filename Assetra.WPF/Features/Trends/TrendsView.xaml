@@ -15,7 +15,7 @@
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
 
-    <Grid Margin="20">
+    <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -131,7 +131,7 @@
         </DockPanel>
 
         <!--  ── Chart card ──  -->
-        <ui:Card Grid.Row="1" Padding="16">
+        <ui:Card Grid.Row="1" Padding="20">
             <Grid>
                 <lvc:CartesianChart
                     Background="Transparent"

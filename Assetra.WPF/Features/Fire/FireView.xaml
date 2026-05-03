@@ -15,7 +15,7 @@
     <UserControl.Resources>
     </UserControl.Resources>
 
-    <Grid Margin="20">
+    <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -23,35 +23,35 @@
         </Grid.RowDefinitions>
 
 
-        <ui:Card Grid.Row="0" Padding="16">
+        <ui:Card Grid.Row="0" Padding="20">
             <StackPanel>
                 <UniformGrid Columns="5" Rows="1">
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.NetWorth}" />
+                    <StackPanel Margin="0,0,16,0">
+                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.NetWorth}" />
                         <ui:TextBox Text="{Binding CurrentNetWorth, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.AnnualExpenses}" />
+                    <StackPanel Margin="0,0,16,0">
+                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.AnnualExpenses}" />
                         <ui:TextBox Text="{Binding AnnualExpenses, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.AnnualSavings}" />
+                    <StackPanel Margin="0,0,16,0">
+                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.AnnualSavings}" />
                         <ui:TextBox Text="{Binding AnnualSavings, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.Return}" />
+                    <StackPanel Margin="0,0,16,0">
+                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.Return}" />
                         <ui:TextBox Text="{Binding ExpectedAnnualReturn, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel>
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.WithdrawalRate}" />
+                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.WithdrawalRate}" />
                         <ui:TextBox Text="{Binding WithdrawalRate, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </UniformGrid>
-                <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppDanger}" Text="{Binding ErrorMessage}"
+                <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppDanger}" Text="{Binding ErrorMessage}"
                            Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
-                <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppAccent}" Text="{Binding StatusMessage}"
+                <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppAccent}" Text="{Binding StatusMessage}"
                            Visibility="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}}" />
-                <StackPanel Margin="0,12,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
+                <StackPanel Margin="0,16,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
                     <ui:Button Margin="0,0,8,0"
                                Command="{Binding SaveToGoalsCommand}"
                                Content="{DynamicResource Fire.SaveToGoals}"
@@ -61,23 +61,23 @@
             </StackPanel>
         </ui:Card>
 
-        <ui:Card Grid.Row="1" Margin="0,16,0,0" Padding="16">
+        <ui:Card Grid.Row="1" Margin="0,16,0,0" Padding="20">
             <UniformGrid Columns="3">
                 <StackPanel>
                     <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.FireNumber}" />
-                    <TextBlock FontSize="{DynamicResource FontSizeLg}" FontWeight="SemiBold"
+                    <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
                                Foreground="{DynamicResource AppTextPrimary}"
                                Text="{Binding FireNumber, StringFormat=N0}" />
                 </StackPanel>
                 <StackPanel>
                     <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.YearsToFire}" />
-                    <TextBlock FontSize="{DynamicResource FontSizeLg}" FontWeight="SemiBold"
+                    <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
                                Foreground="{DynamicResource AppTextPrimary}"
                                Text="{Binding YearsToFire}" />
                 </StackPanel>
                 <StackPanel>
                     <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.Projected}" />
-                    <TextBlock FontSize="{DynamicResource FontSizeLg}" FontWeight="SemiBold"
+                    <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
                                Foreground="{DynamicResource AppTextPrimary}"
                                Text="{Binding ProjectedNetWorthAtFire, StringFormat=N0}" />
                 </StackPanel>
