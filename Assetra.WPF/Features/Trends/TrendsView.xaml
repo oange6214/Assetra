@@ -18,15 +18,12 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!--  ── Header ──  -->
-
         <!--  ── Period selector + custom range picker ──  -->
-        <DockPanel Grid.Row="1" Margin="0,0,0,16">
+        <DockPanel Grid.Row="0" Margin="0,0,0,16">
             <controls:DateRangePicker
                 MinWidth="260"
                 DockPanel.Dock="Right"
@@ -134,7 +131,7 @@
         </DockPanel>
 
         <!--  ── Chart card ──  -->
-        <ui:Card Grid.Row="2" Padding="16">
+        <ui:Card Grid.Row="1" Padding="16">
             <Grid>
                 <lvc:CartesianChart
                     Background="Transparent"
@@ -167,7 +164,7 @@
 
         <!--  ── Footer hint ──  -->
         <TextBlock
-            Grid.Row="3"
+            Grid.Row="2"
             Margin="0,12,0,0"
             FontSize="{DynamicResource FontSizeXs}"
             Foreground="{DynamicResource AppTextSecondary}"
