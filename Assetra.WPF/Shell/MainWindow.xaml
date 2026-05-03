@@ -323,7 +323,7 @@
             IsPaneOpen="False"
             IsPaneToggleVisible="True"
             OpenPaneLength="220"
-            PaneDisplayMode="LeftMinimal"
+            PaneDisplayMode="Left"
             SelectionChanged="RootNavView_SelectionChanged">
 
             <ui:NavigationView.MenuItems>
