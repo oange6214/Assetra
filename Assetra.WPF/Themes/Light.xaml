@@ -91,6 +91,18 @@
     <SolidColorBrush x:Key="TextOnAccentFillColorDisabledBrush"     Color="#88FFFFFF" />
     <SolidColorBrush x:Key="TextOnAccentFillColorSelectedTextBrush" Color="#FFFFFF" />
 
+    <!--  Wpf.Ui Primary button (Appearance="Primary") binds these directly  -->
+    <SolidColorBrush x:Key="AccentButtonBackground"            Color="#0078D4" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#1289DA" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPressed"     Color="#005A9E" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundDisabled"    Color="#A6C8E0" />
+    <SolidColorBrush x:Key="AccentButtonForeground"            Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AccentButtonForegroundPressed"     Color="#E6FFFFFF" />
+    <SolidColorBrush x:Key="AccentButtonForegroundDisabled"    Color="#88FFFFFF" />
+    <SolidColorBrush x:Key="AccentButtonBorderBrushPressed"    Color="#005A9E" />
+    <SolidColorBrush x:Key="AccentControlElevationBorderBrush" Color="#005A9E" />
+
     <!--  DataGrid  -->
     <SolidColorBrush x:Key="AppSelectedRow" Color="#C0DEFA" />
     <SolidColorBrush x:Key="AppGridLines"   Color="#EBEBEB" />
