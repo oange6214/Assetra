@@ -471,7 +471,7 @@
         </ListBox.ItemTemplate>
       </ListBox>
 
-      <DataGrid
+      <ui:DataGrid
                 x:Name="PortfolioGrid"
                 AlternationCount="2"
                 AutoGenerateColumns="False"
@@ -498,8 +498,8 @@
                 SelectionMode="Single"
                 VirtualizingPanel.IsVirtualizing="True"
                 VirtualizingPanel.VirtualizationMode="Recycling">
-        <DataGrid.Style>
-          <Style TargetType="DataGrid">
+        <ui:DataGrid.Style>
+          <Style TargetType="ui:DataGrid">
             <Setter Property="Visibility" Value="Visible" />
             <Style.Triggers>
               <DataTrigger Value="True">
@@ -513,19 +513,19 @@
               </DataTrigger>
             </Style.Triggers>
           </Style>
-        </DataGrid.Style>
+        </ui:DataGrid.Style>
 
-        <DataGrid.ColumnHeaderStyle>
+        <ui:DataGrid.ColumnHeaderStyle>
           <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
-        </DataGrid.ColumnHeaderStyle>
-        <DataGrid.CellStyle>
+        </ui:DataGrid.ColumnHeaderStyle>
+        <ui:DataGrid.CellStyle>
           <Style BasedOn="{StaticResource AppDataGridCell}" TargetType="DataGridCell" />
-        </DataGrid.CellStyle>
-        <DataGrid.RowStyle>
+        </ui:DataGrid.CellStyle>
+        <ui:DataGrid.RowStyle>
           <Style BasedOn="{StaticResource AppDataGridRowSelectable}" TargetType="DataGridRow" />
-        </DataGrid.RowStyle>
+        </ui:DataGrid.RowStyle>
 
-        <DataGrid.Columns>
+        <ui:DataGrid.Columns>
           <!--  資產 — 合併代號 + 類型 badge + 名稱 (以 badge 為對齊錨點)  -->
           <DataGridTemplateColumn
                         Width="*"
@@ -837,8 +837,8 @@
               </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
           </DataGridTemplateColumn>
-        </DataGrid.Columns>
-      </DataGrid>
+        </ui:DataGrid.Columns>
+      </ui:DataGrid>
 
       <!--  Empty state  -->
       <Border Padding="32" Visibility="{Binding HasNoPositions, Converter={StaticResource BooleanToVisibilityConverter}}">

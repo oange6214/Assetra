@@ -2,6 +2,7 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.RebalanceDataGrid"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:conv="clr-namespace:Assetra.WPF.Infrastructure.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -248,7 +249,7 @@
       </ListBox.ItemTemplate>
     </ListBox>
 
-    <DataGrid
+    <ui:DataGrid
             Margin="16,0,16,16"
             AutoGenerateColumns="False"
             Background="{DynamicResource AppBackground}"
@@ -272,8 +273,8 @@
             SelectionMode="Single"
             VirtualizingPanel.IsVirtualizing="True"
             VirtualizingPanel.VirtualizationMode="Recycling">
-      <DataGrid.Style>
-        <Style TargetType="DataGrid">
+      <ui:DataGrid.Style>
+        <Style TargetType="ui:DataGrid">
           <Setter Property="Visibility" Value="Visible" />
           <Style.Triggers>
             <DataTrigger Value="True">
@@ -287,19 +288,19 @@
             </DataTrigger>
           </Style.Triggers>
         </Style>
-      </DataGrid.Style>
+      </ui:DataGrid.Style>
 
-      <DataGrid.ColumnHeaderStyle>
+      <ui:DataGrid.ColumnHeaderStyle>
         <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
-      </DataGrid.ColumnHeaderStyle>
-      <DataGrid.CellStyle>
+      </ui:DataGrid.ColumnHeaderStyle>
+      <ui:DataGrid.CellStyle>
         <Style BasedOn="{StaticResource AppDataGridCell}" TargetType="DataGridCell" />
-      </DataGrid.CellStyle>
-      <DataGrid.RowStyle>
+      </ui:DataGrid.CellStyle>
+      <ui:DataGrid.RowStyle>
         <Style BasedOn="{StaticResource AppDataGridRow}" TargetType="DataGridRow" />
-      </DataGrid.RowStyle>
+      </ui:DataGrid.RowStyle>
 
-      <DataGrid.Columns>
+      <ui:DataGrid.Columns>
 
         <!--  資產  -->
         <DataGridTemplateColumn
@@ -563,7 +564,7 @@
           </DataGridTemplateColumn.CellTemplate>
         </DataGridTemplateColumn>
 
-      </DataGrid.Columns>
-    </DataGrid>
+      </ui:DataGrid.Columns>
+    </ui:DataGrid>
   </Grid>
 </UserControl>

@@ -176,7 +176,7 @@
                     Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <!--  Preview grid  -->
-                <DataGrid
+                <ui:DataGrid
                     AutoGenerateColumns="False"
                     Background="Transparent"
                     BorderThickness="0"
@@ -189,7 +189,7 @@
                     ItemsSource="{Binding Rows}"
                     SelectionMode="Single"
                     Visibility="{Binding HasRows, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <DataGrid.Columns>
+                    <ui:DataGrid.Columns>
                         <DataGridTextColumn
                             Width="40"
                             Binding="{Binding RowIndex}"
@@ -268,8 +268,8 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                    </ui:DataGrid.Columns>
+                </ui:DataGrid>
             </Grid>
         </Border>
 

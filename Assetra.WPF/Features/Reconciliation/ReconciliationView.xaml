@@ -2,7 +2,6 @@
     x:Class="Assetra.WPF.Features.Reconciliation.ReconciliationView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="clr-namespace:Assetra.WPF.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -145,9 +144,9 @@
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Reconciliation.NewSession.Period}" />
                 <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,8">
-                    <controls:FormDatePicker SelectedDate="{Binding NewPeriodStart, Mode=TwoWay}" />
+                    <ui:CalendarDatePicker Date="{Binding NewPeriodStart, Mode=TwoWay}" />
                     <TextBlock Margin="8,0,8,0" VerticalAlignment="Center" Text="–" />
-                    <controls:FormDatePicker SelectedDate="{Binding NewPeriodEnd, Mode=TwoWay}" />
+                    <ui:CalendarDatePicker Date="{Binding NewPeriodEnd, Mode=TwoWay}" />
                 </StackPanel>
 
                 <TextBlock
@@ -230,7 +229,7 @@
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
                 CornerRadius="8">
-                <DataGrid
+                <ui:DataGrid
                     AutoGenerateColumns="False"
                     Background="Transparent"
                     BorderThickness="0"
@@ -242,7 +241,7 @@
                     IsReadOnly="True"
                     ItemsSource="{Binding GroupedDiffs}"
                     SelectionMode="Single">
-                    <DataGrid.GroupStyle>
+                    <ui:DataGrid.GroupStyle>
                         <GroupStyle>
                             <GroupStyle.HeaderTemplate>
                                 <DataTemplate>
@@ -254,8 +253,8 @@
                                 </DataTemplate>
                             </GroupStyle.HeaderTemplate>
                         </GroupStyle>
-                    </DataGrid.GroupStyle>
-                    <DataGrid.Columns>
+                    </ui:DataGrid.GroupStyle>
+                    <ui:DataGrid.Columns>
                         <DataGridTextColumn
                             Width="120"
                             Binding="{Binding KindDisplay}">
@@ -268,6 +267,13 @@
                             Binding="{Binding DateDisplay}">
                             <DataGridTextColumn.Header>
                                 <TextBlock Text="{DynamicResource Reconciliation.Col.Date}" />
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn
+                            Width="90"
+                            Binding="{Binding TradeIdDisplay}">
+                            <DataGridTextColumn.Header>
+                                <TextBlock Text="{DynamicResource Reconciliation.Col.Trade}" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
                         <DataGridTextColumn
@@ -336,8 +342,8 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                    </ui:DataGrid.Columns>
+                </ui:DataGrid>
             </Border>
 
             <Border
