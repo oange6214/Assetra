@@ -18,16 +18,12 @@
   </UserControl.Resources>
 
   <Grid>
-    <ListBox
+    <ScrollViewer
             Margin="16,0,16,16"
-            Background="Transparent"
-            BorderThickness="0"
-            ItemContainerStyle="{x:Null}"
-            ItemsSource="{Binding AllocationRows}"
-            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-            ScrollViewer.VerticalScrollBarVisibility="Auto">
-      <ListBox.Style>
-        <Style TargetType="ListBox">
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Disabled">
+      <ScrollViewer.Style>
+        <Style TargetType="ScrollViewer">
           <Setter Property="Visibility" Value="Collapsed" />
           <Style.Triggers>
             <DataTrigger Value="True">
@@ -41,8 +37,9 @@
             </DataTrigger>
           </Style.Triggers>
         </Style>
-      </ListBox.Style>
-      <ListBox.ItemTemplate>
+      </ScrollViewer.Style>
+      <ItemsControl ItemsSource="{Binding AllocationRows}">
+      <ItemsControl.ItemTemplate>
         <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
           <ui:Card
                         Margin="0,0,0,10"
@@ -117,7 +114,7 @@
                         <Style TargetType="TextBlock">
                           <Setter Property="Text" Value="實際比例" />
                           <Style.Triggers>
-                            <DataTrigger Binding="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="True">
+                            <DataTrigger Binding="{Binding DataContext.IsCashRebalance, ElementName=Root}" Value="True">
                               <Setter Property="Text" Value="配置變化" />
                             </DataTrigger>
                           </Style.Triggers>
@@ -130,7 +127,7 @@
                           <Style TargetType="StackPanel">
                             <Setter Property="Visibility" Value="Collapsed" />
                             <Style.Triggers>
-                              <DataTrigger Binding="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="True">
+                              <DataTrigger Binding="{Binding DataContext.IsCashRebalance, ElementName=Root}" Value="True">
                                 <Setter Property="Visibility" Value="Visible" />
                               </DataTrigger>
                             </Style.Triggers>
@@ -163,7 +160,7 @@
                           <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Visible" />
                             <Style.Triggers>
-                              <DataTrigger Binding="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="True">
+                              <DataTrigger Binding="{Binding DataContext.IsCashRebalance, ElementName=Root}" Value="True">
                                 <Setter Property="Visibility" Value="Collapsed" />
                               </DataTrigger>
                             </Style.Triggers>
@@ -243,8 +240,9 @@
             </StackPanel>
           </ui:Card>
         </DataTemplate>
-      </ListBox.ItemTemplate>
-    </ListBox>
+      </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
 
     <ui:DataGrid
             Margin="16,0,16,16"

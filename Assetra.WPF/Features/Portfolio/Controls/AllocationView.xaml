@@ -492,14 +492,8 @@
             </Grid>
           </ui:Card>
 
-          <ListBox
-                        Background="Transparent"
-                        BorderThickness="0"
-                        ItemContainerStyle="{x:Null}"
-                        ItemsSource="{Binding AllocationRows}"
-                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                        ScrollViewer.VerticalScrollBarVisibility="Disabled">
-            <ListBox.ItemTemplate>
+          <ItemsControl ItemsSource="{Binding AllocationRows}">
+            <ItemsControl.ItemTemplate>
               <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
                 <ui:Card
                                     Margin="0,0,0,10"
@@ -642,8 +636,8 @@
                   </StackPanel>
                 </ui:Card>
               </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
         </StackPanel>
       </ScrollViewer>
     </Grid>
