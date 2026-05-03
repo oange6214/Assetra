@@ -105,13 +105,13 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button
+                                    <ui:Button
                                         Margin="0,0,4,0"
                                         Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
                                         Content="{DynamicResource Common.Edit}"
                                         Style="{StaticResource SmallButtonStyle}" />
-                                    <Button
+                                    <ui:Button
                                         Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
                                         Content="{DynamicResource Common.Delete}"

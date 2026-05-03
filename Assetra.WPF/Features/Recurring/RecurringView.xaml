@@ -38,7 +38,7 @@
           FontWeight="SemiBold"
           Foreground="{DynamicResource AppTextPrimary}"
           Text="{DynamicResource Recurring.Title}" />
-      <Button
+      <ui:Button
           DockPanel.Dock="Right"
           Margin="8,0,0,0"
           Command="{Binding RunSchedulerCommand}"
@@ -51,10 +51,10 @@
           Text="{Binding RunStatus}" />
     </DockPanel>
 
-    <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0">
+    <ui:TabView Grid.Row="1" Background="Transparent" BorderThickness="0">
 
       <!-- Subscriptions tab -->
-      <TabItem Header="{DynamicResource Recurring.Tab.Subscriptions}">
+      <ui:TabViewItem Header="{DynamicResource Recurring.Tab.Subscriptions}">
         <Grid Margin="0,12,0,0">
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -176,6 +176,23 @@
                 </StackPanel>
 
                 <StackPanel Style="{StaticResource InlineFormField}">
+                  <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Recurring.Field.Interval}" />
+                  <ui:TextBox
+                      Width="100"
+                      MinHeight="36"
+
+                      ToolTip="{DynamicResource Recurring.IntervalHint}"
+                      Text="{Binding AddInterval, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <StackPanel Style="{StaticResource InlineFormField}">
+                  <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Recurring.Field.StartDate}" />
+                  <ui:CalendarDatePicker
+                      Width="160"
+                      Date="{Binding AddStartDate, Mode=TwoWay}" />
+                </StackPanel>
+
+                <StackPanel Style="{StaticResource InlineFormField}">
                   <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Recurring.Field.Mode}" />
                   <ComboBox
                       Width="180"
@@ -200,6 +217,15 @@
                       </DataTemplate>
                     </ComboBox.ItemTemplate>
                   </ComboBox>
+                </StackPanel>
+
+                <StackPanel Style="{StaticResource InlineFormField}">
+                  <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Recurring.Field.Note}" />
+                  <ui:TextBox
+                      Width="260"
+                      MinHeight="36"
+
+                      Text="{Binding AddNote, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
 
               </WrapPanel>
@@ -295,7 +321,7 @@
                             Command="{Binding DataContext.ToggleEnabledCommand, ElementName=Root}"
                             CommandParameter="{Binding}"
                             IsChecked="{Binding IsEnabled, Mode=OneWay}" />
-                        <Button
+                        <ui:Button
                             Margin="6,0,0,0"
                             Command="{Binding DataContext.DeleteSubscriptionCommand, ElementName=Root}"
                             CommandParameter="{Binding}"
@@ -308,10 +334,10 @@
             </ItemsControl>
           </ScrollViewer>
         </Grid>
-      </TabItem>
+      </ui:TabViewItem>
 
       <!-- Pending tab -->
-      <TabItem Header="{DynamicResource Recurring.Tab.Pending}">
+      <ui:TabViewItem Header="{DynamicResource Recurring.Tab.Pending}">
         <ScrollViewer Margin="0,12,0,0" VerticalScrollBarVisibility="Auto">
           <ItemsControl ItemsSource="{Binding Pending}">
             <ItemsControl.ItemTemplate>
@@ -357,12 +383,12 @@
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding AmountDisplay}" />
                     <StackPanel Grid.Column="3" Orientation="Horizontal">
-                      <Button
+                      <ui:Button
                           Margin="6,0,0,0"
                           Command="{Binding DataContext.ConfirmPendingCommand, ElementName=Root}"
                           CommandParameter="{Binding}"
                           Content="{DynamicResource Recurring.Pending.Confirm}" />
-                      <Button
+                      <ui:Button
                           Margin="6,0,0,0"
                           Command="{Binding DataContext.SkipPendingCommand, ElementName=Root}"
                           CommandParameter="{Binding}"
@@ -374,8 +400,8 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
         </ScrollViewer>
-      </TabItem>
+      </ui:TabViewItem>
 
-    </TabControl>
+    </ui:TabView>
   </Grid>
 </UserControl>

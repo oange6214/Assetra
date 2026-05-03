@@ -20,7 +20,8 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
                     ClipToBounds="True"
-                    CornerRadius="6">
+                    CornerRadius="6"
+                    Loaded="SnackbarItem_Loaded">
                     <Border.Effect>
                         <DropShadowEffect
                             BlurRadius="12"
@@ -52,19 +53,18 @@
                         <!--  Content  -->
                         <DockPanel Margin="16,10,8,10">
                             <!--  Dismiss button  -->
-                            <Button
+                            <ui:Button
                                 Width="24"
                                 Height="24"
                                 Padding="0"
                                 VerticalAlignment="Top"
-                                Background="Transparent"
-                                BorderThickness="0"
+                                Appearance="Transparent"
                                 Command="{Binding DismissCommand}"
                                 Cursor="Hand"
                                 DockPanel.Dock="Right"
                                 ToolTip="關閉">
                                 <ui:SymbolIcon Symbol="Dismiss24" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="{DynamicResource AppTextMuted}" />
-                            </Button>
+                            </ui:Button>
 
                             <!--  Kind icon  -->
                             <TextBlock

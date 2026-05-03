@@ -134,14 +134,13 @@
         </ToggleButton>
 
         <!--  清除 X — 疊在 ToggleButton 之上、右側；獨立 Button 以不觸發外層 toggle  -->
-        <Button
+        <ui:Button
             Width="22"
             Height="22"
             Margin="0,0,6,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
-            Background="Transparent"
-            BorderThickness="0"
+            Appearance="Transparent"
             Click="ClearButton_Click"
             Cursor="Hand"
             FocusVisualStyle="{StaticResource FocusVisual}"
@@ -152,7 +151,7 @@
                 FontSize="10"
                 Foreground="{DynamicResource AppTextMuted}"
                 Symbol="Dismiss24" />
-        </Button>
+        </ui:Button>
 
         <!--  Popup：兩個月份行事曆  -->
         <Popup
@@ -228,13 +227,12 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <Button
+                                <ui:Button
                                     Grid.Column="0"
                                     Width="24"
                                     Height="24"
                                     Padding="0"
-                                    Background="Transparent"
-                                    BorderThickness="0"
+                                    Appearance="Transparent"
                                     Click="PrevMonth_Click"
                                     Cursor="Hand"
                                     FocusVisualStyle="{StaticResource FocusVisual}">
@@ -244,7 +242,7 @@
                                         FontSize="12"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Symbol="ChevronLeft24" />
-                                </Button>
+                                </ui:Button>
                                 <TextBlock
                                     Grid.Column="1"
                                     HorizontalAlignment="Center"
@@ -298,13 +296,12 @@
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{Binding RightMonthLabel}" />
-                                <Button
+                                <ui:Button
                                     Grid.Column="2"
                                     Width="24"
                                     Height="24"
                                     Padding="0"
-                                    Background="Transparent"
-                                    BorderThickness="0"
+                                    Appearance="Transparent"
                                     Click="NextMonth_Click"
                                     Cursor="Hand"
                                     FocusVisualStyle="{StaticResource FocusVisual}">
@@ -314,7 +311,7 @@
                                         FontSize="12"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Symbol="ChevronRight24" />
-                                </Button>
+                                </ui:Button>
                             </Grid>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource WeekdayHeader}" Text="Su" />
