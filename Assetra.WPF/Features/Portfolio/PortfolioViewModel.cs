@@ -148,54 +148,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     /// </summary>
     public TradeFilterViewModel TradeFilter { get; }
 
-    // Tab state
+    // Tab state — XAML binds TabControl.SelectedValue (with SelectedValuePath="Tag") to this.
     [ObservableProperty] private PortfolioTab _selectedTab = PortfolioTab.Positions;
-
-    public bool IsDashboardTab
-    {
-        get => SelectedTab == PortfolioTab.Dashboard;
-        set { if (value) SelectedTab = PortfolioTab.Dashboard; }
-    }
-
-    public bool IsPositionsTab
-    {
-        get => SelectedTab == PortfolioTab.Positions;
-        set { if (value) SelectedTab = PortfolioTab.Positions; }
-    }
-
-    public bool IsAllocationAnalysisTab
-    {
-        get => SelectedTab == PortfolioTab.AllocationAnalysis;
-        set { if (value) SelectedTab = PortfolioTab.AllocationAnalysis; }
-    }
-
-    public bool IsAccountsTab
-    {
-        get => SelectedTab == PortfolioTab.Accounts;
-        set { if (value) SelectedTab = PortfolioTab.Accounts; }
-    }
-
-    public bool IsLiabilityTab
-    {
-        get => SelectedTab == PortfolioTab.Liability;
-        set { if (value) SelectedTab = PortfolioTab.Liability; }
-    }
-
-    public bool IsTradesTab
-    {
-        get => SelectedTab == PortfolioTab.Trades;
-        set { if (value) SelectedTab = PortfolioTab.Trades; }
-    }
-
-    partial void OnSelectedTabChanged(PortfolioTab value)
-    {
-        OnPropertyChanged(nameof(IsDashboardTab));
-        OnPropertyChanged(nameof(IsPositionsTab));
-        OnPropertyChanged(nameof(IsAllocationAnalysisTab));
-        OnPropertyChanged(nameof(IsAccountsTab));
-        OnPropertyChanged(nameof(IsLiabilityTab));
-        OnPropertyChanged(nameof(IsTradesTab));
-    }
 
     // 負債健康度 + 緊急預備金 — owned by FinancialSummaryViewModel.
     public FinancialSummaryViewModel Financial { get; }

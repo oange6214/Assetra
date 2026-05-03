@@ -997,7 +997,7 @@ public class PortfolioViewModelTests
         var (vm, _, _) = await CreateVmWithCashAsync(0m);
         vm.OpenAddAccountDialogCommand.Execute(null);
 
-        Assert.True(vm.IsAccountsTab);
+        Assert.Equal(Assetra.WPF.Features.Portfolio.PortfolioTab.Accounts, vm.SelectedTab);
         Assert.True(vm.AddAssetDialog.IsAddDialogOpen);
         Assert.True(vm.AddAssetDialog.IsTypePickerStep);
         Assert.True(vm.AddAssetDialog.IsAccountDialogMode);

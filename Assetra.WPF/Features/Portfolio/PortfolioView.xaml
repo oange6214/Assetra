@@ -22,34 +22,76 @@
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
-      <!--  Row 0: Tab bar  -->
-      <RowDefinition Height="Auto" />
-      <!--  Row 1: Setup notice  -->
+      <!--  Row 0: Setup notice  -->
       <RowDefinition Height="*" />
-      <!--  Row 2: Tab content  -->
+      <!--  Row 1: TabControl (header + content)  -->
     </Grid.RowDefinitions>
 
-    <pcontrols:PortfolioTabBar Grid.Row="0" />
+    <pcontrols:PortfolioSetupNoticePanel Grid.Row="0" />
 
-    <pcontrols:PortfolioSetupNoticePanel Grid.Row="1" />
+    <!--  ── Row 1: TabControl with floating Add Record button ──  -->
+    <Grid Grid.Row="1">
+      <TabControl
+                Background="Transparent"
+                BorderThickness="0"
+                SelectedValue="{Binding SelectedTab, Mode=TwoWay}"
+                SelectedValuePath="Tag">
 
-    <!--  ── Row 2: Tab content ──  -->
-    <pcontrols:DashboardTabPanel
-            Grid.Row="2"
-            DataContext="{Binding DataContext.Dashboard, RelativeSource={RelativeSource AncestorType=Window}}"
-            Visibility="{Binding DataContext.Portfolio.IsDashboardTab, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-    <pcontrols:PositionsTabPanel Grid.Row="2" Visibility="{Binding IsPositionsTab, Converter={StaticResource BooleanToVisibilityConverter}}" />
-    <pcontrols:AllocationView
-            Grid.Row="2"
-            DataContext="{Binding DataContext.Allocation, RelativeSource={RelativeSource AncestorType=Window}}"
-            Visibility="{Binding DataContext.Portfolio.IsAllocationAnalysisTab, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-    <pcontrols:AccountsTabPanel Grid.Row="2" Visibility="{Binding IsAccountsTab, Converter={StaticResource BooleanToVisibilityConverter}}" />
-    <pcontrols:LiabilityTabPanel Grid.Row="2" Visibility="{Binding IsLiabilityTab, Converter={StaticResource BooleanToVisibilityConverter}}" />
-    <pcontrols:TradesTabPanel Grid.Row="2" Visibility="{Binding IsTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <TabItem Header="{DynamicResource Portfolio.Tab.Overview}" Tag="{x:Static vm:PortfolioTab.Dashboard}">
+          <pcontrols:DashboardTabPanel
+                        DataContext="{Binding DataContext.Dashboard, RelativeSource={RelativeSource AncestorType=Window}}" />
+        </TabItem>
+
+        <TabItem Header="{DynamicResource Portfolio.Tab.Allocation}" Tag="{x:Static vm:PortfolioTab.AllocationAnalysis}">
+          <pcontrols:AllocationView
+                        DataContext="{Binding DataContext.Allocation, RelativeSource={RelativeSource AncestorType=Window}}" />
+        </TabItem>
+
+        <TabItem Header="{DynamicResource Portfolio.Tab.Positions}" Tag="{x:Static vm:PortfolioTab.Positions}">
+          <pcontrols:PositionsTabPanel />
+        </TabItem>
+
+        <TabItem Header="{DynamicResource Portfolio.Tab.Cash}" Tag="{x:Static vm:PortfolioTab.Accounts}">
+          <pcontrols:AccountsTabPanel />
+        </TabItem>
+
+        <TabItem Header="{DynamicResource Portfolio.Tab.Liability}" Tag="{x:Static vm:PortfolioTab.Liability}">
+          <pcontrols:LiabilityTabPanel />
+        </TabItem>
+
+        <TabItem Header="{DynamicResource Portfolio.Tab.Trades}" Tag="{x:Static vm:PortfolioTab.Trades}">
+          <pcontrols:TradesTabPanel />
+        </TabItem>
+      </TabControl>
+
+      <!--  Floating Add Record button overlaid on the tab header strip  -->
+      <ui:Button
+                Height="35"
+                Margin="0,4,12,0"
+                Padding="14,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Panel.ZIndex="10"
+                Appearance="Primary"
+                Command="{Binding AddRecordCommand}">
+        <StackPanel Orientation="Horizontal">
+          <ui:SymbolIcon
+                        Margin="0,0,4,0"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource FontSizeXs}"
+                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                        Symbol="Add24" />
+          <TextBlock
+                        VerticalAlignment="Center"
+                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                        Text="{DynamicResource Portfolio.AddRecord}" />
+        </StackPanel>
+      </ui:Button>
+    </Grid>
 
     <!--  ── Cash / Liability detail overlays (floating side panel with backdrop) ──  -->
     <Grid
-            Grid.RowSpan="3"
+            Grid.RowSpan="2"
             Panel.ZIndex="180"
             Visibility="{Binding HasSelectedCashRow, Converter={StaticResource BooleanToVisibilityConverter}}">
       <!--  Click-to-close backdrop  -->
@@ -409,7 +451,7 @@
 
     <!--  Liability detail overlay  -->
     <Grid
-            Grid.RowSpan="3"
+            Grid.RowSpan="2"
             Panel.ZIndex="180"
             Visibility="{Binding HasSelectedLiabilityRow, Converter={StaticResource BooleanToVisibilityConverter}}">
       <Border Background="{DynamicResource AppModalOverlay}" MouseLeftButtonDown="OnLiabilityDetailBackdropClick" />
@@ -967,7 +1009,7 @@
 
     <!--  ── Position detail overlay (investment) ──  -->
     <Grid
-            Grid.RowSpan="3"
+            Grid.RowSpan="2"
             Panel.ZIndex="180"
             Visibility="{Binding HasSelectedPositionRow, Converter={StaticResource BooleanToVisibilityConverter}}">
       <Border Background="{DynamicResource AppModalOverlay}" MouseLeftButtonDown="OnPositionDetailBackdropClick" />
@@ -1668,17 +1710,17 @@
 
     <!--  ── Dialog overlays ──  -->
     <pcontrols:AddRecordDialog
-            Grid.RowSpan="3"
+            Grid.RowSpan="2"
             Panel.ZIndex="210"
             DataContext="{Binding Transaction}" />
-    <pcontrols:AddAssetDialog Grid.RowSpan="3" Panel.ZIndex="200" />
+    <pcontrols:AddAssetDialog Grid.RowSpan="2" Panel.ZIndex="200" />
     <pcontrols:EditAssetDialog
-            Grid.RowSpan="3"
+            Grid.RowSpan="2"
             Panel.ZIndex="205"
             DataContext="{Binding Account}" />
     <!--  ── Confirm dialog ──  -->
     <Grid
-            Grid.RowSpan="3"
+            Grid.RowSpan="2"
             Panel.ZIndex="220"
             Visibility="{Binding IsConfirmDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
       <Border Background="{DynamicResource AppModalOverlay}" />
