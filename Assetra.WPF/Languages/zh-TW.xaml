@@ -802,6 +802,8 @@
     <sys:String x:Key="Categories.Field.Priority">優先序</sys:String>
     <sys:String x:Key="Categories.Field.CaseSensitive">比對選項</sys:String>
     <sys:String x:Key="Categories.Rule.Add">新增規則</sys:String>
+    <sys:String x:Key="Categories.Rule.AddTitle">新增規則</sys:String>
+    <sys:String x:Key="Categories.Budget.AddTitle">新增預算</sys:String>
     <sys:String x:Key="Categories.Rule.KeywordHint">關鍵字</sys:String>
     <sys:String x:Key="Categories.Rule.CategoryHint">分類</sys:String>
     <sys:String x:Key="Categories.Rule.PriorityHint">優先序</sys:String>

@@ -74,6 +74,26 @@ public partial class CategoriesViewModel : ObservableObject
     [ObservableProperty] private string _addBudgetNote = string.Empty;
     [ObservableProperty] private string _addBudgetError = string.Empty;
 
+    // Collapsible add-form state for each tab
+    [ObservableProperty] private bool _isAddCategoryOpen;
+    [ObservableProperty] private bool _isAddRuleOpen;
+    [ObservableProperty] private bool _isAddBudgetOpen;
+
+    // Empty-state predicates per tab
+    public bool HasNoExpense => Categories.Count(c => c.Kind == CategoryKind.Expense && !c.IsArchived) == 0;
+    public bool HasNoIncome  => Categories.Count(c => c.Kind == CategoryKind.Income  && !c.IsArchived) == 0;
+    public bool HasNoRules   => Rules.Count == 0;
+    public bool HasRules     => Rules.Count > 0;
+    public bool HasNoBudgets => Budgets.Count == 0;
+    public bool HasBudgets   => Budgets.Count > 0;
+
+    [RelayCommand] private void OpenAddCategory() { AddError = string.Empty; IsAddCategoryOpen = true; }
+    [RelayCommand] private void CloseAddCategory() { IsAddCategoryOpen = false; AddError = string.Empty; }
+    [RelayCommand] private void OpenAddRule() { AddRuleError = string.Empty; IsAddRuleOpen = true; }
+    [RelayCommand] private void CloseAddRule() { IsAddRuleOpen = false; AddRuleError = string.Empty; }
+    [RelayCommand] private void OpenAddBudget() { AddBudgetError = string.Empty; IsAddBudgetOpen = true; }
+    [RelayCommand] private void CloseAddBudget() { IsAddBudgetOpen = false; AddBudgetError = string.Empty; }
+
     public IReadOnlyList<BudgetMode> BudgetModeOptions { get; } =
         [BudgetMode.Monthly, BudgetMode.Yearly];
 
@@ -135,6 +155,20 @@ public partial class CategoriesViewModel : ObservableObject
         _localization.LanguageChanged += OnLanguageChanged;
         RefreshIconOptions();
         ApplyAddDefaults(AddKind);
+
+        Categories.CollectionChanged += (_, _) => NotifyEmptyStatesChanged();
+        Rules.CollectionChanged       += (_, _) => NotifyEmptyStatesChanged();
+        Budgets.CollectionChanged     += (_, _) => NotifyEmptyStatesChanged();
+    }
+
+    private void NotifyEmptyStatesChanged()
+    {
+        OnPropertyChanged(nameof(HasNoExpense));
+        OnPropertyChanged(nameof(HasNoIncome));
+        OnPropertyChanged(nameof(HasNoRules));
+        OnPropertyChanged(nameof(HasRules));
+        OnPropertyChanged(nameof(HasNoBudgets));
+        OnPropertyChanged(nameof(HasBudgets));
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
@@ -250,6 +284,7 @@ public partial class CategoriesViewModel : ObservableObject
 
         AddName = string.Empty;
         ApplyAddDefaults(AddKind);
+        IsAddCategoryOpen = false;
 
         _snackbar.Success(string.Format(
             GetString("Categories.Toast.Added", "已新增分類「{0}」"), name));
@@ -383,6 +418,7 @@ public partial class CategoriesViewModel : ObservableObject
         AddRuleMatchType = AutoCategorizationMatchType.Contains;
         AddRuleAppliesToManual = true;
         AddRuleAppliesToImport = true;
+        IsAddRuleOpen = false;
 
         _snackbar.Success(string.Format(
             GetString("Categories.Rule.Toast.Added", "已新增規則「{0}」"), keyword));
@@ -520,6 +556,7 @@ public partial class CategoriesViewModel : ObservableObject
 
         AddBudgetAmount = 0m;
         AddBudgetNote = string.Empty;
+        IsAddBudgetOpen = false;
 
         _snackbar.Success(GetString("Categories.Budget.Toast.Added", "已新增預算"));
     }

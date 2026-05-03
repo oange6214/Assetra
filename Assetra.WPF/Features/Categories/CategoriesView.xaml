@@ -360,12 +360,27 @@
             <TabItem Header="{DynamicResource Categories.Tab.Categories}">
                 <Grid Margin="0,12,0,0">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
+                    <!--  Toolbar  -->
+                    <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="False">
+                        <ui:Button
+                            DockPanel.Dock="Right"
+                            Appearance="Primary"
+                            Command="{Binding OpenAddCategoryCommand}"
+                            Visibility="{Binding IsAddCategoryOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Add24" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                <TextBlock VerticalAlignment="Center" Text="{DynamicResource Categories.AddForm.Title}" />
+                            </StackPanel>
+                        </ui:Button>
+                    </DockPanel>
+
                     <!--  Two-column list  -->
-                    <Grid Grid.Row="0">
+                    <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="16" />
@@ -417,11 +432,12 @@
                         </ui:Card>
                     </Grid>
 
-                    <!--  Add form  -->
+                    <!--  Add form (collapsible)  -->
                     <ui:Card
-                        Grid.Row="1"
+                        Grid.Row="2"
                         Margin="0,12,0,0"
-                        Padding="14,12">
+                        Padding="14,12"
+                        Visibility="{Binding IsAddCategoryOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel>
                             <TextBlock
                                 FontSize="{StaticResource FontSizeMd}"
@@ -522,8 +538,16 @@
                                         Appearance="Primary"
                                         Command="{Binding AddCategoryCommand}"
                                         DockPanel.Dock="Right">
-                                        <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Categories.Add}" />
+                                        <TextBlock Text="{DynamicResource Categories.Add}" />
                                     </ui:Button>
+                                    <ui:Button
+                                        MinWidth="80"
+                                        MinHeight="36"
+                                        Margin="0,0,8,0"
+                                        Appearance="Secondary"
+                                        Command="{Binding CloseAddCategoryCommand}"
+                                        Content="{DynamicResource Common.Cancel}"
+                                        DockPanel.Dock="Right" />
                                 </DockPanel>
                             </Border>
                             <TextBlock
@@ -545,13 +569,25 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock
-                        Grid.Row="0"
-                        Margin="0,0,0,12"
-                        FontSize="{StaticResource FontSizeBase}"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Categories.Rule.Hint}"
-                        TextWrapping="Wrap" />
+                    <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="True">
+                        <ui:Button
+                            DockPanel.Dock="Right"
+                            Margin="12,0,0,0"
+                            Appearance="Primary"
+                            Command="{Binding OpenAddRuleCommand}"
+                            Visibility="{Binding IsAddRuleOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Add24" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                <TextBlock VerticalAlignment="Center" Text="{DynamicResource Categories.Rule.AddTitle}" />
+                            </StackPanel>
+                        </ui:Button>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeBase}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Categories.Rule.Hint}"
+                            TextWrapping="Wrap" />
+                    </DockPanel>
 
                     <ui:Card
                         Grid.Row="1"
@@ -943,11 +979,12 @@
                         </ScrollViewer>
                     </ui:Card>
 
-                    <!--  Add rule form  -->
+                    <!--  Add rule form (collapsible)  -->
                     <ui:Card
                         Grid.Row="2"
                         Margin="0,12,0,0"
-                        Padding="14,12">
+                        Padding="14,12"
+                        Visibility="{Binding IsAddRuleOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel>
                             <TextBlock
                                 FontSize="{StaticResource FontSizeMd}"
@@ -1015,8 +1052,16 @@
                                         Appearance="Primary"
                                         Command="{Binding AddRuleCommand}"
                                         DockPanel.Dock="Right">
-                                        <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Categories.Rule.Add}" />
+                                        <TextBlock Text="{DynamicResource Categories.Rule.Add}" />
                                     </ui:Button>
+                                    <ui:Button
+                                        MinWidth="80"
+                                        MinHeight="36"
+                                        Margin="0,0,8,0"
+                                        Appearance="Secondary"
+                                        Command="{Binding CloseAddRuleCommand}"
+                                        Content="{DynamicResource Common.Cancel}"
+                                        DockPanel.Dock="Right" />
                                 </DockPanel>
                             </Border>
                             <ui:CardExpander
@@ -1123,13 +1168,25 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock
-                        Grid.Row="0"
-                        Margin="0,0,0,12"
-                        FontSize="{StaticResource FontSizeBase}"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Categories.Budget.Hint}"
-                        TextWrapping="Wrap" />
+                    <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="True">
+                        <ui:Button
+                            DockPanel.Dock="Right"
+                            Margin="12,0,0,0"
+                            Appearance="Primary"
+                            Command="{Binding OpenAddBudgetCommand}"
+                            Visibility="{Binding IsAddBudgetOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Add24" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                <TextBlock VerticalAlignment="Center" Text="{DynamicResource Categories.Budget.AddTitle}" />
+                            </StackPanel>
+                        </ui:Button>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeBase}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Categories.Budget.Hint}"
+                            TextWrapping="Wrap" />
+                    </DockPanel>
 
                     <ui:Card
                         Grid.Row="1"
@@ -1356,11 +1413,12 @@
                         </ScrollViewer>
                     </ui:Card>
 
-                    <!--  Add budget form  -->
+                    <!--  Add budget form (collapsible)  -->
                     <ui:Card
                         Grid.Row="2"
                         Margin="0,12,0,0"
-                        Padding="14,12">
+                        Padding="14,12"
+                        Visibility="{Binding IsAddBudgetOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel>
                             <TextBlock
                                 FontSize="{StaticResource FontSizeMd}"
@@ -1460,8 +1518,16 @@
                                         Appearance="Primary"
                                         Command="{Binding AddBudgetCommand}"
                                         DockPanel.Dock="Right">
-                                        <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Categories.Budget.Add}" />
+                                        <TextBlock Text="{DynamicResource Categories.Budget.Add}" />
                                     </ui:Button>
+                                    <ui:Button
+                                        MinWidth="80"
+                                        MinHeight="36"
+                                        Margin="0,0,8,0"
+                                        Appearance="Secondary"
+                                        Command="{Binding CloseAddBudgetCommand}"
+                                        Content="{DynamicResource Common.Cancel}"
+                                        DockPanel.Dock="Right" />
                                 </DockPanel>
                             </Border>
                             <TextBlock
