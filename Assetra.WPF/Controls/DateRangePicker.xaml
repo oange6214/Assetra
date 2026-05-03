@@ -27,7 +27,7 @@
                         <Border
                             x:Name="Bd"
                             Background="{TemplateBinding Background}"
-                            CornerRadius="4">
+                            CornerRadius="{StaticResource RadiusSm}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>

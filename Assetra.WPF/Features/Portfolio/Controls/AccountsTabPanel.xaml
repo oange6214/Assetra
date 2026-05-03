@@ -69,12 +69,12 @@
                                 <Border
                                     Height="4"
                                     Background="{DynamicResource AppBorder}"
-                                    CornerRadius="2" />
+                                    CornerRadius="{StaticResource RadiusXs}" />
                                 <Border
                                     Height="4"
                                     HorizontalAlignment="Left"
                                     Background="{Binding Financial.EmergencyStatusTag, Converter={StaticResource StatusTagToBrush}}"
-                                    CornerRadius="2">
+                                    CornerRadius="{StaticResource RadiusXs}">
                                     <Border.Width>
                                         <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
                                             <Binding Path="Financial.EmergencyFundBarValue" />

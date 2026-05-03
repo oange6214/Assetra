@@ -230,9 +230,11 @@
 
 
   <!--  ── Corner Radius ──  -->
+  <CornerRadius x:Key="RadiusXs">2</CornerRadius>
   <CornerRadius x:Key="RadiusSm">4</CornerRadius>
   <CornerRadius x:Key="RadiusMd">6</CornerRadius>
   <CornerRadius x:Key="RadiusLg">8</CornerRadius>
+  <CornerRadius x:Key="RadiusXl">12</CornerRadius>
 
   <!--  ── Keyboard Focus Visual (WCAG 2.4.7 Focus Visible) ──  -->
   <!--

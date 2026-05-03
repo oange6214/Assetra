@@ -54,7 +54,7 @@
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1.5"
-            CornerRadius="12">
+            CornerRadius="{StaticResource RadiusXl}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -146,7 +146,7 @@
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
-            CornerRadius="8">
+            CornerRadius="{StaticResource RadiusLg}">
             <Grid>
                 <!--  Empty state  -->
                 <StackPanel

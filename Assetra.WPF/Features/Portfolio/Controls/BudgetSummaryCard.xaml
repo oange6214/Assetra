@@ -103,7 +103,7 @@
 
             <!--  Budget bar  -->
             <Grid Height="6" Margin="0,0,0,10">
-                <Border Background="{DynamicResource AppBorderLight}" CornerRadius="3" />
+                <Border Background="{DynamicResource AppBorderLight}" CornerRadius="{StaticResource RadiusXs}" />
                 <ProgressBar
                     Background="Transparent"
                     BorderThickness="0"

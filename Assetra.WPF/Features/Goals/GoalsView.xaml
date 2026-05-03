@@ -61,7 +61,7 @@
                                     Background="{DynamicResource AppSurfaceAlt}"
                                     BorderBrush="{DynamicResource AppBorder}"
                                     BorderThickness="1"
-                                    CornerRadius="6">
+                                    CornerRadius="{StaticResource RadiusMd}">
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto" />

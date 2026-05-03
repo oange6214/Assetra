@@ -56,7 +56,7 @@
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
-            CornerRadius="8">
+            CornerRadius="{StaticResource RadiusLg}">
             <ui:DataGrid
                 MaxHeight="500"
                 AutoGenerateColumns="False"

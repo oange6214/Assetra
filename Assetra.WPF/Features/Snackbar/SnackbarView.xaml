@@ -20,7 +20,7 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
                     ClipToBounds="True"
-                    CornerRadius="6"
+                    CornerRadius="{StaticResource RadiusMd}"
                     Loaded="SnackbarItem_Loaded">
                     <Border.Effect>
                         <DropShadowEffect

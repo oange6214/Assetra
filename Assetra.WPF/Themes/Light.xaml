@@ -22,39 +22,48 @@
         Accent: Windows default system accent blue     #0078D4
     -->
 
-    <!--  Backgrounds  -->
-    <SolidColorBrush x:Key="AppBackground" Color="#F3F3F3" />
-    <SolidColorBrush x:Key="AppSurface"    Color="#FFFFFF" />
-    <SolidColorBrush x:Key="AppSurfaceAlt" Color="#F9F9F9" />
+    <!--
+        Aliases AppXxx -> Design System tokens (see Themes/DesignTokens.xaml).
+        Existing view bindings stay valid; values now follow the
+        UX/UI guideline (Slate neutrals + Navy primary + Gold accent).
+    -->
+
+    <!--  Backgrounds — Slate scale  -->
+    <SolidColorBrush x:Key="AppBackground"     Color="#F8FAFC" />
+    <SolidColorBrush x:Key="AppSurface"        Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AppSurfaceAlt"     Color="#F1F5F9" />
     <SolidColorBrush x:Key="AppCardBackground" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="AppHover"      Color="#E8E8E8" />
+    <SolidColorBrush x:Key="AppHover"          Color="#F1F5F9" />
 
     <!--  Borders  -->
-    <SolidColorBrush x:Key="AppBorder"      Color="#D9D9D9" />
-    <SolidColorBrush x:Key="AppBorderLight" Color="#EBEBEB" />
+    <SolidColorBrush x:Key="AppBorder"      Color="#E2E8F0" />
+    <SolidColorBrush x:Key="AppBorderLight" Color="#F1F5F9" />
 
-    <!--  Text  -->
-    <SolidColorBrush x:Key="AppTextPrimary"   Color="#1A1A1A" />
-    <SolidColorBrush x:Key="AppTextSecondary" Color="#616161" />
-    <!--  #6B6B6B gives 4.72:1 on AppBackground (#F3F3F3) and 5.2:1 on AppSurface (#FFFFFF) — passes WCAG AA  -->
-    <!--  (was #919191: only 2.68:1 / 2.96:1 — failed for all text uses)  -->
-    <SolidColorBrush x:Key="AppTextMuted"     Color="#6B6B6B" />
+    <!--  Text — Slate ramp  -->
+    <SolidColorBrush x:Key="AppTextPrimary"   Color="#0F172A" />
+    <SolidColorBrush x:Key="AppTextSecondary" Color="#475569" />
+    <SolidColorBrush x:Key="AppTextMuted"     Color="#64748B" />
     <SolidColorBrush x:Key="AppTextOnAccent"  Color="#FFFFFF" />
 
-    <!--  Semantic — price direction  -->
-    <SolidColorBrush x:Key="AppUp"   Color="#0D7A5B" />
-    <SolidColorBrush x:Key="AppDown" Color="#C42B1C" />
-    <SolidColorBrush x:Key="AppFlat" Color="#616161" />
+    <!--  Semantic — price direction (preserved for ColorSchemeService Taiwan/Intl swap)  -->
+    <SolidColorBrush x:Key="AppUp"   Color="#16A34A" />
+    <SolidColorBrush x:Key="AppDown" Color="#DC2626" />
+    <SolidColorBrush x:Key="AppFlat" Color="#475569" />
 
-    <!--  Semantic — destructive action (always red, independent of price-direction convention)  -->
-    <SolidColorBrush x:Key="AppDanger" Color="#C42B1C" />
+    <!--  Semantic — destructive (Semantic.Error)  -->
+    <SolidColorBrush x:Key="AppDanger" Color="#DC2626" />
 
-    <!--  Accent — Windows system accent blue  -->
-    <SolidColorBrush x:Key="AppAccent"       Color="#0078D4" />
-    <SolidColorBrush x:Key="AppAccentHover"  Color="#006CBE" />
-    <SolidColorBrush x:Key="AppAccentSubtle" Color="#D6EAFA" />
-    <SolidColorBrush x:Key="AppAccentSoft"   Color="#D6EAFA" />
-    <SolidColorBrush x:Key="AppAccentText"   Color="#005A9E" />
+    <!--  Brand primary — Navy (UX/UI guideline §2: trust + structure)  -->
+    <SolidColorBrush x:Key="AppAccent"       Color="#142F55" />
+    <SolidColorBrush x:Key="AppAccentHover"  Color="#1F4275" />
+    <SolidColorBrush x:Key="AppAccentSubtle" Color="#E5EAF1" />
+    <SolidColorBrush x:Key="AppAccentSoft"   Color="#E5EAF1" />
+    <SolidColorBrush x:Key="AppAccentText"   Color="#142F55" />
+
+    <!--  Brand accent — Gold (UX/UI guideline §2: financial value emphasis)  -->
+    <SolidColorBrush x:Key="AppGold"        Color="#C8A25A" />
+    <SolidColorBrush x:Key="AppGoldHover"   Color="#B58D45" />
+    <SolidColorBrush x:Key="AppGoldSubtle"  Color="#F4ECDC" />
 
     <!--
         ════════════════════════════════════════════════════════════════
@@ -72,19 +81,19 @@
         themes. AppThemeService skips ApplicationAccentColorManager.Apply
         so these overrides are not overwritten on Application.Resources.
     -->
-    <SolidColorBrush x:Key="SystemAccentColorPrimaryBrush"   Color="#0078D4" />
-    <SolidColorBrush x:Key="SystemAccentColorSecondaryBrush" Color="#006CBE" />
-    <SolidColorBrush x:Key="SystemAccentColorTertiaryBrush"  Color="#005A9E" />
+    <SolidColorBrush x:Key="SystemAccentColorPrimaryBrush"   Color="#142F55" />
+    <SolidColorBrush x:Key="SystemAccentColorSecondaryBrush" Color="#1F4275" />
+    <SolidColorBrush x:Key="SystemAccentColorTertiaryBrush"  Color="#0D2444" />
 
-    <SolidColorBrush x:Key="AccentFillColorDefaultBrush"   Color="#0078D4" />
-    <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="#006CBE" />
-    <SolidColorBrush x:Key="AccentFillColorTertiaryBrush"  Color="#005A9E" />
-    <SolidColorBrush x:Key="AccentFillColorDisabledBrush"  Color="#A6C8E0" />
+    <SolidColorBrush x:Key="AccentFillColorDefaultBrush"   Color="#142F55" />
+    <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="#1F4275" />
+    <SolidColorBrush x:Key="AccentFillColorTertiaryBrush"  Color="#0D2444" />
+    <SolidColorBrush x:Key="AccentFillColorDisabledBrush"  Color="#A2ADC1" />
 
-    <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush"   Color="#005A9E" />
-    <SolidColorBrush x:Key="AccentTextFillColorSecondaryBrush" Color="#004C84" />
-    <SolidColorBrush x:Key="AccentTextFillColorTertiaryBrush"  Color="#003D6B" />
-    <SolidColorBrush x:Key="AccentTextFillColorDisabledBrush"  Color="#88B5DD" />
+    <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush"   Color="#142F55" />
+    <SolidColorBrush x:Key="AccentTextFillColorSecondaryBrush" Color="#0D2444" />
+    <SolidColorBrush x:Key="AccentTextFillColorTertiaryBrush"  Color="#091A33" />
+    <SolidColorBrush x:Key="AccentTextFillColorDisabledBrush"  Color="#94A3B8" />
 
     <SolidColorBrush x:Key="TextOnAccentFillColorPrimaryBrush"      Color="#FFFFFF" />
     <SolidColorBrush x:Key="TextOnAccentFillColorSecondaryBrush"    Color="#E6FFFFFF" />
@@ -92,24 +101,24 @@
     <SolidColorBrush x:Key="TextOnAccentFillColorSelectedTextBrush" Color="#FFFFFF" />
 
     <!--  Wpf.Ui Primary button (Appearance="Primary") binds these directly  -->
-    <SolidColorBrush x:Key="AccentButtonBackground"            Color="#0078D4" />
-    <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#1289DA" />
-    <SolidColorBrush x:Key="AccentButtonBackgroundPressed"     Color="#005A9E" />
-    <SolidColorBrush x:Key="AccentButtonBackgroundDisabled"    Color="#A6C8E0" />
+    <SolidColorBrush x:Key="AccentButtonBackground"            Color="#142F55" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#1F4275" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPressed"     Color="#0D2444" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundDisabled"    Color="#A2ADC1" />
     <SolidColorBrush x:Key="AccentButtonForeground"            Color="#FFFFFF" />
     <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFFFFF" />
     <SolidColorBrush x:Key="AccentButtonForegroundPressed"     Color="#E6FFFFFF" />
     <SolidColorBrush x:Key="AccentButtonForegroundDisabled"    Color="#88FFFFFF" />
     <SolidColorBrush x:Key="AccentButtonBorderBrushPressed"    Color="#005A9E" />
-    <SolidColorBrush x:Key="AccentControlElevationBorderBrush" Color="#005A9E" />
+    <SolidColorBrush x:Key="AccentControlElevationBorderBrush" Color="#0D2444" />
 
     <!--  DataGrid  -->
-    <SolidColorBrush x:Key="AppSelectedRow" Color="#C0DEFA" />
-    <SolidColorBrush x:Key="AppGridLines"   Color="#EBEBEB" />
+    <SolidColorBrush x:Key="AppSelectedRow" Color="#E5EAF1" />
+    <SolidColorBrush x:Key="AppGridLines"   Color="#F1F5F9" />
 
     <!--  Error banner  -->
-    <SolidColorBrush x:Key="AppErrorBg"     Color="#FDF3F2" />
-    <SolidColorBrush x:Key="AppErrorBorder" Color="#C42B1C" />
+    <SolidColorBrush x:Key="AppErrorBg"     Color="#FEF2F2" />
+    <SolidColorBrush x:Key="AppErrorBorder" Color="#DC2626" />
 
     <!--  Modal overlay scrim  -->
     <SolidColorBrush x:Key="AppModalOverlay" Color="#33000000" />

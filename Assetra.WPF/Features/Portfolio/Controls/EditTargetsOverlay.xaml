@@ -15,7 +15,7 @@
   </UserControl.Resources>
 
   <!--  ── 編輯目標配置 overlay ────────────────────────────────────────  -->
-  <Grid Background="#80000000" Visibility="{Binding IsEditingTargets, Converter={StaticResource BoolToVis}}">
+  <Grid Background="{DynamicResource AppModalOverlay}" Visibility="{Binding IsEditingTargets, Converter={StaticResource BoolToVis}}">
     <ui:Card
             MaxHeight="560"
             Padding="0"

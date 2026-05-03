@@ -16,7 +16,7 @@
         Background="{DynamicResource AppBackground}"
         BorderBrush="{DynamicResource AppBorder}"
         BorderThickness="1"
-        CornerRadius="12">
+        CornerRadius="{StaticResource RadiusXl}">
         <StackPanel
             HorizontalAlignment="Center"
             VerticalAlignment="Center">

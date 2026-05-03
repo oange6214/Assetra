@@ -52,7 +52,7 @@
                                     Margin="0,4,8,0"
                                     VerticalAlignment="Top"
                                     Background="{Binding ColorBrush}"
-                                    CornerRadius="2"
+                                    CornerRadius="{StaticResource RadiusXs}"
                                     DockPanel.Dock="Left" />
                 <TextBlock
                                     DockPanel.Dock="Right"
@@ -326,7 +326,7 @@
                                         Margin="0,0,6,0"
                                         VerticalAlignment="Center"
                                         Background="{Binding ColorBrush}"
-                                        CornerRadius="2" />
+                                        CornerRadius="{StaticResource RadiusXs}" />
                   <TextBlock
                                         FontSize="{StaticResource FontSizeSm}"
                                         FontWeight="SemiBold"
