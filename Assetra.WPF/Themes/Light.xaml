@@ -45,8 +45,15 @@
     <SolidColorBrush x:Key="AppTextMuted"     Color="#64748B" />
     <SolidColorBrush x:Key="AppTextOnAccent"  Color="#FFFFFF" />
 
-    <!--  Semantic — price direction (preserved for ColorSchemeService Taiwan/Intl swap)  -->
-    <SolidColorBrush x:Key="AppUp"   Color="#16A34A" />
+    <!--
+        Semantic — price direction.
+        AppUp lifted from #16A34A (green-600, ~3.34:1 on white — FAILS
+        WCAG AA for normal text) to #15803D (green-700, ~5.5:1 — passes
+        AA). Affects every "+X.XX%" / "+NT$..." gain display across the
+        portfolio at small font sizes.
+        Preserved for ColorSchemeService Taiwan/Intl swap.
+    -->
+    <SolidColorBrush x:Key="AppUp"   Color="#15803D" />
     <SolidColorBrush x:Key="AppDown" Color="#DC2626" />
     <SolidColorBrush x:Key="AppFlat" Color="#475569" />
 

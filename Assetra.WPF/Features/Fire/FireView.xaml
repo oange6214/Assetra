@@ -49,8 +49,6 @@
                 </UniformGrid>
                 <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppDanger}" Text="{Binding ErrorMessage}"
                            Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
-                <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppAccent}" Text="{Binding StatusMessage}"
-                           Visibility="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}}" />
                 <StackPanel Margin="0,16,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
                     <ui:Button Margin="0,0,8,0"
                                Command="{Binding SaveToGoalsCommand}"

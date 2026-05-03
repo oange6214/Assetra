@@ -4,6 +4,7 @@ using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Fire;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Fire;
+using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -15,6 +16,7 @@ public sealed partial class FireViewModel : ObservableObject
 {
     private readonly IFireCalculatorService _calculator;
     private readonly IFinancialGoalRepository _goals;
+    private readonly ISnackbarService? _snackbar;
 
     [ObservableProperty] private string _currentNetWorth = "1000000";
     [ObservableProperty] private string _annualExpenses = "600000";
@@ -23,7 +25,6 @@ public sealed partial class FireViewModel : ObservableObject
     [ObservableProperty] private string _withdrawalRate = "0.04";
 
     [ObservableProperty] private string? _errorMessage;
-    [ObservableProperty] private string? _statusMessage;
     [ObservableProperty] private decimal _fireNumber;
     [ObservableProperty] private string _yearsToFire = string.Empty;
     [ObservableProperty] private decimal _projectedNetWorthAtFire;
@@ -35,19 +36,20 @@ public sealed partial class FireViewModel : ObservableObject
 
     public FireViewModel(
         IFireCalculatorService calculator,
-        IFinancialGoalRepository goals)
+        IFinancialGoalRepository goals,
+        ISnackbarService? snackbar = null)
     {
         ArgumentNullException.ThrowIfNull(calculator);
         ArgumentNullException.ThrowIfNull(goals);
         _calculator = calculator;
         _goals = goals;
+        _snackbar = snackbar;
     }
 
     [RelayCommand]
     private void Calculate()
     {
         ErrorMessage = null;
-        StatusMessage = null;
         HasCalculatedResult = false;
         if (!TryParseDecimal(CurrentNetWorth, out var nw))   { ErrorMessage = "目前淨資產格式錯誤"; return; }
         if (!TryParseDecimal(AnnualExpenses, out var exp))   { ErrorMessage = "年支出格式錯誤"; return; }
@@ -80,7 +82,6 @@ public sealed partial class FireViewModel : ObservableObject
     private async Task SaveToGoalsAsync()
     {
         ErrorMessage = null;
-        StatusMessage = null;
         if (!TryParseDecimal(CurrentNetWorth, out var current))
         {
             ErrorMessage = "目前淨資產格式錯誤";
@@ -108,11 +109,11 @@ public sealed partial class FireViewModel : ObservableObject
                 await _goals.UpdateAsync(goal).ConfigureAwait(true);
 
             WeakReferenceMessenger.Default.Send(new FireGoalSavedMessage(goal));
-            StatusMessage = "已同步到財務目標";
+            _snackbar?.Success("已同步到財務目標");
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            _snackbar?.Error(ex.Message);
         }
     }
 
