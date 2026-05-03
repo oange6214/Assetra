@@ -103,15 +103,21 @@
                                 <StackPanel Orientation="Horizontal">
                                     <ui:Button
                                         Margin="0,0,4,0"
+                                        Padding="6"
+                                        Appearance="Transparent"
                                         Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
-                                        Content="{DynamicResource Common.Edit}"
-                                        Style="{StaticResource SmallButtonStyle}" />
+                                        ToolTip="{DynamicResource Common.Edit}">
+                    <ui:SymbolIcon Symbol="Edit24" />
+                  </ui:Button>
                                     <ui:Button
+                                        Padding="6"
+                                        Appearance="Transparent"
                                         Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
-                                        Content="{DynamicResource Common.Delete}"
-                                        Style="{StaticResource SmallDangerButtonStyle}" />
+                                        ToolTip="{DynamicResource Common.Delete}">
+                    <ui:SymbolIcon Foreground="{DynamicResource AppDanger}" Symbol="Delete24" />
+                  </ui:Button>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
