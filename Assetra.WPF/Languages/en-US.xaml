@@ -881,7 +881,9 @@
     <sys:String x:Key="Recurring.Field.StartDate">Starts</sys:String>
     <sys:String x:Key="Recurring.Field.Mode">Handling mode</sys:String>
     <sys:String x:Key="Recurring.Field.Note">Note</sys:String>
-    <sys:String x:Key="Recurring.Add">Add</sys:String>
+    <sys:String x:Key="Recurring.Add">Add Subscription</sys:String>
+    <sys:String x:Key="Recurring.Empty">No subscriptions yet</sys:String>
+    <sys:String x:Key="Recurring.Pending.Empty">No pending items</sys:String>
     <sys:String x:Key="Recurring.NameHint">Name</sys:String>
     <sys:String x:Key="Recurring.AmountHint">Amount</sys:String>
     <sys:String x:Key="Recurring.IntervalHint">Repeat every N frequency units</sys:String>
@@ -1146,7 +1148,7 @@
     <sys:String x:Key="PhysicalAsset.Form.Notes">Notes</sys:String>
 
     <!-- v0.25 FIRE Calculator -->
-    <sys:String x:Key="Fire.Title">FIRE Calculator</sys:String>
+    <sys:String x:Key="Fire.Title">FIRE</sys:String>
     <sys:String x:Key="Fire.Input.NetWorth">Current Net Worth</sys:String>
     <sys:String x:Key="Fire.Input.AnnualExpenses">Annual Expenses</sys:String>
     <sys:String x:Key="Fire.Input.AnnualSavings">Annual Savings</sys:String>
@@ -1161,7 +1163,7 @@
     <sys:String x:Key="Fire.Path.NetWorth">Net Worth</sys:String>
 
     <!--  Monte Carlo  -->
-    <sys:String x:Key="MonteCarlo.Title">Monte Carlo Retirement Simulation</sys:String>
+    <sys:String x:Key="MonteCarlo.Title">Monte Carlo</sys:String>
     <sys:String x:Key="MonteCarlo.Input.Initial">Initial Balance</sys:String>
     <sys:String x:Key="MonteCarlo.Input.Withdrawal">Annual Withdrawal</sys:String>
     <sys:String x:Key="MonteCarlo.Input.Mean">Mean Return</sys:String>

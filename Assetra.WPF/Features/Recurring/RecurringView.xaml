@@ -51,14 +51,30 @@
         <Grid Margin="0,12,0,0">
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
           </Grid.RowDefinitions>
 
-          <!-- Add form -->
+          <!-- Toolbar: + Add Subscription button -->
+          <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="False">
+            <ui:Button
+                DockPanel.Dock="Right"
+                Command="{Binding OpenAddFormCommand}"
+                Appearance="Primary"
+                Visibility="{Binding IsAddFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+              <StackPanel Orientation="Horizontal">
+                <ui:SymbolIcon Symbol="Add24" Margin="0,0,4,0" VerticalAlignment="Center" />
+                <TextBlock Text="{DynamicResource Recurring.Add}" VerticalAlignment="Center" />
+              </StackPanel>
+            </ui:Button>
+          </DockPanel>
+
+          <!-- Add form (collapsible) -->
           <ui:Card
-              Grid.Row="0"
+              Grid.Row="1"
               Margin="0,0,0,12"
-              Padding="12">
+              Padding="12"
+              Visibility="{Binding IsAddFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>
               <TextBlock
                   FontSize="{StaticResource FontSizeMd}"
@@ -231,6 +247,14 @@
                       Command="{Binding AddSubscriptionCommand}"
                       Content="{DynamicResource Recurring.Add}"
                       Appearance="Primary" />
+                  <ui:Button
+                      DockPanel.Dock="Right"
+                      MinWidth="80"
+                      MinHeight="36"
+                      Margin="0,0,8,0"
+                      Command="{Binding CloseAddFormCommand}"
+                      Content="{DynamicResource Common.Cancel}"
+                      Appearance="Secondary" />
                 </DockPanel>
               </Border>
               <TextBlock
@@ -242,8 +266,30 @@
             </StackPanel>
           </ui:Card>
 
+          <!-- Empty state -->
+          <StackPanel
+              Grid.Row="2"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Visibility="{Binding HasNoSubscriptions, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ui:SymbolIcon
+                HorizontalAlignment="Center"
+                FontSize="48"
+                Foreground="{DynamicResource AppTextMuted}"
+                Symbol="ArrowRepeatAll24" />
+            <TextBlock
+                Margin="0,12,0,0"
+                HorizontalAlignment="Center"
+                FontSize="{DynamicResource FontSizeSm}"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{DynamicResource Recurring.Empty}" />
+          </StackPanel>
+
           <!-- Subscriptions list -->
-          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+          <ScrollViewer
+              Grid.Row="2"
+              VerticalScrollBarVisibility="Auto"
+              Visibility="{Binding HasSubscriptions, Converter={StaticResource BooleanToVisibilityConverter}}">
             <ItemsControl ItemsSource="{Binding Subscriptions}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type vm:RecurringRowViewModel}">
@@ -299,8 +345,8 @@
                           FontSize="{StaticResource FontSizeSm}"
                           Foreground="{DynamicResource AppTextMuted}"
                           Text="{Binding NextDueDisplay}" />
-                      <StackPanel Grid.Column="5" Orientation="Horizontal">
-                        <CheckBox
+                      <StackPanel Grid.Column="5" VerticalAlignment="Center" Orientation="Horizontal">
+                        <ui:ToggleSwitch
                             Margin="6,0"
                             VerticalAlignment="Center"
                             Command="{Binding DataContext.ToggleEnabledCommand, ElementName=Root}"
@@ -308,9 +354,13 @@
                             IsChecked="{Binding IsEnabled, Mode=OneWay}" />
                         <ui:Button
                             Margin="6,0,0,0"
+                            Padding="8"
+                            Appearance="Transparent"
                             Command="{Binding DataContext.DeleteSubscriptionCommand, ElementName=Root}"
                             CommandParameter="{Binding}"
-                            Content="{DynamicResource Common.Delete}" />
+                            ToolTip="{DynamicResource Common.Delete}">
+                          <ui:SymbolIcon Symbol="Delete24" Foreground="{DynamicResource AppDanger}" />
+                        </ui:Button>
                       </StackPanel>
                     </Grid>
                   </ui:Card>
@@ -323,7 +373,28 @@
 
       <!-- Pending tab -->
       <TabItem Header="{DynamicResource Recurring.Tab.Pending}">
-        <ScrollViewer Margin="0,12,0,0" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="0,12,0,0">
+          <!-- Empty state -->
+          <StackPanel
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Visibility="{Binding HasPending, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+            <ui:SymbolIcon
+                HorizontalAlignment="Center"
+                FontSize="48"
+                Foreground="{DynamicResource AppTextMuted}"
+                Symbol="CheckmarkCircle24" />
+            <TextBlock
+                Margin="0,12,0,0"
+                HorizontalAlignment="Center"
+                FontSize="{DynamicResource FontSizeSm}"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{DynamicResource Recurring.Pending.Empty}" />
+          </StackPanel>
+
+          <ScrollViewer
+              VerticalScrollBarVisibility="Auto"
+              Visibility="{Binding HasPending, Converter={StaticResource BooleanToVisibilityConverter}}">
           <ItemsControl ItemsSource="{Binding Pending}">
             <ItemsControl.ItemTemplate>
               <DataTemplate DataType="{x:Type vm:PendingRecurringRowViewModel}">
@@ -363,14 +434,16 @@
                         FontSize="{StaticResource FontSizeBase}"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding AmountDisplay}" />
-                    <StackPanel Grid.Column="3" Orientation="Horizontal">
+                    <StackPanel Grid.Column="3" VerticalAlignment="Center" Orientation="Horizontal">
                       <ui:Button
                           Margin="6,0,0,0"
+                          Appearance="Primary"
                           Command="{Binding DataContext.ConfirmPendingCommand, ElementName=Root}"
                           CommandParameter="{Binding}"
                           Content="{DynamicResource Recurring.Pending.Confirm}" />
                       <ui:Button
                           Margin="6,0,0,0"
+                          Appearance="Secondary"
                           Command="{Binding DataContext.SkipPendingCommand, ElementName=Root}"
                           CommandParameter="{Binding}"
                           Content="{DynamicResource Recurring.Pending.Skip}" />
@@ -380,7 +453,8 @@
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
-        </ScrollViewer>
+          </ScrollViewer>
+        </Grid>
       </TabItem>
 
     </TabControl>

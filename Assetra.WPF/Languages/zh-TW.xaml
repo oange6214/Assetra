@@ -883,7 +883,9 @@
     <sys:String x:Key="Recurring.Field.StartDate">開始日期</sys:String>
     <sys:String x:Key="Recurring.Field.Mode">處理方式</sys:String>
     <sys:String x:Key="Recurring.Field.Note">備註</sys:String>
-    <sys:String x:Key="Recurring.Add">新增</sys:String>
+    <sys:String x:Key="Recurring.Add">新增訂閱</sys:String>
+    <sys:String x:Key="Recurring.Empty">尚無訂閱排程</sys:String>
+    <sys:String x:Key="Recurring.Pending.Empty">沒有待處理的項目</sys:String>
     <sys:String x:Key="Recurring.NameHint">名稱</sys:String>
     <sys:String x:Key="Recurring.AmountHint">金額</sys:String>
     <sys:String x:Key="Recurring.IntervalHint">每 N 個頻率單位重複一次</sys:String>
@@ -1148,7 +1150,7 @@
     <sys:String x:Key="PhysicalAsset.Form.Notes">備註</sys:String>
 
     <!--  v0.25 FIRE 計算機  -->
-    <sys:String x:Key="Fire.Title">FIRE 計算機</sys:String>
+    <sys:String x:Key="Fire.Title">FIRE</sys:String>
     <sys:String x:Key="Fire.Input.NetWorth">目前淨資產</sys:String>
     <sys:String x:Key="Fire.Input.AnnualExpenses">年支出</sys:String>
     <sys:String x:Key="Fire.Input.AnnualSavings">年儲蓄</sys:String>
@@ -1163,7 +1165,7 @@
     <sys:String x:Key="Fire.Path.NetWorth">淨資產</sys:String>
 
     <!--  v0.26 Monte Carlo  -->
-    <sys:String x:Key="MonteCarlo.Title">Monte Carlo 退休模擬</sys:String>
+    <sys:String x:Key="MonteCarlo.Title">Monte Carlo</sys:String>
     <sys:String x:Key="MonteCarlo.Input.Initial">起始餘額</sys:String>
     <sys:String x:Key="MonteCarlo.Input.Withdrawal">年提領</sys:String>
     <sys:String x:Key="MonteCarlo.Input.Mean">平均報酬率</sys:String>

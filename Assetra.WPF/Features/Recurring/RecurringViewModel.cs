@@ -26,6 +26,9 @@ public partial class RecurringViewModel : ObservableObject
     [ObservableProperty] private bool _isLoaded;
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string _runStatus = string.Empty;
+    [ObservableProperty] private bool _isAddFormOpen;
+    public bool HasNoSubscriptions => Subscriptions.Count == 0;
+    public bool HasSubscriptions   => Subscriptions.Count > 0;
 
     // Add subscription form
     [ObservableProperty] private string _addName = string.Empty;
@@ -68,6 +71,12 @@ public partial class RecurringViewModel : ObservableObject
             OnPropertyChanged(nameof(PendingBadge));
         };
 
+        Subscriptions.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(HasNoSubscriptions));
+            OnPropertyChanged(nameof(HasSubscriptions));
+        };
+
         _localization.LanguageChanged += OnLanguageChanged;
     }
 
@@ -101,6 +110,20 @@ public partial class RecurringViewModel : ObservableObject
             var sourceName = Subscriptions.FirstOrDefault(s => s.Id == e.RecurringSourceId)?.Name ?? "—";
             Pending.Add(PendingRecurringRowViewModel.FromModel(e, sourceName));
         }
+    }
+
+    [RelayCommand]
+    private void OpenAddForm()
+    {
+        AddError = string.Empty;
+        IsAddFormOpen = true;
+    }
+
+    [RelayCommand]
+    private void CloseAddForm()
+    {
+        IsAddFormOpen = false;
+        AddError = string.Empty;
     }
 
     [RelayCommand]
@@ -152,6 +175,7 @@ public partial class RecurringViewModel : ObservableObject
         AddName = string.Empty;
         AddAmount = 0m;
         AddNote = string.Empty;
+        IsAddFormOpen = false;
 
         _snackbar.Success(string.Format(
             GetString("Recurring.Toast.Added", "已新增訂閱「{0}」"), name));
