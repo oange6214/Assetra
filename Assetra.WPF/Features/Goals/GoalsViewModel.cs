@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Windows;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -28,6 +27,34 @@ public sealed partial class GoalsViewModel : ObservableObject
 
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string? _errorMessage;
+
+    // ── In-app confirm dialog (mirrors PortfolioViewModel for consistency) ──
+    [ObservableProperty] private bool _isConfirmDialogOpen;
+    [ObservableProperty] private string _confirmDialogMessage = string.Empty;
+    private Func<Task>? _confirmDialogAction;
+
+    [RelayCommand]
+    private async Task ConfirmDialogYes()
+    {
+        IsConfirmDialogOpen = false;
+        if (_confirmDialogAction is not null)
+            await _confirmDialogAction();
+        _confirmDialogAction = null;
+    }
+
+    [RelayCommand]
+    private void ConfirmDialogNo()
+    {
+        IsConfirmDialogOpen = false;
+        _confirmDialogAction = null;
+    }
+
+    private void AskConfirm(string message, Func<Task> action)
+    {
+        ConfirmDialogMessage = message;
+        _confirmDialogAction = action;
+        IsConfirmDialogOpen = true;
+    }
 
     // ── Add / Edit form (shared) ──
     [ObservableProperty] private string _addName = string.Empty;
@@ -168,29 +195,26 @@ public sealed partial class GoalsViewModel : ObservableObject
     private void CancelEdit() => ResetAddForm();
 
     [RelayCommand]
-    private async Task RemoveAsync(GoalRowViewModel? row)
+    private void Remove(GoalRowViewModel? row)
     {
         if (row is null) return;
 
-        var title = L("Goals.Delete.ConfirmTitle", "Delete goal");
         var template = L("Goals.Delete.ConfirmMessage", "Delete \"{0}\"? This cannot be undone.");
         var message = string.Format(CultureInfo.CurrentCulture, template, row.Goal.Name);
 
-        var result = MessageBox.Show(
-            message, title, MessageBoxButton.OKCancel, MessageBoxImage.Warning,
-            MessageBoxResult.Cancel);
-        if (result != MessageBoxResult.OK) return;
-
-        try
+        AskConfirm(message, async () =>
         {
-            await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
-            Goals.Remove(row);
-            if (EditingId == row.Id) ResetAddForm();
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
+            try
+            {
+                await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
+                Goals.Remove(row);
+                if (EditingId == row.Id) ResetAddForm();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+            }
+        });
     }
 
     private void ResetAddForm()

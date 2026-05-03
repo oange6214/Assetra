@@ -257,5 +257,53 @@
                     Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
             </StackPanel>
         </ui:Card>
+
+        <!--  ── Confirm dialog (mirrors PortfolioView.xaml structure) ──  -->
+        <Grid
+            Grid.RowSpan="3"
+            Panel.ZIndex="220"
+            Visibility="{Binding IsConfirmDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Background="{DynamicResource AppModalOverlay}" />
+            <Border
+                Width="320"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource RadiusMd}">
+                <StackPanel Margin="24,20">
+                    <TextBlock
+                        Margin="0,0,0,4"
+                        FontSize="{StaticResource FontSizeSm}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Goals.Delete.ConfirmTitle}" />
+                    <TextBlock
+                        Margin="0,0,0,20"
+                        FontSize="{StaticResource FontSizeSm}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{Binding ConfirmDialogMessage}"
+                        TextWrapping="Wrap" />
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <ui:Button
+                            Height="30"
+                            Margin="0,0,8,0"
+                            Padding="14,0"
+                            Command="{Binding ConfirmDialogNoCommand}"
+                            Appearance="Secondary">
+                            <TextBlock Text="{DynamicResource Common.Cancel}" />
+                        </ui:Button>
+                        <ui:Button
+                            Height="30"
+                            Padding="14,0"
+                            Command="{Binding ConfirmDialogYesCommand}"
+                            Appearance="Danger">
+                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Common.Delete}" />
+                        </ui:Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
