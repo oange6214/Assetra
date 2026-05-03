@@ -31,102 +31,50 @@
                 Placeholder="{DynamicResource Trends.CustomRange}"
                 StartDate="{Binding CustomStartDate, Mode=TwoWay}" />
 
+            <!--
+                Period filter — RadioButton group sharing NavTabBtn (the
+                same underline-indicator style used by the Allocation
+                inner tabs and the new TabItem template). Replaces the
+                previous five verbose Style/DataTrigger Primary/Secondary
+                button blocks (~90 lines) with a single visual treatment
+                aligned with the rest of the app.
+            -->
             <StackPanel Orientation="Horizontal">
-                <!--
-                    Each preset button's Appearance is driven by a DataTrigger
-                    comparing ViewModel.ActivePeriod to that button's Tag, so
-                    the currently-active range is highlighted as Primary while
-                    the rest stay Secondary.
-                -->
-                <ui:Button
-                    Margin="0,0,8,0"
+                <RadioButton
                     Command="{Binding ChangePeriodCommand}"
                     CommandParameter="30"
                     Content="{DynamicResource Trends.Period.30}"
-                    Tag="30">
-                    <ui:Button.Style>
-                        <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="ui:Button">
-                            <Setter Property="Appearance" Value="Secondary" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ActivePeriod}" Value="30">
-                                    <Setter Property="Appearance" Value="Primary" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ui:Button.Style>
-                </ui:Button>
-
-                <ui:Button
-                    Margin="0,0,8,0"
+                    GroupName="TrendsPeriod"
+                    IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=30}"
+                    Style="{StaticResource NavTabBtn}" />
+                <RadioButton
                     Command="{Binding ChangePeriodCommand}"
                     CommandParameter="90"
                     Content="{DynamicResource Trends.Period.90}"
-                    Tag="90">
-                    <ui:Button.Style>
-                        <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="ui:Button">
-                            <Setter Property="Appearance" Value="Secondary" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ActivePeriod}" Value="90">
-                                    <Setter Property="Appearance" Value="Primary" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ui:Button.Style>
-                </ui:Button>
-
-                <ui:Button
-                    Margin="0,0,8,0"
+                    GroupName="TrendsPeriod"
+                    IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=90}"
+                    Style="{StaticResource NavTabBtn}" />
+                <RadioButton
                     Command="{Binding ChangePeriodCommand}"
                     CommandParameter="180"
                     Content="{DynamicResource Trends.Period.180}"
-                    Tag="180">
-                    <ui:Button.Style>
-                        <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="ui:Button">
-                            <Setter Property="Appearance" Value="Secondary" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ActivePeriod}" Value="180">
-                                    <Setter Property="Appearance" Value="Primary" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ui:Button.Style>
-                </ui:Button>
-
-                <ui:Button
-                    Margin="0,0,8,0"
+                    GroupName="TrendsPeriod"
+                    IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=180}"
+                    Style="{StaticResource NavTabBtn}" />
+                <RadioButton
                     Command="{Binding ChangePeriodCommand}"
                     CommandParameter="365"
                     Content="{DynamicResource Trends.Period.365}"
-                    Tag="365">
-                    <ui:Button.Style>
-                        <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="ui:Button">
-                            <Setter Property="Appearance" Value="Secondary" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ActivePeriod}" Value="365">
-                                    <Setter Property="Appearance" Value="Primary" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ui:Button.Style>
-                </ui:Button>
-
-                <ui:Button
-                    Margin="0,0,16,0"
+                    GroupName="TrendsPeriod"
+                    IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=365}"
+                    Style="{StaticResource NavTabBtn}" />
+                <RadioButton
                     Command="{Binding ChangePeriodCommand}"
                     CommandParameter="All"
                     Content="{DynamicResource Trends.Period.All}"
-                    Tag="All">
-                    <ui:Button.Style>
-                        <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="ui:Button">
-                            <Setter Property="Appearance" Value="Secondary" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ActivePeriod}" Value="All">
-                                    <Setter Property="Appearance" Value="Primary" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ui:Button.Style>
-                </ui:Button>
+                    GroupName="TrendsPeriod"
+                    IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=All}"
+                    Style="{StaticResource NavTabBtn}" />
             </StackPanel>
         </DockPanel>
 
