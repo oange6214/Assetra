@@ -19,8 +19,6 @@ public partial class MainWindow : FluentWindow
         SearchPopup.CustomPopupPlacementCallback = PlaceSearchPopup;
     }
 
-    // Backdrop click handlers
-
     private void SearchBackdrop_MouseDown(object sender, MouseButtonEventArgs e) =>
         _viewModel.ToggleSearchCommand.Execute(null);
 
