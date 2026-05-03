@@ -62,14 +62,10 @@
           </Grid.RowDefinitions>
 
           <!-- Add form -->
-          <Border
+          <ui:Card
               Grid.Row="0"
               Margin="0,0,0,12"
-              Padding="12"
-              Background="{DynamicResource AppSurface}"
-              BorderBrush="{DynamicResource AppBorder}"
-              BorderThickness="1"
-              CornerRadius="{StaticResource RadiusSm}">
+              Padding="12">
             <StackPanel>
               <TextBlock
                   FontSize="{StaticResource FontSizeMd}"
@@ -251,20 +247,16 @@
                   Text="{Binding AddError}"
                   Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
             </StackPanel>
-          </Border>
+          </ui:Card>
 
           <!-- Subscriptions list -->
           <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <ItemsControl ItemsSource="{Binding Subscriptions}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type vm:RecurringRowViewModel}">
-                  <Border
+                  <ui:Card
                       Margin="0,0,0,6"
-                      Padding="12,10"
-                      Background="{DynamicResource AppSurface}"
-                      BorderBrush="{DynamicResource AppBorder}"
-                      BorderThickness="1"
-                      CornerRadius="{StaticResource RadiusSm}">
+                      Padding="12,10">
                     <Grid>
                       <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -328,7 +320,7 @@
                             Content="{DynamicResource Common.Delete}" />
                       </StackPanel>
                     </Grid>
-                  </Border>
+                  </ui:Card>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -342,13 +334,9 @@
           <ItemsControl ItemsSource="{Binding Pending}">
             <ItemsControl.ItemTemplate>
               <DataTemplate DataType="{x:Type vm:PendingRecurringRowViewModel}">
-                <Border
+                <ui:Card
                     Margin="0,0,0,6"
-                    Padding="12,10"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusSm}">
+                    Padding="12,10">
                   <Grid>
                     <Grid.ColumnDefinitions>
                       <ColumnDefinition Width="*" />
@@ -395,7 +383,7 @@
                           Content="{DynamicResource Recurring.Pending.Skip}" />
                     </StackPanel>
                   </Grid>
-                </Border>
+                </ui:Card>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>

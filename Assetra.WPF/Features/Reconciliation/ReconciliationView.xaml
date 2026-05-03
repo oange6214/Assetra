@@ -41,14 +41,10 @@
         </StackPanel>
 
         <!--  Toolbar  -->
-        <Border
+        <ui:Card
             Grid.Row="1"
             Margin="0,0,0,12"
-            Padding="12"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="8">
+            Padding="12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -98,17 +94,13 @@
                         Content="{DynamicResource Reconciliation.SignOff}" />
                 </StackPanel>
             </Grid>
-        </Border>
+        </ui:Card>
 
         <!--  New Session Panel (collapsible)  -->
-        <Border
+        <ui:Card
             Grid.Row="2"
             Margin="0,0,0,12"
             Padding="12"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="8"
             Visibility="{Binding IsNewSessionPanelOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -214,7 +206,7 @@
                         Content="{DynamicResource Reconciliation.NewSession.Create}" />
                 </StackPanel>
             </Grid>
-        </Border>
+        </ui:Card>
 
         <!--  Body: DataGrid + Balance panel  -->
         <Grid Grid.Row="3">
@@ -346,15 +338,11 @@
                 </ui:DataGrid>
             </Border>
 
-            <Border
+            <ui:Card
                 Grid.Column="1"
                 Width="260"
                 Margin="12,0,0,0"
-                Padding="12"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="8">
+                Padding="12">
                 <StackPanel>
                     <TextBlock
                         Margin="0,0,0,8"
@@ -367,7 +355,7 @@
                         TextWrapping="Wrap"
                         Text="{Binding BalancePanelDisplay}" />
                 </StackPanel>
-            </Border>
+            </ui:Card>
         </Grid>
 
         <!--  Status footer  -->

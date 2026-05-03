@@ -49,13 +49,9 @@
         </ListBox.Style>
         <ListBox.ItemTemplate>
           <DataTemplate>
-            <Border
+            <ui:Card
                             Margin="0,0,0,10"
-                            Padding="14,12"
-                            Background="{DynamicResource AppSurface}"
-                            BorderBrush="{DynamicResource AppBorder}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource RadiusMd}">
+                            Padding="14,12">
               <StackPanel>
                 <DockPanel LastChildFill="False">
                   <StackPanel DockPanel.Dock="Left">
@@ -372,7 +368,7 @@
                   </Border>
                 </WrapPanel>
               </StackPanel>
-            </Border>
+            </ui:Card>
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>

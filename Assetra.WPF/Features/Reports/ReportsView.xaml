@@ -95,13 +95,9 @@
             Columns="4"
             Rows="1">
 
-            <Border
+            <ui:Card
                 Margin="0,0,8,0"
-                Padding="16"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="8">
+                Padding="16">
                 <StackPanel>
                     <TextBlock
                         FontSize="{DynamicResource FontSizeXs}"
@@ -121,15 +117,11 @@
                         Text="{Binding IncomeDeltaDisplay}"
                         ToolTip="{DynamicResource Reports.DeltaTooltip}" />
                 </StackPanel>
-            </Border>
+            </ui:Card>
 
-            <Border
+            <ui:Card
                 Margin="8,0"
-                Padding="16"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="8">
+                Padding="16">
                 <StackPanel>
                     <TextBlock
                         FontSize="{DynamicResource FontSizeXs}"
@@ -149,15 +141,11 @@
                         Text="{Binding ExpenseDeltaDisplay}"
                         ToolTip="{DynamicResource Reports.DeltaTooltip}" />
                 </StackPanel>
-            </Border>
+            </ui:Card>
 
-            <Border
+            <ui:Card
                 Margin="8,0"
-                Padding="16"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="8">
+                Padding="16">
                 <StackPanel>
                     <TextBlock
                         FontSize="{DynamicResource FontSizeXs}"
@@ -177,15 +165,11 @@
                         Text="{Binding NetDeltaDisplay}"
                         ToolTip="{DynamicResource Reports.DeltaTooltip}" />
                 </StackPanel>
-            </Border>
+            </ui:Card>
 
-            <Border
+            <ui:Card
                 Margin="8,0,0,0"
-                Padding="16"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="8">
+                Padding="16">
                 <StackPanel>
                     <TextBlock
                         FontSize="{DynamicResource FontSizeXs}"
@@ -199,7 +183,7 @@
                         Foreground="{DynamicResource AppAccent}"
                         Text="{Binding SavingsRateDisplay}" />
                 </StackPanel>
-            </Border>
+            </ui:Card>
         </UniformGrid>
 
         <!--  ── Detail lists: over-budget + upcoming ──  -->
@@ -210,14 +194,10 @@
             </Grid.ColumnDefinitions>
 
             <!--  Over-budget categories  -->
-            <Border
+            <ui:Card
                 Grid.Column="0"
                 Margin="0,0,8,0"
-                Padding="16"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="8">
+                Padding="16">
                 <DockPanel>
                     <TextBlock
                         DockPanel.Dock="Top"
@@ -302,17 +282,13 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </DockPanel>
-            </Border>
+            </ui:Card>
 
             <!--  Upcoming recurring  -->
-            <Border
+            <ui:Card
                 Grid.Column="1"
                 Margin="8,0,0,0"
-                Padding="16"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="8">
+                Padding="16">
                 <DockPanel>
                     <TextBlock
                         DockPanel.Dock="Top"
@@ -361,7 +337,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </DockPanel>
-            </Border>
+            </ui:Card>
         </Grid>
 
         <!--  ── Statements (Income / Balance / CashFlow) ──  -->

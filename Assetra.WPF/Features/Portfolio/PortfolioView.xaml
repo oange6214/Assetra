@@ -320,13 +320,9 @@
                 <ItemsControl ItemsSource="{Binding SelectedCashTrades}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                      <Border
+                      <ui:Card
                                                 Margin="0,0,0,10"
-                                                Padding="12"
-                                                Background="{DynamicResource AppSurface}"
-                                                BorderBrush="{DynamicResource AppBorder}"
-                                                BorderThickness="1"
-                                                CornerRadius="{StaticResource RadiusSm}">
+                                                Padding="12">
                         <StackPanel>
                           <Grid>
                             <Grid.ColumnDefinitions>
@@ -392,7 +388,7 @@
                                                         TextWrapping="Wrap"
                                                         Visibility="{Binding Note, Converter={StaticResource StringToVisibilityConverter}}" />
                         </StackPanel>
-                      </Border>
+                      </ui:Card>
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -639,13 +635,9 @@
                 <ItemsControl ItemsSource="{Binding SelectedLiabilityTrades}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                      <Border
+                      <ui:Card
                                                 Margin="0,0,0,10"
-                                                Padding="12"
-                                                Background="{DynamicResource AppSurface}"
-                                                BorderBrush="{DynamicResource AppBorder}"
-                                                BorderThickness="1"
-                                                CornerRadius="{StaticResource RadiusSm}">
+                                                Padding="12">
                         <StackPanel>
                           <Grid>
                             <Grid.ColumnDefinitions>
@@ -711,7 +703,7 @@
                                                         TextWrapping="Wrap"
                                                         Visibility="{Binding Note, Converter={StaticResource StringToVisibilityConverter}}" />
                         </StackPanel>
-                      </Border>
+                      </ui:Card>
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -825,15 +817,11 @@
                 <ItemsControl ItemsSource="{Binding SelectedLiabilityRow.ScheduleEntries}" Visibility="{Binding SelectedLiabilityRow.HasSchedule, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                      <Border
+                      <ui:Card
                                                 Margin="0,0,0,10"
-                                                Padding="12"
-                                                Background="{DynamicResource AppSurface}"
-                                                BorderBrush="{DynamicResource AppBorder}"
-                                                BorderThickness="1"
-                                                CornerRadius="{StaticResource RadiusSm}">
-                        <Border.Style>
-                          <Style TargetType="Border">
+                                                Padding="12">
+                        <ui:Card.Style>
+                          <Style TargetType="ui:Card">
                             <Setter Property="Opacity" Value="1" />
                             <Style.Triggers>
                               <DataTrigger Binding="{Binding IsPaid}" Value="True">
@@ -841,7 +829,7 @@
                               </DataTrigger>
                             </Style.Triggers>
                           </Style>
-                        </Border.Style>
+                        </ui:Card.Style>
                         <StackPanel>
                           <DockPanel LastChildFill="True">
                             <Border
@@ -948,7 +936,7 @@
                                                             Text="{DynamicResource Portfolio.Loan.ConfirmPayment}" />
                           </ui:Button>
                         </StackPanel>
-                      </Border>
+                      </ui:Card>
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -1541,13 +1529,9 @@
                 <ItemsControl ItemsSource="{Binding SelectedPositionTrades}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                      <Border
+                      <ui:Card
                                                 Margin="0,0,0,10"
-                                                Padding="12"
-                                                Background="{DynamicResource AppSurface}"
-                                                BorderBrush="{DynamicResource AppBorder}"
-                                                BorderThickness="1"
-                                                CornerRadius="{StaticResource RadiusSm}">
+                                                Padding="12">
                         <StackPanel>
                           <Grid>
                             <Grid.ColumnDefinitions>
@@ -1651,7 +1635,7 @@
                                                         TextWrapping="Wrap"
                                                         Visibility="{Binding Note, Converter={StaticResource StringToVisibilityConverter}}" />
                         </StackPanel>
-                      </Border>
+                      </ui:Card>
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>

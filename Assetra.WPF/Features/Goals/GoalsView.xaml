@@ -39,13 +39,9 @@
         </StackPanel>
 
         <!--  Goal list  -->
-        <Border
+        <ui:Card
             Grid.Row="1"
-            Padding="16"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="8">
+            Padding="16">
             <Grid>
                 <TextBlock
                     HorizontalAlignment="Center"
@@ -166,17 +162,13 @@
                     </ItemsControl>
                 </ScrollViewer>
             </Grid>
-        </Border>
+        </ui:Card>
 
         <!--  ── Add form ──  -->
-        <Border
+        <ui:Card
             Grid.Row="2"
             Margin="0,16,0,0"
-            Padding="16"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="8">
+            Padding="16">
             <StackPanel>
                 <TextBlock
                     Margin="0,0,0,8"
@@ -264,6 +256,6 @@
                     Text="{Binding AddError}"
                     Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
             </StackPanel>
-        </Border>
+        </ui:Card>
     </Grid>
 </UserControl>

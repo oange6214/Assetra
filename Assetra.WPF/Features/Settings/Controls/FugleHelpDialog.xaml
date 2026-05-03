@@ -10,18 +10,14 @@
     <Grid Visibility="{Binding IsFugleHelpOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
         <Border Background="{DynamicResource AppModalOverlay}" />
 
-        <Border
+        <ui:Card
             Width="Auto"
             MaxWidth="560"
             MaxHeight="620"
             Margin="24"
             Padding="0"
             HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="{StaticResource RadiusMd}">
+            VerticalAlignment="Center">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -154,6 +150,6 @@
                     </DockPanel>
                 </Border>
             </Grid>
-        </Border>
+        </ui:Card>
     </Grid>
 </UserControl>

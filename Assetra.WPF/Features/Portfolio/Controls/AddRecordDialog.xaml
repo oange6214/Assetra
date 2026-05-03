@@ -304,12 +304,8 @@
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{DynamicResource Portfolio.TradeHistory.Type}" />
-                                        <Border
-                                            Padding="10"
-                                            Background="{DynamicResource AppSurface}"
-                                            BorderBrush="{DynamicResource AppBorder}"
-                                            BorderThickness="1"
-                                            CornerRadius="{StaticResource RadiusSm}">
+                                        <ui:Card
+                                            Padding="10">
                                             <StackPanel>
                                                 <Border
                                                     Padding="8"
@@ -427,7 +423,7 @@
                                                     </StackPanel>
                                                 </Border>
                                             </StackPanel>
-                                        </Border>
+                                        </ui:Card>
                                     </StackPanel>
                                 </DockPanel>
                             </Border>

@@ -77,13 +77,9 @@
             </Grid>
 
             <UniformGrid Columns="2">
-              <Border
+              <ui:Card
                                 Margin="0,0,6,0"
-                                Padding="10,8"
-                                Background="{DynamicResource AppSurface}"
-                                BorderBrush="{DynamicResource AppBorder}"
-                                BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusSm}">
+                                Padding="10,8">
                 <StackPanel>
                   <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
@@ -97,14 +93,10 @@
                                         Foreground="{DynamicResource AppUp}"
                                         Text="{Binding Financial.PaidPercentDisplay, Mode=OneWay}" />
                 </StackPanel>
-              </Border>
-              <Border
+              </ui:Card>
+              <ui:Card
                                 Margin="6,0,0,0"
-                                Padding="10,8"
-                                Background="{DynamicResource AppSurface}"
-                                BorderBrush="{DynamicResource AppBorder}"
-                                BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusSm}">
+                                Padding="10,8">
                 <StackPanel>
                   <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
@@ -118,7 +110,7 @@
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Financial.TotalOriginalDisplay, Mode=OneWay}" />
                 </StackPanel>
-              </Border>
+              </ui:Card>
             </UniformGrid>
           </StackPanel>
         </Border>
@@ -141,13 +133,9 @@
                                 FontSize="{StaticResource FontSizeXs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Portfolio.Liability.Health.Label}" />
-              <Border
+              <ui:Card
                                 Padding="8,2"
                                 HorizontalAlignment="Right"
-                                Background="{DynamicResource AppSurface}"
-                                BorderBrush="{DynamicResource AppBorder}"
-                                BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusSm}"
                                 DockPanel.Dock="Right">
                 <TextBlock
                                     FontSize="{StaticResource FontSizeXs}"
@@ -167,17 +155,13 @@
                     </Style>
                   </TextBlock.Style>
                 </TextBlock>
-              </Border>
+              </ui:Card>
             </DockPanel>
 
             <UniformGrid Margin="0,0,0,14" Columns="2">
-              <Border
+              <ui:Card
                                 Margin="0,0,6,0"
-                                Padding="10,8"
-                                Background="{DynamicResource AppSurface}"
-                                BorderBrush="{DynamicResource AppBorder}"
-                                BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusSm}">
+                                Padding="10,8">
                 <StackPanel>
                   <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
@@ -191,14 +175,10 @@
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Financial.DebtRatioDisplay}" />
                 </StackPanel>
-              </Border>
-              <Border
+              </ui:Card>
+              <ui:Card
                                 Margin="6,0,0,0"
-                                Padding="10,8"
-                                Background="{DynamicResource AppSurface}"
-                                BorderBrush="{DynamicResource AppBorder}"
-                                BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusSm}">
+                                Padding="10,8">
                 <StackPanel>
                   <TextBlock
                                         FontSize="{StaticResource FontSizeXs}"
@@ -212,7 +192,7 @@
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Financial.LeverageRatioDisplay}" />
                 </StackPanel>
-              </Border>
+              </ui:Card>
             </UniformGrid>
 
             <!--  Progress bar with 30% / 50% threshold tick marks  -->

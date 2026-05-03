@@ -254,12 +254,8 @@
         </MultiBinding>
       </StackPanel.Visibility>
 
-      <Border
-                Padding="14,12"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource RadiusMd}">
+      <ui:Card
+                Padding="14,12">
         <StackPanel>
           <TextBlock
                         FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
@@ -441,7 +437,7 @@
             </ui:Button>
           </StackPanel>
         </StackPanel>
-      </Border>
+      </ui:Card>
     </StackPanel>
   </Grid>
 </UserControl>

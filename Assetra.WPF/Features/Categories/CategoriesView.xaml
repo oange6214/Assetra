@@ -96,13 +96,9 @@
         </Style>
 
         <DataTemplate x:Key="CategoryRowTemplate" DataType="{x:Type vm:CategoryRowViewModel}">
-            <Border
+            <ui:Card
                 Margin="0,0,0,6"
-                Padding="10,8"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource RadiusSm}">
+                Padding="10,8">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -327,7 +323,7 @@
                         </ui:Button>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </ui:Card>
         </DataTemplate>
     </UserControl.Resources>
 
@@ -377,13 +373,9 @@
                         </Grid.ColumnDefinitions>
 
                         <!--  Expense  -->
-                        <Border
+                        <ui:Card
                             Grid.Column="0"
-                            Padding="12"
-                            Background="{DynamicResource AppSurface}"
-                            BorderBrush="{DynamicResource AppBorder}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource RadiusMd}">
+                            Padding="12">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -400,16 +392,12 @@
                                     <ItemsControl ItemTemplate="{StaticResource CategoryRowTemplate}" ItemsSource="{Binding ExpenseView}" />
                                 </ScrollViewer>
                             </Grid>
-                        </Border>
+                        </ui:Card>
 
                         <!--  Income  -->
-                        <Border
+                        <ui:Card
                             Grid.Column="2"
-                            Padding="12"
-                            Background="{DynamicResource AppSurface}"
-                            BorderBrush="{DynamicResource AppBorder}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource RadiusMd}">
+                            Padding="12">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -426,18 +414,14 @@
                                     <ItemsControl ItemTemplate="{StaticResource CategoryRowTemplate}" ItemsSource="{Binding IncomeView}" />
                                 </ScrollViewer>
                             </Grid>
-                        </Border>
+                        </ui:Card>
                     </Grid>
 
                     <!--  Add form  -->
-                    <Border
+                    <ui:Card
                         Grid.Row="1"
                         Margin="0,12,0,0"
-                        Padding="14,12"
-                        Background="{DynamicResource AppSurface}"
-                        BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusMd}">
+                        Padding="14,12">
                         <StackPanel>
                             <TextBlock
                                 FontSize="{StaticResource FontSizeMd}"
@@ -549,7 +533,7 @@
                                 Text="{Binding AddError}"
                                 Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
                         </StackPanel>
-                    </Border>
+                    </ui:Card>
                 </Grid>
             </TabItem>
 
@@ -569,13 +553,9 @@
                         Text="{DynamicResource Categories.Rule.Hint}"
                         TextWrapping="Wrap" />
 
-                    <Border
+                    <ui:Card
                         Grid.Row="1"
-                        Padding="12"
-                        Background="{DynamicResource AppSurface}"
-                        BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusMd}">
+                        Padding="12">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding Rules}">
                                 <ItemsControl.ItemTemplate>
@@ -765,13 +745,9 @@
                                                                 <CheckBox Content="{DynamicResource Categories.Rule.AppliesTo.Import}" IsChecked="{Binding EditAppliesToImport}" />
                                                             </StackPanel>
 
-                                                            <Border
+                                                            <ui:Card
                                                                 Margin="0,8,0,0"
-                                                                Padding="10,8"
-                                                                Background="{DynamicResource AppSurface}"
-                                                                BorderBrush="{DynamicResource AppBorder}"
-                                                                BorderThickness="1"
-                                                                CornerRadius="{StaticResource RadiusSm}">
+                                                                Padding="10,8">
                                                                 <StackPanel>
                                                                     <TextBlock
                                                                         FontSize="{StaticResource FontSizeXs}"
@@ -849,7 +825,7 @@
                                                                         </ui:SymbolIcon>
                                                                     </Grid>
                                                                 </StackPanel>
-                                                            </Border>
+                                                            </ui:Card>
                                                         </StackPanel>
                                                     </ui:CardExpander>
                                                 </StackPanel>
@@ -965,17 +941,13 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
-                    </Border>
+                    </ui:Card>
 
                     <!--  Add rule form  -->
-                    <Border
+                    <ui:Card
                         Grid.Row="2"
                         Margin="0,12,0,0"
-                        Padding="14,12"
-                        Background="{DynamicResource AppSurface}"
-                        BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusMd}">
+                        Padding="14,12">
                         <StackPanel>
                             <TextBlock
                                 FontSize="{StaticResource FontSizeMd}"
@@ -1139,7 +1111,7 @@
                                 Text="{Binding AddRuleError}"
                                 Visibility="{Binding AddRuleError, Converter={StaticResource StringToVisibilityConverter}}" />
                         </StackPanel>
-                    </Border>
+                    </ui:Card>
                 </Grid>
             </TabItem>
 
@@ -1159,13 +1131,9 @@
                         Text="{DynamicResource Categories.Budget.Hint}"
                         TextWrapping="Wrap" />
 
-                    <Border
+                    <ui:Card
                         Grid.Row="1"
-                        Padding="12"
-                        Background="{DynamicResource AppSurface}"
-                        BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusMd}">
+                        Padding="12">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding Budgets}">
                                 <ItemsControl.ItemTemplate>
@@ -1386,17 +1354,13 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
-                    </Border>
+                    </ui:Card>
 
                     <!--  Add budget form  -->
-                    <Border
+                    <ui:Card
                         Grid.Row="2"
                         Margin="0,12,0,0"
-                        Padding="14,12"
-                        Background="{DynamicResource AppSurface}"
-                        BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusMd}">
+                        Padding="14,12">
                         <StackPanel>
                             <TextBlock
                                 FontSize="{StaticResource FontSizeMd}"
@@ -1507,7 +1471,7 @@
                                 Text="{Binding AddBudgetError}"
                                 Visibility="{Binding AddBudgetError, Converter={StaticResource StringToVisibilityConverter}}" />
                         </StackPanel>
-                    </Border>
+                    </ui:Card>
                 </Grid>
             </TabItem>
         </TabControl>

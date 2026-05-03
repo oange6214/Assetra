@@ -304,14 +304,10 @@
         </Grid>
 
         <!--  ── History ──  -->
-        <Border
+        <ui:Card
             Grid.Row="5"
             Margin="0,16,0,0"
             Padding="16,12,16,12"
-            Background="{DynamicResource AppCardBackground}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="8"
             Visibility="{Binding HasHistory, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>
                 <TextBlock
@@ -368,6 +364,6 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </StackPanel>
-        </Border>
+        </ui:Card>
     </Grid>
 </UserControl>

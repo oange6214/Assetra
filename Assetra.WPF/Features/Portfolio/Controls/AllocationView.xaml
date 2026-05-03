@@ -79,14 +79,10 @@
         </Grid.ColumnDefinitions>
 
         <!--  Left: treemap  -->
-        <Border
+        <ui:Card
                     Grid.Column="0"
                     Margin="16,16,8,16"
-                    Padding="12"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusSm}">
+                    Padding="12">
           <Grid>
             <Grid.RowDefinitions>
               <RowDefinition Height="Auto" />
@@ -212,7 +208,7 @@
               </ItemsControl.ItemTemplate>
             </ItemsControl>
           </Grid>
-        </Border>
+        </ui:Card>
 
         <!--  Right: asset list DataGrid  -->
         <ui:DataGrid
@@ -429,13 +425,9 @@
             </Style>
           </StackPanel.Style>
 
-          <Border
+          <ui:Card
                         Margin="0,0,0,12"
-                        Padding="12"
-                        Background="{DynamicResource AppSurface}"
-                        BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}">
+                        Padding="12">
             <Grid>
               <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -498,7 +490,7 @@
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
             </Grid>
-          </Border>
+          </ui:Card>
 
           <ListBox
                         Background="Transparent"
@@ -509,13 +501,9 @@
                         ScrollViewer.VerticalScrollBarVisibility="Disabled">
             <ListBox.ItemTemplate>
               <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                <Border
+                <ui:Card
                                     Margin="0,0,0,10"
-                                    Padding="14,12"
-                                    Background="{DynamicResource AppSurface}"
-                                    BorderBrush="{DynamicResource AppBorder}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource RadiusMd}">
+                                    Padding="14,12">
                   <StackPanel>
                     <DockPanel LastChildFill="True">
                       <TextBlock
@@ -652,7 +640,7 @@
                       </Border>
                     </WrapPanel>
                   </StackPanel>
-                </Border>
+                </ui:Card>
               </DataTemplate>
             </ListBox.ItemTemplate>
           </ListBox>
@@ -677,14 +665,10 @@
       </Grid.RowDefinitions>
 
       <!--  Header card  -->
-      <Border
+      <ui:Card
                 Grid.Row="0"
                 Margin="16,16,16,12"
-                Padding="16,12"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource RadiusSm}">
+                Padding="16,12">
         <StackPanel>
           <TextBlock
                         FontSize="{StaticResource FontSizeMd}"
@@ -730,17 +714,13 @@
             </ui:Button>
           </WrapPanel>
         </StackPanel>
-      </Border>
+      </ui:Card>
 
       <!--  Cash-flow info bar (only when IsCashRebalance)  -->
-      <Border
+      <ui:Card
                 Grid.Row="1"
                 Margin="16,0,16,8"
                 Padding="14,10"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource RadiusSm}"
                 Visibility="{Binding IsCashRebalance, Converter={StaticResource BoolToVis}}">
         <StackPanel>
           <StackPanel Orientation="Horizontal">
@@ -806,7 +786,7 @@
                             Text="{Binding CashFlowInput, UpdateSourceTrigger=PropertyChanged}" />
           </WrapPanel>
         </StackPanel>
-      </Border>
+      </ui:Card>
 
       <!--  Rebalance DataGrid (extracted)  -->
       <alloccontrols:RebalanceDataGrid Grid.Row="2" Grid.RowSpan="2" />

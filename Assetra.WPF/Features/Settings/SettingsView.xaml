@@ -47,13 +47,9 @@
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Settings.Section.Appearance}" />
 
-                <Border
+                <ui:Card
                     Margin="0,0,0,24"
-                    Padding="16,12"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusSm}">
+                    Padding="16,12">
                     <StackPanel>
                         <StackPanel Margin="0,0,0,14">
                             <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.DarkTheme}" />
@@ -132,7 +128,7 @@
                             </DockPanel>
                         </StackPanel>
                     </StackPanel>
-                </Border>
+                </ui:Card>
 
                 <!--  ── 語言與區域  ──  -->
                 <TextBlock
@@ -142,13 +138,9 @@
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Settings.Section.Language}" />
 
-                <Border
+                <ui:Card
                     Margin="0,0,0,24"
-                    Padding="16,12"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusSm}">
+                    Padding="16,12">
                     <StackPanel>
                         <StackPanel Margin="0,0,0,14">
                             <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Language}" />
@@ -186,7 +178,7 @@
                                 ToolTip="{DynamicResource Settings.BaseCurrency.Tooltip}" />
                         </StackPanel>
                     </StackPanel>
-                </Border>
+                </ui:Card>
 
                 <!--  ── 資料 ──  -->
                 <TextBlock
@@ -196,13 +188,9 @@
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Settings.Section.Data}" />
 
-                <Border
+                <ui:Card
                     Margin="0,0,0,24"
-                    Padding="16,12"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusSm}">
+                    Padding="16,12">
                     <StackPanel>
                         <StackPanel Margin="0,0,0,14">
                             <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.DataDir}" />
@@ -299,7 +287,7 @@
                                 TextWrapping="Wrap" />
                         </StackPanel>
                     </StackPanel>
-                </Border>
+                </ui:Card>
 
                 <TextBlock
                     Margin="0,0,0,8"
@@ -308,13 +296,9 @@
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Settings.Section.Ocr}" />
 
-                <Border
+                <ui:Card
                     Margin="0,0,0,24"
-                    Padding="16,12"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusSm}">
+                    Padding="16,12">
                     <StackPanel>
                         <StackPanel Margin="0,0,0,14">
                             <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Ocr.TessdataPath}" />
@@ -355,7 +339,7 @@
                                 TextWrapping="Wrap" />
                         </StackPanel>
                     </StackPanel>
-                </Border>
+                </ui:Card>
 
                 <!--  ── 雲端同步 ──  -->
                 <TextBlock
@@ -365,13 +349,9 @@
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Settings.Section.Sync}" />
 
-                <Border
+                <ui:Card
                     Margin="0,0,0,24"
-                    Padding="16,12"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusSm}">
+                    Padding="16,12">
                     <StackPanel DataContext="{Binding Sync}">
                         <CheckBox
                             Margin="0,0,0,12"
@@ -553,7 +533,7 @@
                                 Text="{Binding StatusMessage}" />
                         </StackPanel>
                     </StackPanel>
-                </Border>
+                </ui:Card>
 
             </StackPanel>
         </ScrollViewer>

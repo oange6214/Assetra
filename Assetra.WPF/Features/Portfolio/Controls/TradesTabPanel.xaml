@@ -477,12 +477,8 @@
                             Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             Appearance="Secondary">
-              <Border
-                                Padding="14,12"
-                                Background="{DynamicResource AppSurface}"
-                                BorderBrush="{DynamicResource AppBorder}"
-                                BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusMd}">
+              <ui:Card
+                                Padding="14,12">
                 <StackPanel>
                   <DockPanel LastChildFill="True">
                     <TextBlock
@@ -575,7 +571,7 @@
                   </WrapPanel>
 
                 </StackPanel>
-              </Border>
+              </ui:Card>
             </ui:Button>
           </DataTemplate>
         </ListBox.ItemTemplate>

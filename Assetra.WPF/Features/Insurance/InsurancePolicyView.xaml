@@ -54,13 +54,9 @@
             Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
 
     <!--  Policy list  -->
-    <Border
+    <ui:Card
             Grid.Row="2"
-            Padding="0"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="8">
+            Padding="0">
       <ui:DataGrid
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
@@ -121,7 +117,7 @@
           </DataGridTemplateColumn>
         </DataGrid.Columns>
       </ui:DataGrid>
-    </Border>
+    </ui:Card>
 
     <!--  Add/Edit form  -->
     <Border
