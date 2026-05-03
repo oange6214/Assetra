@@ -60,29 +60,52 @@
         </ui:Card>
 
         <ui:Card Grid.Row="1" Margin="0,16,0,0" Padding="20">
-            <UniformGrid Columns="3">
-                <StackPanel>
-                    <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.FireNumber}" />
-                    <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
-                               Foreground="{DynamicResource AppTextPrimary}"
-                               Text="{Binding FireNumber, StringFormat=N0}" />
+            <Grid>
+                <!--  Empty state — before first Calculate  -->
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding HasCalculatedResult, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <ui:SymbolIcon
+                        HorizontalAlignment="Center"
+                        FontSize="32"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Symbol="Calculator24" />
+                    <TextBlock
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Center"
+                        FontSize="{StaticResource FontSizeSm}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Fire.Result.NotCalculated}" />
                 </StackPanel>
-                <StackPanel>
-                    <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.YearsToFire}" />
-                    <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
-                               Foreground="{DynamicResource AppTextPrimary}"
-                               Text="{Binding YearsToFire}" />
-                </StackPanel>
-                <StackPanel>
-                    <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.Projected}" />
-                    <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
-                               Foreground="{DynamicResource AppTextPrimary}"
-                               Text="{Binding ProjectedNetWorthAtFire, StringFormat=N0}" />
-                </StackPanel>
-            </UniformGrid>
+
+                <!--  Result KPIs — after Calculate  -->
+                <UniformGrid Columns="3" Visibility="{Binding HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel>
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.FireNumber}" />
+                        <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding FireNumber, StringFormat=N0}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.YearsToFire}" />
+                        <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding YearsToFire}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.Projected}" />
+                        <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding ProjectedNetWorthAtFire, StringFormat=N0}" />
+                    </StackPanel>
+                </UniformGrid>
+            </Grid>
         </ui:Card>
 
-        <ui:Card Grid.Row="2" Margin="0,16,0,0" Padding="0">
+        <!--  Wealth path table — hidden until calculated  -->
+        <ui:Card Grid.Row="2" Margin="0,16,0,0" Padding="0"
+                 Visibility="{Binding HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
             <ui:DataGrid MaxHeight="500" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                       GridLinesVisibility="Horizontal" HeadersVisibility="Column" IsReadOnly="True"
                       ItemsSource="{Binding WealthPath}" RowBackground="Transparent" SelectionMode="Single">

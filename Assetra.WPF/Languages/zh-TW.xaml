@@ -1167,6 +1167,7 @@
     <sys:String x:Key="Fire.Result.FireNumber">FIRE 目標金額</sys:String>
     <sys:String x:Key="Fire.Result.YearsToFire">所需年數</sys:String>
     <sys:String x:Key="Fire.Result.Projected">達標時淨資產</sys:String>
+    <sys:String x:Key="Fire.Result.NotCalculated">填入參數後點擊「計算」以查看 FIRE 數據</sys:String>
     <sys:String x:Key="Fire.Path.Year">年度</sys:String>
     <sys:String x:Key="Fire.Path.NetWorth">淨資產</sys:String>
 
@@ -1184,6 +1185,7 @@
     <sys:String x:Key="MonteCarlo.Result.P10">10 百分位餘額</sys:String>
     <sys:String x:Key="MonteCarlo.Result.Median">中位數餘額</sys:String>
     <sys:String x:Key="MonteCarlo.Result.P90">90 百分位餘額</sys:String>
+    <sys:String x:Key="MonteCarlo.Result.NotCalculated">填入參數後點擊「執行」以查看模擬結果</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Year">年度</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Median">中位數餘額</sys:String>
 </ResourceDictionary>

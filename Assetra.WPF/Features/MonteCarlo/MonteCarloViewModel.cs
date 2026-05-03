@@ -23,6 +23,7 @@ public sealed partial class MonteCarloViewModel : ObservableObject
     [ObservableProperty] private decimal _p10Ending;
     [ObservableProperty] private decimal _p90Ending;
     [ObservableProperty] private bool _isRunning;
+    [ObservableProperty] private bool _hasResult;
 
     public ObservableCollection<MonteCarloPathPoint> MedianPath { get; } = [];
 
@@ -66,6 +67,8 @@ public sealed partial class MonteCarloViewModel : ObservableObject
             MedianPath.Clear();
             for (int i = 0; i < result.MedianBalancePath.Count; i++)
                 MedianPath.Add(new MonteCarloPathPoint(i, result.MedianBalancePath[i]));
+
+            HasResult = true;
         }
         finally
         {

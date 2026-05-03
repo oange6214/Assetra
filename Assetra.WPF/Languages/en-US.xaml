@@ -1163,6 +1163,7 @@
     <sys:String x:Key="Fire.Result.FireNumber">FIRE Number</sys:String>
     <sys:String x:Key="Fire.Result.YearsToFire">Years to FIRE</sys:String>
     <sys:String x:Key="Fire.Result.Projected">Net Worth at FIRE</sys:String>
+    <sys:String x:Key="Fire.Result.NotCalculated">Fill in the inputs and click Calculate to see your FIRE numbers.</sys:String>
     <sys:String x:Key="Fire.Path.Year">Year</sys:String>
     <sys:String x:Key="Fire.Path.NetWorth">Net Worth</sys:String>
 
@@ -1180,6 +1181,7 @@
     <sys:String x:Key="MonteCarlo.Result.P10">P10 Ending Balance</sys:String>
     <sys:String x:Key="MonteCarlo.Result.Median">Median Ending Balance</sys:String>
     <sys:String x:Key="MonteCarlo.Result.P90">P90 Ending Balance</sys:String>
+    <sys:String x:Key="MonteCarlo.Result.NotCalculated">Fill in the inputs and click Run to see the simulation results.</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Year">Year</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Median">Median Balance</sys:String>
 </ResourceDictionary>
