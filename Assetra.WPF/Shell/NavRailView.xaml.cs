@@ -29,13 +29,15 @@ public partial class NavRailView : UserControl
         if (_navRail is null) return;
 
         _navRail.PropertyChanged += OnNavRailPropertyChanged;
-        Dispatcher.BeginInvoke(() => SyncNavViewSelection(_navRail.SelectedRailSection));
+        Dispatcher.BeginInvoke(() => SyncNavViewSelection(_navRail.ActiveSection));
     }
 
+    // Listen to ActiveSection (leaf-level) — not SelectedRailSection (hub-level) —
+    // so a leaf inside a group correctly highlights the leaf item, not its parent.
     private void OnNavRailPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName != nameof(NavRailViewModel.SelectedRailSection) || _navRail is null) return;
-        Dispatcher.Invoke(() => SyncNavViewSelection(_navRail.SelectedRailSection));
+        if (e.PropertyName != nameof(NavRailViewModel.ActiveSection) || _navRail is null) return;
+        Dispatcher.Invoke(() => SyncNavViewSelection(_navRail.ActiveSection));
     }
 
     private void SyncNavViewSelection(NavSection section)
@@ -52,18 +54,30 @@ public partial class NavRailView : UserControl
     {
         NavSection.Portfolio         => NavPortfolio,
         NavSection.FinancialOverview => NavFinancialOverview,
-        NavSection.Cashflow          => NavCashflow,
-        NavSection.Insights          => NavInsights,
-        NavSection.MultiAsset        => NavMultiAsset,
+        NavSection.Categories        => NavCategories,
+        NavSection.Recurring         => NavRecurring,
+        NavSection.Goals             => NavGoals,
+        NavSection.Trends            => NavTrends,
+        NavSection.Reports           => NavReports,
+        NavSection.Fire              => NavFire,
+        NavSection.MonteCarlo        => NavMonteCarlo,
+        NavSection.RealEstate        => NavRealEstate,
+        NavSection.Insurance         => NavInsurance,
+        NavSection.Retirement        => NavRetirement,
+        NavSection.PhysicalAsset     => NavPhysicalAsset,
         NavSection.Alerts            => NavAlerts,
         NavSection.Import            => NavImport,
         NavSection.Settings          => NavSettings,
+        // Cashflow / Insights / MultiAsset are parent-only items in the pane;
+        // ActiveSection is normalized to a leaf, so these cases never fire.
         _                            => null,
     };
 
     // Drive ActiveSection from per-item Click rather than NavigationView.SelectionChanged.
     // Wpf.Ui's internal click handler tries to navigate the Frame and throws when
     // TargetPageType is null, which we don't use (DataTemplate routing instead).
+    // Parent items have no TargetPageTag — clicks fall through and let
+    // NavigationView's built-in expand/collapse handle them.
     private void NavItem_Click(object sender, RoutedEventArgs e)
     {
         if (_navRail is null) return;

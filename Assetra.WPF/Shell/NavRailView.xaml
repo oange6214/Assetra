@@ -8,7 +8,6 @@
     xmlns:financialoverview="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     xmlns:fire="clr-namespace:Assetra.WPF.Features.Fire"
     xmlns:goals="clr-namespace:Assetra.WPF.Features.Goals"
-    xmlns:hubs="clr-namespace:Assetra.WPF.Features.Hubs"
     xmlns:import="clr-namespace:Assetra.WPF.Features.Import"
     xmlns:insurance="clr-namespace:Assetra.WPF.Features.Insurance"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -100,37 +99,20 @@
         <DataTemplate x:Key="SettingsContentTemplate">
             <settings:SettingsView DataContext="{Binding Settings}" />
         </DataTemplate>
-
-        <!--  ── Hub views (Phase 2 IA consolidation) ──  -->
-        <DataTemplate x:Key="CashflowHubContentTemplate">
-            <hubs:CashflowHubView />
-        </DataTemplate>
-
-        <DataTemplate x:Key="InsightsHubContentTemplate">
-            <hubs:InsightsHubView />
-        </DataTemplate>
-
-        <DataTemplate x:Key="MultiAssetHubContentTemplate">
-            <hubs:MultiAssetHubView />
-        </DataTemplate>
     </UserControl.Resources>
 
     <!--
-        ui:NavigationView — Wpf.Ui Fluent navigation pane.
-        Collapsed (56 px) shows icons only; toggling the hamburger expands to 220 px with labels.
-        InfoBadges surface pending recurring entries and triggered alerts.
+        ui:NavigationView — hierarchical Wpf.Ui Fluent navigation.
+        Cashflow / Insights / MultiAsset are parent items (no TargetPageTag);
+        clicking them expands their MenuItems but does not navigate. Each leaf has
+        a TargetPageTag matching the NavSection enum and routes content via the
+        ContentOverlay DataTrigger below.
 
-        Why per-item Click instead of NavigationView.SelectionChanged:
-            Wpf.Ui's internal click handler routes through Frame.Navigate(TargetPageType),
-            which throws when TargetPageType is null. We don't use Page navigation here
-            (DataTemplate routing via ContentOverlay below), so we hook each item's
-            ButtonBase.Click directly.
+        Per-item Click bypasses Wpf.Ui's internal Frame.Navigate path which throws
+        on null TargetPageType — we route via DataTemplate instead, so no Pages.
 
-        Why _activeItem tracking instead of RootNavView.SelectedItem:
-            NavigationView only updates its SelectedItem from its own internal click
-            path; bypassing that means SelectedItem never advances, which would cause
-            Activate() calls to stack red indicator bars. The code-behind tracks the
-            currently-active item explicitly.
+        _activeItem tracking in code-behind handles deactivate/activate manually
+        because NavigationView.SelectedItem only updates from its own click path.
     -->
     <ui:NavigationView
         x:Name="RootNavView"
@@ -165,11 +147,10 @@
                 </ui:NavigationViewItem.Icon>
             </ui:NavigationViewItem>
 
+            <!--  ── Cashflow group: Categories + Recurring ──  -->
             <ui:NavigationViewItem
                 x:Name="NavCashflow"
-                Click="NavItem_Click"
                 Content="{DynamicResource Nav.Cashflow}"
-                TargetPageTag="Cashflow"
                 ToolTip="{DynamicResource Nav.Cashflow}">
                 <ui:NavigationViewItem.Icon>
                     <ui:SymbolIcon Symbol="Wallet24" />
@@ -180,28 +161,98 @@
                         Value="{Binding Recurring.PendingCount}"
                         Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </ui:NavigationViewItem.InfoBadge>
+                <ui:NavigationViewItem.MenuItems>
+                    <ui:NavigationViewItem
+                        x:Name="NavCategories"
+                        Click="NavItem_Click"
+                        Content="{DynamicResource Nav.Categories}"
+                        TargetPageTag="Categories"
+                        ToolTip="{DynamicResource Nav.Categories}" />
+                    <ui:NavigationViewItem
+                        x:Name="NavRecurring"
+                        Click="NavItem_Click"
+                        Content="{DynamicResource Nav.Recurring}"
+                        TargetPageTag="Recurring"
+                        ToolTip="{DynamicResource Nav.Recurring}" />
+                </ui:NavigationViewItem.MenuItems>
             </ui:NavigationViewItem>
 
+            <!--  ── Insights group: Goals / Trends / Reports / FIRE / MonteCarlo ──  -->
             <ui:NavigationViewItem
                 x:Name="NavInsights"
-                Click="NavItem_Click"
                 Content="{DynamicResource Nav.Insights}"
-                TargetPageTag="Insights"
                 ToolTip="{DynamicResource Nav.Insights}">
                 <ui:NavigationViewItem.Icon>
                     <ui:SymbolIcon Symbol="Pulse24" />
                 </ui:NavigationViewItem.Icon>
+                <ui:NavigationViewItem.MenuItems>
+                    <ui:NavigationViewItem
+                        x:Name="NavGoals"
+                        Click="NavItem_Click"
+                        Content="{DynamicResource Nav.Goals}"
+                        TargetPageTag="Goals"
+                        ToolTip="{DynamicResource Nav.Goals}" />
+                    <ui:NavigationViewItem
+                        x:Name="NavTrends"
+                        Click="NavItem_Click"
+                        Content="{DynamicResource Nav.Trends}"
+                        TargetPageTag="Trends"
+                        ToolTip="{DynamicResource Nav.Trends}" />
+                    <ui:NavigationViewItem
+                        x:Name="NavReports"
+                        Click="NavItem_Click"
+                        Content="{DynamicResource Nav.Reports}"
+                        TargetPageTag="Reports"
+                        ToolTip="{DynamicResource Nav.Reports}" />
+                    <ui:NavigationViewItem
+                        x:Name="NavFire"
+                        Click="NavItem_Click"
+                        Content="{DynamicResource Fire.Title}"
+                        TargetPageTag="Fire"
+                        ToolTip="{DynamicResource Fire.Title}" />
+                    <ui:NavigationViewItem
+                        x:Name="NavMonteCarlo"
+                        Click="NavItem_Click"
+                        Content="{DynamicResource MonteCarlo.Title}"
+                        TargetPageTag="MonteCarlo"
+                        ToolTip="{DynamicResource MonteCarlo.Title}" />
+                </ui:NavigationViewItem.MenuItems>
             </ui:NavigationViewItem>
 
+            <!--  ── MultiAsset group: RealEstate / Insurance / Retirement / PhysicalAsset ──  -->
             <ui:NavigationViewItem
                 x:Name="NavMultiAsset"
-                Click="NavItem_Click"
                 Content="{DynamicResource Nav.MultiAsset}"
-                TargetPageTag="MultiAsset"
                 ToolTip="{DynamicResource Nav.MultiAsset}">
                 <ui:NavigationViewItem.Icon>
                     <ui:SymbolIcon Symbol="Home24" />
                 </ui:NavigationViewItem.Icon>
+                <ui:NavigationViewItem.MenuItems>
+                    <ui:NavigationViewItem
+                        x:Name="NavRealEstate"
+                        Click="NavItem_Click"
+                        Content="{DynamicResource RealEstate.Title}"
+                        TargetPageTag="RealEstate"
+                        ToolTip="{DynamicResource RealEstate.Title}" />
+                    <ui:NavigationViewItem
+                        x:Name="NavInsurance"
+                        Click="NavItem_Click"
+                        Content="{DynamicResource Insurance.Title}"
+                        TargetPageTag="Insurance"
+                        ToolTip="{DynamicResource Insurance.Title}" />
+                    <ui:NavigationViewItem
+                        x:Name="NavRetirement"
+                        Click="NavItem_Click"
+                        Content="{DynamicResource Retirement.Title}"
+                        TargetPageTag="Retirement"
+                        ToolTip="{DynamicResource Retirement.Title}" />
+                    <ui:NavigationViewItem
+                        x:Name="NavPhysicalAsset"
+                        Click="NavItem_Click"
+                        Content="{DynamicResource PhysicalAsset.Title}"
+                        TargetPageTag="PhysicalAsset"
+                        ToolTip="{DynamicResource PhysicalAsset.Title}" />
+                </ui:NavigationViewItem.MenuItems>
             </ui:NavigationViewItem>
 
             <ui:NavigationViewItem
@@ -303,15 +354,6 @@
                             </DataTrigger>
                             <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Settings}">
                                 <Setter Property="ContentTemplate" Value="{StaticResource SettingsContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Cashflow}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource CashflowHubContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Insights}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource InsightsHubContentTemplate}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.MultiAsset}">
-                                <Setter Property="ContentTemplate" Value="{StaticResource MultiAssetHubContentTemplate}" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
