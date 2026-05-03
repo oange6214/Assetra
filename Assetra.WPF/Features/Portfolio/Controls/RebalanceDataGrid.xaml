@@ -395,7 +395,7 @@
                   <Setter Property="Text" Value="{DynamicResource Allocation.Col.ActualPct}" />
                   <Setter Property="HorizontalAlignment" Value="Right" />
                   <Style.Triggers>
-                    <DataTrigger Binding="{Binding DataContext.IsCashRebalance, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True">
+                    <DataTrigger Binding="{Binding DataContext.IsCashRebalance, ElementName=Root}" Value="True">
                       <Setter Property="Text" Value="{DynamicResource Allocation.Col.AllocChange}" />
                       <Setter Property="HorizontalAlignment" Value="Center" />
                     </DataTrigger>
