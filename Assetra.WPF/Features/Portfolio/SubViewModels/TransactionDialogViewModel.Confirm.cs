@@ -514,7 +514,8 @@ public partial class TransactionDialogViewModel
             TxCreditCard.Label,
             tradeDate,
             amount,
-            string.IsNullOrWhiteSpace(TxNote) ? null : TxNote));
+            string.IsNullOrWhiteSpace(TxNote) ? null : TxNote,
+            TxCategoryId));
 
         await _reloadAccountBalancesAsync();
         CloseTxDialog();

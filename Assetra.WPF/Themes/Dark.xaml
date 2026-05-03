@@ -26,6 +26,7 @@
     <SolidColorBrush x:Key="AppBackground" Color="#1C1C1C" />
     <SolidColorBrush x:Key="AppSurface" Color="#282828" />
     <SolidColorBrush x:Key="AppSurfaceAlt" Color="#222222" />
+    <SolidColorBrush x:Key="AppCardBackground" Color="#282828" />
     <SolidColorBrush x:Key="AppHover" Color="#333333" />
 
     <!--  Borders  -->
@@ -52,6 +53,8 @@
     <SolidColorBrush x:Key="AppAccent" Color="#0078D4" />
     <SolidColorBrush x:Key="AppAccentHover" Color="#006CBE" />
     <SolidColorBrush x:Key="AppAccentSubtle" Color="#153047" />
+    <SolidColorBrush x:Key="AppAccentSoft" Color="#153047" />
+    <SolidColorBrush x:Key="AppAccentText" Color="#B8DFFF" />
 
     <!--  DataGrid  -->
     <SolidColorBrush x:Key="AppSelectedRow" Color="#153047" />

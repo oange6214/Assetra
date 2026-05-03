@@ -131,9 +131,9 @@ public sealed partial class InsurancePolicyViewModel : ObservableObject
         FormStartDate = row.StartDate.ToDateTime(TimeOnly.MinValue);
         FormMaturityDate = row.MaturityDate?.ToDateTime(TimeOnly.MinValue);
         FormFaceValue = row.FaceValue.ToString();
-        FormCurrentCashValue = row.CashValue.ToString();
-        FormAnnualPremium = row.AnnualPremium.ToString();
-        FormCurrency = row.Currency;
+        FormCurrentCashValue = row.OriginalCashValue.ToString();
+        FormAnnualPremium = row.OriginalAnnualPremium.ToString();
+        FormCurrency = row.OriginalCurrency;
         FormNotes = row.Notes ?? string.Empty;
         FormError = null;
     }

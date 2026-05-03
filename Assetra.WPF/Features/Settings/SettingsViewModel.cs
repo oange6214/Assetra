@@ -62,11 +62,14 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     private readonly IThemeService _theme;
     private readonly ILocalizationService _localization;
     private readonly ICurrencyService _currencyService;
+    private readonly ISnackbarService? _snackbar;
+    private readonly SemaphoreSlim _saveGate = new(1, 1);
 
     public SyncSettingsViewModel Sync { get; }
     public ConflictResolutionViewModel Conflicts { get; }
 
     private bool _isLoading;
+    private int _saveVersion;
 
     [ObservableProperty] private string _language = "zh-TW";
     [ObservableProperty] private bool _useTaiwanColors = true;
@@ -120,7 +123,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         ILocalizationService localization,
         ICurrencyService currencyService,
         SyncSettingsViewModel sync,
-        ConflictResolutionViewModel conflicts)
+        ConflictResolutionViewModel conflicts,
+        ISnackbarService? snackbar = null)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(theme);
@@ -133,6 +137,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         _theme = theme;
         _localization = localization;
         _currencyService = currencyService;
+        _snackbar = snackbar;
         Sync = sync;
         Conflicts = conflicts;
 
@@ -199,7 +204,14 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     {
         if (_isLoading)
             return;
-        _ = _currencyService.ApplyAsync(value);
+        _ = ApplyPrimaryCurrencyAsync(value);
+    }
+
+    partial void OnBaseCurrencyChanged(string value)
+    {
+        if (_isLoading)
+            return;
+        _ = SaveAsync();
     }
 
     partial void OnUiScaleChanged(double value)
@@ -270,7 +282,53 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         ColorSchemeService.Apply(UseTaiwanColors, theme);
     }
 
-    private async Task SaveAsync()
+    private Task<bool> SaveAsync(bool showDataSourceSuccess = false)
+    {
+        var version = Interlocked.Increment(ref _saveVersion);
+        return SaveLatestAsync(version, showDataSourceSuccess);
+    }
+
+    private async Task<bool> SaveLatestAsync(int version, bool showDataSourceSuccess)
+    {
+        var enteredGate = false;
+        try
+        {
+            await _saveGate.WaitAsync().ConfigureAwait(true);
+            enteredGate = true;
+
+            if (version != Volatile.Read(ref _saveVersion))
+                return true;
+
+            await SaveSnapshotAsync().ConfigureAwait(true);
+            if (showDataSourceSuccess)
+                DataSourceSaveStatus = _localization.Get("Settings.DataSource.Saved");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            ShowSaveFailure(ex);
+            return false;
+        }
+        finally
+        {
+            if (enteredGate)
+                _saveGate.Release();
+        }
+    }
+
+    private async Task ApplyPrimaryCurrencyAsync(string value)
+    {
+        try
+        {
+            await _currencyService.ApplyAsync(value).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            ShowSaveFailure(ex);
+        }
+    }
+
+    private async Task SaveSnapshotAsync()
     {
         var updated = _settings.Current with
         {
@@ -285,7 +343,14 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             OcrTessdataPath = OcrTessdataPath?.Trim() ?? string.Empty,
             OcrLanguage = string.IsNullOrWhiteSpace(OcrLanguage) ? "eng" : OcrLanguage.Trim(),
         };
-        await _settings.SaveAsync(updated);
+        await _settings.SaveAsync(updated).ConfigureAwait(true);
+    }
+
+    private void ShowSaveFailure(Exception ex)
+    {
+        var message = $"{_localization.Get("Settings.SaveFailed", "Settings could not be saved.")} {ex.Message}";
+        DataSourceSaveStatus = message;
+        _snackbar?.Error(message);
     }
 
     public async Task CommitUiScaleAsync()
@@ -301,8 +366,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private async Task SaveDataSourceSettingsAsync()
     {
-        await SaveAsync();
-        DataSourceSaveStatus = _localization.Get("Settings.DataSource.Saved");
+        await SaveAsync(showDataSourceSuccess: true);
     }
 
     [RelayCommand]

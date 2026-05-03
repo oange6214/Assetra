@@ -192,11 +192,18 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     [ObservableProperty] private string _editSummaryAmount = string.Empty;
     [ObservableProperty] private string _editSummaryQuantity = string.Empty;
 
-    // The Tx dialog's shared date picker is bound to TxDate, but ConfirmBuyAsync →
-    // AddPosition reads AddBuyDate when building the PortfolioEntry. Without this
-    // sync, editing a Buy trade's date changes the picker's TxDate but AddPosition
-    // still sees the stale AddBuyDate → the saved buy keeps the old date.
-    partial void OnTxDateChanged(DateTime value) => AddAssetDialog.AddBuyDate = value;
+    // The Tx dialog date picker is bound to TxDate, but ConfirmBuyAsync →
+    // AddPosition reads AddBuyDate when building the PortfolioEntry.
+    partial void OnTxDateChanged(DateTime value)
+    {
+        if (value.Date > DateTime.Today)
+        {
+            TxDate = DateTime.Today;
+            return;
+        }
+
+        AddAssetDialog.AddBuyDate = value;
+    }
     [ObservableProperty] private DateTime _txDate = DateTime.Today;
     [ObservableProperty] private string _txError = string.Empty;
 
@@ -648,7 +655,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(TxCashFlowHint));
         OnPropertyChanged(nameof(TxTransferHint));
         OnPropertyChanged(nameof(TxCreditCardHint));
+        OnPropertyChanged(nameof(CashFlowCategories));
         TxError = string.Empty;
+        ApplyAutoCategoryFromNote();
         UpdateSellTxPreview();
         if (TxTypeIsLoanRepay)
             _ = AutoFillLoanRepayAsync(TxLoanLabel);

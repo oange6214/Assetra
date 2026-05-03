@@ -1,12 +1,5 @@
 using System.IO;
 using System.Windows;
-using Velopack;
-using Velopack.Sources;
-using LiveChartsCore;
-using LiveChartsCore.SkiaSharpView;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using SkiaSharp;
 using Assetra.Core.Interfaces;
 using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Alerts;
@@ -21,6 +14,12 @@ using Assetra.WPF.Features.Retirement;
 using Assetra.WPF.Infrastructure;
 using Assetra.WPF.Infrastructure.Converters;
 using Assetra.WPF.Shell;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using SkiaSharp;
+using Velopack;
 using Wpf.Ui.Appearance;
 
 namespace Assetra.WPF;

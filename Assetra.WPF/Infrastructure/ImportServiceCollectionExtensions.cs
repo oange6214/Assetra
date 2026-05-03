@@ -42,13 +42,15 @@ internal static class ImportServiceCollectionExtensions
         services.AddSingleton<IImportRowApplier>(sp => new DefaultImportRowApplier(
             sp.GetRequiredService<ITradeRepository>(),
             sp.GetRequiredService<IImportRowMapper>(),
-            sp.GetService<IAutoCategorizationRuleRepository>()));
+            sp.GetService<IAutoCategorizationRuleRepository>(),
+            sp.GetService<ICategoryRepository>()));
         services.AddSingleton<IImportBatchHistoryRepository>(_ => new ImportBatchHistorySqliteRepository(dbPath));
         services.AddSingleton<IImportApplyService>(sp => new ImportApplyService(
             sp.GetRequiredService<ITradeRepository>(),
             sp.GetRequiredService<IImportRowMapper>(),
             sp.GetService<IImportBatchHistoryRepository>(),
-            sp.GetService<IAutoCategorizationRuleRepository>()));
+            sp.GetService<IAutoCategorizationRuleRepository>(),
+            sp.GetService<ICategoryRepository>()));
         services.AddSingleton<IImportRollbackService, ImportRollbackService>();
         services.AddSingleton<ImportViewModel>();
         return services;

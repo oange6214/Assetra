@@ -109,7 +109,11 @@ public partial class DateRangePicker : UserControl, INotifyPropertyChanged
         set
         {
             if (DateTime.TryParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d))
+            {
                 StartDate = d;
+                if (EndDate.HasValue && EndDate.Value.Date < d.Date)
+                    EndDate = null;
+            }
             else if (string.IsNullOrWhiteSpace(value))
                 StartDate = null;
             RaisePropertyChanged();
@@ -122,7 +126,11 @@ public partial class DateRangePicker : UserControl, INotifyPropertyChanged
         set
         {
             if (DateTime.TryParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d))
+            {
                 EndDate = d;
+                if (StartDate.HasValue && StartDate.Value.Date > d.Date)
+                    StartDate = null;
+            }
             else if (string.IsNullOrWhiteSpace(value))
                 EndDate = null;
             RaisePropertyChanged();

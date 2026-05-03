@@ -3,6 +3,7 @@ using Assetra.Application.Loans.Contracts;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Analysis;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Infrastructure;
 
@@ -103,7 +104,8 @@ public sealed record PortfolioServices(
     /// <summary>
     /// 自動分類規則來源（P1 收支管理）。為 null 時不執行 Note → Category 自動匹配。
     /// </summary>
-    IAutoCategorizationRuleRepository? AutoCategorizationRuleRepository = null)
+    IAutoCategorizationRuleRepository? AutoCategorizationRuleRepository = null,
+    IMultiCurrencyValuationService? Fx = null)
 {
     /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。

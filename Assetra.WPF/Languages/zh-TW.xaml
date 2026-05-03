@@ -7,9 +7,9 @@
     <sys:String x:Key="App.Title">Assetra</sys:String>
 
     <!--  Shared controls  -->
-    <sys:String x:Key="ColorPicker.Presets">常用色票</sys:String>
-    <sys:String x:Key="ColorPicker.Apply">套用</sys:String>
-    <sys:String x:Key="ColorPicker.HexInvalid">請輸入 6 位十六進位色碼（例：#3B82F6）</sys:String>
+    <sys:String x:Key="HexColorPicker.Presets">常用色票</sys:String>
+    <sys:String x:Key="HexColorPicker.Apply">套用</sys:String>
+    <sys:String x:Key="HexColorPicker.HexInvalid">請輸入 6 位十六進位色碼（例：#3B82F6）</sys:String>
 
     <!--  Splash  -->
     <sys:String x:Key="Splash.Init">正在初始化…</sys:String>
@@ -605,6 +605,7 @@
     <sys:String x:Key="Settings.QuoteSource">即時報價來源</sys:String>
     <sys:String x:Key="Settings.FugleApiKeyHint">貼上 Fugle API Key 後按下儲存，即可在設定中選用 Fugle 資料來源。</sys:String>
     <sys:String x:Key="Settings.DataSource.Saved">資料來源設定已儲存</sys:String>
+    <sys:String x:Key="Settings.SaveFailed">設定儲存失敗。</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Tooltip">查看 Fugle API Key 申請與設定說明</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Title">Fugle API Key 教學</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Subtitle">在 app 內快速查看申請流程與設定步驟。</sys:String>
@@ -878,10 +879,14 @@
     <sys:String x:Key="Recurring.Field.Type">類型</sys:String>
     <sys:String x:Key="Recurring.Field.Amount">金額</sys:String>
     <sys:String x:Key="Recurring.Field.Frequency">頻率</sys:String>
+    <sys:String x:Key="Recurring.Field.Interval">每隔</sys:String>
+    <sys:String x:Key="Recurring.Field.StartDate">開始日期</sys:String>
     <sys:String x:Key="Recurring.Field.Mode">處理方式</sys:String>
+    <sys:String x:Key="Recurring.Field.Note">備註</sys:String>
     <sys:String x:Key="Recurring.Add">新增</sys:String>
     <sys:String x:Key="Recurring.NameHint">名稱</sys:String>
     <sys:String x:Key="Recurring.AmountHint">金額</sys:String>
+    <sys:String x:Key="Recurring.IntervalHint">每 N 個頻率單位重複一次</sys:String>
     <sys:String x:Key="Recurring.Error.NameRequired">請輸入名稱</sys:String>
     <sys:String x:Key="Recurring.Error.AmountRequired">請輸入大於 0 的金額</sys:String>
     <sys:String x:Key="Recurring.Error.IntervalInvalid">間隔必須 ≥ 1</sys:String>
@@ -954,6 +959,7 @@
     <sys:String x:Key="Goals.Delete.ConfirmMessage">確定要刪除「{0}」嗎？此動作無法復原。</sys:String>
     <sys:String x:Key="Goals.Error.NameRequired">請輸入目標名稱</sys:String>
     <sys:String x:Key="Goals.Error.TargetAmountInvalid">請輸入大於 0 的目標金額</sys:String>
+    <sys:String x:Key="Goals.Error.CurrentAmountInvalid">請輸入大於或等於 0 的目前金額</sys:String>
     <sys:String x:Key="Goals.Deadline.DaysRemaining">剩 {0} 天</sys:String>
     <sys:String x:Key="Goals.Deadline.Overdue">已逾期</sys:String>
 
@@ -966,6 +972,7 @@
     <sys:String x:Key="Reconciliation.SignOff">儲存簽收</sys:String>
     <sys:String x:Key="Reconciliation.Col.Kind">類型</sys:String>
     <sys:String x:Key="Reconciliation.Col.Date">日期</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Trade">交易</sys:String>
     <sys:String x:Key="Reconciliation.Col.Amount">金額</sys:String>
     <sys:String x:Key="Reconciliation.Col.Counterparty">對方</sys:String>
     <sys:String x:Key="Reconciliation.Col.Resolution">處置</sys:String>
@@ -995,6 +1002,7 @@
     <sys:String x:Key="Reconciliation.Error.BatchRequired">請選擇既有匯入批次。</sys:String>
     <sys:String x:Key="Reconciliation.Error.FileOrServiceRequired">請先選擇檔案，或確認匯入服務可用。</sys:String>
     <sys:String x:Key="Reconciliation.Error.UnsupportedFileType">目前不支援這個檔案類型。</sys:String>
+    <sys:String x:Key="Reconciliation.Error.NoStatementRows">這個對帳來源沒有可用的明細列。</sys:String>
     <sys:String x:Key="Reconciliation.Balance.Title">餘額對帳</sys:String>
     <sys:String x:Key="Reports.IncomeStatement.Title">損益表</sys:String>
     <sys:String x:Key="Reports.BalanceSheet.Title">資產負債表</sys:String>
@@ -1084,6 +1092,9 @@
     <sys:String x:Key="Insurance.Form.CashValue">現金價值</sys:String>
     <sys:String x:Key="Insurance.Form.AnnualPremium">年繳保費</sys:String>
     <sys:String x:Key="Insurance.Form.Currency">幣別</sys:String>
+    <sys:String x:Key="Insurance.Form.StartDate">起始日</sys:String>
+    <sys:String x:Key="Insurance.Form.MaturityDate">到期日</sys:String>
+    <sys:String x:Key="Insurance.Form.Notes">備註</sys:String>
 
     <!--  v0.24 退休專戶  -->
     <sys:String x:Key="Retirement.Title">退休專戶</sys:String>
@@ -1144,6 +1155,7 @@
     <sys:String x:Key="Fire.Input.Return">預期年化報酬率</sys:String>
     <sys:String x:Key="Fire.Input.WithdrawalRate">安全提領率</sys:String>
     <sys:String x:Key="Fire.Calculate">計算</sys:String>
+    <sys:String x:Key="Fire.SaveToGoals">同步到財務目標</sys:String>
     <sys:String x:Key="Fire.Result.FireNumber">FIRE 目標金額</sys:String>
     <sys:String x:Key="Fire.Result.YearsToFire">所需年數</sys:String>
     <sys:String x:Key="Fire.Result.Projected">達標時淨資產</sys:String>

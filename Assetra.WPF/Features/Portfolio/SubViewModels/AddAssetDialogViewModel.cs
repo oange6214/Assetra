@@ -496,11 +496,9 @@ public partial class AddAssetDialogViewModel : ObservableObject
 
         var symbol = AddSymbol.Trim().ToUpper();
         var txFee = GetTxFee();
-        var manualFee = !string.IsNullOrWhiteSpace(txFee) &&
-                        ParseHelpers.TryParseDecimal(txFee, out var parsedManualFee) &&
-                        parsedManualFee >= 0
-            ? parsedManualFee
-            : (decimal?)null;
+        if (!TryResolveManualFee(txFee, out var manualFee))
+        { AddError = "手續費無效"; return; }
+
         var cashAccId = GetTxUseCashAccount() ? GetTxCashAccountId() : null;
         await _addAssetWorkflow.ExecuteStockBuyAsync(new StockBuyRequest(
             symbol,
@@ -541,7 +539,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
         if (!ParseHelpers.TryParseDecimal(AddCryptoPrice, out var price) || price <= 0)
         { AddError = "單價無效"; return; }
 
-        var cryptoBuyDate = DateOnly.FromDateTime(DateTime.Today);
+        var cryptoBuyDate = DateOnly.FromDateTime(AddBuyDate.Date);
         await _addAssetWorkflow.CreateManualAssetAsync(new ManualAssetCreateRequest(
             sym,
             string.Empty,
@@ -570,7 +568,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
         if (!ParseHelpers.TryParseDecimal(AddCost, out var cost) || cost <= 0)
         { AddError = "持有成本無效"; return; }
 
-        var nonStockDate = DateOnly.FromDateTime(DateTime.Today);
+        var nonStockDate = DateOnly.FromDateTime(AddBuyDate.Date);
         await _addAssetWorkflow.CreateManualAssetAsync(new ManualAssetCreateRequest(
             AddName.Trim(),
             string.Empty,
@@ -726,11 +724,12 @@ public partial class AddAssetDialogViewModel : ObservableObject
             { AddError = "手續費無效"; return; }
         }
 
-        var firstPaymentDate = DateOnly.FromDateTime((AddLoanStartDate ?? DateTime.Today).Date);
+        var loanDate = (AddLoanStartDate ?? DateTime.Today).Date;
+        var firstPaymentDate = DateOnly.FromDateTime(loanDate);
         await _loanMutationWorkflow.RecordAsync(new LoanTransactionRequest(
             TradeType.LoanBorrow,
             amount,
-            DateTime.Today,
+            loanDate,
             AddLoanName.Trim(),
             SelectedLoanCashAccount?.Id,
             null,
@@ -767,6 +766,19 @@ public partial class AddAssetDialogViewModel : ObservableObject
     private static string ValidatePositiveDecimalOrEmpty(string? value) =>
         string.IsNullOrWhiteSpace(value) ? string.Empty :
         !ParseHelpers.TryParseDecimal(value, out var v) || v <= 0 ? "請輸入大於 0 的數字" : string.Empty;
+
+    private static bool TryResolveManualFee(string? value, out decimal? manualFee)
+    {
+        manualFee = null;
+        if (string.IsNullOrWhiteSpace(value))
+            return true;
+
+        if (!ParseHelpers.TryParseDecimal(value, out var parsed) || parsed < 0)
+            return false;
+
+        manualFee = parsed;
+        return true;
+    }
 
     private static string ValidatePositiveIntOrEmpty(string? value)
     {

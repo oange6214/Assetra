@@ -109,7 +109,7 @@ public partial class PortfolioViewModel
         bool changed = false;
         foreach (var quote in quotes)
         {
-            var row = Positions.FirstOrDefault(p => p.Symbol == quote.Symbol);
+            var row = FindQuoteTarget(quote);
             if (row is null)
                 continue;
 
@@ -124,6 +124,22 @@ public partial class PortfolioViewModel
         }
         if (changed)
             RebuildTotals();
+    }
+
+    private PortfolioRowViewModel? FindQuoteTarget(StockQuote quote)
+    {
+        var exact = Positions.FirstOrDefault(p =>
+            string.Equals(p.Symbol, quote.Symbol, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(p.Exchange, quote.Exchange, StringComparison.OrdinalIgnoreCase));
+        if (exact is not null)
+            return exact;
+
+        // Legacy rows may not have Exchange populated. Only fall back to those rows;
+        // never update a populated exchange with a quote from another exchange.
+        var legacyMatches = Positions.Where(p =>
+            string.Equals(p.Symbol, quote.Symbol, StringComparison.OrdinalIgnoreCase) &&
+            string.IsNullOrWhiteSpace(p.Exchange)).Take(2).ToList();
+        return legacyMatches.Count == 1 ? legacyMatches[0] : null;
     }
 
     private async Task RecordSnapshotAsync()

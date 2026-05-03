@@ -11,6 +11,6 @@ public sealed partial class AssetItemVm : ObservableObject
 
     [ObservableProperty] private decimal _currentValue;
 
-    public string CurrentValueDisplay => $"{Currency} {CurrentValue:N0}";
+    public string CurrentValueDisplay => MoneyFormatter.Format(CurrentValue, Currency);
     partial void OnCurrentValueChanged(decimal _) => OnPropertyChanged(nameof(CurrentValueDisplay));
 }

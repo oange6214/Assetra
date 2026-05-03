@@ -134,8 +134,17 @@ public class ImportApplyServiceTests
         repo.Setup(r => r.AddAsync(It.IsAny<Trade>()))
             .Callback<Trade, CancellationToken>((t, _) => added.Add(t))
             .Returns(Task.CompletedTask);
-        repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>()))
-            .Callback<Guid, CancellationToken>((id, _) => removedId = id)
+        repo.Setup(r => r.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Trade(existingId, "", "", "舊", TradeType.Income,
+                new DateTime(2026, 4, 27), 0m, 1, null, null, CashAmount: 1m));
+        repo.Setup(r => r.ApplyAtomicAsync(It.IsAny<IReadOnlyList<TradeMutation>>(), It.IsAny<CancellationToken>()))
+            .Callback<IReadOnlyList<TradeMutation>, CancellationToken>((mutations, _) =>
+            {
+                var remove = Assert.IsType<RemoveTradeMutation>(mutations[0]);
+                removedId = remove.Id;
+                var add = Assert.IsType<AddTradeMutation>(mutations[1]);
+                added.Add(add.Trade);
+            })
             .Returns(Task.CompletedTask);
 
         var row = new ImportPreviewRow(1, new DateOnly(2026, 4, 27), 1500m, "薪資", null);
@@ -155,15 +164,15 @@ public class ImportApplyServiceTests
     [Fact]
     public async Task OverwritesConflict_RemovesBeforeAdd()
     {
-        var calls = new List<string>();
+        IReadOnlyList<TradeMutation>? mutations = null;
         var existingId = Guid.NewGuid();
 
         var repo = new Mock<ITradeRepository>();
-        repo.Setup(r => r.AddAsync(It.IsAny<Trade>()))
-            .Callback<Trade, CancellationToken>((_, _) => calls.Add("Add"))
-            .Returns(Task.CompletedTask);
-        repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>()))
-            .Callback<Guid, CancellationToken>((_, _) => calls.Add("Remove"))
+        repo.Setup(r => r.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Trade(existingId, "", "", "舊", TradeType.Income,
+                new DateTime(2026, 4, 27), 0m, 1, null, null, CashAmount: 1m));
+        repo.Setup(r => r.ApplyAtomicAsync(It.IsAny<IReadOnlyList<TradeMutation>>(), It.IsAny<CancellationToken>()))
+            .Callback<IReadOnlyList<TradeMutation>, CancellationToken>((m, _) => mutations = m)
             .Returns(Task.CompletedTask);
 
         var row = new ImportPreviewRow(1, new DateOnly(2026, 4, 27), 1500m, "薪資", null);
@@ -174,7 +183,10 @@ public class ImportApplyServiceTests
 
         await new ImportApplyService(repo.Object, new ImportRowMapper()).ApplyAsync(batch, new ImportApplyOptions());
 
-        Assert.Equal(new[] { "Remove", "Add" }, calls);
+        Assert.NotNull(mutations);
+        Assert.Collection(mutations!,
+            m => Assert.Equal(existingId, Assert.IsType<RemoveTradeMutation>(m).Id),
+            m => Assert.IsType<AddTradeMutation>(m));
     }
 
     [Fact]
@@ -210,6 +222,9 @@ public class ImportApplyServiceTests
         var added = new List<Trade>();
         var repo = NewRepo(added);
         repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
+        repo.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Guid id, CancellationToken _) => new Trade(id, "", "", "舊", TradeType.Income,
+                new DateTime(2026, 4, 26), 0m, 1, null, null, CashAmount: 1m));
 
         var skipRow = new ImportPreviewRow(1, new DateOnly(2026, 4, 25), 100m, "A", null);
         var overwriteRow = new ImportPreviewRow(2, new DateOnly(2026, 4, 26), 200m, "B", null);
@@ -278,6 +293,16 @@ public class ImportApplyServiceTests
         repo.Setup(r => r.RemoveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
         repo.Setup(r => r.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingTrade);
+        repo.Setup(r => r.ApplyAtomicAsync(It.IsAny<IReadOnlyList<TradeMutation>>(), It.IsAny<CancellationToken>()))
+            .Callback<IReadOnlyList<TradeMutation>, CancellationToken>((mutations, _) =>
+            {
+                foreach (var mutation in mutations)
+                {
+                    if (mutation is AddTradeMutation add)
+                        added.Add(add.Trade);
+                }
+            })
+            .Returns(Task.CompletedTask);
 
         var skipRow = new ImportPreviewRow(1, new DateOnly(2026, 4, 25), 100m, "A", null);
         var overwriteRow = new ImportPreviewRow(2, new DateOnly(2026, 4, 26), 200m, "B", null);
@@ -354,6 +379,60 @@ public class ImportApplyServiceTests
     }
 
     [Fact]
+    public async Task AutoCategorization_FiltersRulesByImportedTradeType()
+    {
+        var added = new List<Trade>();
+        var repo = NewRepo(added);
+        var incomeCat = Guid.NewGuid();
+        var expenseCat = Guid.NewGuid();
+        var rules = new[]
+        {
+            new AutoCategorizationRule(
+                Id: Guid.NewGuid(),
+                KeywordPattern: "Uber",
+                CategoryId: incomeCat,
+                Priority: 0,
+                IsEnabled: true,
+                MatchCaseSensitive: false,
+                MatchField: AutoCategorizationMatchField.Counterparty,
+                AppliesTo: AutoCategorizationScope.Import),
+            new AutoCategorizationRule(
+                Id: Guid.NewGuid(),
+                KeywordPattern: "Uber",
+                CategoryId: expenseCat,
+                Priority: 1,
+                IsEnabled: true,
+                MatchCaseSensitive: false,
+                MatchField: AutoCategorizationMatchField.Counterparty,
+                AppliesTo: AutoCategorizationScope.Import),
+        };
+        var ruleRepo = new Mock<IAutoCategorizationRuleRepository>();
+        ruleRepo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(rules);
+        var categoryRepo = new Mock<ICategoryRepository>();
+        categoryRepo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+            [
+                new ExpenseCategory(incomeCat, "薪資", CategoryKind.Income),
+                new ExpenseCategory(expenseCat, "交通", CategoryKind.Expense),
+            ]);
+
+        var batch = BankBatch(
+            new ImportPreviewRow(1, new DateOnly(2026, 4, 27), -150m, "Uber Trip", null));
+
+        var svc = new ImportApplyService(
+            repo.Object,
+            new ImportRowMapper(),
+            null,
+            ruleRepo.Object,
+            categoryRepo.Object);
+        await svc.ApplyAsync(batch, new ImportApplyOptions());
+
+        Assert.Single(added);
+        Assert.Equal(expenseCat, added[0].CategoryId);
+    }
+
+    [Fact]
     public async Task AutoCategorization_NoMatch_LeavesCategoryNull()
     {
         var added = new List<Trade>();
@@ -385,6 +464,16 @@ public class ImportApplyServiceTests
         var mock = new Mock<ITradeRepository>();
         mock.Setup(r => r.AddAsync(It.IsAny<Trade>()))
             .Callback<Trade, CancellationToken>((t, _) => sink.Add(t))
+            .Returns(Task.CompletedTask);
+        mock.Setup(r => r.ApplyAtomicAsync(It.IsAny<IReadOnlyList<TradeMutation>>(), It.IsAny<CancellationToken>()))
+            .Callback<IReadOnlyList<TradeMutation>, CancellationToken>((mutations, _) =>
+            {
+                foreach (var mutation in mutations)
+                {
+                    if (mutation is AddTradeMutation add)
+                        sink.Add(add.Trade);
+                }
+            })
             .Returns(Task.CompletedTask);
         return mock;
     }

@@ -6,7 +6,9 @@
     xmlns:goals="clr-namespace:Assetra.WPF.Features.Goals"
     xmlns:montecarlo="clr-namespace:Assetra.WPF.Features.MonteCarlo"
     xmlns:reports="clr-namespace:Assetra.WPF.Features.Reports"
+    xmlns:shell="clr-namespace:Assetra.WPF.Shell"
     xmlns:trends="clr-namespace:Assetra.WPF.Features.Trends"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="{DynamicResource AppBackground}"
@@ -16,20 +18,24 @@
         InsightsHub — Goals / Trends / Reports / FIRE / MonteCarlo under one nav entry.
         DataContext = MainViewModel.
     -->
-    <TabControl Background="Transparent" BorderThickness="0">
-        <TabItem Header="{DynamicResource Nav.Goals}">
+    <TabControl
+        Background="Transparent"
+        BorderThickness="0"
+        SelectedValue="{Binding NavRail.SelectedInsightsTab, Mode=TwoWay}"
+        SelectedValuePath="Tag">
+        <TabItem Header="{DynamicResource Nav.Goals}" Tag="{x:Static shell:NavSection.Goals}">
             <goals:GoalsView DataContext="{Binding Goals}" />
         </TabItem>
-        <TabItem Header="{DynamicResource Nav.Trends}">
+        <TabItem Header="{DynamicResource Nav.Trends}" Tag="{x:Static shell:NavSection.Trends}">
             <trends:TrendsView DataContext="{Binding Portfolio.History}" />
         </TabItem>
-        <TabItem Header="{DynamicResource Nav.Reports}">
+        <TabItem Header="{DynamicResource Nav.Reports}" Tag="{x:Static shell:NavSection.Reports}">
             <reports:ReportsView DataContext="{Binding Reports}" />
         </TabItem>
-        <TabItem Header="{DynamicResource Fire.Title}">
+        <TabItem Header="{DynamicResource Fire.Title}" Tag="{x:Static shell:NavSection.Fire}">
             <fire:FireView DataContext="{Binding Fire}" />
         </TabItem>
-        <TabItem Header="{DynamicResource MonteCarlo.Title}">
+        <TabItem Header="{DynamicResource MonteCarlo.Title}" Tag="{x:Static shell:NavSection.MonteCarlo}">
             <montecarlo:MonteCarloView DataContext="{Binding MonteCarlo}" />
         </TabItem>
     </TabControl>

@@ -6,6 +6,8 @@
     xmlns:physicalasset="clr-namespace:Assetra.WPF.Features.PhysicalAsset"
     xmlns:realestate="clr-namespace:Assetra.WPF.Features.RealEstate"
     xmlns:retirement="clr-namespace:Assetra.WPF.Features.Retirement"
+    xmlns:shell="clr-namespace:Assetra.WPF.Shell"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="{DynamicResource AppBackground}"
@@ -15,17 +17,21 @@
         MultiAssetHub — RealEstate / Insurance / Retirement / PhysicalAsset under one nav entry.
         DataContext = MainViewModel.
     -->
-    <TabControl Background="Transparent" BorderThickness="0">
-        <TabItem Header="{DynamicResource RealEstate.Title}">
+    <TabControl
+        Background="Transparent"
+        BorderThickness="0"
+        SelectedValue="{Binding NavRail.SelectedMultiAssetTab, Mode=TwoWay}"
+        SelectedValuePath="Tag">
+        <TabItem Header="{DynamicResource RealEstate.Title}" Tag="{x:Static shell:NavSection.RealEstate}">
             <realestate:RealEstateView DataContext="{Binding RealEstate}" />
         </TabItem>
-        <TabItem Header="{DynamicResource Insurance.Title}">
+        <TabItem Header="{DynamicResource Insurance.Title}" Tag="{x:Static shell:NavSection.Insurance}">
             <insurance:InsurancePolicyView DataContext="{Binding Insurance}" />
         </TabItem>
-        <TabItem Header="{DynamicResource Retirement.Title}">
+        <TabItem Header="{DynamicResource Retirement.Title}" Tag="{x:Static shell:NavSection.Retirement}">
             <retirement:RetirementView DataContext="{Binding Retirement}" />
         </TabItem>
-        <TabItem Header="{DynamicResource PhysicalAsset.Title}">
+        <TabItem Header="{DynamicResource PhysicalAsset.Title}" Tag="{x:Static shell:NavSection.PhysicalAsset}">
             <physicalasset:PhysicalAssetView DataContext="{Binding PhysicalAsset}" />
         </TabItem>
     </TabControl>

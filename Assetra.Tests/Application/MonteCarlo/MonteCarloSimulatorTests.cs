@@ -85,4 +85,50 @@ public sealed class MonteCarloSimulatorTests
         var inputs = DefaultInputs() with { SimulationCount = 0 };
         Assert.Throws<ArgumentOutOfRangeException>(() => sim.Simulate(inputs));
     }
+
+    [Fact]
+    public void Simulate_YearsAboveLimit_Throws()
+    {
+        var sim = new MonteCarloSimulator();
+        var inputs = DefaultInputs() with { Years = MonteCarloInputs.MaxYears + 1 };
+        Assert.Throws<ArgumentOutOfRangeException>(() => sim.Simulate(inputs));
+    }
+
+    [Fact]
+    public void Simulate_SimulationCountAboveLimit_Throws()
+    {
+        var sim = new MonteCarloSimulator();
+        var inputs = DefaultInputs() with { SimulationCount = MonteCarloInputs.MaxSimulationCount + 1 };
+        Assert.Throws<ArgumentOutOfRangeException>(() => sim.Simulate(inputs));
+    }
+
+    [Fact]
+    public void Simulate_InvalidReturnParameters_Throw()
+    {
+        var sim = new MonteCarloSimulator();
+
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => sim.Simulate(DefaultInputs() with { AnnualReturnStdDev = -0.01m }));
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => sim.Simulate(DefaultInputs() with { MeanAnnualReturn = -1m }));
+    }
+
+    [Fact]
+    public void Simulate_LogNormalReturns_DoNotDriveBalanceNegativeThroughReturnShock()
+    {
+        var sim = new MonteCarloSimulator();
+        var inputs = new MonteCarloInputs(
+            InitialBalance: 1_000_000m,
+            AnnualWithdrawal: 0m,
+            MeanAnnualReturn: 0.05m,
+            AnnualReturnStdDev: 2.00m,
+            Years: 5,
+            SimulationCount: 500,
+            RandomSeed: 99);
+
+        var result = sim.Simulate(inputs);
+
+        Assert.All(result.MedianBalancePath, balance => Assert.True(balance >= 0m));
+        Assert.True(result.P10EndingBalance >= 0m);
+    }
 }

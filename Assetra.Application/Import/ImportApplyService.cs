@@ -26,17 +26,20 @@ public sealed class ImportApplyService : IImportApplyService
     private readonly IImportRowMapper _mapper;
     private readonly IImportBatchHistoryRepository? _history;
     private readonly IAutoCategorizationRuleRepository? _rules;
+    private readonly ICategoryRepository? _categories;
 
     public ImportApplyService(
         ITradeRepository trades,
         IImportRowMapper mapper,
         IImportBatchHistoryRepository? history = null,
-        IAutoCategorizationRuleRepository? rules = null)
+        IAutoCategorizationRuleRepository? rules = null,
+        ICategoryRepository? categories = null)
     {
         _trades = trades ?? throw new ArgumentNullException(nameof(trades));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _history = history;
         _rules = rules;
+        _categories = categories;
     }
 
     public async Task<ImportApplyResult> ApplyAsync(
@@ -55,6 +58,11 @@ public sealed class ImportApplyService : IImportApplyService
         if (_rules is not null)
         {
             ruleSnapshot = await _rules.GetAllAsync(ct).ConfigureAwait(false);
+        }
+        IReadOnlyList<ExpenseCategory>? categorySnapshot = null;
+        if (_categories is not null)
+        {
+            categorySnapshot = await _categories.GetAllAsync(ct).ConfigureAwait(false);
         }
 
         int applied = 0, skipped = 0, overwritten = 0;
@@ -75,20 +83,7 @@ public sealed class ImportApplyService : IImportApplyService
                 continue;
             }
 
-            string? overwrittenJson = null;
-            if (resolution == ImportConflictResolution.Overwrite
-                && conflict?.ExistingTradeId is { } existingId)
-            {
-                var existing = await _trades.GetByIdAsync(existingId, ct).ConfigureAwait(false);
-                if (existing is not null)
-                {
-                    overwrittenJson = JsonSerializer.Serialize(existing, SnapshotJsonOptions);
-                }
-                await _trades.RemoveAsync(existingId, ct).ConfigureAwait(false);
-                overwritten++;
-            }
-
-            var trade = _mapper.Map(row, batch.SourceKind, options, warnings, ruleSnapshot);
+            var trade = _mapper.Map(row, batch.SourceKind, options, warnings, ruleSnapshot, categorySnapshot);
             if (trade is null)
             {
                 skipped++;
@@ -98,12 +93,32 @@ public sealed class ImportApplyService : IImportApplyService
                 continue;
             }
 
-            await _trades.AddAsync(trade, ct).ConfigureAwait(false);
+            string? overwrittenJson = null;
+            var didOverwrite = false;
+            if (resolution == ImportConflictResolution.Overwrite
+                && conflict?.ExistingTradeId is { } existingId)
+            {
+                var existing = await _trades.GetByIdAsync(existingId, ct).ConfigureAwait(false);
+                if (existing is not null)
+                {
+                    overwrittenJson = JsonSerializer.Serialize(existing, SnapshotJsonOptions);
+                    await _trades.ApplyAtomicAsync(
+                        [new RemoveTradeMutation(existingId), new AddTradeMutation(trade)],
+                        ct).ConfigureAwait(false);
+                    overwritten++;
+                    didOverwrite = true;
+                }
+            }
+
+            if (!didOverwrite)
+            {
+                await _trades.AddAsync(trade, ct).ConfigureAwait(false);
+            }
             applied++;
 
             entries.Add(new ImportBatchEntry(
                 RowIndex: row.RowIndex,
-                Action: overwrittenJson is not null ? ImportBatchAction.Overwritten : ImportBatchAction.Added,
+                Action: didOverwrite ? ImportBatchAction.Overwritten : ImportBatchAction.Added,
                 NewTradeId: trade.Id,
                 OverwrittenTradeJson: overwrittenJson,
                 PreviewRowJson: JsonSerializer.Serialize(row, SnapshotJsonOptions)));

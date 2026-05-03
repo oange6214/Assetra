@@ -44,8 +44,11 @@ public sealed class IncomeStatementService : IIncomeStatementService
 
         var rentalRows = await BuildRentalRowsAsync(period, ct).ConfigureAwait(false);
         var premiumRows = await BuildPremiumRowsAsync(period, ct).ConfigureAwait(false);
+        var priorRentalRows = await BuildRentalRowsAsync(prior, ct).ConfigureAwait(false);
+        var priorPremiumRows = await BuildPremiumRowsAsync(prior, ct).ConfigureAwait(false);
 
-        return Build(period, trades, categories, rentalRows, premiumRows, includePrior: true);
+        var priorStatement = Build(prior, trades, categories, priorRentalRows, priorPremiumRows);
+        return Build(period, trades, categories, rentalRows, premiumRows, priorStatement);
     }
 
     private IncomeStatement Build(
@@ -54,7 +57,7 @@ public sealed class IncomeStatementService : IIncomeStatementService
         IReadOnlyList<ExpenseCategory> categories,
         IReadOnlyList<StatementRow> rentalRows,
         IReadOnlyList<StatementRow> premiumRows,
-        bool includePrior)
+        IncomeStatement? prior = null)
     {
         var inPeriod = allTrades.Where(t => period.Contains(t.TradeDate)).ToList();
 
@@ -81,11 +84,6 @@ public sealed class IncomeStatementService : IIncomeStatementService
         var expense = new StatementSection("Expense", expenseRows, expenseRows.Sum(r => r.Amount));
 
         var net = income.Total - expense.Total;
-
-        IncomeStatement? prior = null;
-        if (includePrior)
-            prior = Build(period.Prior(), allTrades, categories,
-                Array.Empty<StatementRow>(), Array.Empty<StatementRow>(), includePrior: false);
 
         return new IncomeStatement(period, income, expense, net, prior);
     }
@@ -117,7 +115,7 @@ public sealed class IncomeStatementService : IIncomeStatementService
         // Treat regular CreditCardCharge as expense (cash-equivalent outflow);
         // LoanRepay InterestPaid also expense but principal is financing — handled in CashFlow.
         return t.Type == TradeType.CreditCardCharge ||
-               (t.Type == TradeType.Withdrawal && t.CategoryId is not null);
+               t.Type == TradeType.Withdrawal;
     }
 
     private static StatementSection BuildSection(

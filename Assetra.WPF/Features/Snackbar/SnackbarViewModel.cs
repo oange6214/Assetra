@@ -9,6 +9,7 @@ public sealed partial class SnackbarViewModel : ObservableObject
 {
     private const int MaxItems = 5;
     private static readonly TimeSpan DefaultDuration = TimeSpan.FromSeconds(4);
+    private readonly HashSet<SnackbarItemViewModel> _autoDismissStarted = [];
 
     public ObservableCollection<SnackbarItemViewModel> Items { get; } = [];
 
@@ -23,8 +24,13 @@ public sealed partial class SnackbarViewModel : ObservableObject
             OnDismiss = Remove
         };
         Items.Add(item);
+    }
 
-        // Auto-dismiss
+    public void StartAutoDismiss(SnackbarItemViewModel item)
+    {
+        if (!Items.Contains(item) || !_autoDismissStarted.Add(item))
+            return;
+
         var timer = new DispatcherTimer { Interval = DefaultDuration };
         timer.Tick += (_, _) =>
         {
@@ -38,5 +44,6 @@ public sealed partial class SnackbarViewModel : ObservableObject
     {
         if (Items.Contains(item))
             Items.Remove(item);
+        _autoDismissStarted.Remove(item);
     }
 }

@@ -11,6 +11,8 @@ public sealed partial class RetirementViewModel : ObservableObject
 {
     private readonly IRetirementAccountRepository _repository;
     private readonly IRetirementProjectionService _projection;
+    private readonly Func<string> _deviceIdProvider;
+    private readonly TimeProvider _time;
 
     public ObservableCollection<RetirementRowViewModel> Accounts { get; } = [];
     public IReadOnlyList<RetirementAccountType> AccountTypes { get; } =
@@ -48,12 +50,16 @@ public sealed partial class RetirementViewModel : ObservableObject
 
     public RetirementViewModel(
         IRetirementAccountRepository repository,
-        IRetirementProjectionService projection)
+        IRetirementProjectionService projection,
+        Func<string>? deviceIdProvider = null,
+        TimeProvider? time = null)
     {
         ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(projection);
         _repository = repository;
         _projection = projection;
+        _deviceIdProvider = deviceIdProvider ?? (() => "local");
+        _time = time ?? TimeProvider.System;
     }
 
     [RelayCommand]
@@ -93,8 +99,8 @@ public sealed partial class RetirementViewModel : ObservableObject
         if (!int.TryParse(FormYearsOfService, out var years))        { FormError = "年資格式錯誤"; return; }
         if (!int.TryParse(FormLegalWithdrawalAge, out var withAge))  { FormError = "法定提領年齡格式錯誤"; return; }
 
-        var now = DateTimeOffset.UtcNow;
-        var deviceId = string.Empty;
+        var now = _time.GetUtcNow();
+        var deviceId = CurrentDeviceId();
         var version = EditingId.HasValue
             ? (await _repository.GetByIdAsync(EditingId.Value).ConfigureAwait(false))?.Version.Bump(deviceId, now)
               ?? EntityVersion.Initial(deviceId, now)
@@ -182,5 +188,11 @@ public sealed partial class RetirementViewModel : ObservableObject
         FormCurrency = "TWD";
         FormNotes = string.Empty;
         FormError = null;
+    }
+
+    private string CurrentDeviceId()
+    {
+        var device = _deviceIdProvider();
+        return string.IsNullOrWhiteSpace(device) ? "local" : device;
     }
 }

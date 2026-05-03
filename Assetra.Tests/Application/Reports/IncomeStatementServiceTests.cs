@@ -1,6 +1,8 @@
 using Assetra.Application.Reports.Statements;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.MultiAsset;
 using Assetra.Core.Models;
+using Assetra.Core.Models.MultiAsset;
 using Assetra.Core.Models.Reports;
 using Xunit;
 
@@ -63,6 +65,57 @@ public class IncomeStatementServiceTests
         Assert.Equal("(Uncategorized)", report.Income.Rows[0].Label);
     }
 
+    [Fact]
+    public async Task GenerateAsync_UncategorizedWithdrawal_IsIncludedAsExpense()
+    {
+        var trades = new FakeTradeRepo();
+        trades.Store.Add(new Trade(
+            Guid.NewGuid(), "", "", "expense", TradeType.Withdrawal,
+            new DateTime(2026, 4, 5), 0m, 1, null, null,
+            CashAmount: 2500m));
+        var svc = new IncomeStatementService(trades, new FakeCategoryRepo());
+
+        var report = await svc.GenerateAsync(ReportPeriod.Month(2026, 4));
+
+        Assert.Equal(2500m, report.Expense.Total);
+        var row = Assert.Single(report.Expense.Rows);
+        Assert.Equal("(Uncategorized)", row.Label);
+        Assert.Equal(2500m, row.Amount);
+    }
+
+    [Fact]
+    public async Task GenerateAsync_PriorIncludesRentalIncomeAndInsurancePremiums()
+    {
+        var rentalRecords = new FakeRentalIncomeRecordRepo
+        {
+            Items =
+            {
+                new RentalIncomeRecord(Guid.NewGuid(), Guid.NewGuid(), new DateOnly(2026, 3, 10), 30000m, 5000m, "TWD", null),
+                new RentalIncomeRecord(Guid.NewGuid(), Guid.NewGuid(), new DateOnly(2026, 4, 1), 10000m, 1000m, "TWD", null),
+            },
+        };
+        var premiumRecords = new FakeInsurancePremiumRecordRepo
+        {
+            Items =
+            {
+                new InsurancePremiumRecord(Guid.NewGuid(), Guid.NewGuid(), new DateOnly(2026, 3, 10), 6000m, "TWD", null),
+                new InsurancePremiumRecord(Guid.NewGuid(), Guid.NewGuid(), new DateOnly(2026, 4, 10), 2000m, "TWD", null),
+            },
+        };
+        var svc = new IncomeStatementService(
+            new FakeTradeRepo(),
+            new FakeCategoryRepo(),
+            rentalRecords,
+            premiumRecords);
+
+        var report = await svc.GenerateAsync(ReportPeriod.Month(2026, 4));
+
+        Assert.NotNull(report.Prior);
+        Assert.Equal(25000m, report.Prior!.Income.Total);
+        Assert.Equal(6000m, report.Prior.Expense.Total);
+        Assert.Equal(19000m, report.Prior.Net);
+    }
+
     private static Trade MakeIncome(DateTime when, decimal amount, Guid? categoryId) => new(
         Guid.NewGuid(), string.Empty, string.Empty, "income",
         TradeType.Income, when, 0m, 1, null, null,
@@ -114,5 +167,34 @@ public class IncomeStatementServiceTests
         public Task UpdateAsync(ExpenseCategory c, CancellationToken ct = default) => Task.CompletedTask;
         public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
         public Task<bool> AnyAsync(CancellationToken ct = default) => Task.FromResult(Items.Count > 0);
+    }
+
+    private sealed class FakeRentalIncomeRecordRepo : IRentalIncomeRecordRepository
+    {
+        public List<RentalIncomeRecord> Items { get; } = [];
+
+        public Task<IReadOnlyList<RentalIncomeRecord>> GetByPropertyAsync(Guid realEstateId, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<RentalIncomeRecord>>(Items.Where(r => r.RealEstateId == realEstateId).ToList());
+
+        public Task<IReadOnlyList<RentalIncomeRecord>> GetByPeriodAsync(DateOnly from, DateOnly to, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<RentalIncomeRecord>>(Items.Where(r => r.Month >= from && r.Month <= to).ToList());
+
+        public Task AddAsync(RentalIncomeRecord record, CancellationToken ct = default) { Items.Add(record); return Task.CompletedTask; }
+        public Task UpdateAsync(RentalIncomeRecord record, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    private sealed class FakeInsurancePremiumRecordRepo : IInsurancePremiumRecordRepository
+    {
+        public List<InsurancePremiumRecord> Items { get; } = [];
+
+        public Task<IReadOnlyList<InsurancePremiumRecord>> GetByPolicyAsync(Guid policyId, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<InsurancePremiumRecord>>(Items.Where(r => r.PolicyId == policyId).ToList());
+
+        public Task<IReadOnlyList<InsurancePremiumRecord>> GetByPeriodAsync(DateOnly from, DateOnly to, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<InsurancePremiumRecord>>(Items.Where(r => r.PaidDate >= from && r.PaidDate <= to).ToList());
+
+        public Task AddAsync(InsurancePremiumRecord record, CancellationToken ct = default) { Items.Add(record); return Task.CompletedTask; }
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
     }
 }

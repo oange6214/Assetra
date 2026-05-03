@@ -7,86 +7,50 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <!--
+  <!--
         Outer filter bar — 獨立模式時有 AppSurface 背景 + 底線分隔；
         IsInline=True 時移除這些額外 chrome，只留核心輸入樣式，方便嵌進既有工具列。
     -->
-    <Border>
-        <Border.Style>
-            <Style TargetType="Border">
-                <Setter Property="Padding" Value="12,6" />
-                <Setter Property="Background" Value="{DynamicResource AppSurface}" />
-                <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
-                <Setter Property="BorderThickness" Value="0,0,0,1" />
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsInline, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderThickness" Value="0" />
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </Border.Style>
-        <DockPanel>
-            <!--
+  <Border>
+    <Border.Style>
+      <Style TargetType="Border">
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Style.Triggers>
+          <DataTrigger Binding="{Binding IsInline, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+          </DataTrigger>
+        </Style.Triggers>
+      </Style>
+    </Border.Style>
+    <DockPanel>
+      <!--
                 Optional right-side slot (e.g. "＋ 新增現金" button). Sits flush with the search
                 input's right edge via DockPanel.Dock="Right" + left margin for breathing room.
             -->
-            <ContentPresenter
+      <ContentPresenter
                 Margin="8,0,0,0"
                 VerticalAlignment="Center"
                 Content="{Binding RightContent, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 DockPanel.Dock="Right" />
 
-            <!--  Inner search field: fills remaining width.  -->
-            <Border
+      <ui:TextBox
+                ClearButtonEnabled="True"
                 MinHeight="34"
-                Background="{DynamicResource AppBackground}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource RadiusSm}">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Style.Triggers>
-                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <DockPanel Margin="8,0">
-                    <ui:SymbolIcon Symbol="Search24" Margin="0,0,5,0" VerticalAlignment="Center" DockPanel.Dock="Left" FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}" IsHitTestVisible="False" />
-                    <Grid DockPanel.Dock="Right">
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeSm}"
-                            Foreground="{DynamicResource AppTextMuted}"
-                            IsHitTestVisible="False"
-                            Text="{Binding Placeholder, RelativeSource={RelativeSource AncestorType=UserControl}}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Text, ElementName=InnerTextBox}" Value="">
-                                            <Setter Property="Visibility" Value="Visible" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                        <TextBox
-                            x:Name="InnerTextBox"
-                            VerticalContentAlignment="Center"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            FocusVisualStyle="{x:Null}"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{StaticResource FontSizeSm}"
-                            Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}" />
-                    </Grid>
-                </DockPanel>
-            </Border>
-        </DockPanel>
-    </Border>
+                FontFamily="{StaticResource FontBase}"
+                FontSize="{StaticResource FontSizeSm}"
+                PlaceholderText="{Binding Placeholder, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}">
+        <ui:TextBox.Icon>
+          <ui:IconSourceElement>
+            <ui:SymbolIconSource Symbol="Search24" />
+          </ui:IconSourceElement>
+        </ui:TextBox.Icon>
+      </ui:TextBox>
+    </DockPanel>
+  </Border>
 </UserControl>

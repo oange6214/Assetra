@@ -10,6 +10,43 @@ namespace Assetra.Tests.WPF;
 public sealed class RecurringViewModelTests
 {
     [Fact]
+    public async Task AddSubscriptionAsync_PersistsScheduleFields()
+    {
+        var recurringRepo = new FakeRecurringRepo();
+        var pendingRepo = new FakePendingRepo();
+        var scheduler = new RecurringTransactionScheduler(
+            recurringRepo,
+            pendingRepo,
+            new FakeTransactionService());
+        var startDate = new DateTime(2026, 6, 15);
+
+        var vm = new RecurringViewModel(
+            recurringRepo,
+            pendingRepo,
+            scheduler,
+            new FakeSnackbarService(),
+            new FakeLocalizationService())
+        {
+            AddName = "Rent",
+            AddTradeType = TradeType.Withdrawal,
+            AddAmount = 18000m,
+            AddFrequency = RecurrenceFrequency.Monthly,
+            AddInterval = 2,
+            AddStartDate = startDate,
+            AddGenerationMode = AutoGenerationMode.PendingConfirm,
+            AddNote = "Lease payment",
+        };
+
+        await vm.AddSubscriptionCommand.ExecuteAsync(null);
+
+        var recurring = Assert.Single(recurringRepo.Store);
+        Assert.Equal(2, recurring.Interval);
+        Assert.Equal(startDate, recurring.StartDate);
+        Assert.Equal(startDate, recurring.NextDueAt);
+        Assert.Equal("Lease payment", recurring.Note);
+    }
+
+    [Fact]
     public async Task AddSubscriptionAsync_RejectsUnsupportedTradeType()
     {
         var recurringRepo = new FakeRecurringRepo();

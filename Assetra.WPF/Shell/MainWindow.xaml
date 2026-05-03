@@ -15,6 +15,7 @@
     MinWidth="900"
     MinHeight="600"
     Background="{DynamicResource AppBackground}"
+    ExtendsContentIntoTitleBar="False"
     Icon="pack://application:,,,/Assetra.WPF;component/Assets/windows/assetra-app.ico"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
@@ -35,7 +36,7 @@
             Modifiers="Alt" />
     </ui:FluentWindow.InputBindings>
 
-    <Grid>
+    <Grid Background="{DynamicResource AppBackground}">
         <Grid.LayoutTransform>
             <ScaleTransform ScaleX="{Binding Settings.UiScale}" ScaleY="{Binding Settings.UiScale}" />
         </Grid.LayoutTransform>
@@ -83,22 +84,35 @@
                             Margin="-4,0,0,0"
                             Orientation="Horizontal">
                             <ui:Button
+                                Width="32"
+                                Height="32"
                                 Margin="4,0,0,0"
+                                Padding="0"
                                 Appearance="Transparent"
                                 Command="{Binding NavRail.GoBackCommand}"
+                                IsEnabled="{Binding NavRail.CanGoBack}"
+                                ToolTipService.ShowOnDisabled="True"
                                 ToolTip="{DynamicResource Nav.GoBack}">
-                                <ui:SymbolIcon Symbol="ChevronRight24" FontSize="{StaticResource FontSizeBase}" Foreground="{DynamicResource AppTextMuted}" />
-                            </ui:Button>
-                            <ui:Button
-                                Margin="2,0,0,0"
-                                Appearance="Transparent"
-                                Command="{Binding NavRail.GoForwardCommand}"
-                                ToolTip="{DynamicResource Nav.GoForward}">
                                 <ui:SymbolIcon Symbol="ChevronLeft24" FontSize="{StaticResource FontSizeBase}" Foreground="{DynamicResource AppTextMuted}" />
                             </ui:Button>
                             <ui:Button
+                                Width="32"
+                                Height="32"
+                                Margin="2,0,0,0"
+                                Padding="0"
+                                Appearance="Transparent"
+                                Command="{Binding NavRail.GoForwardCommand}"
+                                IsEnabled="{Binding NavRail.CanGoForward}"
+                                ToolTipService.ShowOnDisabled="True"
+                                ToolTip="{DynamicResource Nav.GoForward}">
+                                <ui:SymbolIcon Symbol="ChevronRight24" FontSize="{StaticResource FontSizeBase}" Foreground="{DynamicResource AppTextMuted}" />
+                            </ui:Button>
+                            <ui:Button
                                 x:Name="SearchIconBtn"
+                                Width="32"
+                                Height="32"
                                 Margin="8,0,0,0"
+                                Padding="0"
                                 Appearance="Transparent"
                                 Command="{Binding ToggleSearchCommand}"
                                 ToolTip="Ctrl+K">
@@ -187,6 +201,9 @@
                             Margin="0,0,8,0"
                             Orientation="Horizontal">
                             <ui:Button
+                                Width="32"
+                                Height="32"
+                                Padding="0"
                                 Appearance="Transparent"
                                 Command="{Binding ToggleThemeCommand}"
                                 ToolTip="{Binding ThemeToggleLabel}">

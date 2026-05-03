@@ -1,5 +1,6 @@
 using Assetra.Application.Reports.Statements;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Interfaces.MultiAsset;
 using Assetra.Core.Models;
 using Assetra.Core.Models.MultiAsset;
@@ -17,10 +18,10 @@ public class BalanceSheetMultiAssetTests
             new DateOnly(2020, 1, 1), currentValue, mortgage, "TWD",
             false, RealEstateStatus.Active, null, new EntityVersion());
 
-    private static InsurancePolicy MakePolicy(decimal cashValue) =>
+    private static InsurancePolicy MakePolicy(decimal cashValue, string currency = "TWD") =>
         new(Guid.NewGuid(), "Life", "P001", InsuranceType.WholeLife, "國泰",
             new DateOnly(2020, 1, 1), null, 2_000_000m, cashValue, 24_000m,
-            "TWD", InsurancePolicyStatus.Active, null, new EntityVersion());
+            currency, InsurancePolicyStatus.Active, null, new EntityVersion());
 
     [Fact]
     public async Task GenerateAsync_WithRealEstate_IncludesEquityRow()
@@ -103,6 +104,38 @@ public class BalanceSheetMultiAssetTests
         Assert.Equal(5_100_000m, sheet.NetWorth);
     }
 
+    [Fact]
+    public async Task GenerateAsync_ConvertsForeignInsuranceRetirementAndPhysicalAssets()
+    {
+        var policy = MakePolicy(1000m, "USD");
+        var retirement = new RetirementAccount(
+            Guid.NewGuid(), "IRA", RetirementAccountType.IndividualRetirementAccount, "Broker",
+            2000m, 0m, 0m, 5, 65, new DateOnly(2020, 1, 1),
+            "USD", RetirementAccountStatus.Active, null, new EntityVersion());
+        var physical = new PhysicalAsset(
+            Guid.NewGuid(), "Gold", PhysicalAssetCategory.PreciousMetal, "coin",
+            300m, new DateOnly(2020, 1, 1), 500m, "market",
+            "USD", PhysicalAssetStatus.Active, null, new EntityVersion());
+        var svc = new BalanceSheetService(
+            new StubAssetRepo(),
+            new StubTradeRepo(),
+            fx: new StubFx(new Dictionary<(string, string), decimal>
+            {
+                { ("USD", "TWD"), 30m },
+            }),
+            settings: new StubSettings("TWD"),
+            insurancePolicies: new StubInsuranceRepo([policy]),
+            retirementAccounts: new StubRetirementRepo([retirement]),
+            physicalAssets: new StubPhysicalAssetRepo([physical]));
+
+        var sheet = await svc.GenerateAsync(AsOf);
+
+        Assert.Equal(105000m, sheet.Assets.Total);
+        Assert.Equal(30000m, sheet.Assets.Rows.Single(r => r.Group == "Insurance").Amount);
+        Assert.Equal(60000m, sheet.Assets.Rows.Single(r => r.Group == "Retirement").Amount);
+        Assert.Equal(15000m, sheet.Assets.Rows.Single(r => r.Group == "Physical Asset").Amount);
+    }
+
     // ── Stubs ──
 
     private sealed class StubAssetRepo : IAssetRepository
@@ -157,5 +190,49 @@ public class BalanceSheetMultiAssetTests
         public Task AddAsync(InsurancePolicy policy, CancellationToken ct = default) => Task.CompletedTask;
         public Task UpdateAsync(InsurancePolicy policy, CancellationToken ct = default) => Task.CompletedTask;
         public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    private sealed class StubRetirementRepo(IReadOnlyList<RetirementAccount> data) : IRetirementAccountRepository
+    {
+        public Task<IReadOnlyList<RetirementAccount>> GetAllAsync(CancellationToken ct = default) => Task.FromResult(data);
+        public Task<RetirementAccount?> GetByIdAsync(Guid id, CancellationToken ct = default) => Task.FromResult(data.FirstOrDefault(x => x.Id == id));
+        public Task AddAsync(RetirementAccount entity, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UpdateAsync(RetirementAccount entity, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    private sealed class StubPhysicalAssetRepo(IReadOnlyList<PhysicalAsset> data) : IPhysicalAssetRepository
+    {
+        public Task<IReadOnlyList<PhysicalAsset>> GetAllAsync(CancellationToken ct = default) => Task.FromResult(data);
+        public Task<PhysicalAsset?> GetByIdAsync(Guid id, CancellationToken ct = default) => Task.FromResult(data.FirstOrDefault(x => x.Id == id));
+        public Task AddAsync(PhysicalAsset entity, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UpdateAsync(PhysicalAsset entity, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    private sealed class StubFx(Dictionary<(string, string), decimal> rates) : IMultiCurrencyValuationService
+    {
+        public Task<decimal?> ConvertAsync(decimal amount, string from, string to, DateOnly asOf, CancellationToken ct = default)
+        {
+            if (string.Equals(from, to, StringComparison.OrdinalIgnoreCase))
+                return Task.FromResult<decimal?>(amount);
+            return rates.TryGetValue((from.ToUpperInvariant(), to.ToUpperInvariant()), out var rate)
+                ? Task.FromResult<decimal?>(amount * rate)
+                : Task.FromResult<decimal?>(null);
+        }
+    }
+
+    private sealed class StubSettings(string baseCurrency) : IAppSettingsService
+    {
+        public AppSettings Current { get; private set; } = new(BaseCurrency: baseCurrency);
+
+        public event Action? Changed;
+
+        public Task SaveAsync(AppSettings settings)
+        {
+            Current = settings;
+            Changed?.Invoke();
+            return Task.CompletedTask;
+        }
     }
 }

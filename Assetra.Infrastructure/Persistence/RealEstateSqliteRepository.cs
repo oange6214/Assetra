@@ -10,10 +10,17 @@ namespace Assetra.Infrastructure.Persistence;
 public sealed class RealEstateSqliteRepository : IRealEstateRepository, IRealEstateSyncStore
 {
     private readonly string _connectionString;
+    private readonly Func<string> _deviceIdProvider;
+    private readonly TimeProvider _time;
 
-    public RealEstateSqliteRepository(string dbPath)
+    public RealEstateSqliteRepository(
+        string dbPath,
+        Func<string>? deviceIdProvider = null,
+        TimeProvider? time = null)
     {
         _connectionString = $"Data Source={dbPath}";
+        _deviceIdProvider = deviceIdProvider ?? (() => string.Empty);
+        _time = time ?? TimeProvider.System;
         RealEstateSchemaMigrator.EnsureInitialized(_connectionString);
     }
 
@@ -60,6 +67,8 @@ public sealed class RealEstateSqliteRepository : IRealEstateRepository, IRealEst
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
+        var now = _time.GetUtcNow();
+        var stamped = entity with { Version = StampVersion(entity.Version, now) };
         cmd.CommandText = """
             INSERT INTO real_estate
                 (id, name, address, purchase_price, purchase_date, current_value,
@@ -72,8 +81,8 @@ public sealed class RealEstateSqliteRepository : IRealEstateRepository, IRealEst
                  $ev_version, $ev_modified_at, $ev_device_id,
                  0, 1, $now, $now);
             """;
-        BindParams(cmd, entity);
-        cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
+        BindParams(cmd, stamped);
+        cmd.Parameters.AddWithValue("$now", now.ToString("o"));
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -82,6 +91,9 @@ public sealed class RealEstateSqliteRepository : IRealEstateRepository, IRealEst
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
+        var now = _time.GetUtcNow();
+        var currentVersion = await GetVersionAsync(conn, entity.Id, ct).ConfigureAwait(false) ?? entity.Version;
+        var stamped = entity with { Version = StampVersion(currentVersion, now) };
         cmd.CommandText = """
             UPDATE real_estate SET
                 name             = $name,
@@ -101,8 +113,8 @@ public sealed class RealEstateSqliteRepository : IRealEstateRepository, IRealEst
                 updated_at       = $now
             WHERE id = $id;
             """;
-        BindParams(cmd, entity);
-        cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
+        BindParams(cmd, stamped);
+        cmd.Parameters.AddWithValue("$now", now.ToString("o"));
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -112,16 +124,21 @@ public sealed class RealEstateSqliteRepository : IRealEstateRepository, IRealEst
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
+        var now = _time.GetUtcNow();
+        var deviceId = CurrentDeviceId();
         cmd.CommandText = """
             UPDATE real_estate SET
                 is_deleted      = 1,
                 is_pending_push = 1,
                 ev_version      = ev_version + 1,
+                ev_modified_at  = $now,
+                ev_device_id    = $device_id,
                 updated_at      = $now
             WHERE id = $id;
             """;
         cmd.Parameters.AddWithValue("$id", id.ToString());
-        cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
+        cmd.Parameters.AddWithValue("$device_id", deviceId);
+        cmd.Parameters.AddWithValue("$now", now.ToString("o"));
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -269,6 +286,40 @@ public sealed class RealEstateSqliteRepository : IRealEstateRepository, IRealEst
     }
 
     // ─── Helpers ────────────────────────────────────────────────────────────
+
+    private string CurrentDeviceId() => _deviceIdProvider() ?? string.Empty;
+
+    private EntityVersion StampVersion(EntityVersion version, DateTimeOffset now)
+    {
+        var deviceId = CurrentDeviceId();
+        return version.Version <= 0
+            ? EntityVersion.Initial(deviceId, now)
+            : version.Bump(deviceId, now);
+    }
+
+    private static async Task<EntityVersion?> GetVersionAsync(
+        SqliteConnection conn,
+        Guid id,
+        CancellationToken ct)
+    {
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT ev_version, ev_modified_at, ev_device_id
+            FROM real_estate
+            WHERE id = $id;
+            """;
+        cmd.Parameters.AddWithValue("$id", id.ToString());
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        if (!await reader.ReadAsync(ct).ConfigureAwait(false))
+            return null;
+
+        return new EntityVersion(
+            reader.GetInt64(0),
+            reader.IsDBNull(1) || reader.GetString(1).Length == 0
+                ? default
+                : DateTimeOffset.Parse(reader.GetString(1)),
+            reader.IsDBNull(2) ? string.Empty : reader.GetString(2));
+    }
 
     private static RealEstate MapRow(SqliteDataReader r)
     {

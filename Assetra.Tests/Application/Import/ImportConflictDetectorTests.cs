@@ -71,7 +71,8 @@ public class ImportConflictDetectorTests
     [Fact]
     public async Task FlagsRow_ForBankIncomeMatchingExistingIncome()
     {
-        var existing = NewIncomeTrade(new DateTime(2026, 4, 27), amount: 1500m);
+        var accountId = Guid.NewGuid();
+        var existing = NewIncomeTrade(new DateTime(2026, 4, 27), amount: 1500m, accountId);
         var repo = MockRepo(existing);
 
         var batch = new ImportBatch(
@@ -80,16 +81,56 @@ public class ImportConflictDetectorTests
             new[] { new ImportPreviewRow(1, new DateOnly(2026, 4, 27), 1500m, "薪資", "四月") },
             Array.Empty<ImportConflict>());
 
-        var result = await new ImportConflictDetector(repo.Object).DetectAsync(batch);
+        var result = await new ImportConflictDetector(repo.Object)
+            .DetectAsync(batch, new ImportApplyOptions(CashAccountId: accountId));
 
         Assert.Single(result.Conflicts);
         Assert.Equal(existing.Id, result.Conflicts[0].ExistingTradeId);
     }
 
+    [Fact]
+    public async Task NoConflict_ForBankSameDateAmount_WhenDirectionDiffers()
+    {
+        var accountId = Guid.NewGuid();
+        var existing = NewIncomeTrade(new DateTime(2026, 4, 27), amount: 1500m, accountId);
+        var repo = MockRepo(existing);
+
+        var batch = new ImportBatch(
+            Guid.NewGuid(), "statement.csv", ImportFileType.Csv, ImportFormat.CathayUnitedBank,
+            DateTimeOffset.UtcNow,
+            new[] { new ImportPreviewRow(1, new DateOnly(2026, 4, 27), -1500m, "房租", null) },
+            Array.Empty<ImportConflict>());
+
+        var result = await new ImportConflictDetector(repo.Object)
+            .DetectAsync(batch, new ImportApplyOptions(CashAccountId: accountId));
+
+        Assert.Empty(result.Conflicts);
+    }
+
+    [Fact]
+    public async Task NoConflict_ForBankSameDateAmount_WhenCashAccountDiffers()
+    {
+        var existingAccountId = Guid.NewGuid();
+        var importAccountId = Guid.NewGuid();
+        var existing = NewIncomeTrade(new DateTime(2026, 4, 27), amount: 1500m, existingAccountId);
+        var repo = MockRepo(existing);
+
+        var batch = new ImportBatch(
+            Guid.NewGuid(), "statement.csv", ImportFileType.Csv, ImportFormat.CathayUnitedBank,
+            DateTimeOffset.UtcNow,
+            new[] { new ImportPreviewRow(1, new DateOnly(2026, 4, 27), 1500m, "薪資", null) },
+            Array.Empty<ImportConflict>());
+
+        var result = await new ImportConflictDetector(repo.Object)
+            .DetectAsync(batch, new ImportApplyOptions(CashAccountId: importAccountId));
+
+        Assert.Empty(result.Conflicts);
+    }
+
     private static Mock<Assetra.Core.Interfaces.ITradeRepository> MockRepo(params Trade[] existing)
     {
         var mock = new Mock<Assetra.Core.Interfaces.ITradeRepository>();
-        mock.Setup(r => r.GetAllAsync()).ReturnsAsync(existing);
+        mock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(existing);
         return mock;
     }
 
@@ -97,9 +138,9 @@ public class ImportConflictDetectorTests
         new(Guid.NewGuid(), symbol, "TWSE", symbol, TradeType.Buy, date,
             price, qty, null, null);
 
-    private static Trade NewIncomeTrade(DateTime date, decimal amount) =>
+    private static Trade NewIncomeTrade(DateTime date, decimal amount, Guid? cashAccountId = null) =>
         new(Guid.NewGuid(), string.Empty, string.Empty, string.Empty, TradeType.Income, date,
-            0m, 1, null, null, CashAmount: amount);
+            0m, 1, null, null, CashAmount: amount, CashAccountId: cashAccountId);
 
     private static ImportBatch NewBatch(params ImportPreviewRow[] rows) =>
         new(Guid.NewGuid(), "trades.csv", ImportFileType.Csv, ImportFormat.YuantaSecurities,

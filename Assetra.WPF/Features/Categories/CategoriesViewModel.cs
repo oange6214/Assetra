@@ -291,6 +291,7 @@ public partial class CategoriesViewModel : ObservableObject
 
         await _repository.UpdateAsync(row.ToModel()).ConfigureAwait(true);
         RefreshRuleDisplaysFor(row.Id);
+        RefreshBudgetDisplaysFor(row.Id);
         RefreshAvailableCategories();
         _snackbar.Success(string.Format(
             GetString("Categories.Toast.Updated", "已更新分類「{0}」"), row.Name));
@@ -300,6 +301,12 @@ public partial class CategoriesViewModel : ObservableObject
     private async Task ToggleArchiveAsync(CategoryRowViewModel row)
     {
         if (row is null) return;
+        if (row.IsArchived && HasActiveDuplicateName(row.Id, row.Kind, row.Name))
+        {
+            _snackbar.Warning(GetString("Categories.Error.NameDuplicate", "已存在同名分類"));
+            return;
+        }
+
         row.IsArchived = !row.IsArchived;
         await _repository.UpdateAsync(row.ToModel()).ConfigureAwait(true);
         ExpenseView.Refresh();
@@ -451,6 +458,18 @@ public partial class CategoriesViewModel : ObservableObject
         foreach (var r in Rules.Where(r => r.CategoryId == categoryId))
             r.CategoryDisplay = LookupCategoryDisplay(categoryId);
     }
+
+    private void RefreshBudgetDisplaysFor(Guid categoryId)
+    {
+        foreach (var b in Budgets.Where(b => b.CategoryId == categoryId))
+            b.CategoryDisplay = LookupBudgetCategoryDisplay(categoryId);
+    }
+
+    private bool HasActiveDuplicateName(Guid id, CategoryKind kind, string name) =>
+        Categories.Any(c => c.Id != id
+                         && !c.IsArchived
+                         && c.Kind == kind
+                         && string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
 
     // ── Budgets ──────────────────────────────────────────────────────────
 

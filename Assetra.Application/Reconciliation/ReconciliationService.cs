@@ -113,7 +113,7 @@ public sealed class ReconciliationService : IReconciliationService
         switch (resolution)
         {
             case ReconciliationDiffResolution.Deleted when diff.TradeId is { } tid:
-                await _trades.RemoveAsync(tid).ConfigureAwait(false);
+                await _trades.RemoveAsync(tid, ct).ConfigureAwait(false);
                 break;
 
             case ReconciliationDiffResolution.Created when diff.StatementRow is { } row:
@@ -130,8 +130,8 @@ public sealed class ReconciliationService : IReconciliationService
                 var existing = await _trades.GetByIdAsync(existingTid, ct).ConfigureAwait(false);
                 if (existing is null)
                     throw new InvalidOperationException($"Trade {existingTid} not found.");
-                var updated = existing with { CashAmount = srow.Amount };
-                await _trades.UpdateAsync(updated).ConfigureAwait(false);
+                var updated = existing with { CashAmount = StatementCashAmountForTrade(existing, srow.Amount) };
+                await _trades.UpdateAsync(updated, ct).ConfigureAwait(false);
                 break;
         }
 
@@ -158,7 +158,7 @@ public sealed class ReconciliationService : IReconciliationService
     private async Task<IReadOnlyList<Trade>> LoadTradesAsync(
         Guid accountId, DateOnly periodStart, DateOnly periodEnd, CancellationToken ct)
     {
-        var all = await _trades.GetByCashAccountAsync(accountId).ConfigureAwait(false);
+        var all = await _trades.GetByCashAccountAsync(accountId, ct).ConfigureAwait(false);
         var startDt = periodStart.ToDateTime(TimeOnly.MinValue);
         var endDt = periodEnd.ToDateTime(TimeOnly.MaxValue);
         return all.Where(t => t.TradeDate >= startDt && t.TradeDate <= endDt).ToList();
@@ -232,6 +232,14 @@ public sealed class ReconciliationService : IReconciliationService
             Resolution: ReconciliationDiffResolution.Pending,
             ResolvedAt: null,
             Note: null);
+
+    private static decimal StatementCashAmountForTrade(Trade trade, decimal statementAmount)
+        => trade.Type switch
+        {
+            TradeType.Withdrawal or TradeType.Transfer or TradeType.LoanRepay or TradeType.CreditCardPayment
+                => Math.Abs(statementAmount),
+            _ => statementAmount,
+        };
 
     /// <summary>
     /// Kind × Resolution 合法表：

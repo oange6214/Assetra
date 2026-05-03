@@ -85,6 +85,8 @@ public sealed partial class ReportsViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasUpcoming))]
     [NotifyPropertyChangedFor(nameof(OverBudgetCategories))]
     [NotifyPropertyChangedFor(nameof(Upcoming))]
+    [NotifyPropertyChangedFor(nameof(OverBudgetRows))]
+    [NotifyPropertyChangedFor(nameof(UpcomingRows))]
     private MonthEndReport? _report;
 
     public ReportsViewModel(
@@ -194,6 +196,7 @@ public sealed partial class ReportsViewModel : ObservableObject
         if (IsLoading) return;
         IsLoading = true;
         ErrorMessage = null;
+        ClearReportDetails();
         try
         {
             Report = await _service.BuildAsync(Year, Month).ConfigureAwait(true);
@@ -203,6 +206,7 @@ public sealed partial class ReportsViewModel : ObservableObject
         {
             ErrorMessage = ex.Message;
             Report = null;
+            ClearReportDetails();
         }
         finally
         {
@@ -221,6 +225,15 @@ public sealed partial class ReportsViewModel : ObservableObject
             CashFlowStatement = await _cashFlowService.GenerateAsync(period).ConfigureAwait(true);
         await LoadPerformanceAsync().ConfigureAwait(true);
         await LoadRiskAsync().ConfigureAwait(true);
+    }
+
+    private void ClearReportDetails()
+    {
+        IncomeStatement = null;
+        BalanceSheet = null;
+        CashFlowStatement = null;
+        Performance = null;
+        Risk = null;
     }
 
     private async Task LoadRiskAsync()

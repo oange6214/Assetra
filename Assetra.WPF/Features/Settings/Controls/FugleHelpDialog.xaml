@@ -48,15 +48,16 @@
                                 Text="{DynamicResource Settings.FugleHelp.Subtitle}"
                                 TextWrapping="Wrap" />
                         </StackPanel>
-                        <Button
+                        <ui:Button
                             Width="28"
                             Height="28"
                             HorizontalAlignment="Right"
                             Command="{Binding CloseFugleHelpCommand}"
                             DockPanel.Dock="Right"
-                            Style="{StaticResource BtnIcon}">
+                            Padding="0"
+                            Appearance="Transparent">
                             <ui:SymbolIcon Symbol="Dismiss24" FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}" />
-                        </Button>
+                        </ui:Button>
                     </DockPanel>
                 </Border>
 

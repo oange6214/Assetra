@@ -1,3 +1,4 @@
+using System.IO;
 using Moq;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Sync;
@@ -46,10 +47,10 @@ public class SettingsViewModelTests
         return new ConflictResolutionViewModel(queue, queue);
     }
 
-    private SettingsViewModel CreateVm() =>
+    private SettingsViewModel CreateVm(ISnackbarService? snackbar = null) =>
         new(_mockSettings.Object, _mockTheme.Object,
             _mockLocalization.Object, _mockCurrency.Object,
-            CreateSyncVm(), CreateConflictsVm());
+            CreateSyncVm(), CreateConflictsVm(), snackbar);
 
     [Fact]
     public void Constructor_DarkTheme_SetsIsDarkThemeTrue()
@@ -116,5 +117,47 @@ public class SettingsViewModelTests
             settings.QuoteProvider == "fugle"
             && settings.HistoryProvider == "fugle"
             && settings.FugleApiKey == "demo-key")), Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public async Task BaseCurrencyChanged_PersistsSetting()
+    {
+        var saved = new TaskCompletionSource<AppSettings>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _mockSettings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>()))
+            .Callback<AppSettings>(s => saved.TrySetResult(s))
+            .Returns(Task.CompletedTask);
+        var vm = CreateVm();
+
+        vm.BaseCurrency = "USD";
+
+        var settings = await saved.Task.WaitAsync(TimeSpan.FromSeconds(1));
+        Assert.Equal("USD", settings.BaseCurrency);
+    }
+
+    [Fact]
+    public async Task BaseCurrencyChanged_SaveFailureSetsStatusAndSnackbar()
+    {
+        _mockSettings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>()))
+            .ThrowsAsync(new IOException("disk full"));
+        var snackbar = new Mock<ISnackbarService>();
+        var vm = CreateVm(snackbar.Object);
+
+        vm.BaseCurrency = "USD";
+
+        await WaitForAsync(() => vm.DataSourceSaveStatus.Contains("disk full", StringComparison.Ordinal));
+        snackbar.Verify(s => s.Error(It.Is<string>(message => message.Contains("disk full"))), Times.Once);
+    }
+
+    private static async Task WaitForAsync(Func<bool> condition)
+    {
+        for (var i = 0; i < 50; i++)
+        {
+            if (condition())
+                return;
+
+            await Task.Delay(20);
+        }
+
+        Assert.True(condition());
     }
 }

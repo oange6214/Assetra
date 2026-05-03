@@ -30,16 +30,24 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     [ObservableProperty] private decimal _totalAssets;
     [ObservableProperty] private decimal _totalInvestments;
     [ObservableProperty] private decimal _totalLiabilities;
+    [ObservableProperty] private string _baseCurrency = "TWD";
 
-    public string TotalNetWorthDisplay => $"NT${TotalNetWorth:N0}";
-    public string TotalAssetsDisplay => $"NT${TotalAssets:N0}";
-    public string TotalInvestmentsDisplay => $"NT${TotalInvestments:N0}";
-    public string TotalLiabilitiesDisplay => $"NT${TotalLiabilities:N0}";
+    public string TotalNetWorthDisplay => MoneyFormatter.Format(TotalNetWorth, BaseCurrency);
+    public string TotalAssetsDisplay => MoneyFormatter.Format(TotalAssets, BaseCurrency);
+    public string TotalInvestmentsDisplay => MoneyFormatter.Format(TotalInvestments, BaseCurrency);
+    public string TotalLiabilitiesDisplay => MoneyFormatter.Format(TotalLiabilities, BaseCurrency);
 
     partial void OnTotalNetWorthChanged(decimal _) => OnPropertyChanged(nameof(TotalNetWorthDisplay));
     partial void OnTotalAssetsChanged(decimal _) => OnPropertyChanged(nameof(TotalAssetsDisplay));
     partial void OnTotalInvestmentsChanged(decimal _) => OnPropertyChanged(nameof(TotalInvestmentsDisplay));
     partial void OnTotalLiabilitiesChanged(decimal _) => OnPropertyChanged(nameof(TotalLiabilitiesDisplay));
+    partial void OnBaseCurrencyChanged(string _)
+    {
+        OnPropertyChanged(nameof(TotalNetWorthDisplay));
+        OnPropertyChanged(nameof(TotalAssetsDisplay));
+        OnPropertyChanged(nameof(TotalInvestmentsDisplay));
+        OnPropertyChanged(nameof(TotalLiabilitiesDisplay));
+    }
 
     // ── Accordion collections ─────────────────────────────────────────────
 
@@ -112,6 +120,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
             foreach (var g in result.LiabilityGroups)
                 LiabGroups.Add(ToGroupVm(g));
 
+            BaseCurrency = result.BaseCurrency;
             TotalAssets = result.TotalAssets;
             TotalInvestments = result.TotalInvestments;
             TotalLiabilities = result.TotalLiabilities;
@@ -121,7 +130,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
     private static AssetGroupVm ToGroupVm(FinancialOverviewGroup group)
     {
-        var vm = new AssetGroupVm { Icon = group.Icon, Name = group.Name };
+        var vm = new AssetGroupVm { Icon = group.Icon, Name = group.Name, Currency = group.Currency };
         foreach (var item in group.Items)
             vm.Items.Add(new AssetItemVm { Id = item.Id, Name = item.Name, Currency = item.Currency, CurrentValue = item.CurrentValue });
         vm.Subtotal = group.Subtotal;

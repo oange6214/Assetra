@@ -68,6 +68,8 @@ public partial class SyncSettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool _cachePassphraseForBackground;
 
+    public event Action? PassphraseCleared;
+
     public SyncSettingsViewModel(
         IAppSettingsService settings,
         SyncCoordinator coordinator,
@@ -105,7 +107,15 @@ public partial class SyncSettingsViewModel : ObservableObject
             SyncIntervalMinutes = Math.Max(0, IntervalMinutes),
         };
         await _settings.SaveAsync(s).ConfigureAwait(false);
+        if (!CachePassphraseForBackground)
+            _passphraseCache.Clear();
         StatusMessage = Text("Settings.Sync.Status.Saved", "Saved.");
+    }
+
+    partial void OnCachePassphraseForBackgroundChanged(bool value)
+    {
+        if (!value)
+            _passphraseCache.Clear();
     }
 
     private bool CanSyncNow() => !IsSyncing && !string.IsNullOrEmpty(Passphrase);
@@ -148,6 +158,7 @@ public partial class SyncSettingsViewModel : ObservableObject
             IsSyncing = false;
             // Wipe passphrase from VM — cache (if user opted in) holds the only remaining copy
             Passphrase = string.Empty;
+            PassphraseCleared?.Invoke();
         }
     }
 

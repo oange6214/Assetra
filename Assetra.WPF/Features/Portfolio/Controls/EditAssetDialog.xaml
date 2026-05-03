@@ -39,15 +39,16 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="0,0,0,1">
                     <DockPanel>
-                        <Button
+                        <ui:Button
                             Width="28"
                             Height="28"
                             HorizontalAlignment="Right"
                             Command="{Binding CloseEditAssetCommand}"
                             DockPanel.Dock="Right"
-                            Style="{StaticResource BtnIcon}">
+                            Padding="0"
+                            Appearance="Transparent">
                             <ui:SymbolIcon Symbol="Dismiss24" FontSize="12" Foreground="{DynamicResource AppTextMuted}" />
-                        </Button>
+                        </ui:Button>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock
                                 FontSize="{StaticResource FontSizeSm}"

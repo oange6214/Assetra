@@ -5,6 +5,8 @@ using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Assetra.WPF.Features.Fire;
 
 namespace Assetra.WPF.Features.Goals;
 
@@ -70,6 +72,9 @@ public sealed partial class GoalsViewModel : ObservableObject
             _currency.CurrencyChanged += OnCurrencyChanged;
         if (_localization is not null)
             _localization.LanguageChanged += OnLanguageChanged;
+        WeakReferenceMessenger.Default.Register<FireGoalSavedMessage>(
+            this,
+            static (recipient, message) => ((GoalsViewModel)recipient).UpsertGoal(message.Value));
     }
 
     [RelayCommand]
@@ -110,7 +115,11 @@ public sealed partial class GoalsViewModel : ObservableObject
             AddError = L("Goals.Error.TargetAmountInvalid", "Target amount must be greater than 0");
             return;
         }
-        TryParseAmount(AddCurrentAmount, out var current);
+        if (!TryParseAmount(AddCurrentAmount, out var current) || current < 0m)
+        {
+            AddError = L("Goals.Error.CurrentAmountInvalid", "Current amount must be 0 or greater");
+            return;
+        }
 
         var goal = new FinancialGoal(
             EditingId ?? Guid.NewGuid(),
@@ -193,6 +202,20 @@ public sealed partial class GoalsViewModel : ObservableObject
         AddDeadline = null;
         AddNotes = string.Empty;
         AddError = null;
+    }
+
+    private void UpsertGoal(FinancialGoal goal)
+    {
+        if (!IsLoaded)
+            return;
+
+        var existing = Goals.FirstOrDefault(g => g.Id == goal.Id);
+        if (existing is not null)
+        {
+            existing.Goal = goal;
+            return;
+        }
+        Goals.Add(new GoalRowViewModel(goal, _currency, _localization));
     }
 
     private static bool TryParseAmount(string? input, out decimal value)

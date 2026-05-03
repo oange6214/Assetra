@@ -6,7 +6,7 @@ namespace Assetra.Core.DomainServices.Reconciliation;
 
 /// <summary>
 /// 預設對帳比對器：日期 ± 1 天、金額 abs 容忍 ± 0.005。
-/// 交易的 SignedAmount 取 <see cref="Trade.CashAmount"/>，若為 <c>null</c> 則退回 <c>Price × Quantity</c>。
+/// 交易的 SignedAmount 依交易類型投影成現金流入/流出方向。
 /// </summary>
 public sealed class DefaultReconciliationMatcher : IReconciliationMatcher
 {
@@ -33,7 +33,24 @@ public sealed class DefaultReconciliationMatcher : IReconciliationMatcher
     public decimal SignedAmount(Trade trade)
     {
         ArgumentNullException.ThrowIfNull(trade);
-        return trade.CashAmount ?? trade.Price * trade.Quantity;
+        return trade.Type switch
+        {
+            TradeType.Income or TradeType.CashDividend or TradeType.Deposit
+                => trade.CashAmount ?? 0m,
+            TradeType.Withdrawal or TradeType.CreditCardPayment
+                => -(trade.CashAmount ?? 0m),
+            TradeType.Transfer
+                => -(trade.CashAmount ?? 0m),
+            TradeType.LoanBorrow
+                => (trade.CashAmount ?? 0m) - (trade.Commission ?? 0m),
+            TradeType.LoanRepay
+                => -(trade.CashAmount ?? ((trade.Principal ?? 0m) + (trade.InterestPaid ?? 0m))),
+            TradeType.Buy
+                => -(trade.Price * trade.Quantity + (trade.Commission ?? 0m)),
+            TradeType.Sell
+                => trade.Price * trade.Quantity - (trade.Commission ?? 0m),
+            _ => 0m,
+        };
     }
 
     public DateOnly DateOf(Trade trade)

@@ -41,7 +41,7 @@ public partial class StatusBarViewModel : ObservableObject, IDisposable
 
         UpdateStatus(DateTime.Now);
 
-        localization.LanguageChanged += (_, _) => UpdateStatus(DateTime.Now);
+        localization.LanguageChanged += OnLanguageChanged;
 
         // Tick every second to refresh clock + market status.
         Observable.Interval(TimeSpan.FromSeconds(1), uiScheduler)
@@ -58,6 +58,9 @@ public partial class StatusBarViewModel : ObservableObject, IDisposable
             : _localization.Get("StatusBar.MarketClosed", "休市");
     }
 
+    private void OnLanguageChanged(object? sender, EventArgs e) =>
+        UpdateStatus(DateTime.Now);
+
     private static bool IsTwseOpen(DateTime now)
     {
         if (now.DayOfWeek == DayOfWeek.Saturday || now.DayOfWeek == DayOfWeek.Sunday)
@@ -66,5 +69,9 @@ public partial class StatusBarViewModel : ObservableObject, IDisposable
         return tod >= MarketOpen && tod <= MarketClose;
     }
 
-    public void Dispose() => _disposables.Dispose();
+    public void Dispose()
+    {
+        _localization.LanguageChanged -= OnLanguageChanged;
+        _disposables.Dispose();
+    }
 }

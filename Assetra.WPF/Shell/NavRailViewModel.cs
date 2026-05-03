@@ -26,6 +26,41 @@ public partial class NavRailViewModel : ObservableObject
         set => NavigateTo(value);
     }
 
+    public NavSection SelectedCashflowTab
+    {
+        get => _activeSection switch
+        {
+            NavSection.Recurring => NavSection.Recurring,
+            _ => NavSection.Categories,
+        };
+        set => NavigateTo(value);
+    }
+
+    public NavSection SelectedInsightsTab
+    {
+        get => _activeSection switch
+        {
+            NavSection.Trends => NavSection.Trends,
+            NavSection.Reports => NavSection.Reports,
+            NavSection.Fire => NavSection.Fire,
+            NavSection.MonteCarlo => NavSection.MonteCarlo,
+            _ => NavSection.Goals,
+        };
+        set => NavigateTo(value);
+    }
+
+    public NavSection SelectedMultiAssetTab
+    {
+        get => _activeSection switch
+        {
+            NavSection.Insurance => NavSection.Insurance,
+            NavSection.Retirement => NavSection.Retirement,
+            NavSection.PhysicalAsset => NavSection.PhysicalAsset,
+            _ => NavSection.RealEstate,
+        };
+        set => NavigateTo(value);
+    }
+
     public bool CanGoBack    => _backStack.Count > 0;
     public bool CanGoForward => _forwardStack.Count > 0;
 
@@ -35,8 +70,14 @@ public partial class NavRailViewModel : ObservableObject
         if (!_backStack.TryPop(out var prev)) return;
         _forwardStack.Push(_activeSection);
         _isHistoryNavigation = true;
-        NavigateTo(prev);
-        _isHistoryNavigation = false;
+        try
+        {
+            NavigateTo(prev);
+        }
+        finally
+        {
+            _isHistoryNavigation = false;
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanGoForward))]
@@ -45,8 +86,14 @@ public partial class NavRailViewModel : ObservableObject
         if (!_forwardStack.TryPop(out var next)) return;
         _backStack.Push(_activeSection);
         _isHistoryNavigation = true;
-        NavigateTo(next);
-        _isHistoryNavigation = false;
+        try
+        {
+            NavigateTo(next);
+        }
+        finally
+        {
+            _isHistoryNavigation = false;
+        }
     }
 
     /// <summary>
@@ -65,6 +112,13 @@ public partial class NavRailViewModel : ObservableObject
 
         SetProperty(ref _activeSection, section, nameof(ActiveSection));
         NotifyActiveSectionDependents();
+        NotifyHistoryStateChanged();
+    }
+
+    private void NotifyHistoryStateChanged()
+    {
+        OnPropertyChanged(nameof(CanGoBack));
+        OnPropertyChanged(nameof(CanGoForward));
         GoBackCommand.NotifyCanExecuteChanged();
         GoForwardCommand.NotifyCanExecuteChanged();
     }
@@ -72,6 +126,9 @@ public partial class NavRailViewModel : ObservableObject
     private void NotifyActiveSectionDependents()
     {
         OnPropertyChanged(nameof(SelectedRailSection));
+        OnPropertyChanged(nameof(SelectedCashflowTab));
+        OnPropertyChanged(nameof(SelectedInsightsTab));
+        OnPropertyChanged(nameof(SelectedMultiAssetTab));
         OnPropertyChanged(nameof(IsPortfolioActive));
         OnPropertyChanged(nameof(IsFinancialOverviewActive));
         OnPropertyChanged(nameof(IsCashflowActive));

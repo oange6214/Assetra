@@ -33,6 +33,7 @@ public partial class ReconciliationViewModel : ObservableObject
     private readonly ImportParserFactory? _parserFactory;
     private readonly ILocalizationService? _localization;
     private readonly ICurrencyService? _currency;
+    private int _reloadVersion;
 
     public ObservableCollection<ReconciliationSession> Sessions { get; } = new();
     public ObservableCollection<ReconciliationDiffRowViewModel> Diffs { get; } = new();
@@ -188,40 +189,57 @@ public partial class ReconciliationViewModel : ObservableObject
 
     partial void OnSelectedSessionChanged(ReconciliationSession? value)
     {
-        _ = ReloadDiffsAsync();
+        _ = ReloadDiffsAsync(value, ++_reloadVersion);
     }
 
-    private async Task ReloadDiffsAsync()
+    private Task ReloadDiffsAsync()
+        => ReloadDiffsAsync(SelectedSession, ++_reloadVersion);
+
+    private async Task ReloadDiffsAsync(ReconciliationSession? session, int version)
     {
-        Diffs.Clear();
-        if (SelectedSession is null)
+        if (session is null)
         {
+            if (version != _reloadVersion)
+                return;
+            Diffs.Clear();
             BalancePanelDisplay = string.Empty;
             OnPropertyChanged(nameof(SummaryDisplay));
             return;
         }
-        var diffs = await _sessions.GetDiffsAsync(SelectedSession.Id).ConfigureAwait(true);
+
+        var diffs = await _sessions.GetDiffsAsync(session.Id).ConfigureAwait(true);
+        var tradeLookup = await LoadTradeLookupAsync(session).ConfigureAwait(true);
+        if (version != _reloadVersion || SelectedSession?.Id != session.Id)
+            return;
+
+        Diffs.Clear();
         foreach (var d in diffs)
-            Diffs.Add(new ReconciliationDiffRowViewModel(d));
+        {
+            tradeLookup.TryGetValue(d.TradeId ?? Guid.Empty, out var trade);
+            var tradeAmount = trade is null ? (decimal?)null : _matcher.SignedAmount(trade);
+            Diffs.Add(new ReconciliationDiffRowViewModel(d, trade, tradeAmount));
+        }
         OnPropertyChanged(nameof(SummaryDisplay));
-        await RecomputeBalancePanelAsync().ConfigureAwait(true);
+        await RecomputeBalancePanelAsync(session, version).ConfigureAwait(true);
     }
 
-    private async Task RecomputeBalancePanelAsync()
+    private Task RecomputeBalancePanelAsync()
+        => RecomputeBalancePanelAsync(SelectedSession, _reloadVersion);
+
+    private async Task RecomputeBalancePanelAsync(ReconciliationSession? session, int version)
     {
-        if (SelectedSession is null) { BalancePanelDisplay = string.Empty; return; }
+        if (session is null) { BalancePanelDisplay = string.Empty; return; }
         try
         {
-            var rows = await _sessions.GetStatementRowsAsync(SelectedSession.Id).ConfigureAwait(true);
-            var trades = (await _trades.GetByCashAccountAsync(SelectedSession.AccountId).ConfigureAwait(true))
-                .Where(t => DateOnly.FromDateTime(t.TradeDate) >= SelectedSession.PeriodStart
-                         && DateOnly.FromDateTime(t.TradeDate) <= SelectedSession.PeriodEnd)
-                .ToList();
+            var rows = await _sessions.GetStatementRowsAsync(session.Id).ConfigureAwait(true);
+            var trades = await LoadTradesForSessionAsync(session).ConfigureAwait(true);
+            if (version != _reloadVersion || SelectedSession?.Id != session.Id)
+                return;
 
             var stmtSum = rows.Sum(r => _matcher.SignedAmount(r));
             var tradeSum = trades.Sum(t => _matcher.SignedAmount(t));
             var delta = stmtSum - tradeSum;
-            var endingDisplay = SelectedSession.StatementEndingBalance is { } eb
+            var endingDisplay = session.StatementEndingBalance is { } eb
                 ? FormatAmount(eb)
                 : "—";
 
@@ -239,6 +257,21 @@ public partial class ReconciliationViewModel : ObservableObject
             BalancePanelDisplay = ex.Message;
         }
     }
+
+    private async Task<IReadOnlyList<Trade>> LoadTradesForSessionAsync(ReconciliationSession session)
+    {
+        var start = session.PeriodStart;
+        var end = session.PeriodEnd;
+        return (await _trades.GetByCashAccountAsync(session.AccountId).ConfigureAwait(true))
+            .Where(t => DateOnly.FromDateTime(t.TradeDate) >= start
+                     && DateOnly.FromDateTime(t.TradeDate) <= end)
+            .ToList();
+    }
+
+    private async Task<Dictionary<Guid, Trade>> LoadTradeLookupAsync(ReconciliationSession session)
+        => (await LoadTradesForSessionAsync(session).ConfigureAwait(true))
+            .GroupBy(t => t.Id)
+            .ToDictionary(g => g.Key, g => g.First());
 
     [RelayCommand]
     public async Task RecomputeAsync()
@@ -417,6 +450,14 @@ public partial class ReconciliationViewModel : ObservableObject
                 var parser = _parserFactory.Create(format ?? ImportFormat.Generic, fileType.Value);
                 await using var parseStream = File.OpenRead(UploadedFilePath);
                 rows = await parser.ParseAsync(parseStream).ConfigureAwait(true);
+            }
+
+            if (rows.Count == 0)
+            {
+                StatusMessage = GetString(
+                    "Reconciliation.Error.NoStatementRows",
+                    "No statement rows are available for this reconciliation source.");
+                return;
             }
 
             var session = await _service.CreateAsync(

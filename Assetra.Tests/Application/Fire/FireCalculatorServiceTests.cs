@@ -75,4 +75,27 @@ public class FireCalculatorServiceTests
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             _svc.Calculate(new FireInputs(0m, 100m, 0m, 0.05m, 0m)));
     }
+
+    [Theory]
+    [InlineData(0, 0, 0, 0.05, 0.04)]
+    [InlineData(0, -100, 0, 0.05, 0.04)]
+    [InlineData(-1, 100, 0, 0.05, 0.04)]
+    [InlineData(0, 100, -1, 0.05, 0.04)]
+    [InlineData(0, 100, 0, -1, 0.04)]
+    [InlineData(0, 100, 0, 0.05, 1.01)]
+    public void Calculate_InvalidDomainInputs_Throw(
+        double currentNetWorth,
+        double annualExpenses,
+        double annualSavings,
+        double expectedAnnualReturn,
+        double withdrawalRate)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            _svc.Calculate(new FireInputs(
+                (decimal)currentNetWorth,
+                (decimal)annualExpenses,
+                (decimal)annualSavings,
+                (decimal)expectedAnnualReturn,
+                (decimal)withdrawalRate)));
+    }
 }

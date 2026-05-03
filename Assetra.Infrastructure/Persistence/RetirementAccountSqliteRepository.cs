@@ -10,10 +10,25 @@ namespace Assetra.Infrastructure.Persistence;
 public sealed class RetirementAccountSqliteRepository : IRetirementAccountRepository, IRetirementAccountSyncStore
 {
     private readonly string _connectionString;
+    private readonly Func<string> _deviceIdProvider;
+    private readonly TimeProvider _time;
 
     public RetirementAccountSqliteRepository(string dbPath)
+        : this(dbPath, "local")
     {
+    }
+
+    public RetirementAccountSqliteRepository(string dbPath, string deviceId = "local", TimeProvider? time = null)
+        : this(dbPath, () => deviceId, time)
+    {
+    }
+
+    public RetirementAccountSqliteRepository(string dbPath, Func<string> deviceIdProvider, TimeProvider? time = null)
+    {
+        ArgumentNullException.ThrowIfNull(deviceIdProvider);
         _connectionString = $"Data Source={dbPath}";
+        _deviceIdProvider = deviceIdProvider;
+        _time = time ?? TimeProvider.System;
         RetirementSchemaMigrator.EnsureInitialized(_connectionString);
     }
 
@@ -78,8 +93,9 @@ public sealed class RetirementAccountSqliteRepository : IRetirementAccountReposi
                  $ev_version, $ev_modified_at, $ev_device_id,
                  0, 1, $now, $now);
             """;
-        BindParams(cmd, entity);
-        cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
+        var stamped = StampLocalMutation(entity);
+        BindParams(cmd, stamped);
+        cmd.Parameters.AddWithValue("$now", stamped.Version.LastModifiedAt.UtcDateTime.ToString("o"));
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -109,8 +125,9 @@ public sealed class RetirementAccountSqliteRepository : IRetirementAccountReposi
                 updated_at                 = $now
             WHERE id = $id;
             """;
-        BindParams(cmd, entity);
-        cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
+        var stamped = StampLocalMutation(entity);
+        BindParams(cmd, stamped);
+        cmd.Parameters.AddWithValue("$now", stamped.Version.LastModifiedAt.UtcDateTime.ToString("o"));
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -124,11 +141,16 @@ public sealed class RetirementAccountSqliteRepository : IRetirementAccountReposi
                 is_deleted      = 1,
                 is_pending_push = 1,
                 ev_version      = ev_version + 1,
+                ev_modified_at  = $modified_at,
+                ev_device_id    = $device,
                 updated_at      = $now
             WHERE id = $id;
             """;
         cmd.Parameters.AddWithValue("$id", id.ToString());
-        cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
+        var now = _time.GetUtcNow();
+        cmd.Parameters.AddWithValue("$modified_at", now.ToString("o"));
+        cmd.Parameters.AddWithValue("$device", CurrentDeviceId());
+        cmd.Parameters.AddWithValue("$now", now.UtcDateTime.ToString("o"));
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -329,5 +351,24 @@ public sealed class RetirementAccountSqliteRepository : IRetirementAccountReposi
         cmd.Parameters.AddWithValue("$ev_modified_at", e.Version.LastModifiedAt == default
             ? string.Empty : e.Version.LastModifiedAt.ToString("o"));
         cmd.Parameters.AddWithValue("$ev_device_id", e.Version.LastModifiedByDevice);
+    }
+
+    private RetirementAccount StampLocalMutation(RetirementAccount entity)
+    {
+        var now = _time.GetUtcNow();
+        return entity with
+        {
+            Version = entity.Version with
+            {
+                LastModifiedAt = now,
+                LastModifiedByDevice = CurrentDeviceId(),
+            },
+        };
+    }
+
+    private string CurrentDeviceId()
+    {
+        var device = _deviceIdProvider();
+        return string.IsNullOrWhiteSpace(device) ? "local" : device;
     }
 }

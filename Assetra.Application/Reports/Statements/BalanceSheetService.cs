@@ -65,6 +65,18 @@ public sealed class BalanceSheetService : IBalanceSheetService
         var portfolioCurrencies = portfolioSnapshot is null
             ? Enumerable.Empty<string>()
             : new[] { portfolioSnapshot.Currency };
+        var realEstateProperties = _realEstate is null
+            ? Array.Empty<RealEstate>()
+            : await _realEstate.GetAllAsync(ct).ConfigureAwait(false);
+        var insurancePolicies = _insurancePolicies is null
+            ? Array.Empty<InsurancePolicy>()
+            : await _insurancePolicies.GetAllAsync(ct).ConfigureAwait(false);
+        var retirementAccounts = _retirementAccounts is null
+            ? Array.Empty<RetirementAccount>()
+            : await _retirementAccounts.GetAllAsync(ct).ConfigureAwait(false);
+        var physicalAssets = _physicalAssets is null
+            ? Array.Empty<PhysicalAsset>()
+            : await _physicalAssets.GetAllAsync(ct).ConfigureAwait(false);
 
         // Pre-resolve FX factor (foreign 1 unit → base) once per distinct currency.
         // Avoids N+1 ConvertAsync calls when many accounts share a currency.
@@ -73,7 +85,19 @@ public sealed class BalanceSheetService : IBalanceSheetService
                 .Concat(liabilityAssets)
                 .Where(a => a.IsActive)
                 .Select(a => a.Currency)
-                .Concat(portfolioCurrencies),
+                .Concat(portfolioCurrencies)
+                .Concat(realEstateProperties
+                    .Where(p => p.Status == RealEstateStatus.Active && p.PurchaseDate <= asOf)
+                    .Select(p => p.Currency))
+                .Concat(insurancePolicies
+                    .Where(p => p.Status == InsurancePolicyStatus.Active)
+                    .Select(p => p.Currency))
+                .Concat(retirementAccounts
+                    .Where(a => a.Status == RetirementAccountStatus.Active)
+                    .Select(a => a.Currency))
+                .Concat(physicalAssets
+                    .Where(a => a.Status == PhysicalAssetStatus.Active)
+                    .Select(a => a.Currency)),
             asOf, baseCurrency, ct).ConfigureAwait(false);
 
         var assetRows = new List<StatementRow>();
@@ -93,10 +117,10 @@ public sealed class BalanceSheetService : IBalanceSheetService
                 "Investments"));
         }
 
-        await AppendRealEstateRowsAsync(assetRows, asOf, baseCurrency, fxFactors, ct).ConfigureAwait(false);
-        await AppendInsuranceRowsAsync(assetRows, baseCurrency, fxFactors, ct).ConfigureAwait(false);
-        await AppendRetirementRowsAsync(assetRows, baseCurrency, fxFactors, ct).ConfigureAwait(false);
-        await AppendPhysicalAssetRowsAsync(assetRows, baseCurrency, fxFactors, ct).ConfigureAwait(false);
+        AppendRealEstateRows(assetRows, realEstateProperties, asOf, baseCurrency, fxFactors);
+        AppendInsuranceRows(assetRows, insurancePolicies, baseCurrency, fxFactors);
+        AppendRetirementRows(assetRows, retirementAccounts, baseCurrency, fxFactors);
+        AppendPhysicalAssetRows(assetRows, physicalAssets, baseCurrency, fxFactors);
 
         var assetTotal = assetRows.Sum(r => r.Amount);
 
@@ -116,16 +140,14 @@ public sealed class BalanceSheetService : IBalanceSheetService
             NetWorth: assetTotal - liabilityTotal);
     }
 
-    private async Task AppendRealEstateRowsAsync(
+    private void AppendRealEstateRows(
         List<StatementRow> rows,
+        IReadOnlyList<RealEstate> properties,
         DateOnly asOf,
         string? baseCurrency,
-        Dictionary<string, decimal?> fxFactors,
-        CancellationToken ct)
+        Dictionary<string, decimal?> fxFactors)
     {
-        if (_realEstate is null) return;
-        var all = await _realEstate.GetAllAsync(ct).ConfigureAwait(false);
-        foreach (var prop in all.Where(p => p.Status == RealEstateStatus.Active))
+        foreach (var prop in properties.Where(p => p.Status == RealEstateStatus.Active && p.PurchaseDate <= asOf))
         {
             var equity = prop.Equity;
             if (equity == 0m) continue;
@@ -136,15 +158,13 @@ public sealed class BalanceSheetService : IBalanceSheetService
         }
     }
 
-    private async Task AppendRetirementRowsAsync(
+    private void AppendRetirementRows(
         List<StatementRow> rows,
+        IReadOnlyList<RetirementAccount> accounts,
         string? baseCurrency,
-        Dictionary<string, decimal?> fxFactors,
-        CancellationToken ct)
+        Dictionary<string, decimal?> fxFactors)
     {
-        if (_retirementAccounts is null) return;
-        var all = await _retirementAccounts.GetAllAsync(ct).ConfigureAwait(false);
-        foreach (var account in all.Where(a => a.Status == RetirementAccountStatus.Active))
+        foreach (var account in accounts.Where(a => a.Status == RetirementAccountStatus.Active))
         {
             if (account.Balance == 0m) continue;
             rows.Add(new StatementRow(
@@ -154,15 +174,13 @@ public sealed class BalanceSheetService : IBalanceSheetService
         }
     }
 
-    private async Task AppendPhysicalAssetRowsAsync(
+    private void AppendPhysicalAssetRows(
         List<StatementRow> rows,
+        IReadOnlyList<PhysicalAsset> assets,
         string? baseCurrency,
-        Dictionary<string, decimal?> fxFactors,
-        CancellationToken ct)
+        Dictionary<string, decimal?> fxFactors)
     {
-        if (_physicalAssets is null) return;
-        var all = await _physicalAssets.GetAllAsync(ct).ConfigureAwait(false);
-        foreach (var asset in all.Where(a => a.Status == PhysicalAssetStatus.Active))
+        foreach (var asset in assets.Where(a => a.Status == PhysicalAssetStatus.Active))
         {
             if (asset.CurrentValue == 0m) continue;
             rows.Add(new StatementRow(
@@ -172,15 +190,13 @@ public sealed class BalanceSheetService : IBalanceSheetService
         }
     }
 
-    private async Task AppendInsuranceRowsAsync(
+    private void AppendInsuranceRows(
         List<StatementRow> rows,
+        IReadOnlyList<InsurancePolicy> policies,
         string? baseCurrency,
-        Dictionary<string, decimal?> fxFactors,
-        CancellationToken ct)
+        Dictionary<string, decimal?> fxFactors)
     {
-        if (_insurancePolicies is null) return;
-        var all = await _insurancePolicies.GetAllAsync(ct).ConfigureAwait(false);
-        foreach (var policy in all.Where(p => p.Status == InsurancePolicyStatus.Active))
+        foreach (var policy in policies.Where(p => p.Status == InsurancePolicyStatus.Active))
         {
             if (policy.CurrentCashValue == 0m) continue;
             rows.Add(new StatementRow(

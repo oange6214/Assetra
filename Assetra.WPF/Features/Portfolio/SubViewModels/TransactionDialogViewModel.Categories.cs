@@ -22,9 +22,13 @@ public partial class TransactionDialogViewModel
     /// <summary>收入分類（已過濾封存與排序）。供 Income 表單下拉選用。</summary>
     public ObservableCollection<CategoryRowViewModel> IncomeCategories { get; } = [];
 
+    public ObservableCollection<CategoryRowViewModel> CashFlowCategories =>
+        TxType == "deposit" ? IncomeCategories : ExpenseCategories;
+
     [ObservableProperty] private Guid? _txCategoryId;
     private bool _txCategoryAutoMatched;
     private bool _suppressCategoryAutoTracking;
+    private IReadOnlyList<ExpenseCategory> _categorySnapshot = [];
 
     private async Task LoadCategoriesAsync()
     {
@@ -32,10 +36,14 @@ public partial class TransactionDialogViewModel
         {
             if (_categoryRepository is not null)
             {
-                var cats = await _categoryRepository.GetAllAsync().ConfigureAwait(true);
+                var cats = (await _categoryRepository.GetAllAsync().ConfigureAwait(true))
+                    .Where(x => !x.IsArchived)
+                    .OrderBy(x => x.SortOrder)
+                    .ToList();
+                _categorySnapshot = cats;
                 ExpenseCategories.Clear();
                 IncomeCategories.Clear();
-                foreach (var c in cats.Where(x => !x.IsArchived).OrderBy(x => x.SortOrder))
+                foreach (var c in cats)
                 {
                     var row = CategoryRowViewModel.FromModel(c);
                     if (c.Kind == CategoryKind.Expense) ExpenseCategories.Add(row);
@@ -46,6 +54,7 @@ public partial class TransactionDialogViewModel
             {
                 _autoRulesCache = await _ruleRepository.GetAllAsync().ConfigureAwait(true);
             }
+            ApplyAutoCategoryFromNote();
         }
         catch (Exception ex)
         {
@@ -55,10 +64,19 @@ public partial class TransactionDialogViewModel
 
     partial void OnTxNoteChanged(string value)
     {
+        ApplyAutoCategoryFromNote();
+    }
+
+    private void ApplyAutoCategoryFromNote()
+    {
         // 僅當使用者尚未手動指定分類，或上次是被自動匹配的，才重新自動匹配
         if (!_txCategoryAutoMatched && TxCategoryId.HasValue) return;
         if (_autoRulesCache.Count == 0) return;
-        var match = AutoCategorizationEngine.Match(value, _autoRulesCache);
+
+        var rules = FilterAutoRulesForCurrentTxType();
+        var match = rules.Count > 0
+            ? AutoCategorizationEngine.Match(TxNote, rules)
+            : null;
         _suppressCategoryAutoTracking = true;
         try
         {
@@ -75,6 +93,31 @@ public partial class TransactionDialogViewModel
         }
         finally { _suppressCategoryAutoTracking = false; }
     }
+
+    private IReadOnlyList<AutoCategorizationRule> FilterAutoRulesForCurrentTxType()
+    {
+        var tradeType = AutoCategorizationTradeType();
+        if (tradeType is null)
+            return [];
+
+        if (_categorySnapshot.Count == 0 && _categoryRepository is null)
+            return _autoRulesCache;
+
+        return AutoCategorizationRuleFilter.ForTradeType(
+            _autoRulesCache,
+            _categorySnapshot,
+            tradeType.Value);
+    }
+
+    private TradeType? AutoCategorizationTradeType() =>
+        TxType switch
+        {
+            "income" => TradeType.Income,
+            "deposit" => TradeType.Deposit,
+            "withdrawal" => TradeType.Withdrawal,
+            "creditCardCharge" => TradeType.CreditCardCharge,
+            _ => null,
+        };
 
     partial void OnTxCategoryIdChanged(Guid? value)
     {

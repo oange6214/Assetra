@@ -10,10 +10,20 @@ namespace Assetra.Infrastructure.Persistence;
 public sealed class InsurancePolicySqliteRepository : IInsurancePolicyRepository, IInsurancePolicySyncStore
 {
     private readonly string _connectionString;
+    private readonly Func<string> _deviceIdProvider;
+    private readonly TimeProvider _time;
 
-    public InsurancePolicySqliteRepository(string dbPath)
+    public InsurancePolicySqliteRepository(string dbPath, string deviceId = "local", TimeProvider? time = null)
+        : this(dbPath, () => deviceId, time)
     {
+    }
+
+    public InsurancePolicySqliteRepository(string dbPath, Func<string> deviceIdProvider, TimeProvider? time = null)
+    {
+        ArgumentNullException.ThrowIfNull(deviceIdProvider);
         _connectionString = $"Data Source={dbPath}";
+        _deviceIdProvider = deviceIdProvider;
+        _time = time ?? TimeProvider.System;
         InsuranceSchemaMigrator.EnsureInitialized(_connectionString);
     }
 
@@ -119,11 +129,16 @@ public sealed class InsurancePolicySqliteRepository : IInsurancePolicyRepository
                 is_deleted      = 1,
                 is_pending_push = 1,
                 ev_version      = ev_version + 1,
+                ev_modified_at  = $modified_at,
+                ev_device_id    = $device,
                 updated_at      = $now
             WHERE id = $id;
             """;
         cmd.Parameters.AddWithValue("$id", id.ToString());
-        cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
+        var now = _time.GetUtcNow();
+        cmd.Parameters.AddWithValue("$modified_at", now.ToString("o"));
+        cmd.Parameters.AddWithValue("$device", CurrentDeviceId());
+        cmd.Parameters.AddWithValue("$now", now.UtcDateTime.ToString("o"));
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
@@ -301,6 +316,12 @@ public sealed class InsurancePolicySqliteRepository : IInsurancePolicyRepository
             Status: Enum.Parse<InsurancePolicyStatus>(r.GetString(11)),
             Notes: r.IsDBNull(12) ? null : r.GetString(12),
             Version: version);
+
+    private string CurrentDeviceId()
+    {
+        var deviceId = _deviceIdProvider();
+        return string.IsNullOrWhiteSpace(deviceId) ? "local" : deviceId;
+    }
 
     private static void BindParams(SqliteCommand cmd, InsurancePolicy p)
     {

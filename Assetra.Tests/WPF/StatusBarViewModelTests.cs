@@ -1,23 +1,14 @@
-using System.Reactive.Concurrency;
-using Moq;
 using Assetra.Core.Interfaces;
 using Assetra.WPF.Features.StatusBar;
+using Microsoft.Reactive.Testing;
 using Xunit;
 
 namespace Assetra.Tests.WPF;
 
 public class StatusBarViewModelTests
 {
-    private static readonly Mock<ILocalizationService> MockLocalization = new();
-
-    static StatusBarViewModelTests()
-    {
-        MockLocalization.Setup(l => l.Get(It.IsAny<string>(), It.IsAny<string>()))
-            .Returns((string _, string fallback) => fallback);
-    }
-
     private static StatusBarViewModel CreateVm() =>
-        new(TaskPoolScheduler.Default, MockLocalization.Object);
+        new(new TestScheduler(), new FakeLocalizationService());
 
     [Fact]
     public void Constructor_InitializesClockText()
@@ -51,5 +42,38 @@ public class StatusBarViewModelTests
         var vm = CreateVm();
         var ex = Record.Exception(() => vm.Dispose());
         Assert.Null(ex);
+    }
+
+    [Fact]
+    public void Dispose_UnsubscribesFromLanguageChanged()
+    {
+        var localization = new FakeLocalizationService();
+        var vm = new StatusBarViewModel(new TestScheduler(), localization);
+        var before = localization.GetCallCount;
+
+        vm.Dispose();
+        localization.SetLanguage("en-US");
+
+        Assert.Equal(before, localization.GetCallCount);
+    }
+
+    private sealed class FakeLocalizationService : ILocalizationService
+    {
+        public string CurrentLanguage { get; private set; } = "zh-TW";
+        public int GetCallCount { get; private set; }
+
+        public event EventHandler? LanguageChanged;
+
+        public string Get(string key, string fallback = "")
+        {
+            GetCallCount++;
+            return fallback;
+        }
+
+        public void SetLanguage(string languageCode)
+        {
+            CurrentLanguage = languageCode;
+            LanguageChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 }

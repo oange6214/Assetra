@@ -39,6 +39,7 @@ public sealed partial class ImportViewModel : ObservableObject
     private readonly ILocalizationService? _localization;
 
     private ImportBatch? _currentBatch;
+    private int _conflictRefreshVersion;
 
     public ObservableCollection<ImportRowViewModel> Rows { get; } = [];
     public ObservableCollection<CashAccountOption> CashAccountOptions { get; } = [];
@@ -57,6 +58,7 @@ public sealed partial class ImportViewModel : ObservableObject
     [ObservableProperty] private ImportFileType? _detectedFileType;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ApplyCommand))]
     [NotifyPropertyChangedFor(nameof(IsBusy))]
     private bool _isWorking;
 
@@ -66,6 +68,15 @@ public sealed partial class ImportViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ApplyCommand))]
     private CashAccountOption? _selectedCashAccount;
+
+    partial void OnSelectedCashAccountChanged(CashAccountOption? value)
+    {
+        if (_currentBatch is not null && !IsWorking)
+            _ = RefreshConflictsSafelyAsync(
+                Interlocked.Increment(ref _conflictRefreshVersion),
+                _currentBatch.Id,
+                value?.Id);
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasRows))]
@@ -261,7 +272,7 @@ public sealed partial class ImportViewModel : ObservableObject
                 rows,
                 Array.Empty<ImportConflict>());
 
-            var withConflicts = await _conflictDetector.DetectAsync(batch).ConfigureAwait(true);
+            var withConflicts = await DetectConflictsAsync(batch, SelectedCashAccount?.Id).ConfigureAwait(true);
             BindBatch(withConflicts);
             StatusMessage = string.Format(
                 L("Import.Status.ParsedRows", "Parsed {0} rows ({1} conflicts)."),
@@ -295,8 +306,46 @@ public sealed partial class ImportViewModel : ObservableObject
         OnPropertyChanged(nameof(NewRowCount));
     }
 
+    private Task<ImportBatch> DetectConflictsAsync(ImportBatch batch, Guid? cashAccountId)
+    {
+        var options = new ImportApplyOptions(CashAccountId: cashAccountId);
+        return _conflictDetector.DetectAsync(batch, options);
+    }
+
+    private async Task RefreshConflictsAsync(int version, Guid batchId, Guid? cashAccountId)
+    {
+        if (_currentBatch is null || _currentBatch.Id != batchId)
+            return;
+
+        var cleanBatch = _currentBatch with { Conflicts = Array.Empty<ImportConflict>() };
+        var withConflicts = await DetectConflictsAsync(cleanBatch, cashAccountId).ConfigureAwait(true);
+        if (version != Volatile.Read(ref _conflictRefreshVersion) ||
+            IsWorking ||
+            _currentBatch?.Id != batchId ||
+            SelectedCashAccount?.Id != cashAccountId)
+        {
+            return;
+        }
+
+        BindBatch(withConflicts);
+    }
+
+    private async Task RefreshConflictsSafelyAsync(int version, Guid batchId, Guid? cashAccountId)
+    {
+        try
+        {
+            await RefreshConflictsAsync(version, batchId, cashAccountId).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+            _snackbar.Error(ex.Message);
+        }
+    }
+
     private void ResetBatch()
     {
+        Interlocked.Increment(ref _conflictRefreshVersion);
         _currentBatch = null;
         Rows.Clear();
         RowCount = 0;
@@ -305,14 +354,17 @@ public sealed partial class ImportViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Clear()
+    private void Clear() => Clear(preserveApplySummary: false);
+
+    private void Clear(bool preserveApplySummary)
     {
+        var summary = ApplySummary;
         SelectedFilePath = null;
         DetectedFormat = null;
         DetectedFileType = null;
         ErrorMessage = null;
         StatusMessage = null;
-        ApplySummary = null;
+        ApplySummary = preserveApplySummary ? summary : null;
         ResetBatch();
     }
 
@@ -324,6 +376,7 @@ public sealed partial class ImportViewModel : ObservableObject
     {
         if (_currentBatch is null || SelectedCashAccount is null) return;
 
+        Interlocked.Increment(ref _conflictRefreshVersion);
         IsWorking = true;
         ErrorMessage = null;
         try
@@ -352,7 +405,7 @@ public sealed partial class ImportViewModel : ObservableObject
             if (result.Warnings.Count > 0)
                 _snackbar.Warning(string.Join(' ', result.Warnings));
 
-            Clear();
+            Clear(preserveApplySummary: true);
             await RefreshHistoryAsync().ConfigureAwait(true);
         }
         catch (Exception ex)

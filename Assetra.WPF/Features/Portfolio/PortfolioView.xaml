@@ -83,29 +83,31 @@
                         BorderThickness="0,0,0,1">
             <DockPanel LastChildFill="True">
               <!--  Close  -->
-              <Button
+              <ui:Button
                                 Width="30"
                                 Height="30"
                                 Margin="6,0,0,0"
                                 VerticalAlignment="Center"
                                 Command="{Binding CloseCashDetailCommand}"
                                 DockPanel.Dock="Right"
-                                Style="{StaticResource BtnIcon}">
+                                Padding="0"
+                                Appearance="Transparent">
                 <ui:SymbolIcon Symbol="Dismiss24" FontSize="11" Foreground="{DynamicResource AppTextSecondary}" />
-              </Button>
+              </ui:Button>
               <!--  Edit pencil → opens shared EditAssetDialog  -->
-              <Button
+              <ui:Button
                                 Width="30"
                                 Height="30"
                                 VerticalAlignment="Center"
                                 Command="{Binding Account.OpenEditCashCommand}"
                                 CommandParameter="{Binding SelectedCashRow}"
                                 DockPanel.Dock="Right"
-                                Style="{StaticResource BtnIcon}">
+                                Padding="0"
+                                Appearance="Transparent">
                 <ui:SymbolIcon Symbol="Edit24" FontSize="12" Foreground="{DynamicResource AppTextPrimary}" />
-              </Button>
+              </ui:Button>
               <!--  設為預設 / 取消預設 toggle  -->
-              <Button
+              <ui:Button
                                 Width="30"
                                 Height="30"
                                 Margin="0,0,4,0"
@@ -113,8 +115,9 @@
                                 Command="{Binding Account.ToggleDefaultCashAccountCommand}"
                                 CommandParameter="{Binding SelectedCashRow}"
                                 DockPanel.Dock="Right">
-                <Button.Style>
-                  <Style BasedOn="{StaticResource BtnIcon}" TargetType="Button">
+                <ui:Button.Style>
+                  <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
+                  <Setter Property="Appearance" Value="Transparent" />
                     <Setter Property="ToolTip" Value="{DynamicResource Portfolio.Cash.SetDefault}" />
                     <Style.Triggers>
                       <DataTrigger Binding="{Binding SelectedCashRow.IsDefault}" Value="True">
@@ -122,7 +125,7 @@
                       </DataTrigger>
                     </Style.Triggers>
                   </Style>
-                </Button.Style>
+                </ui:Button.Style>
                 <ui:SymbolIcon FontSize="12" Symbol="Star24">
                   <ui:SymbolIcon.Style>
                     <Style TargetType="ui:SymbolIcon">
@@ -137,7 +140,7 @@
                     </Style>
                   </ui:SymbolIcon.Style>
                 </ui:SymbolIcon>
-              </Button>
+              </ui:Button>
               <TextBlock
                                 VerticalAlignment="Center"
                                 FontSize="{StaticResource FontSizeLg}"
@@ -310,7 +313,7 @@
                                                                 Foreground="{DynamicResource AppTextOnAccent}"
                                                                 Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
                             </Border>
-                            <Button
+                            <ui:Button
                                                             Grid.Column="2"
                                                             Width="28"
                                                             Height="28"
@@ -319,9 +322,9 @@
                                                             VerticalAlignment="Center"
                                                             Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                             CommandParameter="{Binding}"
-                                                            Style="{StaticResource BtnIcon}">
+                                                            Appearance="Transparent">
                               <ui:SymbolIcon Symbol="Edit24" FontSize="11" Foreground="{DynamicResource AppTextMuted}" />
-                            </Button>
+                            </ui:Button>
                           </Grid>
 
                           <WrapPanel Margin="0,8,0,0">
@@ -436,16 +439,17 @@
                         BorderThickness="0,0,0,1">
             <DockPanel LastChildFill="True">
               <!--  Close  -->
-              <Button
+              <ui:Button
                                 Width="30"
                                 Height="30"
                                 Margin="6,0,0,0"
                                 VerticalAlignment="Center"
                                 Command="{Binding CloseLiabilityDetailCommand}"
                                 DockPanel.Dock="Right"
-                                Style="{StaticResource BtnIcon}">
+                                Padding="0"
+                                Appearance="Transparent">
                 <ui:SymbolIcon Symbol="Dismiss24" FontSize="11" Foreground="{DynamicResource AppTextSecondary}" />
-              </Button>
+              </ui:Button>
               <TextBlock
                                 VerticalAlignment="Center"
                                 FontSize="{StaticResource FontSizeLg}"
@@ -628,7 +632,7 @@
                                                                 Foreground="{DynamicResource AppTextOnAccent}"
                                                                 Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
                             </Border>
-                            <Button
+                            <ui:Button
                                                             Grid.Column="2"
                                                             Width="28"
                                                             Height="28"
@@ -637,9 +641,9 @@
                                                             VerticalAlignment="Center"
                                                             Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                             CommandParameter="{Binding}"
-                                                            Style="{StaticResource BtnIcon}">
+                                                            Appearance="Transparent">
                               <ui:SymbolIcon Symbol="Edit24" FontSize="11" Foreground="{DynamicResource AppTextMuted}" />
-                            </Button>
+                            </ui:Button>
                           </Grid>
 
                           <WrapPanel Margin="0,8,0,0">
@@ -878,15 +882,16 @@
                             </StackPanel>
                           </WrapPanel>
 
-                          <Button
+                          <ui:Button
                                                         Height="28"
                                                         Margin="0,2,0,0"
                                                         Padding="10,0"
+                                                        Appearance="Primary"
                                                         HorizontalAlignment="Left"
                                                         Command="{Binding DataContext.Loan.ConfirmLoanPaymentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}">
-                            <Button.Style>
-                              <Style BasedOn="{StaticResource BtnPrimary}" TargetType="Button">
+                            <ui:Button.Style>
+                              <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
                                 <Setter Property="Visibility" Value="Visible" />
                                 <Style.Triggers>
                                   <DataTrigger Binding="{Binding IsPaid}" Value="True">
@@ -894,12 +899,12 @@
                                   </DataTrigger>
                                 </Style.Triggers>
                               </Style>
-                            </Button.Style>
+                            </ui:Button.Style>
                             <TextBlock
                                                             FontSize="{StaticResource FontSizeXs}"
                                                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                             Text="{DynamicResource Portfolio.Loan.ConfirmPayment}" />
-                          </Button>
+                          </ui:Button>
                         </StackPanel>
                       </Border>
                     </DataTemplate>
@@ -998,27 +1003,29 @@
             <StackPanel>
               <DockPanel LastChildFill="True">
                 <!--  Close  -->
-                <Button
+                <ui:Button
                                     Width="30"
                                     Height="30"
                                     Margin="6,0,0,0"
                                     VerticalAlignment="Center"
                                     Command="{Binding ClosePositionDetailCommand}"
                                     DockPanel.Dock="Right"
-                                    Style="{StaticResource BtnIcon}">
+                                    Padding="0"
+                                    Appearance="Transparent">
                   <ui:SymbolIcon Symbol="Dismiss24" FontSize="11" Foreground="{DynamicResource AppTextSecondary}" />
-                </Button>
+                </ui:Button>
                 <!--  Edit pencil → opens shared EditAssetDialog  -->
-                <Button
+                <ui:Button
                                     Width="30"
                                     Height="30"
                                     VerticalAlignment="Center"
                                     Command="{Binding Account.OpenEditPositionCommand}"
                                     CommandParameter="{Binding SelectedPositionRow}"
                                     DockPanel.Dock="Right"
-                                    Style="{StaticResource BtnIcon}">
+                                    Padding="0"
+                                    Appearance="Transparent">
                   <ui:SymbolIcon Symbol="Edit24" FontSize="12" Foreground="{DynamicResource AppTextPrimary}" />
-                </Button>
+                </ui:Button>
                 <!--  Symbol + Name (left-fill)  -->
                 <StackPanel Orientation="Horizontal">
                   <TextBlock
@@ -1527,7 +1534,7 @@
                                                                 Foreground="{DynamicResource AppTextOnAccent}"
                                                                 Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
                             </Border>
-                            <Button
+                            <ui:Button
                                                             Grid.Column="2"
                                                             Width="28"
                                                             Height="28"
@@ -1536,9 +1543,9 @@
                                                             VerticalAlignment="Center"
                                                             Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                             CommandParameter="{Binding}"
-                                                            Style="{StaticResource BtnIcon}">
+                                                            Appearance="Transparent">
                               <ui:SymbolIcon Symbol="Edit24" FontSize="11" Foreground="{DynamicResource AppTextMuted}" />
-                            </Button>
+                            </ui:Button>
                           </Grid>
 
                           <WrapPanel Margin="0,8,0,0">

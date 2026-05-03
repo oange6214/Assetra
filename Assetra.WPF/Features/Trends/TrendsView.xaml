@@ -7,6 +7,7 @@
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:portfolio="clr-namespace:Assetra.WPF.Features.Portfolio"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     d:DataContext="{d:DesignInstance Type={x:Type portfolio:PortfolioHistoryViewModel},
                                      IsDesignTimeCreatable=False}"
     d:DesignHeight="776"
@@ -15,7 +16,13 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <Style x:Key="BtnPeriod" TargetType="Button" BasedOn="{StaticResource BtnGhost}">
+        <Style
+            x:Key="PeriodButtonStyle"
+            BasedOn="{StaticResource {x:Type ui:Button}}"
+            TargetType="{x:Type ui:Button}">
+            <Setter Property="Appearance" Value="Secondary" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="FontSize" Value="{StaticResource FontSizeXs}" />
             <Style.Triggers>
                 <DataTrigger Value="True">
                     <DataTrigger.Binding>
@@ -24,9 +31,7 @@
                             <Binding Path="DataContext.ActivePeriod" RelativeSource="{RelativeSource AncestorType=UserControl}" />
                         </MultiBinding>
                     </DataTrigger.Binding>
-                    <Setter Property="Background" Value="{DynamicResource AppAccent}" />
-                    <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
-                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="Appearance" Value="Primary" />
                     <Setter Property="FontWeight" Value="SemiBold" />
                 </DataTrigger>
             </Style.Triggers>
@@ -56,41 +61,41 @@
             Grid.Row="1"
             Margin="0,0,0,12"
             Orientation="Horizontal">
-            <Button
+            <ui:Button
                 Margin="0,0,8,0"
                 Command="{Binding ChangePeriodCommand}"
                 CommandParameter="30"
                 Content="{DynamicResource Trends.Period.30}"
-                Style="{StaticResource BtnPeriod}"
+                Style="{StaticResource PeriodButtonStyle}"
                 Tag="30" />
-            <Button
+            <ui:Button
                 Margin="0,0,8,0"
                 Command="{Binding ChangePeriodCommand}"
                 CommandParameter="90"
                 Content="{DynamicResource Trends.Period.90}"
-                Style="{StaticResource BtnPeriod}"
+                Style="{StaticResource PeriodButtonStyle}"
                 Tag="90" />
-            <Button
+            <ui:Button
                 Margin="0,0,8,0"
                 Command="{Binding ChangePeriodCommand}"
                 CommandParameter="180"
                 Content="{DynamicResource Trends.Period.180}"
-                Style="{StaticResource BtnPeriod}"
+                Style="{StaticResource PeriodButtonStyle}"
                 Tag="180" />
-            <Button
+            <ui:Button
                 Margin="0,0,8,0"
                 Command="{Binding ChangePeriodCommand}"
                 CommandParameter="365"
                 Content="{DynamicResource Trends.Period.365}"
-                Style="{StaticResource BtnPeriod}"
+                Style="{StaticResource PeriodButtonStyle}"
                 Tag="365" />
-            <Button
+            <ui:Button
                 Margin="0,0,16,0"
                 Command="{Binding ChangePeriodCommand}"
-                CommandParameter="3650"
+                CommandParameter="All"
                 Content="{DynamicResource Trends.Period.All}"
-                Style="{StaticResource BtnPeriod}"
-                Tag="3650" />
+                Style="{StaticResource PeriodButtonStyle}"
+                Tag="All" />
 
             <controls:DateRangePicker
                 MinWidth="260"

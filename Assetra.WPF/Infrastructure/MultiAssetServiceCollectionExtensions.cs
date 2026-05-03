@@ -1,5 +1,6 @@
 using Assetra.Application.MultiAsset;
 using Assetra.Application.Sync;
+using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.MultiAsset;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Infrastructure.Persistence;
@@ -18,26 +19,42 @@ internal static class MultiAssetServiceCollectionExtensions
         string dbPath)
     {
         // Repositories (dual-role: IRealEstateRepository + IRealEstateSyncStore)
-        services.AddSingleton<RealEstateSqliteRepository>(_ => new RealEstateSqliteRepository(dbPath));
+        services.AddSingleton<RealEstateSqliteRepository>(sp =>
+        {
+            var settings = sp.GetRequiredService<IAppSettingsService>();
+            return new RealEstateSqliteRepository(dbPath, () => SyncDeviceIdProvider.Resolve(settings));
+        });
         services.AddSingleton<IRealEstateRepository>(sp => sp.GetRequiredService<RealEstateSqliteRepository>());
         services.AddSingleton<IRealEstateSyncStore>(sp => sp.GetRequiredService<RealEstateSqliteRepository>());
 
         services.AddSingleton<IRentalIncomeRecordRepository>(_ => new RentalIncomeRecordSqliteRepository(dbPath));
 
-        services.AddSingleton<InsurancePolicySqliteRepository>(_ => new InsurancePolicySqliteRepository(dbPath));
+        services.AddSingleton<InsurancePolicySqliteRepository>(sp =>
+        {
+            var settings = sp.GetRequiredService<IAppSettingsService>();
+            return new InsurancePolicySqliteRepository(dbPath, () => SyncDeviceIdProvider.Resolve(settings));
+        });
         services.AddSingleton<IInsurancePolicyRepository>(sp => sp.GetRequiredService<InsurancePolicySqliteRepository>());
         services.AddSingleton<IInsurancePolicySyncStore>(sp => sp.GetRequiredService<InsurancePolicySqliteRepository>());
 
         services.AddSingleton<IInsurancePremiumRecordRepository>(_ => new InsurancePremiumRecordSqliteRepository(dbPath));
 
         // Retirement (v0.24)
-        services.AddSingleton<RetirementAccountSqliteRepository>(_ => new RetirementAccountSqliteRepository(dbPath));
+        services.AddSingleton<RetirementAccountSqliteRepository>(sp =>
+        {
+            var settings = sp.GetRequiredService<IAppSettingsService>();
+            return new RetirementAccountSqliteRepository(dbPath, () => SyncDeviceIdProvider.Resolve(settings));
+        });
         services.AddSingleton<IRetirementAccountRepository>(sp => sp.GetRequiredService<RetirementAccountSqliteRepository>());
         services.AddSingleton<IRetirementAccountSyncStore>(sp => sp.GetRequiredService<RetirementAccountSqliteRepository>());
         services.AddSingleton<IRetirementContributionRepository>(_ => new RetirementContributionSqliteRepository(dbPath));
 
         // Physical asset (v0.24)
-        services.AddSingleton<PhysicalAssetSqliteRepository>(_ => new PhysicalAssetSqliteRepository(dbPath));
+        services.AddSingleton<PhysicalAssetSqliteRepository>(sp =>
+        {
+            var settings = sp.GetRequiredService<IAppSettingsService>();
+            return new PhysicalAssetSqliteRepository(dbPath, () => SyncDeviceIdProvider.Resolve(settings));
+        });
         services.AddSingleton<IPhysicalAssetRepository>(sp => sp.GetRequiredService<PhysicalAssetSqliteRepository>());
         services.AddSingleton<IPhysicalAssetSyncStore>(sp => sp.GetRequiredService<PhysicalAssetSqliteRepository>());
 
@@ -60,7 +77,14 @@ internal static class MultiAssetServiceCollectionExtensions
         // ViewModels
         services.AddSingleton<RealEstateViewModel>();
         services.AddSingleton<InsurancePolicyViewModel>();
-        services.AddSingleton<RetirementViewModel>();
+        services.AddSingleton<RetirementViewModel>(sp =>
+        {
+            var settings = sp.GetRequiredService<IAppSettingsService>();
+            return new RetirementViewModel(
+                sp.GetRequiredService<IRetirementAccountRepository>(),
+                sp.GetRequiredService<IRetirementProjectionService>(),
+                () => SyncDeviceIdProvider.Resolve(settings));
+        });
         services.AddSingleton<PhysicalAssetViewModel>();
 
         return services;

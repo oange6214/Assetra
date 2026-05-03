@@ -18,6 +18,7 @@ public sealed record FinancialOverviewGroupItem(
 public sealed record FinancialOverviewGroup(
     string Icon,
     string Name,
+    string Currency,
     IReadOnlyList<FinancialOverviewGroupItem> Items,
     decimal Subtotal);
 
@@ -25,6 +26,7 @@ public sealed record FinancialOverviewResult(
     IReadOnlyList<FinancialOverviewGroup> AssetGroups,
     IReadOnlyList<FinancialOverviewGroup> InvestmentGroups,
     IReadOnlyList<FinancialOverviewGroup> LiabilityGroups,
+    string BaseCurrency,
     decimal TotalAssets,
     decimal TotalInvestments,
     decimal TotalLiabilities);

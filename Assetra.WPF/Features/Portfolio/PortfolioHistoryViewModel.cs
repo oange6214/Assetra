@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Media;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -22,8 +23,12 @@ namespace Assetra.WPF.Features.Portfolio;
 /// </summary>
 public sealed partial class PortfolioHistoryViewModel : ObservableObject
 {
+    private const int AllPeriodDays = 0;
+
     private readonly IPortfolioHistoryQueryService _historyQueryService;
     private readonly ILocalizationService _localization;
+    private readonly IAppSettingsService? _settings;
+    private readonly IMultiCurrencyValuationService? _fx;
 
     /// <summary>Full snapshot history (all dates), cached on each DB load.</summary>
     private IReadOnlyList<PortfolioDailySnapshot> _allSnapshots = [];
@@ -44,24 +49,26 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     [ObservableProperty] private DateTime? _customEndDate;
 
     /// <summary>
-    /// Tag of the currently-active preset ("30"/"90"/"180"/"365"/"3650"), or
+    /// Tag of the currently-active preset ("30"/"90"/"180"/"365"/"All"), or
     /// "Custom" when both ends of the custom range are set. Drives the active
     /// state of the Trends preset buttons.
     /// </summary>
     public string ActivePeriod =>
         (CustomStartDate, CustomEndDate) is ({ }, { })
             ? "Custom"
-            : SelectedDays.ToString(CultureInfo.InvariantCulture);
+            : SelectedDays == AllPeriodDays
+                ? "All"
+                : SelectedDays.ToString(CultureInfo.InvariantCulture);
 
-    partial void OnSelectedDaysChanged(int _) => OnPropertyChanged(nameof(ActivePeriod));
+    partial void OnSelectedDaysChanged(int value) => OnPropertyChanged(nameof(ActivePeriod));
 
-    partial void OnCustomStartDateChanged(DateTime? _)
+    partial void OnCustomStartDateChanged(DateTime? value)
     {
         OnPropertyChanged(nameof(ActivePeriod));
         RefreshChart();
     }
 
-    partial void OnCustomEndDateChanged(DateTime? _)
+    partial void OnCustomEndDateChanged(DateTime? value)
     {
         OnPropertyChanged(nameof(ActivePeriod));
         RefreshChart();
@@ -72,15 +79,19 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     [ObservableProperty] private bool _isChartVisible = true;
     [ObservableProperty] private bool _isHistoryPanelVisible;
 
-    partial void OnHasHistoryChanged(bool _) => IsHistoryPanelVisible = HasHistory && IsChartVisible;
-    partial void OnIsChartVisibleChanged(bool _) => IsHistoryPanelVisible = HasHistory && IsChartVisible;
+    partial void OnHasHistoryChanged(bool value) => IsHistoryPanelVisible = HasHistory && IsChartVisible;
+    partial void OnIsChartVisibleChanged(bool value) => IsHistoryPanelVisible = HasHistory && IsChartVisible;
 
     public PortfolioHistoryViewModel(
         IPortfolioHistoryQueryService historyQueryService,
-        ILocalizationService? localization = null)
+        ILocalizationService? localization = null,
+        IAppSettingsService? settings = null,
+        IMultiCurrencyValuationService? fx = null)
     {
         _historyQueryService = historyQueryService;
         _localization = localization ?? NullLocalizationService.Instance;
+        _settings = settings;
+        _fx = fx;
     }
 
     // Public API
@@ -90,7 +101,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     {
         _allSnapshots = await _historyQueryService.GetSnapshotsAsync();
         OnPropertyChanged(nameof(Snapshots));
-        RefreshChart();
+        await RefreshChartAsync();
     }
 
     /// <summary>
@@ -103,33 +114,58 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     // Period command
 
     [RelayCommand]
-    private void ChangePeriod(string? daysStr)
+    private async Task ChangePeriod(string? period)
     {
-        if (int.TryParse(daysStr, out var days) && days > 0)
+        if (string.Equals(period, "All", StringComparison.OrdinalIgnoreCase))
+        {
+            CustomStartDate = null;
+            CustomEndDate = null;
+            SelectedDays = AllPeriodDays;
+            await RefreshChartAsync();
+            return;
+        }
+
+        if (int.TryParse(period, out var days) && days > 0)
         {
             // Selecting a preset clears any custom range.
             CustomStartDate = null;
             CustomEndDate = null;
             SelectedDays = days;
-            RefreshChart();
+            await RefreshChartAsync();
         }
     }
 
     // Chart building
 
-    private void RefreshChart()
+    private async Task RefreshChartAsync()
     {
         var filtered = (CustomStartDate, CustomEndDate) is ({ } s, { } e)
             ? FilterByRange(_allSnapshots, s, e)
             : FilterByDays(_allSnapshots, SelectedDays);
-        BuildChart(filtered);
+        var points = await BuildPointsAsync(filtered);
+        BuildChart(points);
+    }
+
+    private void RefreshChart()
+    {
+        _ = RefreshChartAsync();
     }
 
     private static IReadOnlyList<PortfolioDailySnapshot> FilterByDays(
         IReadOnlyList<PortfolioDailySnapshot> all, int days)
     {
-        var cutoff = DateOnly.FromDateTime(DateTime.Today.AddDays(-(days - 1)));
-        return all.Where(s => s.SnapshotDate >= cutoff).ToList();
+        if (days == AllPeriodDays)
+            return all.OrderBy(s => s.SnapshotDate).ToList();
+
+        if (all.Count == 0)
+            return [];
+
+        var latestSnapshotDate = all.Max(s => s.SnapshotDate);
+        var cutoff = latestSnapshotDate.AddDays(-(days - 1));
+        return all
+            .Where(s => s.SnapshotDate >= cutoff)
+            .OrderBy(s => s.SnapshotDate)
+            .ToList();
     }
 
     private static IReadOnlyList<PortfolioDailySnapshot> FilterByRange(
@@ -138,13 +174,57 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var (lo, hi) = start <= end ? (start, end) : (end, start);
         var loDate = DateOnly.FromDateTime(lo);
         var hiDate = DateOnly.FromDateTime(hi);
-        return all.Where(s => s.SnapshotDate >= loDate && s.SnapshotDate <= hiDate).ToList();
+        return all
+            .Where(s => s.SnapshotDate >= loDate && s.SnapshotDate <= hiDate)
+            .OrderBy(s => s.SnapshotDate)
+            .ToList();
     }
 
-    private void BuildChart(IReadOnlyList<PortfolioDailySnapshot> snapshots)
+    private async Task<IReadOnlyList<DateTimePoint>> BuildPointsAsync(
+        IReadOnlyList<PortfolioDailySnapshot> snapshots)
     {
-        HasHistory = _allSnapshots.Count >= 1;
-        if (snapshots.Count == 0)
+        var points = new List<DateTimePoint>(snapshots.Count);
+        foreach (var snapshot in snapshots.OrderBy(s => s.SnapshotDate))
+        {
+            var value = await ConvertMarketValueToBaseAsync(snapshot);
+            if (value is null)
+                continue;
+
+            points.Add(new DateTimePoint(
+                snapshot.SnapshotDate.ToDateTime(TimeOnly.MinValue),
+                (double)value.Value));
+        }
+        return points;
+    }
+
+    private async Task<decimal?> ConvertMarketValueToBaseAsync(PortfolioDailySnapshot snapshot)
+    {
+        var baseCurrency = _settings?.Current.BaseCurrency;
+        if (_fx is null || string.IsNullOrWhiteSpace(baseCurrency))
+            return snapshot.MarketValue;
+
+        var fromCurrency = string.IsNullOrWhiteSpace(snapshot.Currency) ? "TWD" : snapshot.Currency;
+        if (string.Equals(fromCurrency, baseCurrency, StringComparison.OrdinalIgnoreCase))
+            return snapshot.MarketValue;
+
+        try
+        {
+            return await _fx.ConvertAsync(
+                snapshot.MarketValue,
+                fromCurrency,
+                baseCurrency,
+                snapshot.SnapshotDate);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return null;
+        }
+    }
+
+    private void BuildChart(IReadOnlyList<DateTimePoint> points)
+    {
+        HasHistory = points.Count >= 1;
+        if (points.Count == 0)
         {
             ValueSeries = [];
             return;
@@ -156,12 +236,6 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var fillColor = accentColor.WithAlpha(32);
         var labelColor = GetSkColor("AppTextSecondary", "#787B86");
         var separatorColor = GetSkColor("AppBorderLight", "#2E2E2E");
-
-        var points = snapshots
-            .Select(s => new DateTimePoint(
-                s.SnapshotDate.ToDateTime(TimeOnly.MinValue),
-                (double)s.MarketValue))
-            .ToList();
 
         ValueSeries =
         [

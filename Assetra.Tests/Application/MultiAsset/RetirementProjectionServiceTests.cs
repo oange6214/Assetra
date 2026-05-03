@@ -1,5 +1,8 @@
 using Assetra.Application.MultiAsset;
+using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Interfaces.MultiAsset;
+using Assetra.Core.Models;
 using Assetra.Core.Models.MultiAsset;
 using Assetra.Core.Models.Sync;
 using Xunit;
@@ -12,10 +15,11 @@ public class RetirementProjectionServiceTests
         string name,
         decimal balance,
         int withdrawalAge = 65,
-        RetirementAccountStatus status = RetirementAccountStatus.Active) =>
+        RetirementAccountStatus status = RetirementAccountStatus.Active,
+        string currency = "TWD") =>
         new(Guid.NewGuid(), name, RetirementAccountType.LaborPension, "Bureau",
             balance, 0.06m, 0.06m, 5, withdrawalAge,
-            new DateOnly(2020, 1, 1), "TWD", status, null, new EntityVersion());
+            new DateOnly(2020, 1, 1), currency, status, null, new EntityVersion());
 
     [Fact]
     public async Task GetTotalBalance_ActiveOnly()
@@ -27,6 +31,21 @@ public class RetirementProjectionServiceTests
             new StubContribRepo([]));
 
         Assert.Equal(1_000_000m, await svc.GetTotalBalanceAsync());
+    }
+
+    [Fact]
+    public async Task GetTotalBalance_WithFxAndBaseCurrency_ConvertsBeforeSumming()
+    {
+        var twd = MakeAccount("TWD", 1_000_000m);
+        var usd = MakeAccount("USD", 10_000m, currency: "USD");
+        var closed = MakeAccount("Closed", 20_000m, status: RetirementAccountStatus.Closed, currency: "USD");
+        var svc = new RetirementProjectionService(
+            new StubAccountRepo([twd, usd, closed]),
+            new StubContribRepo([]),
+            new StubFx(("USD", "TWD"), 32m),
+            new StubSettings(new AppSettings(BaseCurrency: "TWD")));
+
+        Assert.Equal(1_320_000m, await svc.GetTotalBalanceAsync());
     }
 
     [Fact]
@@ -107,5 +126,26 @@ public class RetirementProjectionServiceTests
         public Task AddAsync(RetirementContribution record, CancellationToken ct = default) => Task.CompletedTask;
         public Task UpdateAsync(RetirementContribution record, CancellationToken ct = default) => Task.CompletedTask;
         public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    private sealed class StubFx((string From, string To) pair, decimal rate) : IMultiCurrencyValuationService
+    {
+        public Task<decimal?> ConvertAsync(decimal amount, string from, string to, DateOnly asOf, CancellationToken ct = default)
+            => Task.FromResult<decimal?>(
+                string.Equals(from, pair.From, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(to, pair.To, StringComparison.OrdinalIgnoreCase)
+                    ? amount * rate
+                    : amount);
+    }
+
+    private sealed class StubSettings(AppSettings current) : IAppSettingsService
+    {
+        public AppSettings Current { get; } = current;
+        public event Action? Changed
+        {
+            add { }
+            remove { }
+        }
+        public Task SaveAsync(AppSettings settings) => Task.CompletedTask;
     }
 }

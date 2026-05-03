@@ -8,10 +8,11 @@ public sealed partial class AssetGroupVm : ObservableObject
 {
     public string Icon { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
+    public string Currency { get; init; } = "TWD";
 
     [ObservableProperty] private decimal _subtotal;
 
-    public string SubtotalDisplay => $"NT${Subtotal:N0}";
+    public string SubtotalDisplay => MoneyFormatter.Format(Subtotal, Currency);
     partial void OnSubtotalChanged(decimal _) => OnPropertyChanged(nameof(SubtotalDisplay));
 
     public ObservableCollection<AssetItemVm> Items { get; } = [];

@@ -14,8 +14,11 @@ public sealed partial class InsurancePolicyRowViewModel : ObservableObject
     public DateOnly StartDate { get; }
     public DateOnly? MaturityDate { get; }
     public decimal FaceValue { get; }
+    public decimal OriginalCashValue { get; }
     public decimal CashValue { get; }
+    public decimal OriginalAnnualPremium { get; }
     public decimal AnnualPremium { get; }
+    public string OriginalCurrency { get; }
     public decimal TotalPremiumsPaid { get; }
     public string Currency { get; }
     public InsurancePolicyStatus Status { get; }
@@ -32,10 +35,13 @@ public sealed partial class InsurancePolicyRowViewModel : ObservableObject
         StartDate = p.StartDate;
         MaturityDate = p.MaturityDate;
         FaceValue = p.FaceValue;
+        OriginalCashValue = p.CurrentCashValue;
         CashValue = summary.CashValue;
-        AnnualPremium = p.AnnualPremium;
+        OriginalAnnualPremium = p.AnnualPremium;
+        AnnualPremium = summary.AnnualPremium ?? p.AnnualPremium;
         TotalPremiumsPaid = summary.TotalPremiumsPaid;
-        Currency = p.Currency;
+        OriginalCurrency = p.Currency;
+        Currency = string.IsNullOrWhiteSpace(summary.Currency) ? p.Currency : summary.Currency;
         Status = p.Status;
         Notes = p.Notes;
     }

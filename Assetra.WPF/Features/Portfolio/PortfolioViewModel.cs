@@ -329,7 +329,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
             onAddTrade: AddRecord);
         History = new PortfolioHistoryViewModel(
             services.HistoryQuery ?? new NullPortfolioHistoryQueryService(),
-            ui.Localization);
+            ui.Localization,
+            ui.Settings,
+            services.Fx);
 
         // TradeFilter must be created before LoadAsync so LoadTradesAsync can call
         // TradeFilter.InitTradeTypeFilters() and TradeFilter.RefreshTradesView().
@@ -564,10 +566,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     {
         var entries = loaded.Entries;
         var snapshots = loaded.PositionSnapshots;
-        // Build the new desired set of rows keyed by (Symbol, AssetType).
-        var newRows = new Dictionary<(string Symbol, AssetType AssetType), PortfolioRowViewModel>();
+        // Build the new desired set of rows keyed by (Symbol, Exchange, AssetType).
+        var newRows = new Dictionary<(string Symbol, string Exchange, AssetType AssetType), PortfolioRowViewModel>();
 
-        foreach (var g in entries.GroupBy(e => (e.Symbol, e.AssetType)))
+        foreach (var g in entries.GroupBy(e => (e.Symbol, e.Exchange, e.AssetType)))
         {
             var lots = g.ToList();
             var primary = lots[0];
@@ -616,19 +618,19 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                     row.AllEntryIds.Add(extra.Id);
             }
 
-            newRows[(g.Key.Symbol, g.Key.AssetType)] = row;
+            newRows[(g.Key.Symbol, g.Key.Exchange, g.Key.AssetType)] = row;
         }
 
         // Diff against current Positions: remove stale rows (iterate backward to avoid index shift),
         // then add new rows, then update in-place for rows that exist in both sets.
-        var existingIndex = new Dictionary<(string Symbol, AssetType AssetType), PortfolioRowViewModel>();
+        var existingIndex = new Dictionary<(string Symbol, string Exchange, AssetType AssetType), PortfolioRowViewModel>();
         foreach (var r in Positions)
-            existingIndex[(r.Symbol, r.AssetType)] = r;
+            existingIndex[(r.Symbol, r.Exchange, r.AssetType)] = r;
 
         // Remove rows that are no longer in the new set (backward iteration).
         for (var i = Positions.Count - 1; i >= 0; i--)
         {
-            var key = (Positions[i].Symbol, Positions[i].AssetType);
+            var key = (Positions[i].Symbol, Positions[i].Exchange, Positions[i].AssetType);
             if (!newRows.ContainsKey(key))
                 Positions.RemoveAt(i);
         }

@@ -8,5 +8,5 @@ namespace Assetra.Core.Interfaces.Import;
 /// </summary>
 public interface IImportConflictDetector
 {
-    Task<ImportBatch> DetectAsync(ImportBatch batch, CancellationToken ct = default);
+    Task<ImportBatch> DetectAsync(ImportBatch batch, ImportApplyOptions? options = null, CancellationToken ct = default);
 }

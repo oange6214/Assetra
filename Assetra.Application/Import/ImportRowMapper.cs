@@ -17,7 +17,8 @@ public sealed class ImportRowMapper : IImportRowMapper
         ImportSourceKind kind,
         ImportApplyOptions options,
         IList<string> warnings,
-        IReadOnlyList<AutoCategorizationRule>? rules = null)
+        IReadOnlyList<AutoCategorizationRule>? rules = null,
+        IReadOnlyList<ExpenseCategory>? categories = null)
     {
         ArgumentNullException.ThrowIfNull(row);
         ArgumentNullException.ThrowIfNull(options);
@@ -35,12 +36,18 @@ public sealed class ImportRowMapper : IImportRowMapper
 
         if (trade is not null && rules is { Count: > 0 } && trade.CategoryId is null)
         {
+            var eligibleRules = categories is { Count: > 0 }
+                ? AutoCategorizationRuleFilter.ForTradeType(rules, categories, trade.Type)
+                : rules;
+            if (eligibleRules.Count == 0)
+                return trade;
+
             var ctx = new AutoCategorizationContext(
                 Note: null,
                 Counterparty: row.Counterparty,
                 Memo: row.Memo,
                 Source: AutoCategorizationScope.Import);
-            var matched = AutoCategorizationEngine.Match(ctx, rules);
+            var matched = AutoCategorizationEngine.Match(ctx, eligibleRules);
             if (matched is not null) trade = trade with { CategoryId = matched };
         }
         return trade;

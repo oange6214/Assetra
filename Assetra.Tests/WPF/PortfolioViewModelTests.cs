@@ -1,5 +1,6 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Moq;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
@@ -129,6 +130,52 @@ public class PortfolioViewModelTests
         Assert.Equal(2, vm.Positions.Count);
         Assert.Contains(vm.Positions, p => p.Symbol == "2330");
         Assert.Contains(vm.Positions, p => p.Symbol == "2317");
+    }
+
+    [Fact]
+    public async Task QuoteStream_UpdatesOnlyMatchingExchangePosition()
+    {
+        var quoteStream = new Subject<IReadOnlyList<StockQuote>>();
+        var stockService = new Mock<IStockService>();
+        stockService.Setup(s => s.QuoteStream).Returns(quoteStream);
+        var twse = new PortfolioEntry(Guid.NewGuid(), "1234", "TWSE");
+        var tpex = new PortfolioEntry(Guid.NewGuid(), "1234", "TPEX");
+        var snapshots = SnapshotsFor([(twse, 10m, 100), (tpex, 20m, 100)]);
+        var repo = new Mock<IPortfolioRepository>();
+        repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync([twse, tpex]);
+        var search = new Mock<IStockSearchService>();
+        var (snapshotSvc, snapshotRepo) = SnapshotStubs();
+        var (logRepo, backfill) = BackfillStubs(snapshotRepo);
+        var vm = new PortfolioViewModel(
+            new PortfolioRepositories(repo.Object, snapshotRepo.Object, logRepo.Object, Trade: new FakeTradeRepo()),
+            new PortfolioServices(stockService.Object, search.Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                PositionQuery: PositionQueryMock(snapshots).Object),
+            new PortfolioUiServices(ImmediateScheduler.Instance));
+        await vm.LoadAsync();
+
+        quoteStream.OnNext(
+        [
+            new StockQuote(
+                "1234",
+                "TPEX Target",
+                "TPEX",
+                55m,
+                1m,
+                1.8m,
+                1000,
+                54m,
+                56m,
+                53m,
+                54m,
+                DateTimeOffset.UtcNow),
+        ]);
+
+        var twseRow = vm.Positions.Single(p => p.Symbol == "1234" && p.Exchange == "TWSE");
+        var tpexRow = vm.Positions.Single(p => p.Symbol == "1234" && p.Exchange == "TPEX");
+        Assert.Equal(0m, twseRow.CurrentPrice);
+        Assert.Equal(55m, tpexRow.CurrentPrice);
+        Assert.Equal("TPEX Target", tpexRow.Name);
     }
 
     [Fact]

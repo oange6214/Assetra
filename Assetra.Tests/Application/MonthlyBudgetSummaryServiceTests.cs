@@ -63,6 +63,52 @@ public class MonthlyBudgetSummaryServiceTests
     }
 
     [Fact]
+    public async Task BuildAsync_UsesYearlyBudgetAsMonthlyFallback()
+    {
+        var cat = Guid.NewGuid();
+        var trades = new FakeTradeRepo();
+        var budgets = new FakeBudgetRepo();
+        var categories = new FakeCategoryRepo
+        {
+            Items = { new ExpenseCategory(cat, "餐飲", CategoryKind.Expense) }
+        };
+
+        trades.Store.Add(MakeWithdrawal(new DateTime(2026, 4, 10), 3000m, cat));
+        budgets.Store.Add(new Budget(Guid.NewGuid(), cat, BudgetMode.Yearly, 2026, null, 24000m));
+        budgets.Store.Add(new Budget(Guid.NewGuid(), null, BudgetMode.Yearly, 2026, null, 120000m));
+
+        var svc = new MonthlyBudgetSummaryService(trades, budgets, categories);
+        var summary = await svc.BuildAsync(2026, 4);
+
+        Assert.Equal(10000m, summary.TotalBudget);
+        var food = Assert.Single(summary.Categories);
+        Assert.Equal(2000m, food.BudgetAmount);
+        Assert.True(food.IsOverBudget);
+    }
+
+    [Fact]
+    public async Task BuildAsync_MonthlyBudgetOverridesYearlyFallback()
+    {
+        var cat = Guid.NewGuid();
+        var trades = new FakeTradeRepo();
+        var budgets = new FakeBudgetRepo();
+        var categories = new FakeCategoryRepo
+        {
+            Items = { new ExpenseCategory(cat, "餐飲", CategoryKind.Expense) }
+        };
+
+        trades.Store.Add(MakeWithdrawal(new DateTime(2026, 4, 10), 3000m, cat));
+        budgets.Store.Add(new Budget(Guid.NewGuid(), cat, BudgetMode.Yearly, 2026, null, 24000m));
+        budgets.Store.Add(new Budget(Guid.NewGuid(), cat, BudgetMode.Monthly, 2026, 4, 5000m));
+
+        var svc = new MonthlyBudgetSummaryService(trades, budgets, categories);
+        var summary = await svc.BuildAsync(2026, 4);
+
+        var food = Assert.Single(summary.Categories);
+        Assert.Equal(5000m, food.BudgetAmount);
+    }
+
+    [Fact]
     public async Task BuildAsync_LoanRepayInterest_CountsAsExpense()
     {
         var trades = new FakeTradeRepo();

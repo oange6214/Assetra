@@ -51,10 +51,10 @@
           Text="{Binding RunStatus}" />
     </DockPanel>
 
-    <ui:TabView Grid.Row="1" Background="Transparent" BorderThickness="0">
+    <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0">
 
       <!-- Subscriptions tab -->
-      <ui:TabViewItem Header="{DynamicResource Recurring.Tab.Subscriptions}">
+      <TabItem Header="{DynamicResource Recurring.Tab.Subscriptions}">
         <Grid Margin="0,12,0,0">
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -334,10 +334,10 @@
             </ItemsControl>
           </ScrollViewer>
         </Grid>
-      </ui:TabViewItem>
+      </TabItem>
 
       <!-- Pending tab -->
-      <ui:TabViewItem Header="{DynamicResource Recurring.Tab.Pending}">
+      <TabItem Header="{DynamicResource Recurring.Tab.Pending}">
         <ScrollViewer Margin="0,12,0,0" VerticalScrollBarVisibility="Auto">
           <ItemsControl ItemsSource="{Binding Pending}">
             <ItemsControl.ItemTemplate>
@@ -400,8 +400,8 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
         </ScrollViewer>
-      </ui:TabViewItem>
+      </TabItem>
 
-    </ui:TabView>
+    </TabControl>
   </Grid>
 </UserControl>

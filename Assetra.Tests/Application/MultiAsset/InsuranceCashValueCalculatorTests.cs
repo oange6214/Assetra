@@ -1,5 +1,8 @@
 using Assetra.Application.MultiAsset;
+using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Interfaces.MultiAsset;
+using Assetra.Core.Models;
 using Assetra.Core.Models.MultiAsset;
 using Assetra.Core.Models.Sync;
 using Xunit;
@@ -81,6 +84,30 @@ public class InsuranceCashValueCalculatorTests
         Assert.Empty(summaries);
     }
 
+    [Fact]
+    public async Task Totals_WithFxAndBaseCurrency_ConvertBeforeSumming()
+    {
+        var twd = MakePolicy("TWD", 100_000m, annualPremium: 10_000m);
+        var usd = MakePolicy("USD", 1_000m, annualPremium: 100m) with { Currency = "USD" };
+        var calc = new InsuranceCashValueCalculator(
+            new StubPolicyRepo([twd, usd]),
+            new StubPremiumRepo([new InsurancePremiumRecord(Guid.NewGuid(), usd.Id, new DateOnly(2024, 1, 15), 50m, "USD", null)]),
+            new StubFx(("USD", "TWD"), 32m),
+            new StubSettings(new AppSettings(BaseCurrency: "TWD")));
+
+        var totalCashValue = await calc.GetTotalCashValueAsync();
+        var totalAnnualPremium = await calc.GetTotalAnnualPremiumAsync();
+        var summaries = await calc.GetCashValueSummariesAsync();
+
+        Assert.Equal(132_000m, totalCashValue);
+        Assert.Equal(13_200m, totalAnnualPremium);
+        var usdSummary = Assert.Single(summaries.Where(s => s.Policy.Id == usd.Id));
+        Assert.Equal(32_000m, usdSummary.CashValue);
+        Assert.Equal(1_600m, usdSummary.TotalPremiumsPaid);
+        Assert.Equal("TWD", usdSummary.Currency);
+        Assert.Equal(3_200m, usdSummary.AnnualPremium);
+    }
+
     // ── Stubs ──
 
     private sealed class StubPolicyRepo(IReadOnlyList<InsurancePolicy> data) : IInsurancePolicyRepository
@@ -100,5 +127,26 @@ public class InsuranceCashValueCalculatorTests
             Task.FromResult<IReadOnlyList<InsurancePremiumRecord>>(data.Where(r => r.PaidDate >= from && r.PaidDate <= to).ToList());
         public Task AddAsync(InsurancePremiumRecord record, CancellationToken ct = default) => Task.CompletedTask;
         public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    private sealed class StubFx((string From, string To) pair, decimal rate) : IMultiCurrencyValuationService
+    {
+        public Task<decimal?> ConvertAsync(decimal amount, string from, string to, DateOnly asOf, CancellationToken ct = default)
+            => Task.FromResult<decimal?>(
+                string.Equals(from, pair.From, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(to, pair.To, StringComparison.OrdinalIgnoreCase)
+                    ? amount * rate
+                    : amount);
+    }
+
+    private sealed class StubSettings(AppSettings current) : IAppSettingsService
+    {
+        public AppSettings Current { get; } = current;
+        public event Action? Changed
+        {
+            add { }
+            remove { }
+        }
+        public Task SaveAsync(AppSettings settings) => Task.CompletedTask;
     }
 }

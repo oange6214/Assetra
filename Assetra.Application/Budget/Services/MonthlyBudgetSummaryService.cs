@@ -1,5 +1,6 @@
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using CoreBudget = Assetra.Core.Models.Budget;
 
 namespace Assetra.Application.Budget.Services;
 
@@ -42,7 +43,9 @@ public sealed class MonthlyBudgetSummaryService
             .Where(IsExpenseTrade)
             .Sum(GetExpenseAmount);
 
-        var budgets = await _budgetRepository.GetByPeriodAsync(year, month, ct).ConfigureAwait(false);
+        var monthlyBudgets = await _budgetRepository.GetByPeriodAsync(year, month, ct).ConfigureAwait(false);
+        var yearlyBudgets = await _budgetRepository.GetByPeriodAsync(year, null, ct).ConfigureAwait(false);
+        var budgets = BuildEffectiveMonthlyBudgets(monthlyBudgets, yearlyBudgets);
         var totalBudget = budgets.FirstOrDefault(b => b.CategoryId is null)?.Amount;
         var budgetByCategory = budgets
             .Where(b => b.CategoryId.HasValue)
@@ -69,6 +72,24 @@ public sealed class MonthlyBudgetSummaryService
             .ToList();
 
         return new MonthlyBudgetSummary(year, month, totalIncome, totalExpense, totalBudget, categorySpend);
+    }
+
+    private static IReadOnlyList<CoreBudget> BuildEffectiveMonthlyBudgets(
+        IReadOnlyList<CoreBudget> monthlyBudgets,
+        IReadOnlyList<CoreBudget> yearlyBudgets)
+    {
+        var monthlyKeys = monthlyBudgets
+            .Select(b => b.CategoryId)
+            .ToHashSet();
+
+        var yearlyFallbacks = yearlyBudgets
+            .Where(b => b.Mode == BudgetMode.Yearly && !monthlyKeys.Contains(b.CategoryId))
+            .Select(b => b with
+            {
+                Amount = b.Amount / 12m,
+            });
+
+        return [.. monthlyBudgets, .. yearlyFallbacks];
     }
 
     private static bool IsIncomeTrade(Trade t) =>

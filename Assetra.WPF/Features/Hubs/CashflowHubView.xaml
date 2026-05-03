@@ -4,6 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
     xmlns:recurring="clr-namespace:Assetra.WPF.Features.Recurring"
+    xmlns:shell="clr-namespace:Assetra.WPF.Shell"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="{DynamicResource AppBackground}"
@@ -13,11 +15,15 @@
         CashflowHub — composes Categories + Recurring under one nav entry.
         DataContext = MainViewModel.
     -->
-    <TabControl Background="Transparent" BorderThickness="0">
-        <TabItem Header="{DynamicResource Nav.Categories}">
+    <TabControl
+        Background="Transparent"
+        BorderThickness="0"
+        SelectedValue="{Binding NavRail.SelectedCashflowTab, Mode=TwoWay}"
+        SelectedValuePath="Tag">
+        <TabItem Header="{DynamicResource Nav.Categories}" Tag="{x:Static shell:NavSection.Categories}">
             <categories:CategoriesView DataContext="{Binding Categories}" />
         </TabItem>
-        <TabItem Header="{DynamicResource Nav.Recurring}">
+        <TabItem Header="{DynamicResource Nav.Recurring}" Tag="{x:Static shell:NavSection.Recurring}">
             <recurring:RecurringView DataContext="{Binding Recurring}" />
         </TabItem>
     </TabControl>

@@ -2,7 +2,6 @@
     x:Class="Assetra.WPF.Features.Goals.GoalsView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="clr-namespace:Assetra.WPF.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -22,15 +21,22 @@
         </Grid.RowDefinitions>
 
         <!--  Header  -->
-        <TextBlock
+        <StackPanel
             Grid.Row="0"
-            Margin="0,0,0,16"
-            FontFamily="{StaticResource FontBase}"
-            FontSize="{DynamicResource FontSizeXl}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextPrimary}"
-            Text="{DynamicResource Goals.Title}"
-            Typography.NumeralAlignment="Tabular" />
+            Margin="0,0,0,16">
+            <TextBlock
+                FontFamily="{StaticResource FontBase}"
+                FontSize="{DynamicResource FontSizeXl}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource Goals.Title}"
+                Typography.NumeralAlignment="Tabular" />
+            <TextBlock
+                Margin="0,8,0,0"
+                Foreground="{DynamicResource AppDown}"
+                Text="{Binding ErrorMessage}"
+                Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}" />
+        </StackPanel>
 
         <!--  Goal list  -->
         <Border
@@ -86,21 +92,23 @@
                                             Grid.Column="1"
                                             VerticalAlignment="Center"
                                             Orientation="Horizontal">
-                                            <Button
+                                            <ui:Button
                                                 Margin="0,0,4,0"
                                                 Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}"
-                                                Style="{StaticResource BtnIcon}"
+                                                Padding="0"
+                                                Appearance="Transparent"
                                                 ToolTip="{DynamicResource Goals.Edit.Action}">
                                                 <ui:SymbolIcon FontSize="14" Symbol="Edit24" />
-                                            </Button>
-                                            <Button
+                                            </ui:Button>
+                                            <ui:Button
                                                 Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}"
-                                                Style="{StaticResource BtnIcon}"
+                                                Padding="0"
+                                                Appearance="Transparent"
                                                 ToolTip="{DynamicResource Goals.Delete.ConfirmTitle}">
                                                 <ui:SymbolIcon FontSize="14" Symbol="Dismiss24" />
-                                            </Button>
+                                            </ui:Button>
                                         </StackPanel>
 
                                         <!--  Numbers row  -->
@@ -212,7 +220,7 @@
 
                     <StackPanel Width="170" Margin="0,0,12,12">
                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Deadline}" />
-                        <controls:FormDatePicker SelectedDate="{Binding AddDeadline, Mode=TwoWay}" />
+                        <ui:CalendarDatePicker Date="{Binding AddDeadline, Mode=TwoWay}" />
                     </StackPanel>
 
                     <StackPanel Width="260" Margin="0,0,12,12">

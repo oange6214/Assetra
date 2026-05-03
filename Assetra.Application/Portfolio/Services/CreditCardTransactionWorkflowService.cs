@@ -38,6 +38,7 @@ public sealed class CreditCardTransactionWorkflowService : ICreditCardTransactio
             RealizedPnlPct: null,
             CashAmount: request.Amount,
             Note: NormalizeNote(request.Note),
+            CategoryId: request.CategoryId,
             LiabilityAssetId: request.CreditCardAssetId);
 
         await _transactionService.RecordAsync(trade).ConfigureAwait(false);

@@ -123,6 +123,73 @@ public sealed class CategoriesViewModelTests
             snackbar.LastWarning);
     }
 
+    [Fact]
+    public async Task ToggleArchiveAsync_BlocksRestoreWhenActiveDuplicateExists()
+    {
+        var archivedId = Guid.NewGuid();
+        var activeId = Guid.NewGuid();
+        var categoryRepo = new FakeCategoryRepo(
+        [
+            new ExpenseCategory(archivedId, "飲食", CategoryKind.Expense, null, "🍜", "#FF8800", 1, true),
+            new ExpenseCategory(activeId, "飲食", CategoryKind.Expense, null, "🍱", "#F59E0B", 2, false),
+        ]);
+        var snackbar = new FakeSnackbarService();
+        var vm = new CategoriesViewModel(
+            categoryRepo,
+            new FakeRuleRepo([]),
+            new FakeBudgetRepo([]),
+            new FakeTradeRepo(),
+            new FakeRecurringRepo(),
+            new FakePendingRepo(),
+            new BudgetRefreshNotifier(),
+            snackbar,
+            new FakeLocalizationService());
+
+        await vm.LoadAsync();
+        var archived = vm.Categories.Single(c => c.Id == archivedId);
+
+        await vm.ToggleArchiveCommand.ExecuteAsync(archived);
+
+        Assert.True(archived.IsArchived);
+        Assert.Equal("已存在同名分類", snackbar.LastWarning);
+    }
+
+    [Fact]
+    public async Task SaveEditAsync_RefreshesBudgetCategoryDisplay()
+    {
+        var categoryId = Guid.NewGuid();
+        var categoryRepo = new FakeCategoryRepo(
+        [
+            new ExpenseCategory(categoryId, "飲食", CategoryKind.Expense, null, "🍜", "#FF8800", 1, false)
+        ]);
+        var budgetRepo = new FakeBudgetRepo(
+        [
+            new Budget(Guid.NewGuid(), categoryId, BudgetMode.Monthly, 2026, 4, 5000m)
+        ]);
+        var vm = new CategoriesViewModel(
+            categoryRepo,
+            new FakeRuleRepo([]),
+            budgetRepo,
+            new FakeTradeRepo(),
+            new FakeRecurringRepo(),
+            new FakePendingRepo(),
+            new BudgetRefreshNotifier(),
+            new FakeSnackbarService(),
+            new FakeLocalizationService());
+
+        await vm.LoadAsync();
+        var row = vm.Categories.Single();
+        var budget = vm.Budgets.Single();
+        Assert.Equal("🍜 飲食", budget.CategoryDisplay);
+
+        row.EnterEditMode();
+        row.EditName = "餐飲";
+        row.EditIcon = "🍱";
+        await vm.SaveEditCommand.ExecuteAsync(row);
+
+        Assert.Equal("🍱 餐飲", budget.CategoryDisplay);
+    }
+
     private sealed class FakeCategoryRepo(List<ExpenseCategory> seed) : ICategoryRepository
     {
         private readonly List<ExpenseCategory> _store = [..seed];

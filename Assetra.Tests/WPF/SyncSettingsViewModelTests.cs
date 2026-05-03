@@ -25,8 +25,10 @@ public class SyncSettingsViewModelTests
             new Mock<IConflictResolver>().Object,
             Path.Combine(Path.GetTempPath(), $"sync-meta-{Guid.NewGuid():N}.json"));
 
-    private SyncSettingsViewModel CreateVm(SyncCoordinator? coord = null) =>
-        new(_settings.Object, coord ?? CreateCoordinator(), new SyncPassphraseCache());
+    private SyncSettingsViewModel CreateVm(
+        SyncCoordinator? coord = null,
+        SyncPassphraseCache? passphraseCache = null) =>
+        new(_settings.Object, coord ?? CreateCoordinator(), passphraseCache ?? new SyncPassphraseCache());
 
     [Fact]
     public void Reload_PopulatesFromAppSettings()
@@ -85,5 +87,19 @@ public class SyncSettingsViewModelTests
         Assert.True(saved!.SyncEnabled);
         Assert.Equal("https://x", saved.SyncBackendUrl);
         Assert.Equal("tok", saved.SyncAuthToken);
+    }
+
+    [Fact]
+    public async Task SaveSettingsCommand_WhenBackgroundCacheDisabled_ClearsCachedPassphrase()
+    {
+        _settings.Setup(s => s.Current).Returns(new AppSettings());
+        var cache = new SyncPassphraseCache();
+        cache.Set("secret");
+        var vm = CreateVm(passphraseCache: cache);
+
+        vm.CachePassphraseForBackground = false;
+        await vm.SaveSettingsCommand.ExecuteAsync(null);
+
+        Assert.False(cache.TryGet(out _));
     }
 }

@@ -61,10 +61,11 @@ internal sealed class PortfolioSellPanelController
 
         decimal sellCommission;
         decimal? sellDiscount;
-        if (!string.IsNullOrWhiteSpace(manualFeeInput) &&
-            ParseHelpers.TryParseDecimal(manualFeeInput, out var manualFee) &&
-            manualFee >= 0)
+        if (!string.IsNullOrWhiteSpace(manualFeeInput))
         {
+            if (!ParseHelpers.TryParseDecimal(manualFeeInput, out var manualFee) || manualFee < 0)
+                return new SellPanelSubmitState(null, "手續費無效");
+
             sellCommission = manualFee;
             sellDiscount = null;
         }

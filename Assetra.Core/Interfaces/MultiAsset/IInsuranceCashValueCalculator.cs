@@ -23,4 +23,6 @@ public interface IInsuranceCashValueCalculator
 public sealed record InsuranceCashValueSummary(
     InsurancePolicy Policy,
     decimal CashValue,
-    decimal TotalPremiumsPaid);
+    decimal TotalPremiumsPaid,
+    string? Currency = null,
+    decimal? AnnualPremium = null);

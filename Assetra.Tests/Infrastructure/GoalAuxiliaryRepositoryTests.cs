@@ -130,4 +130,24 @@ public class GoalAuxiliaryRepositoryTests : IDisposable
 
         Assert.Equal(2, (await repo.GetAllAsync()).Count);
     }
+
+    [Fact]
+    public async Task GoalRemove_CascadesMilestonesAndFundingRules()
+    {
+        var goalRepo = new GoalSqliteRepository(_dbPath);
+        var milestoneRepo = new GoalMilestoneSqliteRepository(_dbPath);
+        var ruleRepo = new GoalFundingRuleSqliteRepository(_dbPath);
+        var goalId = await CreateGoalAsync();
+
+        await milestoneRepo.AddAsync(new GoalMilestone(
+            Guid.NewGuid(), goalId, new DateOnly(2027, 6, 30), 250_000m, "Halfway", false));
+        await ruleRepo.AddAsync(new GoalFundingRule(
+            Guid.NewGuid(), goalId, 5_000m, RecurrenceFrequency.Monthly,
+            null, new DateOnly(2026, 1, 1), null, true));
+
+        await goalRepo.RemoveAsync(goalId);
+
+        Assert.Empty(await milestoneRepo.GetByGoalAsync(goalId));
+        Assert.Empty(await ruleRepo.GetByGoalAsync(goalId));
+    }
 }

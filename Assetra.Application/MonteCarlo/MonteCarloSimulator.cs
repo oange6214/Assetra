@@ -5,7 +5,7 @@ namespace Assetra.Application.MonteCarlo;
 
 /// <summary>
 /// 退休現金流 Monte Carlo 模擬器。
-/// 每年報酬以常態分佈 N(μ, σ²) 抽樣，採用 Box-Muller 轉換。
+/// 每年簡單報酬以對數常態分佈抽樣，採用 Box-Muller 轉換產生 log return。
 /// 路徑：balance_{t+1} = (balance_t − withdrawal) × (1 + return_t)。
 /// 成功 = 模擬期末餘額 ≥ 0 且過程未跌破 0。
 /// </summary>
@@ -16,12 +16,25 @@ public sealed class MonteCarloSimulator : IMonteCarloSimulator
         ArgumentNullException.ThrowIfNull(inputs);
         if (inputs.Years <= 0)
             throw new ArgumentOutOfRangeException(nameof(inputs.Years), "Years must be positive.");
+        if (inputs.Years > MonteCarloInputs.MaxYears)
+            throw new ArgumentOutOfRangeException(
+                nameof(inputs.Years),
+                $"Years must be <= {MonteCarloInputs.MaxYears}.");
         if (inputs.SimulationCount <= 0)
             throw new ArgumentOutOfRangeException(nameof(inputs.SimulationCount), "SimulationCount must be positive.");
+        if (inputs.SimulationCount > MonteCarloInputs.MaxSimulationCount)
+            throw new ArgumentOutOfRangeException(
+                nameof(inputs.SimulationCount),
+                $"SimulationCount must be <= {MonteCarloInputs.MaxSimulationCount}.");
+        if (inputs.AnnualReturnStdDev < 0)
+            throw new ArgumentOutOfRangeException(nameof(inputs.AnnualReturnStdDev), "AnnualReturnStdDev must be non-negative.");
+        if (inputs.MeanAnnualReturn <= -1)
+            throw new ArgumentOutOfRangeException(nameof(inputs.MeanAnnualReturn), "MeanAnnualReturn must be greater than -100%.");
 
         var rng = inputs.RandomSeed is int seed ? new Random(seed) : new Random();
         var mean = (double)inputs.MeanAnnualReturn;
         var stdDev = (double)inputs.AnnualReturnStdDev;
+        var (logMean, logStdDev) = ToLogReturnParameters(mean, stdDev);
         var withdrawal = (double)inputs.AnnualWithdrawal;
         var initial = (double)inputs.InitialBalance;
 
@@ -38,7 +51,7 @@ public sealed class MonteCarloSimulator : IMonteCarloSimulator
 
             for (int y = 1; y <= inputs.Years; y++)
             {
-                var r = NextNormal(rng, mean, stdDev);
+                var r = NextLogNormalSimpleReturn(rng, logMean, logStdDev);
                 balance = (balance - withdrawal) * (1.0 + r);
                 if (balance < 0)
                 {
@@ -76,13 +89,26 @@ public sealed class MonteCarloSimulator : IMonteCarloSimulator
             MedianBalancePath: medianPath);
     }
 
-    private static double NextNormal(Random rng, double mean, double stdDev)
+    private static double NextLogNormalSimpleReturn(Random rng, double logMean, double logStdDev)
     {
-        // Box-Muller: two uniforms → one standard normal
+        // Box-Muller: two uniforms -> one standard normal log return.
         double u1 = 1.0 - rng.NextDouble();
         double u2 = 1.0 - rng.NextDouble();
         double z = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Cos(2.0 * Math.PI * u2);
-        return mean + stdDev * z;
+        return Math.Exp(logMean + logStdDev * z) - 1.0;
+    }
+
+    private static (double Mean, double StdDev) ToLogReturnParameters(double mean, double stdDev)
+    {
+        if (stdDev == 0)
+            return (Math.Log(1.0 + mean), 0.0);
+
+        var onePlusMean = 1.0 + mean;
+        var variance = stdDev * stdDev;
+        var logVariance = Math.Log(1.0 + variance / (onePlusMean * onePlusMean));
+        var logStdDev = Math.Sqrt(logVariance);
+        var logMean = Math.Log(onePlusMean) - logVariance / 2.0;
+        return (logMean, logStdDev);
     }
 
     private static double Percentile(double[] sorted, double p)

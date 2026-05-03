@@ -33,18 +33,21 @@ public sealed class CreditCardTransactionWorkflowServiceTests
             .Returns(Task.CompletedTask);
 
         var service = new CreditCardTransactionWorkflowService(assetRepo.Object, tx.Object);
+        var categoryId = Guid.NewGuid();
         var result = await service.ChargeAsync(new CreditCardChargeRequest(
             cardId,
             "Cube",
             new DateTime(2026, 4, 23, 10, 0, 0, DateTimeKind.Local),
             1234m,
-            " Uber Eats "));
+            " Uber Eats ",
+            categoryId));
 
         Assert.NotNull(recorded);
         Assert.Equal(TradeType.CreditCardCharge, recorded!.Type);
         Assert.Equal(cardId, recorded.LiabilityAssetId);
         Assert.Equal(1234m, recorded.CashAmount);
         Assert.Equal("Uber Eats", recorded.Note);
+        Assert.Equal(categoryId, recorded.CategoryId);
         Assert.Equal(recorded, result.Trade);
     }
 

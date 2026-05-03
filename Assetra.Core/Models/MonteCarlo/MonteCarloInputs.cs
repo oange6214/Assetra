@@ -17,4 +17,8 @@ public sealed record MonteCarloInputs(
     decimal AnnualReturnStdDev,
     int Years,
     int SimulationCount = 1_000,
-    int? RandomSeed = null);
+    int? RandomSeed = null)
+{
+    public const int MaxYears = 100;
+    public const int MaxSimulationCount = 100_000;
+}

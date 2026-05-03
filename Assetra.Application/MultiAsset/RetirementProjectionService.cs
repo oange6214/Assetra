@@ -1,3 +1,5 @@
+using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Interfaces.MultiAsset;
 using Assetra.Core.Models.MultiAsset;
 
@@ -10,21 +12,31 @@ public sealed class RetirementProjectionService : IRetirementProjectionService
 {
     private readonly IRetirementAccountRepository _accounts;
     private readonly IRetirementContributionRepository _contributions;
+    private readonly IMultiCurrencyValuationService? _fx;
+    private readonly IAppSettingsService? _settings;
 
     public RetirementProjectionService(
         IRetirementAccountRepository accounts,
-        IRetirementContributionRepository contributions)
+        IRetirementContributionRepository contributions,
+        IMultiCurrencyValuationService? fx = null,
+        IAppSettingsService? settings = null)
     {
         ArgumentNullException.ThrowIfNull(accounts);
         ArgumentNullException.ThrowIfNull(contributions);
         _accounts = accounts;
         _contributions = contributions;
+        _fx = fx;
+        _settings = settings;
     }
 
     public async Task<decimal> GetTotalBalanceAsync(CancellationToken ct = default)
     {
         var all = await _accounts.GetAllAsync(ct).ConfigureAwait(false);
-        return all.Where(a => a.Status == RetirementAccountStatus.Active).Sum(a => a.Balance);
+        var total = 0m;
+        var asOf = DateOnly.FromDateTime(DateTime.Today);
+        foreach (var account in all.Where(a => a.Status == RetirementAccountStatus.Active))
+            total += await ConvertToBaseOrOriginalAsync(account.Balance, account.Currency, asOf, ct).ConfigureAwait(false);
+        return total;
     }
 
     public async Task<RetirementProjection?> ProjectAsync(
@@ -80,5 +92,26 @@ public sealed class RetirementProjectionService : IRetirementProjectionService
             results.Add(new RetirementAccountSummary(account, latestTotal));
         }
         return results;
+    }
+
+    private string? GetBaseCurrency() => _settings?.Current.BaseCurrency;
+
+    private async Task<decimal> ConvertToBaseOrOriginalAsync(
+        decimal amount,
+        string fromCurrency,
+        DateOnly asOf,
+        CancellationToken ct)
+    {
+        var baseCurrency = GetBaseCurrency();
+        if (_fx is null
+            || string.IsNullOrWhiteSpace(baseCurrency)
+            || string.IsNullOrWhiteSpace(fromCurrency)
+            || string.Equals(fromCurrency, baseCurrency, StringComparison.OrdinalIgnoreCase))
+        {
+            return amount;
+        }
+
+        var converted = await _fx.ConvertAsync(amount, fromCurrency, baseCurrency, asOf, ct).ConfigureAwait(false);
+        return converted ?? amount;
     }
 }

@@ -17,5 +17,6 @@ public interface IImportRowMapper
         ImportSourceKind kind,
         ImportApplyOptions options,
         IList<string> warnings,
-        IReadOnlyList<AutoCategorizationRule>? rules = null);
+        IReadOnlyList<AutoCategorizationRule>? rules = null,
+        IReadOnlyList<ExpenseCategory>? categories = null);
 }

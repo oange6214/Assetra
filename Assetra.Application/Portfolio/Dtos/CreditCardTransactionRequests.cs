@@ -7,7 +7,8 @@ public sealed record CreditCardChargeRequest(
     string CardName,
     DateTime TradeDate,
     decimal Amount,
-    string? Note);
+    string? Note,
+    Guid? CategoryId = null);
 
 public sealed record CreditCardPaymentRequest(
     Guid CreditCardAssetId,

@@ -357,11 +357,11 @@
                 IsChecked="{Binding ShowArchived}" />
         </DockPanel>
 
-        <ui:TabView
+        <TabControl
             Grid.Row="1"
             Background="Transparent"
             BorderThickness="0">
-            <ui:TabViewItem Header="{DynamicResource Categories.Tab.Categories}">
+            <TabItem Header="{DynamicResource Categories.Tab.Categories}">
                 <Grid Margin="0,12,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
@@ -551,9 +551,9 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-            </ui:TabViewItem>
+            </TabItem>
 
-            <ui:TabViewItem Header="{DynamicResource Categories.Tab.Rules}">
+            <TabItem Header="{DynamicResource Categories.Tab.Rules}">
                 <Grid Margin="0,12,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -1141,9 +1141,9 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-            </ui:TabViewItem>
+            </TabItem>
 
-            <ui:TabViewItem Header="{DynamicResource Categories.Tab.Budgets}">
+            <TabItem Header="{DynamicResource Categories.Tab.Budgets}">
                 <Grid Margin="0,12,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -1509,7 +1509,7 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-            </ui:TabViewItem>
-        </ui:TabView>
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>

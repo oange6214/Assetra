@@ -149,6 +149,23 @@ public class ApplyResolutionAsyncTests
     }
 
     [Fact]
+    public async Task OverwrittenFromStatement_KeepsWithdrawalCashAmountPositive()
+    {
+        var tradeId = Guid.NewGuid();
+        var seed = NewTrade(tradeId, cashAmount: 1000m) with { Type = TradeType.Withdrawal };
+        var row = Row(-1234.56m);
+        var diff = Diff(ReconciliationDiffKind.AmountMismatch, row: row, tradeId: tradeId);
+        var (svc, _, trades, _) = BuildServiceWithDiff(diff, seedTrade: seed);
+
+        await svc.ApplyResolutionAsync(
+            diff.Id, ReconciliationDiffResolution.OverwrittenFromStatement, note: null,
+            sourceKind: null, options: null);
+
+        var updated = Assert.Single(trades.Updated);
+        Assert.Equal(1234.56m, updated.CashAmount);
+    }
+
+    [Fact]
     public async Task OverwrittenFromStatement_WhenTradeMissing_Throws()
     {
         var row = Row(1234.56m);

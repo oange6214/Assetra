@@ -16,6 +16,16 @@ public sealed class FireCalculatorService : IFireCalculatorService
 
         if (inputs.WithdrawalRate <= 0m)
             throw new ArgumentOutOfRangeException(nameof(inputs.WithdrawalRate), "Withdrawal rate must be positive.");
+        if (inputs.WithdrawalRate > 1m)
+            throw new ArgumentOutOfRangeException(nameof(inputs.WithdrawalRate), "Withdrawal rate must be less than or equal to 100%.");
+        if (inputs.AnnualExpenses <= 0m)
+            throw new ArgumentOutOfRangeException(nameof(inputs.AnnualExpenses), "Annual expenses must be positive.");
+        if (inputs.CurrentNetWorth < 0m)
+            throw new ArgumentOutOfRangeException(nameof(inputs.CurrentNetWorth), "Current net worth cannot be negative.");
+        if (inputs.AnnualSavings < 0m)
+            throw new ArgumentOutOfRangeException(nameof(inputs.AnnualSavings), "Annual savings cannot be negative.");
+        if (inputs.ExpectedAnnualReturn <= -1m)
+            throw new ArgumentOutOfRangeException(nameof(inputs.ExpectedAnnualReturn), "Expected annual return must be greater than -100%.");
         if (inputs.MaxYears <= 0)
             throw new ArgumentOutOfRangeException(nameof(inputs.MaxYears), "MaxYears must be positive.");
 

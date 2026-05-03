@@ -15,17 +15,20 @@ public sealed class DefaultImportRowApplier : IImportRowApplier
     private readonly ITradeRepository _trades;
     private readonly IImportRowMapper _mapper;
     private readonly IAutoCategorizationRuleRepository? _rules;
+    private readonly ICategoryRepository? _categories;
 
     public DefaultImportRowApplier(
         ITradeRepository trades,
         IImportRowMapper mapper,
-        IAutoCategorizationRuleRepository? rules = null)
+        IAutoCategorizationRuleRepository? rules = null,
+        ICategoryRepository? categories = null)
     {
         ArgumentNullException.ThrowIfNull(trades);
         ArgumentNullException.ThrowIfNull(mapper);
         _trades = trades;
         _mapper = mapper;
         _rules = rules;
+        _categories = categories;
     }
 
     public async Task<Guid?> ApplyAsync(
@@ -45,8 +48,13 @@ public sealed class DefaultImportRowApplier : IImportRowApplier
         {
             ruleSnapshot = await _rules.GetAllAsync(ct).ConfigureAwait(false);
         }
+        IReadOnlyList<ExpenseCategory>? categorySnapshot = null;
+        if (_categories is not null)
+        {
+            categorySnapshot = await _categories.GetAllAsync(ct).ConfigureAwait(false);
+        }
 
-        var trade = _mapper.Map(row, sourceKind, options, sink, ruleSnapshot);
+        var trade = _mapper.Map(row, sourceKind, options, sink, ruleSnapshot, categorySnapshot);
         if (trade is null) return null;
 
         await _trades.AddAsync(trade).ConfigureAwait(false);

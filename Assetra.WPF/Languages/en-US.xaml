@@ -7,9 +7,9 @@
     <sys:String x:Key="App.Title">Assetra</sys:String>
 
     <!--  Shared controls  -->
-    <sys:String x:Key="ColorPicker.Presets">Presets</sys:String>
-    <sys:String x:Key="ColorPicker.Apply">Apply</sys:String>
-    <sys:String x:Key="ColorPicker.HexInvalid">Enter a 6-digit hex color (e.g. #3B82F6)</sys:String>
+    <sys:String x:Key="HexColorPicker.Presets">Presets</sys:String>
+    <sys:String x:Key="HexColorPicker.Apply">Apply</sys:String>
+    <sys:String x:Key="HexColorPicker.HexInvalid">Enter a 6-digit hex color (e.g. #3B82F6)</sys:String>
 
     <!--  Splash  -->
     <sys:String x:Key="Splash.Init">Initializing…</sys:String>
@@ -603,6 +603,7 @@
     <sys:String x:Key="Settings.QuoteSource">Live quote source</sys:String>
     <sys:String x:Key="Settings.FugleApiKeyHint">Paste your Fugle API key here and click Save to enable Fugle as a data source in Settings.</sys:String>
     <sys:String x:Key="Settings.DataSource.Saved">Data source settings saved</sys:String>
+    <sys:String x:Key="Settings.SaveFailed">Settings could not be saved.</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Tooltip">View how to apply for and configure a Fugle API key</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Title">Fugle API Key Help</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Subtitle">Quickly view the application steps and setup flow inside the app.</sys:String>
@@ -876,10 +877,14 @@
     <sys:String x:Key="Recurring.Field.Type">Type</sys:String>
     <sys:String x:Key="Recurring.Field.Amount">Amount</sys:String>
     <sys:String x:Key="Recurring.Field.Frequency">Frequency</sys:String>
+    <sys:String x:Key="Recurring.Field.Interval">Every</sys:String>
+    <sys:String x:Key="Recurring.Field.StartDate">Starts</sys:String>
     <sys:String x:Key="Recurring.Field.Mode">Handling mode</sys:String>
+    <sys:String x:Key="Recurring.Field.Note">Note</sys:String>
     <sys:String x:Key="Recurring.Add">Add</sys:String>
     <sys:String x:Key="Recurring.NameHint">Name</sys:String>
     <sys:String x:Key="Recurring.AmountHint">Amount</sys:String>
+    <sys:String x:Key="Recurring.IntervalHint">Repeat every N frequency units</sys:String>
     <sys:String x:Key="Recurring.Error.NameRequired">Name is required</sys:String>
     <sys:String x:Key="Recurring.Error.AmountRequired">Amount must be greater than 0</sys:String>
     <sys:String x:Key="Recurring.Error.IntervalInvalid">Interval must be ≥ 1</sys:String>
@@ -952,6 +957,7 @@
     <sys:String x:Key="Goals.Delete.ConfirmMessage">Delete "{0}"? This cannot be undone.</sys:String>
     <sys:String x:Key="Goals.Error.NameRequired">Please enter a goal name</sys:String>
     <sys:String x:Key="Goals.Error.TargetAmountInvalid">Please enter a target amount greater than 0</sys:String>
+    <sys:String x:Key="Goals.Error.CurrentAmountInvalid">Please enter a current amount of 0 or greater</sys:String>
     <sys:String x:Key="Goals.Deadline.DaysRemaining">{0}d left</sys:String>
     <sys:String x:Key="Goals.Deadline.Overdue">Overdue</sys:String>
 
@@ -964,6 +970,7 @@
     <sys:String x:Key="Reconciliation.SignOff">Sign Off</sys:String>
     <sys:String x:Key="Reconciliation.Col.Kind">Kind</sys:String>
     <sys:String x:Key="Reconciliation.Col.Date">Date</sys:String>
+    <sys:String x:Key="Reconciliation.Col.Trade">Trade</sys:String>
     <sys:String x:Key="Reconciliation.Col.Amount">Amount</sys:String>
     <sys:String x:Key="Reconciliation.Col.Counterparty">Counterparty</sys:String>
     <sys:String x:Key="Reconciliation.Col.Resolution">Resolution</sys:String>
@@ -993,6 +1000,7 @@
     <sys:String x:Key="Reconciliation.Error.BatchRequired">Pick an existing batch.</sys:String>
     <sys:String x:Key="Reconciliation.Error.FileOrServiceRequired">Pick a file first, or make sure import services are available.</sys:String>
     <sys:String x:Key="Reconciliation.Error.UnsupportedFileType">Unsupported file type.</sys:String>
+    <sys:String x:Key="Reconciliation.Error.NoStatementRows">No statement rows are available for this reconciliation source.</sys:String>
     <sys:String x:Key="Reconciliation.Balance.Title">Balance Reconciliation</sys:String>
     <sys:String x:Key="Reports.IncomeStatement.Title">Income Statement</sys:String>
     <sys:String x:Key="Reports.BalanceSheet.Title">Balance Sheet</sys:String>
@@ -1079,9 +1087,12 @@
     <sys:String x:Key="Insurance.Form.Insurer">Insurer</sys:String>
     <sys:String x:Key="Insurance.Form.Type">Type</sys:String>
     <sys:String x:Key="Insurance.Form.FaceValue">Face Value</sys:String>
-    <sys:String x:Key="Insurance.Form.CashValue">Cash Value</sys:String>
-    <sys:String x:Key="Insurance.Form.AnnualPremium">Annual Premium</sys:String>
-    <sys:String x:Key="Insurance.Form.Currency">Currency</sys:String>
+<sys:String x:Key="Insurance.Form.CashValue">Cash Value</sys:String>
+<sys:String x:Key="Insurance.Form.AnnualPremium">Annual Premium</sys:String>
+<sys:String x:Key="Insurance.Form.Currency">Currency</sys:String>
+<sys:String x:Key="Insurance.Form.StartDate">Start Date</sys:String>
+<sys:String x:Key="Insurance.Form.MaturityDate">Maturity Date</sys:String>
+<sys:String x:Key="Insurance.Form.Notes">Notes</sys:String>
 
     <!-- v0.24 Retirement -->
     <sys:String x:Key="Retirement.Title">Retirement Accounts</sys:String>
@@ -1142,6 +1153,7 @@
     <sys:String x:Key="Fire.Input.Return">Expected Annual Return</sys:String>
     <sys:String x:Key="Fire.Input.WithdrawalRate">Withdrawal Rate</sys:String>
     <sys:String x:Key="Fire.Calculate">Calculate</sys:String>
+    <sys:String x:Key="Fire.SaveToGoals">Sync to Goals</sys:String>
     <sys:String x:Key="Fire.Result.FireNumber">FIRE Number</sys:String>
     <sys:String x:Key="Fire.Result.YearsToFire">Years to FIRE</sys:String>
     <sys:String x:Key="Fire.Result.Projected">Net Worth at FIRE</sys:String>

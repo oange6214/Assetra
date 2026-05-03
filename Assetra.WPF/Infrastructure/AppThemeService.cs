@@ -35,31 +35,30 @@ public sealed class AppThemeService : IThemeService
 
     private static void ApplyInternal(ApplicationTheme theme)
     {
-        // 1. Swap WPF-UI's own ThemesDictionary (Light / Dark control styles)
-        // We do this MANUALLY instead of calling ApplicationThemeManager.Apply()
-        // because that method also runs destructive DWM operations
-        // (RemoveWindowCaption, RemoveBackdrop, RemoveTitlebarBackground,
-        //  SetCurrentValue(Background, Transparent)) that produce a white
-        // overlay and destroy our DynamicResource background bindings.
+        // 1. Swap WPF-UI's own ThemesDictionary (Light / Dark control styles).
+        // Keep this resource-only for now: ApplicationThemeManager.Apply()
+        // also takes over the FluentWindow chrome/backdrop and requires
+        // ExtendsContentIntoTitleBar=True. Assetra still has a custom shell
+        // (TitleBar + NavRail + content grid), so that runtime chrome handoff
+        // can collapse the shell into a blank/unstyled surface.
         SwapWpfUiThemeDictionary(theme);
 
-        // 2. Update WPF-UI accent colour resources
+        // 2. Update WPF-UI accent colour resources.
         ApplicationAccentColorManager.Apply(
             ApplicationAccentColorManager.GetColorizationColor(), theme);
 
-        // 3. Swap our custom palette (Dark.xaml ↔ Light.xaml)
+        // 3. Swap Assetra's semantic palette (Dark.xaml <-> Light.xaml). These
+        // tokens intentionally stay as aliases above WPF-UI's control resources.
         SwapCustomDictionary(theme);
 
-        // 4. Re-apply colour-scheme convention (Taiwan / International)
+        // 4. Re-apply colour-scheme convention (Taiwan / International).
         ColorSchemeService.ReapplyCurrentScheme(theme);
     }
 
-    // WPF-UI ThemesDictionary swap
+    // WPF-UI ThemesDictionary resource-only swap
 
     /// <summary>
     /// In-place replacement of the WPF-UI theme resource dictionary.
-    /// Equivalent to what <c>ResourceDictionaryManager.UpdateDictionary("theme", uri)</c>
-    /// does inside WPF-UI, but without any window/DWM side-effects.
     /// </summary>
     private static void SwapWpfUiThemeDictionary(ApplicationTheme theme)
     {

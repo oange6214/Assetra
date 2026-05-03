@@ -4,6 +4,7 @@ using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Services;
 using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Infrastructure;
 using Assetra.Infrastructure.Http;
@@ -83,7 +84,9 @@ internal static class PortfolioServiceCollectionExtensions
         services.AddSingleton<IFinancialOverviewQueryService>(sp =>
             new FinancialOverviewQueryService(
                 sp.GetRequiredService<IAssetRepository>(),
-                sp.GetRequiredService<IBalanceQueryService>()));
+                sp.GetRequiredService<IBalanceQueryService>(),
+                sp.GetService<IMultiCurrencyValuationService>(),
+                sp.GetService<IAppSettingsService>()));
         services.AddSingleton<IPortfolioHistoryMaintenanceService>(sp =>
             new PortfolioHistoryMaintenanceService(
                 sp.GetRequiredService<PortfolioSnapshotService>(),
@@ -150,6 +153,7 @@ internal static class PortfolioServiceCollectionExtensions
                 Load: sp.GetRequiredService<IPortfolioLoadService>(),
                 History: sp.GetRequiredService<IStockHistoryProvider>(),
                 Currency: sp.GetRequiredService<ICurrencyService>(),
+                Fx: sp.GetService<IMultiCurrencyValuationService>(),
                 Crypto: sp.GetRequiredService<ICryptoService>(),
                 BalanceQuery: sp.GetRequiredService<IBalanceQueryService>(),
                 PositionQuery: sp.GetRequiredService<IPositionQueryService>(),

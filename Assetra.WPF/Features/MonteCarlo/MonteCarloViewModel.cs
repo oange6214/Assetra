@@ -32,34 +32,40 @@ public sealed partial class MonteCarloViewModel : ObservableObject
         _simulator = simulator;
     }
 
-    [RelayCommand]
+    private bool CanRun() => !IsRunning;
+
+    partial void OnIsRunningChanged(bool value) => RunCommand.NotifyCanExecuteChanged();
+
+    [RelayCommand(CanExecute = nameof(CanRun))]
     private async Task RunAsync()
     {
+        if (IsRunning)
+            return;
+
         ErrorMessage = null;
         if (!decimal.TryParse(InitialBalance, out var init))   { ErrorMessage = "起始餘額格式錯誤"; return; }
         if (!decimal.TryParse(AnnualWithdrawal, out var wd))   { ErrorMessage = "年提領格式錯誤"; return; }
-        if (!decimal.TryParse(MeanReturn, out var mu))         { ErrorMessage = "平均報酬率格式錯誤"; return; }
+        if (!decimal.TryParse(MeanReturn, out var mu) || mu <= -1m) { ErrorMessage = "平均報酬率必須 > -100%"; return; }
         if (!decimal.TryParse(StdDev, out var sigma) || sigma < 0) { ErrorMessage = "標準差必須 ≥ 0"; return; }
         if (!int.TryParse(Years, out var years) || years <= 0) { ErrorMessage = "年數必須 > 0"; return; }
+        if (years > MonteCarloInputs.MaxYears) { ErrorMessage = $"年數必須 ≤ {MonteCarloInputs.MaxYears}"; return; }
         if (!int.TryParse(SimulationCount, out var count) || count <= 0) { ErrorMessage = "模擬次數必須 > 0"; return; }
+        if (count > MonteCarloInputs.MaxSimulationCount) { ErrorMessage = $"模擬次數必須 ≤ {MonteCarloInputs.MaxSimulationCount:N0}"; return; }
 
         IsRunning = true;
         try
         {
             var inputs = new MonteCarloInputs(init, wd, mu, sigma, years, count);
-            var result = await Task.Run(() => _simulator.Simulate(inputs)).ConfigureAwait(false);
+            var result = await Task.Run(() => _simulator.Simulate(inputs));
 
-            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
-            {
-                SuccessRate = result.SuccessRate;
-                MedianEnding = result.MedianEndingBalance;
-                P10Ending = result.P10EndingBalance;
-                P90Ending = result.P90EndingBalance;
+            SuccessRate = result.SuccessRate;
+            MedianEnding = result.MedianEndingBalance;
+            P10Ending = result.P10EndingBalance;
+            P90Ending = result.P90EndingBalance;
 
-                MedianPath.Clear();
-                for (int i = 0; i < result.MedianBalancePath.Count; i++)
-                    MedianPath.Add(new MonteCarloPathPoint(i, result.MedianBalancePath[i]));
-            });
+            MedianPath.Clear();
+            for (int i = 0; i < result.MedianBalancePath.Count; i++)
+                MedianPath.Add(new MonteCarloPathPoint(i, result.MedianBalancePath[i]));
         }
         finally
         {

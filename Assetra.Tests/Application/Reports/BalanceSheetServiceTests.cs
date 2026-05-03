@@ -1,7 +1,10 @@
 using Assetra.Application.Reports.Statements;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Analysis;
+using Assetra.Core.Interfaces.MultiAsset;
 using Assetra.Core.Models;
+using Assetra.Core.Models.MultiAsset;
+using Assetra.Core.Models.Sync;
 using Xunit;
 
 namespace Assetra.Tests.Application.Reports;
@@ -104,6 +107,68 @@ public class BalanceSheetServiceTests
         var bs = await svc.GenerateAsync(new DateOnly(2026, 4, 30));
 
         Assert.Equal(32000m, bs.Assets.Total);
+    }
+
+    [Fact]
+    public async Task GenerateAsync_RealEstatePurchasedAfterAsOf_IsNotIncluded()
+    {
+        var property = new RealEstate(
+            Guid.NewGuid(),
+            "Future House",
+            "Taipei",
+            8_000_000m,
+            new DateOnly(2026, 5, 1),
+            10_000_000m,
+            2_000_000m,
+            "TWD",
+            false,
+            RealEstateStatus.Active,
+            null,
+            new EntityVersion());
+
+        var svc = new BalanceSheetService(
+            new FakeAssetRepo(),
+            new FakeTradeRepo(),
+            realEstate: new FakeRealEstateRepo([property]));
+
+        var bs = await svc.GenerateAsync(new DateOnly(2026, 4, 30));
+
+        Assert.DoesNotContain(bs.Assets.Rows, r => r.Group == "Real Estate");
+        Assert.Equal(0m, bs.Assets.Total);
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ConvertsForeignRealEstateToBaseCurrency()
+    {
+        var property = new RealEstate(
+            Guid.NewGuid(),
+            "USD House",
+            "New York",
+            1000m,
+            new DateOnly(2020, 1, 1),
+            1000m,
+            250m,
+            "USD",
+            false,
+            RealEstateStatus.Active,
+            null,
+            new EntityVersion());
+        var fx = new StubFx(new Dictionary<(string, string), decimal>
+        {
+            { ("USD", "TWD"), 32m },
+        });
+        var svc = new BalanceSheetService(
+            new FakeAssetRepo(),
+            new FakeTradeRepo(),
+            snapshots: null,
+            fx: fx,
+            settings: new FakeSettings("TWD"),
+            realEstate: new FakeRealEstateRepo([property]));
+
+        var bs = await svc.GenerateAsync(new DateOnly(2026, 4, 30));
+
+        Assert.Equal(24000m, bs.Assets.Total);
+        Assert.Equal(24000m, bs.Assets.Rows.Single(r => r.Group == "Real Estate").Amount);
     }
 
     private sealed class StubFx : IMultiCurrencyValuationService
@@ -223,5 +288,14 @@ public class BalanceSheetServiceTests
             Store.Add(snapshot);
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class FakeRealEstateRepo(IReadOnlyList<RealEstate> data) : IRealEstateRepository
+    {
+        public Task<IReadOnlyList<RealEstate>> GetAllAsync(CancellationToken ct = default) => Task.FromResult(data);
+        public Task<RealEstate?> GetByIdAsync(Guid id, CancellationToken ct = default) => Task.FromResult(data.FirstOrDefault(x => x.Id == id));
+        public Task AddAsync(RealEstate entity, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UpdateAsync(RealEstate entity, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
     }
 }

@@ -12,15 +12,16 @@ namespace Assetra.Application.Import;
 /// </summary>
 internal static class ImportMatchKey
 {
-    public static string FromPreview(ImportPreviewRow row) =>
+    public static string FromPreview(ImportPreviewRow row, Guid? cashAccountId = null) =>
         IsBrokerRow(row)
             ? BuildBroker(
                 row.Date,
                 row.Symbol,
                 row.Quantity!.Value,
                 ResolvePreviewDirection(row),
-                ResolvePreviewPrice(row))
-            : BuildBank(row.Date, row.Amount);
+                ResolvePreviewPrice(row),
+                cashAccountId)
+            : BuildBank(row.Date, row.Amount, cashAccountId);
 
     public static string FromTrade(Trade trade)
     {
@@ -32,17 +33,20 @@ internal static class ImportMatchKey
                 trade.Symbol,
                 trade.Quantity,
                 trade.Type == TradeType.Sell ? "SELL" : "BUY",
-                trade.Price),
-            _ => BuildBank(date, trade.CashAmount ?? 0m),
+                trade.Price,
+                trade.CashAccountId),
+            _ => BuildBank(date, trade.CashAmount ?? 0m, trade.CashAccountId, DirectionForTrade(trade)),
         };
     }
 
     private static bool IsBrokerRow(ImportPreviewRow row) =>
         !string.IsNullOrWhiteSpace(row.Symbol) && row.Quantity is > 0m;
 
-    private static string BuildBank(DateOnly date, decimal amount) =>
+    private static string BuildBank(DateOnly date, decimal amount, Guid? cashAccountId, string? direction = null) =>
         string.Join('|',
             date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            cashAccountId?.ToString("N") ?? string.Empty,
+            direction ?? (amount >= 0m ? "IN" : "OUT"),
             Math.Abs(amount).ToString("0.00", CultureInfo.InvariantCulture));
 
     private static string BuildBroker(
@@ -50,13 +54,22 @@ internal static class ImportMatchKey
         string? symbol,
         decimal quantity,
         string direction,
-        decimal unitPrice) =>
+        decimal unitPrice,
+        Guid? cashAccountId) =>
         string.Join('|',
             date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            cashAccountId?.ToString("N") ?? string.Empty,
             string.IsNullOrWhiteSpace(symbol) ? string.Empty : symbol.Trim().ToUpperInvariant(),
             direction,
             quantity.ToString("0.####", CultureInfo.InvariantCulture),
             Math.Abs(unitPrice).ToString("0.####", CultureInfo.InvariantCulture));
+
+    private static string DirectionForTrade(Trade trade) =>
+        trade.Type switch
+        {
+            TradeType.Income or TradeType.Deposit or TradeType.Sell or TradeType.CashDividend or TradeType.LoanBorrow => "IN",
+            _ => "OUT",
+        };
 
     private static string ResolvePreviewDirection(ImportPreviewRow row) =>
         (row.Counterparty ?? string.Empty).Contains("賣", StringComparison.Ordinal)

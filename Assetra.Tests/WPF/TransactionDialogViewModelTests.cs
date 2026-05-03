@@ -26,7 +26,9 @@ public class TransactionDialogViewModelTests
         ObservableCollection<TradeRowViewModel>? trades = null,
         ObservableCollection<PortfolioRowViewModel>? positions = null,
         ObservableCollection<CashAccountRowViewModel>? cashAccounts = null,
-        ObservableCollection<LiabilityRowViewModel>? liabilities = null)
+        ObservableCollection<LiabilityRowViewModel>? liabilities = null,
+        ICategoryRepository? categoryRepository = null,
+        IAutoCategorizationRuleRepository? ruleRepository = null)
     {
         var addAsset = new AddAssetDialogViewModel(
             Mock.Of<IAddAssetWorkflowService>(),
@@ -60,7 +62,9 @@ public class TransactionDialogViewModelTests
             LoadTradesAsync: () => Task.CompletedTask,
             ReloadAccountBalancesAsync: () => Task.CompletedTask,
             RebuildTotals: () => { },
-            Localize: (_, fallback) => fallback);
+            Localize: (_, fallback) => fallback,
+            CategoryRepository: categoryRepository,
+            AutoCategorizationRuleRepository: ruleRepository);
 
         return new TransactionDialogViewModel(deps);
     }
@@ -102,6 +106,17 @@ public class TransactionDialogViewModelTests
         Assert.True(vm.TxTypeIsLoan);
         Assert.False(vm.TxTypeIsLoanBorrow);
         Assert.True(vm.TxTypeIsLoanRepay);
+    }
+
+    [Fact]
+    public void TxDate_FutureDate_ClampsToToday()
+    {
+        var vm = CreateVm();
+
+        vm.TxDate = DateTime.Today.AddDays(3);
+
+        Assert.Equal(DateTime.Today, vm.TxDate);
+        Assert.Equal(DateTime.Today, vm.AddAssetDialog.AddBuyDate);
     }
 
     [Fact]
@@ -260,6 +275,45 @@ public class TransactionDialogViewModelTests
         Assert.True(vm.AreEconomicFieldsEditable);
     }
 
+    [Fact]
+    public async Task AutoCategorization_FiltersRulesByCurrentTransactionType()
+    {
+        var incomeCategoryId = Guid.NewGuid();
+        var expenseCategoryId = Guid.NewGuid();
+        var categoryRepo = new Mock<ICategoryRepository>();
+        categoryRepo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+            [
+                new ExpenseCategory(incomeCategoryId, "薪資", CategoryKind.Income, null, "💼", "#22C55E", 1, false),
+                new ExpenseCategory(expenseCategoryId, "交通", CategoryKind.Expense, null, "🚇", "#3B82F6", 2, false),
+            ]);
+        var ruleRepo = new Mock<IAutoCategorizationRuleRepository>();
+        ruleRepo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+            [
+                new AutoCategorizationRule(Guid.NewGuid(), "uber", incomeCategoryId, 0, true, false),
+                new AutoCategorizationRule(Guid.NewGuid(), "uber", expenseCategoryId, 1, true, false),
+            ]);
+        var vm = CreateVm(
+            categoryRepository: categoryRepo.Object,
+            ruleRepository: ruleRepo.Object);
+        await WaitForAsync(() => vm.IncomeCategories.Count == 1 && vm.ExpenseCategories.Count == 1);
+
+        vm.TxType = "withdrawal";
+        vm.TxNote = "uber trip";
+
+        Assert.Equal(expenseCategoryId, vm.TxCategoryId);
+        Assert.Same(vm.ExpenseCategories, vm.CashFlowCategories);
+
+        vm.TxType = "income";
+
+        Assert.Equal(incomeCategoryId, vm.TxCategoryId);
+
+        vm.TxType = "deposit";
+
+        Assert.Same(vm.IncomeCategories, vm.CashFlowCategories);
+    }
+
     // ── Sell preview (HasTxSellPreview gating) ───────────────────────────────
 
     [Fact]
@@ -303,6 +357,104 @@ public class TransactionDialogViewModelTests
         Assert.Equal(string.Empty, vm.AddError);
         Assert.NotNull(captured);
         Assert.Equal(0.02m, captured!.AmortAnnualRate);
+        Assert.Equal(new DateTime(2026, 6, 1), captured.TradeDate);
+    }
+
+    [Theory]
+    [InlineData("crypto")]
+    [InlineData("fund")]
+    public async Task ConfirmAdd_ManualAssets_UseSelectedBuyDate(string assetType)
+    {
+        ManualAssetCreateRequest? captured = null;
+        var addWorkflow = new Mock<IAddAssetWorkflowService>();
+        addWorkflow.Setup(w => w.CreateManualAssetAsync(
+                It.IsAny<ManualAssetCreateRequest>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<ManualAssetCreateRequest, CancellationToken>((request, _) => captured = request)
+            .Returns<ManualAssetCreateRequest, CancellationToken>((request, _) =>
+                Task.FromResult(new ManualAssetCreateResult(
+                    new PortfolioEntry(Guid.NewGuid(), request.Symbol, request.Exchange, request.AssetType, request.Name),
+                    new PositionSnapshot(Guid.NewGuid(), request.Quantity, request.TotalCost, request.UnitPrice, 0m, request.AcquiredOn))));
+        var vm = new AddAssetDialogViewModel(
+            addWorkflow.Object,
+            Mock.Of<IAccountUpsertWorkflowService>(),
+            Mock.Of<ITransactionWorkflowService>(),
+            Mock.Of<ICreditCardMutationWorkflowService>());
+        var buyDate = new DateTime(2026, 4, 15);
+
+        vm.AddAssetType = assetType;
+        vm.AddBuyDate = buyDate;
+        if (assetType == "crypto")
+        {
+            vm.AddCryptoSymbol = "btc";
+            vm.AddCryptoQty = "0.5";
+            vm.AddCryptoPrice = "2000000";
+        }
+        else
+        {
+            vm.AddName = "Global Fund";
+            vm.AddCost = "10000";
+        }
+
+        await vm.ConfirmAddCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.AddError);
+        Assert.NotNull(captured);
+        Assert.Equal(DateOnly.FromDateTime(buyDate), captured!.AcquiredOn);
+    }
+
+    [Fact]
+    public async Task ConfirmAdd_Stock_InvalidManualFee_ReturnsErrorWithoutRecording()
+    {
+        var addWorkflow = new Mock<IAddAssetWorkflowService>();
+        addWorkflow.Setup(w => w.SearchSymbols(It.IsAny<string>(), It.IsAny<int>()))
+            .Returns([]);
+        addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
+            .Returns(new BuyPreviewResult(1000m, 0m, 1000m, 10m));
+        var vm = new AddAssetDialogViewModel(
+            addWorkflow.Object,
+            Mock.Of<IAccountUpsertWorkflowService>(),
+            Mock.Of<ITransactionWorkflowService>(),
+            Mock.Of<ICreditCardMutationWorkflowService>())
+        {
+            GetTxFee = () => "abc",
+        };
+
+        vm.AddAssetType = "stock";
+        vm.AddSymbol = "2330";
+        vm.AddPrice = "100";
+        vm.AddQuantity = "10";
+
+        await vm.ConfirmAddCommand.ExecuteAsync(null);
+
+        Assert.Contains("手續費", vm.AddError);
+        addWorkflow.Verify(w => w.ExecuteStockBuyAsync(
+            It.IsAny<StockBuyRequest>(),
+            It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteSellFromTxDialogAsync_InvalidManualFee_ReturnsErrorWithoutRecording()
+    {
+        var workflow = new Mock<ISellWorkflowService>();
+        var vm = new SellPanelViewModel(workflow.Object, new PortfolioSellPanelController())
+        {
+            GetTxFee = () => "-1",
+        };
+
+        var error = await vm.ExecuteSellFromTxDialogAsync(
+            CreatePositionRow(),
+            "120",
+            new DateTime(2026, 5, 1, 16, 0, 0, DateTimeKind.Utc),
+            null,
+            false,
+            1);
+
+        Assert.NotNull(error);
+        Assert.Contains("手續費", error);
+        workflow.Verify(w => w.RecordAsync(
+            It.IsAny<SellWorkflowRequest>(),
+            It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -375,4 +527,17 @@ public class TransactionDialogViewModelTests
         Quantity: 1,
         RealizedPnl: 20m,
         RealizedPnlPct: 20m);
+
+    private static async Task WaitForAsync(Func<bool> condition)
+    {
+        for (var i = 0; i < 50; i++)
+        {
+            if (condition())
+                return;
+
+            await Task.Delay(20);
+        }
+
+        Assert.True(condition());
+    }
 }

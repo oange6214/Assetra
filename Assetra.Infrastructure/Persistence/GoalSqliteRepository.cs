@@ -84,9 +84,17 @@ public sealed class GoalSqliteRepository : IFinancialGoalRepository
     {
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
+        await EnableForeignKeysAsync(conn, ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = "DELETE FROM financial_goal WHERE id = $id;";
         cmd.Parameters.AddWithValue("$id", id.ToString());
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+    }
+
+    private static async Task EnableForeignKeysAsync(SqliteConnection conn, CancellationToken ct)
+    {
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = "PRAGMA foreign_keys = ON;";
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
