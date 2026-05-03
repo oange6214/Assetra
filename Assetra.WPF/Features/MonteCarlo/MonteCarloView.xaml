@@ -20,14 +20,9 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Margin="0,0,0,16"
-                   FontSize="{DynamicResource FontSizeXl}"
-                   FontWeight="SemiBold"
-                   Foreground="{DynamicResource AppTextPrimary}"
-                   Text="{DynamicResource MonteCarlo.Title}" />
 
         <ui:Card Grid.Row="1" Padding="16">
             <StackPanel>
@@ -102,7 +97,7 @@
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1" CornerRadius="8">
-            <ui:DataGrid AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+            <ui:DataGrid MaxHeight="500" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                       GridLinesVisibility="Horizontal" HeadersVisibility="Column" IsReadOnly="True"
                       ItemsSource="{Binding MedianPath}" RowBackground="Transparent" SelectionMode="Single">
                 <DataGrid.Columns>

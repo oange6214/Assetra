@@ -16,31 +16,22 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!--  Header  -->
-        <StackPanel
+        <!--  Inline error (only visible when set)  -->
+        <TextBlock
             Grid.Row="0"
-            Margin="0,0,0,16">
-            <TextBlock
-                FontFamily="{StaticResource FontBase}"
-                FontSize="{DynamicResource FontSizeXl}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextPrimary}"
-                Text="{DynamicResource Goals.Title}"
-                Typography.NumeralAlignment="Tabular" />
-            <TextBlock
-                Margin="0,8,0,0"
-                Foreground="{DynamicResource AppDown}"
-                Text="{Binding ErrorMessage}"
-                Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}" />
-        </StackPanel>
+            Margin="0,0,0,12"
+            Foreground="{DynamicResource AppDown}"
+            Text="{Binding ErrorMessage}"
+            Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}" />
 
         <!--  Goal list  -->
         <ui:Card
             Grid.Row="1"
+            MaxHeight="500"
             Padding="16">
             <Grid>
                 <StackPanel

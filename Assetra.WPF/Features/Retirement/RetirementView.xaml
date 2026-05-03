@@ -31,11 +31,6 @@
             Margin="0,0,0,16"
             Orientation="Horizontal">
       <TextBlock
-                FontSize="{DynamicResource FontSizeXl}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextPrimary}"
-                Text="{DynamicResource Retirement.Title}" />
-      <TextBlock
                 Margin="16,0,0,0"
                 VerticalAlignment="Bottom"
                 FontSize="{DynamicResource FontSizeBase}"

@@ -34,13 +34,6 @@
 
         <!--  ── Header: month picker ──  -->
         <DockPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock
-                VerticalAlignment="Center"
-                FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
-                FontSize="{DynamicResource FontSizeXl}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextPrimary}"
-                Text="{DynamicResource Reports.Title}" />
 
             <StackPanel
                 Margin="24,0,0,0"

@@ -120,71 +120,7 @@
                             </ui:Button>
                         </StackPanel>
 
-                        <!--  Center: Current page title (dynamic per ActiveSection)  -->
-                        <TextBlock
-                            Grid.Column="1"
-                            Margin="16,0,12,0"
-                            VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeMd}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextPrimary}"
-                            TextTrimming="CharacterEllipsis">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="{DynamicResource Nav.Portfolio}" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Portfolio}">
-                                            <Setter Property="Text" Value="{DynamicResource Nav.Portfolio}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.FinancialOverview}">
-                                            <Setter Property="Text" Value="{DynamicResource FinancialOverview.Nav.Label}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Categories}">
-                                            <Setter Property="Text" Value="{DynamicResource Nav.Categories}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Recurring}">
-                                            <Setter Property="Text" Value="{DynamicResource Nav.Recurring}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Goals}">
-                                            <Setter Property="Text" Value="{DynamicResource Nav.Goals}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Trends}">
-                                            <Setter Property="Text" Value="{DynamicResource Nav.Trends}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Reports}">
-                                            <Setter Property="Text" Value="{DynamicResource Nav.Reports}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.RealEstate}">
-                                            <Setter Property="Text" Value="{DynamicResource RealEstate.Title}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Insurance}">
-                                            <Setter Property="Text" Value="{DynamicResource Insurance.Title}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Retirement}">
-                                            <Setter Property="Text" Value="{DynamicResource Retirement.Title}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.PhysicalAsset}">
-                                            <Setter Property="Text" Value="{DynamicResource PhysicalAsset.Title}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Fire}">
-                                            <Setter Property="Text" Value="{DynamicResource Fire.Title}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.MonteCarlo}">
-                                            <Setter Property="Text" Value="{DynamicResource MonteCarlo.Title}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Alerts}">
-                                            <Setter Property="Text" Value="{DynamicResource Nav.Alerts}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Import}">
-                                            <Setter Property="Text" Value="{DynamicResource Nav.Import}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Settings}">
-                                            <Setter Property="Text" Value="{DynamicResource Nav.Settings}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+                        <!--  Center column reserved for layout balance; section name lives in the NavRail.  -->
 
                         <!--  Right: Theme toggle (Settings moved to NavRail bottom)  -->
                         <StackPanel

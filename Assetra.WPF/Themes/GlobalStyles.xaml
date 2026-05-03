@@ -20,6 +20,9 @@
     -->
   <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
     <Style.Triggers>
+      <Trigger Property="Appearance" Value="Primary">
+        <Setter Property="Foreground" Value="#FFFFFF" />
+      </Trigger>
       <Trigger Property="Appearance" Value="Danger">
         <Setter Property="Foreground" Value="#FFFFFF" />
       </Trigger>

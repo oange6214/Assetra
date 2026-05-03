@@ -41,13 +41,6 @@
         <!--  ── Header ──  -->
         <StackPanel Grid.Row="0" Margin="0,0,0,16">
             <TextBlock
-                FontFamily="{StaticResource FontBase}"
-                FontSize="{DynamicResource FontSizeXl}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextPrimary}"
-                Text="{DynamicResource Import.Title}"
-                Typography.NumeralAlignment="Tabular" />
-            <TextBlock
                 Margin="0,4,0,0"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Import.Subtitle}" />

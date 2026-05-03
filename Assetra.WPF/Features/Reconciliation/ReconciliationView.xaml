@@ -29,12 +29,6 @@
         <!--  Header  -->
         <StackPanel Grid.Row="0" Margin="0,0,0,12">
             <TextBlock
-                FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
-                FontSize="{DynamicResource FontSizeXl}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextPrimary}"
-                Text="{DynamicResource Reconciliation.Title}" />
-            <TextBlock
                 Margin="0,4,0,0"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Reconciliation.Subtitle}" />

@@ -24,15 +24,6 @@
         </Grid.RowDefinitions>
 
         <!--  ── Header ──  -->
-        <TextBlock
-            Grid.Row="0"
-            Margin="0,0,0,16"
-            FontFamily="{StaticResource FontBase}"
-            FontSize="{DynamicResource FontSizeXl}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextPrimary}"
-            Text="{DynamicResource Trends.Title}"
-            Typography.NumeralAlignment="Tabular" />
 
         <!--  ── Period selector + custom range picker ──  -->
         <DockPanel Grid.Row="1" Margin="0,0,0,16">
