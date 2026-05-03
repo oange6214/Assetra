@@ -43,15 +43,19 @@ public sealed class AppThemeService : IThemeService
         // can collapse the shell into a blank/unstyled surface.
         SwapWpfUiThemeDictionary(theme);
 
-        // 2. Update WPF-UI accent colour resources.
-        ApplicationAccentColorManager.Apply(
-            ApplicationAccentColorManager.GetColorizationColor(), theme);
-
-        // 3. Swap Assetra's semantic palette (Dark.xaml <-> Light.xaml). These
-        // tokens intentionally stay as aliases above WPF-UI's control resources.
+        // 2. Swap Assetra's semantic palette (Dark.xaml <-> Light.xaml). These
+        // tokens intentionally stay as aliases above WPF-UI's control resources,
+        // and also override AccentFillColor* / SystemAccentColor* keys so Wpf.Ui
+        // controls (Primary button, NavView indicator, ToggleSwitch focus, ...)
+        // pin to AppAccent instead of the Windows colorization color.
+        //
+        // ApplicationAccentColorManager.Apply() is intentionally NOT called:
+        // it sets accent brushes directly on Application.Resources (not in a
+        // MergedDictionary), which would beat our overrides and re-introduce
+        // the Light/Dark shade drift on every toggle.
         SwapCustomDictionary(theme);
 
-        // 4. Re-apply colour-scheme convention (Taiwan / International).
+        // 3. Re-apply colour-scheme convention (Taiwan / International).
         ColorSchemeService.ReapplyCurrentScheme(theme);
     }
 

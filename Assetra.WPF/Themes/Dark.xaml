@@ -56,6 +56,32 @@
     <SolidColorBrush x:Key="AppAccentSoft" Color="#153047" />
     <SolidColorBrush x:Key="AppAccentText" Color="#B8DFFF" />
 
+    <!--
+        ════════════════════════════════════════════════════════════════
+        Wpf.Ui accent overrides — pin Wpf.Ui controls to AppAccent.
+        Mirrors the override block in Light.xaml. See that file for the
+        full rationale; values are tuned for dark backgrounds (lighter
+        text-on-accent variants for readability).
+    -->
+    <SolidColorBrush x:Key="SystemAccentColorPrimaryBrush"   Color="#0078D4" />
+    <SolidColorBrush x:Key="SystemAccentColorSecondaryBrush" Color="#1E88DC" />
+    <SolidColorBrush x:Key="SystemAccentColorTertiaryBrush"  Color="#3D9BE0" />
+
+    <SolidColorBrush x:Key="AccentFillColorDefaultBrush"   Color="#0078D4" />
+    <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="#1E88DC" />
+    <SolidColorBrush x:Key="AccentFillColorTertiaryBrush"  Color="#3D9BE0" />
+    <SolidColorBrush x:Key="AccentFillColorDisabledBrush"  Color="#3A526A" />
+
+    <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush"   Color="#B8DFFF" />
+    <SolidColorBrush x:Key="AccentTextFillColorSecondaryBrush" Color="#9BCFF8" />
+    <SolidColorBrush x:Key="AccentTextFillColorTertiaryBrush"  Color="#7EC0F1" />
+    <SolidColorBrush x:Key="AccentTextFillColorDisabledBrush"  Color="#5A7C95" />
+
+    <SolidColorBrush x:Key="TextOnAccentFillColorPrimaryBrush"      Color="#FFFFFF" />
+    <SolidColorBrush x:Key="TextOnAccentFillColorSecondaryBrush"    Color="#E6FFFFFF" />
+    <SolidColorBrush x:Key="TextOnAccentFillColorDisabledBrush"     Color="#88FFFFFF" />
+    <SolidColorBrush x:Key="TextOnAccentFillColorSelectedTextBrush" Color="#FFFFFF" />
+
     <!--  DataGrid  -->
     <SolidColorBrush x:Key="AppSelectedRow" Color="#153047" />
     <SolidColorBrush x:Key="AppGridLines" Color="#2E2E2E" />
