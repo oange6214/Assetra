@@ -5,6 +5,7 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:conv="clr-namespace:Assetra.WPF.Infrastructure.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:infra="clr-namespace:Assetra.WPF.Infrastructure"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     x:Name="Root"
@@ -273,6 +274,17 @@
             SelectionMode="Single"
             VirtualizingPanel.IsVirtualizing="True"
             VirtualizingPanel.VirtualizationMode="Recycling">
+      <ui:DataGrid.Resources>
+        <!--
+            BindingProxy: DataGridColumn lives in its own NameScope outside the
+            DataGrid's visual tree, so headers/templates can't reach the
+            DataGrid's DataContext via RelativeSource or ElementName. The proxy
+            captures DataContext here and is reachable via StaticResource from
+            any column header / cell template below.
+        -->
+        <infra:BindingProxy x:Key="VmProxy" Data="{Binding}" />
+      </ui:DataGrid.Resources>
+
       <ui:DataGrid.Style>
         <Style TargetType="ui:DataGrid">
           <Setter Property="Visibility" Value="Visible" />
@@ -395,7 +407,7 @@
                   <Setter Property="Text" Value="{DynamicResource Allocation.Col.ActualPct}" />
                   <Setter Property="HorizontalAlignment" Value="Right" />
                   <Style.Triggers>
-                    <DataTrigger Binding="{Binding DataContext.IsCashRebalance, ElementName=Root}" Value="True">
+                    <DataTrigger Binding="{Binding Data.IsCashRebalance, Source={StaticResource VmProxy}}" Value="True">
                       <Setter Property="Text" Value="{DynamicResource Allocation.Col.AllocChange}" />
                       <Setter Property="HorizontalAlignment" Value="Center" />
                     </DataTrigger>
