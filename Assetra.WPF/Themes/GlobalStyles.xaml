@@ -806,18 +806,21 @@
                                 KeyboardNavigation.TabIndex="1" />
             </Border>
 
-            <!--  Selected content  -->
-            <Border
+            <!--
+                Selected content — direct ContentPresenter (no Border
+                wrapper) so the hosted UserControl/DataGrid stretches
+                naturally to fill the row. An intermediate Border
+                breaks vertical fill in some virtualized DataGrid
+                scenarios, leaving content centered with empty space
+                above and below.
+            -->
+            <ContentPresenter
+                            x:Name="PART_SelectedContentHost"
                             Grid.Row="1"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
-              <ContentPresenter
-                                x:Name="PART_SelectedContentHost"
-                                Margin="0"
-                                ContentSource="SelectedContent"
-                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-            </Border>
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            ContentSource="SelectedContent"
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
           </Grid>
         </ControlTemplate>
       </Setter.Value>
