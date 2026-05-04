@@ -190,6 +190,23 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
         return null;
     }
 
+    /// <summary>
+    /// SQL <c>COUNT(*)</c> override for category-usage probes
+    /// (e.g., Categories.DeleteAsync pre-check). Avoids loading every
+    /// row + LINQ count in memory; the interface default still falls
+    /// back to GetAllAsync for non-SQL implementations.
+    /// </summary>
+    public async Task<int> CountByCategoryAsync(Guid categoryId, CancellationToken ct = default)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT COUNT(*) FROM trade WHERE category_id = $cat AND is_deleted = 0;";
+        cmd.Parameters.AddWithValue("$cat", categoryId.ToString());
+        var result = await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
+        return Convert.ToInt32(result, System.Globalization.CultureInfo.InvariantCulture);
+    }
+
     public async Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);

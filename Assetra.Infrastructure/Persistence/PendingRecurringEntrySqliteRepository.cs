@@ -70,6 +70,21 @@ public sealed class PendingRecurringEntrySqliteRepository : IPendingRecurringEnt
         return await reader.ReadAsync(ct).ConfigureAwait(false) ? Map(reader) : null;
     }
 
+    /// <summary>
+    /// SQL <c>COUNT(*)</c> override — see ITradeRepository.CountByCategoryAsync
+    /// for rationale. Used by Categories.DeleteAsync pre-check.
+    /// </summary>
+    public async Task<int> CountByCategoryAsync(Guid categoryId, CancellationToken ct = default)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT COUNT(*) FROM pending_recurring_entry WHERE category_id = $cat;";
+        cmd.Parameters.AddWithValue("$cat", categoryId.ToString());
+        var result = await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
+        return Convert.ToInt32(result, System.Globalization.CultureInfo.InvariantCulture);
+    }
+
     public async Task AddAsync(PendingRecurringEntry entry, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(entry);
