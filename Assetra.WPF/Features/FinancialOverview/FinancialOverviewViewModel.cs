@@ -86,7 +86,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         IsLoading = true;
         try
         {
-            await LoadInternalAsync().ConfigureAwait(false);
+            await LoadInternalAsync().ConfigureAwait(true);
         }
         finally
         {
@@ -105,7 +105,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
                     p.MarketValue,
                     p.AssetType))
                 .ToList())
-            .ConfigureAwait(false);
+            .ConfigureAwait(true);
 
         System.Windows.Application.Current?.Dispatcher.Invoke(() =>
         {

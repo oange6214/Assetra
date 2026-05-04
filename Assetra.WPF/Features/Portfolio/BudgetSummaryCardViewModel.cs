@@ -69,7 +69,7 @@ public sealed partial class BudgetSummaryCardViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
-        var summary = await _service.BuildAsync(Year, Month).ConfigureAwait(false);
+        var summary = await _service.BuildAsync(Year, Month).ConfigureAwait(true);
         System.Windows.Application.Current?.Dispatcher.Invoke(() =>
         {
             TotalIncome = summary.TotalIncome;

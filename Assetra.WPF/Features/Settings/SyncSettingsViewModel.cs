@@ -106,7 +106,7 @@ public partial class SyncSettingsViewModel : ObservableObject
             SyncAuthToken = AuthToken?.Trim() ?? string.Empty,
             SyncIntervalMinutes = Math.Max(0, IntervalMinutes),
         };
-        await _settings.SaveAsync(s).ConfigureAwait(false);
+        await _settings.SaveAsync(s).ConfigureAwait(true);
         if (!CachePassphraseForBackground)
             _passphraseCache.Clear();
         StatusMessage = Text("Settings.Sync.Status.Saved", "Saved.");

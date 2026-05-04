@@ -73,7 +73,7 @@ public partial class ConflictResolutionViewModel : ObservableObject
     private async Task UseRemoteAsync(ConflictRowViewModel row)
     {
         ArgumentNullException.ThrowIfNull(row);
-        await _queue.ApplyRemoteAsync(new[] { row.Conflict.Remote }).ConfigureAwait(false);
+        await _queue.ApplyRemoteAsync(new[] { row.Conflict.Remote }).ConfigureAwait(true);
         Items.Remove(row);
         OnPropertyChanged(nameof(HasItems));
         StatusMessage = Text("Settings.Sync.Conflicts.Status.UsedRemote", "Adopted remote for {0}.", row.EntityId);
