@@ -844,12 +844,18 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type TabItem}">
-          <Border
-                        x:Name="Bg"
-                        Padding="{TemplateBinding Padding}"
-                        Background="{TemplateBinding Background}"
-                        SnapsToDevicePixels="True">
-            <Grid>
+          <!--
+                        Indicator sits as a sibling of the padded Border
+                        (not inside its padding) so the 3 px underline
+                        anchors to the visual bottom edge of the tab,
+                        flush with the AppBorderLight separator under
+                        the strip.
+                    -->
+          <Grid SnapsToDevicePixels="True">
+            <Border
+                            x:Name="Bg"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}">
               <ContentPresenter
                                 x:Name="Content"
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -858,17 +864,16 @@
                                 RecognizesAccessKey="True"
                                 TextElement.Foreground="{TemplateBinding Foreground}"
                                 TextElement.FontWeight="{TemplateBinding FontWeight}" />
-              <!--  Bottom underline indicator  -->
-              <Border
-                                x:Name="Indicator"
-                                Height="2.5"
-                                Margin="8,0"
-                                VerticalAlignment="Bottom"
-                                Background="{DynamicResource AppAccent}"
-                                CornerRadius="1.5"
-                                Visibility="Hidden" />
-            </Grid>
-          </Border>
+            </Border>
+            <Border
+                            x:Name="Indicator"
+                            Height="3"
+                            Margin="8,0"
+                            VerticalAlignment="Bottom"
+                            Background="{DynamicResource AppAccent}"
+                            CornerRadius="1.5,1.5,0,0"
+                            Visibility="Hidden" />
+          </Grid>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
               <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />

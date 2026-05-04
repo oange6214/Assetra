@@ -15,6 +15,15 @@
                 separate testing. Suppress until migration is done.
     -->
     <NoWarn>$(NoWarn);CS8826;MVVMTK0034;CS0618</NoWarn>
+    <!--
+      NU1900 : "Audit data unavailable" — NuGet vulnerability check fails
+               when api.nuget.org is unreachable (offline / proxy / DNS).
+               Assetra is intentionally offline-capable; downgrade this to
+               a warning so a no-network build still succeeds. Real
+               vulnerability findings (NU1901-NU1904) remain warnings as
+               errors per TreatWarningsAsErrors above.
+    -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1900</WarningsNotAsErrors>
   </PropertyGroup>
 
   <!-- 自動從 git tag 推算版本（MinVer）
