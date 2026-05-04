@@ -268,7 +268,7 @@
       </Border>
 
       <ListBox
-                Margin="12"
+                Margin="12,8,12,12"
                 Background="Transparent"
                 BorderThickness="0"
                 ItemsSource="{Binding PositionsView}"

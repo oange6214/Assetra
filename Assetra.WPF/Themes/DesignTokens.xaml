@@ -78,7 +78,7 @@
     <sys:Double x:Key="Size.Input.Height">40</sys:Double>
     <sys:Double x:Key="Size.Table.RowHeight">44</sys:Double>
     <sys:Double x:Key="Size.Table.RowHeight.Compact">36</sys:Double>
-    <sys:Double x:Key="Size.Sidebar.Width">240</sys:Double>
+    <sys:Double x:Key="Size.Sidebar.Width">220</sys:Double>
     <sys:Double x:Key="Size.Topbar.Height">64</sys:Double>
 
     <!--  ══ Card defaults ══  -->
