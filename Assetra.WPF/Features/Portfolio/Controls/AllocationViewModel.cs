@@ -51,7 +51,8 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isCashRebalance = false;
     [ObservableProperty] private string _cashFlowInput = string.Empty;
     [ObservableProperty] private decimal _cashFlowTotal;     // sum of buys in cash-flow mode
-    public string CashFlowTotalDisplay => $"NT${CashFlowTotal:N0}";
+    // CashFlowTotal is bound directly via CurrencyConverter in AllocationView.xaml,
+    // so the user's TWD/USD preference applies. No more hard-coded "NT$".
 
     partial void OnCashFlowInputChanged(string _) => RebuildBuySell();
 
@@ -129,20 +130,15 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     [ObservableProperty] private decimal _totalPnl;
     [ObservableProperty] private int _assetCount;
 
-    public string TotalValueDisplay => $"NT${TotalValue:N0}";
-    public string TotalInvestmentDisplay => $"NT${TotalInvestment:N0}";
-    public string TotalCashDisplay => $"NT${TotalCash:N0}";
-    public string TotalPnlDisplay => (TotalPnl >= 0 ? "+" : "") + $"NT${TotalPnl:N0}";
+    // Display strings removed (TotalValueDisplay / TotalInvestmentDisplay /
+    // TotalCashDisplay / TotalPnlDisplay) — verified unbound across all
+    // *.xaml/*.cs in the solution. They were dead code from a past refactor
+    // and hard-coded "NT$" which bypassed the CurrencyConverter pipeline.
+    // If a future view needs them, bind to the underlying decimal properties
+    // through {StaticResource CurrencyConverter} like CashFlowTotal does.
     public bool IsTotalPnlPositive => TotalPnl >= 0;
 
-    partial void OnTotalPnlChanged(decimal _)
-    {
-        OnPropertyChanged(nameof(TotalPnlDisplay));
-        OnPropertyChanged(nameof(IsTotalPnlPositive));
-    }
-    partial void OnTotalValueChanged(decimal _) => OnPropertyChanged(nameof(TotalValueDisplay));
-    partial void OnTotalInvestmentChanged(decimal _) => OnPropertyChanged(nameof(TotalInvestmentDisplay));
-    partial void OnTotalCashChanged(decimal _) => OnPropertyChanged(nameof(TotalCashDisplay));
+    partial void OnTotalPnlChanged(decimal _) => OnPropertyChanged(nameof(IsTotalPnlPositive));
 
     private readonly ILocalizationService? _localization;
 
@@ -301,7 +297,6 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
                 row.SetBuySell(Math.Round(needed, 0), row.ActualPercent);
             }
             CashFlowTotal = 0m;
-            OnPropertyChanged(nameof(CashFlowTotalDisplay));
         }
         else
         {
@@ -353,7 +348,6 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
             }
 
             CashFlowTotal = runningTotal;
-            OnPropertyChanged(nameof(CashFlowTotalDisplay));
         }
     }
 

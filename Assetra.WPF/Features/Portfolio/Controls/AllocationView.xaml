@@ -749,7 +749,7 @@
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextOnAccent}">
                                 <Run Text="{DynamicResource Allocation.CashFlow.Total}" />
-                                <Run Text="{Binding CashFlowTotalDisplay, Mode=OneWay}" />
+                                <Run Text="{Binding CashFlowTotal, Mode=OneWay, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
               </TextBlock>
             </Border>
             <Border
