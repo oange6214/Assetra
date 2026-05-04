@@ -46,17 +46,17 @@ internal sealed record TransactionDialogDependencies(
     Func<Task> LoadPositionsAsync,
     Func<Task> LoadTradesAsync,
     Func<Task> ReloadAccountBalancesAsync,
+    Action RebuildTotals,
+    Func<string, string, string> Localize,
+    // P1 收支管理：收支分類與自動分類規則來源（皆可為 null 以保留向後相容）
+    ICategoryRepository? CategoryRepository = null,
+    IAutoCategorizationRuleRepository? AutoCategorizationRuleRepository = null,
     // L1 perf: post-edit cleanup needs positions + trades + balances + totals,
     // but calling each delegate triggered three separate _loadService.LoadAsync
     // round-trips. ReloadAllAsync runs one load and applies every slice in
     // sequence — used by ConfirmTx's edit-cleanup branch only. Optional with a
     // null-default so existing test factories without the delegate still build.
-    Func<Task>? ReloadAllAsync,
-    Action RebuildTotals,
-    Func<string, string, string> Localize,
-    // P1 收支管理：收支分類與自動分類規則來源（皆可為 null 以保留向後相容）
-    ICategoryRepository? CategoryRepository = null,
-    IAutoCategorizationRuleRepository? AutoCategorizationRuleRepository = null);
+    Func<Task>? ReloadAllAsync = null);
 
 /// <summary>
 /// Owns all transaction-dialog observable state, validation, and commands.
