@@ -27,9 +27,27 @@
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemesDictionary Theme="Dark" />
                 <ui:ControlsDictionary />
+
+                <!--  ── Design System tokens (palette + scales) ──  -->
                 <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/DesignTokens.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/Typography.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/Sizes.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/Radius.xaml" />
+
+                <!--  ── Theme palette (swappable Light ↔ Dark) ──  -->
                 <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Themes/Dark.xaml" />
+
+                <!--  ── Design System control styles (depend on tokens + theme above) ──  -->
+                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Buttons.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Focus.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Inputs.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Tabs.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/DataGrid.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Cards.xaml" />
+
+                <!--  ── App-specific resources (logo, stock-search template, asset-type badges) ──  -->
                 <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/Themes/GlobalStyles.xaml" />
+
                 <!--  Default language — overridden at startup by WpfLocalizationService based on saved AppSettings.Language  -->
                 <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/Languages/zh-TW.xaml" />
             </ResourceDictionary.MergedDictionaries>

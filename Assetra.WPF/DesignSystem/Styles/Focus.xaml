@@ -1,0 +1,31 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        ══════════════════════════════════════════════════════════
+        Keyboard Focus Visual (WCAG 2.4.7 Focus Visible)
+        ══════════════════════════════════════════════════════════
+        Applied to all interactive button-like controls.
+        A 1.5 px dashed accent-coloured rectangle sits 3 px outside
+        the control bounds, visible against any background in both
+        dark and light themes.
+    -->
+    <Style x:Key="FocusVisual">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Rectangle
+                        Margin="-3"
+                        RadiusX="6"
+                        RadiusY="6"
+                        SnapsToDevicePixels="True"
+                        Stroke="{DynamicResource AppAccent}"
+                        StrokeDashArray="1 2"
+                        StrokeThickness="1.5" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

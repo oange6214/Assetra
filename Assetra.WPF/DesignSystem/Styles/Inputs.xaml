@@ -1,0 +1,214 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+    <!--
+        ════════════════════════════════════════════════════════════
+        Input + text controls
+        ════════════════════════════════════════════════════════════
+        TextBlock (implicit)   : default font / colour / rendering.
+        ToolTip   (implicit)   : CJK-capable popup (no inheritance).
+        TextBox   (implicit)   : explicit caret colour.
+        FormFieldError         : 12 px AppDanger error label below
+                                  inputs.
+        FormComboBoxItem +     : Custom dropdown chrome matching the
+        FormComboBox             rest of the design (border + chevron
+                                  + AppHover/AppAccentSubtle states).
+    -->
+
+    <!--  ── Global TextBlock ──  -->
+    <Style TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBase}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
+    </Style>
+
+    <!--
+        ── Global ToolTip ──
+        Tooltip is a separate Popup window and does not inherit
+        FontFamily from the visual tree. Explicitly set CJK-capable
+        fonts so Chinese characters render correctly.
+    -->
+    <Style TargetType="ToolTip">
+        <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8,4" />
+    </Style>
+
+    <!--
+        ── Global TextBox ──
+        CaretBrush must be set explicitly; it never inherits Foreground
+        in WPF.
+    -->
+    <Style TargetType="TextBox">
+        <Setter Property="CaretBrush" Value="{DynamicResource AppTextPrimary}" />
+    </Style>
+
+    <!--  ── Form Field Validation Error ──  -->
+    <Style x:Key="FormFieldError" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeXs}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppDanger}" />
+        <Setter Property="Margin" Value="0,2,0,0" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!--  ── Form ComboBox dropdown item ──  -->
+    <Style x:Key="FormComboBoxItem" TargetType="ComboBoxItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border
+                        x:Name="Bd"
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHover}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppAccentSubtle}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsSelected" Value="True" />
+                                <Condition Property="IsMouseOver" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppAccentSubtle}" />
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  ── Form ComboBox shell + dropdown ──  -->
+    <Style x:Key="FormComboBox" TargetType="ComboBox">
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Background" Value="{DynamicResource AppBackground}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource FormComboBoxItem}" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid x:Name="Root">
+                        <ToggleButton
+                            x:Name="ToggleButton"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            ClickMode="Press"
+                            Focusable="False"
+                            IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border
+                                        x:Name="Bd"
+                                        Background="{DynamicResource AppBackground}"
+                                        BorderBrush="{DynamicResource AppBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource RadiusSm}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="24" />
+                                            </Grid.ColumnDefinitions>
+                                            <Rectangle Grid.Column="0" Fill="Transparent" />
+                                            <ui:SymbolIcon
+                                                Grid.Column="1"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                FontSize="10"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                IsHitTestVisible="False"
+                                                Symbol="ChevronDown24" />
+                                        </Grid>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding IsKeyboardFocusWithin, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value="True">
+                                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value="False">
+                                            <Setter TargetName="Bd" Property="Opacity" Value="0.5" />
+                                        </DataTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+
+                        <ContentPresenter
+                            x:Name="ContentPresenter"
+                            Margin="8,0,24,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Content="{TemplateBinding SelectionBoxItem}"
+                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                            IsHitTestVisible="False" />
+
+                        <TextBox
+                            x:Name="PART_EditableTextBox"
+                            Margin="6,0,24,0"
+                            Padding="0"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            CaretBrush="{DynamicResource AppTextPrimary}"
+                            FontFamily="{TemplateBinding FontFamily}"
+                            FontSize="{TemplateBinding FontSize}"
+                            Foreground="{TemplateBinding Foreground}"
+                            IsReadOnly="{Binding IsReadOnly, RelativeSource={RelativeSource TemplatedParent}}"
+                            Visibility="Collapsed" />
+
+                        <Popup
+                            x:Name="PART_Popup"
+                            AllowsTransparency="True"
+                            IsOpen="{TemplateBinding IsDropDownOpen}"
+                            Placement="Bottom">
+                            <Border
+                                MinWidth="{Binding ActualWidth, ElementName=Root}"
+                                MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                Margin="0,2,0,0"
+                                Background="{DynamicResource AppSurface}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSm}">
+                                <ScrollViewer Focusable="False">
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEditable" Value="True">
+                            <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="ContentPresenter" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

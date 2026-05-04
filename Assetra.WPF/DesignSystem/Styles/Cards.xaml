@@ -1,0 +1,32 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        ════════════════════════════════════════════════════════════
+        Form / card surface helpers
+        ════════════════════════════════════════════════════════════
+        FormCard         : Border ready-to-use as a form container —
+                            16 px padding, AppSurface bg, 1 px AppBorder,
+                            RadiusLg (8) corners.
+        FormSectionTitle : 20 px SemiBold AppTextPrimary heading with
+                            12 px bottom margin, for section labels
+                            inside a form.
+    -->
+
+    <Style x:Key="FormCard" TargetType="Border">
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusLg}" />
+    </Style>
+
+    <Style x:Key="FormSectionTitle" TargetType="TextBlock">
+        <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLg}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+    </Style>
+
+</ResourceDictionary>

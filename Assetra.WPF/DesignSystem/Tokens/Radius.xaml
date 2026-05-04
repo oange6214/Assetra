@@ -1,0 +1,23 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        ══════════════════════════════════════════════════════════
+        Corner radius scale
+        ══════════════════════════════════════════════════════════
+        Xs (2)  : indicator chips / pill dots / tiny color swatches
+        Sm (4)  : default for inputs, small badges
+        Md (6)  : compact cards
+        Lg (8)  : standard cards
+        Xl (12) : larger card shells / dialogs
+        Card.Radius (16, in DesignTokens.xaml) : page-level hero cards
+    -->
+
+    <CornerRadius x:Key="RadiusXs">2</CornerRadius>
+    <CornerRadius x:Key="RadiusSm">4</CornerRadius>
+    <CornerRadius x:Key="RadiusMd">6</CornerRadius>
+    <CornerRadius x:Key="RadiusLg">8</CornerRadius>
+    <CornerRadius x:Key="RadiusXl">12</CornerRadius>
+
+</ResourceDictionary>
