@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Windows;
 using System.Windows.Media;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.Interfaces;
@@ -148,7 +147,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
     private void RefreshChart()
     {
-        _ = RefreshChartAsync();
+        AsyncHelpers.SafeFireAndForget(RefreshChartAsync, "PortfolioHistory.RefreshChart");
     }
 
     private static IReadOnlyList<PortfolioDailySnapshot> FilterByDays(

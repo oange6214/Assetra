@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Assetra.WPF.Infrastructure;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
@@ -74,7 +75,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     private void OnPortfolioPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Portfolio.PortfolioViewModel.TotalMarketValue))
-            _ = LoadAsync();
+            AsyncHelpers.SafeFireAndForget(LoadAsync, "FinancialOverview.Load");
     }
 
     [RelayCommand]

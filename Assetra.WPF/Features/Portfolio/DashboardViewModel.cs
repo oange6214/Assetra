@@ -1,6 +1,9 @@
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Wpf.Ui.Appearance;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
@@ -12,9 +15,11 @@ using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Portfolio;
 
-public sealed partial class DashboardViewModel : ObservableObject
+public sealed partial class DashboardViewModel : ObservableObject, IDisposable
 {
     private readonly PortfolioViewModel _portfolio;
+    private readonly IThemeService? _themeService;
+    private readonly Action<ApplicationTheme>? _themeChangedHandler;
 
     [ObservableProperty] private ISeries[] _tenDaySeries = [];
     [ObservableProperty] private ICartesianAxis[] _tenDayXAxes = [new Axis { IsVisible = false }];
@@ -28,52 +33,83 @@ public sealed partial class DashboardViewModel : ObservableObject
         BudgetSummaryCardViewModel? budgetSummary = null)
     {
         _portfolio = portfolio;
+        _themeService = themeService;
         BudgetSummary = budgetSummary;
         if (BudgetSummary is not null)
         {
-            _portfolio.Trades.CollectionChanged += (_, _) =>
-                _ = BudgetSummary.LoadAsync();
-            _ = BudgetSummary.LoadAsync();
+            _portfolio.Trades.CollectionChanged += OnTradesChangedForBudget;
+            AsyncHelpers.SafeFireAndForget(BudgetSummary.LoadAsync, "BudgetSummary.LoadFromDashboard");
         }
 
-        _portfolio.PropertyChanged += (_, e) =>
-        {
-            OnPropertyChanged(e.PropertyName);
-            switch (e.PropertyName)
-            {
-                case nameof(PortfolioViewModel.NetWorth):
-                    OnPropertyChanged(nameof(NetWorthDisplay));
-                    OnPropertyChanged(nameof(LeverageRatio));
-                    break;
-                case nameof(PortfolioViewModel.TotalPnl):
-                    OnPropertyChanged(nameof(TotalPnlDisplay));
-                    break;
-                case nameof(PortfolioViewModel.TotalAssets):
-                    OnPropertyChanged(nameof(TotalAssetsDisplay));
-                    OnPropertyChanged(nameof(LeverageRatio));
-                    break;
-                case nameof(PortfolioViewModel.TotalLiabilities):
-                    OnPropertyChanged(nameof(TotalLiabilitiesDisplay));
-                    break;
-                case nameof(PortfolioViewModel.DayPnl):
-                    OnPropertyChanged(nameof(DayPnlDisplay));
-                    break;
-            }
-        };
-
-        _portfolio.Positions.CollectionChanged += (_, _) => OnPropertyChanged(nameof(TopPositions));
-        _portfolio.Trades.CollectionChanged    += (_, _) => OnPropertyChanged(nameof(RecentTrades));
-
-        _portfolio.History.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(PortfolioHistoryViewModel.Snapshots))
-                RefreshTenDayChart();
-        };
+        _portfolio.PropertyChanged += OnPortfolioPropertyChanged;
+        _portfolio.Positions.CollectionChanged += OnPositionsChanged;
+        _portfolio.Trades.CollectionChanged    += OnTradesChanged;
+        _portfolio.History.PropertyChanged     += OnHistoryPropertyChanged;
 
         if (themeService is not null)
-            themeService.ThemeChanged += _ => RefreshTenDayChart();
+        {
+            _themeChangedHandler = _ => RefreshTenDayChart();
+            themeService.ThemeChanged += _themeChangedHandler;
+        }
 
         RefreshTenDayChart();
+    }
+
+    private void OnTradesChangedForBudget(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (BudgetSummary is not null)
+            AsyncHelpers.SafeFireAndForget(BudgetSummary.LoadAsync, "BudgetSummary.LoadFromDashboard");
+    }
+
+    private void OnPortfolioPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        OnPropertyChanged(e.PropertyName);
+        switch (e.PropertyName)
+        {
+            case nameof(PortfolioViewModel.NetWorth):
+                OnPropertyChanged(nameof(NetWorthDisplay));
+                OnPropertyChanged(nameof(LeverageRatio));
+                break;
+            case nameof(PortfolioViewModel.TotalPnl):
+                OnPropertyChanged(nameof(TotalPnlDisplay));
+                break;
+            case nameof(PortfolioViewModel.TotalAssets):
+                OnPropertyChanged(nameof(TotalAssetsDisplay));
+                OnPropertyChanged(nameof(LeverageRatio));
+                break;
+            case nameof(PortfolioViewModel.TotalLiabilities):
+                OnPropertyChanged(nameof(TotalLiabilitiesDisplay));
+                break;
+            case nameof(PortfolioViewModel.DayPnl):
+                OnPropertyChanged(nameof(DayPnlDisplay));
+                break;
+        }
+    }
+
+    private void OnPositionsChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+        OnPropertyChanged(nameof(TopPositions));
+
+    private void OnTradesChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+        OnPropertyChanged(nameof(RecentTrades));
+
+    private void OnHistoryPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(PortfolioHistoryViewModel.Snapshots))
+            RefreshTenDayChart();
+    }
+
+    public void Dispose()
+    {
+        // C2 leak fix: anonymous-lambda subscriptions can't be detached;
+        // refactored to named handlers so Dispose actually unsubscribes.
+        if (BudgetSummary is not null)
+            _portfolio.Trades.CollectionChanged -= OnTradesChangedForBudget;
+        _portfolio.PropertyChanged -= OnPortfolioPropertyChanged;
+        _portfolio.Positions.CollectionChanged -= OnPositionsChanged;
+        _portfolio.Trades.CollectionChanged    -= OnTradesChanged;
+        _portfolio.History.PropertyChanged     -= OnHistoryPropertyChanged;
+        if (_themeService is not null && _themeChangedHandler is not null)
+            _themeService.ThemeChanged -= _themeChangedHandler;
     }
 
     // Hero card

@@ -355,5 +355,14 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     {
         ColorSchemeService.SchemeChanged -= OnSchemeChanged;
         _portfolio.PropertyChanged -= OnPortfolioPropertyChanged;
+
+        // C1 leak fix: also unsubscribe Positions.CollectionChanged and the
+        // per-row PropertyChanged handlers attached at construction (line 159)
+        // and via OnCollectionChanged (line 186). Previously these stayed
+        // subscribed forever, keeping every recreated AllocationViewModel
+        // alive on every quote tick.
+        _portfolio.Positions.CollectionChanged -= OnCollectionChanged;
+        foreach (var row in _portfolio.Positions)
+            row.PropertyChanged -= OnRowPropertyChanged;
     }
 }

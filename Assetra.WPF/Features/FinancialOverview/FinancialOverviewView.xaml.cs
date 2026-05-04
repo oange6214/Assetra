@@ -1,4 +1,5 @@
 using System.Windows.Controls;
+using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.FinancialOverview;
 
@@ -13,6 +14,6 @@ public partial class FinancialOverviewView : UserControl
     private void OnIsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
     {
         if (e.NewValue is true && DataContext is FinancialOverviewViewModel vm)
-            _ = vm.LoadAsync();
+            AsyncHelpers.SafeFireAndForget(vm.LoadAsync, "FinancialOverview.Load");
     }
 }

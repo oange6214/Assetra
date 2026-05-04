@@ -64,7 +64,7 @@ public sealed partial class BudgetSummaryCardViewModel : ObservableObject
         _budgetRefreshNotifier.BudgetChanged += OnBudgetChanged;
     }
 
-    private void OnBudgetChanged(object? sender, EventArgs e) => _ = LoadAsync();
+    private void OnBudgetChanged(object? sender, EventArgs e) => AsyncHelpers.SafeFireAndForget(LoadAsync, "BudgetSummary.LoadOnBudgetChange");
 
     [RelayCommand]
     public async Task LoadAsync()

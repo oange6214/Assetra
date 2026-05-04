@@ -157,7 +157,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private void OnMonthlyExpenseFromSubVm(decimal value)
     {
         Financial.Apply(_summaryService.Calculate(BuildSummaryInput()));
-        _ = SaveMonthlyExpenseAsync();
+        AsyncHelpers.SafeFireAndForget(SaveMonthlyExpenseAsync, "Portfolio.SaveMonthlyExpense");
     }
 
     private async Task SaveMonthlyExpenseAsync()
@@ -661,7 +661,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         // LoanBorrow transactions themselves.
 
         // Backfill gaps in snapshot history — fire and forget
-        _ = BackfillAndRefreshAsync();
+        AsyncHelpers.SafeFireAndForget(BackfillAndRefreshAsync, "Portfolio.BackfillAndRefresh");
     }
 
     /// <summary>Test-only hook — lets tests re-populate the Trades collection after
@@ -750,7 +750,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         Allocation.Apply(summary.AllocationSlices);
 
         // Fire-and-forget: record today's snapshot once prices are live
-        _ = RecordSnapshotAsync();
+        AsyncHelpers.SafeFireAndForget(RecordSnapshotAsync, "Portfolio.RecordSnapshot");
     }
 
     // Position log helpers — seeding helpers removed in Wave 9.3: the trade log is now
