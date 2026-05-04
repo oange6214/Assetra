@@ -43,6 +43,10 @@ Desktop.ini
 .nuget/
 .dotnet-home*/
 .artifacts/
+# Build / packaging outputs (Velopack, dotnet publish, test runners)
+# Sized 25M-460M per project; 5 folders total ~750M.
+artifacts/
+**/artifacts/
 
 # Generated
 *.g.cs
