@@ -1,11 +1,13 @@
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
+using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Core.Trading;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Serilog;
 
 namespace Assetra.WPF.Features.Portfolio.SubViewModels;
 
@@ -22,6 +24,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
     private readonly ICreditCardMutationWorkflowService _creditCardMutationWorkflow;
     private readonly ICreditCardTransactionWorkflowService? _creditCardTransactionWorkflow;
     private readonly ILoanMutationWorkflowService? _loanMutationWorkflow;
+    private readonly ILocalizationService? _localization;
 
     /// <summary>
     /// Raised after every successful add (stock buy, crypto, non-stock, cash account).
@@ -62,7 +65,8 @@ public partial class AddAssetDialogViewModel : ObservableObject
         ITransactionWorkflowService? transactionWorkflow,
         ICreditCardMutationWorkflowService creditCardMutationWorkflow,
         ICreditCardTransactionWorkflowService? creditCardTransactionWorkflow = null,
-        ILoanMutationWorkflowService? loanMutationWorkflow = null)
+        ILoanMutationWorkflowService? loanMutationWorkflow = null,
+        ILocalizationService? localization = null)
     {
         _addAssetWorkflow = addAssetWorkflow;
         _accountUpsertWorkflow = accountUpsertWorkflow;
@@ -70,6 +74,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
         _creditCardMutationWorkflow = creditCardMutationWorkflow;
         _creditCardTransactionWorkflow = creditCardTransactionWorkflow;
         _loanMutationWorkflow = loanMutationWorkflow;
+        _localization = localization;
     }
 
     // ── Dialog visibility ────────────────────────────────────────────────────────────
@@ -249,7 +254,14 @@ public partial class AddAssetDialogViewModel : ObservableObject
             }
         }
         catch (OperationCanceledException) { /* normal cancellation */ }
-        catch { ClosePriceHint = "收盤價查詢失敗，請手動輸入"; }
+        catch (Exception ex)
+        {
+            // H5: previously the catch swallowed the exception silently with a
+            // hard-coded zh-TW hint — invisible in logs and broken for en-US.
+            Log.Warning(ex, "Close-price fetch failed for {Symbol}", AddSymbol);
+            ClosePriceHint = _localization?.Get("AddAsset.ClosePrice.FetchFailed",
+                "收盤價查詢失敗，請手動輸入") ?? "收盤價查詢失敗，請手動輸入";
+        }
         finally { IsLoadingClosePrice = false; }
     }
 

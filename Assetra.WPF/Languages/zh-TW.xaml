@@ -672,6 +672,9 @@
     <sys:String x:Key="Portfolio.Trade.DeleteFailed">刪除交易記錄失敗，請稍後再試</sys:String>
     <sys:String x:Key="Portfolio.Trade.OldDeleteFailed">舊交易記錄刪除失敗，資料庫可能存在重複筆數，建議重新整理或重啟應用程式</sys:String>
     <sys:String x:Key="Portfolio.Trade.DeleteBlockedBySell">請先刪除此股票的賣出記錄，再刪除（或修改）此買入記錄。</sys:String>
+    <sys:String x:Key="Portfolio.Trade.MetaUpdateFailed">更新失敗，找不到此筆記錄或記錄已被修改。請關閉後重試。</sys:String>
+    <sys:String x:Key="Portfolio.Trade.MetaUpdateError">更新失敗：{0}</sys:String>
+    <sys:String x:Key="AddAsset.ClosePrice.FetchFailed">收盤價查詢失敗，請手動輸入</sys:String>
 
     <!--  Financial Overview  -->
     <sys:String x:Key="FinancialOverview.Nav.Label">財務總覽</sys:String>

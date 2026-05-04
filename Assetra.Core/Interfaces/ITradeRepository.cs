@@ -43,6 +43,19 @@ public interface ITradeRepository
     /// <summary>依 Id 取單筆交易；不存在回傳 <see langword="null"/>。</summary>
     Task<Trade?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
+    /// <summary>
+    /// Count trades referencing a specific category. Default fallback is
+    /// in-memory count over <see cref="GetAllAsync" />; SQLite-backed
+    /// implementations should override with a SQL <c>COUNT(*)</c> + WHERE
+    /// to avoid loading every row when only a count is needed
+    /// (e.g., category-delete pre-check).
+    /// </summary>
+    async Task<int> CountByCategoryAsync(Guid categoryId, CancellationToken ct = default)
+    {
+        var all = await GetAllAsync(ct).ConfigureAwait(false);
+        return all.Count(t => t.CategoryId == categoryId);
+    }
+
     Task AddAsync(Trade trade, CancellationToken ct = default);
     Task UpdateAsync(Trade trade, CancellationToken ct = default);
     Task RemoveAsync(Guid id, CancellationToken ct = default);

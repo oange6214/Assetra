@@ -670,6 +670,9 @@
     <sys:String x:Key="Portfolio.Trade.DeleteFailed">Failed to delete trade record, please try again</sys:String>
     <sys:String x:Key="Portfolio.Trade.OldDeleteFailed">Failed to delete old trade records; possible duplicates in DB. Try refreshing or restarting.</sys:String>
     <sys:String x:Key="Portfolio.Trade.DeleteBlockedBySell">Delete the related sell trade first before removing or editing this buy.</sys:String>
+    <sys:String x:Key="Portfolio.Trade.MetaUpdateFailed">Update failed: record not found or has been modified. Please close and retry.</sys:String>
+    <sys:String x:Key="Portfolio.Trade.MetaUpdateError">Update failed: {0}</sys:String>
+    <sys:String x:Key="AddAsset.ClosePrice.FetchFailed">Close price lookup failed. Please enter manually.</sys:String>
 
     <!--  Financial Overview  -->
     <sys:String x:Key="FinancialOverview.Nav.Label">Financial Overview</sys:String>

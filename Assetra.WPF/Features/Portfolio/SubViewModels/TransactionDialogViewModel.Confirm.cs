@@ -175,14 +175,23 @@ public partial class TransactionDialogViewModel
                     string.IsNullOrWhiteSpace(TxNote) ? null : TxNote))
                 .ConfigureAwait(true);
             if (!updated)
+            {
+                // L2: previously returned silently — dialog stayed open with no
+                // visible feedback. Surface a localized "update failed" hint so
+                // the user knows the click did something.
+                TxError = L("Portfolio.Trade.MetaUpdateFailed",
+                    "更新失敗，找不到此筆記錄或記錄已被修改。請關閉後重試。");
                 return;
+            }
             CloseTxDialog();
             await _loadTradesAsync();
             TransactionCompleted?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)
         {
-            TxError = $"更新失敗：{ex.Message}";
+            TxError = string.Format(
+                L("Portfolio.Trade.MetaUpdateError", "更新失敗：{0}"),
+                ex.Message);
         }
     }
 

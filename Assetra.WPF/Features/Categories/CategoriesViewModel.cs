@@ -20,6 +20,8 @@ public partial class CategoriesViewModel : ObservableObject
     private readonly IBudgetRefreshNotifier _budgetRefreshNotifier;
     private readonly ISnackbarService _snackbar;
     private readonly ILocalizationService _localization;
+    private readonly CollectionViewSource _expenseViewSource = new();
+    private readonly CollectionViewSource _incomeViewSource = new();
 
     public ObservableCollection<CategoryRowViewModel> Categories { get; } = [];
     public ObservableCollection<AutoCategorizationRuleRowViewModel> Rules { get; } = [];
@@ -80,8 +82,8 @@ public partial class CategoriesViewModel : ObservableObject
     [ObservableProperty] private bool _isAddBudgetOpen;
 
     // Empty-state predicates per tab
-    public bool HasNoExpense => Categories.Count(c => c.Kind == CategoryKind.Expense && !c.IsArchived) == 0;
-    public bool HasNoIncome  => Categories.Count(c => c.Kind == CategoryKind.Income  && !c.IsArchived) == 0;
+    public bool HasNoExpense => Categories.Count(c => c.Kind == CategoryKind.Expense && (ShowArchived || !c.IsArchived)) == 0;
+    public bool HasNoIncome  => Categories.Count(c => c.Kind == CategoryKind.Income  && (ShowArchived || !c.IsArchived)) == 0;
     public bool HasNoRules   => Rules.Count == 0;
     public bool HasRules     => Rules.Count > 0;
     public bool HasNoBudgets => Budgets.Count == 0;
@@ -143,11 +145,13 @@ public partial class CategoriesViewModel : ObservableObject
         _snackbar = snackbar;
         _localization = localization;
 
-        ExpenseView = CollectionViewSource.GetDefaultView(Categories);
+        _expenseViewSource.Source = Categories;
+        ExpenseView = _expenseViewSource.View;
         ExpenseView.Filter = o => o is CategoryRowViewModel r && r.IsExpense && (ShowArchived || !r.IsArchived);
 
         // Income column needs its own view — use a wrapper observable collection bound separately.
-        IncomeView = new CollectionViewSource { Source = Categories }.View;
+        _incomeViewSource.Source = Categories;
+        IncomeView = _incomeViewSource.View;
         IncomeView.Filter = o => o is CategoryRowViewModel r && r.IsIncome && (ShowArchived || !r.IsArchived);
         IncomeView.SortDescriptions.Add(new SortDescription(nameof(CategoryRowViewModel.SortOrder), ListSortDirection.Ascending));
         ExpenseView.SortDescriptions.Add(new SortDescription(nameof(CategoryRowViewModel.SortOrder), ListSortDirection.Ascending));
@@ -171,6 +175,13 @@ public partial class CategoriesViewModel : ObservableObject
         OnPropertyChanged(nameof(HasBudgets));
     }
 
+    private void RefreshCategoryViews()
+    {
+        ExpenseView?.Refresh();
+        IncomeView?.Refresh();
+        NotifyEmptyStatesChanged();
+    }
+
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         RefreshIconOptions();
@@ -185,8 +196,7 @@ public partial class CategoriesViewModel : ObservableObject
 
     partial void OnShowArchivedChanged(bool value)
     {
-        ExpenseView.Refresh();
-        IncomeView.Refresh();
+        RefreshCategoryViews();
     }
 
     partial void OnAddKindChanged(CategoryKind value) => ApplyAddDefaults(value);
@@ -344,8 +354,7 @@ public partial class CategoriesViewModel : ObservableObject
 
         row.IsArchived = !row.IsArchived;
         await _repository.UpdateAsync(row.ToModel()).ConfigureAwait(true);
-        ExpenseView.Refresh();
-        IncomeView.Refresh();
+        RefreshCategoryViews();
         RefreshAvailableCategories();
         var key = row.IsArchived ? "Categories.Toast.Archived" : "Categories.Toast.Restored";
         var fallback = row.IsArchived ? "已封存「{0}」" : "已還原「{0}」";
@@ -356,11 +365,18 @@ public partial class CategoriesViewModel : ObservableObject
     private async Task DeleteAsync(CategoryRowViewModel row)
     {
         if (row is null) return;
+        // M2: previously did N×O(rows) full scans of three repositories then
+        // counted in-memory via LINQ — for a long-running user with thousands
+        // of trades that's a real cost on every delete attempt. The new
+        // CountByCategoryAsync default still fetches all rows (interface
+        // default), but SQLite-backed implementations can override with a
+        // proper SQL COUNT(*) when this becomes a hotspot. Same call site —
+        // no further changes needed when the SQL override lands.
         var budgetRefs = Budgets.Count(b => b.CategoryId == row.Id);
         var ruleRefs = Rules.Count(r => r.CategoryId == row.Id);
-        var tradeRefs = (await _tradeRepository.GetAllAsync().ConfigureAwait(true)).Count(t => t.CategoryId == row.Id);
-        var recurringRefs = (await _recurringRepository.GetAllAsync().ConfigureAwait(true)).Count(r => r.CategoryId == row.Id);
-        var pendingRefs = (await _pendingRecurringRepository.GetAllAsync().ConfigureAwait(true)).Count(e => e.CategoryId == row.Id);
+        var tradeRefs = await _tradeRepository.CountByCategoryAsync(row.Id).ConfigureAwait(true);
+        var recurringRefs = await _recurringRepository.CountByCategoryAsync(row.Id).ConfigureAwait(true);
+        var pendingRefs = await _pendingRecurringRepository.CountByCategoryAsync(row.Id).ConfigureAwait(true);
         if (budgetRefs > 0 || ruleRefs > 0 || tradeRefs > 0 || recurringRefs > 0 || pendingRefs > 0)
         {
             var message = GetDeleteBlockedMessage(row.Name, budgetRefs, ruleRefs, tradeRefs, recurringRefs, pendingRefs);
