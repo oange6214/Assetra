@@ -12,7 +12,7 @@
 
         Layer 1 — primitive values (theme-independent).
         Layer 2 — Light/Dark palette mappings live in their respective
-                  theme dictionaries (Themes/Light.xaml, Themes/Dark.xaml)
+                  theme dictionaries (DesignSystem/Themes/Light.xaml, DesignSystem/Themes/Dark.xaml)
                   and consume these primitives through DynamicResource so
                   swapping the theme dictionary at runtime carries through.
         Layer 3 — Wpf.Ui control-key overrides (AccentButton*, etc.) also

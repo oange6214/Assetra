@@ -23,7 +23,7 @@
     -->
 
     <!--
-        Aliases AppXxx -> Design System tokens (see Themes/DesignTokens.xaml).
+        Aliases AppXxx -> Design System tokens (see DesignSystem/Tokens/DesignTokens.xaml).
         Existing view bindings stay valid; values now follow the
         UX/UI guideline (Slate neutrals + Navy primary + Gold accent).
     -->

@@ -27,8 +27,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemesDictionary Theme="Dark" />
                 <ui:ControlsDictionary />
-                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/Themes/DesignTokens.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/Themes/Dark.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/DesignTokens.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Themes/Dark.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/Themes/GlobalStyles.xaml" />
                 <!--  Default language — overridden at startup by WpfLocalizationService based on saved AppSettings.Language  -->
                 <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/Languages/zh-TW.xaml" />

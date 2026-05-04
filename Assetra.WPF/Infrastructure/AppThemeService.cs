@@ -104,7 +104,7 @@ public sealed class AppThemeService : IThemeService
         var paletteName = theme == ApplicationTheme.Light ? "Light" : "Dark";
         var newDict = new ResourceDictionary
         {
-            Source = new Uri($"pack://application:,,,/Assetra.WPF;component/Themes/{paletteName}.xaml")
+            Source = new Uri($"pack://application:,,,/Assetra.WPF;component/DesignSystem/Themes/{paletteName}.xaml")
         };
 
         // In-place replacement preserves index order and avoids a momentary gap
@@ -114,8 +114,8 @@ public sealed class AppThemeService : IThemeService
             var src = dicts[i].Source?.ToString();
             if (src is null)
                 continue;
-            if (src.Contains("Assetra.WPF;component/Themes/Dark.xaml", StringComparison.OrdinalIgnoreCase) ||
-                src.Contains("Assetra.WPF;component/Themes/Light.xaml", StringComparison.OrdinalIgnoreCase))
+            if (src.Contains("DesignSystem/Themes/Dark.xaml", StringComparison.OrdinalIgnoreCase) ||
+                src.Contains("DesignSystem/Themes/Light.xaml", StringComparison.OrdinalIgnoreCase))
             {
                 dicts[i] = newDict;
                 return;

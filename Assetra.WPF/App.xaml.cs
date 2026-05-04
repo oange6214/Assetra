@@ -298,14 +298,14 @@ public partial class App : System.Windows.Application
                 var paletteName = theme == ApplicationTheme.Light ? "Light" : "Dark";
                 var newDict = new ResourceDictionary
                 {
-                    Source = new Uri($"pack://application:,,,/Assetra.WPF;component/Themes/{paletteName}.xaml")
+                    Source = new Uri($"pack://application:,,,/Assetra.WPF;component/DesignSystem/Themes/{paletteName}.xaml")
                 };
                 for (var i = 0; i < dicts.Count; i++)
                 {
                     var src = dicts[i].Source?.ToString();
                     if (src is not null
-                        && (src.Contains("Themes/Dark.xaml", StringComparison.OrdinalIgnoreCase)
-                         || src.Contains("Themes/Light.xaml", StringComparison.OrdinalIgnoreCase)))
+                        && (src.Contains("DesignSystem/Themes/Dark.xaml", StringComparison.OrdinalIgnoreCase)
+                         || src.Contains("DesignSystem/Themes/Light.xaml", StringComparison.OrdinalIgnoreCase)))
                     {
                         dicts[i] = newDict;
                         break;

@@ -23,7 +23,7 @@
     -->
 
     <!--
-        Aliases AppXxx -> Design System Dark variant (Themes/DesignTokens.xaml).
+        Aliases AppXxx -> Design System Dark variant (DesignSystem/Tokens/DesignTokens.xaml).
         Per the UX/UI guideline §2, Dark mode lifts primary to a brighter
         blue (#3B82F6) so it stays visible on Slate-900 surfaces; the
         Light theme's deep navy (#142F55) is too low-contrast in dark.
