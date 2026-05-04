@@ -630,6 +630,7 @@
 
     <!--  ── 資產配置 ──  -->
     <sys:String x:Key="Allocation.Tab.Overview">配置概覽</sys:String>
+    <sys:String x:Key="Allocation.Cash">現金</sys:String>
     <sys:String x:Key="Allocation.Tab.Rebalance">再平衡</sys:String>
     <sys:String x:Key="Allocation.Overview.Title">配置概覽</sys:String>
     <sys:String x:Key="Allocation.Summary.Investment">持股市值</sys:String>
@@ -1074,6 +1075,7 @@
     <sys:String x:Key="RealEstate.Column.Mortgage">房貸餘額</sys:String>
     <sys:String x:Key="RealEstate.Column.Equity">淨值</sys:String>
     <sys:String x:Key="RealEstate.Column.Currency">幣別</sys:String>
+    <sys:String x:Key="RealEstate.Action.Add">新增不動產</sys:String>
     <sys:String x:Key="RealEstate.Form.Title">新增 / 編輯不動產</sys:String>
     <sys:String x:Key="RealEstate.Form.Name">名稱</sys:String>
     <sys:String x:Key="RealEstate.Form.Address">地址</sys:String>
@@ -1085,7 +1087,7 @@
     <sys:String x:Key="RealEstate.Form.Notes">備註</sys:String>
     <sys:String x:Key="RealEstate.Empty.Title">尚未建立不動產</sys:String>
     <sys:String x:Key="RealEstate.Empty.Hint">新增房屋、土地或投資物件後，這裡會顯示市值、房貸餘額與淨值。</sys:String>
-    <sys:String x:Key="RealEstate.Empty.Cta">使用下方表單新增第一筆不動產。</sys:String>
+    <sys:String x:Key="RealEstate.Empty.Cta">按「新增不動產」建立第一筆資料。</sys:String>
 
     <!--  Insurance  -->
     <sys:String x:Key="Insurance.Title">保險保單</sys:String>
@@ -1097,6 +1099,7 @@
     <sys:String x:Key="Insurance.Column.CashValue">現金價值</sys:String>
     <sys:String x:Key="Insurance.Column.AnnualPremium">年繳保費</sys:String>
     <sys:String x:Key="Insurance.Column.Currency">幣別</sys:String>
+    <sys:String x:Key="Insurance.Action.Add">新增保單</sys:String>
     <sys:String x:Key="Insurance.Form.Title">新增 / 編輯保單</sys:String>
     <sys:String x:Key="Insurance.Form.Name">保單名稱</sys:String>
     <sys:String x:Key="Insurance.Form.PolicyNumber">保單號碼</sys:String>
@@ -1117,7 +1120,7 @@
     <sys:String x:Key="Insurance.Type.Other">其他</sys:String>
     <sys:String x:Key="Insurance.Empty.Title">尚未建立保單</sys:String>
     <sys:String x:Key="Insurance.Empty.Hint">新增保單後，這裡會顯示現金價值、年繳保費與保單狀態。</sys:String>
-    <sys:String x:Key="Insurance.Empty.Cta">使用下方表單新增第一張保單。</sys:String>
+    <sys:String x:Key="Insurance.Empty.Cta">按「新增保單」建立第一張保單。</sys:String>
 
     <!--  v0.24 退休專戶  -->
     <sys:String x:Key="Retirement.Title">退休專戶</sys:String>
@@ -1130,6 +1133,7 @@
     <sys:String x:Key="Retirement.Column.WithdrawalAge">提領年齡</sys:String>
     <sys:String x:Key="Retirement.Column.LatestContribution">近一年提撥</sys:String>
     <sys:String x:Key="Retirement.Column.Currency">幣別</sys:String>
+    <sys:String x:Key="Retirement.Action.Add">新增退休專戶</sys:String>
     <sys:String x:Key="Retirement.Action.Project">試算</sys:String>
     <sys:String x:Key="Retirement.Form.Title">新增 / 編輯退休專戶</sys:String>
     <sys:String x:Key="Retirement.Form.Name">名稱</sys:String>
@@ -1154,7 +1158,7 @@
     <sys:String x:Key="Retirement.Projection.AnnualContribution">每年提撥</sys:String>
     <sys:String x:Key="Retirement.Empty.Title">尚未建立退休專戶</sys:String>
     <sys:String x:Key="Retirement.Empty.Hint">新增勞退、自提或其他退休帳戶後，這裡會顯示餘額、年資與提撥資訊。</sys:String>
-    <sys:String x:Key="Retirement.Empty.Cta">使用下方表單新增第一個退休專戶。</sys:String>
+    <sys:String x:Key="Retirement.Empty.Cta">按「新增退休專戶」建立第一個帳戶。</sys:String>
 
     <!--  v0.24 實物資產  -->
     <sys:String x:Key="PhysicalAsset.Title">實物資產</sys:String>
@@ -1167,6 +1171,7 @@
     <sys:String x:Key="PhysicalAsset.Column.Gain">未實現損益</sys:String>
     <sys:String x:Key="PhysicalAsset.Column.GainRate">報酬率</sys:String>
     <sys:String x:Key="PhysicalAsset.Column.Currency">幣別</sys:String>
+    <sys:String x:Key="PhysicalAsset.Action.Add">新增實物資產</sys:String>
     <sys:String x:Key="PhysicalAsset.Form.Title">新增 / 編輯實物資產</sys:String>
     <sys:String x:Key="PhysicalAsset.Form.Name">名稱</sys:String>
     <sys:String x:Key="PhysicalAsset.Form.Category">類別</sys:String>
@@ -1186,7 +1191,7 @@
     <sys:String x:Key="PhysicalAsset.Category.Other">其他</sys:String>
     <sys:String x:Key="PhysicalAsset.Empty.Title">尚未建立實物資產</sys:String>
     <sys:String x:Key="PhysicalAsset.Empty.Hint">新增車輛、收藏品或其他實物資產後，這裡會顯示成本、市值與未實現損益。</sys:String>
-    <sys:String x:Key="PhysicalAsset.Empty.Cta">使用下方表單新增第一筆實物資產。</sys:String>
+    <sys:String x:Key="PhysicalAsset.Empty.Cta">按「新增實物資產」建立第一筆資料。</sys:String>
 
     <!--  v0.25 FIRE 計算機  -->
     <sys:String x:Key="Fire.Title">FIRE</sys:String>

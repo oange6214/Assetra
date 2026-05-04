@@ -144,11 +144,24 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     partial void OnTotalInvestmentChanged(decimal _) => OnPropertyChanged(nameof(TotalInvestmentDisplay));
     partial void OnTotalCashChanged(decimal _) => OnPropertyChanged(nameof(TotalCashDisplay));
 
+    private readonly ILocalizationService? _localization;
+
+    private string L(string key, string fallback) =>
+        _localization?.Get(key, fallback) ?? fallback;
+
+    // L4: localized "現金" display label. Symbol stays "現金" (domain key for
+    // the target-percentage dictionary lookup); only the display Name varies.
+    private string CashLabel => L("Allocation.Cash", "現金");
+
     // Ctor
-    public AllocationViewModel(PortfolioViewModel portfolio, IAppSettingsService? settings = null)
+    public AllocationViewModel(
+        PortfolioViewModel portfolio,
+        IAppSettingsService? settings = null,
+        ILocalizationService? localization = null)
     {
         _portfolio = portfolio;
         _settings = settings;
+        _localization = localization;
 
         // Subscribe to live collection changes
         portfolio.Positions.CollectionChanged += OnCollectionChanged;
@@ -254,7 +267,9 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         // Cash row (neutral grey, no target, no P&L)
         if (cashTotal > 0)
         {
-            var cashRow = new AllocationRowViewModel("現金", "現金", "cash", cashTotal, 0m, 0m, 0m, CashBrush);
+            // Symbol "現金" stays as the dictionary key (matches saved target
+            // percentages); Name is localized for display.
+            var cashRow = new AllocationRowViewModel("現金", CashLabel, "cash", cashTotal, 0m, 0m, 0m, CashBrush);
             cashRow.ActualPercent = total > 0 ? Math.Round(cashTotal / total * 100m, 1) : 0m;
             cashRow.TargetPercent = targets.TryGetValue("現金", out var cashTarget) ? cashTarget : 0m;
             cashRow.EditTargetText = cashRow.TargetPercent.ToString("G");

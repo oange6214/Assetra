@@ -628,6 +628,7 @@
 
     <!--  ── Asset Allocation ──  -->
     <sys:String x:Key="Allocation.Tab.Overview">Overview</sys:String>
+    <sys:String x:Key="Allocation.Cash">Cash</sys:String>
     <sys:String x:Key="Allocation.Tab.Rebalance">Rebalance</sys:String>
     <sys:String x:Key="Allocation.Overview.Title">Allocation Overview</sys:String>
     <sys:String x:Key="Allocation.Summary.Investment">Holdings</sys:String>
@@ -1070,6 +1071,7 @@
     <sys:String x:Key="RealEstate.Column.Mortgage">Mortgage Balance</sys:String>
     <sys:String x:Key="RealEstate.Column.Equity">Equity</sys:String>
     <sys:String x:Key="RealEstate.Column.Currency">Currency</sys:String>
+    <sys:String x:Key="RealEstate.Action.Add">Add property</sys:String>
     <sys:String x:Key="RealEstate.Form.Title">Add / Edit Property</sys:String>
     <sys:String x:Key="RealEstate.Form.Name">Name</sys:String>
     <sys:String x:Key="RealEstate.Form.Address">Address</sys:String>
@@ -1081,7 +1083,7 @@
     <sys:String x:Key="RealEstate.Form.Notes">Notes</sys:String>
     <sys:String x:Key="RealEstate.Empty.Title">No properties yet</sys:String>
     <sys:String x:Key="RealEstate.Empty.Hint">Add a home, land, or investment property to track market value, mortgage balance, and equity here.</sys:String>
-    <sys:String x:Key="RealEstate.Empty.Cta">Use the form below to add your first property.</sys:String>
+    <sys:String x:Key="RealEstate.Empty.Cta">Choose "Add property" to create the first record.</sys:String>
 
     <!--  Insurance  -->
     <sys:String x:Key="Insurance.Title">Insurance Policies</sys:String>
@@ -1093,6 +1095,7 @@
     <sys:String x:Key="Insurance.Column.CashValue">Cash Value</sys:String>
     <sys:String x:Key="Insurance.Column.AnnualPremium">Annual Premium</sys:String>
     <sys:String x:Key="Insurance.Column.Currency">Currency</sys:String>
+    <sys:String x:Key="Insurance.Action.Add">Add policy</sys:String>
     <sys:String x:Key="Insurance.Form.Title">Add / Edit Policy</sys:String>
     <sys:String x:Key="Insurance.Form.Name">Policy Name</sys:String>
     <sys:String x:Key="Insurance.Form.PolicyNumber">Policy Number</sys:String>
@@ -1113,7 +1116,7 @@
 <sys:String x:Key="Insurance.Type.Other">Other</sys:String>
 <sys:String x:Key="Insurance.Empty.Title">No policies yet</sys:String>
 <sys:String x:Key="Insurance.Empty.Hint">Add a policy to track cash value, annual premium, and coverage details here.</sys:String>
-<sys:String x:Key="Insurance.Empty.Cta">Use the form below to add your first policy.</sys:String>
+<sys:String x:Key="Insurance.Empty.Cta">Choose "Add policy" to create the first policy.</sys:String>
 
     <!-- v0.24 Retirement -->
     <sys:String x:Key="Retirement.Title">Retirement Accounts</sys:String>
@@ -1126,6 +1129,7 @@
     <sys:String x:Key="Retirement.Column.WithdrawalAge">Withdrawal Age</sys:String>
     <sys:String x:Key="Retirement.Column.LatestContribution">Latest Year Contribution</sys:String>
     <sys:String x:Key="Retirement.Column.Currency">Currency</sys:String>
+    <sys:String x:Key="Retirement.Action.Add">Add retirement account</sys:String>
     <sys:String x:Key="Retirement.Action.Project">Project</sys:String>
     <sys:String x:Key="Retirement.Form.Title">Add / Edit Retirement Account</sys:String>
     <sys:String x:Key="Retirement.Form.Name">Name</sys:String>
@@ -1150,7 +1154,7 @@
     <sys:String x:Key="Retirement.Projection.AnnualContribution">Annual Contribution</sys:String>
     <sys:String x:Key="Retirement.Empty.Title">No retirement accounts yet</sys:String>
     <sys:String x:Key="Retirement.Empty.Hint">Add a pension or retirement account to track balance, years of service, and contributions here.</sys:String>
-    <sys:String x:Key="Retirement.Empty.Cta">Use the form below to add your first retirement account.</sys:String>
+    <sys:String x:Key="Retirement.Empty.Cta">Choose "Add retirement account" to create the first account.</sys:String>
 
     <!-- v0.24 Physical Asset -->
     <sys:String x:Key="PhysicalAsset.Title">Physical Assets</sys:String>
@@ -1163,6 +1167,7 @@
     <sys:String x:Key="PhysicalAsset.Column.Gain">Unrealized Gain</sys:String>
     <sys:String x:Key="PhysicalAsset.Column.GainRate">Return Rate</sys:String>
     <sys:String x:Key="PhysicalAsset.Column.Currency">Currency</sys:String>
+    <sys:String x:Key="PhysicalAsset.Action.Add">Add physical asset</sys:String>
     <sys:String x:Key="PhysicalAsset.Form.Title">Add / Edit Physical Asset</sys:String>
     <sys:String x:Key="PhysicalAsset.Form.Name">Name</sys:String>
     <sys:String x:Key="PhysicalAsset.Form.Category">Category</sys:String>
@@ -1182,7 +1187,7 @@
     <sys:String x:Key="PhysicalAsset.Category.Other">Other</sys:String>
     <sys:String x:Key="PhysicalAsset.Empty.Title">No physical assets yet</sys:String>
     <sys:String x:Key="PhysicalAsset.Empty.Hint">Add vehicles, collectibles, or other physical assets to track cost, value, and unrealized gain here.</sys:String>
-    <sys:String x:Key="PhysicalAsset.Empty.Cta">Use the form below to add your first physical asset.</sys:String>
+    <sys:String x:Key="PhysicalAsset.Empty.Cta">Choose "Add physical asset" to create the first record.</sys:String>
 
     <!-- v0.25 FIRE Calculator -->
     <sys:String x:Key="Fire.Title">FIRE</sys:String>
