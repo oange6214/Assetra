@@ -142,9 +142,20 @@ public partial class TransactionDialogViewModel
                 Log.Error(ex, "Failed to remove old trade {TradeId} during edit — possible duplicate entry", oldRow.Id);
                 _snackbar?.Error(L("Portfolio.Trade.OldDeleteFailed", "舊交易記錄刪除失敗，資料庫可能存在重複筆數，建議重新整理或重啟應用程式"));
             }
-            await _loadPositionsAsync();
-            await _loadTradesAsync();
-            await _reloadAccountBalancesAsync();
+            // L1 perf: previously three back-to-back _loadService.LoadAsync
+            // round-trips. ReloadAllAsync (when wired) does a single load and
+            // applies every slice; falls back to the per-slice path for older
+            // dependency configurations.
+            if (_reloadAllAsync is not null)
+            {
+                await _reloadAllAsync();
+            }
+            else
+            {
+                await _loadPositionsAsync();
+                await _loadTradesAsync();
+                await _reloadAccountBalancesAsync();
+            }
             _rebuildTotals();
         }
 

@@ -368,6 +368,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
                 LoadPositionsAsync: LoadPositionsAsync,
                 LoadTradesAsync: LoadTradesAsync,
                 ReloadAccountBalancesAsync: ReloadAccountBalancesAsync,
+                ReloadAllAsync: ReloadAllAfterEditAsync,
                 RebuildTotals: RebuildTotals,
                 Localize: L,
                 CategoryRepository: services.CategoryRepository,
@@ -675,6 +676,23 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     {
         var loaded = await _loadService.LoadAsync();
         ApplyTrades(loaded.Trades);
+    }
+
+    /// <summary>
+    /// L1 perf: post-edit cleanup needs positions + trades + cash + liabilities
+    /// reapplied in lock-step. Calling each per-slice delegate fires three
+    /// separate _loadService.LoadAsync round-trips. This method does one load
+    /// and applies every slice from the same snapshot — saves two full reloads
+    /// on the edit-with-revision path. Wired into TransactionDialogDeps as the
+    /// optional ReloadAllAsync delegate.
+    /// </summary>
+    private async Task ReloadAllAfterEditAsync()
+    {
+        var loaded = await _loadService.LoadAsync();
+        ApplyPositions(loaded);
+        ApplyTrades(loaded.Trades);
+        ApplyCashAccounts(loaded);
+        ApplyLiabilities(loaded);
     }
 
     private void ApplyTrades(IReadOnlyList<Trade> trades)

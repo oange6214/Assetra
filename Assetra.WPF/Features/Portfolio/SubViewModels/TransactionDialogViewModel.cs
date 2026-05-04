@@ -46,6 +46,12 @@ internal sealed record TransactionDialogDependencies(
     Func<Task> LoadPositionsAsync,
     Func<Task> LoadTradesAsync,
     Func<Task> ReloadAccountBalancesAsync,
+    // L1 perf: post-edit cleanup needs positions + trades + balances + totals,
+    // but calling each delegate triggered three separate _loadService.LoadAsync
+    // round-trips. ReloadAllAsync runs one load and applies every slice in
+    // sequence — used by ConfirmTx's edit-cleanup branch only. Optional with a
+    // null-default so existing test factories without the delegate still build.
+    Func<Task>? ReloadAllAsync,
     Action RebuildTotals,
     Func<string, string, string> Localize,
     // P1 收支管理：收支分類與自動分類規則來源（皆可為 null 以保留向後相容）
@@ -92,6 +98,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private readonly Func<Task> _loadPositionsAsync;
     private readonly Func<Task> _loadTradesAsync;
     private readonly Func<Task> _reloadAccountBalancesAsync;
+    private readonly Func<Task>? _reloadAllAsync;
     private readonly Action _rebuildTotals;
     private readonly Func<string, string, string> _localize;
 
@@ -135,6 +142,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _loadPositionsAsync = deps.LoadPositionsAsync;
         _loadTradesAsync = deps.LoadTradesAsync;
         _reloadAccountBalancesAsync = deps.ReloadAccountBalancesAsync;
+        _reloadAllAsync = deps.ReloadAllAsync;
         _rebuildTotals = deps.RebuildTotals;
         _localize = deps.Localize;
         _categoryRepository = deps.CategoryRepository;
