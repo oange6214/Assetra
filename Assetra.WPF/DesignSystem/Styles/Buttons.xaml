@@ -13,26 +13,52 @@
         (dark in Light theme). On a saturated red/orange/green/blue
         background that produces unreadable dark-on-saturated text.
 
-        Force white Foreground for those four appearances. Primary stays
-        on its own AccentButtonForeground key (already overridden in
-        the theme dictionaries) so this trigger doesn't affect it.
+        Force the control foreground and inherited text foreground for
+        filled appearances. Wpf.Ui can host plain string Content through
+        a ContentPresenter, so TextElement.Foreground is needed for the
+        generated text to inherit the intended on-accent color.
     -->
     <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
+        <!--
+            Style.Resources : descendant TextBlock / SymbolIcon styles that
+            re-inherit the Button's Foreground.
+
+            Why:  the global implicit TextBlock style (Inputs.xaml) sets
+                  Foreground=AppTextPrimary as a Setter, which overrides
+                  the Button trigger's TextElement.Foreground inheritance.
+                  On a saturated Primary/Danger/Caution/Success/Info
+                  background that produced unreadable dark text on dark
+                  navy / red / orange / green / blue.
+
+            Fix:  for descendants of ui:Button, bind their Foreground back
+                  to the Button's current Foreground. Buttons without a
+                  trigger (Secondary / Transparent) still pick up
+                  AppTextPrimary because that's what their Foreground
+                  resolves to from the base ui:Button style.
+        -->
+        <Style.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}" />
+            </Style>
+            <Style TargetType="{x:Type ui:SymbolIcon}">
+                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}" />
+            </Style>
+        </Style.Resources>
         <Style.Triggers>
             <Trigger Property="Appearance" Value="Primary">
-                <Setter Property="Foreground" Value="#FFFFFF" />
+                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
             </Trigger>
             <Trigger Property="Appearance" Value="Danger">
-                <Setter Property="Foreground" Value="#FFFFFF" />
+                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
             </Trigger>
             <Trigger Property="Appearance" Value="Caution">
-                <Setter Property="Foreground" Value="#FFFFFF" />
+                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
             </Trigger>
             <Trigger Property="Appearance" Value="Success">
-                <Setter Property="Foreground" Value="#FFFFFF" />
+                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
             </Trigger>
             <Trigger Property="Appearance" Value="Info">
-                <Setter Property="Foreground" Value="#FFFFFF" />
+                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
             </Trigger>
         </Style.Triggers>
     </Style>
