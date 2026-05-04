@@ -1076,6 +1076,9 @@
     <sys:String x:Key="RealEstate.Form.Currency">Currency</sys:String>
     <sys:String x:Key="RealEstate.Form.IsRental">Rental Property</sys:String>
     <sys:String x:Key="RealEstate.Form.Notes">Notes</sys:String>
+    <sys:String x:Key="RealEstate.Empty.Title">No properties yet</sys:String>
+    <sys:String x:Key="RealEstate.Empty.Hint">Add a home, land, or investment property to track market value, mortgage balance, and equity here.</sys:String>
+    <sys:String x:Key="RealEstate.Empty.Cta">Use the form below to add your first property.</sys:String>
 
     <!--  Insurance  -->
     <sys:String x:Key="Insurance.Title">Insurance Policies</sys:String>
@@ -1099,6 +1102,15 @@
 <sys:String x:Key="Insurance.Form.StartDate">Start Date</sys:String>
 <sys:String x:Key="Insurance.Form.MaturityDate">Maturity Date</sys:String>
 <sys:String x:Key="Insurance.Form.Notes">Notes</sys:String>
+<sys:String x:Key="Insurance.Type.WholeLife">Whole life</sys:String>
+<sys:String x:Key="Insurance.Type.TermLife">Term life</sys:String>
+<sys:String x:Key="Insurance.Type.Endowment">Endowment</sys:String>
+<sys:String x:Key="Insurance.Type.Annuity">Annuity</sys:String>
+<sys:String x:Key="Insurance.Type.Universal">Universal life</sys:String>
+<sys:String x:Key="Insurance.Type.Other">Other</sys:String>
+<sys:String x:Key="Insurance.Empty.Title">No policies yet</sys:String>
+<sys:String x:Key="Insurance.Empty.Hint">Add a policy to track cash value, annual premium, and coverage details here.</sys:String>
+<sys:String x:Key="Insurance.Empty.Cta">Use the form below to add your first policy.</sys:String>
 
     <!-- v0.24 Retirement -->
     <sys:String x:Key="Retirement.Title">Retirement Accounts</sys:String>
@@ -1124,10 +1136,18 @@
     <sys:String x:Key="Retirement.Form.OpenedDate">Opened Date</sys:String>
     <sys:String x:Key="Retirement.Form.Currency">Currency</sys:String>
     <sys:String x:Key="Retirement.Form.Notes">Notes</sys:String>
+    <sys:String x:Key="Retirement.AccountType.LaborPension">Labor pension</sys:String>
+    <sys:String x:Key="Retirement.AccountType.EmployerSponsored">Employer sponsored</sys:String>
+    <sys:String x:Key="Retirement.AccountType.IndividualRetirementAccount">Individual retirement account</sys:String>
+    <sys:String x:Key="Retirement.AccountType.Annuity">Annuity</sys:String>
+    <sys:String x:Key="Retirement.AccountType.Other">Other</sys:String>
     <sys:String x:Key="Retirement.Projection.Title">Retirement Projection</sys:String>
     <sys:String x:Key="Retirement.Projection.CurrentAge">Current Age</sys:String>
     <sys:String x:Key="Retirement.Projection.AnnualReturn">Annual Return Rate</sys:String>
     <sys:String x:Key="Retirement.Projection.AnnualContribution">Annual Contribution</sys:String>
+    <sys:String x:Key="Retirement.Empty.Title">No retirement accounts yet</sys:String>
+    <sys:String x:Key="Retirement.Empty.Hint">Add a pension or retirement account to track balance, years of service, and contributions here.</sys:String>
+    <sys:String x:Key="Retirement.Empty.Cta">Use the form below to add your first retirement account.</sys:String>
 
     <!-- v0.24 Physical Asset -->
     <sys:String x:Key="PhysicalAsset.Title">Physical Assets</sys:String>
@@ -1150,6 +1170,16 @@
     <sys:String x:Key="PhysicalAsset.Form.ValuationMethod">Valuation Method</sys:String>
     <sys:String x:Key="PhysicalAsset.Form.Currency">Currency</sys:String>
     <sys:String x:Key="PhysicalAsset.Form.Notes">Notes</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.Vehicle">Vehicle</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.Jewelry">Jewelry</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.Art">Art</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.Collectible">Collectible</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.PreciousMetal">Precious metal</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.Equipment">Equipment</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.Other">Other</sys:String>
+    <sys:String x:Key="PhysicalAsset.Empty.Title">No physical assets yet</sys:String>
+    <sys:String x:Key="PhysicalAsset.Empty.Hint">Add vehicles, collectibles, or other physical assets to track cost, value, and unrealized gain here.</sys:String>
+    <sys:String x:Key="PhysicalAsset.Empty.Cta">Use the form below to add your first physical asset.</sys:String>
 
     <!-- v0.25 FIRE Calculator -->
     <sys:String x:Key="Fire.Title">FIRE</sys:String>
@@ -1164,6 +1194,12 @@
     <sys:String x:Key="Fire.Result.YearsToFire">Years to FIRE</sys:String>
     <sys:String x:Key="Fire.Result.Projected">Net Worth at FIRE</sys:String>
     <sys:String x:Key="Fire.Result.NotCalculated">Fill in the inputs and click Calculate to see your FIRE numbers.</sys:String>
+    <sys:String x:Key="Fire.Saved">Synced to financial goals</sys:String>
+    <sys:String x:Key="Fire.Error.NetWorthInvalid">Invalid current net worth</sys:String>
+    <sys:String x:Key="Fire.Error.ExpensesInvalid">Invalid annual expenses</sys:String>
+    <sys:String x:Key="Fire.Error.SavingsInvalid">Invalid annual savings</sys:String>
+    <sys:String x:Key="Fire.Error.ReturnInvalid">Invalid expected return</sys:String>
+    <sys:String x:Key="Fire.Error.WithdrawalInvalid">Invalid withdrawal rate</sys:String>
     <sys:String x:Key="Fire.Path.Year">Year</sys:String>
     <sys:String x:Key="Fire.Path.NetWorth">Net Worth</sys:String>
 
@@ -1182,6 +1218,14 @@
     <sys:String x:Key="MonteCarlo.Result.Median">Median Ending Balance</sys:String>
     <sys:String x:Key="MonteCarlo.Result.P90">P90 Ending Balance</sys:String>
     <sys:String x:Key="MonteCarlo.Result.NotCalculated">Fill in the inputs and click Run to see the simulation results.</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.InitialInvalid">Invalid initial balance</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.WithdrawalInvalid">Invalid annual withdrawal</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.MeanInvalid">Mean return must be &gt; -100%</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.StdDevInvalid">StdDev must be ≥ 0</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.YearsInvalid">Years must be &gt; 0</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.YearsMax">Years must be ≤ {0}</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.CountInvalid">Simulation count must be &gt; 0</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.CountMax">Simulation count must be ≤ {0:N0}</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Year">Year</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Median">Median Balance</sys:String>
 </ResourceDictionary>

@@ -1080,6 +1080,9 @@
     <sys:String x:Key="RealEstate.Form.Currency">幣別</sys:String>
     <sys:String x:Key="RealEstate.Form.IsRental">出租中</sys:String>
     <sys:String x:Key="RealEstate.Form.Notes">備註</sys:String>
+    <sys:String x:Key="RealEstate.Empty.Title">尚未建立不動產</sys:String>
+    <sys:String x:Key="RealEstate.Empty.Hint">新增房屋、土地或投資物件後，這裡會顯示市值、房貸餘額與淨值。</sys:String>
+    <sys:String x:Key="RealEstate.Empty.Cta">使用下方表單新增第一筆不動產。</sys:String>
 
     <!--  Insurance  -->
     <sys:String x:Key="Insurance.Title">保險保單</sys:String>
@@ -1103,6 +1106,15 @@
     <sys:String x:Key="Insurance.Form.StartDate">起始日</sys:String>
     <sys:String x:Key="Insurance.Form.MaturityDate">到期日</sys:String>
     <sys:String x:Key="Insurance.Form.Notes">備註</sys:String>
+    <sys:String x:Key="Insurance.Type.WholeLife">終身壽險</sys:String>
+    <sys:String x:Key="Insurance.Type.TermLife">定期壽險</sys:String>
+    <sys:String x:Key="Insurance.Type.Endowment">儲蓄險</sys:String>
+    <sys:String x:Key="Insurance.Type.Annuity">年金險</sys:String>
+    <sys:String x:Key="Insurance.Type.Universal">萬能壽險</sys:String>
+    <sys:String x:Key="Insurance.Type.Other">其他</sys:String>
+    <sys:String x:Key="Insurance.Empty.Title">尚未建立保單</sys:String>
+    <sys:String x:Key="Insurance.Empty.Hint">新增保單後，這裡會顯示現金價值、年繳保費與保單狀態。</sys:String>
+    <sys:String x:Key="Insurance.Empty.Cta">使用下方表單新增第一張保單。</sys:String>
 
     <!--  v0.24 退休專戶  -->
     <sys:String x:Key="Retirement.Title">退休專戶</sys:String>
@@ -1128,10 +1140,18 @@
     <sys:String x:Key="Retirement.Form.OpenedDate">開戶日期</sys:String>
     <sys:String x:Key="Retirement.Form.Currency">幣別</sys:String>
     <sys:String x:Key="Retirement.Form.Notes">備註</sys:String>
+    <sys:String x:Key="Retirement.AccountType.LaborPension">勞退</sys:String>
+    <sys:String x:Key="Retirement.AccountType.EmployerSponsored">雇主退休計畫</sys:String>
+    <sys:String x:Key="Retirement.AccountType.IndividualRetirementAccount">個人退休帳戶</sys:String>
+    <sys:String x:Key="Retirement.AccountType.Annuity">年金</sys:String>
+    <sys:String x:Key="Retirement.AccountType.Other">其他</sys:String>
     <sys:String x:Key="Retirement.Projection.Title">退休金試算</sys:String>
     <sys:String x:Key="Retirement.Projection.CurrentAge">目前年齡</sys:String>
     <sys:String x:Key="Retirement.Projection.AnnualReturn">年化報酬率</sys:String>
     <sys:String x:Key="Retirement.Projection.AnnualContribution">每年提撥</sys:String>
+    <sys:String x:Key="Retirement.Empty.Title">尚未建立退休專戶</sys:String>
+    <sys:String x:Key="Retirement.Empty.Hint">新增勞退、自提或其他退休帳戶後，這裡會顯示餘額、年資與提撥資訊。</sys:String>
+    <sys:String x:Key="Retirement.Empty.Cta">使用下方表單新增第一個退休專戶。</sys:String>
 
     <!--  v0.24 實物資產  -->
     <sys:String x:Key="PhysicalAsset.Title">實物資產</sys:String>
@@ -1154,6 +1174,16 @@
     <sys:String x:Key="PhysicalAsset.Form.ValuationMethod">估值方法</sys:String>
     <sys:String x:Key="PhysicalAsset.Form.Currency">幣別</sys:String>
     <sys:String x:Key="PhysicalAsset.Form.Notes">備註</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.Vehicle">車輛</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.Jewelry">珠寶</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.Art">藝術品</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.Collectible">收藏品</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.PreciousMetal">貴金屬</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.Equipment">設備</sys:String>
+    <sys:String x:Key="PhysicalAsset.Category.Other">其他</sys:String>
+    <sys:String x:Key="PhysicalAsset.Empty.Title">尚未建立實物資產</sys:String>
+    <sys:String x:Key="PhysicalAsset.Empty.Hint">新增車輛、收藏品或其他實物資產後，這裡會顯示成本、市值與未實現損益。</sys:String>
+    <sys:String x:Key="PhysicalAsset.Empty.Cta">使用下方表單新增第一筆實物資產。</sys:String>
 
     <!--  v0.25 FIRE 計算機  -->
     <sys:String x:Key="Fire.Title">FIRE</sys:String>
@@ -1168,6 +1198,12 @@
     <sys:String x:Key="Fire.Result.YearsToFire">所需年數</sys:String>
     <sys:String x:Key="Fire.Result.Projected">達標時淨資產</sys:String>
     <sys:String x:Key="Fire.Result.NotCalculated">填入參數後點擊「計算」以查看 FIRE 數據</sys:String>
+    <sys:String x:Key="Fire.Saved">已同步到財務目標</sys:String>
+    <sys:String x:Key="Fire.Error.NetWorthInvalid">目前淨資產格式錯誤</sys:String>
+    <sys:String x:Key="Fire.Error.ExpensesInvalid">年支出格式錯誤</sys:String>
+    <sys:String x:Key="Fire.Error.SavingsInvalid">年儲蓄格式錯誤</sys:String>
+    <sys:String x:Key="Fire.Error.ReturnInvalid">預期報酬率格式錯誤</sys:String>
+    <sys:String x:Key="Fire.Error.WithdrawalInvalid">提領率格式錯誤</sys:String>
     <sys:String x:Key="Fire.Path.Year">年度</sys:String>
     <sys:String x:Key="Fire.Path.NetWorth">淨資產</sys:String>
 
@@ -1186,6 +1222,14 @@
     <sys:String x:Key="MonteCarlo.Result.Median">中位數餘額</sys:String>
     <sys:String x:Key="MonteCarlo.Result.P90">90 百分位餘額</sys:String>
     <sys:String x:Key="MonteCarlo.Result.NotCalculated">填入參數後點擊「執行」以查看模擬結果</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.InitialInvalid">起始餘額格式錯誤</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.WithdrawalInvalid">年提領格式錯誤</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.MeanInvalid">平均報酬率必須 &gt; -100%</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.StdDevInvalid">標準差必須 ≥ 0</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.YearsInvalid">年數必須 &gt; 0</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.YearsMax">年數必須 ≤ {0}</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.CountInvalid">模擬次數必須 &gt; 0</sys:String>
+    <sys:String x:Key="MonteCarlo.Error.CountMax">模擬次數必須 ≤ {0:N0}</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Year">年度</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Median">中位數餘額</sys:String>
 </ResourceDictionary>

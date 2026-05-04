@@ -17,10 +17,11 @@ public sealed partial class FireViewModel : ObservableObject
     private readonly IFireCalculatorService _calculator;
     private readonly IFinancialGoalRepository _goals;
     private readonly ISnackbarService? _snackbar;
+    private readonly ILocalizationService? _localization;
 
-    [ObservableProperty] private string _currentNetWorth = "1000000";
-    [ObservableProperty] private string _annualExpenses = "600000";
-    [ObservableProperty] private string _annualSavings = "300000";
+    [ObservableProperty] private string _currentNetWorth = "1,000,000";
+    [ObservableProperty] private string _annualExpenses = "600,000";
+    [ObservableProperty] private string _annualSavings = "300,000";
     [ObservableProperty] private string _expectedAnnualReturn = "0.05";
     [ObservableProperty] private string _withdrawalRate = "0.04";
 
@@ -37,25 +38,30 @@ public sealed partial class FireViewModel : ObservableObject
     public FireViewModel(
         IFireCalculatorService calculator,
         IFinancialGoalRepository goals,
-        ISnackbarService? snackbar = null)
+        ISnackbarService? snackbar = null,
+        ILocalizationService? localization = null)
     {
         ArgumentNullException.ThrowIfNull(calculator);
         ArgumentNullException.ThrowIfNull(goals);
         _calculator = calculator;
         _goals = goals;
         _snackbar = snackbar;
+        _localization = localization;
     }
+
+    private string L(string key, string fallback) =>
+        _localization?.Get(key, fallback) ?? fallback;
 
     [RelayCommand]
     private void Calculate()
     {
         ErrorMessage = null;
         HasCalculatedResult = false;
-        if (!TryParseDecimal(CurrentNetWorth, out var nw))   { ErrorMessage = "目前淨資產格式錯誤"; return; }
-        if (!TryParseDecimal(AnnualExpenses, out var exp))   { ErrorMessage = "年支出格式錯誤"; return; }
-        if (!TryParseDecimal(AnnualSavings, out var sav))    { ErrorMessage = "年儲蓄格式錯誤"; return; }
-        if (!TryParseDecimal(ExpectedAnnualReturn, out var r)) { ErrorMessage = "預期報酬率格式錯誤"; return; }
-        if (!TryParseDecimal(WithdrawalRate, out var w)) { ErrorMessage = "提領率格式錯誤"; return; }
+        if (!TryParseDecimal(CurrentNetWorth, out var nw))   { ErrorMessage = L("Fire.Error.NetWorthInvalid",  "目前淨資產格式錯誤"); return; }
+        if (!TryParseDecimal(AnnualExpenses, out var exp))   { ErrorMessage = L("Fire.Error.ExpensesInvalid",  "年支出格式錯誤");   return; }
+        if (!TryParseDecimal(AnnualSavings, out var sav))    { ErrorMessage = L("Fire.Error.SavingsInvalid",   "年儲蓄格式錯誤");   return; }
+        if (!TryParseDecimal(ExpectedAnnualReturn, out var r)) { ErrorMessage = L("Fire.Error.ReturnInvalid",  "預期報酬率格式錯誤"); return; }
+        if (!TryParseDecimal(WithdrawalRate, out var w))     { ErrorMessage = L("Fire.Error.WithdrawalInvalid","提領率格式錯誤");   return; }
 
         FireProjection result;
         try
@@ -84,7 +90,7 @@ public sealed partial class FireViewModel : ObservableObject
         ErrorMessage = null;
         if (!TryParseDecimal(CurrentNetWorth, out var current))
         {
-            ErrorMessage = "目前淨資產格式錯誤";
+            ErrorMessage = L("Fire.Error.NetWorthInvalid", "目前淨資產格式錯誤");
             return;
         }
 
@@ -109,7 +115,7 @@ public sealed partial class FireViewModel : ObservableObject
                 await _goals.UpdateAsync(goal).ConfigureAwait(true);
 
             WeakReferenceMessenger.Default.Send(new FireGoalSavedMessage(goal));
-            _snackbar?.Success("已同步到財務目標");
+            _snackbar?.Success(L("Fire.Saved", "已同步到財務目標"));
         }
         catch (Exception ex)
         {
