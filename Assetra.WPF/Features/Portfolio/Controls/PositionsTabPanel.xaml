@@ -268,7 +268,8 @@
       </Border>
 
       <ListBox
-                Margin="12,8,12,12"
+                Margin="0,8,0,12"
+                HorizontalContentAlignment="Stretch"
                 Background="Transparent"
                 BorderThickness="0"
                 ItemsSource="{Binding PositionsView}"
@@ -281,12 +282,13 @@
             <Setter Property="Margin" Value="0" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Template">
               <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
-                  <ContentPresenter />
+                  <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                 </ControlTemplate>
               </Setter.Value>
             </Setter>
