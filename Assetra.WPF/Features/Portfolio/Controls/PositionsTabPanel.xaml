@@ -33,7 +33,14 @@
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="0,0,0,1">
-      <WrapPanel ItemHeight="Auto" ItemWidth="250">
+      <!--
+            UniformGrid distributes width equally across 4 columns and
+            stretches each cell to fill the parent. The previous
+            WrapPanel ItemWidth="250" pinned each card to 250 px and
+            left 380+ px of dead space on a 1600-wide window — visually
+            reading as "content centered with margins on both sides."
+        -->
+      <UniformGrid Columns="4" Rows="1">
 
         <!--  Card 1: 總市值  -->
         <Border
@@ -198,7 +205,7 @@
           </StackPanel>
         </Border>
 
-      </WrapPanel>
+      </UniformGrid>
     </Border>
 
     <!--  ═══ Row 1: Text search ═══  -->
