@@ -209,6 +209,7 @@
                         <ui:Button
                             Width="32"
                             Height="32"
+                            Padding="0"
                             Margin="0,0,4,0"
                             Command="{Binding DataContext.BeginEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
@@ -233,6 +234,7 @@
                         <ui:Button
                             Width="32"
                             Height="32"
+                            Padding="0"
                             Margin="0,0,4,0"
                             Command="{Binding DataContext.ToggleArchiveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
@@ -257,6 +259,7 @@
                         <ui:Button
                             Width="32"
                             Height="32"
+                            Padding="0"
                             Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             ToolTip="{DynamicResource Common.Delete}">
@@ -278,6 +281,7 @@
                         <ui:Button
                             Width="32"
                             Height="32"
+                            Padding="0"
                             Margin="0,0,4,0"
                             Command="{Binding DataContext.SaveEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
@@ -302,6 +306,7 @@
                         <ui:Button
                             Width="32"
                             Height="32"
+                            Padding="0"
                             Command="{Binding DataContext.CancelEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             ToolTip="{DynamicResource Common.Cancel}">
@@ -356,9 +361,19 @@
         <TabControl
             Grid.Row="1"
             Background="Transparent"
-            BorderThickness="0">
+            BorderThickness="0"
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            VerticalContentAlignment="Stretch">
+            <TabControl.ItemContainerStyle>
+                <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="{x:Type TabItem}">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                </Style>
+            </TabControl.ItemContainerStyle>
             <TabItem Header="{DynamicResource Categories.Tab.Categories}">
-                <Grid Margin="0,12,0,0">
+                <Grid Margin="0,4,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -366,15 +381,22 @@
                     </Grid.RowDefinitions>
 
                     <!--  Toolbar  -->
-                    <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="False">
+                    <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="False">
                         <ui:Button
                             DockPanel.Dock="Right"
                             Appearance="Primary"
                             Command="{Binding OpenAddCategoryCommand}"
                             Visibility="{Binding IsAddCategoryOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
-                                <ui:SymbolIcon Symbol="Add24" Margin="0,0,4,0" VerticalAlignment="Center" />
-                                <TextBlock VerticalAlignment="Center" Text="{DynamicResource Categories.AddForm.Title}" />
+                                <ui:SymbolIcon
+                                    Margin="0,0,4,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}"
+                                    Symbol="Add24" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}"
+                                    Text="{DynamicResource Categories.AddForm.Title}" />
                             </StackPanel>
                         </ui:Button>
                     </DockPanel>
@@ -390,6 +412,10 @@
                         <!--  Expense  -->
                         <ui:Card
                             Grid.Column="0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
                             Padding="12">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -404,7 +430,13 @@
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Categories.Expense}" />
                                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                                    <ItemsControl ItemTemplate="{StaticResource CategoryRowTemplate}" ItemsSource="{Binding ExpenseView}" />
+                                    <ItemsControl ItemTemplate="{StaticResource CategoryRowTemplate}" ItemsSource="{Binding ExpenseView}">
+                                        <ItemsControl.ItemContainerStyle>
+                                            <Style TargetType="{x:Type ContentPresenter}">
+                                                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                            </Style>
+                                        </ItemsControl.ItemContainerStyle>
+                                    </ItemsControl>
                                 </ScrollViewer>
                             </Grid>
                         </ui:Card>
@@ -412,6 +444,10 @@
                         <!--  Income  -->
                         <ui:Card
                             Grid.Column="2"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
                             Padding="12">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -426,7 +462,13 @@
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Categories.Income}" />
                                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                                    <ItemsControl ItemTemplate="{StaticResource CategoryRowTemplate}" ItemsSource="{Binding IncomeView}" />
+                                    <ItemsControl ItemTemplate="{StaticResource CategoryRowTemplate}" ItemsSource="{Binding IncomeView}">
+                                        <ItemsControl.ItemContainerStyle>
+                                            <Style TargetType="{x:Type ContentPresenter}">
+                                                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                            </Style>
+                                        </ItemsControl.ItemContainerStyle>
+                                    </ItemsControl>
                                 </ScrollViewer>
                             </Grid>
                         </ui:Card>
@@ -562,14 +604,14 @@
             </TabItem>
 
             <TabItem Header="{DynamicResource Categories.Tab.Rules}">
-                <Grid Margin="0,12,0,0">
+                <Grid Margin="0,4,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="True">
+                    <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="True">
                         <ui:Button
                             DockPanel.Dock="Right"
                             Margin="12,0,0,0"
@@ -577,8 +619,15 @@
                             Command="{Binding OpenAddRuleCommand}"
                             Visibility="{Binding IsAddRuleOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
-                                <ui:SymbolIcon Symbol="Add24" Margin="0,0,4,0" VerticalAlignment="Center" />
-                                <TextBlock VerticalAlignment="Center" Text="{DynamicResource Categories.Rule.AddTitle}" />
+                                <ui:SymbolIcon
+                                    Margin="0,0,4,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}"
+                                    Symbol="Add24" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}"
+                                    Text="{DynamicResource Categories.Rule.AddTitle}" />
                             </StackPanel>
                         </ui:Button>
                         <TextBlock
@@ -591,9 +640,16 @@
 
                     <ui:Card
                         Grid.Row="1"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
                         Padding="12">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding Rules}">
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="{x:Type ContentPresenter}">
+                                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border
@@ -874,6 +930,7 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
+                            Padding="0"
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.BeginEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
@@ -898,6 +955,7 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
+                            Padding="0"
                                                         Command="{Binding DataContext.DeleteRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Delete}">
@@ -918,6 +976,7 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
+                            Padding="0"
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.SaveEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
@@ -942,6 +1001,7 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
+                            Padding="0"
                                                         Command="{Binding DataContext.CancelEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Cancel}">
@@ -1161,14 +1221,14 @@
             </TabItem>
 
             <TabItem Header="{DynamicResource Categories.Tab.Budgets}">
-                <Grid Margin="0,12,0,0">
+                <Grid Margin="0,4,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="True">
+                    <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="True">
                         <ui:Button
                             DockPanel.Dock="Right"
                             Margin="12,0,0,0"
@@ -1176,8 +1236,15 @@
                             Command="{Binding OpenAddBudgetCommand}"
                             Visibility="{Binding IsAddBudgetOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
-                                <ui:SymbolIcon Symbol="Add24" Margin="0,0,4,0" VerticalAlignment="Center" />
-                                <TextBlock VerticalAlignment="Center" Text="{DynamicResource Categories.Budget.AddTitle}" />
+                                <ui:SymbolIcon
+                                    Margin="0,0,4,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}"
+                                    Symbol="Add24" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}"
+                                    Text="{DynamicResource Categories.Budget.AddTitle}" />
                             </StackPanel>
                         </ui:Button>
                         <TextBlock
@@ -1190,9 +1257,16 @@
 
                     <ui:Card
                         Grid.Row="1"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
                         Padding="12">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding Budgets}">
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="{x:Type ContentPresenter}">
+                                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border
@@ -1320,6 +1394,7 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
+                            Padding="0"
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.BeginEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
@@ -1343,6 +1418,7 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
+                            Padding="0"
                                                         Command="{Binding DataContext.DeleteBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Delete}">
@@ -1362,6 +1438,7 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
+                            Padding="0"
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.SaveEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
@@ -1385,6 +1462,7 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
+                            Padding="0"
                                                         Command="{Binding DataContext.CancelEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Cancel}">
