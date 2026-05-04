@@ -258,9 +258,7 @@ public partial class TransactionDialogViewModel
             fee,
             TxCategoryId));
 
-        await _reloadAccountBalancesAsync();
-        CloseTxDialog();
-        await _loadTradesAsync();
+        await AfterTxSuccessAsync();
         // TransactionCompleted raised by ConfirmTx
     }
 
@@ -312,9 +310,7 @@ public partial class TransactionDialogViewModel
             cashAccId,
             fee));
 
-        await _reloadAccountBalancesAsync();
-        CloseTxDialog();
-        await _loadTradesAsync();
+        await AfterTxSuccessAsync();
         // TransactionCompleted raised by ConfirmTx
     }
 
@@ -336,8 +332,7 @@ public partial class TransactionDialogViewModel
             DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
             TxStockDivPosition.Id));
 
-        CloseTxDialog();
-        await _loadTradesAsync();
+        await AfterTxSuccessAsync(reloadBalances: false);
         // TransactionCompleted raised by ConfirmTx
     }
 
@@ -372,9 +367,7 @@ public partial class TransactionDialogViewModel
             fee,
             TxCategoryId));
 
-        await _reloadAccountBalancesAsync();
-        CloseTxDialog();
-        await _loadTradesAsync();
+        await AfterTxSuccessAsync();
         // TransactionCompleted raised by ConfirmTx
     }
 
@@ -489,15 +482,9 @@ public partial class TransactionDialogViewModel
             amortTermMonths,
             amortAnnualRate.HasValue && amortTermMonths.HasValue ? DateOnly.FromDateTime(TxLoanStartDate) : null));
 
-        await _reloadAccountBalancesAsync();
-        CloseTxDialog();
-        await _loadTradesAsync();
-
-        if (amortAnnualRate.HasValue)
-        {
-            await _loadLiabilitiesAsync();
-            _rebuildTotals();
-        }
+        await AfterTxSuccessAsync(
+            reloadLiabilities: amortAnnualRate.HasValue,
+            rebuildTotals: amortAnnualRate.HasValue);
         // TransactionCompleted raised by ConfirmTx
     }
 
@@ -517,9 +504,7 @@ public partial class TransactionDialogViewModel
             string.IsNullOrWhiteSpace(TxNote) ? null : TxNote,
             TxCategoryId));
 
-        await _reloadAccountBalancesAsync();
-        CloseTxDialog();
-        await _loadTradesAsync();
+        await AfterTxSuccessAsync();
     }
 
     private async Task ConfirmCreditCardPaymentAsync()
@@ -560,9 +545,7 @@ public partial class TransactionDialogViewModel
             amount,
             string.IsNullOrWhiteSpace(TxNote) ? null : TxNote));
 
-        await _reloadAccountBalancesAsync();
-        CloseTxDialog();
-        await _loadTradesAsync();
+        await AfterTxSuccessAsync();
     }
 
     /// <summary>
@@ -603,12 +586,38 @@ public partial class TransactionDialogViewModel
             userNote,
             fee));
 
-        await _reloadAccountBalancesAsync();
-        CloseTxDialog();
-        await _loadTradesAsync();
+        await AfterTxSuccessAsync();
         // TransactionCompleted raised by ConfirmTx
     }
 
     private static TradeDeletionRequest ToTradeDeletionRequest(TradeRowViewModel row) =>
         new(row.Id, row.Type, row.Symbol, row.Quantity, row.PortfolioEntryId);
+
+    /// <summary>
+    /// H2 consolidation: every successful Confirm method previously ended
+    /// with a near-identical reload tail
+    ///
+    ///     await _reloadAccountBalancesAsync();
+    ///     CloseTxDialog();
+    ///     await _loadTradesAsync();
+    ///
+    /// (sometimes plus liabilities + totals for amortised loans).
+    /// Repeated 7+ times across this file with subtle inconsistencies —
+    /// CreditCard paths skipped certain reloads, Loan reloaded
+    /// liabilities only when amortised. One helper, one exit point.
+    /// </summary>
+    private async Task AfterTxSuccessAsync(
+        bool reloadBalances = true,
+        bool reloadLiabilities = false,
+        bool rebuildTotals = false)
+    {
+        if (reloadBalances)
+            await _reloadAccountBalancesAsync();
+        CloseTxDialog();
+        await _loadTradesAsync();
+        if (reloadLiabilities)
+            await _loadLiabilitiesAsync();
+        if (rebuildTotals)
+            _rebuildTotals();
+    }
 }

@@ -18,7 +18,7 @@ namespace Assetra.WPF.Features.Portfolio;
 /// circular reference back to <see cref="PortfolioViewModel"/>.
 /// </para>
 /// </summary>
-public partial class TradeFilterViewModel : ObservableObject
+public partial class TradeFilterViewModel : ObservableObject, IDisposable
 {
     private readonly Func<IEnumerable<TradeRowViewModel>> _getTrades;
     private readonly ILocalizationService _localization;
@@ -545,6 +545,21 @@ public partial class TradeFilterViewModel : ObservableObject
         TradeDateFrom.HasValue || TradeDateTo.HasValue ||
         TradeTypeFilters.Any(f => f.IsChecked) ||
         TradeAssetFilters.Any(f => f.IsChecked);
+
+    /// <summary>
+    /// M4 leak fix: TradeTypeFilters items are added once and never
+    /// removed, but their PropertyChanged subscriptions accumulated
+    /// across the parent VM lifetime. TradeAssetFilters items get
+    /// rebuilt; only the asset path detached on rebuild — no Dispose.
+    /// Now PortfolioViewModel.Dispose chains here and cleans both.
+    /// </summary>
+    public void Dispose()
+    {
+        foreach (var item in TradeTypeFilters)
+            item.PropertyChanged -= OnTradeTypeFilterItemChanged;
+        foreach (var item in TradeAssetFilters)
+            item.PropertyChanged -= OnTradeAssetFilterItemChanged;
+    }
 }
 
 /// <summary>

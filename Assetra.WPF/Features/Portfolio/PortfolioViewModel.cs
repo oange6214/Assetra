@@ -1058,6 +1058,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         Transaction.TradeDeleted -= OnTradeDeleted;
         Account.AccountChanged -= OnAccountChanged;
         Loan.LoanChanged -= OnLoanChanged;
+        TradeFilter.Dispose();
         _disposables.Dispose();
     }
 }
