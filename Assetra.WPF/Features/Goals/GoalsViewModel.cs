@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Text;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -32,6 +33,7 @@ public sealed partial class GoalsViewModel : ObservableObject
     [ObservableProperty] private bool _isConfirmDialogOpen;
     [ObservableProperty] private string _confirmDialogMessage = string.Empty;
     private Func<Task>? _confirmDialogAction;
+    private bool _isFormattingAmountInput;
 
     [RelayCommand]
     private async Task ConfirmDialogYes()
@@ -63,6 +65,7 @@ public sealed partial class GoalsViewModel : ObservableObject
     [ObservableProperty] private DateTime? _addDeadline;
     [ObservableProperty] private string _addNotes = string.Empty;
     [ObservableProperty] private string? _addError;
+    [ObservableProperty] private bool _isFormOpen;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditing))]
@@ -129,6 +132,13 @@ public sealed partial class GoalsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void OpenAddForm()
+    {
+        ResetAddForm();
+        IsFormOpen = true;
+    }
+
+    [RelayCommand]
     private async Task AddAsync()
     {
         AddError = null;
@@ -184,12 +194,19 @@ public sealed partial class GoalsViewModel : ObservableObject
         if (row is null) return;
         AddError = null;
         EditingId = row.Id;
+        IsFormOpen = true;
         AddName = row.Goal.Name;
         AddTargetAmount = row.Goal.TargetAmount.ToString("0.##", CultureInfo.InvariantCulture);
         AddCurrentAmount = row.Goal.CurrentAmount.ToString("0.##", CultureInfo.InvariantCulture);
         AddDeadline = row.Goal.Deadline is { } d ? d.ToDateTime(TimeOnly.MinValue) : null;
         AddNotes = row.Goal.Notes ?? string.Empty;
     }
+
+    partial void OnAddTargetAmountChanged(string value) =>
+        FormatAmountInput(value, formatted => AddTargetAmount = formatted);
+
+    partial void OnAddCurrentAmountChanged(string value) =>
+        FormatAmountInput(value, formatted => AddCurrentAmount = formatted);
 
     [RelayCommand]
     private void CancelEdit() => ResetAddForm();
@@ -226,6 +243,7 @@ public sealed partial class GoalsViewModel : ObservableObject
         AddDeadline = null;
         AddNotes = string.Empty;
         AddError = null;
+        IsFormOpen = false;
     }
 
     private void UpsertGoal(FinancialGoal goal)
@@ -251,6 +269,65 @@ public sealed partial class GoalsViewModel : ObservableObject
         }
         return decimal.TryParse(input, NumberStyles.Number, CultureInfo.InvariantCulture, out value)
             || decimal.TryParse(input, NumberStyles.Number, CultureInfo.CurrentCulture, out value);
+    }
+
+    private void FormatAmountInput(string value, Action<string> setValue)
+    {
+        if (_isFormattingAmountInput)
+            return;
+
+        var formatted = FormatWithThousands(value);
+        if (formatted == value)
+            return;
+
+        _isFormattingAmountInput = true;
+        try
+        {
+            setValue(formatted);
+        }
+        finally
+        {
+            _isFormattingAmountInput = false;
+        }
+    }
+
+    private static string FormatWithThousands(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return text;
+
+        var negative = text.StartsWith('-');
+        var body = negative ? text[1..] : text;
+        var filtered = new string(body.Where(c => char.IsDigit(c) || c == '.' || c == ',').ToArray());
+
+        // Bug fix: if the user typed something with no numeric content (e.g.
+        // "abc"), don't silently strip it to empty — TryParseAmount treats
+        // empty as 0, which let invalid input pass form validation. Return
+        // the original so the validator reports it as a parse error.
+        if (filtered.Replace(",", "").Length == 0 && body.Length > 0)
+            return text;
+
+        body = filtered.Replace(",", "");
+
+        var dotIdx = body.IndexOf('.');
+        var intPart = dotIdx >= 0 ? body[..dotIdx] : body;
+        var fracPart = dotIdx >= 0 ? body[dotIdx..] : string.Empty;
+
+        if (intPart.Length <= 3)
+            return (negative ? "-" : "") + intPart + fracPart;
+
+        var sb = new StringBuilder();
+        var offset = intPart.Length % 3;
+        if (offset > 0)
+            sb.Append(intPart[..offset]);
+        for (var i = offset; i < intPart.Length; i += 3)
+        {
+            if (i > 0)
+                sb.Append(',');
+            sb.Append(intPart, i, 3);
+        }
+
+        return (negative ? "-" : "") + sb + fracPart;
     }
 
     private void OnCurrencyChanged()
