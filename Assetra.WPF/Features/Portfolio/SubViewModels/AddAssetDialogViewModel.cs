@@ -790,4 +790,53 @@ public partial class AddAssetDialogViewModel : ObservableObject
             return $"數量超過上限（最大 {int.MaxValue:N0}）";
         return string.Empty;
     }
+
+    /// <summary>
+    /// M3 — owns its own field reset for account-mode open. Previously
+    /// PortfolioViewModel.OpenAddAccountDialog poked ~10 individual
+    /// AddAssetDialog properties from outside, drifting out of sync as
+    /// fields were added. Keeps reset logic next to the fields it touches.
+    /// </summary>
+    public void ResetForAccountForm()
+    {
+        AddDialogMode = "account";
+        IsTypePickerStep = true;
+        AddError = string.Empty;
+        AddSubtype = string.Empty;
+        AddAccountName = string.Empty;
+        AddInitialDepositEnabled = false;
+        AddInitialDepositAmount = string.Empty;
+        AddInitialDepositDate = DateTime.Today;
+        AddInitialDepositNote = string.Empty;
+        IsAddDialogOpen = true;
+    }
+
+    /// <summary>
+    /// M3 — owns its own field reset for liability-mode open. Same
+    /// rationale as <see cref="ResetForAccountForm" />: previously 16
+    /// loan + credit-card fields cleared by the parent VM.
+    /// </summary>
+    public void ResetForLiabilityForm()
+    {
+        AddDialogMode = "liability";
+        IsTypePickerStep = true;
+        AddError = string.Empty;
+        AddLoanName = string.Empty;
+        AddLoanAmount = string.Empty;
+        AddLoanAnnualRate = string.Empty;
+        AddLoanTermMonths = string.Empty;
+        AddLoanHandlingFee = string.Empty;
+        AddLoanStartDate = DateTime.Today;
+        SelectedLoanCashAccount = null;
+        AddCreditCardName = string.Empty;
+        AddCreditCardIssuer = string.Empty;
+        AddCreditCardBillingDay = string.Empty;
+        AddCreditCardDueDay = string.Empty;
+        AddCreditCardLimit = string.Empty;
+        AddInitialCreditCardBalanceEnabled = false;
+        AddInitialCreditCardBalanceAmount = string.Empty;
+        AddInitialCreditCardBalanceDate = DateTime.Today;
+        AddInitialCreditCardBalanceNote = string.Empty;
+        IsAddDialogOpen = true;
+    }
 }

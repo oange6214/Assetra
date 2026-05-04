@@ -518,6 +518,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     private void ApplyPositions(PortfolioLoadResult loaded)
     {
+        // M5: assert UI thread; collection mutation requires dispatcher access.
+        System.Diagnostics.Debug.Assert(System.Windows.Application.Current?.Dispatcher.CheckAccess() ?? true,
+            $"{nameof(ApplyPositions)} must be called on the UI thread");
         var entries = loaded.Entries;
         var snapshots = loaded.PositionSnapshots;
         // Build the new desired set of rows keyed by (Symbol, Exchange, AssetType).
@@ -676,6 +679,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     private void ApplyTrades(IReadOnlyList<Trade> trades)
     {
+        // M5: assert UI thread; collection mutation requires dispatcher access.
+        System.Diagnostics.Debug.Assert(System.Windows.Application.Current?.Dispatcher.CheckAccess() ?? true,
+            $"{nameof(ApplyTrades)} must be called on the UI thread");
         // 首次呼叫時建立 type filter 項目（需要 Application resources 已就緒）
         TradeFilter.InitTradeTypeFilters();
         try
@@ -911,42 +917,14 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private void OpenAddAccountDialog()
     {
         SelectedTab = PortfolioTab.Accounts;
-        AddAssetDialog.AddDialogMode = "account";
-        AddAssetDialog.IsTypePickerStep = true;
-        AddAssetDialog.AddError = string.Empty;
-        AddAssetDialog.AddSubtype = string.Empty;
-        AddAssetDialog.AddAccountName = string.Empty;
-        AddAssetDialog.AddInitialDepositEnabled = false;
-        AddAssetDialog.AddInitialDepositAmount = string.Empty;
-        AddAssetDialog.AddInitialDepositDate = DateTime.Today;
-        AddAssetDialog.AddInitialDepositNote = string.Empty;
-        AddAssetDialog.IsAddDialogOpen = true;
+        AddAssetDialog.ResetForAccountForm();
     }
 
     [RelayCommand]
     private void OpenAddLiabilityDialog()
     {
         SelectedTab = PortfolioTab.Liability;
-        AddAssetDialog.AddDialogMode = "liability";
-        AddAssetDialog.IsTypePickerStep = true;
-        AddAssetDialog.AddError = string.Empty;
-        AddAssetDialog.AddLoanName = string.Empty;
-        AddAssetDialog.AddLoanAmount = string.Empty;
-        AddAssetDialog.AddLoanAnnualRate = string.Empty;
-        AddAssetDialog.AddLoanTermMonths = string.Empty;
-        AddAssetDialog.AddLoanHandlingFee = string.Empty;
-        AddAssetDialog.AddLoanStartDate = DateTime.Today;
-        AddAssetDialog.SelectedLoanCashAccount = null;
-        AddAssetDialog.AddCreditCardName = string.Empty;
-        AddAssetDialog.AddCreditCardIssuer = string.Empty;
-        AddAssetDialog.AddCreditCardBillingDay = string.Empty;
-        AddAssetDialog.AddCreditCardDueDay = string.Empty;
-        AddAssetDialog.AddCreditCardLimit = string.Empty;
-        AddAssetDialog.AddInitialCreditCardBalanceEnabled = false;
-        AddAssetDialog.AddInitialCreditCardBalanceAmount = string.Empty;
-        AddAssetDialog.AddInitialCreditCardBalanceDate = DateTime.Today;
-        AddAssetDialog.AddInitialCreditCardBalanceNote = string.Empty;
-        AddAssetDialog.IsAddDialogOpen = true;
+        AddAssetDialog.ResetForLiabilityForm();
     }
 
     // ── Supported currencies (static list — referenced from XAML as PortfolioViewModel.SupportedCurrencies) ─
@@ -964,6 +942,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     private void ApplyCashAccounts(PortfolioLoadResult loaded)
     {
+        // M5: assert UI thread; collection mutation requires dispatcher access.
+        System.Diagnostics.Debug.Assert(System.Windows.Application.Current?.Dispatcher.CheckAccess() ?? true,
+            $"{nameof(ApplyCashAccounts)} must be called on the UI thread");
         var accounts = loaded.CashAccounts;
         var balances = loaded.CashBalances;
         var visibleAccounts = accounts
@@ -1025,6 +1006,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
 
     private void ApplyLiabilities(PortfolioLoadResult loaded)
     {
+        // M5: assert UI thread; collection mutation requires dispatcher access.
+        System.Diagnostics.Debug.Assert(System.Windows.Application.Current?.Dispatcher.CheckAccess() ?? true,
+            $"{nameof(ApplyLiabilities)} must be called on the UI thread");
         var snapshots = loaded.LiabilitySnapshots;
         var liabilityAssets = loaded.LiabilityAssets;
 
