@@ -24,27 +24,27 @@
   </UserControl.Resources>
 
   <Grid Margin="24">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
-    </Grid.RowDefinitions>
-
-    <!-- Header -->
-    <DockPanel Grid.Row="0" Margin="0,0,0,16">
-      <ui:Button
-          DockPanel.Dock="Right"
-          Margin="8,0,0,0"
-          Command="{Binding RunSchedulerCommand}"
-          Content="{DynamicResource Recurring.Run}" />
-      <TextBlock
-          Margin="16,0,0,0"
-          VerticalAlignment="Center"
-          FontSize="{StaticResource FontSizeSm}"
-          Foreground="{DynamicResource AppTextMuted}"
-          Text="{Binding RunStatus}" />
-    </DockPanel>
-
-    <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0">
+    <!--
+        Removed the outer header that previously hosted "立即結算" +
+        RunStatus. The button only acts on the Pending tab's content
+        (it converts due subscription rows into actual transactions),
+        so floating it above the tab strip read as a disconnected
+        global action. It now lives inside the Pending tab toolbar,
+        next to the data it operates on.
+    -->
+    <TabControl
+        Background="Transparent"
+        BorderThickness="0"
+        HorizontalAlignment="Stretch"
+        HorizontalContentAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        VerticalContentAlignment="Stretch">
+      <TabControl.ItemContainerStyle>
+        <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="{x:Type TabItem}">
+          <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+          <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        </Style>
+      </TabControl.ItemContainerStyle>
 
       <!-- Subscriptions tab -->
       <TabItem Header="{DynamicResource Recurring.Tab.Subscriptions}">
@@ -291,6 +291,11 @@
               VerticalScrollBarVisibility="Auto"
               Visibility="{Binding HasSubscriptions, Converter={StaticResource BooleanToVisibilityConverter}}">
             <ItemsControl ItemsSource="{Binding Subscriptions}">
+              <ItemsControl.ItemContainerStyle>
+                <Style TargetType="{x:Type ContentPresenter}">
+                  <Setter Property="HorizontalAlignment" Value="Stretch" />
+                </Style>
+              </ItemsControl.ItemContainerStyle>
               <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type vm:RecurringRowViewModel}">
                   <ui:Card
@@ -374,8 +379,34 @@
       <!-- Pending tab -->
       <TabItem Header="{DynamicResource Recurring.Tab.Pending}">
         <Grid Margin="0,12,0,0">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+
+          <!--
+              Toolbar — Run scheduler + last-run status. Sits on top
+              of the Pending list because Run resolves due rows into
+              transactions; placing it elsewhere divorced it from the
+              data it operates on.
+          -->
+          <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="False">
+            <ui:Button
+                DockPanel.Dock="Right"
+                Command="{Binding RunSchedulerCommand}"
+                Content="{DynamicResource Recurring.Run}"
+                Appearance="Primary" />
+            <TextBlock
+                DockPanel.Dock="Left"
+                VerticalAlignment="Center"
+                FontSize="{StaticResource FontSizeSm}"
+                Foreground="{DynamicResource AppTextMuted}"
+                Text="{Binding RunStatus}" />
+          </DockPanel>
+
           <!-- Empty state -->
           <StackPanel
+              Grid.Row="1"
               HorizontalAlignment="Center"
               VerticalAlignment="Center"
               Visibility="{Binding HasPending, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
@@ -393,9 +424,15 @@
           </StackPanel>
 
           <ScrollViewer
+              Grid.Row="1"
               VerticalScrollBarVisibility="Auto"
               Visibility="{Binding HasPending, Converter={StaticResource BooleanToVisibilityConverter}}">
           <ItemsControl ItemsSource="{Binding Pending}">
+            <ItemsControl.ItemContainerStyle>
+              <Style TargetType="{x:Type ContentPresenter}">
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+              </Style>
+            </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
               <DataTemplate DataType="{x:Type vm:PendingRecurringRowViewModel}">
                 <ui:Card
