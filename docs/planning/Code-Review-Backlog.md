@@ -8,17 +8,13 @@ Already shipped (closed): C1, C2, H2, H4, H5, H6, H7-partial, M2, M3, M4, M5, M7
 
 ---
 
-## L3 — AllocationViewModel ↔ PortfolioViewModel coupling  🟡 Partial
+## L3 — AllocationViewModel ↔ PortfolioViewModel coupling  ✅ Closed for the read-only consumers
 
-**Effort:** 2–3h remaining (AllocationViewModel done, Dashboard + FinancialOverview pending)
+✅ **AllocationViewModel:** decoupled via `IPortfolioPositionFeed`. 8 unit tests.
 
-✅ **AllocationViewModel:** decoupled via `IPortfolioPositionFeed` (Positions + TotalCash + INotifyPropertyChanged). 8 unit tests demonstrate substitution against a stub feed. PortfolioViewModel implements the interface through explicit member forwarding so existing direct callers keep their `ObservableCollection<T>` access.
+✅ **FinancialOverviewViewModel:** decoupled via the same interface (extended with `TotalMarketValue`). 5 unit tests.
 
-🔲 **DashboardViewModel:** consumes 30+ proxy properties forwarding NetWorth/DayPnl/TotalAssets/TotalLiabilities/Financial/History from PortfolioViewModel. Either expose a fatter `IPortfolioDashboardSource` or inline the proxy values into a separate snapshot DTO.
-
-🔲 **FinancialOverviewViewModel:** subscribes to `PortfolioViewModel.PropertyChanged` for `TotalMarketValue`; reads `Positions`. Smaller surface — could reuse `IPortfolioPositionFeed` plus a `TotalMarketValueChanged` notification pattern.
-
-Both follow-ups share the existing `IPortfolioPositionFeed` skeleton — extend per consumer.
+🔲 **DashboardViewModel:** kept as direct `PortfolioViewModel` consumer — it has 30+ proxy properties (NetWorth/DayPnl/TotalAssets/TotalLiabilities/Financial/History) AND writes back `SelectedTab`. Not a read-only feed pattern; introducing a fat interface here would just duplicate the parent's surface. Decision: keep coupled.
 
 ---
 
@@ -84,27 +80,19 @@ See [H3-PortfolioViewModelFactory-Plan.md](./H3-PortfolioViewModelFactory-Plan.m
 
 ---
 
-## M7 餘 — FinancialOverviewViewModel test coverage
+## M7 餘 — FinancialOverviewViewModel test coverage  ✅ Closed
 
-**Effort:** 2–4h
-
-Currently skipped because `FinancialOverviewViewModel` constructor takes a fully-wired `PortfolioViewModel`. Two paths:
-
-1. Wait for L3 (introduces `IPortfolioSnapshotProvider`) and test `FinancialOverviewViewModel` against a stub provider.
-2. Build a `PortfolioViewModelTestFactory` (per H3 Phase 3) and reuse it.
-
-Path 1 is cleaner; recommend deferring until L3 lands.
+5 construction-time tests landed once L3 introduced `IPortfolioPositionFeed` for FinancialOverview. Reload paths route through `Application.Current.Dispatcher.Invoke` so they're left as integration-only (would need an STA dispatcher fixture).
 
 ---
 
-## Recommended Order
+## Recommended Order (remaining)
 
-1. **H3** (factory) — unblocks better test ergonomics for everything downstream.
-2. **L3** (Allocation/Dashboard/FinancialOverview decoupling) — pairs with H3 since both touch DI wiring.
-3. **M7 餘** — drops out for free once L3 is done.
-4. **L6** (code-behind moves) — independent.
-5. **H1** (TransactionDialog split) — biggest single item; do after L3+H3 so the new VMs benefit from the factory pattern.
-6. **M1** (Money value object) — risky cross-cutting work; do last, on its own branch.
-7. **M6** (ObservableCollection encapsulation) — mechanical; do feature-by-feature whenever each feature stabilizes.
+1. **H3 Phase 2-3** (test fixture builder for PortfolioViewModelTests) — pure-test mechanical, ~2-4h.
+2. **M1** (Money value object full migration) — risky cross-cutting; do on its own branch, ~4-6h.
+3. **M6**餘 (ObservableCollection encapsulation, 24 sites) — gated on H1 for Portfolio root + Tx mirror, ~4-6h.
+4. **H1** (TransactionDialog split) — biggest single item, dedicated 16-32h.
 
-Total estimated remaining effort: **44–82h** (was 44–82h before this round; no net change but the order is clearer now).
+Closed this session: C1, C2, H2, H4, H5, H6, H7-partial, M2, M3, M4, M5, **M7 (all VMs)**, **L1**, L2, **L3 (Allocation + FinancialOverview)**, **L4-partial**, **L6 (all 3 files)**, **M1 foundation**, **H3 Phase 1**, plus **the long-standing test-isolation bug**.
+
+Total estimated remaining effort: **26–48h** (down from 44–82h at session start).
