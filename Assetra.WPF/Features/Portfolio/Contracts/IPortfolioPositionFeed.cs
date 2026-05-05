@@ -28,4 +28,12 @@ public interface IPortfolioPositionFeed : INotifyPropertyChanged
     IReadOnlyList<PortfolioRowViewModel> Positions { get; }
 
     decimal TotalCash { get; }
+
+    /// <summary>
+    /// Sum of all live position market values in the portfolio's base currency.
+    /// Updated asynchronously after each quote-fetch cycle; consumers that need to
+    /// re-snapshot when prices land subscribe to <see cref="INotifyPropertyChanged"/>
+    /// and filter on this property's name.
+    /// </summary>
+    decimal TotalMarketValue { get; }
 }

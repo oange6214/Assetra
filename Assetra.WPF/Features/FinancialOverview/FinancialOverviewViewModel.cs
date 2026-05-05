@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Assetra.WPF.Features.Portfolio.Contracts;
 using Assetra.WPF.Infrastructure;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
@@ -23,7 +24,7 @@ namespace Assetra.WPF.Features.FinancialOverview;
 public sealed partial class FinancialOverviewViewModel : ObservableObject
 {
     private readonly IFinancialOverviewQueryService _queryService;
-    private readonly Portfolio.PortfolioViewModel _portfolio;
+    private readonly IPortfolioPositionFeed _portfolio;
 
     // ── KPI bar ──────────────────────────────────────────────────────────
 
@@ -60,7 +61,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
     public FinancialOverviewViewModel(
         IFinancialOverviewQueryService queryService,
-        Portfolio.PortfolioViewModel portfolio)
+        IPortfolioPositionFeed portfolio)
     {
         _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
         _portfolio = portfolio ?? throw new ArgumentNullException(nameof(portfolio));
@@ -74,7 +75,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
     private void OnPortfolioPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(Portfolio.PortfolioViewModel.TotalMarketValue))
+        if (e.PropertyName == nameof(IPortfolioPositionFeed.TotalMarketValue))
             AsyncHelpers.SafeFireAndForget(LoadAsync, "FinancialOverview.Load");
     }
 
