@@ -20,7 +20,8 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
     private readonly ICurrencyService? _currencyService;
     private IDisposable? _subscription;
 
-    public ObservableCollection<AlertRowViewModel> Rules { get; } = [];
+    private readonly ObservableCollection<AlertRowViewModel> _rules = [];
+    public ReadOnlyObservableCollection<AlertRowViewModel> Rules { get; }
 
     // Add form
     [ObservableProperty] private string _addSymbol = string.Empty;
@@ -85,6 +86,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         _snackbar = snackbar;
         _localization = localization;
         _currencyService = currencyService;
+        Rules = new ReadOnlyObservableCollection<AlertRowViewModel>(_rules);
 
         _subscription = stockService.QuoteStream
             .ObserveOn(uiScheduler)
@@ -104,9 +106,9 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
     public async Task LoadAsync()
     {
         var rules = await _alertService.GetRulesAsync();
-        Rules.Clear();
+        _rules.Clear();
         foreach (var r in rules)
-            Rules.Add(ToRow(r));
+            _rules.Add(ToRow(r));
         HasNoRules = Rules.Count == 0;
         TriggeredCount = Rules.Count(r => r.IsTriggered);
         NotifyRuleCountsChanged();
@@ -150,7 +152,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         var rule = new AlertRule(Guid.NewGuid(), symbol, exchange, condition, price);
         await _alertService.AddAsync(rule);
 
-        Rules.Add(ToRow(rule));
+        _rules.Add(ToRow(rule));
         HasNoRules = false;
         NotifyRuleCountsChanged();
 
@@ -203,7 +205,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         {
             if (row.IsTriggered)
                 TriggeredCount = Math.Max(0, TriggeredCount - 1);
-            Rules.Remove(row);
+            _rules.Remove(row);
         }
         HasNoRules = Rules.Count == 0;
         NotifyRuleCountsChanged();

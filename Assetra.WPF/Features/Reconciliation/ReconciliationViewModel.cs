@@ -35,10 +35,15 @@ public partial class ReconciliationViewModel : ObservableObject
     private readonly ICurrencyService? _currency;
     private int _reloadVersion;
 
-    public ObservableCollection<ReconciliationSession> Sessions { get; } = new();
-    public ObservableCollection<ReconciliationDiffRowViewModel> Diffs { get; } = new();
-    public ObservableCollection<CashAccountOption> AccountOptions { get; } = new();
-    public ObservableCollection<BatchOption> BatchOptions { get; } = new();
+    private readonly ObservableCollection<ReconciliationSession> _sessionItems = new();
+    private readonly ObservableCollection<ReconciliationDiffRowViewModel> _diffItems = new();
+    private readonly ObservableCollection<CashAccountOption> _accountOptionItems = new();
+    private readonly ObservableCollection<BatchOption> _batchOptionItems = new();
+
+    public ReadOnlyObservableCollection<ReconciliationSession> Sessions { get; }
+    public ReadOnlyObservableCollection<ReconciliationDiffRowViewModel> Diffs { get; }
+    public ReadOnlyObservableCollection<CashAccountOption> AccountOptions { get; }
+    public ReadOnlyObservableCollection<BatchOption> BatchOptions { get; }
 
     public ICollectionView GroupedDiffs { get; }
 
@@ -131,6 +136,11 @@ public partial class ReconciliationViewModel : ObservableObject
         _localization = localization;
         _currency = currency;
 
+        Sessions = new ReadOnlyObservableCollection<ReconciliationSession>(_sessionItems);
+        Diffs = new ReadOnlyObservableCollection<ReconciliationDiffRowViewModel>(_diffItems);
+        AccountOptions = new ReadOnlyObservableCollection<CashAccountOption>(_accountOptionItems);
+        BatchOptions = new ReadOnlyObservableCollection<BatchOption>(_batchOptionItems);
+
         GroupedDiffs = CollectionViewSource.GetDefaultView(Diffs);
         GroupedDiffs.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ReconciliationDiffRowViewModel.KindDisplay)));
 
@@ -161,21 +171,21 @@ public partial class ReconciliationViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            Sessions.Clear();
+            _sessionItems.Clear();
             foreach (var s in await _sessions.GetAllAsync().ConfigureAwait(true))
-                Sessions.Add(s);
+                _sessionItems.Add(s);
 
-            AccountOptions.Clear();
+            _accountOptionItems.Clear();
             var assets = await _assets.GetItemsByTypeAsync(FinancialType.Asset).ConfigureAwait(true);
             foreach (var item in assets.Where(a => a.IsActive))
-                AccountOptions.Add(new CashAccountOption(item.Id, item.Name));
+                _accountOptionItems.Add(new CashAccountOption(item.Id, item.Name));
 
-            BatchOptions.Clear();
+            _batchOptionItems.Clear();
             if (_history is not null)
             {
                 var batches = await _history.GetRecentAsync(50).ConfigureAwait(true);
                 foreach (var b in batches.Where(x => !x.IsRolledBack))
-                    BatchOptions.Add(new BatchOption(b.Id, b.FileName, b.AppliedAt));
+                    _batchOptionItems.Add(new BatchOption(b.Id, b.FileName, b.AppliedAt));
             }
 
             if (Sessions.Count > 0 && SelectedSession is null)
@@ -201,7 +211,7 @@ public partial class ReconciliationViewModel : ObservableObject
         {
             if (version != _reloadVersion)
                 return;
-            Diffs.Clear();
+            _diffItems.Clear();
             BalancePanelDisplay = string.Empty;
             OnPropertyChanged(nameof(SummaryDisplay));
             return;
@@ -212,12 +222,12 @@ public partial class ReconciliationViewModel : ObservableObject
         if (version != _reloadVersion || SelectedSession?.Id != session.Id)
             return;
 
-        Diffs.Clear();
+        _diffItems.Clear();
         foreach (var d in diffs)
         {
             tradeLookup.TryGetValue(d.TradeId ?? Guid.Empty, out var trade);
             var tradeAmount = trade is null ? (decimal?)null : _matcher.SignedAmount(trade);
-            Diffs.Add(new ReconciliationDiffRowViewModel(d, trade, tradeAmount));
+            _diffItems.Add(new ReconciliationDiffRowViewModel(d, trade, tradeAmount));
         }
         OnPropertyChanged(nameof(SummaryDisplay));
         await RecomputeBalancePanelAsync(session, version).ConfigureAwait(true);
@@ -469,7 +479,7 @@ public partial class ReconciliationViewModel : ObservableObject
                 note: null,
                 statementEndingBalance: StatementEndingBalance).ConfigureAwait(true);
 
-            Sessions.Insert(0, session);
+            _sessionItems.Insert(0, session);
             SelectedSession = session;
             IsNewSessionPanelOpen = false;
             UploadedFilePath = null;

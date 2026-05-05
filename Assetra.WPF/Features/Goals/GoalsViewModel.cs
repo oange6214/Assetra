@@ -19,7 +19,8 @@ public sealed partial class GoalsViewModel : ObservableObject
     private readonly ICurrencyService? _currency;
     private readonly ILocalizationService? _localization;
 
-    public ObservableCollection<GoalRowViewModel> Goals { get; } = [];
+    private readonly ObservableCollection<GoalRowViewModel> _goals = [];
+    public ReadOnlyObservableCollection<GoalRowViewModel> Goals { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasGoals))]
@@ -104,7 +105,8 @@ public sealed partial class GoalsViewModel : ObservableObject
         _repository = repository;
         _currency = currency;
         _localization = localization;
-        Goals.CollectionChanged += (_, _) =>
+        Goals = new ReadOnlyObservableCollection<GoalRowViewModel>(_goals);
+        _goals.CollectionChanged += (_, _) =>
         {
             RefreshGoalSummary();
         };
@@ -126,9 +128,9 @@ public sealed partial class GoalsViewModel : ObservableObject
         try
         {
             var goals = await _repository.GetAllAsync().ConfigureAwait(true);
-            Goals.Clear();
+            _goals.Clear();
             foreach (var g in goals)
-                Goals.Add(new GoalRowViewModel(g, _currency, _localization));
+                _goals.Add(new GoalRowViewModel(g, _currency, _localization));
             IsLoaded = true;
         }
         catch (Exception ex)
@@ -191,7 +193,7 @@ public sealed partial class GoalsViewModel : ObservableObject
             else
             {
                 await _repository.AddAsync(goal).ConfigureAwait(true);
-                Goals.Add(new GoalRowViewModel(goal, _currency, _localization));
+                _goals.Add(new GoalRowViewModel(goal, _currency, _localization));
             }
             ResetAddForm();
         }
@@ -237,7 +239,7 @@ public sealed partial class GoalsViewModel : ObservableObject
             try
             {
                 await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
-                Goals.Remove(row);
+                _goals.Remove(row);
                 if (EditingId == row.Id) ResetAddForm();
             }
             catch (Exception ex)
@@ -271,7 +273,7 @@ public sealed partial class GoalsViewModel : ObservableObject
             RefreshGoalSummary();
             return;
         }
-        Goals.Add(new GoalRowViewModel(goal, _currency, _localization));
+        _goals.Add(new GoalRowViewModel(goal, _currency, _localization));
     }
 
     private static bool TryParseAmount(string? input, out decimal value)
