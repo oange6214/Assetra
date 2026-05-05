@@ -11,10 +11,10 @@
         ToolTip   (implicit)   : CJK-capable popup (no inheritance).
         TextBox   (implicit)   : explicit caret colour.
         FormFieldError         : 12 px AppDanger error label below
-                                  inputs.
+        inputs.
         FormComboBoxItem +     : Custom dropdown chrome matching the
         FormComboBox             rest of the design (border + chevron
-                                  + AppHover/AppAccentSubtle states).
+        + AppHover/AppAccentSubtle states).
     -->
 
     <!--  ── Global TextBlock ──  -->

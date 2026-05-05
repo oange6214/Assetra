@@ -79,12 +79,12 @@
 
         <DataTemplate x:Key="ImportContentTemplate">
             <TabControl
-                Background="Transparent"
-                BorderThickness="0"
                 HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                VerticalContentAlignment="Stretch">
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                Background="Transparent"
+                BorderThickness="0">
                 <TabControl.ItemContainerStyle>
                     <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="{x:Type TabItem}">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -139,10 +139,10 @@
     -->
     <ui:NavigationView
         x:Name="RootNavView"
+        CompactPaneLength="56"
         IsBackButtonVisible="Collapsed"
         IsPaneToggleVisible="True"
         OpenPaneLength="{StaticResource Size.Sidebar.Width}"
-        CompactPaneLength="56"
         PaneDisplayMode="Left">
 
         <ui:NavigationView.MenuItems>
@@ -209,8 +209,8 @@
                 <ui:NavigationViewItem.InfoBadge>
                     <ui:InfoBadge
                         Severity="Critical"
-                        Value="{Binding Alerts.TriggeredCount}"
-                        Visibility="{Binding Alerts.HasTriggeredAlerts, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        Visibility="{Binding Alerts.HasTriggeredAlerts, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Value="{Binding Alerts.TriggeredCount}" />
                 </ui:NavigationViewItem.InfoBadge>
             </ui:NavigationViewItem>
 
@@ -240,8 +240,8 @@
                 <ui:NavigationViewItem.InfoBadge>
                     <ui:InfoBadge
                         Severity="Attention"
-                        Value="{Binding Recurring.PendingCount}"
-                        Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Value="{Binding Recurring.PendingCount}" />
                 </ui:NavigationViewItem.InfoBadge>
             </ui:NavigationViewItem>
 
@@ -367,8 +367,8 @@
         <ui:NavigationView.ContentOverlay>
             <ContentControl
                 HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Stretch"
                 VerticalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
                 VerticalContentAlignment="Stretch"
                 Content="{Binding}">
                 <ContentControl.Style>

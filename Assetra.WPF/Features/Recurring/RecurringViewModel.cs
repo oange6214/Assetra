@@ -19,12 +19,20 @@ public partial class RecurringViewModel : ObservableObject
     public ObservableCollection<RecurringRowViewModel> Subscriptions { get; } = [];
     public ObservableCollection<PendingRecurringRowViewModel> Pending { get; } = [];
 
+    public int SubscriptionCount => Subscriptions.Count;
+    public int EnabledSubscriptionCount => Subscriptions.Count(row => row.IsEnabled);
+    public int DisabledSubscriptionCount => Subscriptions.Count(row => !row.IsEnabled);
     public int PendingCount => Pending.Count;
     public bool HasPending  => Pending.Count > 0;
+    public bool HasNoPending => Pending.Count == 0;
     public string PendingBadge => Pending.Count > 99 ? "99+" : Pending.Count.ToString();
 
     [ObservableProperty] private bool _isLoaded;
-    [ObservableProperty] private bool _isBusy;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RunSchedulerCommand))]
+    private bool _isBusy;
+
     [ObservableProperty] private string _runStatus = string.Empty;
     [ObservableProperty] private bool _isAddFormOpen;
     public bool HasNoSubscriptions => Subscriptions.Count == 0;
@@ -68,13 +76,13 @@ public partial class RecurringViewModel : ObservableObject
         {
             OnPropertyChanged(nameof(PendingCount));
             OnPropertyChanged(nameof(HasPending));
+            OnPropertyChanged(nameof(HasNoPending));
             OnPropertyChanged(nameof(PendingBadge));
         };
 
         Subscriptions.CollectionChanged += (_, _) =>
         {
-            OnPropertyChanged(nameof(HasNoSubscriptions));
-            OnPropertyChanged(nameof(HasSubscriptions));
+            RefreshSubscriptionSummary();
         };
 
         _localization.LanguageChanged += OnLanguageChanged;
@@ -116,6 +124,11 @@ public partial class RecurringViewModel : ObservableObject
     private void OpenAddForm()
     {
         AddError = string.Empty;
+        AddName = string.Empty;
+        AddAmount = 0m;
+        AddInterval = 1;
+        AddStartDate = DateTime.Today;
+        AddNote = string.Empty;
         IsAddFormOpen = true;
     }
 
@@ -187,6 +200,7 @@ public partial class RecurringViewModel : ObservableObject
         if (row is null) return;
         row.IsEnabled = !row.IsEnabled;
         await _recurringRepo.UpdateAsync(row.ToModel()).ConfigureAwait(true);
+        RefreshSubscriptionSummary();
     }
 
     [RelayCommand]
@@ -202,7 +216,9 @@ public partial class RecurringViewModel : ObservableObject
             GetString("Recurring.Toast.Deleted", "已刪除「{0}」"), row.Name));
     }
 
-    [RelayCommand]
+    private bool CanRunScheduler() => !IsBusy;
+
+    [RelayCommand(CanExecute = nameof(CanRunScheduler))]
     private async Task RunSchedulerAsync()
     {
         if (IsBusy) return;
@@ -245,4 +261,13 @@ public partial class RecurringViewModel : ObservableObject
 
     private string GetString(string key, string fallback) =>
         _localization.Get(key, fallback);
+
+    private void RefreshSubscriptionSummary()
+    {
+        OnPropertyChanged(nameof(SubscriptionCount));
+        OnPropertyChanged(nameof(EnabledSubscriptionCount));
+        OnPropertyChanged(nameof(DisabledSubscriptionCount));
+        OnPropertyChanged(nameof(HasNoSubscriptions));
+        OnPropertyChanged(nameof(HasSubscriptions));
+    }
 }

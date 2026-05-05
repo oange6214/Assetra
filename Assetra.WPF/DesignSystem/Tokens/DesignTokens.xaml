@@ -67,10 +67,9 @@
 
     <!--
         ══ Radius / Typography ══
-        Radius and font-size scales live in Themes/GlobalStyles.xaml as
-        RadiusSm/Md/Lg (4/6/8) and FontSizeXs/Sm/Base/Md/Lg/Xl/2xl/3xl
-        (12/14/16/18/20/24/32/48). DesignTokens stays the source of
-        palette, semantic, spacing, sizing, and motion primitives.
+        Radius and font-size scales live in DesignSystem/Tokens/Radius.xaml
+        and DesignSystem/Tokens/Typography.xaml. DesignTokens stays the
+        source of palette, semantic, spacing, sizing, and motion primitives.
     -->
 
     <!--  ══ Component sizes ══  -->

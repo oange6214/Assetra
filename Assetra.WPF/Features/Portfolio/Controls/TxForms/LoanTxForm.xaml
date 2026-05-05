@@ -40,10 +40,7 @@
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.Amount}" />
-            <ui:TextBox
-                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-
-                Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
+            <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,12"
                 Style="{StaticResource FormFieldError}"
@@ -188,10 +185,7 @@
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Tx.Principal}" />
-                    <ui:TextBox
-                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-
-                        Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
+                    <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Margin="0,0,0,0"
                         Style="{StaticResource FormFieldError}"
@@ -205,10 +199,7 @@
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Tx.InterestPaid}" />
-                    <ui:TextBox
-                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-
-                        Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
+                    <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Style="{StaticResource FormFieldError}"
                         Text="{Binding TxInterestPaidError}"
@@ -228,10 +219,7 @@
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.Principal}" />
-                <ui:TextBox
-                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-
-                    Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
+                <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Margin="0,0,0,12"
                     Style="{StaticResource FormFieldError}"
@@ -244,10 +232,7 @@
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.InterestPaid}" />
-                <ui:TextBox
-                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-
-                    Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
+                <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Style="{StaticResource FormFieldError}"
                     Text="{Binding TxInterestPaidError}"
@@ -268,10 +253,7 @@
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Fee}" />
-        <ui:TextBox
-            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-
-            Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
+        <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Margin="0,0,0,12"
             Style="{StaticResource FormFieldError}"

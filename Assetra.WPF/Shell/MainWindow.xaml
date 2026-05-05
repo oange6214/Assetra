@@ -91,9 +91,12 @@
                                 Appearance="Transparent"
                                 Command="{Binding NavRail.GoBackCommand}"
                                 IsEnabled="{Binding NavRail.CanGoBack}"
-                                ToolTipService.ShowOnDisabled="True"
-                                ToolTip="{DynamicResource Nav.GoBack}">
-                                <ui:SymbolIcon Symbol="ChevronLeft24" FontSize="{StaticResource FontSizeBase}" Foreground="{DynamicResource AppTextMuted}" />
+                                ToolTip="{DynamicResource Nav.GoBack}"
+                                ToolTipService.ShowOnDisabled="True">
+                                <ui:SymbolIcon
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Symbol="ChevronLeft24" />
                             </ui:Button>
                             <ui:Button
                                 Width="32"
@@ -103,9 +106,12 @@
                                 Appearance="Transparent"
                                 Command="{Binding NavRail.GoForwardCommand}"
                                 IsEnabled="{Binding NavRail.CanGoForward}"
-                                ToolTipService.ShowOnDisabled="True"
-                                ToolTip="{DynamicResource Nav.GoForward}">
-                                <ui:SymbolIcon Symbol="ChevronRight24" FontSize="{StaticResource FontSizeBase}" Foreground="{DynamicResource AppTextMuted}" />
+                                ToolTip="{DynamicResource Nav.GoForward}"
+                                ToolTipService.ShowOnDisabled="True">
+                                <ui:SymbolIcon
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Symbol="ChevronRight24" />
                             </ui:Button>
                             <ui:Button
                                 x:Name="SearchIconBtn"
@@ -116,7 +122,10 @@
                                 Appearance="Transparent"
                                 Command="{Binding ToggleSearchCommand}"
                                 ToolTip="Ctrl+K">
-                                <ui:SymbolIcon Symbol="Search24" FontSize="{StaticResource FontSizeMd}" Foreground="{DynamicResource AppTextMuted}" />
+                                <ui:SymbolIcon
+                                    FontSize="{StaticResource FontSizeMd}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Symbol="Search24" />
                             </ui:Button>
                         </StackPanel>
 
@@ -178,8 +187,8 @@
             PopupAnimation="Fade"
             StaysOpen="False">
             <Border
-                Margin="12"
                 MaxHeight="440"
+                Margin="12"
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
@@ -203,7 +212,14 @@
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,0,0,1">
                         <DockPanel>
-                            <ui:SymbolIcon Symbol="Search24" Margin="0,0,10,0" VerticalAlignment="Center" DockPanel.Dock="Left" FontSize="{StaticResource FontSizeLg}" Foreground="{DynamicResource AppTextMuted}" IsHitTestVisible="False" />
+                            <ui:SymbolIcon
+                                Margin="0,0,10,0"
+                                VerticalAlignment="Center"
+                                DockPanel.Dock="Left"
+                                FontSize="{StaticResource FontSizeLg}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                IsHitTestVisible="False"
+                                Symbol="Search24" />
                             <ui:TextBox
                                 x:Name="SearchPaletteInput"
                                 VerticalContentAlignment="Center"

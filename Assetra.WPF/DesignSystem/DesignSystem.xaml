@@ -1,0 +1,13 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Generic design-system entry point for design-time/manual consumers.
+        App.xaml loads Tokens.xaml, the active theme palette, then Styles.xaml
+        separately so StaticResource lookup and runtime theme swaps stay stable.
+    -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>

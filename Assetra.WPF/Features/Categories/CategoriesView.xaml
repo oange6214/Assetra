@@ -96,9 +96,7 @@
         </Style>
 
         <DataTemplate x:Key="CategoryRowTemplate" DataType="{x:Type vm:CategoryRowViewModel}">
-            <ui:Card
-                Margin="0,0,0,6"
-                Padding="10,8">
+            <ui:Card Margin="0,0,0,6" Padding="10,8">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -209,14 +207,14 @@
                         <ui:Button
                             Width="32"
                             Height="32"
-                            Padding="0"
                             Margin="0,0,4,0"
+                            Padding="0"
                             Command="{Binding DataContext.BeginEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             ToolTip="{DynamicResource Common.Edit}">
                             <ui:Button.Style>
                                 <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                    <Setter Property="Appearance" Value="Transparent" />
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -234,14 +232,14 @@
                         <ui:Button
                             Width="32"
                             Height="32"
-                            Padding="0"
                             Margin="0,0,4,0"
+                            Padding="0"
                             Command="{Binding DataContext.ToggleArchiveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             ToolTip="{DynamicResource Categories.ToggleArchive}">
                             <ui:Button.Style>
                                 <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                    <Setter Property="Appearance" Value="Transparent" />
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -265,7 +263,7 @@
                             ToolTip="{DynamicResource Common.Delete}">
                             <ui:Button.Style>
                                 <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                    <Setter Property="Appearance" Value="Transparent" />
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -274,21 +272,24 @@
                                     </Style.Triggers>
                                 </Style>
                             </ui:Button.Style>
-                            <ui:SymbolIcon FontSize="{StaticResource FontSizeXs}" Symbol="Delete24" Foreground="{DynamicResource AppDanger}" />
+                            <ui:SymbolIcon
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppDanger}"
+                                Symbol="Delete24" />
                         </ui:Button>
 
                         <!--  Edit mode buttons  -->
                         <ui:Button
                             Width="32"
                             Height="32"
-                            Padding="0"
                             Margin="0,0,4,0"
+                            Padding="0"
                             Command="{Binding DataContext.SaveEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             ToolTip="{DynamicResource Common.Save}">
                             <ui:Button.Style>
                                 <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                    <Setter Property="Appearance" Value="Transparent" />
                                     <Setter Property="Visibility" Value="Collapsed" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -312,7 +313,7 @@
                             ToolTip="{DynamicResource Common.Cancel}">
                             <ui:Button.Style>
                                 <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                    <Setter Property="Appearance" Value="Transparent" />
                                     <Setter Property="Visibility" Value="Collapsed" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -360,12 +361,12 @@
 
         <TabControl
             Grid.Row="1"
-            Background="Transparent"
-            BorderThickness="0"
             HorizontalAlignment="Stretch"
-            HorizontalContentAlignment="Stretch"
             VerticalAlignment="Stretch"
-            VerticalContentAlignment="Stretch">
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
+            Background="Transparent"
+            BorderThickness="0">
             <TabControl.ItemContainerStyle>
                 <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="{x:Type TabItem}">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -381,11 +382,14 @@
                     </Grid.RowDefinitions>
 
                     <!--  Toolbar  -->
-                    <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="False">
+                    <DockPanel
+                        Grid.Row="0"
+                        Margin="0,0,0,8"
+                        LastChildFill="False">
                         <ui:Button
-                            DockPanel.Dock="Right"
                             Appearance="Primary"
                             Command="{Binding OpenAddCategoryCommand}"
+                            DockPanel.Dock="Right"
                             Visibility="{Binding IsAddCategoryOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <ui:SymbolIcon
@@ -412,11 +416,11 @@
                         <!--  Expense  -->
                         <ui:Card
                             Grid.Column="0"
+                            Padding="12"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch"
-                            VerticalContentAlignment="Stretch"
-                            Padding="12">
+                            VerticalContentAlignment="Stretch">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -444,11 +448,11 @@
                         <!--  Income  -->
                         <ui:Card
                             Grid.Column="2"
+                            Padding="12"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch"
-                            VerticalContentAlignment="Stretch"
-                            Padding="12">
+                            VerticalContentAlignment="Stretch">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -611,12 +615,15 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="True">
+                    <DockPanel
+                        Grid.Row="0"
+                        Margin="0,0,0,8"
+                        LastChildFill="True">
                         <ui:Button
-                            DockPanel.Dock="Right"
                             Margin="12,0,0,0"
                             Appearance="Primary"
                             Command="{Binding OpenAddRuleCommand}"
+                            DockPanel.Dock="Right"
                             Visibility="{Binding IsAddRuleOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <ui:SymbolIcon
@@ -640,9 +647,9 @@
 
                     <ui:Card
                         Grid.Row="1"
+                        Padding="12"
                         HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        Padding="12">
+                        VerticalAlignment="Stretch">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding Rules}">
                                 <ItemsControl.ItemContainerStyle>
@@ -837,9 +844,7 @@
                                                                 <CheckBox Content="{DynamicResource Categories.Rule.AppliesTo.Import}" IsChecked="{Binding EditAppliesToImport}" />
                                                             </StackPanel>
 
-                                                            <ui:Card
-                                                                Margin="0,8,0,0"
-                                                                Padding="10,8">
+                                                            <ui:Card Margin="0,8,0,0" Padding="10,8">
                                                                 <StackPanel>
                                                                     <TextBlock
                                                                         FontSize="{StaticResource FontSizeXs}"
@@ -930,14 +935,14 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
-                            Padding="0"
                                                         Margin="0,0,4,0"
+                                                        Padding="0"
                                                         Command="{Binding DataContext.BeginEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Edit}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                                                <Setter Property="Appearance" Value="Transparent" />
                                                                 <Setter Property="Visibility" Value="Visible" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -955,13 +960,13 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
-                            Padding="0"
+                                                        Padding="0"
                                                         Command="{Binding DataContext.DeleteRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Delete}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                                                <Setter Property="Appearance" Value="Transparent" />
                                                                 <Setter Property="Visibility" Value="Visible" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -970,20 +975,23 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </ui:Button.Style>
-                                                        <ui:SymbolIcon FontSize="{StaticResource FontSizeXs}" Symbol="Delete24" Foreground="{DynamicResource AppDanger}" />
+                                                        <ui:SymbolIcon
+                                                            FontSize="{StaticResource FontSizeXs}"
+                                                            Foreground="{DynamicResource AppDanger}"
+                                                            Symbol="Delete24" />
                                                     </ui:Button>
 
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
-                            Padding="0"
                                                         Margin="0,0,4,0"
+                                                        Padding="0"
                                                         Command="{Binding DataContext.SaveEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Save}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                                                <Setter Property="Appearance" Value="Transparent" />
                                                                 <Setter Property="Visibility" Value="Collapsed" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -1001,13 +1009,13 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
-                            Padding="0"
+                                                        Padding="0"
                                                         Command="{Binding DataContext.CancelEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Cancel}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                                                <Setter Property="Appearance" Value="Transparent" />
                                                                 <Setter Property="Visibility" Value="Collapsed" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -1228,12 +1236,15 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="True">
+                    <DockPanel
+                        Grid.Row="0"
+                        Margin="0,0,0,8"
+                        LastChildFill="True">
                         <ui:Button
-                            DockPanel.Dock="Right"
                             Margin="12,0,0,0"
                             Appearance="Primary"
                             Command="{Binding OpenAddBudgetCommand}"
+                            DockPanel.Dock="Right"
                             Visibility="{Binding IsAddBudgetOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <ui:SymbolIcon
@@ -1257,9 +1268,9 @@
 
                     <ui:Card
                         Grid.Row="1"
+                        Padding="12"
                         HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        Padding="12">
+                        VerticalAlignment="Stretch">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding Budgets}">
                                 <ItemsControl.ItemContainerStyle>
@@ -1394,14 +1405,14 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
-                            Padding="0"
                                                         Margin="0,0,4,0"
+                                                        Padding="0"
                                                         Command="{Binding DataContext.BeginEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Edit}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                                                <Setter Property="Appearance" Value="Transparent" />
                                                                 <Setter Property="Visibility" Value="Visible" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -1418,13 +1429,13 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
-                            Padding="0"
+                                                        Padding="0"
                                                         Command="{Binding DataContext.DeleteBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Delete}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                                                <Setter Property="Appearance" Value="Transparent" />
                                                                 <Setter Property="Visibility" Value="Visible" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -1433,19 +1444,22 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </ui:Button.Style>
-                                                        <ui:SymbolIcon FontSize="{StaticResource FontSizeXs}" Symbol="Delete24" Foreground="{DynamicResource AppDanger}" />
+                                                        <ui:SymbolIcon
+                                                            FontSize="{StaticResource FontSizeXs}"
+                                                            Foreground="{DynamicResource AppDanger}"
+                                                            Symbol="Delete24" />
                                                     </ui:Button>
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
-                            Padding="0"
                                                         Margin="0,0,4,0"
+                                                        Padding="0"
                                                         Command="{Binding DataContext.SaveEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Save}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                                                <Setter Property="Appearance" Value="Transparent" />
                                                                 <Setter Property="Visibility" Value="Collapsed" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -1462,13 +1476,13 @@
                                                     <ui:Button
                                                         Width="32"
                                                         Height="32"
-                            Padding="0"
+                                                        Padding="0"
                                                         Command="{Binding DataContext.CancelEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Cancel}">
                                                         <ui:Button.Style>
                                                             <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                          <Setter Property="Appearance" Value="Transparent" />
+                                                                <Setter Property="Appearance" Value="Transparent" />
                                                                 <Setter Property="Visibility" Value="Collapsed" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">

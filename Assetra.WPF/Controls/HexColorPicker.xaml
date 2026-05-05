@@ -13,8 +13,8 @@
             x:Name="OpenButton"
             MinHeight="{Binding MinHeight, RelativeSource={RelativeSource AncestorType=UserControl}}"
             Padding="6,4"
-            Appearance="Secondary"
             HorizontalContentAlignment="Stretch"
+            Appearance="Secondary"
             Click="OpenButton_OnClick"
             Cursor="Hand">
             <DockPanel>

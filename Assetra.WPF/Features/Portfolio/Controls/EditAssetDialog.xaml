@@ -42,13 +42,16 @@
                         <ui:Button
                             Width="28"
                             Height="28"
+                            Padding="0"
                             HorizontalAlignment="Right"
+                            Appearance="Transparent"
                             Command="{Binding CloseEditAssetCommand}"
                             DockPanel.Dock="Right"
-                            Padding="0"
-                            Appearance="Transparent"
-            ToolTip="{DynamicResource Common.Close}">
-                            <ui:SymbolIcon Symbol="Dismiss24" FontSize="12" Foreground="{DynamicResource AppTextMuted}" />
+                            ToolTip="{DynamicResource Common.Close}">
+                            <ui:SymbolIcon
+                                FontSize="12"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Symbol="Dismiss24" />
                         </ui:Button>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock
@@ -159,15 +162,15 @@
                             Height="30"
                             Margin="0,0,8,0"
                             Padding="14,0"
-                            Command="{Binding CloseEditAssetCommand}"
-                            Appearance="Secondary">
+                            Appearance="Secondary"
+                            Command="{Binding CloseEditAssetCommand}">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Common.Cancel}" />
                         </ui:Button>
                         <ui:Button
                             Height="30"
                             Padding="14,0"
-                            Command="{Binding SaveEditAssetCommand}"
-                            Appearance="Primary">
+                            Appearance="Primary"
+                            Command="{Binding SaveEditAssetCommand}">
                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.EditAsset.Update}" />
                         </ui:Button>
                     </StackPanel>

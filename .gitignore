@@ -58,5 +58,8 @@ node_modules/
 # Git worktrees
 .worktrees/
 
+# Local assistant/tool state
+.claude/
+
 # Superpowers tool artifacts (brainstorm HTML, server state)
 .superpowers/

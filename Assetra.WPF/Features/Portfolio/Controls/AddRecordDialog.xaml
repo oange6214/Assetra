@@ -96,13 +96,16 @@
                         <ui:Button
                             Width="28"
                             Height="28"
+                            Padding="0"
                             HorizontalAlignment="Right"
+                            Appearance="Transparent"
                             Command="{Binding CloseTxDialogCommand}"
                             DockPanel.Dock="Right"
-                            Padding="0"
-                            Appearance="Transparent"
-            ToolTip="{DynamicResource Common.Close}">
-                            <ui:SymbolIcon Symbol="Dismiss24" FontSize="12" Foreground="{DynamicResource AppTextMuted}" />
+                            ToolTip="{DynamicResource Common.Close}">
+                            <ui:SymbolIcon
+                                FontSize="12"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Symbol="Dismiss24" />
                         </ui:Button>
                     </DockPanel>
                 </Border>
@@ -305,8 +308,7 @@
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{DynamicResource Portfolio.TradeHistory.Type}" />
-                                        <ui:Card
-                                            Padding="10">
+                                        <ui:Card Padding="10">
                                             <StackPanel>
                                                 <Border
                                                     Padding="8"
@@ -561,9 +563,9 @@
                                 <ui:Button
                                     Height="30"
                                     Padding="14,0"
+                                    Appearance="Danger"
                                     Command="{Binding DeleteTradeCommand}"
                                     DockPanel.Dock="Left"
-                                    Appearance="Danger"
                                     Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Tx.Delete}" />
                                 </ui:Button>
@@ -571,9 +573,9 @@
                                     Height="30"
                                     Margin="8,0,0,0"
                                     Padding="14,0"
+                                    Appearance="Secondary"
                                     Command="{Binding CreateRevisionCommand}"
                                     DockPanel.Dock="Left"
-                                    Appearance="Secondary"
                                     Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.CreateRevision}" />
                                 </ui:Button>
@@ -584,15 +586,15 @@
                                             Height="30"
                                             Margin="0,0,8,0"
                                             Padding="14,0"
-                                            Command="{Binding KeepBothRecordsCommand}"
-                                            Appearance="Secondary">
+                                            Appearance="Secondary"
+                                            Command="{Binding KeepBothRecordsCommand}">
                                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.KeepBoth}" />
                                         </ui:Button>
                                         <ui:Button
                                             Height="30"
                                             Padding="14,0"
-                                            Command="{Binding ReplaceOriginalRecordCommand}"
-                                            Appearance="Primary">
+                                            Appearance="Primary"
+                                            Command="{Binding ReplaceOriginalRecordCommand}">
                                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.ReplaceAndDelete}" />
                                         </ui:Button>
                                     </StackPanel>
@@ -601,15 +603,15 @@
                                             Height="30"
                                             Margin="0,0,8,0"
                                             Padding="14,0"
-                                            Command="{Binding CloseTxDialogCommand}"
-                                            Appearance="Secondary">
+                                            Appearance="Secondary"
+                                            Command="{Binding CloseTxDialogCommand}">
                                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Cancel}" />
                                         </ui:Button>
                                         <ui:Button
                                             Height="30"
                                             Padding="14,0"
-                                            Command="{Binding ConfirmTxCommand}"
-                                            Appearance="Primary">
+                                            Appearance="Primary"
+                                            Command="{Binding ConfirmTxCommand}">
                                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -650,16 +652,16 @@
                                     Height="30"
                                     Margin="0,0,8,8"
                                     Padding="14,0"
-                                    Command="{Binding DeleteTradeCommand}"
-                                    Appearance="Danger">
+                                    Appearance="Danger"
+                                    Command="{Binding DeleteTradeCommand}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Tx.Delete}" />
                                 </ui:Button>
                                 <ui:Button
                                     Height="30"
                                     Margin="0,0,0,8"
                                     Padding="14,0"
-                                    Command="{Binding CreateRevisionCommand}"
-                                    Appearance="Secondary">
+                                    Appearance="Secondary"
+                                    Command="{Binding CreateRevisionCommand}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.CreateRevision}" />
                                 </ui:Button>
                             </StackPanel>
@@ -668,15 +670,15 @@
                                     Height="30"
                                     Margin="0,0,0,8"
                                     Padding="14,0"
-                                    Command="{Binding ReplaceOriginalRecordCommand}"
-                                    Appearance="Primary">
+                                    Appearance="Primary"
+                                    Command="{Binding ReplaceOriginalRecordCommand}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.ReplaceAndDelete}" />
                                 </ui:Button>
                                 <ui:Button
                                     Height="30"
                                     Padding="14,0"
-                                    Command="{Binding KeepBothRecordsCommand}"
-                                    Appearance="Secondary">
+                                    Appearance="Secondary"
+                                    Command="{Binding KeepBothRecordsCommand}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.KeepBoth}" />
                                 </ui:Button>
                             </StackPanel>
@@ -688,15 +690,15 @@
                                     Height="30"
                                     Margin="0,0,8,0"
                                     Padding="14,0"
-                                    Command="{Binding CloseTxDialogCommand}"
-                                    Appearance="Secondary">
+                                    Appearance="Secondary"
+                                    Command="{Binding CloseTxDialogCommand}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Cancel}" />
                                 </ui:Button>
                                 <ui:Button
                                     Height="30"
                                     Padding="14,0"
-                                    Command="{Binding ConfirmTxCommand}"
-                                    Appearance="Primary">
+                                    Appearance="Primary"
+                                    Command="{Binding ConfirmTxCommand}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">

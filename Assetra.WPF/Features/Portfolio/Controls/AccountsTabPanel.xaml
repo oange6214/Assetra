@@ -169,10 +169,14 @@
                     <ui:Button
                         MinHeight="32"
                         Padding="10,0"
-                        Command="{Binding OpenAddAccountDialogCommand}"
-                        Appearance="Secondary">
+                        Appearance="Secondary"
+                        Command="{Binding OpenAddAccountDialogCommand}">
                         <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon Symbol="Add24" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeXs}" />
+                            <ui:SymbolIcon
+                                Margin="0,0,6,0"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Symbol="Add24" />
                             <TextBlock VerticalAlignment="Center" Text="{DynamicResource Portfolio.AddCash}" />
                         </StackPanel>
                     </ui:Button>
@@ -205,8 +209,8 @@
                         Margin="0,16,0,0"
                         Padding="20,0"
                         HorizontalAlignment="Center"
-                        Command="{Binding OpenAddAccountDialogCommand}"
-                        Appearance="Primary">
+                        Appearance="Primary"
+                        Command="{Binding OpenAddAccountDialogCommand}">
                         <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.AddCash}" />
                     </ui:Button>
                 </StackPanel>
@@ -366,13 +370,17 @@
                                     Padding="0"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
+                                    Appearance="Secondary"
                                     Background="Transparent"
                                     BorderThickness="0"
                                     Command="{Binding DataContext.Account.ArchiveAccountCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     CommandParameter="{Binding}"
-                                    Appearance="Secondary"
                                     ToolTip="{DynamicResource Portfolio.Account.Archive}">
-                                    <ui:SymbolIcon Symbol="Call24" VerticalAlignment="Center" FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextSecondary}" />
+                                    <ui:SymbolIcon
+                                        VerticalAlignment="Center"
+                                        FontSize="{StaticResource FontSizeXs}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Symbol="Call24" />
                                 </ui:Button>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

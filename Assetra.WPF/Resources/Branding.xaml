@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <DrawingImage x:Key="AssetraLogo">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="#142F55">
+                    <GeometryDrawing.Geometry>
+                        <PathGeometry Figures="M 34,72 L 52,28 64,28 46,72 Z" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="#C8A25A">
+                    <GeometryDrawing.Geometry>
+                        <PathGeometry Figures="M 60,72 L 72,52 82,72 Z" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+</ResourceDictionary>

@@ -184,10 +184,11 @@
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
+                            FontFamily="{StaticResource FontBase}"
                             FontSize="{StaticResource FontSizeSm}"
                             Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{Binding StartDateText, UpdateSourceTrigger=LostFocus}" />
+                            Text="{Binding StartDateText, UpdateSourceTrigger=LostFocus}"
+                            Typography.NumeralAlignment="Tabular" />
                         <TextBox
                             Grid.Column="1"
                             Height="30"
@@ -197,18 +198,19 @@
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
+                            FontFamily="{StaticResource FontBase}"
                             FontSize="{StaticResource FontSizeSm}"
                             Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{Binding EndDateText, UpdateSourceTrigger=LostFocus}" />
+                            Text="{Binding EndDateText, UpdateSourceTrigger=LostFocus}"
+                            Typography.NumeralAlignment="Tabular" />
                         <ui:Button
                             Grid.Column="2"
                             Height="30"
                             Padding="12,0"
+                            Appearance="Secondary"
                             Click="Reset_Click"
                             Content="{DynamicResource DateRangePicker.Reset}"
-                            FontSize="{StaticResource FontSizeSm}"
-                            Appearance="Secondary" />
+                            FontSize="{StaticResource FontSizeSm}" />
                     </Grid>
 
                     <!--  兩月並排  -->

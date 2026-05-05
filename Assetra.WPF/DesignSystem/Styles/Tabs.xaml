@@ -1,22 +1,20 @@
-<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
         ════════════════════════════════════════════════════════════
         Tab-style controls
         ════════════════════════════════════════════════════════════
         NavTabBtn      : RadioButton-based tab (TradingView-style),
-                          underline indicator + AppHover bg on hover.
-                          Used for sub-tabs (Allocation 配置概覽/再平衡,
-                          Trends period filter).
+        underline indicator + AppHover bg on hover.
+        Used for sub-tabs (Allocation 配置概覽/再平衡,
+        Trends period filter).
         SegmentBtn     : RadioButton-based pill segment, filled bg
-                          when checked. Used for compact segmented
-                          controls.
+        when checked. Used for compact segmented
+        controls.
         TabControl /   : Implicit (no x:Key) modern fintech tab strip
         TabItem          with 3 px AppAccent underline indicator
-                          flush to bottom edge. Used by main feature
-                          views (PortfolioView, CategoriesView, etc).
+        flush to bottom edge. Used by main feature
+        views (PortfolioView, CategoriesView, etc).
     -->
 
     <!--  ── NavTabBtn — RadioButton-based tab with bottom indicator ──  -->
@@ -194,8 +192,8 @@
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                 ContentSource="Header"
                                 RecognizesAccessKey="True"
-                                TextElement.Foreground="{TemplateBinding Foreground}"
-                                TextElement.FontWeight="{TemplateBinding FontWeight}" />
+                                TextElement.FontWeight="{TemplateBinding FontWeight}"
+                                TextElement.Foreground="{TemplateBinding Foreground}" />
                         </Border>
                         <Border
                             x:Name="Indicator"

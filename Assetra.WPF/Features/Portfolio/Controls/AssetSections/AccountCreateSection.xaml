@@ -2,9 +2,9 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.AssetSections.AccountCreateSection"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     x:Name="Root"
     mc:Ignorable="d">
 
@@ -29,7 +29,6 @@
             Text="{DynamicResource Portfolio.Account.Subtype}" />
         <ui:TextBox
             Margin="0,0,0,10"
-
             Text="{Binding AddSubtype, UpdateSourceTrigger=PropertyChanged}"
             ToolTip="{DynamicResource Portfolio.Account.SubtypeHint}" />
 
@@ -39,10 +38,7 @@
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Cash.Name}" />
-        <ui:TextBox
-            Margin="0,0,0,8"
-
-            Text="{Binding AddAccountName, UpdateSourceTrigger=PropertyChanged}" />
+        <ui:TextBox Margin="0,0,0,8" Text="{Binding AddAccountName, UpdateSourceTrigger=PropertyChanged}" />
 
         <TextBlock
             Margin="0,0,0,12"
@@ -84,10 +80,7 @@
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Cash.InitialDeposit.Amount}" />
-                    <ui:TextBox
-                        Margin="0,0,0,10"
-
-                        Text="{Binding AddInitialDepositAmount, UpdateSourceTrigger=PropertyChanged}" />
+                    <ui:TextBox Margin="0,0,0,10" Text="{Binding AddInitialDepositAmount, UpdateSourceTrigger=PropertyChanged}" />
 
                     <TextBlock
                         Margin="0,0,0,4"
@@ -110,7 +103,6 @@
                     <ui:TextBox
                         Height="64"
                         AcceptsReturn="True"
-
                         Text="{Binding AddInitialDepositNote, UpdateSourceTrigger=PropertyChanged}"
                         TextWrapping="Wrap"
                         VerticalScrollBarVisibility="Auto" />

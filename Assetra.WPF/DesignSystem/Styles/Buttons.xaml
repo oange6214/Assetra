@@ -24,17 +24,17 @@
             re-inherit the Button's Foreground.
 
             Why:  the global implicit TextBlock style (Inputs.xaml) sets
-                  Foreground=AppTextPrimary as a Setter, which overrides
-                  the Button trigger's TextElement.Foreground inheritance.
-                  On a saturated Primary/Danger/Caution/Success/Info
-                  background that produced unreadable dark text on dark
-                  navy / red / orange / green / blue.
+            Foreground=AppTextPrimary as a Setter, which overrides
+            the Button trigger's TextElement.Foreground inheritance.
+            On a saturated Primary/Danger/Caution/Success/Info
+            background that produced unreadable dark text on dark
+            navy / red / orange / green / blue.
 
             Fix:  for descendants of ui:Button, bind their Foreground back
-                  to the Button's current Foreground. Buttons without a
-                  trigger (Secondary / Transparent) still pick up
-                  AppTextPrimary because that's what their Foreground
-                  resolves to from the base ui:Button style.
+            to the Button's current Foreground. Buttons without a
+            trigger (Secondary / Transparent) still pick up
+            AppTextPrimary because that's what their Foreground
+            resolves to from the base ui:Button style.
         -->
         <Style.Resources>
             <Style TargetType="TextBlock">

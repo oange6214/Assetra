@@ -1,0 +1,13 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Primitive tokens must be loaded before Light/Dark theme palettes. -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/DesignTokens.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/Typography.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/Sizes.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/Radius.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>

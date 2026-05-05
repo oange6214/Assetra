@@ -883,6 +883,11 @@
     <sys:String x:Key="Recurring.Title">Subscriptions &amp; Pending Items</sys:String>
     <sys:String x:Key="Recurring.Tab.Subscriptions">Subscriptions</sys:String>
     <sys:String x:Key="Recurring.Tab.Pending">Pending</sys:String>
+    <sys:String x:Key="Recurring.SubscriptionCount">Subscriptions</sys:String>
+    <sys:String x:Key="Recurring.EnabledCount">Enabled</sys:String>
+    <sys:String x:Key="Recurring.PendingCount">Pending</sys:String>
+    <sys:String x:Key="Recurring.Subscriptions.Hint">Manage recurring income, expenses, and cash movement. Due items can auto-apply or wait for confirmation.</sys:String>
+    <sys:String x:Key="Recurring.Pending.Hint">Review generated pending items. Confirming them writes the transaction record.</sys:String>
     <sys:String x:Key="Recurring.Run">Run now</sys:String>
     <sys:String x:Key="Recurring.Run.Status">Applied {0}, queued {1} pending</sys:String>
     <sys:String x:Key="Recurring.AddForm.Title">Add Subscription</sys:String>
@@ -895,9 +900,12 @@
     <sys:String x:Key="Recurring.Field.StartDate">Starts</sys:String>
     <sys:String x:Key="Recurring.Field.Mode">Handling mode</sys:String>
     <sys:String x:Key="Recurring.Field.Note">Note</sys:String>
+    <sys:String x:Key="Recurring.NextDue">Next due</sys:String>
     <sys:String x:Key="Recurring.Add">Add Subscription</sys:String>
     <sys:String x:Key="Recurring.Empty">No subscriptions yet</sys:String>
+    <sys:String x:Key="Recurring.Empty.Hint">Add rent, insurance, salary, or other recurring items so Assetra can generate transactions on schedule.</sys:String>
     <sys:String x:Key="Recurring.Pending.Empty">No pending items</sys:String>
+    <sys:String x:Key="Recurring.Pending.Empty.Hint">Use "Run now" to check whether any schedules are due.</sys:String>
     <sys:String x:Key="Recurring.NameHint">Name</sys:String>
     <sys:String x:Key="Recurring.AmountHint">Amount</sys:String>
     <sys:String x:Key="Recurring.IntervalHint">Repeat every N frequency units</sys:String>

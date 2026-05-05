@@ -8,15 +8,15 @@
         DataGrid styles (header / cell / row)
         ════════════════════════════════════════════════════════════
         AppDataGridColHeader      : column header with sortable
-                                     chevron arrow + hover color.
+        chevron arrow + hover color.
         AppDataGridCell           : transparent cell with 8 px
-                                     horizontal padding (vertical
-                                     centred).
+        horizontal padding (vertical
+        centred).
         AppDataGridRow            : alternating bg + hover only,
-                                     no selection visual.
+        no selection visual.
         AppDataGridRowSelectable  : extends AppDataGridRow with
-                                     accent-left selection bar +
-                                     AppSelectedRow background.
+        accent-left selection bar +
+        AppSelectedRow background.
     -->
 
     <!--  ── Column header ──  -->

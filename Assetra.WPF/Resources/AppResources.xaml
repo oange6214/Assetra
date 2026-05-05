@@ -1,0 +1,14 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        App and feature resource entry point.
+        Add new feature-owned resources here instead of putting domain
+        styles into the generic DesignSystem.
+    -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/Resources/Branding.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/Features/Portfolio/Resources/SearchResources.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/Features/Portfolio/Resources/Badges.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>

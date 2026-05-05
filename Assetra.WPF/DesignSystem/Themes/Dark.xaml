@@ -30,24 +30,24 @@
     -->
 
     <!--  Backgrounds — Slate scale (dark)  -->
-    <SolidColorBrush x:Key="AppBackground"     Color="#0F172A" />
-    <SolidColorBrush x:Key="AppSurface"        Color="#1E293B" />
-    <SolidColorBrush x:Key="AppSurfaceAlt"     Color="#334155" />
+    <SolidColorBrush x:Key="AppBackground" Color="#0F172A" />
+    <SolidColorBrush x:Key="AppSurface" Color="#1E293B" />
+    <SolidColorBrush x:Key="AppSurfaceAlt" Color="#334155" />
     <SolidColorBrush x:Key="AppCardBackground" Color="#1E293B" />
-    <SolidColorBrush x:Key="AppHover"          Color="#334155" />
+    <SolidColorBrush x:Key="AppHover" Color="#334155" />
 
     <!--  Borders  -->
-    <SolidColorBrush x:Key="AppBorder"      Color="#334155" />
+    <SolidColorBrush x:Key="AppBorder" Color="#334155" />
     <SolidColorBrush x:Key="AppBorderLight" Color="#1E293B" />
 
     <!--  Text — Slate ramp (dark)  -->
-    <SolidColorBrush x:Key="AppTextPrimary"   Color="#F8FAFC" />
+    <SolidColorBrush x:Key="AppTextPrimary" Color="#F8FAFC" />
     <SolidColorBrush x:Key="AppTextSecondary" Color="#CBD5E1" />
-    <SolidColorBrush x:Key="AppTextMuted"     Color="#94A3B8" />
-    <SolidColorBrush x:Key="AppTextOnAccent"  Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AppTextMuted" Color="#94A3B8" />
+    <SolidColorBrush x:Key="AppTextOnAccent" Color="#FFFFFF" />
 
     <!--  Semantic — price direction (preserved, brightened for dark surfaces)  -->
-    <SolidColorBrush x:Key="AppUp"   Color="#22C55E" />
+    <SolidColorBrush x:Key="AppUp" Color="#22C55E" />
     <SolidColorBrush x:Key="AppDown" Color="#EF4444" />
     <SolidColorBrush x:Key="AppFlat" Color="#94A3B8" />
 
@@ -55,16 +55,16 @@
     <SolidColorBrush x:Key="AppDanger" Color="#EF4444" />
 
     <!--  Brand primary — Dark variant (UX/UI guideline §2 dark.primary)  -->
-    <SolidColorBrush x:Key="AppAccent"       Color="#3B82F6" />
-    <SolidColorBrush x:Key="AppAccentHover"  Color="#60A5FA" />
+    <SolidColorBrush x:Key="AppAccent" Color="#3B82F6" />
+    <SolidColorBrush x:Key="AppAccentHover" Color="#60A5FA" />
     <SolidColorBrush x:Key="AppAccentSubtle" Color="#1E3A5F" />
-    <SolidColorBrush x:Key="AppAccentSoft"   Color="#1E3A5F" />
-    <SolidColorBrush x:Key="AppAccentText"   Color="#93C5FD" />
+    <SolidColorBrush x:Key="AppAccentSoft" Color="#1E3A5F" />
+    <SolidColorBrush x:Key="AppAccentText" Color="#93C5FD" />
 
     <!--  Brand accent — Gold (dark variant)  -->
-    <SolidColorBrush x:Key="AppGold"        Color="#E6C27A" />
-    <SolidColorBrush x:Key="AppGoldHover"   Color="#F0D397" />
-    <SolidColorBrush x:Key="AppGoldSubtle"  Color="#3D3320" />
+    <SolidColorBrush x:Key="AppGold" Color="#E6C27A" />
+    <SolidColorBrush x:Key="AppGoldHover" Color="#F0D397" />
+    <SolidColorBrush x:Key="AppGoldSubtle" Color="#3D3320" />
 
     <!--
         ════════════════════════════════════════════════════════════════
@@ -73,46 +73,46 @@
         full rationale; values are tuned for dark backgrounds (lighter
         text-on-accent variants for readability).
     -->
-    <SolidColorBrush x:Key="SystemAccentColorPrimaryBrush"   Color="#3B82F6" />
+    <SolidColorBrush x:Key="SystemAccentColorPrimaryBrush" Color="#3B82F6" />
     <SolidColorBrush x:Key="SystemAccentColorSecondaryBrush" Color="#60A5FA" />
-    <SolidColorBrush x:Key="SystemAccentColorTertiaryBrush"  Color="#2563EB" />
+    <SolidColorBrush x:Key="SystemAccentColorTertiaryBrush" Color="#2563EB" />
 
-    <SolidColorBrush x:Key="AccentFillColorDefaultBrush"   Color="#3B82F6" />
+    <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#3B82F6" />
     <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="#60A5FA" />
-    <SolidColorBrush x:Key="AccentFillColorTertiaryBrush"  Color="#2563EB" />
-    <SolidColorBrush x:Key="AccentFillColorDisabledBrush"  Color="#334155" />
+    <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="#2563EB" />
+    <SolidColorBrush x:Key="AccentFillColorDisabledBrush" Color="#334155" />
 
-    <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush"   Color="#93C5FD" />
+    <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush" Color="#93C5FD" />
     <SolidColorBrush x:Key="AccentTextFillColorSecondaryBrush" Color="#BFDBFE" />
-    <SolidColorBrush x:Key="AccentTextFillColorTertiaryBrush"  Color="#60A5FA" />
-    <SolidColorBrush x:Key="AccentTextFillColorDisabledBrush"  Color="#64748B" />
+    <SolidColorBrush x:Key="AccentTextFillColorTertiaryBrush" Color="#60A5FA" />
+    <SolidColorBrush x:Key="AccentTextFillColorDisabledBrush" Color="#64748B" />
 
-    <SolidColorBrush x:Key="TextOnAccentFillColorPrimaryBrush"      Color="#FFFFFF" />
-    <SolidColorBrush x:Key="TextOnAccentFillColorSecondaryBrush"    Color="#E6FFFFFF" />
-    <SolidColorBrush x:Key="TextOnAccentFillColorDisabledBrush"     Color="#88FFFFFF" />
+    <SolidColorBrush x:Key="TextOnAccentFillColorPrimaryBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="TextOnAccentFillColorSecondaryBrush" Color="#E6FFFFFF" />
+    <SolidColorBrush x:Key="TextOnAccentFillColorDisabledBrush" Color="#88FFFFFF" />
     <SolidColorBrush x:Key="TextOnAccentFillColorSelectedTextBrush" Color="#FFFFFF" />
 
     <!--  Wpf.Ui Primary button (Appearance="Primary") binds these directly  -->
-    <SolidColorBrush x:Key="AccentButtonBackground"            Color="#3B82F6" />
+    <SolidColorBrush x:Key="AccentButtonBackground" Color="#3B82F6" />
     <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#60A5FA" />
-    <SolidColorBrush x:Key="AccentButtonBackgroundPressed"     Color="#2563EB" />
-    <SolidColorBrush x:Key="AccentButtonBackgroundDisabled"    Color="#334155" />
-    <SolidColorBrush x:Key="AccentButtonForeground"            Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#2563EB" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#334155" />
+    <SolidColorBrush x:Key="AccentButtonForeground" Color="#FFFFFF" />
     <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="AccentButtonForegroundPressed"     Color="#E6FFFFFF" />
-    <SolidColorBrush x:Key="AccentButtonForegroundDisabled"    Color="#88FFFFFF" />
-    <SolidColorBrush x:Key="AccentButtonBorderBrushPressed"    Color="#2563EB" />
+    <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#E6FFFFFF" />
+    <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#88FFFFFF" />
+    <SolidColorBrush x:Key="AccentButtonBorderBrushPressed" Color="#2563EB" />
     <SolidColorBrush x:Key="AccentControlElevationBorderBrush" Color="#1E3A5F" />
 
     <!--  DataGrid  -->
     <SolidColorBrush x:Key="AppSelectedRow" Color="#1E3A5F" />
-    <SolidColorBrush x:Key="AppGridLines"   Color="#334155" />
+    <SolidColorBrush x:Key="AppGridLines" Color="#334155" />
 
     <!--  Modal overlay  -->
     <SolidColorBrush x:Key="AppModalOverlay" Color="#88000000" />
 
     <!--  Error banner  -->
-    <SolidColorBrush x:Key="AppErrorBg"     Color="#3B1F1F" />
+    <SolidColorBrush x:Key="AppErrorBg" Color="#3B1F1F" />
     <SolidColorBrush x:Key="AppErrorBorder" Color="#EF4444" />
 
     <!--  Legacy aliases  -->

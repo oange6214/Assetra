@@ -2,55 +2,55 @@
     x:Class="Assetra.WPF.Controls.SearchBox"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     mc:Ignorable="d">
 
-  <!--
+    <!--
         Outer filter bar — 獨立模式時有 AppSurface 背景 + 底線分隔；
         IsInline=True 時移除這些額外 chrome，只留核心輸入樣式，方便嵌進既有工具列。
     -->
-  <Border>
-    <Border.Style>
-      <Style TargetType="Border">
-        <Setter Property="Padding" Value="12,6" />
-        <Setter Property="Background" Value="{DynamicResource AppSurface}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
-        <Setter Property="BorderThickness" Value="0,0,0,1" />
-        <Style.Triggers>
-          <DataTrigger Binding="{Binding IsInline, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-          </DataTrigger>
-        </Style.Triggers>
-      </Style>
-    </Border.Style>
-    <DockPanel>
-      <!--
+    <Border>
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Padding" Value="12,6" />
+                <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+                <Setter Property="BorderThickness" Value="0,0,0,1" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsInline, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <DockPanel>
+            <!--
                 Optional right-side slot (e.g. "＋ 新增現金" button). Sits flush with the search
                 input's right edge via DockPanel.Dock="Right" + left margin for breathing room.
             -->
-      <ContentPresenter
+            <ContentPresenter
                 Margin="8,0,0,0"
                 VerticalAlignment="Center"
                 Content="{Binding RightContent, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 DockPanel.Dock="Right" />
 
-      <ui:TextBox
-                ClearButtonEnabled="True"
+            <ui:TextBox
                 MinHeight="34"
+                ClearButtonEnabled="True"
                 FontFamily="{StaticResource FontBase}"
                 FontSize="{StaticResource FontSizeSm}"
                 PlaceholderText="{Binding Placeholder, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}">
-        <ui:TextBox.Icon>
-          <ui:IconSourceElement>
-            <ui:SymbolIconSource Symbol="Search24" />
-          </ui:IconSourceElement>
-        </ui:TextBox.Icon>
-      </ui:TextBox>
-    </DockPanel>
-  </Border>
+                <ui:TextBox.Icon>
+                    <ui:IconSourceElement>
+                        <ui:SymbolIconSource Symbol="Search24" />
+                    </ui:IconSourceElement>
+                </ui:TextBox.Icon>
+            </ui:TextBox>
+        </DockPanel>
+    </Border>
 </UserControl>

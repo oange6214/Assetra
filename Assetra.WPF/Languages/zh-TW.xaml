@@ -887,6 +887,11 @@
     <sys:String x:Key="Recurring.Title">訂閱與待確認排程</sys:String>
     <sys:String x:Key="Recurring.Tab.Subscriptions">訂閱項目</sys:String>
     <sys:String x:Key="Recurring.Tab.Pending">待確認</sys:String>
+    <sys:String x:Key="Recurring.SubscriptionCount">訂閱數</sys:String>
+    <sys:String x:Key="Recurring.EnabledCount">啟用中</sys:String>
+    <sys:String x:Key="Recurring.PendingCount">待確認</sys:String>
+    <sys:String x:Key="Recurring.Subscriptions.Hint">管理固定週期的收入、支出與轉入轉出，到期時自動寫入或先加入待確認。</sys:String>
+    <sys:String x:Key="Recurring.Pending.Hint">檢查排程產生的待確認項目，確認後會寫入交易記錄。</sys:String>
     <sys:String x:Key="Recurring.Run">立即結算</sys:String>
     <sys:String x:Key="Recurring.Run.Status">已套用 {0} 筆，新增 {1} 筆待確認</sys:String>
     <sys:String x:Key="Recurring.AddForm.Title">新增訂閱項目</sys:String>
@@ -899,9 +904,12 @@
     <sys:String x:Key="Recurring.Field.StartDate">開始日期</sys:String>
     <sys:String x:Key="Recurring.Field.Mode">處理方式</sys:String>
     <sys:String x:Key="Recurring.Field.Note">備註</sys:String>
+    <sys:String x:Key="Recurring.NextDue">下次到期</sys:String>
     <sys:String x:Key="Recurring.Add">新增訂閱</sys:String>
     <sys:String x:Key="Recurring.Empty">尚無訂閱排程</sys:String>
+    <sys:String x:Key="Recurring.Empty.Hint">新增房租、保費、薪資或其他固定週期項目，Assetra 會依排程產生交易。</sys:String>
     <sys:String x:Key="Recurring.Pending.Empty">沒有待處理的項目</sys:String>
+    <sys:String x:Key="Recurring.Pending.Empty.Hint">按「立即結算」可檢查目前是否有到期排程。</sys:String>
     <sys:String x:Key="Recurring.NameHint">名稱</sys:String>
     <sys:String x:Key="Recurring.AmountHint">金額</sys:String>
     <sys:String x:Key="Recurring.IntervalHint">每 N 個頻率單位重複一次</sys:String>
