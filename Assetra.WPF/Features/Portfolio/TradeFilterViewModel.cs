@@ -41,11 +41,14 @@ public partial class TradeFilterViewModel : ObservableObject, IDisposable
         ArgumentNullException.ThrowIfNull(localization);
         _getTrades = getTrades;
         _localization = localization;
+        TradeTypeFilters = new ReadOnlyObservableCollection<TradeTypeFilterItem>(_tradeTypeFilters);
+        TradeAssetFilters = new ReadOnlyObservableCollection<TradeAssetFilterItem>(_tradeAssetFilters);
     }
 
     // ── Type filter ──────────────────────────────────────────────────────────
 
-    public ObservableCollection<TradeTypeFilterItem> TradeTypeFilters { get; } = [];
+    private readonly ObservableCollection<TradeTypeFilterItem> _tradeTypeFilters = [];
+    public ReadOnlyObservableCollection<TradeTypeFilterItem> TradeTypeFilters { get; }
 
     [ObservableProperty] private string _tradeTypeFiltersSearch = string.Empty;
 
@@ -71,7 +74,8 @@ public partial class TradeFilterViewModel : ObservableObject, IDisposable
 
     // ── Asset filter ─────────────────────────────────────────────────────────
 
-    public ObservableCollection<TradeAssetFilterItem> TradeAssetFilters { get; } = [];
+    private readonly ObservableCollection<TradeAssetFilterItem> _tradeAssetFilters = [];
+    public ReadOnlyObservableCollection<TradeAssetFilterItem> TradeAssetFilters { get; }
 
     [ObservableProperty] private string _tradeAssetFiltersSearch = string.Empty;
 
@@ -359,7 +363,7 @@ public partial class TradeFilterViewModel : ObservableObject, IDisposable
         {
             var item = new TradeTypeFilterItem(k, Label(k));
             item.PropertyChanged += OnTradeTypeFilterItemChanged;
-            TradeTypeFilters.Add(item);
+            _tradeTypeFilters.Add(item);
         }
         TradeTypeFiltersView = CollectionViewSource.GetDefaultView(TradeTypeFilters);
         TradeTypeFiltersView.Filter = o =>
@@ -418,7 +422,7 @@ public partial class TradeFilterViewModel : ObservableObject, IDisposable
             if (!desiredSymbols.Contains(TradeAssetFilters[i].Symbol))
             {
                 TradeAssetFilters[i].PropertyChanged -= OnTradeAssetFilterItemChanged;
-                TradeAssetFilters.RemoveAt(i);
+                _tradeAssetFilters.RemoveAt(i);
             }
         }
 
@@ -431,7 +435,7 @@ public partial class TradeFilterViewModel : ObservableObject, IDisposable
             {
                 var item = new TradeAssetFilterItem(sym, catKey, catOrder, catLabel);
                 item.PropertyChanged += OnTradeAssetFilterItemChanged;
-                TradeAssetFilters.Add(item);
+                _tradeAssetFilters.Add(item);
             }
         }
 
@@ -448,7 +452,7 @@ public partial class TradeFilterViewModel : ObservableObject, IDisposable
                 }
             }
             if (currentIndex != i)
-                TradeAssetFilters.Move(currentIndex, i);
+                _tradeAssetFilters.Move(currentIndex, i);
         }
 
         if (TradeAssetFiltersView is null)

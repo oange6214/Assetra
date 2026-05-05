@@ -148,6 +148,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _categoryRepository = deps.CategoryRepository;
         _ruleRepository = deps.AutoCategorizationRuleRepository;
 
+        ExpenseCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_expenseCategories);
+        IncomeCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_incomeCategories);
+
         // 啟動時載入分類與自動規則快照（失敗不影響其它功能）
         if (_categoryRepository is not null || _ruleRepository is not null)
             _ = LoadCategoriesAsync();

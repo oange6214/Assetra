@@ -16,13 +16,16 @@ namespace Assetra.WPF.Features.Portfolio.SubViewModels;
 /// </summary>
 public partial class TransactionDialogViewModel
 {
+    private readonly ObservableCollection<CategoryRowViewModel> _expenseCategories = [];
+    private readonly ObservableCollection<CategoryRowViewModel> _incomeCategories = [];
+
     /// <summary>支出分類（已過濾封存與排序）。供 CashFlow 等支出表單下拉選用。</summary>
-    public ObservableCollection<CategoryRowViewModel> ExpenseCategories { get; } = [];
+    public ReadOnlyObservableCollection<CategoryRowViewModel> ExpenseCategories { get; }
 
     /// <summary>收入分類（已過濾封存與排序）。供 Income 表單下拉選用。</summary>
-    public ObservableCollection<CategoryRowViewModel> IncomeCategories { get; } = [];
+    public ReadOnlyObservableCollection<CategoryRowViewModel> IncomeCategories { get; }
 
-    public ObservableCollection<CategoryRowViewModel> CashFlowCategories =>
+    public ReadOnlyObservableCollection<CategoryRowViewModel> CashFlowCategories =>
         TxType == "deposit" ? IncomeCategories : ExpenseCategories;
 
     [ObservableProperty] private Guid? _txCategoryId;
@@ -41,13 +44,13 @@ public partial class TransactionDialogViewModel
                     .OrderBy(x => x.SortOrder)
                     .ToList();
                 _categorySnapshot = cats;
-                ExpenseCategories.Clear();
-                IncomeCategories.Clear();
+                _expenseCategories.Clear();
+                _incomeCategories.Clear();
                 foreach (var c in cats)
                 {
                     var row = CategoryRowViewModel.FromModel(c);
-                    if (c.Kind == CategoryKind.Expense) ExpenseCategories.Add(row);
-                    else IncomeCategories.Add(row);
+                    if (c.Kind == CategoryKind.Expense) _expenseCategories.Add(row);
+                    else _incomeCategories.Add(row);
                 }
             }
             if (_ruleRepository is not null)
