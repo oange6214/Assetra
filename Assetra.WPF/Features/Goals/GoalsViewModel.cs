@@ -184,11 +184,11 @@ public sealed partial class GoalsViewModel : ObservableObject
             {
                 await _repository.UpdateAsync(goal).ConfigureAwait(true);
                 var existing = Goals.FirstOrDefault(g => g.Id == id);
-            if (existing is not null)
-            {
-                existing.Goal = goal;
-                RefreshGoalSummary();
-            }
+                if (existing is not null)
+                {
+                    existing.Goal = goal;
+                    RefreshGoalSummary();
+                }
             }
             else
             {

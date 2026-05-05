@@ -209,25 +209,28 @@ public sealed partial class ReportsViewModel : ObservableObject
         ClearReportDetails();
         try
         {
-            Report = await _service.BuildAsync(Year, Month).ConfigureAwait(true);
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-            Report = null;
-            ClearReportDetails();
-            IsLoading = false;
-            return;
-        }
+            try
+            {
+                Report = await _service.BuildAsync(Year, Month).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+                Report = null;
+                ClearReportDetails();
+                return;
+            }
 
-        try
-        {
-            await LoadStatementsAsync().ConfigureAwait(true);
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-            ClearReportDetails();
+            try
+            {
+                await LoadStatementsAsync().ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+                Report = null;
+                ClearReportDetails();
+            }
         }
         finally
         {
@@ -300,7 +303,7 @@ public sealed partial class ReportsViewModel : ObservableObject
         }
 
         if (detailErrors.Count > 0)
-            ErrorMessage = string.Join(" / ", detailErrors.Distinct());
+            throw new InvalidOperationException(string.Join(" / ", detailErrors.Distinct()));
     }
 
     private void ClearReportDetails()

@@ -15,21 +15,42 @@ namespace Assetra.Core.Models;
 /// of <c>IBalanceQueryService</c> / repositories / display layer is tracked separately.
 /// </para>
 /// <para>
-/// Currency code is normalised to upper-case at construction so equality is case-insensitive
-/// across "twd" / "TWD".
+/// Currency code is normalised to upper-case via the <c>init</c> setter so equality is
+/// case-insensitive across "twd" / "TWD" — and the same normalisation applies to
+/// <c>with { Currency = ... }</c> rewrites.
+/// </para>
+/// <para>
+/// <b>Equality semantics:</b> the record-synthesized <c>==</c> / <c>Equals</c> are
+/// <i>structural</i> — two <c>Money</c> values with different currencies are unequal,
+/// silently. Ordering operators (<c>&lt;</c>, <c>&gt;</c>, etc.) and arithmetic operators
+/// throw <see cref="InvalidOperationException"/> on currency mismatch. This split is
+/// deliberate: dictionary keys / <c>Distinct()</c> need structural equality to work
+/// without surprise, while ordering and arithmetic must never silently mix currencies.
 /// </para>
 /// </remarks>
-public readonly record struct Money
+public readonly record struct Money : IComparable<Money>
 {
-    public decimal Amount { get; }
-    public string Currency { get; }
+    private readonly string _currency;
+
+    public decimal Amount { get; init; }
+
+    public string Currency
+    {
+        get => _currency;
+        init
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Currency is required.", nameof(value));
+            _currency = value.Trim().ToUpperInvariant();
+        }
+    }
 
     public Money(decimal amount, string currency)
     {
         if (string.IsNullOrWhiteSpace(currency))
             throw new ArgumentException("Currency is required.", nameof(currency));
         Amount = amount;
-        Currency = currency.Trim().ToUpperInvariant();
+        _currency = currency.Trim().ToUpperInvariant();
     }
 
     public static Money Zero(string currency) => new(0m, currency);
@@ -69,6 +90,18 @@ public readonly record struct Money
     public static bool operator <=(Money a, Money b) { EnsureSameCurrency(a, b); return a.Amount <= b.Amount; }
     public static bool operator >=(Money a, Money b) { EnsureSameCurrency(a, b); return a.Amount >= b.Amount; }
 
+    /// <summary>
+    /// Ordered comparison enforcing same-currency invariant. Throws
+    /// <see cref="InvalidOperationException"/> on currency mismatch — matches the
+    /// behaviour of <c>&lt;</c>/<c>&gt;</c> so that <c>List&lt;Money&gt;.Sort()</c>,
+    /// <c>OrderBy</c>, and <c>SortedSet</c> consistently fail loudly on mixed currencies.
+    /// </summary>
+    public int CompareTo(Money other)
+    {
+        EnsureSameCurrency(this, other);
+        return Amount.CompareTo(other.Amount);
+    }
+
     private static void EnsureSameCurrency(Money a, Money b)
     {
         if (!string.Equals(a.Currency, b.Currency, StringComparison.Ordinal))
@@ -78,5 +111,8 @@ public readonly record struct Money
     }
 
     public override string ToString() =>
-        $"{Amount.ToString(CultureInfo.InvariantCulture)} {Currency}";
+        ToString(format: null, formatProvider: CultureInfo.InvariantCulture);
+
+    public string ToString(string? format, IFormatProvider? formatProvider) =>
+        $"{Amount.ToString(format, formatProvider)} {Currency}";
 }

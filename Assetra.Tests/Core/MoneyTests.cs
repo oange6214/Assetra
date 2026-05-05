@@ -144,4 +144,84 @@ public sealed class MoneyTests
     {
         Assert.Equal("100 TWD", new Money(100m, "TWD").ToString());
     }
+
+    [Fact]
+    public void ToString_WithFormat_ProducesFormattedAmount()
+    {
+        var m = new Money(1234567.89m, "TWD");
+        Assert.Equal("1,234,567.89 TWD", m.ToString("N2", System.Globalization.CultureInfo.InvariantCulture));
+    }
+
+    [Fact]
+    public void With_RewritesCurrency_AndStillNormalizes()
+    {
+        var m = new Money(50m, "TWD") with { Currency = "usd" };
+
+        Assert.Equal("USD", m.Currency);
+        Assert.Equal(new Money(50m, "USD"), m);
+    }
+
+    [Fact]
+    public void With_RewritesCurrencyToBlank_Throws()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            _ = new Money(50m, "TWD") with { Currency = "" });
+    }
+
+    [Fact]
+    public void Equality_DifferentCurrency_ReturnsFalseStructurally()
+    {
+        var twd = new Money(100m, "TWD");
+        var usd = new Money(100m, "USD");
+
+        Assert.NotEqual(twd, usd);
+        Assert.False(twd == usd);
+        Assert.True(twd != usd);
+    }
+
+    [Fact]
+    public void CompareTo_DifferentCurrency_Throws()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            new Money(100m, "TWD").CompareTo(new Money(100m, "USD")));
+    }
+
+    [Fact]
+    public void CompareTo_SameCurrency_OrdersByAmount()
+    {
+        var ten = new Money(10m, "TWD");
+        var twenty = new Money(20m, "TWD");
+
+        Assert.True(ten.CompareTo(twenty) < 0);
+        Assert.True(twenty.CompareTo(ten) > 0);
+        Assert.Equal(0, ten.CompareTo(new Money(10m, "TWD")));
+    }
+
+    [Fact]
+    public void Sort_MixedCurrency_Throws()
+    {
+        var list = new List<Money>
+        {
+            new(20m, "TWD"),
+            new(10m, "USD"),
+            new(15m, "TWD"),
+        };
+
+        Assert.Throws<InvalidOperationException>(list.Sort);
+    }
+
+    [Fact]
+    public void Sort_SingleCurrency_OrdersAscending()
+    {
+        var list = new List<Money>
+        {
+            new(20m, "TWD"),
+            new(10m, "TWD"),
+            new(15m, "TWD"),
+        };
+
+        list.Sort();
+
+        Assert.Equal(new[] { 10m, 15m, 20m }, list.Select(m => m.Amount));
+    }
 }
