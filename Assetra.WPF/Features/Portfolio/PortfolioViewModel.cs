@@ -31,7 +31,7 @@ public sealed record CurrencyOption(string Code, string Display)
     public override string ToString() => Display;
 }
 
-public partial class PortfolioViewModel : ObservableObject, IDisposable
+public partial class PortfolioViewModel : ObservableObject, IDisposable, Contracts.IPortfolioPositionFeed
 {
     private readonly IStockSearchService _search;
     private readonly IAppSettingsService? _settingsService;
@@ -54,6 +54,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private readonly CompositeDisposable _disposables = new();
 
     public ObservableCollection<PortfolioRowViewModel> Positions { get; } = [];
+    IReadOnlyList<PortfolioRowViewModel> Contracts.IPortfolioPositionFeed.Positions => Positions;
+
     public ObservableCollection<TradeRowViewModel> Trades { get; } = [];
     public ObservableCollection<CashAccountRowViewModel> CashAccounts { get; } = [];
     public ObservableCollection<LiabilityRowViewModel> Liabilities { get; } = [];

@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using Assetra.Core.Interfaces;
 using Assetra.WPF.Features.Portfolio;
+using Assetra.WPF.Features.Portfolio.Contracts;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -13,7 +14,8 @@ namespace Assetra.WPF.Features.Portfolio.Controls;
 
 public sealed partial class AllocationViewModel : ObservableObject, IDisposable
 {
-    private readonly PortfolioViewModel _portfolio;
+    private readonly IPortfolioPositionFeed _portfolio;
+    private readonly INotifyCollectionChanged? _positionsObservable;
     private readonly IAppSettingsService? _settings;
 
     // Color palette (assigned by order of appearance) + neutral cash brush
@@ -149,18 +151,22 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     // the target-percentage dictionary lookup); only the display Name varies.
     private string CashLabel => L("Allocation.Cash", "現金");
 
-    // Ctor
+    // Ctor — consumes IPortfolioPositionFeed (PortfolioViewModel implements it)
+    // so this VM can be unit-tested against a stub feed without constructing
+    // the full portfolio dependency graph (L3 decoupling).
     public AllocationViewModel(
-        PortfolioViewModel portfolio,
+        IPortfolioPositionFeed portfolio,
         IAppSettingsService? settings = null,
         ILocalizationService? localization = null)
     {
+        ArgumentNullException.ThrowIfNull(portfolio);
         _portfolio = portfolio;
         _settings = settings;
         _localization = localization;
 
-        // Subscribe to live collection changes
-        portfolio.Positions.CollectionChanged += OnCollectionChanged;
+        _positionsObservable = portfolio.Positions as INotifyCollectionChanged;
+        if (_positionsObservable is not null)
+            _positionsObservable.CollectionChanged += OnCollectionChanged;
         portfolio.PropertyChanged += OnPortfolioPropertyChanged;
 
         // Subscribe to each existing position's property changes
@@ -176,7 +182,7 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
 
     private void OnPortfolioPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(PortfolioViewModel.TotalCash))
+        if (e.PropertyName == nameof(IPortfolioPositionFeed.TotalCash))
             Rebuild();
     }
 
@@ -366,11 +372,11 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         _portfolio.PropertyChanged -= OnPortfolioPropertyChanged;
 
         // C1 leak fix: also unsubscribe Positions.CollectionChanged and the
-        // per-row PropertyChanged handlers attached at construction (line 159)
-        // and via OnCollectionChanged (line 186). Previously these stayed
-        // subscribed forever, keeping every recreated AllocationViewModel
-        // alive on every quote tick.
-        _portfolio.Positions.CollectionChanged -= OnCollectionChanged;
+        // per-row PropertyChanged handlers attached at construction.
+        // Previously these stayed subscribed forever, keeping every recreated
+        // AllocationViewModel alive on every quote tick.
+        if (_positionsObservable is not null)
+            _positionsObservable.CollectionChanged -= OnCollectionChanged;
         foreach (var row in _portfolio.Positions)
             row.PropertyChanged -= OnRowPropertyChanged;
     }
