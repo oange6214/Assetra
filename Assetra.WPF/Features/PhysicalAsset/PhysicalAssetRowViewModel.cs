@@ -9,6 +9,7 @@ public sealed partial class PhysicalAssetRowViewModel : ObservableObject
     public Guid Id { get; }
     public string Name { get; }
     public PhysicalAssetCategory Category { get; }
+    [ObservableProperty] private string _categoryDisplay = string.Empty;
     public string Description { get; }
     public decimal AcquisitionCost { get; }
     public DateOnly AcquisitionDate { get; }
@@ -20,12 +21,13 @@ public sealed partial class PhysicalAssetRowViewModel : ObservableObject
     public decimal UnrealizedGain { get; }
     public decimal UnrealizedGainRate { get; }
 
-    public PhysicalAssetRowViewModel(PhysicalAssetSummary summary)
+    public PhysicalAssetRowViewModel(PhysicalAssetSummary summary, string categoryDisplay)
     {
         var a = summary.Asset;
         Id = a.Id;
         Name = a.Name;
         Category = a.Category;
+        CategoryDisplay = categoryDisplay;
         Description = a.Description;
         AcquisitionCost = a.AcquisitionCost;
         AcquisitionDate = a.AcquisitionDate;

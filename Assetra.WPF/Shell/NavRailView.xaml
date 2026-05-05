@@ -78,7 +78,19 @@
         </DataTemplate>
 
         <DataTemplate x:Key="ImportContentTemplate">
-            <TabControl Background="Transparent" BorderThickness="0">
+            <TabControl
+                Background="Transparent"
+                BorderThickness="0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                VerticalContentAlignment="Stretch">
+                <TabControl.ItemContainerStyle>
+                    <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="{x:Type TabItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                    </Style>
+                </TabControl.ItemContainerStyle>
                 <TabItem Header="{DynamicResource Import.Tab.Import}">
                     <import:ImportView DataContext="{Binding Import}" />
                 </TabItem>
@@ -353,7 +365,12 @@
 
         <!--  ── Active feature view — overlays the (unused) navigation frame ──  -->
         <ui:NavigationView.ContentOverlay>
-            <ContentControl Content="{Binding}">
+            <ContentControl
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                Content="{Binding}">
                 <ContentControl.Style>
                     <Style TargetType="{x:Type ContentControl}">
                         <Setter Property="ContentTemplate" Value="{StaticResource PortfolioContentTemplate}" />

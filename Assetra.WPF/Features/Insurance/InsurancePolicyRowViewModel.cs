@@ -10,6 +10,7 @@ public sealed partial class InsurancePolicyRowViewModel : ObservableObject
     public string Name { get; }
     public string PolicyNumber { get; }
     public InsuranceType Type { get; }
+    [ObservableProperty] private string _typeDisplay = string.Empty;
     public string Insurer { get; }
     public DateOnly StartDate { get; }
     public DateOnly? MaturityDate { get; }
@@ -24,13 +25,14 @@ public sealed partial class InsurancePolicyRowViewModel : ObservableObject
     public InsurancePolicyStatus Status { get; }
     public string? Notes { get; }
 
-    public InsurancePolicyRowViewModel(InsuranceCashValueSummary summary)
+    public InsurancePolicyRowViewModel(InsuranceCashValueSummary summary, string typeDisplay)
     {
         var p = summary.Policy;
         Id = p.Id;
         Name = p.Name;
         PolicyNumber = p.PolicyNumber;
         Type = p.Type;
+        TypeDisplay = typeDisplay;
         Insurer = p.Insurer;
         StartDate = p.StartDate;
         MaturityDate = p.MaturityDate;

@@ -9,6 +9,7 @@ public sealed partial class RetirementRowViewModel : ObservableObject
     public Guid Id { get; }
     public string Name { get; }
     public RetirementAccountType AccountType { get; }
+    [ObservableProperty] private string _accountTypeDisplay = string.Empty;
     public string Provider { get; }
     public decimal Balance { get; }
     public decimal EmployeeContributionRate { get; }
@@ -21,12 +22,13 @@ public sealed partial class RetirementRowViewModel : ObservableObject
     public string? Notes { get; }
     public decimal LatestYearContribution { get; }
 
-    public RetirementRowViewModel(RetirementAccountSummary summary)
+    public RetirementRowViewModel(RetirementAccountSummary summary, string accountTypeDisplay)
     {
         var a = summary.Account;
         Id = a.Id;
         Name = a.Name;
         AccountType = a.AccountType;
+        AccountTypeDisplay = accountTypeDisplay;
         Provider = a.Provider;
         Balance = a.Balance;
         EmployeeContributionRate = a.EmployeeContributionRate;

@@ -34,6 +34,8 @@ public sealed partial class RetirementViewModel : ObservableObject
 
     public bool HasAccounts => Accounts.Count > 0;
     public bool HasNoAccounts => !IsLoading && Accounts.Count == 0;
+    public int AccountCount => Accounts.Count;
+    public decimal TotalLatestYearContribution => Accounts.Sum(static a => a.LatestYearContribution);
 
     // ── Add/Edit form ──
     [ObservableProperty] private string _formName = string.Empty;
@@ -182,6 +184,9 @@ public sealed partial class RetirementViewModel : ObservableObject
     private async Task DeleteAsync(RetirementRowViewModel row)
     {
         await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
+        if (EditingId == row.Id)
+            ClearForm();
+
         await LoadAsync().ConfigureAwait(true);
     }
 
@@ -230,6 +235,8 @@ public sealed partial class RetirementViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(HasAccounts));
         OnPropertyChanged(nameof(HasNoAccounts));
+        OnPropertyChanged(nameof(AccountCount));
+        OnPropertyChanged(nameof(TotalLatestYearContribution));
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e) => RefreshLocalizedAccountTypeText();

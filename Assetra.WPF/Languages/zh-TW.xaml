@@ -555,6 +555,10 @@
     <!--  News  -->
 
     <!--  Alerts  -->
+    <sys:String x:Key="Alerts.Title">警示</sys:String>
+    <sys:String x:Key="Alerts.Count">警示數</sys:String>
+    <sys:String x:Key="Alerts.MonitoringCount">監控中</sys:String>
+    <sys:String x:Key="Alerts.TriggeredCount">已觸發</sys:String>
     <sys:String x:Key="Alerts.Symbol">代號</sys:String>
     <sys:String x:Key="Alerts.Name">名稱</sys:String>
     <sys:String x:Key="Alerts.Condition">條件</sys:String>
@@ -569,8 +573,10 @@
     <sys:String x:Key="Alerts.Cancel">取消</sys:String>
     <sys:String x:Key="Alerts.Empty">尚無警示</sys:String>
     <sys:String x:Key="Alerts.Empty.Hint">設定價格警示，當股價突破或跌破目標價時即時通知</sys:String>
-    <sys:String x:Key="Alerts.Empty.Cta">使用下方表單新增第一個警示</sys:String>
-    <sys:String x:Key="Alerts.AddAlert">＋ 新增警示</sys:String>
+    <sys:String x:Key="Alerts.Empty.Cta">按「新增警示」建立第一個警示</sys:String>
+    <sys:String x:Key="Alerts.AddAlert">新增警示</sys:String>
+    <sys:String x:Key="Alerts.Form.Title">新增警示</sys:String>
+    <sys:String x:Key="Alerts.Form.Hint">輸入代號、觸發條件與目標價，系統會在報價達標時提醒。</sys:String>
     <sys:String x:Key="Alerts.ConditionAbove">突破</sys:String>
     <sys:String x:Key="Alerts.ConditionBelow">跌破</sys:String>
 
@@ -956,6 +962,10 @@
     <!--  Goals / 財務目標  -->
     <sys:String x:Key="Goals.Title">財務目標</sys:String>
     <sys:String x:Key="Goals.Empty">尚未建立任何目標</sys:String>
+    <sys:String x:Key="Goals.Empty.Hint">建立旅遊、購屋、退休或 FIRE 等目標後，這裡會追蹤進度與剩餘金額。</sys:String>
+    <sys:String x:Key="Goals.Count">目標數</sys:String>
+    <sys:String x:Key="Goals.Remaining">剩餘金額</sys:String>
+    <sys:String x:Key="Goals.OverallProgress">整體進度</sys:String>
     <sys:String x:Key="Goals.Add.Title">新增目標</sys:String>
     <sys:String x:Key="Goals.Add.Name">名稱</sys:String>
     <sys:String x:Key="Goals.Add.Target">目標金額</sys:String>
@@ -963,6 +973,7 @@
     <sys:String x:Key="Goals.Add.Notes">備註</sys:String>
     <sys:String x:Key="Goals.Add.Deadline">期限</sys:String>
     <sys:String x:Key="Goals.Add.Submit">新增</sys:String>
+    <sys:String x:Key="Goals.Form.Hint">設定目標金額、目前金額與期限，用來追蹤達成進度。</sys:String>
     <sys:String x:Key="Goals.Edit.Title">編輯目標</sys:String>
     <sys:String x:Key="Goals.Edit.Submit">儲存</sys:String>
     <sys:String x:Key="Goals.Edit.Cancel">取消</sys:String>
@@ -1029,6 +1040,7 @@
     <sys:String x:Key="Reports.Export.Status.Empty">目前沒有可匯出的資料。</sys:String>
     <sys:String x:Key="Reports.Export.Status.Success">已匯出：{0}</sys:String>
     <sys:String x:Key="Reports.Export.Status.Failed">匯出失敗：{0}</sys:String>
+    <sys:String x:Key="Reports.Statement.Empty">目前沒有可顯示的報表資料。</sys:String>
     <sys:String x:Key="Reports.Income.Total">收入合計</sys:String>
     <sys:String x:Key="Reports.Expense.Total">支出合計</sys:String>
     <sys:String x:Key="Reports.Net.Total">淨額</sys:String>
@@ -1068,7 +1080,8 @@
 
     <!--  RealEstate  -->
     <sys:String x:Key="RealEstate.Title">不動產</sys:String>
-    <sys:String x:Key="RealEstate.TotalEquity">總淨值：</sys:String>
+    <sys:String x:Key="RealEstate.TotalEquity">總淨值</sys:String>
+    <sys:String x:Key="RealEstate.Count">物件數</sys:String>
     <sys:String x:Key="RealEstate.Column.Name">名稱</sys:String>
     <sys:String x:Key="RealEstate.Column.Address">地址</sys:String>
     <sys:String x:Key="RealEstate.Column.CurrentValue">目前市值</sys:String>
@@ -1080,6 +1093,7 @@
     <sys:String x:Key="RealEstate.Form.Name">名稱</sys:String>
     <sys:String x:Key="RealEstate.Form.Address">地址</sys:String>
     <sys:String x:Key="RealEstate.Form.PurchasePrice">購入金額</sys:String>
+    <sys:String x:Key="RealEstate.Form.PurchaseDate">購入日期</sys:String>
     <sys:String x:Key="RealEstate.Form.CurrentValue">目前市值</sys:String>
     <sys:String x:Key="RealEstate.Form.MortgageBalance">房貸餘額</sys:String>
     <sys:String x:Key="RealEstate.Form.Currency">幣別</sys:String>
@@ -1091,7 +1105,9 @@
 
     <!--  Insurance  -->
     <sys:String x:Key="Insurance.Title">保險保單</sys:String>
-    <sys:String x:Key="Insurance.TotalCashValue">總現金價值：</sys:String>
+    <sys:String x:Key="Insurance.TotalCashValue">總現金價值</sys:String>
+    <sys:String x:Key="Insurance.TotalAnnualPremium">年繳保費</sys:String>
+    <sys:String x:Key="Insurance.Count">保單數</sys:String>
     <sys:String x:Key="Insurance.Column.Name">保單名稱</sys:String>
     <sys:String x:Key="Insurance.Column.PolicyNumber">保單號碼</sys:String>
     <sys:String x:Key="Insurance.Column.Type">險種</sys:String>
@@ -1124,7 +1140,9 @@
 
     <!--  v0.24 退休專戶  -->
     <sys:String x:Key="Retirement.Title">退休專戶</sys:String>
-    <sys:String x:Key="Retirement.TotalBalance">總餘額：</sys:String>
+    <sys:String x:Key="Retirement.TotalBalance">總餘額</sys:String>
+    <sys:String x:Key="Retirement.TotalLatestContribution">近一年提撥</sys:String>
+    <sys:String x:Key="Retirement.Count">帳戶數</sys:String>
     <sys:String x:Key="Retirement.Column.Name">名稱</sys:String>
     <sys:String x:Key="Retirement.Column.AccountType">類型</sys:String>
     <sys:String x:Key="Retirement.Column.Provider">提供機構</sys:String>
@@ -1162,8 +1180,9 @@
 
     <!--  v0.24 實物資產  -->
     <sys:String x:Key="PhysicalAsset.Title">實物資產</sys:String>
-    <sys:String x:Key="PhysicalAsset.TotalValue">總市值：</sys:String>
-    <sys:String x:Key="PhysicalAsset.TotalGain">未實現損益：</sys:String>
+    <sys:String x:Key="PhysicalAsset.TotalValue">總市值</sys:String>
+    <sys:String x:Key="PhysicalAsset.TotalGain">未實現損益</sys:String>
+    <sys:String x:Key="PhysicalAsset.Count">項目數</sys:String>
     <sys:String x:Key="PhysicalAsset.Column.Name">名稱</sys:String>
     <sys:String x:Key="PhysicalAsset.Column.Category">類別</sys:String>
     <sys:String x:Key="PhysicalAsset.Column.Cost">購入成本</sys:String>
@@ -1205,6 +1224,7 @@
     <sys:String x:Key="Fire.Result.FireNumber">FIRE 目標金額</sys:String>
     <sys:String x:Key="Fire.Result.YearsToFire">所需年數</sys:String>
     <sys:String x:Key="Fire.Result.Projected">達標時淨資產</sys:String>
+    <sys:String x:Key="Fire.Empty.Title">尚未計算 FIRE</sys:String>
     <sys:String x:Key="Fire.Result.NotCalculated">填入參數後點擊「計算」以查看 FIRE 數據</sys:String>
     <sys:String x:Key="Fire.Saved">已同步到財務目標</sys:String>
     <sys:String x:Key="Fire.Error.NetWorthInvalid">目前淨資產格式錯誤</sys:String>
@@ -1212,6 +1232,7 @@
     <sys:String x:Key="Fire.Error.SavingsInvalid">年儲蓄格式錯誤</sys:String>
     <sys:String x:Key="Fire.Error.ReturnInvalid">預期報酬率格式錯誤</sys:String>
     <sys:String x:Key="Fire.Error.WithdrawalInvalid">提領率格式錯誤</sys:String>
+    <sys:String x:Key="Fire.Path.Title">資產路徑</sys:String>
     <sys:String x:Key="Fire.Path.Year">年度</sys:String>
     <sys:String x:Key="Fire.Path.NetWorth">淨資產</sys:String>
 
@@ -1229,6 +1250,7 @@
     <sys:String x:Key="MonteCarlo.Result.P10">10 百分位餘額</sys:String>
     <sys:String x:Key="MonteCarlo.Result.Median">中位數餘額</sys:String>
     <sys:String x:Key="MonteCarlo.Result.P90">90 百分位餘額</sys:String>
+    <sys:String x:Key="MonteCarlo.Empty.Title">尚未執行模擬</sys:String>
     <sys:String x:Key="MonteCarlo.Result.NotCalculated">填入參數後點擊「執行」以查看模擬結果</sys:String>
     <sys:String x:Key="MonteCarlo.Error.InitialInvalid">起始餘額格式錯誤</sys:String>
     <sys:String x:Key="MonteCarlo.Error.WithdrawalInvalid">年提領格式錯誤</sys:String>
@@ -1238,6 +1260,7 @@
     <sys:String x:Key="MonteCarlo.Error.YearsMax">年數必須 ≤ {0}</sys:String>
     <sys:String x:Key="MonteCarlo.Error.CountInvalid">模擬次數必須 &gt; 0</sys:String>
     <sys:String x:Key="MonteCarlo.Error.CountMax">模擬次數必須 ≤ {0:N0}</sys:String>
+    <sys:String x:Key="MonteCarlo.Path.Title">中位數路徑</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Year">年度</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Median">中位數餘額</sys:String>
 </ResourceDictionary>

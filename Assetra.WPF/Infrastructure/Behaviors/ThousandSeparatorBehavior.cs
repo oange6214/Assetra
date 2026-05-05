@@ -1,6 +1,7 @@
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace Assetra.WPF.Infrastructure.Behaviors;
 
@@ -25,9 +26,20 @@ public static class ThousandSeparatorBehavior
     {
         if (d is not TextBox tb) return;
         if ((bool)e.NewValue)
-            tb.TextChanged += OnTextChanged;
-        else
+        {
             tb.TextChanged -= OnTextChanged;
+            tb.Loaded -= OnLoaded;
+            tb.TextChanged += OnTextChanged;
+            tb.Loaded += OnLoaded;
+
+            if (tb.IsLoaded)
+                _ = tb.Dispatcher.BeginInvoke(() => FormatTextBox(tb), DispatcherPriority.Loaded);
+        }
+        else
+        {
+            tb.TextChanged -= OnTextChanged;
+            tb.Loaded -= OnLoaded;
+        }
     }
 
     // ThreadStatic so re-entrancy is blocked per UI thread without a shared flag.
@@ -37,6 +49,17 @@ public static class ThousandSeparatorBehavior
     private static void OnTextChanged(object sender, TextChangedEventArgs e)
     {
         if (_isFormatting || sender is not TextBox tb) return;
+        FormatTextBox(tb);
+    }
+
+    private static void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        if (_isFormatting || sender is not TextBox tb) return;
+        FormatTextBox(tb);
+    }
+
+    private static void FormatTextBox(TextBox tb)
+    {
         _isFormatting = true;
         try
         {
@@ -44,7 +67,8 @@ public static class ThousandSeparatorBehavior
             if (string.IsNullOrEmpty(text)) return;
 
             // Raw caret = position ignoring commas already in the text.
-            var rawCaret = text[..tb.CaretIndex].Replace(",", "").Length;
+            var caretIndex = Math.Clamp(tb.CaretIndex, 0, text.Length);
+            var rawCaret = text[..caretIndex].Replace(",", "").Length;
 
             var formatted = Format(text);
             if (formatted == text) return;

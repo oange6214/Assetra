@@ -83,6 +83,17 @@ public sealed partial class GoalsViewModel : ObservableObject
 
     public bool HasGoals   => Goals.Count > 0;
     public bool HasNoGoals => IsLoaded && Goals.Count == 0;
+    public int GoalCount => Goals.Count;
+    public decimal TotalTarget => Goals.Sum(goal => goal.Goal.TargetAmount);
+    public decimal TotalCurrent => Goals.Sum(goal => goal.Goal.CurrentAmount);
+    public decimal TotalRemaining => Goals.Sum(goal => Math.Max(0m, goal.Goal.Remaining));
+    public decimal OverallProgressPercent => TotalTarget <= 0m
+        ? 0m
+        : Math.Min(100m, TotalCurrent / TotalTarget * 100m);
+    public string TotalTargetDisplay => FormatAmount(TotalTarget);
+    public string TotalCurrentDisplay => FormatAmount(TotalCurrent);
+    public string TotalRemainingDisplay => FormatAmount(TotalRemaining);
+    public string OverallProgressDisplay => $"{OverallProgressPercent:F1}%";
 
     public GoalsViewModel(
         IFinancialGoalRepository repository,
@@ -95,8 +106,7 @@ public sealed partial class GoalsViewModel : ObservableObject
         _localization = localization;
         Goals.CollectionChanged += (_, _) =>
         {
-            OnPropertyChanged(nameof(HasGoals));
-            OnPropertyChanged(nameof(HasNoGoals));
+            RefreshGoalSummary();
         };
         if (_currency is not null)
             _currency.CurrencyChanged += OnCurrencyChanged;
@@ -172,8 +182,11 @@ public sealed partial class GoalsViewModel : ObservableObject
             {
                 await _repository.UpdateAsync(goal).ConfigureAwait(true);
                 var existing = Goals.FirstOrDefault(g => g.Id == id);
-                if (existing is not null)
-                    existing.Goal = goal;
+            if (existing is not null)
+            {
+                existing.Goal = goal;
+                RefreshGoalSummary();
+            }
             }
             else
             {
@@ -255,6 +268,7 @@ public sealed partial class GoalsViewModel : ObservableObject
         if (existing is not null)
         {
             existing.Goal = goal;
+            RefreshGoalSummary();
             return;
         }
         Goals.Add(new GoalRowViewModel(goal, _currency, _localization));
@@ -334,6 +348,9 @@ public sealed partial class GoalsViewModel : ObservableObject
     {
         foreach (var row in Goals)
             row.RefreshDisplayStrings();
+        OnPropertyChanged(nameof(TotalTargetDisplay));
+        OnPropertyChanged(nameof(TotalCurrentDisplay));
+        OnPropertyChanged(nameof(TotalRemainingDisplay));
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
@@ -342,7 +359,28 @@ public sealed partial class GoalsViewModel : ObservableObject
             row.RefreshDisplayStrings();
         OnPropertyChanged(nameof(FormTitle));
         OnPropertyChanged(nameof(SubmitText));
+        OnPropertyChanged(nameof(TotalTargetDisplay));
+        OnPropertyChanged(nameof(TotalCurrentDisplay));
+        OnPropertyChanged(nameof(TotalRemainingDisplay));
     }
+
+    private void RefreshGoalSummary()
+    {
+        OnPropertyChanged(nameof(HasGoals));
+        OnPropertyChanged(nameof(HasNoGoals));
+        OnPropertyChanged(nameof(GoalCount));
+        OnPropertyChanged(nameof(TotalTarget));
+        OnPropertyChanged(nameof(TotalCurrent));
+        OnPropertyChanged(nameof(TotalRemaining));
+        OnPropertyChanged(nameof(OverallProgressPercent));
+        OnPropertyChanged(nameof(TotalTargetDisplay));
+        OnPropertyChanged(nameof(TotalCurrentDisplay));
+        OnPropertyChanged(nameof(TotalRemainingDisplay));
+        OnPropertyChanged(nameof(OverallProgressDisplay));
+    }
+
+    private string FormatAmount(decimal value) =>
+        _currency?.FormatAmount(value) ?? $"NT${value:N0}";
 
     private string L(string key, string fallback) =>
         _localization?.Get(key, fallback) ?? fallback;

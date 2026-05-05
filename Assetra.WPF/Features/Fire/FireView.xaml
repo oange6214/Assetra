@@ -2,118 +2,240 @@
     x:Class="Assetra.WPF.Features.Fire.FireView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Fire"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FireViewModel}, IsDesignTimeCreatable=False}"
-    d:DesignHeight="700"
-    d:DesignWidth="1000"
+    d:DesignHeight="800"
+    d:DesignWidth="1200"
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
-
-    <UserControl.Resources>
-    </UserControl.Resources>
 
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,0,0,16"
+            VerticalAlignment="Center"
+            FontSize="{StaticResource FontSizeXl}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextPrimary}"
+            Text="{DynamicResource Fire.Title}" />
 
-        <ui:Card Grid.Row="0" Padding="20">
+        <ui:Card Grid.Row="1" Padding="20">
             <StackPanel>
                 <UniformGrid Columns="5" Rows="1">
                     <StackPanel Margin="0,0,16,0">
-                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.NetWorth}" />
-                        <ui:TextBox Text="{Binding CurrentNetWorth, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Fire.Input.NetWorth}" />
+                        <ui:TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            Text="{Binding CurrentNetWorth, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,16,0">
-                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.AnnualExpenses}" />
-                        <ui:TextBox Text="{Binding AnnualExpenses, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Fire.Input.AnnualExpenses}" />
+                        <ui:TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            Text="{Binding AnnualExpenses, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,16,0">
-                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.AnnualSavings}" />
-                        <ui:TextBox Text="{Binding AnnualSavings, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Fire.Input.AnnualSavings}" />
+                        <ui:TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            Text="{Binding AnnualSavings, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,16,0">
-                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.Return}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Fire.Input.Return}" />
                         <ui:TextBox Text="{Binding ExpectedAnnualReturn, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel>
-                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Input.WithdrawalRate}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Fire.Input.WithdrawalRate}" />
                         <ui:TextBox Text="{Binding WithdrawalRate, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </UniformGrid>
-                <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppDanger}" Text="{Binding ErrorMessage}"
-                           Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
-                <StackPanel Margin="0,16,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <ui:Button Margin="0,0,8,0"
-                               Command="{Binding SaveToGoalsCommand}"
-                               Content="{DynamicResource Fire.SaveToGoals}"
-                               Appearance="Secondary" />
-                    <ui:Button Command="{Binding CalculateCommand}" Content="{DynamicResource Fire.Calculate}" Appearance="Primary" />
+
+                <StackPanel
+                    Margin="0,16,0,0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <ui:Button
+                        Margin="0,0,8,0"
+                        Command="{Binding SaveToGoalsCommand}"
+                        Content="{DynamicResource Fire.SaveToGoals}"
+                        Appearance="Secondary" />
+                    <ui:Button Command="{Binding CalculateCommand}" Appearance="Primary">
+                        <TextBlock
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                            Text="{DynamicResource Fire.Calculate}" />
+                    </ui:Button>
                 </StackPanel>
             </StackPanel>
         </ui:Card>
 
-        <ui:Card Grid.Row="1" Margin="0,16,0,0" Padding="20">
-            <Grid>
-                <!--  Empty state — before first Calculate  -->
-                <StackPanel
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
+        <TextBlock
+            Grid.Row="2"
+            Margin="0,12,0,0"
+            Foreground="{DynamicResource AppDanger}"
+            Text="{Binding ErrorMessage}"
+            Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+
+        <ScrollViewer Grid.Row="3" Margin="0,16,0,0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <ui:Card
+                    MinHeight="240"
+                    Padding="32"
                     Visibility="{Binding HasCalculatedResult, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                    <ui:SymbolIcon
-                        HorizontalAlignment="Center"
-                        FontSize="32"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Symbol="Calculator24" />
-                    <TextBlock
-                        Margin="0,8,0,0"
-                        HorizontalAlignment="Center"
-                        FontSize="{StaticResource FontSizeSm}"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Fire.Result.NotCalculated}" />
-                </StackPanel>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ui:SymbolIcon
+                            HorizontalAlignment="Center"
+                            FontSize="44"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Symbol="Calculator24" />
+                        <TextBlock
+                            Margin="0,12,0,0"
+                            HorizontalAlignment="Center"
+                            FontSize="{StaticResource FontSizeMd}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Fire.Empty.Title}" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            HorizontalAlignment="Center"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Fire.Result.NotCalculated}"
+                            TextAlignment="Center"
+                            TextWrapping="Wrap" />
+                        <ui:Button
+                            Margin="0,16,0,0"
+                            HorizontalAlignment="Center"
+                            Command="{Binding CalculateCommand}"
+                            Appearance="Primary">
+                            <TextBlock
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                Text="{DynamicResource Fire.Calculate}" />
+                        </ui:Button>
+                    </StackPanel>
+                </ui:Card>
 
-                <!--  Result KPIs — after Calculate  -->
-                <UniformGrid Columns="3" Visibility="{Binding HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel>
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.FireNumber}" />
-                        <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding FireNumber, StringFormat=N0}" />
-                    </StackPanel>
-                    <StackPanel>
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.YearsToFire}" />
-                        <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding YearsToFire}" />
-                    </StackPanel>
-                    <StackPanel>
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Fire.Result.Projected}" />
-                        <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding ProjectedNetWorthAtFire, StringFormat=N0}" />
-                    </StackPanel>
+                <UniformGrid
+                    Columns="3"
+                    Visibility="{Binding HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ui:Card Margin="0,0,12,0" Padding="16">
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Fire.Result.FireNumber}" />
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                FontSize="{StaticResource FontSizeXl}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding FireNumber, StringFormat=N0}"
+                                Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </ui:Card>
+                    <ui:Card Margin="0,0,12,0" Padding="16">
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Fire.Result.YearsToFire}" />
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                FontSize="{StaticResource FontSizeXl}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding YearsToFire}" />
+                        </StackPanel>
+                    </ui:Card>
+                    <ui:Card Padding="16">
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Fire.Result.Projected}" />
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                FontSize="{StaticResource FontSizeXl}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding ProjectedNetWorthAtFire, StringFormat=N0}"
+                                Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </ui:Card>
                 </UniformGrid>
-            </Grid>
-        </ui:Card>
 
-        <!--  Wealth path table — hidden until calculated  -->
-        <ui:Card Grid.Row="2" Margin="0,16,0,0" Padding="0"
-                 Visibility="{Binding HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <ui:DataGrid MaxHeight="500" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
-                      GridLinesVisibility="Horizontal" HeadersVisibility="Column" IsReadOnly="True"
-                      ItemsSource="{Binding WealthPath}" RowBackground="Transparent" SelectionMode="Single">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Width="100" Binding="{Binding Year}" Header="{DynamicResource Fire.Path.Year}" />
-                    <DataGridTextColumn Width="*" Binding="{Binding NetWorth, StringFormat=N0}" Header="{DynamicResource Fire.Path.NetWorth}" />
-                </DataGrid.Columns>
-            </ui:DataGrid>
-        </ui:Card>
+                <StackPanel
+                    Margin="0,16,0,0"
+                    Visibility="{Binding HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock
+                        Margin="0,0,0,8"
+                        FontSize="{StaticResource FontSizeMd}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Fire.Path.Title}" />
+                    <ItemsControl ItemsSource="{Binding WealthPath}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:FireWealthPoint}">
+                                <Border
+                                    Margin="0,0,0,8"
+                                    Padding="14"
+                                    Background="{DynamicResource AppSurface}"
+                                    BorderBrush="{DynamicResource AppBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusMd}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock
+                                                FontSize="{StaticResource FontSizeXs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Fire.Path.Year}" />
+                                            <TextBlock
+                                                Margin="8,0,0,0"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding Year}" />
+                                        </StackPanel>
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding NetWorth, StringFormat=N0}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

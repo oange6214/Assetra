@@ -34,8 +34,18 @@
       <TabControl
                 Background="Transparent"
                 BorderThickness="0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
                 SelectedValue="{Binding SelectedTab, Mode=TwoWay}"
-                SelectedValuePath="Tag">
+                SelectedValuePath="Tag"
+                VerticalAlignment="Stretch"
+                VerticalContentAlignment="Stretch">
+        <TabControl.ItemContainerStyle>
+          <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="{x:Type TabItem}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+          </Style>
+        </TabControl.ItemContainerStyle>
 
         <TabItem Header="{DynamicResource Portfolio.Tab.Overview}" Tag="{x:Static vm:PortfolioTab.Dashboard}">
           <pcontrols:DashboardTabPanel
@@ -161,7 +171,7 @@
                                 DockPanel.Dock="Right">
                 <ui:Button.Style>
                   <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                  <Setter Property="Appearance" Value="Transparent" />
+                    <Setter Property="Appearance" Value="Transparent" />
                     <Setter Property="ToolTip" Value="{DynamicResource Portfolio.Cash.SetDefault}" />
                     <Style.Triggers>
                       <DataTrigger Binding="{Binding SelectedCashRow.IsDefault}" Value="True">

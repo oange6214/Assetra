@@ -28,6 +28,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _addCondition = "突破";
     [ObservableProperty] private string _addError = string.Empty;
     [ObservableProperty] private bool _hasNoRules = true;
+    [ObservableProperty] private bool _isFormOpen;
     [ObservableProperty] private bool _isSuggestionsOpen;
     [ObservableProperty] private StockSearchResult? _selectedSuggestion;
     [ObservableProperty] private IReadOnlyList<StockSearchResult> _symbolSuggestions = [];
@@ -40,6 +41,8 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
 
     public bool HasTriggeredAlerts => TriggeredCount > 0;
     public string TriggeredBadge => TriggeredCount > 99 ? "99+" : TriggeredCount.ToString();
+    public int AlertCount => Rules.Count;
+    public int MonitoringCount => Rules.Count(r => !r.IsTriggered);
 
     public IReadOnlyList<string> Conditions { get; } = ["突破", "跌破"];
 
@@ -106,6 +109,27 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
             Rules.Add(ToRow(r));
         HasNoRules = Rules.Count == 0;
         TriggeredCount = Rules.Count(r => r.IsTriggered);
+        NotifyRuleCountsChanged();
+    }
+
+    [RelayCommand]
+    private void OpenAddForm()
+    {
+        AddError = string.Empty;
+        IsSuggestionsOpen = false;
+        IsFormOpen = true;
+    }
+
+    [RelayCommand]
+    private void CancelAddForm()
+    {
+        AddError = string.Empty;
+        IsSuggestionsOpen = false;
+        SymbolSuggestions = [];
+        AddSymbol = string.Empty;
+        AddTargetPrice = string.Empty;
+        AddCondition = "突破";
+        IsFormOpen = false;
     }
 
     [RelayCommand]
@@ -128,11 +152,13 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
 
         Rules.Add(ToRow(rule));
         HasNoRules = false;
+        NotifyRuleCountsChanged();
 
         IsSuggestionsOpen = false;
         SymbolSuggestions = [];
         AddSymbol = string.Empty;
         AddTargetPrice = string.Empty;
+        IsFormOpen = false;
         var condLabel = condition == AlertCondition.Above
             ? GetString("Alerts.ConditionAbove", "突破")
             : GetString("Alerts.ConditionBelow", "跌破");
@@ -162,6 +188,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         row.TriggerTime = null;
         row.TriggeredAt = string.Empty;
         row.IsEditing = false;
+        NotifyRuleCountsChanged();
 
         await _alertService.UpdateAsync(row.ToRule());
         _snackbar.Success(string.Format(GetString("Alerts.Updated", "已更新 {0} 警示規則"), row.Symbol));
@@ -179,6 +206,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
             Rules.Remove(row);
         }
         HasNoRules = Rules.Count == 0;
+        NotifyRuleCountsChanged();
     }
 
     private async Task CheckAlertsAsync(IReadOnlyList<StockQuote> quotes)
@@ -225,6 +253,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
                     }
 
                     TriggeredCount++;
+                    NotifyRuleCountsChanged();
 
                     var condLabel = row.Condition == AlertCondition.Above
                         ? GetString("Alerts.ConditionAbove", "突破")
@@ -272,6 +301,12 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
 
     private string GetString(string key, string fallback) =>
         _localization.Get(key, fallback);
+
+    private void NotifyRuleCountsChanged()
+    {
+        OnPropertyChanged(nameof(AlertCount));
+        OnPropertyChanged(nameof(MonitoringCount));
+    }
 
     private bool _suppressSuggestions;
 

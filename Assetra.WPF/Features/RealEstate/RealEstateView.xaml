@@ -2,6 +2,7 @@
     x:Class="Assetra.WPF.Features.RealEstate.RealEstateView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -17,135 +18,383 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!--  Header  -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,16" Orientation="Horizontal">
-            <TextBlock
-                Margin="16,0,0,0"
-                VerticalAlignment="Bottom"
-                FontSize="{DynamicResource FontSizeBase}"
-                Foreground="{DynamicResource AppTextSecondary}">
-                <Run Text="{DynamicResource RealEstate.TotalEquity}" />
-                <Run Text="{Binding TotalEquity, StringFormat=N0}" />
-            </TextBlock>
-        </StackPanel>
+        <DockPanel Grid.Row="0" Margin="0,0,0,16" LastChildFill="True">
+            <ui:Button
+                DockPanel.Dock="Right"
+                VerticalAlignment="Center"
+                Command="{Binding OpenAddFormCommand}"
+                Appearance="Primary"
+                Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <ui:SymbolIcon
+                        Margin="0,0,4,0"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource FontSizeXs}"
+                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                        Symbol="Add24" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                        Text="{DynamicResource RealEstate.Action.Add}" />
+                </StackPanel>
+            </ui:Button>
 
-        <!--  Error  -->
+            <TextBlock
+                VerticalAlignment="Center"
+                FontSize="{StaticResource FontSizeXl}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource RealEstate.Title}" />
+        </DockPanel>
+
+        <UniformGrid Grid.Row="1" Margin="0,0,0,16" Columns="4">
+            <ui:Card Margin="0,0,12,0" Padding="16">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon
+                            Margin="0,0,8,0"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Symbol="Home24" />
+                        <TextBlock
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource RealEstate.TotalEquity}" />
+                    </StackPanel>
+                    <TextBlock
+                        Margin="0,8,0,0"
+                        FontSize="{StaticResource FontSizeXl}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding TotalEquity, StringFormat=N0}" />
+                </StackPanel>
+            </ui:Card>
+
+            <ui:Card Margin="0,0,12,0" Padding="16">
+                <StackPanel>
+                    <TextBlock
+                        FontSize="{StaticResource FontSizeXs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource RealEstate.Column.CurrentValue}" />
+                    <TextBlock
+                        Margin="0,8,0,0"
+                        FontSize="{StaticResource FontSizeXl}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding TotalCurrentValue, StringFormat=N0}" />
+                </StackPanel>
+            </ui:Card>
+
+            <ui:Card Margin="0,0,12,0" Padding="16">
+                <StackPanel>
+                    <TextBlock
+                        FontSize="{StaticResource FontSizeXs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource RealEstate.Column.Mortgage}" />
+                    <TextBlock
+                        Margin="0,8,0,0"
+                        FontSize="{StaticResource FontSizeXl}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding TotalMortgageBalance, StringFormat=N0}" />
+                </StackPanel>
+            </ui:Card>
+
+            <ui:Card Padding="16">
+                <StackPanel>
+                    <TextBlock
+                        FontSize="{StaticResource FontSizeXs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource RealEstate.Count}" />
+                    <TextBlock
+                        Margin="0,8,0,0"
+                        FontSize="{StaticResource FontSizeXl}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding PropertyCount}" />
+                </StackPanel>
+            </ui:Card>
+        </UniformGrid>
+
         <TextBlock
-            Grid.Row="1"
+            Grid.Row="2"
             Margin="0,0,0,8"
             Foreground="{DynamicResource AppDanger}"
             Text="{Binding ErrorMessage}"
             Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
 
-        <!--  Property list  -->
-        <ui:Card
-            Grid.Row="2"
-            Padding="0">
-            <ui:DataGrid
-                MaxHeight="500"
-                AutoGenerateColumns="False"
-                CanUserAddRows="False"
-                CanUserDeleteRows="False"
-                GridLinesVisibility="Horizontal"
-                HeadersVisibility="Column"
-                IsReadOnly="True"
-                ItemsSource="{Binding Properties}"
-                RowBackground="Transparent"
-                SelectionMode="Single">
-                <DataGrid.Columns>
-                    <DataGridTextColumn
-                        Width="*"
-                        Binding="{Binding Name}"
-                        Header="{DynamicResource RealEstate.Column.Name}" />
-                    <DataGridTextColumn
-                        Width="2*"
-                        Binding="{Binding Address}"
-                        Header="{DynamicResource RealEstate.Column.Address}" />
-                    <DataGridTextColumn
-                        Width="120"
-                        Binding="{Binding CurrentValue, StringFormat=N0}"
-                        Header="{DynamicResource RealEstate.Column.CurrentValue}" />
-                    <DataGridTextColumn
-                        Width="120"
-                        Binding="{Binding MortgageBalance, StringFormat=N0}"
-                        Header="{DynamicResource RealEstate.Column.Mortgage}" />
-                    <DataGridTextColumn
-                        Width="120"
-                        Binding="{Binding Equity, StringFormat=N0}"
-                        Header="{DynamicResource RealEstate.Column.Equity}" />
-                    <DataGridTextColumn
-                        Width="80"
-                        Binding="{Binding Currency}"
-                        Header="{DynamicResource RealEstate.Column.Currency}" />
-                    <DataGridTemplateColumn Width="120" Header="{DynamicResource Common.Actions}">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <ui:Button
-                                        Margin="0,0,4,0"
-                                        Padding="6"
-                                        Appearance="Transparent"
-                                        Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        CommandParameter="{Binding}"
-                                        ToolTip="{DynamicResource Common.Edit}">
-                    <ui:SymbolIcon Symbol="Edit24" />
-                  </ui:Button>
-                                    <ui:Button
-                                        Padding="6"
-                                        Appearance="Transparent"
-                                        Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        CommandParameter="{Binding}"
-                                        ToolTip="{DynamicResource Common.Delete}">
-                    <ui:SymbolIcon Foreground="{DynamicResource AppDanger}" Symbol="Delete24" />
-                  </ui:Button>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </ui:DataGrid>
-        </ui:Card>
+        <Grid Grid.Row="3">
+            <ScrollViewer
+                VerticalScrollBarVisibility="Auto"
+                Visibility="{Binding HasProperties, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ItemsControl ItemsSource="{Binding Properties}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:RealEstateRowViewModel}">
+                            <Border
+                                Margin="0,0,0,12"
+                                Padding="16"
+                                Background="{DynamicResource AppSurface}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusMd}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
 
-        <!--  Add/Edit form  -->
+                                    <StackPanel Grid.Row="0" Grid.Column="0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock
+                                                FontSize="{StaticResource FontSizeMd}"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding Name}" />
+                                            <Border
+                                                Margin="8,0,0,0"
+                                                Padding="8,2"
+                                                VerticalAlignment="Center"
+                                                Background="{DynamicResource AppHover}"
+                                                CornerRadius="{StaticResource RadiusSm}"
+                                                Visibility="{Binding IsRental, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <TextBlock
+                                                    FontSize="{StaticResource FontSizeXs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource RealEstate.Form.IsRental}" />
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            FontSize="{StaticResource FontSizeSm}"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{Binding Address}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+
+                                    <StackPanel
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Orientation="Horizontal">
+                                        <ui:Button
+                                            Width="32"
+                                            Height="32"
+                                            Margin="0,0,4,0"
+                                            Padding="0"
+                                            Appearance="Transparent"
+                                            Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="{DynamicResource Common.Edit}">
+                                            <ui:SymbolIcon FontSize="14" Symbol="Edit24" />
+                                        </ui:Button>
+                                        <ui:Button
+                                            Width="32"
+                                            Height="32"
+                                            Padding="0"
+                                            Appearance="Transparent"
+                                            Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="{DynamicResource Common.Delete}">
+                                            <ui:SymbolIcon
+                                                FontSize="14"
+                                                Foreground="{DynamicResource AppDanger}"
+                                                Symbol="Delete24" />
+                                        </ui:Button>
+                                    </StackPanel>
+
+                                    <UniformGrid
+                                        Grid.Row="2"
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        Margin="0,16,0,0"
+                                        Columns="4">
+                                        <StackPanel Margin="0,0,16,0">
+                                            <TextBlock
+                                                FontSize="{StaticResource FontSizeXs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource RealEstate.Column.CurrentValue}" />
+                                            <TextBlock
+                                                Margin="0,4,0,0"
+                                                FontFamily="{StaticResource FontBase}"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding CurrentValue, StringFormat=N0}"
+                                                Typography.NumeralAlignment="Tabular" />
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,16,0">
+                                            <TextBlock
+                                                FontSize="{StaticResource FontSizeXs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource RealEstate.Column.Mortgage}" />
+                                            <TextBlock
+                                                Margin="0,4,0,0"
+                                                FontFamily="{StaticResource FontBase}"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding MortgageBalance, StringFormat=N0}"
+                                                Typography.NumeralAlignment="Tabular" />
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,16,0">
+                                            <TextBlock
+                                                FontSize="{StaticResource FontSizeXs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource RealEstate.Column.Equity}" />
+                                            <TextBlock
+                                                Margin="0,4,0,0"
+                                                FontFamily="{StaticResource FontBase}"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding Equity, StringFormat=N0}"
+                                                Typography.NumeralAlignment="Tabular" />
+                                        </StackPanel>
+                                        <StackPanel>
+                                            <TextBlock
+                                                FontSize="{StaticResource FontSizeXs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource RealEstate.Column.Currency}" />
+                                            <TextBlock
+                                                Margin="0,4,0,0"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding Currency}" />
+                                        </StackPanel>
+                                    </UniformGrid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <ui:Card
+                MinHeight="240"
+                Padding="32"
+                Visibility="{Binding HasNoProperties, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ui:SymbolIcon
+                        HorizontalAlignment="Center"
+                        FontSize="44"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Symbol="Home24" />
+                    <TextBlock
+                        Margin="0,12,0,0"
+                        HorizontalAlignment="Center"
+                        FontSize="{StaticResource FontSizeMd}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource RealEstate.Empty.Title}" />
+                    <TextBlock
+                        Margin="0,6,0,0"
+                        HorizontalAlignment="Center"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource RealEstate.Empty.Hint}"
+                        TextAlignment="Center"
+                        TextWrapping="Wrap" />
+                    <ui:Button
+                        Margin="0,16,0,0"
+                        HorizontalAlignment="Center"
+                        Command="{Binding OpenAddFormCommand}"
+                        Appearance="Primary"
+                        Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                Symbol="Add24" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                Text="{DynamicResource RealEstate.Action.Add}" />
+                        </StackPanel>
+                    </ui:Button>
+                </StackPanel>
+            </ui:Card>
+        </Grid>
+
         <Border
-            Grid.Row="3"
-            Margin="0,16,0,0"
-            Style="{StaticResource FormCard}">
-            <StackPanel>
-                <TextBlock
-                    Style="{StaticResource FormSectionTitle}"
-                    Text="{DynamicResource RealEstate.Form.Title}" />
+            Grid.Row="0"
+            Grid.RowSpan="4"
+            Margin="-24"
+            Panel.ZIndex="180"
+            Background="{DynamicResource AppModalOverlay}"
+            Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                <UniformGrid Columns="4" Rows="2">
-                    <StackPanel Margin="0,0,8,8">
+        <Border
+            Grid.Row="0"
+            Grid.RowSpan="4"
+            Width="860"
+            MaxHeight="680"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Panel.ZIndex="181"
+            Style="{StaticResource FormCard}"
+            Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0" Margin="0,0,0,16">
+                    <ui:Button
+                        Width="32"
+                        Height="32"
+                        Padding="0"
+                        Command="{Binding CancelEditCommand}"
+                        DockPanel.Dock="Right"
+                        Appearance="Transparent"
+                        ToolTip="{DynamicResource Common.Close}">
+                        <ui:SymbolIcon FontSize="12" Symbol="Dismiss24" />
+                    </ui:Button>
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Style="{StaticResource FormSectionTitle}"
+                        Text="{DynamicResource RealEstate.Form.Title}" />
+                </DockPanel>
+
+                <UniformGrid Grid.Row="1" Columns="2" Rows="5">
+                    <StackPanel Margin="0,0,12,12">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.Name}" />
                         <ui:TextBox Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,8,8">
+                    <StackPanel Margin="0,0,0,12">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.Address}" />
                         <ui:TextBox Text="{Binding FormAddress, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,8,8">
+                    <StackPanel Margin="0,0,12,12">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.PurchasePrice}" />
-                        <ui:TextBox Text="{Binding FormPurchasePrice, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            Text="{Binding FormPurchasePrice, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,0,8">
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.PurchaseDate}" />
+                        <ui:CalendarDatePicker Date="{Binding FormPurchaseDate, Mode=TwoWay}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,12">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.CurrentValue}" />
-                        <ui:TextBox Text="{Binding FormCurrentValue, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            Text="{Binding FormCurrentValue, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
+                    <StackPanel Margin="0,0,0,12">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.MortgageBalance}" />
-                        <ui:TextBox Text="{Binding FormMortgageBalance, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            Text="{Binding FormMortgageBalance, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
+                    <StackPanel Margin="0,0,12,12">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.Currency}" />
                         <ui:TextBox Text="{Binding FormCurrency, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,8,0">
-                        <!--  Spacer matches sibling label height so checkbox aligns with neighbouring TextBox row.  -->
+                    <StackPanel Margin="0,0,0,12">
                         <TextBlock Text=" " Visibility="Hidden" />
                         <CheckBox
                             Margin="0,4,0,0"
@@ -160,21 +409,29 @@
                 </UniformGrid>
 
                 <TextBlock
+                    Grid.Row="2"
                     Margin="0,8,0,0"
                     Foreground="{DynamicResource AppDanger}"
                     Text="{Binding FormError}"
                     Visibility="{Binding FormError, Converter={StaticResource NullToVisibilityConverter}}" />
 
-                <StackPanel Margin="0,12,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
+                <StackPanel
+                    Grid.Row="3"
+                    Margin="0,16,0,0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
                     <ui:Button
                         Margin="0,0,8,0"
                         Command="{Binding CancelEditCommand}"
                         Content="{DynamicResource Common.Cancel}"
-                        Appearance="Secondary"
-                        Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    <ui:Button Command="{Binding SaveCommand}" Content="{DynamicResource Common.Save}" />
+                        Appearance="Secondary" />
+                    <ui:Button Command="{Binding SaveCommand}" Appearance="Primary">
+                        <TextBlock
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                            Text="{DynamicResource Common.Save}" />
+                    </ui:Button>
                 </StackPanel>
-            </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

@@ -33,6 +33,7 @@ public sealed partial class PhysicalAssetViewModel : ObservableObject
 
     public bool HasAssets => Assets.Count > 0;
     public bool HasNoAssets => !IsLoading && Assets.Count == 0;
+    public int AssetCount => Assets.Count;
 
     [ObservableProperty] private string _formName = string.Empty;
     [ObservableProperty] private PhysicalAssetCategory _formCategory = PhysicalAssetCategory.Vehicle;
@@ -162,6 +163,9 @@ public sealed partial class PhysicalAssetViewModel : ObservableObject
     private async Task DeleteAsync(PhysicalAssetRowViewModel row)
     {
         await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
+        if (EditingId == row.Id)
+            ClearForm();
+
         await LoadAsync().ConfigureAwait(true);
     }
 
@@ -188,6 +192,7 @@ public sealed partial class PhysicalAssetViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(HasAssets));
         OnPropertyChanged(nameof(HasNoAssets));
+        OnPropertyChanged(nameof(AssetCount));
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e) => RefreshLocalizedCategoryText();

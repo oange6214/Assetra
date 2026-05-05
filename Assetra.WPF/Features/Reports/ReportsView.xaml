@@ -79,6 +79,13 @@
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Reports.Loading}"
                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBlock
+                Margin="16,0,0,0"
+                VerticalAlignment="Center"
+                Foreground="{DynamicResource AppDanger}"
+                Text="{Binding ErrorMessage}"
+                TextTrimming="CharacterEllipsis"
+                Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}" />
         </DockPanel>
 
         <!--  ── Metric cards: Income / Expense / Net + Savings rate ──  -->
@@ -341,23 +348,117 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
+                    <StackPanel
+                        Grid.Row="0"
+                        Margin="0,0,0,12"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Visibility="{Binding HasIncomeStatement, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ui:Button Margin="0,0,8,0" Command="{Binding ExportIncomePdfCommand}" Content="{DynamicResource Reports.Export.Pdf}" />
                         <ui:Button Command="{Binding ExportIncomeCsvCommand}" Content="{DynamicResource Reports.Export.Csv}" />
                     </StackPanel>
-                    <StackPanel Grid.Row="1" DataContext="{Binding IncomeStatement}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Income.Total}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Income.Total, StringFormat=': {0:N2}'}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Expense.Total}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Expense.Total, StringFormat=': {0:N2}'}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                                <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{DynamicResource Reports.Net.Total}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{Binding Net, StringFormat=': {0:N2}'}" />
-                        </StackPanel>
+                    <TextBlock
+                        Grid.Row="1"
+                        FontStyle="Italic"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Reports.Statement.Empty}"
+                        Visibility="{Binding HasIncomeStatement, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                    <StackPanel Grid.Row="1" Visibility="{Binding HasIncomeStatement, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Reports.Income.Total}" />
+                                <TextBlock
+                                    Margin="0,4,0,8"
+                                    FontFamily="{StaticResource FontBase}"
+                                    FontSize="{DynamicResource FontSizeLg}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppUp}"
+                                    Text="{Binding IncomeStatement.Income.Total, StringFormat={}{0:N2}}" />
+                                <ItemsControl ItemsSource="{Binding IncomeStatement.Income.Rows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,3,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock
+                                                    Grid.Column="0"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{Binding Label}" />
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    FontFamily="{StaticResource FontBase}"
+                                                    Typography.NumeralAlignment="Tabular"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding Amount, StringFormat={}{0:N2}}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Reports.Expense.Total}" />
+                                <TextBlock
+                                    Margin="0,4,0,8"
+                                    FontFamily="{StaticResource FontBase}"
+                                    FontSize="{DynamicResource FontSizeLg}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppDown}"
+                                    Text="{Binding IncomeStatement.Expense.Total, StringFormat={}{0:N2}}" />
+                                <ItemsControl ItemsSource="{Binding IncomeStatement.Expense.Rows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,3,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock
+                                                    Grid.Column="0"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{Binding Label}" />
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    FontFamily="{StaticResource FontBase}"
+                                                    Typography.NumeralAlignment="Tabular"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding Amount, StringFormat={}{0:N2}}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Grid>
+                        <Border Height="1" Margin="0,12,0,12" Background="{DynamicResource AppBorder}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Reports.Net.Total}" />
+                            <TextBlock
+                                Grid.Column="1"
+                                FontFamily="{StaticResource FontBase}"
+                                Typography.NumeralAlignment="Tabular"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding IncomeStatement.Net, StringFormat={}{0:N2}}" />
+                        </Grid>
                     </StackPanel>
                 </Grid>
             </ui:CardExpander>
@@ -368,27 +469,126 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
+                    <StackPanel
+                        Grid.Row="0"
+                        Margin="0,0,0,12"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Visibility="{Binding HasBalanceSheet, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ui:Button Margin="0,0,8,0" Command="{Binding ExportBalancePdfCommand}" Content="{DynamicResource Reports.Export.Pdf}" />
                         <ui:Button Command="{Binding ExportBalanceCsvCommand}" Content="{DynamicResource Reports.Export.Csv}" />
                     </StackPanel>
-                    <StackPanel Grid.Row="1" DataContext="{Binding BalanceSheet}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Balance.AsOf}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding AsOf, StringFormat=': {0}'}" />
+                    <TextBlock
+                        Grid.Row="1"
+                        FontStyle="Italic"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Reports.Statement.Empty}"
+                        Visibility="{Binding HasBalanceSheet, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                    <StackPanel Grid.Row="1" Visibility="{Binding HasBalanceSheet, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
+                            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.Balance.AsOf}" />
+                            <TextBlock
+                                Margin="8,0,0,0"
+                                FontFamily="{StaticResource FontBase}"
+                                Typography.NumeralAlignment="Tabular"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding BalanceSheet.AsOf, StringFormat={}{0:yyyy-MM-dd}}" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Balance.Assets}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Assets.Total, StringFormat=': {0:N2}'}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Balance.Liabilities}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Liabilities.Total, StringFormat=': {0:N2}'}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{DynamicResource Reports.Balance.NetWorth}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{Binding NetWorth, StringFormat=': {0:N2}'}" />
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Reports.Balance.Assets}" />
+                                <TextBlock
+                                    Margin="0,4,0,8"
+                                    FontFamily="{StaticResource FontBase}"
+                                    FontSize="{DynamicResource FontSizeLg}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding BalanceSheet.Assets.Total, StringFormat={}{0:N2}}" />
+                                <ItemsControl ItemsSource="{Binding BalanceSheet.Assets.Rows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,3,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock
+                                                    Grid.Column="0"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{Binding Label}" />
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    FontFamily="{StaticResource FontBase}"
+                                                    Typography.NumeralAlignment="Tabular"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding Amount, StringFormat={}{0:N2}}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Reports.Balance.Liabilities}" />
+                                <TextBlock
+                                    Margin="0,4,0,8"
+                                    FontFamily="{StaticResource FontBase}"
+                                    FontSize="{DynamicResource FontSizeLg}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding BalanceSheet.Liabilities.Total, StringFormat={}{0:N2}}" />
+                                <ItemsControl ItemsSource="{Binding BalanceSheet.Liabilities.Rows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,3,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock
+                                                    Grid.Column="0"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{Binding Label}" />
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    FontFamily="{StaticResource FontBase}"
+                                                    Typography.NumeralAlignment="Tabular"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding Amount, StringFormat={}{0:N2}}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Grid>
+                        <Border Height="1" Margin="0,12,0,12" Background="{DynamicResource AppBorder}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Reports.Balance.NetWorth}" />
+                            <TextBlock
+                                Grid.Column="1"
+                                FontFamily="{StaticResource FontBase}"
+                                Typography.NumeralAlignment="Tabular"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding BalanceSheet.NetWorth, StringFormat={}{0:N2}}" />
+                        </Grid>
                     </StackPanel>
                 </Grid>
             </ui:CardExpander>
@@ -399,113 +599,194 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
+                    <StackPanel
+                        Grid.Row="0"
+                        Margin="0,0,0,12"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Visibility="{Binding HasCashFlowStatement, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ui:Button Margin="0,0,8,0" Command="{Binding ExportCashFlowPdfCommand}" Content="{DynamicResource Reports.Export.Pdf}" />
                         <ui:Button Command="{Binding ExportCashFlowCsvCommand}" Content="{DynamicResource Reports.Export.Csv}" />
                     </StackPanel>
-                    <StackPanel Grid.Row="1" DataContext="{Binding CashFlowStatement}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.CashFlow.Operating}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Operating.Total, StringFormat=': {0:N2}'}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.CashFlow.Investing}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Investing.Total, StringFormat=': {0:N2}'}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.CashFlow.Financing}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Financing.Total, StringFormat=': {0:N2}'}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{DynamicResource Reports.CashFlow.NetChange}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{Binding NetChange, StringFormat=': {0:N2}'}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.CashFlow.Opening}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding OpeningCash, StringFormat=': {0:N2}'}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.CashFlow.Closing}" />
-                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding ClosingCash, StringFormat=': {0:N2}'}" />
-                        </StackPanel>
+                    <TextBlock
+                        Grid.Row="1"
+                        FontStyle="Italic"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Reports.Statement.Empty}"
+                        Visibility="{Binding HasCashFlowStatement, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                    <StackPanel Grid.Row="1" Visibility="{Binding HasCashFlowStatement, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Reports.CashFlow.Operating}" />
+                                <TextBlock Margin="0,4,0,8" FontFamily="{StaticResource FontBase}" FontSize="{DynamicResource FontSizeLg}" FontWeight="SemiBold" Text="{Binding CashFlowStatement.Operating.Total, StringFormat={}{0:N2}}" />
+                                <ItemsControl ItemsSource="{Binding CashFlowStatement.Operating.Rows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,3,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding Label}" />
+                                                <TextBlock Grid.Column="1" FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Amount, StringFormat={}{0:N2}}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Reports.CashFlow.Investing}" />
+                                <TextBlock Margin="0,4,0,8" FontFamily="{StaticResource FontBase}" FontSize="{DynamicResource FontSizeLg}" FontWeight="SemiBold" Text="{Binding CashFlowStatement.Investing.Total, StringFormat={}{0:N2}}" />
+                                <ItemsControl ItemsSource="{Binding CashFlowStatement.Investing.Rows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,3,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding Label}" />
+                                                <TextBlock Grid.Column="1" FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Amount, StringFormat={}{0:N2}}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <TextBlock FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Reports.CashFlow.Financing}" />
+                                <TextBlock Margin="0,4,0,8" FontFamily="{StaticResource FontBase}" FontSize="{DynamicResource FontSizeLg}" FontWeight="SemiBold" Text="{Binding CashFlowStatement.Financing.Total, StringFormat={}{0:N2}}" />
+                                <ItemsControl ItemsSource="{Binding CashFlowStatement.Financing.Rows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,3,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding Label}" />
+                                                <TextBlock Grid.Column="1" FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Amount, StringFormat={}{0:N2}}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Grid>
+                        <Border Height="1" Margin="0,12,0,12" Background="{DynamicResource AppBorder}" />
+                        <UniformGrid Columns="3">
+                            <StackPanel Margin="0,0,12,0">
+                                <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.CashFlow.Opening}" />
+                                <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{Binding CashFlowStatement.OpeningCash, StringFormat={}{0:N2}}" />
+                            </StackPanel>
+                            <StackPanel Margin="12,0">
+                                <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.CashFlow.Closing}" />
+                                <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{Binding CashFlowStatement.ClosingCash, StringFormat={}{0:N2}}" />
+                            </StackPanel>
+                            <StackPanel Margin="12,0,0,0">
+                                <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.CashFlow.NetChange}" />
+                                <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{Binding CashFlowStatement.NetChange, StringFormat={}{0:N2}}" />
+                            </StackPanel>
+                        </UniformGrid>
                     </StackPanel>
                 </Grid>
             </ui:CardExpander>
 
             <ui:CardExpander Header="{DynamicResource Reports.Performance.Title}" IsExpanded="False" Margin="0,8,0,0">
-                <StackPanel Margin="12" DataContext="{Binding Performance}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Performance.Xirr}" />
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Xirr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                <Grid>
+                    <TextBlock
+                        Margin="12"
+                        FontStyle="Italic"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Reports.Statement.Empty}"
+                        Visibility="{Binding HasPerformance, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                    <StackPanel Margin="12" Visibility="{Binding HasPerformance, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Performance.Xirr}" />
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Performance.Xirr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Performance.Twr}" />
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Performance.Twr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Performance.Mwr}" />
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Performance.Mwr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Performance.Benchmark}" />
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Performance.BenchmarkTwr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{DynamicResource Reports.Performance.Alpha}" />
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{Binding Performance.AlphaOverBenchmark, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                        </StackPanel>
+                        <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding Performance.Attribution}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="160" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Label}" />
+                                        <TextBlock Grid.Column="1" FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" HorizontalAlignment="Right" Text="{Binding Amount, StringFormat='{}{0:N2}'}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Performance.Twr}" />
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Twr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Performance.Mwr}" />
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Mwr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Performance.Benchmark}" />
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding BenchmarkTwr, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{DynamicResource Reports.Performance.Alpha}" />
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" FontWeight="SemiBold" Text="{Binding AlphaOverBenchmark, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
-                    </StackPanel>
-                    <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding Attribution}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="0,2,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="160" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Label}" />
-                                    <TextBlock Grid.Column="1" FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" HorizontalAlignment="Right" Text="{Binding Amount, StringFormat='{}{0:N2}'}" />
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
+                </Grid>
             </ui:CardExpander>
 
             <ui:CardExpander Header="{DynamicResource Reports.Risk.Title}" IsExpanded="False" Margin="0,8,0,0">
-                <StackPanel Margin="12" DataContext="{Binding Risk}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Risk.AnnualizedVolatility}" />
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding AnnualizedVolatility, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                <Grid>
+                    <TextBlock
+                        Margin="12"
+                        FontStyle="Italic"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Reports.Statement.Empty}"
+                        Visibility="{Binding HasRisk, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                    <StackPanel Margin="12" Visibility="{Binding HasRisk, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Risk.AnnualizedVolatility}" />
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Risk.AnnualizedVolatility, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Risk.MaxDrawdown}" />
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Risk.MaxDrawdown, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Risk.SharpeRatio}" />
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Risk.SharpeRatio, StringFormat=': {0:F2}', TargetNullValue=': —'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Risk.Hhi}" />
+                            <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Risk.Hhi, StringFormat=': {0:F3}', TargetNullValue=': —'}" />
+                        </StackPanel>
+                        <TextBlock Margin="0,4,0,0" FontWeight="SemiBold" Foreground="{DynamicResource AppDanger}" Text="{DynamicResource Reports.Risk.ConcentrationWarning}" Visibility="{Binding Risk.HasConcentrationWarning, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <TextBlock Margin="0,8,0,4" FontWeight="SemiBold" Text="{DynamicResource Reports.Risk.TopHoldings}" />
+                        <ItemsControl ItemsSource="{Binding Risk.TopHoldings}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="200" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Label}" />
+                                        <TextBlock Grid.Column="1" FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" HorizontalAlignment="Right" Text="{Binding Weight, StringFormat='{}{0:P2}'}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Risk.MaxDrawdown}" />
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding MaxDrawdown, StringFormat=': {0:P2}', TargetNullValue=': —'}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Risk.SharpeRatio}" />
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding SharpeRatio, StringFormat=': {0:F2}', TargetNullValue=': —'}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{DynamicResource Reports.Risk.Hhi}" />
-                        <TextBlock FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Hhi, StringFormat=': {0:F3}', TargetNullValue=': —'}" />
-                    </StackPanel>
-                    <TextBlock Margin="0,4,0,0" FontWeight="SemiBold" Foreground="{DynamicResource AppDanger}" Text="{DynamicResource Reports.Risk.ConcentrationWarning}" Visibility="{Binding HasConcentrationWarning, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <TextBlock Margin="0,8,0,4" FontWeight="SemiBold" Text="{DynamicResource Reports.Risk.TopHoldings}" />
-                    <ItemsControl ItemsSource="{Binding TopHoldings}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="0,2,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="200" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" Text="{Binding Label}" />
-                                    <TextBlock Grid.Column="1" FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular" HorizontalAlignment="Right" Text="{Binding Weight, StringFormat='{}{0:P2}'}" />
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
+                </Grid>
             </ui:CardExpander>
         </StackPanel>
 

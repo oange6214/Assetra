@@ -553,6 +553,10 @@
     <!--  News  -->
 
     <!--  Alerts  -->
+    <sys:String x:Key="Alerts.Title">Alerts</sys:String>
+    <sys:String x:Key="Alerts.Count">Alerts</sys:String>
+    <sys:String x:Key="Alerts.MonitoringCount">Monitoring</sys:String>
+    <sys:String x:Key="Alerts.TriggeredCount">Triggered</sys:String>
     <sys:String x:Key="Alerts.Symbol">Symbol</sys:String>
     <sys:String x:Key="Alerts.Name">Name</sys:String>
     <sys:String x:Key="Alerts.Condition">Condition</sys:String>
@@ -567,8 +571,10 @@
     <sys:String x:Key="Alerts.Cancel">Cancel</sys:String>
     <sys:String x:Key="Alerts.Empty">No alerts yet</sys:String>
     <sys:String x:Key="Alerts.Empty.Hint">Set price alerts to get notified when a stock breaks above or below your target</sys:String>
-    <sys:String x:Key="Alerts.Empty.Cta">Add your first alert using the form below</sys:String>
-    <sys:String x:Key="Alerts.AddAlert">＋ Add alert</sys:String>
+    <sys:String x:Key="Alerts.Empty.Cta">Choose "Add alert" to create the first alert</sys:String>
+    <sys:String x:Key="Alerts.AddAlert">Add alert</sys:String>
+    <sys:String x:Key="Alerts.Form.Title">Add alert</sys:String>
+    <sys:String x:Key="Alerts.Form.Hint">Enter a symbol, trigger condition, and target price. Assetra will notify you when the quote reaches it.</sys:String>
     <sys:String x:Key="Alerts.ConditionAbove">Above</sys:String>
     <sys:String x:Key="Alerts.ConditionBelow">Below</sys:String>
 
@@ -952,6 +958,10 @@
     <!-- Goals / Financial Goals -->
     <sys:String x:Key="Goals.Title">Financial Goals</sys:String>
     <sys:String x:Key="Goals.Empty">No goals yet</sys:String>
+    <sys:String x:Key="Goals.Empty.Hint">Create goals for travel, home buying, retirement, or FIRE to track progress and remaining amount.</sys:String>
+    <sys:String x:Key="Goals.Count">Goals</sys:String>
+    <sys:String x:Key="Goals.Remaining">Remaining</sys:String>
+    <sys:String x:Key="Goals.OverallProgress">Overall progress</sys:String>
     <sys:String x:Key="Goals.Add.Title">New Goal</sys:String>
     <sys:String x:Key="Goals.Add.Name">Name</sys:String>
     <sys:String x:Key="Goals.Add.Target">Target</sys:String>
@@ -959,6 +969,7 @@
     <sys:String x:Key="Goals.Add.Notes">Notes</sys:String>
     <sys:String x:Key="Goals.Add.Deadline">Deadline</sys:String>
     <sys:String x:Key="Goals.Add.Submit">Add</sys:String>
+    <sys:String x:Key="Goals.Form.Hint">Set a target amount, current amount, and deadline to track progress.</sys:String>
     <sys:String x:Key="Goals.Edit.Title">Edit goal</sys:String>
     <sys:String x:Key="Goals.Edit.Submit">Save</sys:String>
     <sys:String x:Key="Goals.Edit.Cancel">Cancel</sys:String>
@@ -1025,6 +1036,7 @@
     <sys:String x:Key="Reports.Export.Status.Empty">No data to export.</sys:String>
     <sys:String x:Key="Reports.Export.Status.Success">Exported: {0}</sys:String>
     <sys:String x:Key="Reports.Export.Status.Failed">Export failed: {0}</sys:String>
+    <sys:String x:Key="Reports.Statement.Empty">No report data is available.</sys:String>
     <sys:String x:Key="Reports.Income.Total">Income Total</sys:String>
     <sys:String x:Key="Reports.Expense.Total">Expense Total</sys:String>
     <sys:String x:Key="Reports.Net.Total">Net</sys:String>
@@ -1064,7 +1076,8 @@
 
     <!--  RealEstate  -->
     <sys:String x:Key="RealEstate.Title">Real Estate</sys:String>
-    <sys:String x:Key="RealEstate.TotalEquity">Total Equity: </sys:String>
+    <sys:String x:Key="RealEstate.TotalEquity">Total Equity</sys:String>
+    <sys:String x:Key="RealEstate.Count">Properties</sys:String>
     <sys:String x:Key="RealEstate.Column.Name">Name</sys:String>
     <sys:String x:Key="RealEstate.Column.Address">Address</sys:String>
     <sys:String x:Key="RealEstate.Column.CurrentValue">Current Value</sys:String>
@@ -1076,6 +1089,7 @@
     <sys:String x:Key="RealEstate.Form.Name">Name</sys:String>
     <sys:String x:Key="RealEstate.Form.Address">Address</sys:String>
     <sys:String x:Key="RealEstate.Form.PurchasePrice">Purchase Price</sys:String>
+    <sys:String x:Key="RealEstate.Form.PurchaseDate">Purchase Date</sys:String>
     <sys:String x:Key="RealEstate.Form.CurrentValue">Current Value</sys:String>
     <sys:String x:Key="RealEstate.Form.MortgageBalance">Mortgage Balance</sys:String>
     <sys:String x:Key="RealEstate.Form.Currency">Currency</sys:String>
@@ -1087,7 +1101,9 @@
 
     <!--  Insurance  -->
     <sys:String x:Key="Insurance.Title">Insurance Policies</sys:String>
-    <sys:String x:Key="Insurance.TotalCashValue">Total Cash Value: </sys:String>
+    <sys:String x:Key="Insurance.TotalCashValue">Total Cash Value</sys:String>
+    <sys:String x:Key="Insurance.TotalAnnualPremium">Annual Premium</sys:String>
+    <sys:String x:Key="Insurance.Count">Policies</sys:String>
     <sys:String x:Key="Insurance.Column.Name">Policy Name</sys:String>
     <sys:String x:Key="Insurance.Column.PolicyNumber">Policy Number</sys:String>
     <sys:String x:Key="Insurance.Column.Type">Type</sys:String>
@@ -1120,7 +1136,9 @@
 
     <!-- v0.24 Retirement -->
     <sys:String x:Key="Retirement.Title">Retirement Accounts</sys:String>
-    <sys:String x:Key="Retirement.TotalBalance">Total Balance:</sys:String>
+    <sys:String x:Key="Retirement.TotalBalance">Total Balance</sys:String>
+    <sys:String x:Key="Retirement.TotalLatestContribution">Latest Year Contribution</sys:String>
+    <sys:String x:Key="Retirement.Count">Accounts</sys:String>
     <sys:String x:Key="Retirement.Column.Name">Name</sys:String>
     <sys:String x:Key="Retirement.Column.AccountType">Type</sys:String>
     <sys:String x:Key="Retirement.Column.Provider">Provider</sys:String>
@@ -1158,8 +1176,9 @@
 
     <!-- v0.24 Physical Asset -->
     <sys:String x:Key="PhysicalAsset.Title">Physical Assets</sys:String>
-    <sys:String x:Key="PhysicalAsset.TotalValue">Total Value:</sys:String>
-    <sys:String x:Key="PhysicalAsset.TotalGain">Unrealized Gain:</sys:String>
+    <sys:String x:Key="PhysicalAsset.TotalValue">Total Value</sys:String>
+    <sys:String x:Key="PhysicalAsset.TotalGain">Unrealized Gain</sys:String>
+    <sys:String x:Key="PhysicalAsset.Count">Items</sys:String>
     <sys:String x:Key="PhysicalAsset.Column.Name">Name</sys:String>
     <sys:String x:Key="PhysicalAsset.Column.Category">Category</sys:String>
     <sys:String x:Key="PhysicalAsset.Column.Cost">Cost</sys:String>
@@ -1201,6 +1220,7 @@
     <sys:String x:Key="Fire.Result.FireNumber">FIRE Number</sys:String>
     <sys:String x:Key="Fire.Result.YearsToFire">Years to FIRE</sys:String>
     <sys:String x:Key="Fire.Result.Projected">Net Worth at FIRE</sys:String>
+    <sys:String x:Key="Fire.Empty.Title">FIRE not calculated yet</sys:String>
     <sys:String x:Key="Fire.Result.NotCalculated">Fill in the inputs and click Calculate to see your FIRE numbers.</sys:String>
     <sys:String x:Key="Fire.Saved">Synced to financial goals</sys:String>
     <sys:String x:Key="Fire.Error.NetWorthInvalid">Invalid current net worth</sys:String>
@@ -1208,6 +1228,7 @@
     <sys:String x:Key="Fire.Error.SavingsInvalid">Invalid annual savings</sys:String>
     <sys:String x:Key="Fire.Error.ReturnInvalid">Invalid expected return</sys:String>
     <sys:String x:Key="Fire.Error.WithdrawalInvalid">Invalid withdrawal rate</sys:String>
+    <sys:String x:Key="Fire.Path.Title">Wealth Path</sys:String>
     <sys:String x:Key="Fire.Path.Year">Year</sys:String>
     <sys:String x:Key="Fire.Path.NetWorth">Net Worth</sys:String>
 
@@ -1225,6 +1246,7 @@
     <sys:String x:Key="MonteCarlo.Result.P10">P10 Ending Balance</sys:String>
     <sys:String x:Key="MonteCarlo.Result.Median">Median Ending Balance</sys:String>
     <sys:String x:Key="MonteCarlo.Result.P90">P90 Ending Balance</sys:String>
+    <sys:String x:Key="MonteCarlo.Empty.Title">No simulation yet</sys:String>
     <sys:String x:Key="MonteCarlo.Result.NotCalculated">Fill in the inputs and click Run to see the simulation results.</sys:String>
     <sys:String x:Key="MonteCarlo.Error.InitialInvalid">Invalid initial balance</sys:String>
     <sys:String x:Key="MonteCarlo.Error.WithdrawalInvalid">Invalid annual withdrawal</sys:String>
@@ -1234,6 +1256,7 @@
     <sys:String x:Key="MonteCarlo.Error.YearsMax">Years must be ≤ {0}</sys:String>
     <sys:String x:Key="MonteCarlo.Error.CountInvalid">Simulation count must be &gt; 0</sys:String>
     <sys:String x:Key="MonteCarlo.Error.CountMax">Simulation count must be ≤ {0:N0}</sys:String>
+    <sys:String x:Key="MonteCarlo.Path.Title">Median Path</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Year">Year</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Median">Median Balance</sys:String>
 </ResourceDictionary>

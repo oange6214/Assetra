@@ -2,127 +2,264 @@
     x:Class="Assetra.WPF.Features.MonteCarlo.MonteCarloView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.MonteCarlo"
     d:DataContext="{d:DesignInstance Type={x:Type vm:MonteCarloViewModel}, IsDesignTimeCreatable=False}"
-    d:DesignHeight="700"
-    d:DesignWidth="1100"
+    d:DesignHeight="800"
+    d:DesignWidth="1200"
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
-
-    <UserControl.Resources>
-    </UserControl.Resources>
 
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,0,0,16"
+            VerticalAlignment="Center"
+            FontSize="{StaticResource FontSizeXl}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextPrimary}"
+            Text="{DynamicResource MonteCarlo.Title}" />
 
-        <ui:Card Grid.Row="0" Padding="20">
+        <ui:Card Grid.Row="1" Padding="20">
             <StackPanel>
                 <UniformGrid Columns="6" Rows="1">
                     <StackPanel Margin="0,0,16,0">
-                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Input.Initial}" />
-                        <ui:TextBox Text="{Binding InitialBalance, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource MonteCarlo.Input.Initial}" />
+                        <ui:TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            Text="{Binding InitialBalance, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,16,0">
-                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Input.Withdrawal}" />
-                        <ui:TextBox Text="{Binding AnnualWithdrawal, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource MonteCarlo.Input.Withdrawal}" />
+                        <ui:TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            Text="{Binding AnnualWithdrawal, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,16,0">
-                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Input.Mean}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource MonteCarlo.Input.Mean}" />
                         <ui:TextBox Text="{Binding MeanReturn, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,16,0">
-                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Input.StdDev}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource MonteCarlo.Input.StdDev}" />
                         <ui:TextBox Text="{Binding StdDev, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,16,0">
-                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Input.Years}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource MonteCarlo.Input.Years}" />
                         <ui:TextBox Text="{Binding Years, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel>
-                        <TextBlock Margin="0,0,0,4" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Input.Count}" />
-                        <ui:TextBox Text="{Binding SimulationCount, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource MonteCarlo.Input.Count}" />
+                        <ui:TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            Text="{Binding SimulationCount, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </UniformGrid>
-                <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppDanger}" Text="{Binding ErrorMessage}"
-                           Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
-                <StackPanel Margin="0,16,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Margin="0,0,8,0"
-                               Foreground="{DynamicResource AppTextSecondary}"
-                               Text="{DynamicResource MonteCarlo.Running}"
-                               Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    <ui:Button Command="{Binding RunCommand}" Content="{DynamicResource MonteCarlo.Run}" Appearance="Primary" />
+
+                <StackPanel
+                    Margin="0,16,0,0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        Margin="0,0,8,0"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource MonteCarlo.Running}"
+                        Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    <ui:Button Command="{Binding RunCommand}" Appearance="Primary">
+                        <TextBlock
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                            Text="{DynamicResource MonteCarlo.Run}" />
+                    </ui:Button>
                 </StackPanel>
             </StackPanel>
         </ui:Card>
 
-        <ui:Card Grid.Row="1" Margin="0,16,0,0" Padding="20">
-            <Grid>
-                <!--  Empty state — before first Run  -->
-                <StackPanel
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
+        <TextBlock
+            Grid.Row="2"
+            Margin="0,12,0,0"
+            Foreground="{DynamicResource AppDanger}"
+            Text="{Binding ErrorMessage}"
+            Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+
+        <ScrollViewer Grid.Row="3" Margin="0,16,0,0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <ui:Card
+                    MinHeight="240"
+                    Padding="32"
                     Visibility="{Binding HasResult, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                    <ui:SymbolIcon
-                        HorizontalAlignment="Center"
-                        FontSize="32"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Symbol="ChartMultiple24" />
-                    <TextBlock
-                        Margin="0,8,0,0"
-                        HorizontalAlignment="Center"
-                        FontSize="{StaticResource FontSizeSm}"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource MonteCarlo.Result.NotCalculated}" />
-                </StackPanel>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ui:SymbolIcon
+                            HorizontalAlignment="Center"
+                            FontSize="44"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Symbol="ChartMultiple24" />
+                        <TextBlock
+                            Margin="0,12,0,0"
+                            HorizontalAlignment="Center"
+                            FontSize="{StaticResource FontSizeMd}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource MonteCarlo.Empty.Title}" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            HorizontalAlignment="Center"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource MonteCarlo.Result.NotCalculated}"
+                            TextAlignment="Center"
+                            TextWrapping="Wrap" />
+                        <ui:Button
+                            Margin="0,16,0,0"
+                            HorizontalAlignment="Center"
+                            Command="{Binding RunCommand}"
+                            Appearance="Primary">
+                            <TextBlock
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                Text="{DynamicResource MonteCarlo.Run}" />
+                        </ui:Button>
+                    </StackPanel>
+                </ui:Card>
 
-                <UniformGrid Columns="4" Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel>
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Result.SuccessRate}" />
-                        <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding SuccessRate, StringFormat=P1}" />
-                    </StackPanel>
-                    <StackPanel>
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Result.P10}" />
-                        <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding P10Ending, StringFormat=N0}" />
-                    </StackPanel>
-                    <StackPanel>
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Result.Median}" />
-                        <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding MedianEnding, StringFormat=N0}" />
-                    </StackPanel>
-                    <StackPanel>
-                        <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource MonteCarlo.Result.P90}" />
-                        <TextBlock Margin="0,4,0,0" FontSize="{StaticResource FontSizeXl}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding P90Ending, StringFormat=N0}" />
-                    </StackPanel>
+                <UniformGrid
+                    Columns="4"
+                    Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ui:Card Margin="0,0,12,0" Padding="16">
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource MonteCarlo.Result.SuccessRate}" />
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                FontSize="{StaticResource FontSizeXl}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding SuccessRate, StringFormat=P1}"
+                                Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </ui:Card>
+                    <ui:Card Margin="0,0,12,0" Padding="16">
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource MonteCarlo.Result.P10}" />
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                FontSize="{StaticResource FontSizeXl}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding P10Ending, StringFormat=N0}"
+                                Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </ui:Card>
+                    <ui:Card Margin="0,0,12,0" Padding="16">
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource MonteCarlo.Result.Median}" />
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                FontSize="{StaticResource FontSizeXl}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding MedianEnding, StringFormat=N0}"
+                                Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </ui:Card>
+                    <ui:Card Padding="16">
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="{StaticResource FontSizeXs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource MonteCarlo.Result.P90}" />
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                FontSize="{StaticResource FontSizeXl}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding P90Ending, StringFormat=N0}"
+                                Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </ui:Card>
                 </UniformGrid>
-            </Grid>
-        </ui:Card>
 
-        <!--  Median path table — hidden until first Run  -->
-        <ui:Card Grid.Row="2" Margin="0,16,0,0" Padding="0"
-                 Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <ui:DataGrid MaxHeight="500" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
-                      GridLinesVisibility="Horizontal" HeadersVisibility="Column" IsReadOnly="True"
-                      ItemsSource="{Binding MedianPath}" RowBackground="Transparent" SelectionMode="Single">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Width="100" Binding="{Binding Year}" Header="{DynamicResource MonteCarlo.Path.Year}" />
-                    <DataGridTextColumn Width="*" Binding="{Binding Balance, StringFormat=N0}" Header="{DynamicResource MonteCarlo.Path.Median}" />
-                </DataGrid.Columns>
-            </ui:DataGrid>
-        </ui:Card>
+                <StackPanel
+                    Margin="0,16,0,0"
+                    Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock
+                        Margin="0,0,0,8"
+                        FontSize="{StaticResource FontSizeMd}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource MonteCarlo.Path.Title}" />
+                    <ItemsControl ItemsSource="{Binding MedianPath}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:MonteCarloPathPoint}">
+                                <Border
+                                    Margin="0,0,0,8"
+                                    Padding="14"
+                                    Background="{DynamicResource AppSurface}"
+                                    BorderBrush="{DynamicResource AppBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusMd}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock
+                                                FontSize="{StaticResource FontSizeXs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource MonteCarlo.Path.Year}" />
+                                            <TextBlock
+                                                Margin="8,0,0,0"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding Year}" />
+                                        </StackPanel>
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding Balance, StringFormat=N0}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

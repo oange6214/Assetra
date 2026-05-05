@@ -9,11 +9,29 @@ public partial class GoalsView : UserControl
     {
         InitializeComponent();
         Loaded += OnLoaded;
+        DataContextChanged += OnDataContextChanged;
+        IsVisibleChanged += OnIsVisibleChanged;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (DataContext is GoalsViewModel vm && !vm.IsLoaded && !vm.IsLoading)
+        RequestLoadIfReady();
+    }
+
+    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        RequestLoadIfReady();
+    }
+
+    private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (e.NewValue is true)
+            RequestLoadIfReady();
+    }
+
+    private void RequestLoadIfReady()
+    {
+        if (IsVisible && DataContext is GoalsViewModel vm && !vm.IsLoaded && !vm.IsLoading)
             vm.LoadCommand.Execute(null);
     }
 }

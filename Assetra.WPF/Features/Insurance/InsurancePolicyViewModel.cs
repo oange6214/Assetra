@@ -33,6 +33,7 @@ public sealed partial class InsurancePolicyViewModel : ObservableObject
 
     public bool HasPolicies => Policies.Count > 0;
     public bool HasNoPolicies => !IsLoading && Policies.Count == 0;
+    public int PolicyCount => Policies.Count;
 
     // ── Add/Edit form ──
     [ObservableProperty] private string _formName = string.Empty;
@@ -170,6 +171,9 @@ public sealed partial class InsurancePolicyViewModel : ObservableObject
     private async Task DeleteAsync(InsurancePolicyRowViewModel row)
     {
         await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
+        if (EditingId == row.Id)
+            ClearForm();
+
         await LoadAsync().ConfigureAwait(true);
     }
 
@@ -198,6 +202,7 @@ public sealed partial class InsurancePolicyViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(HasPolicies));
         OnPropertyChanged(nameof(HasNoPolicies));
+        OnPropertyChanged(nameof(PolicyCount));
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e) => RefreshLocalizedInsuranceTypeText();

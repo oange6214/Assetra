@@ -23,6 +23,9 @@ public sealed partial class RealEstateViewModel : ObservableObject
 
     public bool HasProperties => Properties.Count > 0;
     public bool HasNoProperties => !IsLoading && Properties.Count == 0;
+    public int PropertyCount => Properties.Count;
+    public decimal TotalCurrentValue => Properties.Sum(static p => p.CurrentValue);
+    public decimal TotalMortgageBalance => Properties.Sum(static p => p.MortgageBalance);
 
     // ── Add/Edit form ──
     [ObservableProperty] private string _formName = string.Empty;
@@ -140,6 +143,9 @@ public sealed partial class RealEstateViewModel : ObservableObject
     private async Task DeleteAsync(RealEstateRowViewModel row)
     {
         await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
+        if (EditingId == row.Id)
+            ClearForm();
+
         await LoadAsync().ConfigureAwait(true);
     }
 
@@ -166,5 +172,8 @@ public sealed partial class RealEstateViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(HasProperties));
         OnPropertyChanged(nameof(HasNoProperties));
+        OnPropertyChanged(nameof(PropertyCount));
+        OnPropertyChanged(nameof(TotalCurrentValue));
+        OnPropertyChanged(nameof(TotalMortgageBalance));
     }
 }

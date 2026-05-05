@@ -41,18 +41,23 @@ public sealed partial class ReportsViewModel : ObservableObject
     private readonly IAppSettingsService? _appSettings;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPerformance))]
     private PerformanceResult? _performance;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasRisk))]
     private RiskMetrics? _risk;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasIncomeStatement))]
     private IncomeStatement? _incomeStatement;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasBalanceSheet))]
     private BalanceSheet? _balanceSheet;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCashFlowStatement))]
     private CashFlowStatement? _cashFlowStatement;
 
     [ObservableProperty]
@@ -149,6 +154,11 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     public string MonthHeader => $"{Year}-{Month:D2}";
     public bool   HasReport   => Report is not null;
+    public bool HasIncomeStatement => IncomeStatement is not null;
+    public bool HasBalanceSheet => BalanceSheet is not null;
+    public bool HasCashFlowStatement => CashFlowStatement is not null;
+    public bool HasPerformance => Performance is not null;
+    public bool HasRisk => Risk is not null;
 
     public string IncomeDisplay  => Report is null ? "—" : FormatAmount(Report.Current.TotalIncome);
     public string ExpenseDisplay => Report is null ? "—" : FormatAmount(Report.Current.TotalExpense);
@@ -200,12 +210,23 @@ public sealed partial class ReportsViewModel : ObservableObject
         try
         {
             Report = await _service.BuildAsync(Year, Month).ConfigureAwait(true);
-            await LoadStatementsAsync().ConfigureAwait(true);
         }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
             Report = null;
+            ClearReportDetails();
+            IsLoading = false;
+            return;
+        }
+
+        try
+        {
+            await LoadStatementsAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
             ClearReportDetails();
         }
         finally
@@ -217,14 +238,69 @@ public sealed partial class ReportsViewModel : ObservableObject
     private async Task LoadStatementsAsync()
     {
         var period = ReportPeriod.Month(Year, Month);
+        var detailErrors = new List<string>();
+
         if (_incomeService is not null)
-            IncomeStatement = await _incomeService.GenerateAsync(period).ConfigureAwait(true);
+        {
+            try
+            {
+                IncomeStatement = await _incomeService.GenerateAsync(period).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                IncomeStatement = null;
+                detailErrors.Add(ex.Message);
+            }
+        }
+
         if (_balanceService is not null)
-            BalanceSheet = await _balanceService.GenerateAsync(period.End).ConfigureAwait(true);
+        {
+            try
+            {
+                BalanceSheet = await _balanceService.GenerateAsync(period.End).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                BalanceSheet = null;
+                detailErrors.Add(ex.Message);
+            }
+        }
+
         if (_cashFlowService is not null)
-            CashFlowStatement = await _cashFlowService.GenerateAsync(period).ConfigureAwait(true);
-        await LoadPerformanceAsync().ConfigureAwait(true);
-        await LoadRiskAsync().ConfigureAwait(true);
+        {
+            try
+            {
+                CashFlowStatement = await _cashFlowService.GenerateAsync(period).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                CashFlowStatement = null;
+                detailErrors.Add(ex.Message);
+            }
+        }
+
+        try
+        {
+            await LoadPerformanceAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            Performance = null;
+            detailErrors.Add(ex.Message);
+        }
+
+        try
+        {
+            await LoadRiskAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            Risk = null;
+            detailErrors.Add(ex.Message);
+        }
+
+        if (detailErrors.Count > 0)
+            ErrorMessage = string.Join(" / ", detailErrors.Distinct());
     }
 
     private void ClearReportDetails()
