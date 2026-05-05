@@ -44,9 +44,9 @@ Domain currently passes `decimal` everywhere with implicit "TWD or whatever the 
 
 ## M6 — ObservableCollection encapsulation
 
-**Effort:** 4–8h remaining (13 of 52 covered)
+**Effort:** 2–4h remaining (28 of 52 covered)
 
-**Done:** Insurance, PhysicalAsset, RealEstate, Retirement, Goals, Alerts, Reconciliation — all expose `ReadOnlyObservableCollection<T>` with private `ObservableCollection<T>` backing fields.
+**Done:** Insurance, PhysicalAsset, RealEstate, Retirement, Goals, Alerts, Reconciliation, Fire, MonteCarlo, Import, BudgetSummaryCard, AllocationPanel, Categories (5 collections), TxVM Categories partial (Expense/Income), TradeFilter (Type/Asset).
 
 **Pattern (canonical):**
 ```csharp
@@ -59,14 +59,14 @@ public Foo() {
 }
 ```
 
-**Remaining (~39 sites):**
-- **Portfolio** (Positions / Trades / CashAccounts / Liabilities) — these are cross-shared with `TransactionDialogViewModel.Trades / Positions / CashAccounts / Liabilities` by reference. Encapsulating them requires Tx VM to also expose `ReadOnlyObservableCollection<T>`. Best tackled together with **H1**.
-- **FinancialOverview** (AssetGroups / InvestGroups / LiabGroups) — depends on `Portfolio.Positions`, so wait for L3.
-- **Categories** (Categories / Rules / Budgets / AvailableCategories / IconOptions / EditIconOptions) — independent feature; can be done anytime.
+**Remaining (~24 sites):**
+- **Portfolio** (Positions / Trades / CashAccounts / Liabilities) — cross-shared with `TransactionDialogViewModel.Trades / Positions / CashAccounts / Liabilities` by reference. Encapsulating requires Tx VM to also expose `ReadOnlyObservableCollection<T>` and the Tx VM's `CashAccountSuggestions` / `PositionSuggestions` (currently mutated by Portfolio directly) need internal mutators. Tackle together with **H1**.
+- **FinancialOverview** (AssetGroups / InvestGroups / LiabGroups) + AssetGroupVm.Items — Items is row-VM populated externally; needs builder pattern. Depends on `Portfolio.Positions` so wait for L3.
 - **Allocation** (AllocationRows) — touched in L3.
-- **Fire / MonteCarlo / Import / BudgetSummaryCard / SellPanel / AllocationPanel / AssetGroupVm / LiabilityRowViewModel.ScheduleEntries** — independent; quick wins.
+- **Row VMs** (LiabilityRowViewModel.ScheduleEntries, CategoryRowViewModel.EditIconOptions, AssetGroupVm.Items) — externally populated; needs constructor-time list-passing or `internal` mutators. Lower priority.
+- **SellPanel.CashAccounts** — has `init {}` setter, externally assigned; works as-is.
 
-Recommend: knock out the **independent** group (Categories + Fire + MonteCarlo + Import + small Portfolio-internal records) as a follow-up commit; defer Portfolio/FinancialOverview to after H1/L3.
+Recommend: gate further M6 work on H1 (Tx split unblocks Portfolio root) and L3 (Allocation/FinancialOverview decoupling). The 28 done are the cleanly-isolated VMs.
 
 ---
 
