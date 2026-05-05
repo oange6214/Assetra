@@ -520,7 +520,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private void ApplyPositions(PortfolioLoadResult loaded)
     {
         // M5: assert UI thread; collection mutation requires dispatcher access.
-        System.Diagnostics.Debug.Assert(System.Windows.Application.Current?.Dispatcher.CheckAccess() ?? true,
+        System.Diagnostics.Debug.Assert(IsOnUiThreadOrTestEnvironment(),
             $"{nameof(ApplyPositions)} must be called on the UI thread");
         var entries = loaded.Entries;
         var snapshots = loaded.PositionSnapshots;
@@ -698,7 +698,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private void ApplyTrades(IReadOnlyList<Trade> trades)
     {
         // M5: assert UI thread; collection mutation requires dispatcher access.
-        System.Diagnostics.Debug.Assert(System.Windows.Application.Current?.Dispatcher.CheckAccess() ?? true,
+        System.Diagnostics.Debug.Assert(IsOnUiThreadOrTestEnvironment(),
             $"{nameof(ApplyTrades)} must be called on the UI thread");
         // 首次呼叫時建立 type filter 項目（需要 Application resources 已就緒）
         TradeFilter.InitTradeTypeFilters();
@@ -961,7 +961,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private void ApplyCashAccounts(PortfolioLoadResult loaded)
     {
         // M5: assert UI thread; collection mutation requires dispatcher access.
-        System.Diagnostics.Debug.Assert(System.Windows.Application.Current?.Dispatcher.CheckAccess() ?? true,
+        System.Diagnostics.Debug.Assert(IsOnUiThreadOrTestEnvironment(),
             $"{nameof(ApplyCashAccounts)} must be called on the UI thread");
         var accounts = loaded.CashAccounts;
         var balances = loaded.CashBalances;
@@ -1025,7 +1025,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
     private void ApplyLiabilities(PortfolioLoadResult loaded)
     {
         // M5: assert UI thread; collection mutation requires dispatcher access.
-        System.Diagnostics.Debug.Assert(System.Windows.Application.Current?.Dispatcher.CheckAccess() ?? true,
+        System.Diagnostics.Debug.Assert(IsOnUiThreadOrTestEnvironment(),
             $"{nameof(ApplyLiabilities)} must be called on the UI thread");
         var snapshots = loaded.LiabilitySnapshots;
         var liabilityAssets = loaded.LiabilityAssets;
@@ -1062,6 +1062,25 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable
         Loan.LoanChanged -= OnLoanChanged;
         TradeFilter.Dispose();
         _disposables.Dispose();
+    }
+
+    /// <summary>
+    /// True when running on the WPF dispatcher thread of a real application,
+    /// OR when no real WPF application is running (xUnit test environment).
+    /// The real production app is the <c>Assetra.WPF.App</c> subclass; tests that
+    /// instantiate the bare <c>System.Windows.Application</c> base class (e.g.
+    /// <c>ControlsBehaviorTests.EnsureResources</c>) get the test-bypass path so
+    /// that subsequent tests on different threads don't trip this assertion.
+    /// We deliberately avoid touching any <c>DependencyProperty</c> (e.g.
+    /// <c>MainWindow</c>) because reading those from off-dispatcher threads
+    /// throws.
+    /// </summary>
+    private static bool IsOnUiThreadOrTestEnvironment()
+    {
+        var app = System.Windows.Application.Current;
+        if (app is null) return true;                  // no Application at all
+        if (app.GetType() == typeof(System.Windows.Application)) return true; // bare-base test fake
+        return app.Dispatcher.CheckAccess();           // real app subclass — must be on dispatcher
     }
 }
 
