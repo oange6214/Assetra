@@ -41,9 +41,13 @@ public sealed partial class ImportViewModel : ObservableObject
     private ImportBatch? _currentBatch;
     private int _conflictRefreshVersion;
 
-    public ObservableCollection<ImportRowViewModel> Rows { get; } = [];
-    public ObservableCollection<CashAccountOption> CashAccountOptions { get; } = [];
-    public ObservableCollection<ImportHistoryRowViewModel> History { get; } = [];
+    private readonly ObservableCollection<ImportRowViewModel> _rows = [];
+    private readonly ObservableCollection<CashAccountOption> _cashAccountOptions = [];
+    private readonly ObservableCollection<ImportHistoryRowViewModel> _history = [];
+
+    public ReadOnlyObservableCollection<ImportRowViewModel> Rows { get; }
+    public ReadOnlyObservableCollection<CashAccountOption> CashAccountOptions { get; }
+    public ReadOnlyObservableCollection<ImportHistoryRowViewModel> History { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasFile))]
@@ -139,7 +143,10 @@ public sealed partial class ImportViewModel : ObservableObject
         _snackbar = snackbar;
         _localization = localization;
 
-        History.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasHistory));
+        Rows = new ReadOnlyObservableCollection<ImportRowViewModel>(_rows);
+        CashAccountOptions = new ReadOnlyObservableCollection<CashAccountOption>(_cashAccountOptions);
+        History = new ReadOnlyObservableCollection<ImportHistoryRowViewModel>(_history);
+        _history.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasHistory));
     }
 
     [RelayCommand]
@@ -148,9 +155,9 @@ public sealed partial class ImportViewModel : ObservableObject
         try
         {
             var items = await _assets.GetItemsByTypeAsync(FinancialType.Asset).ConfigureAwait(true);
-            CashAccountOptions.Clear();
+            _cashAccountOptions.Clear();
             foreach (var item in items.Where(i => i.IsActive))
-                CashAccountOptions.Add(new CashAccountOption(item.Id, item.Name));
+                _cashAccountOptions.Add(new CashAccountOption(item.Id, item.Name));
             if (SelectedCashAccount is null && CashAccountOptions.Count > 0)
                 SelectedCashAccount = CashAccountOptions[0];
 
@@ -165,9 +172,9 @@ public sealed partial class ImportViewModel : ObservableObject
     private async Task RefreshHistoryAsync()
     {
         var list = await _historyRepo.GetRecentAsync(HistoryListLimit).ConfigureAwait(true);
-        History.Clear();
+        _history.Clear();
         foreach (var h in list)
-            History.Add(new ImportHistoryRowViewModel(h));
+            _history.Add(new ImportHistoryRowViewModel(h));
         OnPropertyChanged(nameof(HasHistory));
     }
 
@@ -292,14 +299,14 @@ public sealed partial class ImportViewModel : ObservableObject
     private void BindBatch(ImportBatch batch)
     {
         _currentBatch = batch;
-        Rows.Clear();
+        _rows.Clear();
         var byIndex = batch.Conflicts.ToDictionary(c => c.Row.RowIndex);
         foreach (var row in batch.Rows)
         {
             if (byIndex.TryGetValue(row.RowIndex, out var conflict))
-                Rows.Add(new ImportRowViewModel(row, conflict));
+                _rows.Add(new ImportRowViewModel(row, conflict));
             else
-                Rows.Add(new ImportRowViewModel(row));
+                _rows.Add(new ImportRowViewModel(row));
         }
         RowCount = Rows.Count;
         OnPropertyChanged(nameof(ConflictCount));
@@ -347,7 +354,7 @@ public sealed partial class ImportViewModel : ObservableObject
     {
         Interlocked.Increment(ref _conflictRefreshVersion);
         _currentBatch = null;
-        Rows.Clear();
+        _rows.Clear();
         RowCount = 0;
         OnPropertyChanged(nameof(ConflictCount));
         OnPropertyChanged(nameof(NewRowCount));

@@ -31,9 +31,11 @@ public sealed partial class AllocationPanelViewModel : ObservableObject
     public AllocationPanelViewModel(ILocalizationService? localization)
     {
         _localization = localization;
+        Slices = new ReadOnlyObservableCollection<AssetAllocationSlice>(_slices);
     }
 
-    public ObservableCollection<AssetAllocationSlice> Slices { get; } = [];
+    private readonly ObservableCollection<AssetAllocationSlice> _slices = [];
+    public ReadOnlyObservableCollection<AssetAllocationSlice> Slices { get; }
 
     [ObservableProperty] private ISeries[] _pieSeries = [];
 
@@ -95,9 +97,9 @@ public sealed partial class AllocationPanelViewModel : ObservableObject
         if (!slicesChanged)
             return;
 
-        Slices.Clear();
+        _slices.Clear();
         foreach (var s in newSlices)
-            Slices.Add(s);
+            _slices.Add(s);
 
         if (newSlices.Count == 0)
         {

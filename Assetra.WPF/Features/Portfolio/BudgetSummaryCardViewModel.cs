@@ -22,7 +22,8 @@ public sealed partial class BudgetSummaryCardViewModel : ObservableObject
     [ObservableProperty] private double _budgetUsageRatio;
     [ObservableProperty] private bool _hasData;
 
-    public ObservableCollection<CategorySpendSummary> TopCategories { get; } = [];
+    private readonly ObservableCollection<CategorySpendSummary> _topCategories = [];
+    public ReadOnlyObservableCollection<CategorySpendSummary> TopCategories { get; }
 
     public string PeriodDisplay => $"{Year}-{Month:D2}";
     public string TotalIncomeDisplay => $"NT${TotalIncome:N0}";
@@ -61,6 +62,7 @@ public sealed partial class BudgetSummaryCardViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(budgetRefreshNotifier);
         _service = service;
         _budgetRefreshNotifier = budgetRefreshNotifier;
+        TopCategories = new ReadOnlyObservableCollection<CategorySpendSummary>(_topCategories);
         _budgetRefreshNotifier.BudgetChanged += OnBudgetChanged;
     }
 
@@ -80,9 +82,9 @@ public sealed partial class BudgetSummaryCardViewModel : ObservableObject
                 ? Math.Min(1.0, (double)(summary.TotalExpense / b))
                 : 0;
 
-            TopCategories.Clear();
+            _topCategories.Clear();
             foreach (var c in summary.Categories.Take(5))
-                TopCategories.Add(c);
+                _topCategories.Add(c);
             HasData = summary.TotalIncome != 0 || summary.TotalExpense != 0;
         });
     }
