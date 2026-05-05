@@ -44,13 +44,29 @@ Domain currently passes `decimal` everywhere with implicit "TWD or whatever the 
 
 ## M6 — ObservableCollection encapsulation
 
-**Effort:** 6–12h
+**Effort:** 4–8h remaining (13 of 52 covered)
 
-52 `public ObservableCollection<T>` properties across feature VMs are exposed as concrete `ObservableCollection<T>` rather than `IReadOnlyObservableCollection<T>` (or `INotifyCollectionChanged + IReadOnlyList<T>`). External callers can mutate them directly, breaking the VM's invariants.
+**Done:** Insurance, PhysicalAsset, RealEstate, Retirement, Goals, Alerts, Reconciliation — all expose `ReadOnlyObservableCollection<T>` with private `ObservableCollection<T>` backing fields.
 
-**Target:** expose `IReadOnlyList<T>` + an event surface (`INotifyCollectionChanged`). Mechanical refactor across feature pages. Run after H1 (TransactionDialog split) and L3 (Allocation decoupling) so we're not editing files that are about to be torn apart.
+**Pattern (canonical):**
+```csharp
+private readonly ObservableCollection<T> _items = [];
+public ReadOnlyObservableCollection<T> Items { get; }
 
-Could be done feature-by-feature rather than as one mega commit — recommend per-feature commits.
+public Foo() {
+    Items = new ReadOnlyObservableCollection<T>(_items);
+    // … mutate _items internally
+}
+```
+
+**Remaining (~39 sites):**
+- **Portfolio** (Positions / Trades / CashAccounts / Liabilities) — these are cross-shared with `TransactionDialogViewModel.Trades / Positions / CashAccounts / Liabilities` by reference. Encapsulating them requires Tx VM to also expose `ReadOnlyObservableCollection<T>`. Best tackled together with **H1**.
+- **FinancialOverview** (AssetGroups / InvestGroups / LiabGroups) — depends on `Portfolio.Positions`, so wait for L3.
+- **Categories** (Categories / Rules / Budgets / AvailableCategories / IconOptions / EditIconOptions) — independent feature; can be done anytime.
+- **Allocation** (AllocationRows) — touched in L3.
+- **Fire / MonteCarlo / Import / BudgetSummaryCard / SellPanel / AllocationPanel / AssetGroupVm / LiabilityRowViewModel.ScheduleEntries** — independent; quick wins.
+
+Recommend: knock out the **independent** group (Categories + Fire + MonteCarlo + Import + small Portfolio-internal records) as a follow-up commit; defer Portfolio/FinancialOverview to after H1/L3.
 
 ---
 

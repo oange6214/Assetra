@@ -33,7 +33,8 @@ public sealed partial class FireViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(SaveToGoalsCommand))]
     private bool _hasCalculatedResult;
 
-    public ObservableCollection<FireWealthPoint> WealthPath { get; } = [];
+    private readonly ObservableCollection<FireWealthPoint> _wealthPath = [];
+    public ReadOnlyObservableCollection<FireWealthPoint> WealthPath { get; }
 
     public FireViewModel(
         IFireCalculatorService calculator,
@@ -47,6 +48,7 @@ public sealed partial class FireViewModel : ObservableObject
         _goals = goals;
         _snackbar = snackbar;
         _localization = localization;
+        WealthPath = new ReadOnlyObservableCollection<FireWealthPoint>(_wealthPath);
     }
 
     private string L(string key, string fallback) =>
@@ -79,9 +81,9 @@ public sealed partial class FireViewModel : ObservableObject
         ProjectedNetWorthAtFire = result.ProjectedNetWorthAtFire;
         HasCalculatedResult = true;
 
-        WealthPath.Clear();
+        _wealthPath.Clear();
         for (int i = 0; i < result.WealthPath.Count; i++)
-            WealthPath.Add(new FireWealthPoint(i, result.WealthPath[i]));
+            _wealthPath.Add(new FireWealthPoint(i, result.WealthPath[i]));
     }
 
     [RelayCommand(CanExecute = nameof(HasCalculatedResult))]

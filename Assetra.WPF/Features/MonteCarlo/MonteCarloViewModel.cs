@@ -27,7 +27,8 @@ public sealed partial class MonteCarloViewModel : ObservableObject
     [ObservableProperty] private bool _isRunning;
     [ObservableProperty] private bool _hasResult;
 
-    public ObservableCollection<MonteCarloPathPoint> MedianPath { get; } = [];
+    private readonly ObservableCollection<MonteCarloPathPoint> _medianPath = [];
+    public ReadOnlyObservableCollection<MonteCarloPathPoint> MedianPath { get; }
 
     private readonly ILocalizationService? _localization;
 
@@ -38,6 +39,7 @@ public sealed partial class MonteCarloViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(simulator);
         _simulator = simulator;
         _localization = localization;
+        MedianPath = new ReadOnlyObservableCollection<MonteCarloPathPoint>(_medianPath);
     }
 
     private string L(string key, string fallback) =>
@@ -74,9 +76,9 @@ public sealed partial class MonteCarloViewModel : ObservableObject
             P10Ending = result.P10EndingBalance;
             P90Ending = result.P90EndingBalance;
 
-            MedianPath.Clear();
+            _medianPath.Clear();
             for (int i = 0; i < result.MedianBalancePath.Count; i++)
-                MedianPath.Add(new MonteCarloPathPoint(i, result.MedianBalancePath[i]));
+                _medianPath.Add(new MonteCarloPathPoint(i, result.MedianBalancePath[i]));
 
             HasResult = true;
         }
