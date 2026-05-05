@@ -224,4 +224,65 @@ public sealed class MoneyTests
 
         Assert.Equal(new[] { 10m, 15m, 20m }, list.Select(m => m.Amount));
     }
+
+    // Collection / equality contract — locks the structural-equality semantics
+    // documented on Money: dictionaries / HashSets / Distinct rely on it, and
+    // cross-currency keys are *intentionally* distinct (silent), in contrast
+    // to the throwing arithmetic / ordering operators.
+
+    [Fact]
+    public void Dictionary_UsesStructuralEquality()
+    {
+        var dict = new Dictionary<Money, string>
+        {
+            [new Money(100m, "TWD")] = "twd-100",
+            [new Money(100m, "USD")] = "usd-100",  // different currency → different key
+            [new Money(200m, "TWD")] = "twd-200",
+        };
+
+        Assert.Equal(3, dict.Count);
+        Assert.Equal("twd-100", dict[new Money(100m, "twd")]);  // case-insensitive lookup
+        Assert.Equal("usd-100", dict[new Money(100m, "USD")]);
+    }
+
+    [Fact]
+    public void HashSet_DeduplicatesByStructuralEquality()
+    {
+        var set = new HashSet<Money>
+        {
+            new(100m, "TWD"),
+            new(100m, "twd"),  // duplicate via case-insensitive currency
+            new(100m, "USD"),  // distinct (different currency)
+            new(200m, "TWD"),  // distinct (different amount)
+        };
+
+        Assert.Equal(3, set.Count);
+        Assert.Contains(new Money(100m, "TWD"), set);
+        Assert.Contains(new Money(100m, "USD"), set);
+        Assert.Contains(new Money(200m, "TWD"), set);
+    }
+
+    [Fact]
+    public void Distinct_DropsCaseInsensitiveDuplicates()
+    {
+        var inputs = new[]
+        {
+            new Money(50m, "TWD"),
+            new Money(50m, "twd"),
+            new Money(50m, "USD"),
+        };
+
+        var unique = inputs.Distinct().ToList();
+
+        Assert.Equal(2, unique.Count);
+    }
+
+    [Fact]
+    public void GetHashCode_StableAcrossCurrencyCasing()
+    {
+        var lower = new Money(100m, "twd");
+        var upper = new Money(100m, "TWD");
+
+        Assert.Equal(lower.GetHashCode(), upper.GetHashCode());
+    }
 }
