@@ -8,15 +8,17 @@ Already shipped (closed): C1, C2, H2, H4, H5, H6, H7-partial, M2, M3, M4, M5, M7
 
 ---
 
-## L3 — AllocationViewModel ↔ PortfolioViewModel coupling
+## L3 — AllocationViewModel ↔ PortfolioViewModel coupling  🟡 Partial
 
-**Effort:** 4–6h
+**Effort:** 2–3h remaining (AllocationViewModel done, Dashboard + FinancialOverview pending)
 
-`AllocationViewModel` is a constructor-time dependent of `PortfolioViewModel` (`new AllocationViewModel(sp.GetRequiredService<PortfolioViewModel>(), …)`). It subscribes to `Positions.CollectionChanged` and individual property changes on `PortfolioRowViewModel` to recompute its bars.
+✅ **AllocationViewModel:** decoupled via `IPortfolioPositionFeed` (Positions + TotalCash + INotifyPropertyChanged). 8 unit tests demonstrate substitution against a stub feed. PortfolioViewModel implements the interface through explicit member forwarding so existing direct callers keep their `ObservableCollection<T>` access.
 
-**Target:** introduce `IPortfolioSnapshotProvider` (read-only stream of position summaries) + `IPortfolioPositionFeed` (CollectionChanged proxy). `PortfolioViewModel` *implements* both; `AllocationViewModel` consumes only the interfaces. Result: `AllocationViewModel` becomes unit-testable without constructing PortfolioViewModel.
+🔲 **DashboardViewModel:** consumes 30+ proxy properties forwarding NetWorth/DayPnl/TotalAssets/TotalLiabilities/Financial/History from PortfolioViewModel. Either expose a fatter `IPortfolioDashboardSource` or inline the proxy values into a separate snapshot DTO.
 
-Same surgery applies to `DashboardViewModel` and `FinancialOverviewViewModel` — pair this work with H3 (factory extraction) so the new interfaces drop into both code paths.
+🔲 **FinancialOverviewViewModel:** subscribes to `PortfolioViewModel.PropertyChanged` for `TotalMarketValue`; reads `Positions`. Smaller surface — could reuse `IPortfolioPositionFeed` plus a `TotalMarketValueChanged` notification pattern.
+
+Both follow-ups share the existing `IPortfolioPositionFeed` skeleton — extend per consumer.
 
 ---
 
