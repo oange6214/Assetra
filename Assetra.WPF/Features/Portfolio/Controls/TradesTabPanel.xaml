@@ -105,7 +105,9 @@
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.DivCalendar.Title}" />
                 </StackPanel>
-                <pcontrols:DividendCalendarPanel Visibility="{Binding DivCalendar.IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <pcontrols:DividendCalendarPanel
+                    DataContext="{Binding DivCalendar}"
+                    Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
             </StackPanel>
         </Border>
 

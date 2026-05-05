@@ -2,19 +2,109 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.DividendCalendarPanel"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="clr-namespace:Assetra.WPF.Infrastructure.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sub="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    x:Name="Root"
+    d:DataContext="{d:DesignInstance Type={x:Type sub:DividendCalendarViewModel}, IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
-    <!--  DataContext = PortfolioViewModel, set by parent  -->
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+        <!--  Month-cell button style  -->
+        <Style x:Key="MonthCellButton" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource AppBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Margin" Value="2" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHover}" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Cursor" Value="Arrow" />
+                                <Setter Property="Opacity" Value="0.5" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="MonthCellTemplate" DataType="{x:Type sub:DividendCalendarCellViewModel}">
+            <Button
+                Command="{Binding DataContext.FilterByDividendMonthCommand, RelativeSource={RelativeSource AncestorType=UserControl, AncestorLevel=2}}"
+                CommandParameter="{Binding Month}"
+                IsEnabled="{Binding HasData}"
+                Style="{StaticResource MonthCellButton}">
+                <StackPanel Margin="8,6,8,6">
+                    <TextBlock
+                        FontSize="11"
+                        FontWeight="SemiBold"
+                        Text="{Binding Label}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasData}" Value="False">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <StackPanel
+                        Margin="0,4,0,0"
+                        Orientation="Horizontal"
+                        Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Ellipse
+                            Width="6"
+                            Height="6"
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            Fill="{DynamicResource AppUp}" />
+                        <TextBlock
+                            FontFamily="{DynamicResource FontBase}"
+                            FontSize="12"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppUp}"
+                            Text="{Binding TotalDisplay}"
+                            TextOptions.TextFormattingMode="Display"
+                            Typography.NumeralAlignment="Tabular" />
+                    </StackPanel>
+                </StackPanel>
+            </Button>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <!--  DataContext = DividendCalendarViewModel — parent's PortfolioViewModel binds via DivCalendar  -->
 
     <Border
         x:Name="RootBorder"
         Padding="16,4,16,8"
-        Background="Transparent">
+        Background="Transparent"
+        Visibility="{Binding HasAnyDividends, Converter={StaticResource BooleanToVisibilityConverter}}">
         <StackPanel>
-            <!--  Title + year total + year navigation  -->
+            <!--  Title + year + year total + year navigation  -->
             <Grid Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -39,18 +129,17 @@
                     FontSize="{StaticResource FontSizeSm}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppAccent}"
-                    Text="{Binding DivCalendar.Year}"
+                    Text="{Binding Year}"
                     Typography.NumeralAlignment="Tabular" />
 
-                <!--  Year total  -->
                 <TextBlock
-                    x:Name="YearTotalText"
                     Grid.Column="2"
                     Margin="12,0,0,0"
                     VerticalAlignment="Center"
                     FontFamily="{DynamicResource FontBase}"
                     FontSize="{StaticResource FontSizeXs}"
                     Foreground="{DynamicResource AppUp}"
+                    Text="{Binding YearTotalDisplay}"
                     Typography.NumeralAlignment="Tabular" />
 
                 <StackPanel Grid.Column="4" Orientation="Horizontal">
@@ -59,7 +148,7 @@
                         Height="24"
                         Margin="0,0,4,0"
                         Appearance="Secondary"
-                        Command="{Binding DivCalendar.PrevYearCommand}"
+                        Command="{Binding PrevYearCommand}"
                         ToolTip="{DynamicResource Common.Previous}">
                         <ui:SymbolIcon
                             FontSize="10"
@@ -70,7 +159,7 @@
                         Width="24"
                         Height="24"
                         Appearance="Secondary"
-                        Command="{Binding DivCalendar.NextYearCommand}"
+                        Command="{Binding NextYearCommand}"
                         ToolTip="{DynamicResource Common.Next}">
                         <ui:SymbolIcon
                             FontSize="10"
@@ -80,11 +169,14 @@
                 </StackPanel>
             </Grid>
 
-            <!--  4×3 month grid (populated by code-behind)  -->
-            <UniformGrid
-                x:Name="MonthGrid"
-                Columns="4"
-                Rows="3" />
+            <!--  4×3 month grid — pure data binding (L6)  -->
+            <ItemsControl ItemTemplate="{StaticResource MonthCellTemplate}" ItemsSource="{Binding Cells}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" Rows="3" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
         </StackPanel>
     </Border>
 </UserControl>
