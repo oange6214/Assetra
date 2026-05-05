@@ -141,52 +141,9 @@ internal static class PortfolioServiceCollectionExtensions
                 sp.GetRequiredService<ITransactionService>()));
 
         // ViewModels
-        services.AddSingleton<PortfolioViewModel>(sp => new PortfolioViewModel(
-            new PortfolioServices(
-                Stock: sp.GetRequiredService<IStockService>(),
-                Search: sp.GetRequiredService<IStockSearchService>(),
-                HistoryMaintenance: sp.GetRequiredService<IPortfolioHistoryMaintenanceService>(),
-                HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
-                TradeDeletionWorkflow: sp.GetRequiredService<ITradeDeletionWorkflowService>(),
-                PositionDeletionWorkflow: sp.GetRequiredService<IPositionDeletionWorkflowService>(),
-                LoanSchedule: sp.GetRequiredService<ILoanScheduleService>(),
-                Load: sp.GetRequiredService<IPortfolioLoadService>(),
-                History: sp.GetRequiredService<IStockHistoryProvider>(),
-                Currency: sp.GetRequiredService<ICurrencyService>(),
-                Fx: sp.GetService<IMultiCurrencyValuationService>(),
-                Crypto: sp.GetRequiredService<ICryptoService>(),
-                BalanceQuery: sp.GetRequiredService<IBalanceQueryService>(),
-                PositionQuery: sp.GetRequiredService<IPositionQueryService>(),
-                TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>(),
-                AccountMutation: sp.GetRequiredService<IAccountMutationWorkflowService>(),
-                LiabilityMutation: sp.GetRequiredService<ILiabilityMutationWorkflowService>(),
-                CreditCardMutation: sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
-                CreditCardTransaction: sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
-                LoanPayment: sp.GetRequiredService<ILoanPaymentWorkflowService>(),
-                LoanMutation: sp.GetRequiredService<ILoanMutationWorkflowService>(),
-                CategoryRepository: sp.GetRequiredService<ICategoryRepository>(),
-                AutoCategorizationRuleRepository: sp.GetRequiredService<IAutoCategorizationRuleRepository>(),
-                AddAssetDialog: new AddAssetDialogViewModel(
-                    sp.GetRequiredService<IAddAssetWorkflowService>(),
-                    sp.GetRequiredService<IAccountUpsertWorkflowService>(),
-                    sp.GetRequiredService<ITransactionWorkflowService>(),
-                    sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
-                    sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
-                    sp.GetRequiredService<ILoanMutationWorkflowService>()),
-                SellPanel: new SellPanelViewModel(
-                    sp.GetRequiredService<ISellWorkflowService>(),
-                    new PortfolioSellPanelController(),
-                    sp.GetRequiredService<ISnackbarService>(),
-                    sp.GetRequiredService<ILocalizationService>()))
-            {
-                Summary = sp.GetRequiredService<IPortfolioSummaryService>(),
-            },
-            new PortfolioUiServices(
-                DefaultScheduler.Instance,
-                sp.GetService<IThemeService>(),
-                sp.GetRequiredService<IAppSettingsService>(),
-                sp.GetRequiredService<ISnackbarService>(),
-                sp.GetRequiredService<ILocalizationService>())));
+        services.AddSingleton<PortfolioViewModelFactory>();
+        services.AddSingleton<PortfolioViewModel>(sp =>
+            sp.GetRequiredService<PortfolioViewModelFactory>().Create());
         services.AddSingleton<AllocationViewModel>(sp => new AllocationViewModel(
             sp.GetRequiredService<PortfolioViewModel>(),
             sp.GetRequiredService<IAppSettingsService>()));
