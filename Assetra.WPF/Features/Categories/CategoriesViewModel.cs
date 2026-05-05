@@ -23,9 +23,13 @@ public partial class CategoriesViewModel : ObservableObject
     private readonly CollectionViewSource _expenseViewSource = new();
     private readonly CollectionViewSource _incomeViewSource = new();
 
-    public ObservableCollection<CategoryRowViewModel> Categories { get; } = [];
-    public ObservableCollection<AutoCategorizationRuleRowViewModel> Rules { get; } = [];
-    public ObservableCollection<BudgetRowViewModel> Budgets { get; } = [];
+    private readonly ObservableCollection<CategoryRowViewModel> _categories = [];
+    private readonly ObservableCollection<AutoCategorizationRuleRowViewModel> _rules = [];
+    private readonly ObservableCollection<BudgetRowViewModel> _budgets = [];
+
+    public ReadOnlyObservableCollection<CategoryRowViewModel> Categories { get; }
+    public ReadOnlyObservableCollection<AutoCategorizationRuleRowViewModel> Rules { get; }
+    public ReadOnlyObservableCollection<BudgetRowViewModel> Budgets { get; }
 
     public ICollectionView ExpenseView { get; }
     public ICollectionView IncomeView { get; }
@@ -33,7 +37,8 @@ public partial class CategoriesViewModel : ObservableObject
     /// <summary>
     /// 規則表單可選分類列表（含支出與收入，但排除已封存）。
     /// </summary>
-    public ObservableCollection<CategoryRowViewModel> AvailableCategories { get; } = [];
+    private readonly ObservableCollection<CategoryRowViewModel> _availableCategories = [];
+    public ReadOnlyObservableCollection<CategoryRowViewModel> AvailableCategories { get; }
 
     [ObservableProperty] private string _addName = string.Empty;
     [ObservableProperty] private CategoryKind _addKind = CategoryKind.Expense;
@@ -102,7 +107,8 @@ public partial class CategoriesViewModel : ObservableObject
     public IReadOnlyList<CategoryKind> KindOptions { get; } =
         [CategoryKind.Expense, CategoryKind.Income];
 
-    public ObservableCollection<CategoryVisualOption> IconOptions { get; } = [];
+    private readonly ObservableCollection<CategoryVisualOption> _iconOptions = [];
+    public ReadOnlyObservableCollection<CategoryVisualOption> IconOptions { get; }
 
     public IReadOnlyList<string> ColorOptions { get; } =
     [
@@ -145,6 +151,12 @@ public partial class CategoriesViewModel : ObservableObject
         _snackbar = snackbar;
         _localization = localization;
 
+        Categories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_categories);
+        Rules = new ReadOnlyObservableCollection<AutoCategorizationRuleRowViewModel>(_rules);
+        Budgets = new ReadOnlyObservableCollection<BudgetRowViewModel>(_budgets);
+        AvailableCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_availableCategories);
+        IconOptions = new ReadOnlyObservableCollection<CategoryVisualOption>(_iconOptions);
+
         _expenseViewSource.Source = Categories;
         ExpenseView = _expenseViewSource.View;
         ExpenseView.Filter = o => o is CategoryRowViewModel r && r.IsExpense && (ShowArchived || !r.IsArchived);
@@ -160,9 +172,9 @@ public partial class CategoriesViewModel : ObservableObject
         RefreshIconOptions();
         ApplyAddDefaults(AddKind);
 
-        Categories.CollectionChanged += (_, _) => NotifyEmptyStatesChanged();
-        Rules.CollectionChanged       += (_, _) => NotifyEmptyStatesChanged();
-        Budgets.CollectionChanged     += (_, _) => NotifyEmptyStatesChanged();
+        _categories.CollectionChanged += (_, _) => NotifyEmptyStatesChanged();
+        _rules.CollectionChanged       += (_, _) => NotifyEmptyStatesChanged();
+        _budgets.CollectionChanged     += (_, _) => NotifyEmptyStatesChanged();
     }
 
     private void NotifyEmptyStatesChanged()
@@ -204,9 +216,9 @@ public partial class CategoriesViewModel : ObservableObject
     public async Task LoadAsync()
     {
         var data = await _repository.GetAllAsync().ConfigureAwait(true);
-        Categories.Clear();
+        _categories.Clear();
         foreach (var c in data)
-            Categories.Add(CategoryRowViewModel.FromModel(c));
+            _categories.Add(CategoryRowViewModel.FromModel(c));
 
         RefreshAvailableCategories();
         await LoadRulesAsync().ConfigureAwait(true);
@@ -217,9 +229,9 @@ public partial class CategoriesViewModel : ObservableObject
     private async Task LoadBudgetsAsync()
     {
         var budgets = await _budgetRepository.GetAllAsync().ConfigureAwait(true);
-        Budgets.Clear();
+        _budgets.Clear();
         foreach (var b in budgets)
-            Budgets.Add(BudgetRowViewModel.FromModel(b, LookupBudgetCategoryDisplay(b.CategoryId)));
+            _budgets.Add(BudgetRowViewModel.FromModel(b, LookupBudgetCategoryDisplay(b.CategoryId)));
     }
 
     private string LookupBudgetCategoryDisplay(Guid? categoryId)
@@ -235,20 +247,20 @@ public partial class CategoriesViewModel : ObservableObject
     private async Task LoadRulesAsync()
     {
         var rules = await _ruleRepository.GetAllAsync().ConfigureAwait(true);
-        Rules.Clear();
+        _rules.Clear();
         foreach (var r in rules)
         {
             var row = AutoCategorizationRuleRowViewModel.FromModel(r);
             row.CategoryDisplay = LookupCategoryDisplay(r.CategoryId);
-            Rules.Add(row);
+            _rules.Add(row);
         }
     }
 
     private void RefreshAvailableCategories()
     {
-        AvailableCategories.Clear();
+        _availableCategories.Clear();
         foreach (var c in Categories.Where(c => !c.IsArchived).OrderBy(c => c.Kind).ThenBy(c => c.SortOrder))
-            AvailableCategories.Add(c);
+            _availableCategories.Add(c);
     }
 
     private string LookupCategoryDisplay(Guid id)
@@ -289,7 +301,7 @@ public partial class CategoriesViewModel : ObservableObject
             IsArchived: false);
 
         await _repository.AddAsync(category).ConfigureAwait(true);
-        Categories.Add(CategoryRowViewModel.FromModel(category));
+        _categories.Add(CategoryRowViewModel.FromModel(category));
         RefreshAvailableCategories();
 
         AddName = string.Empty;
@@ -384,7 +396,7 @@ public partial class CategoriesViewModel : ObservableObject
             return;
         }
         await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
-        Categories.Remove(row);
+        _categories.Remove(row);
         RefreshAvailableCategories();
         _snackbar.Success(string.Format(
             GetString("Categories.Toast.Deleted", "已刪除分類「{0}」"), row.Name));
@@ -424,7 +436,7 @@ public partial class CategoriesViewModel : ObservableObject
         await _ruleRepository.AddAsync(rule).ConfigureAwait(true);
         var row = AutoCategorizationRuleRowViewModel.FromModel(rule);
         row.CategoryDisplay = LookupCategoryDisplay(rule.CategoryId);
-        Rules.Add(row);
+        _rules.Add(row);
 
         AddRuleKeyword = string.Empty;
         AddRulePriority = 0;
@@ -492,7 +504,7 @@ public partial class CategoriesViewModel : ObservableObject
     {
         if (row is null) return;
         await _ruleRepository.RemoveAsync(row.Id).ConfigureAwait(true);
-        Rules.Remove(row);
+        _rules.Remove(row);
         _snackbar.Success(string.Format(
             GetString("Categories.Rule.Toast.Deleted", "已刪除規則「{0}」"), row.KeywordPattern));
     }
@@ -567,7 +579,7 @@ public partial class CategoriesViewModel : ObservableObject
             Note: NullIfBlank(AddBudgetNote));
 
         await _budgetRepository.AddAsync(budget).ConfigureAwait(true);
-        Budgets.Add(BudgetRowViewModel.FromModel(budget, LookupBudgetCategoryDisplay(categoryId)));
+        _budgets.Add(BudgetRowViewModel.FromModel(budget, LookupBudgetCategoryDisplay(categoryId)));
         _budgetRefreshNotifier.NotifyChanged();
 
         AddBudgetAmount = 0m;
@@ -605,7 +617,7 @@ public partial class CategoriesViewModel : ObservableObject
     {
         if (row is null) return;
         await _budgetRepository.RemoveAsync(row.Id).ConfigureAwait(true);
-        Budgets.Remove(row);
+        _budgets.Remove(row);
         _budgetRefreshNotifier.NotifyChanged();
         _snackbar.Success(GetString("Categories.Budget.Toast.Deleted", "已刪除預算"));
     }
@@ -640,9 +652,9 @@ public partial class CategoriesViewModel : ObservableObject
 
     private void RefreshIconOptions()
     {
-        IconOptions.Clear();
+        _iconOptions.Clear();
         foreach (var option in BuildIconOptions())
-            IconOptions.Add(option);
+            _iconOptions.Add(option);
     }
 
     private IReadOnlyList<CategoryVisualOption> BuildIconOptions() =>
