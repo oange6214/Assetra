@@ -4,6 +4,8 @@ Items raised during the v0.22 → v0.23 multi-feature code review that have not 
 
 Already shipped (closed): C1, C2, H2, H4, H5, H6, H7-partial, M2, M3, M4, M5, M7-partial (5 of 6 VMs covered), L1, L2, L4-partial.
 
+**Pre-existing test-isolation bug** — the 4 `Debug.Assert(Dispatcher.CheckAccess())` sites in `PortfolioViewModel` fired spuriously after any test created a bare `System.Windows.Application` to populate WPF resources. Replaced inline check with `IsOnUiThreadOrTestEnvironment()` that distinguishes the production `App` subclass from the test-fake bare base. Full suite now 1119/1119 green.
+
 ---
 
 ## L3 — AllocationViewModel ↔ PortfolioViewModel coupling
