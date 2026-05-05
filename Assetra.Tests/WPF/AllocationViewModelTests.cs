@@ -33,6 +33,8 @@ public sealed class AllocationViewModelTests
             }
         }
 
+        public decimal TotalMarketValue { get; set; }
+
         public event PropertyChangedEventHandler? PropertyChanged;
     }
 
