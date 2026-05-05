@@ -22,8 +22,11 @@ public sealed partial class RetirementViewModel : ObservableObject
     private readonly Func<string> _deviceIdProvider;
     private readonly TimeProvider _time;
 
-    public ObservableCollection<RetirementRowViewModel> Accounts { get; } = [];
-    public ObservableCollection<RetirementAccountTypeOption> AccountTypeOptions { get; } = [];
+    private readonly ObservableCollection<RetirementRowViewModel> _accounts = [];
+    private readonly ObservableCollection<RetirementAccountTypeOption> _accountTypeOptions = [];
+
+    public ReadOnlyObservableCollection<RetirementRowViewModel> Accounts { get; }
+    public ReadOnlyObservableCollection<RetirementAccountTypeOption> AccountTypeOptions { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasNoAccounts))]
@@ -78,7 +81,9 @@ public sealed partial class RetirementViewModel : ObservableObject
         _localization = localization ?? NullLocalizationService.Instance;
         _deviceIdProvider = deviceIdProvider ?? (() => "local");
         _time = time ?? TimeProvider.System;
-        Accounts.CollectionChanged += (_, _) => NotifyListStateChanged();
+        Accounts = new ReadOnlyObservableCollection<RetirementRowViewModel>(_accounts);
+        AccountTypeOptions = new ReadOnlyObservableCollection<RetirementAccountTypeOption>(_accountTypeOptions);
+        _accounts.CollectionChanged += (_, _) => NotifyListStateChanged();
         _localization.LanguageChanged += OnLanguageChanged;
         RefreshLocalizedAccountTypeText();
     }
@@ -93,9 +98,9 @@ public sealed partial class RetirementViewModel : ObservableObject
             var summaries = await _projection.GetAccountSummariesAsync().ConfigureAwait(true);
             await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                Accounts.Clear();
+                _accounts.Clear();
                 foreach (var s in summaries)
-                    Accounts.Add(new RetirementRowViewModel(
+                    _accounts.Add(new RetirementRowViewModel(
                         s,
                         GetAccountTypeDisplayName(s.Account.AccountType)));
             });
@@ -243,11 +248,11 @@ public sealed partial class RetirementViewModel : ObservableObject
 
     private void RefreshLocalizedAccountTypeText()
     {
-        AccountTypeOptions.Clear();
+        _accountTypeOptions.Clear();
         foreach (var accountType in Enum.GetValues<RetirementAccountType>())
-            AccountTypeOptions.Add(new RetirementAccountTypeOption(accountType, GetAccountTypeDisplayName(accountType)));
+            _accountTypeOptions.Add(new RetirementAccountTypeOption(accountType, GetAccountTypeDisplayName(accountType)));
 
-        foreach (var account in Accounts)
+        foreach (var account in _accounts)
             account.AccountTypeDisplay = GetAccountTypeDisplayName(account.AccountType);
     }
 

@@ -12,7 +12,8 @@ public sealed partial class RealEstateViewModel : ObservableObject
     private readonly IRealEstateRepository _repository;
     private readonly IRealEstateValuationService _valuation;
 
-    public ObservableCollection<RealEstateRowViewModel> Properties { get; } = [];
+    private readonly ObservableCollection<RealEstateRowViewModel> _properties = [];
+    public ReadOnlyObservableCollection<RealEstateRowViewModel> Properties { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasNoProperties))]
@@ -54,7 +55,8 @@ public sealed partial class RealEstateViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(valuation);
         _repository = repository;
         _valuation = valuation;
-        Properties.CollectionChanged += (_, _) => NotifyListStateChanged();
+        Properties = new ReadOnlyObservableCollection<RealEstateRowViewModel>(_properties);
+        _properties.CollectionChanged += (_, _) => NotifyListStateChanged();
     }
 
     [RelayCommand]
@@ -67,9 +69,9 @@ public sealed partial class RealEstateViewModel : ObservableObject
             var summaries = await _valuation.GetValuationSummariesAsync().ConfigureAwait(true);
             await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                Properties.Clear();
+                _properties.Clear();
                 foreach (var s in summaries)
-                    Properties.Add(new RealEstateRowViewModel(s));
+                    _properties.Add(new RealEstateRowViewModel(s));
             });
             TotalEquity = await _valuation.GetTotalEquityAsync().ConfigureAwait(true);
         }

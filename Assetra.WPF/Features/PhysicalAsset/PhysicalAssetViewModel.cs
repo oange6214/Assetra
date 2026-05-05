@@ -20,8 +20,11 @@ public sealed partial class PhysicalAssetViewModel : ObservableObject
     private readonly IPhysicalAssetValuationService _valuation;
     private readonly ILocalizationService _localization;
 
-    public ObservableCollection<PhysicalAssetRowViewModel> Assets { get; } = [];
-    public ObservableCollection<PhysicalAssetCategoryOption> CategoryOptions { get; } = [];
+    private readonly ObservableCollection<PhysicalAssetRowViewModel> _assets = [];
+    private readonly ObservableCollection<PhysicalAssetCategoryOption> _categoryOptions = [];
+
+    public ReadOnlyObservableCollection<PhysicalAssetRowViewModel> Assets { get; }
+    public ReadOnlyObservableCollection<PhysicalAssetCategoryOption> CategoryOptions { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasNoAssets))]
@@ -63,7 +66,9 @@ public sealed partial class PhysicalAssetViewModel : ObservableObject
         _repository = repository;
         _valuation = valuation;
         _localization = localization ?? NullLocalizationService.Instance;
-        Assets.CollectionChanged += (_, _) => NotifyListStateChanged();
+        Assets = new ReadOnlyObservableCollection<PhysicalAssetRowViewModel>(_assets);
+        CategoryOptions = new ReadOnlyObservableCollection<PhysicalAssetCategoryOption>(_categoryOptions);
+        _assets.CollectionChanged += (_, _) => NotifyListStateChanged();
         _localization.LanguageChanged += OnLanguageChanged;
         RefreshLocalizedCategoryText();
     }
@@ -78,9 +83,9 @@ public sealed partial class PhysicalAssetViewModel : ObservableObject
             var summaries = await _valuation.GetSummariesAsync().ConfigureAwait(true);
             await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                Assets.Clear();
+                _assets.Clear();
                 foreach (var s in summaries)
-                    Assets.Add(new PhysicalAssetRowViewModel(
+                    _assets.Add(new PhysicalAssetRowViewModel(
                         s,
                         GetCategoryDisplayName(s.Asset.Category)));
             });
@@ -199,11 +204,11 @@ public sealed partial class PhysicalAssetViewModel : ObservableObject
 
     private void RefreshLocalizedCategoryText()
     {
-        CategoryOptions.Clear();
+        _categoryOptions.Clear();
         foreach (var category in Enum.GetValues<PhysicalAssetCategory>())
-            CategoryOptions.Add(new PhysicalAssetCategoryOption(category, GetCategoryDisplayName(category)));
+            _categoryOptions.Add(new PhysicalAssetCategoryOption(category, GetCategoryDisplayName(category)));
 
-        foreach (var asset in Assets)
+        foreach (var asset in _assets)
             asset.CategoryDisplay = GetCategoryDisplayName(asset.Category);
     }
 

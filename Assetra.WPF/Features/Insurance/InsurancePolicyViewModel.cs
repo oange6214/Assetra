@@ -20,8 +20,11 @@ public sealed partial class InsurancePolicyViewModel : ObservableObject
     private readonly IInsuranceCashValueCalculator _calculator;
     private readonly ILocalizationService _localization;
 
-    public ObservableCollection<InsurancePolicyRowViewModel> Policies { get; } = [];
-    public ObservableCollection<InsuranceTypeOption> InsuranceTypeOptions { get; } = [];
+    private readonly ObservableCollection<InsurancePolicyRowViewModel> _policies = [];
+    private readonly ObservableCollection<InsuranceTypeOption> _insuranceTypeOptions = [];
+
+    public ReadOnlyObservableCollection<InsurancePolicyRowViewModel> Policies { get; }
+    public ReadOnlyObservableCollection<InsuranceTypeOption> InsuranceTypeOptions { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasNoPolicies))]
@@ -66,7 +69,9 @@ public sealed partial class InsurancePolicyViewModel : ObservableObject
         _repository = repository;
         _calculator = calculator;
         _localization = localization ?? NullLocalizationService.Instance;
-        Policies.CollectionChanged += (_, _) => NotifyListStateChanged();
+        Policies = new ReadOnlyObservableCollection<InsurancePolicyRowViewModel>(_policies);
+        InsuranceTypeOptions = new ReadOnlyObservableCollection<InsuranceTypeOption>(_insuranceTypeOptions);
+        _policies.CollectionChanged += (_, _) => NotifyListStateChanged();
         _localization.LanguageChanged += OnLanguageChanged;
         RefreshLocalizedInsuranceTypeText();
     }
@@ -81,9 +86,9 @@ public sealed partial class InsurancePolicyViewModel : ObservableObject
             var summaries = await _calculator.GetCashValueSummariesAsync().ConfigureAwait(true);
             await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                Policies.Clear();
+                _policies.Clear();
                 foreach (var s in summaries)
-                    Policies.Add(new InsurancePolicyRowViewModel(
+                    _policies.Add(new InsurancePolicyRowViewModel(
                         s,
                         GetInsuranceTypeDisplayName(s.Policy.Type)));
             });
@@ -209,11 +214,11 @@ public sealed partial class InsurancePolicyViewModel : ObservableObject
 
     private void RefreshLocalizedInsuranceTypeText()
     {
-        InsuranceTypeOptions.Clear();
+        _insuranceTypeOptions.Clear();
         foreach (var type in Enum.GetValues<InsuranceType>())
-            InsuranceTypeOptions.Add(new InsuranceTypeOption(type, GetInsuranceTypeDisplayName(type)));
+            _insuranceTypeOptions.Add(new InsuranceTypeOption(type, GetInsuranceTypeDisplayName(type)));
 
-        foreach (var policy in Policies)
+        foreach (var policy in _policies)
             policy.TypeDisplay = GetInsuranceTypeDisplayName(policy.Type);
     }
 
