@@ -13,7 +13,7 @@
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
 
-    <Grid Margin="24">
+    <Grid Style="{StaticResource PageRootGrid}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -21,14 +21,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock
-            Grid.Row="0"
-            Margin="0,0,0,16"
-            VerticalAlignment="Center"
-            FontSize="{StaticResource FontSizeXl}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextPrimary}"
-            Text="{DynamicResource MonteCarlo.Title}" />
+        <DockPanel Grid.Row="0" Style="{StaticResource PageHeaderDock}">
+            <TextBlock
+                Style="{StaticResource PageTitleText}"
+                Text="{DynamicResource MonteCarlo.Title}" />
+        </DockPanel>
 
         <ui:Card Grid.Row="1" Padding="20">
             <StackPanel>
@@ -93,7 +90,7 @@
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource MonteCarlo.Running}"
                         Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    <ui:Button Command="{Binding RunCommand}" Appearance="Primary">
+                    <ui:Button Command="{Binding RunCommand}" Style="{StaticResource PagePrimaryButton}">
                         <TextBlock
                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                             Text="{DynamicResource MonteCarlo.Run}" />
@@ -104,52 +101,34 @@
 
         <TextBlock
             Grid.Row="2"
-            Margin="0,12,0,0"
-            Foreground="{DynamicResource AppDanger}"
+            Style="{StaticResource PageErrorText}"
             Text="{Binding ErrorMessage}"
             Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
 
-        <ScrollViewer Grid.Row="3" Margin="0,16,0,0" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <ui:Card
-                    MinHeight="240"
-                    Padding="32"
-                    Visibility="{Binding HasResult, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <ui:SymbolIcon
-                            HorizontalAlignment="Center"
-                            FontSize="44"
-                            Foreground="{DynamicResource AppTextMuted}"
-                            Symbol="ChartMultiple24" />
-                        <TextBlock
-                            Margin="0,12,0,0"
-                            HorizontalAlignment="Center"
-                            FontSize="{StaticResource FontSizeMd}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{DynamicResource MonteCarlo.Empty.Title}" />
-                        <TextBlock
-                            Margin="0,6,0,0"
-                            HorizontalAlignment="Center"
-                            Foreground="{DynamicResource AppTextSecondary}"
-                            Text="{DynamicResource MonteCarlo.Result.NotCalculated}"
-                            TextAlignment="Center"
-                            TextWrapping="Wrap" />
-                        <ui:Button
-                            Margin="0,16,0,0"
-                            HorizontalAlignment="Center"
-                            Command="{Binding RunCommand}"
-                            Appearance="Primary">
-                            <TextBlock
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Text="{DynamicResource MonteCarlo.Run}" />
-                        </ui:Button>
-                    </StackPanel>
-                </ui:Card>
+        <Grid
+            Grid.Row="3"
+            Margin="{StaticResource PageContentTopGapMargin}"
+            Style="{StaticResource PageContentGrid}">
+            <StackPanel
+                Style="{StaticResource EmptyStatePanel}"
+                Visibility="{Binding HasResult, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                <ui:SymbolIcon Style="{StaticResource EmptyStateIcon}" Symbol="ChartMultiple24" />
+                <TextBlock Style="{StaticResource EmptyStateTitle}" Text="{DynamicResource MonteCarlo.Empty.Title}" />
+                <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource MonteCarlo.Result.NotCalculated}" />
+                <ui:Button
+                    Command="{Binding RunCommand}"
+                    Style="{StaticResource EmptyStateActionButton}">
+                    <TextBlock
+                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                        Text="{DynamicResource MonteCarlo.Run}" />
+                </ui:Button>
+            </StackPanel>
 
-                <UniformGrid
-                    Columns="4"
-                    Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ScrollViewer
+                VerticalScrollBarVisibility="Auto"
+                Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <UniformGrid Columns="4">
                     <ui:Card Margin="0,0,12,0" Padding="16">
                         <StackPanel>
                             <TextBlock
@@ -212,9 +191,7 @@
                     </ui:Card>
                 </UniformGrid>
 
-                <StackPanel
-                    Margin="0,16,0,0"
-                    Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel Margin="0,16,0,0">
                     <TextBlock
                         Margin="0,0,0,8"
                         FontSize="{StaticResource FontSizeMd}"
@@ -259,7 +236,8 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </UserControl>

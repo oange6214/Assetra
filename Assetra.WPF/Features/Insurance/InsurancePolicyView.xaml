@@ -18,7 +18,7 @@
         <Style BasedOn="{StaticResource FormComboBox}" TargetType="ComboBox" />
     </UserControl.Resources>
 
-    <Grid Margin="24">
+    <Grid Style="{StaticResource PageRootGrid}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -26,12 +26,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="0,0,0,16" LastChildFill="True">
+        <DockPanel Grid.Row="0" Style="{StaticResource PageHeaderDock}">
             <ui:Button
                 DockPanel.Dock="Right"
-                VerticalAlignment="Center"
                 Command="{Binding OpenAddFormCommand}"
-                Appearance="Primary"
+                Style="{StaticResource PagePrimaryButton}"
                 Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal">
                     <ui:SymbolIcon
@@ -48,14 +47,11 @@
             </ui:Button>
 
             <TextBlock
-                VerticalAlignment="Center"
-                FontSize="{StaticResource FontSizeXl}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextPrimary}"
+                Style="{StaticResource PageTitleText}"
                 Text="{DynamicResource Insurance.Title}" />
         </DockPanel>
 
-        <UniformGrid Grid.Row="1" Margin="0,0,0,16" Columns="3">
+        <UniformGrid Grid.Row="1" Columns="3" Style="{StaticResource PageMetricsGrid}">
             <ui:Card Margin="0,0,12,0" Padding="16">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
@@ -112,12 +108,11 @@
 
         <TextBlock
             Grid.Row="2"
-            Margin="0,0,0,8"
-            Foreground="{DynamicResource AppDanger}"
+            Style="{StaticResource PageErrorText}"
             Text="{Binding ErrorMessage}"
             Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
 
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="3" Style="{StaticResource PageContentGrid}">
             <ScrollViewer
                 VerticalScrollBarVisibility="Auto"
                 Visibility="{Binding HasPolicies, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -268,51 +263,30 @@
                 </ItemsControl>
             </ScrollViewer>
 
-            <ui:Card
-                MinHeight="240"
-                Padding="32"
+            <StackPanel
+                Style="{StaticResource EmptyStatePanel}"
                 Visibility="{Binding HasNoPolicies, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <ui:SymbolIcon
-                        HorizontalAlignment="Center"
-                        FontSize="44"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Symbol="Shield24" />
-                    <TextBlock
-                        Margin="0,12,0,0"
-                        HorizontalAlignment="Center"
-                        FontSize="{StaticResource FontSizeMd}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{DynamicResource Insurance.Empty.Title}" />
-                    <TextBlock
-                        Margin="0,6,0,0"
-                        HorizontalAlignment="Center"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Insurance.Empty.Hint}"
-                        TextAlignment="Center"
-                        TextWrapping="Wrap" />
-                    <ui:Button
-                        Margin="0,16,0,0"
-                        HorizontalAlignment="Center"
-                        Command="{Binding OpenAddFormCommand}"
-                        Appearance="Primary"
-                        Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                        <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeXs}"
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Symbol="Add24" />
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Text="{DynamicResource Insurance.Action.Add}" />
-                        </StackPanel>
-                    </ui:Button>
-                </StackPanel>
-            </ui:Card>
+                <ui:SymbolIcon Style="{StaticResource EmptyStateIcon}" Symbol="Shield24" />
+                <TextBlock Style="{StaticResource EmptyStateTitle}" Text="{DynamicResource Insurance.Empty.Title}" />
+                <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Insurance.Empty.Hint}" />
+                <ui:Button
+                    Command="{Binding OpenAddFormCommand}"
+                    Style="{StaticResource EmptyStateActionButton}"
+                    Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon
+                            Margin="0,0,4,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                            Symbol="Add24" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                            Text="{DynamicResource Insurance.Action.Add}" />
+                    </StackPanel>
+                </ui:Button>
+            </StackPanel>
         </Grid>
 
         <Border
@@ -403,11 +377,19 @@
                     </StackPanel>
                     <StackPanel Margin="0,0,12,12">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.StartDate}" />
-                        <ui:CalendarDatePicker Date="{Binding FormStartDate, Mode=TwoWay}" />
+                        <ui:CalendarDatePicker
+                            MinWidth="132"
+                            HorizontalContentAlignment="Left"
+                            Content="{Binding FormStartDate, Converter={StaticResource DateDisplayConverter}}"
+                            Date="{Binding FormStartDate, Mode=TwoWay}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,0,12">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.MaturityDate}" />
-                        <ui:CalendarDatePicker Date="{Binding FormMaturityDate, Mode=TwoWay}" />
+                        <ui:CalendarDatePicker
+                            MinWidth="132"
+                            HorizontalContentAlignment="Left"
+                            Content="{Binding FormMaturityDate, Converter={StaticResource DateDisplayConverter}}"
+                            Date="{Binding FormMaturityDate, Mode=TwoWay}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,12,0">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Notes}" />
@@ -431,8 +413,8 @@
                         Margin="0,0,8,0"
                         Command="{Binding CancelEditCommand}"
                         Content="{DynamicResource Common.Cancel}"
-                        Appearance="Secondary" />
-                    <ui:Button Command="{Binding SaveCommand}" Appearance="Primary">
+                        Style="{StaticResource PageSecondaryButton}" />
+                    <ui:Button Command="{Binding SaveCommand}" Style="{StaticResource PagePrimaryButton}">
                         <TextBlock
                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                             Text="{DynamicResource Common.Save}" />

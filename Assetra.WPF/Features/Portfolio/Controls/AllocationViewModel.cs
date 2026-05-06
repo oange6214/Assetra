@@ -46,7 +46,7 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void SwitchToOverview() { IsOverviewTab = true; IsRebalanceTab = false; }
     [RelayCommand]
-    private void SwitchToRebalance() { IsOverviewTab = false; IsRebalanceTab = true; }
+    private void SwitchToRebalance() { IsRebalanceTab = true; IsOverviewTab = false; }
 
     // Rebalance mode
     [ObservableProperty] private bool _isFullRebalance = true;

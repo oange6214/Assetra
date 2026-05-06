@@ -297,7 +297,11 @@
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{DynamicResource Portfolio.Tx.Date}" />
-                                            <ui:CalendarDatePicker Date="{Binding TxDate, Mode=TwoWay}" />
+                                            <ui:CalendarDatePicker
+                                                MinWidth="132"
+                                                HorizontalContentAlignment="Left"
+                                                Content="{Binding TxDate, Converter={StaticResource DateDisplayConverter}}"
+                                                Date="{Binding TxDate, Mode=TwoWay}" />
                                         </StackPanel>
                                     </Border>
 

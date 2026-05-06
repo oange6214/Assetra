@@ -1,0 +1,50 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Thickness x:Key="PageChromeMargin">24</Thickness>
+    <Thickness x:Key="PageHeaderMargin">0,0,0,16</Thickness>
+    <Thickness x:Key="PageSectionGapMargin">0,0,0,16</Thickness>
+    <Thickness x:Key="PageContentTopGapMargin">0,16,0,0</Thickness>
+
+    <Style x:Key="PageRootGrid" TargetType="Grid">
+        <Setter Property="Margin" Value="{StaticResource PageChromeMargin}" />
+        <Setter Property="Background" Value="{DynamicResource AppBackground}" />
+    </Style>
+
+    <Style x:Key="PageHeaderDock" TargetType="DockPanel">
+        <Setter Property="Margin" Value="{StaticResource PageHeaderMargin}" />
+        <Setter Property="LastChildFill" Value="True" />
+    </Style>
+
+    <Style x:Key="PageTitleText" TargetType="TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeXl}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <Style x:Key="PageSubtitleText" TargetType="TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBase}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="PageMetricsGrid" TargetType="UniformGrid">
+        <Setter Property="Margin" Value="{StaticResource PageSectionGapMargin}" />
+    </Style>
+
+    <Style x:Key="PageErrorText" TargetType="TextBlock">
+        <Setter Property="Margin" Value="0,0,0,8" />
+        <Setter Property="Foreground" Value="{DynamicResource AppDanger}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="PageContentGrid" TargetType="Grid">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+    </Style>
+
+</ResourceDictionary>

@@ -16,6 +16,7 @@
             <converters:StatusTagToBrushConverter x:Key="StatusTagToBrushConverter" />
             <converters:PercentToWidthConverter x:Key="PercentToWidthConverter" />
             <converters:CurrencyConverter x:Key="CurrencyConverter" />
+            <converters:DateDisplayConverter x:Key="DateDisplayConverter" />
             <converters:TradeTypeConverter x:Key="TradeTypeConverter" />
             <converters:ResourceKeyToStringConverter x:Key="ResourceKeyToStringConverter" />
             <converters:ZeroToVisibleConverter x:Key="ZeroToVisibleConverter" />

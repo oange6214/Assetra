@@ -14,31 +14,19 @@
     mc:Ignorable="d">
 
     <Grid Background="{DynamicResource AppBackground}">
-        <Grid Margin="24">
+        <Grid Style="{StaticResource PageRootGrid}">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBlock
-                Grid.Row="0"
-                Margin="0,0,0,12"
-                Foreground="{DynamicResource AppDown}"
-                Text="{Binding ErrorMessage}"
-                Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}" />
-
-            <ScrollViewer
-                Grid.Row="1"
-                HorizontalScrollBarVisibility="Disabled"
-                VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <ui:Card Margin="0,0,0,16" Padding="20">
-                        <DockPanel LastChildFill="True">
+            <DockPanel Grid.Row="0" Style="{StaticResource PageHeaderDock}">
                             <ui:Button
                                 DockPanel.Dock="Right"
-                                VerticalAlignment="Center"
-                                Appearance="Primary"
                                 Command="{Binding OpenAddFormCommand}"
+                                Style="{StaticResource PagePrimaryButton}"
                                 Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                 <StackPanel Orientation="Horizontal">
                                     <ui:SymbolIcon
@@ -61,19 +49,16 @@
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Symbol="Target24" />
                                 <TextBlock
-                                    VerticalAlignment="Center"
-                                    FontSize="{StaticResource FontSizeMd}"
-                                    FontWeight="SemiBold"
-                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Style="{StaticResource PageTitleText}"
                                     Text="{DynamicResource Goals.Title}" />
                             </StackPanel>
-                        </DockPanel>
-                    </ui:Card>
+            </DockPanel>
 
-                    <UniformGrid
-                        Margin="0,0,0,16"
+                <UniformGrid
+                    Grid.Row="1"
                         Columns="4"
                         Rows="1"
+                        Style="{StaticResource PageMetricsGrid}"
                         Visibility="{Binding HasGoals, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ui:Card Margin="0,0,8,0" Padding="16">
                             <StackPanel>
@@ -139,57 +124,45 @@
                                     Typography.NumeralAlignment="Tabular" />
                             </StackPanel>
                         </ui:Card>
-                    </UniformGrid>
+                </UniformGrid>
 
-                    <ui:Card
-                        MinHeight="180"
-                        Padding="24"
+            <TextBlock
+                Grid.Row="2"
+                Style="{StaticResource PageErrorText}"
+                Text="{Binding ErrorMessage}"
+                Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}" />
+
+                <Grid Grid.Row="3" Style="{StaticResource PageContentGrid}">
+                    <StackPanel
+                        Style="{StaticResource EmptyStatePanel}"
                         Visibility="{Binding HasNoGoals, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <ui:SymbolIcon
-                                HorizontalAlignment="Center"
-                                FontSize="48"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Symbol="Target24" />
-                            <TextBlock
-                                Margin="0,12,0,0"
-                                HorizontalAlignment="Center"
-                                FontSize="{DynamicResource FontSizeMd}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{DynamicResource Goals.Empty}" />
-                            <TextBlock
-                                Margin="0,6,0,0"
-                                HorizontalAlignment="Center"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{DynamicResource Goals.Empty.Hint}"
-                                TextAlignment="Center"
-                                TextWrapping="Wrap" />
-                            <ui:Button
-                                Margin="0,16,0,0"
-                                HorizontalAlignment="Center"
-                                Appearance="Primary"
-                                Command="{Binding OpenAddFormCommand}"
-                                Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                <StackPanel Orientation="Horizontal">
-                                    <ui:SymbolIcon
-                                        Margin="0,0,4,0"
-                                        VerticalAlignment="Center"
-                                        FontSize="{StaticResource FontSizeXs}"
-                                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                        Symbol="Add24" />
-                                    <TextBlock
-                                        VerticalAlignment="Center"
-                                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                        Text="{DynamicResource Goals.Add.Title}" />
-                                </StackPanel>
-                            </ui:Button>
-                        </StackPanel>
-                    </ui:Card>
+                        <ui:SymbolIcon Style="{StaticResource EmptyStateIcon}" Symbol="Target24" />
+                        <TextBlock Style="{StaticResource EmptyStateTitle}" Text="{DynamicResource Goals.Empty}" />
+                        <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Goals.Empty.Hint}" />
+                        <ui:Button
+                            Command="{Binding OpenAddFormCommand}"
+                            Style="{StaticResource EmptyStateActionButton}"
+                            Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon
+                                    Margin="0,0,4,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="{StaticResource FontSizeXs}"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                    Symbol="Add24" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                    Text="{DynamicResource Goals.Add.Title}" />
+                            </StackPanel>
+                        </ui:Button>
+                    </StackPanel>
 
-                    <ItemsControl
-                        ItemsSource="{Binding Goals}"
+                    <ScrollViewer
+                        HorizontalScrollBarVisibility="Disabled"
+                        VerticalScrollBarVisibility="Auto"
                         Visibility="{Binding HasGoals, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ItemsControl ItemsSource="{Binding Goals}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel />
@@ -336,127 +309,172 @@
                                 </ui:Card>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </ScrollViewer>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
 
             <Border
                 Grid.Row="0"
-                Grid.RowSpan="2"
+                Grid.RowSpan="4"
                 Margin="-24"
                 Panel.ZIndex="180"
-                Background="{DynamicResource AppModalOverlay}"
+                Background="#99000000"
                 Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-            <ui:Card
+            <Border
                 Grid.Row="0"
-                Grid.RowSpan="2"
-                Width="760"
-                MaxWidth="900"
-                MaxHeight="620"
+                Grid.RowSpan="4"
+                Width="640"
+                MaxWidth="720"
+                MaxHeight="680"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Panel.ZIndex="181"
-                Padding="16"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource RadiusLg}"
+                SnapsToDevicePixels="True"
                 Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel>
-                    <TextBlock
-                        Margin="0,0,0,4"
-                        FontSize="{DynamicResource FontSizeMd}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{Binding FormTitle}" />
-                    <TextBlock
-                        Margin="0,0,0,16"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Goals.Form.Hint}" />
+                <Border.Effect>
+                    <DropShadowEffect
+                        BlurRadius="32"
+                        Direction="270"
+                        Opacity="0.18"
+                        ShadowDepth="10"
+                        Color="#000000" />
+                </Border.Effect>
 
-                    <Grid>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Margin="24,22,24,18">
+                        <TextBlock
+                            FontSize="{StaticResource FontSizeLg}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{Binding FormTitle}" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Goals.Form.Hint}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <Border
+                        Grid.Row="1"
+                        Margin="20,0,20,0"
+                        Padding="16"
+                        Background="{DynamicResource AppSurfaceAlt}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource RadiusLg}">
+                        <Grid>
                         <Grid.Resources>
                             <Style x:Key="FormFieldLabel" TargetType="TextBlock">
-                                <Setter Property="Margin" Value="0,0,0,4" />
+                                <Setter Property="Margin" Value="0,0,0,6" />
                                 <Setter Property="FontSize" Value="{DynamicResource FontSizeXs}" />
                                 <Setter Property="FontWeight" Value="SemiBold" />
                                 <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
                             </Style>
-                            <Style TargetType="StackPanel">
-                                <Setter Property="Margin" Value="0,0,12,12" />
+                            <Style BasedOn="{StaticResource {x:Type ui:TextBox}}" TargetType="{x:Type ui:TextBox}">
+                                <Setter Property="MinHeight" Value="40" />
                             </Style>
                         </Grid.Resources>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="1.2*" />
                         </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Row="0" Grid.Column="0">
+                        <StackPanel
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="3"
+                            Margin="0,0,0,14">
                             <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Name}" />
-                            <ui:TextBox MinHeight="36" Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}" />
+                            <ui:TextBox Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
-                        <StackPanel Grid.Row="0" Grid.Column="1">
+
+                        <StackPanel
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Margin="0,0,0,14">
                             <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Target}" />
                             <ui:TextBox
                                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                                MinHeight="36"
                                 Text="{Binding AddTargetAmount, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
-                        <StackPanel Grid.Row="0" Grid.Column="2">
+
+                        <StackPanel
+                            Grid.Row="1"
+                            Grid.Column="2"
+                            Margin="0,0,0,14">
                             <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Current}" />
                             <ui:TextBox
                                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                                MinHeight="36"
                                 Text="{Binding AddCurrentAmount, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
-                        <StackPanel Grid.Row="0" Grid.Column="3" Margin="0,0,0,12">
+
+                        <StackPanel Grid.Row="2" Grid.Column="0">
                             <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Deadline}" />
-                            <ui:CalendarDatePicker Date="{Binding AddDeadline, Mode=TwoWay}" />
+                            <ui:CalendarDatePicker
+                                MinWidth="132"
+                                HorizontalContentAlignment="Left"
+                                Content="{Binding AddDeadline, Converter={StaticResource DateDisplayConverter}}"
+                                Date="{Binding AddDeadline, Mode=TwoWay}" />
                         </StackPanel>
-                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+
+                        <StackPanel Grid.Row="2" Grid.Column="2">
                             <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Notes}" />
-                            <ui:TextBox MinHeight="36" Text="{Binding AddNotes, UpdateSourceTrigger=PropertyChanged}" />
+                            <ui:TextBox Text="{Binding AddNotes, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                     </Grid>
+                    </Border>
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Margin="24,10,24,0"
+                        Foreground="{DynamicResource AppDown}"
+                        Text="{Binding AddError}"
+                        Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                     <Border
-                        Margin="0,4,0,0"
-                        Padding="0,10,0,0"
+                        Grid.Row="3"
+                        Margin="0,18,0,0"
+                        Padding="20,16"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,1,0,0">
                         <DockPanel LastChildFill="False">
                             <ui:Button
-                                MinWidth="96"
-                                MinHeight="36"
                                 Margin="8,0,0,0"
                                 DockPanel.Dock="Right"
-                                Appearance="Primary"
-                                Command="{Binding AddCommand}">
+                                Command="{Binding AddCommand}"
+                                Style="{StaticResource PagePrimaryButton}">
                                 <TextBlock
                                     Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                     Text="{Binding SubmitText}" />
                             </ui:Button>
 
                             <ui:Button
-                                MinWidth="80"
-                                MinHeight="36"
                                 DockPanel.Dock="Right"
-                                Appearance="Secondary"
                                 Command="{Binding CancelEditCommand}"
-                                Content="{DynamicResource Goals.Edit.Cancel}" />
+                                Content="{DynamicResource Goals.Edit.Cancel}"
+                                Style="{StaticResource PageSecondaryButton}" />
                         </DockPanel>
                     </Border>
-
-                    <TextBlock
-                        Margin="0,8,0,0"
-                        Foreground="{DynamicResource AppDown}"
-                        Text="{Binding AddError}"
-                        Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
-                </StackPanel>
-            </ui:Card>
+                </Grid>
+            </Border>
         </Grid>
 
         <Grid
@@ -486,18 +504,14 @@
                         TextWrapping="Wrap" />
                     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
                         <ui:Button
-                            Height="36"
                             Margin="0,0,8,0"
-                            Padding="14,0"
-                            Appearance="Secondary"
-                            Command="{Binding ConfirmDialogNoCommand}">
+                            Command="{Binding ConfirmDialogNoCommand}"
+                            Style="{StaticResource PageSecondaryButton}">
                             <TextBlock Text="{DynamicResource Common.Cancel}" />
                         </ui:Button>
                         <ui:Button
-                            Height="36"
-                            Padding="14,0"
-                            Appearance="Danger"
-                            Command="{Binding ConfirmDialogYesCommand}">
+                            Command="{Binding ConfirmDialogYesCommand}"
+                            Style="{StaticResource PageDangerButton}">
                             <TextBlock
                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                 Text="{DynamicResource Common.Delete}" />

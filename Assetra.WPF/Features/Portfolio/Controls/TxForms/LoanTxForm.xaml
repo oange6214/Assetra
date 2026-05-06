@@ -79,10 +79,13 @@
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Loan.StartDate}" />
-                    <DatePicker
+                    <ui:CalendarDatePicker
                         FontSize="{StaticResource FontSizeSm}"
                         Foreground="{DynamicResource AppTextPrimary}"
-                        SelectedDate="{Binding TxLoanStartDate}" />
+                        MinWidth="132"
+                        HorizontalContentAlignment="Left"
+                        Content="{Binding TxLoanStartDate, Converter={StaticResource DateDisplayConverter}}"
+                        Date="{Binding TxLoanStartDate, Mode=TwoWay}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2">
                     <TextBlock
@@ -151,10 +154,13 @@
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Loan.StartDate}" />
-                <DatePicker
+                <ui:CalendarDatePicker
                     FontSize="{StaticResource FontSizeSm}"
                     Foreground="{DynamicResource AppTextPrimary}"
-                    SelectedDate="{Binding TxLoanStartDate}" />
+                    MinWidth="132"
+                    HorizontalContentAlignment="Left"
+                    Content="{Binding TxLoanStartDate, Converter={StaticResource DateDisplayConverter}}"
+                    Date="{Binding TxLoanStartDate, Mode=TwoWay}" />
                 <TextBlock
                     Margin="0,4,0,0"
                     FontSize="{StaticResource FontSizeXs}"

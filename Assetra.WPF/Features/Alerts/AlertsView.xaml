@@ -18,7 +18,7 @@
         <Style BasedOn="{StaticResource FormComboBox}" TargetType="ComboBox" />
     </UserControl.Resources>
 
-    <Grid Margin="24">
+    <Grid Style="{StaticResource PageRootGrid}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -26,12 +26,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="0,0,0,16" LastChildFill="True">
+        <DockPanel Grid.Row="0" Style="{StaticResource PageHeaderDock}">
             <ui:Button
                 DockPanel.Dock="Right"
-                VerticalAlignment="Center"
                 Command="{Binding OpenAddFormCommand}"
-                Appearance="Primary"
+                Style="{StaticResource PagePrimaryButton}"
                 Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal">
                     <ui:SymbolIcon
@@ -48,14 +47,11 @@
             </ui:Button>
 
             <TextBlock
-                VerticalAlignment="Center"
-                FontSize="{StaticResource FontSizeXl}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextPrimary}"
+                Style="{StaticResource PageTitleText}"
                 Text="{DynamicResource Alerts.Title}" />
         </DockPanel>
 
-        <UniformGrid Grid.Row="1" Margin="0,0,0,16" Columns="3">
+        <UniformGrid Grid.Row="1" Columns="3" Style="{StaticResource PageMetricsGrid}">
             <ui:Card Margin="0,0,12,0" Padding="16">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
@@ -108,7 +104,7 @@
             </ui:Card>
         </UniformGrid>
 
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="3" Style="{StaticResource PageContentGrid}">
             <ScrollViewer
                 VerticalScrollBarVisibility="Auto"
                 Visibility="{Binding HasNoRules, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
@@ -417,51 +413,30 @@
                 </ItemsControl>
             </ScrollViewer>
 
-            <ui:Card
-                MinHeight="260"
-                Padding="32"
+            <StackPanel
+                Style="{StaticResource EmptyStatePanel}"
                 Visibility="{Binding HasNoRules, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <ui:SymbolIcon
-                        HorizontalAlignment="Center"
-                        FontSize="44"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Symbol="Alert24" />
-                    <TextBlock
-                        Margin="0,12,0,0"
-                        HorizontalAlignment="Center"
-                        FontSize="{StaticResource FontSizeMd}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{DynamicResource Alerts.Empty}" />
-                    <TextBlock
-                        Margin="0,6,0,0"
-                        HorizontalAlignment="Center"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Alerts.Empty.Hint}"
-                        TextAlignment="Center"
-                        TextWrapping="Wrap" />
-                    <ui:Button
-                        Margin="0,16,0,0"
-                        HorizontalAlignment="Center"
-                        Command="{Binding OpenAddFormCommand}"
-                        Appearance="Primary"
-                        Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                        <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeXs}"
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Symbol="Add24" />
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Text="{DynamicResource Alerts.AddAlert}" />
-                        </StackPanel>
-                    </ui:Button>
-                </StackPanel>
-            </ui:Card>
+                <ui:SymbolIcon Style="{StaticResource EmptyStateIcon}" Symbol="Alert24" />
+                <TextBlock Style="{StaticResource EmptyStateTitle}" Text="{DynamicResource Alerts.Empty}" />
+                <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Alerts.Empty.Hint}" />
+                <ui:Button
+                    Command="{Binding OpenAddFormCommand}"
+                    Style="{StaticResource EmptyStateActionButton}"
+                    Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon
+                            Margin="0,0,4,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                            Symbol="Add24" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                            Text="{DynamicResource Alerts.AddAlert}" />
+                    </StackPanel>
+                </ui:Button>
+            </StackPanel>
         </Grid>
 
         <Border
@@ -590,8 +565,8 @@
                         Margin="0,0,8,0"
                         Command="{Binding CancelAddFormCommand}"
                         Content="{DynamicResource Common.Cancel}"
-                        Appearance="Secondary" />
-                    <ui:Button Command="{Binding AddRuleCommand}" Appearance="Primary">
+                        Style="{StaticResource PageSecondaryButton}" />
+                    <ui:Button Command="{Binding AddRuleCommand}" Style="{StaticResource PagePrimaryButton}">
                         <TextBlock
                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                             Text="{DynamicResource Alerts.AddAlert}" />

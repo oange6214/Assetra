@@ -113,6 +113,24 @@
                     Value="{Binding BudgetUsageRatio, Mode=OneWay}" />
             </Grid>
 
+            <TextBlock
+                Margin="0,0,0,2"
+                FontSize="{StaticResource FontSizeXs}"
+                Foreground="{DynamicResource AppTextMuted}"
+                Text="{DynamicResource Dashboard.Budget.Empty}"
+                TextWrapping="Wrap">
+                <TextBlock.Style>
+                    <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasData}" Value="False">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
             <!--  Top categories  -->
             <ItemsControl ItemsSource="{Binding TopCategories}">
                 <ItemsControl.ItemTemplate>

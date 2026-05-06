@@ -207,9 +207,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     // AddPosition reads AddBuyDate when building the PortfolioEntry.
     partial void OnTxDateChanged(DateTime value)
     {
-        if (value.Date > DateTime.Today)
+        if (value != value.Date)
         {
-            TxDate = DateTime.Today;
+            TxDate = value.Date;
             return;
         }
 

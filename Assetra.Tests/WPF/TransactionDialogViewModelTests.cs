@@ -109,14 +109,15 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
-    public void TxDate_FutureDate_ClampsToToday()
+    public void TxDate_FutureDate_IsAllowedAndSyncsBuyDate()
     {
         var vm = CreateVm();
+        var future = DateTime.Today.AddDays(3);
 
-        vm.TxDate = DateTime.Today.AddDays(3);
+        vm.TxDate = future;
 
-        Assert.Equal(DateTime.Today, vm.TxDate);
-        Assert.Equal(DateTime.Today, vm.AddAssetDialog.AddBuyDate);
+        Assert.Equal(future, vm.TxDate);
+        Assert.Equal(future, vm.AddAssetDialog.AddBuyDate);
     }
 
     [Fact]

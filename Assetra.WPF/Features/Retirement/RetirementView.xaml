@@ -17,7 +17,7 @@
         <Style BasedOn="{StaticResource FormComboBox}" TargetType="ComboBox" />
     </UserControl.Resources>
 
-    <Grid Margin="24">
+    <Grid Style="{StaticResource PageRootGrid}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -25,12 +25,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="0,0,0,16" LastChildFill="True">
+        <DockPanel Grid.Row="0" Style="{StaticResource PageHeaderDock}">
             <ui:Button
                 DockPanel.Dock="Right"
-                VerticalAlignment="Center"
                 Command="{Binding OpenAddFormCommand}"
-                Appearance="Primary"
+                Style="{StaticResource PagePrimaryButton}"
                 Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal">
                     <ui:SymbolIcon
@@ -47,14 +46,11 @@
             </ui:Button>
 
             <TextBlock
-                VerticalAlignment="Center"
-                FontSize="{StaticResource FontSizeXl}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextPrimary}"
+                Style="{StaticResource PageTitleText}"
                 Text="{DynamicResource Retirement.Title}" />
         </DockPanel>
 
-        <UniformGrid Grid.Row="1" Margin="0,0,0,16" Columns="3">
+        <UniformGrid Grid.Row="1" Columns="3" Style="{StaticResource PageMetricsGrid}">
             <ui:Card Margin="0,0,12,0" Padding="16">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
@@ -111,17 +107,16 @@
 
         <TextBlock
             Grid.Row="2"
-            Margin="0,0,0,8"
-            Foreground="{DynamicResource AppDanger}"
+            Style="{StaticResource PageErrorText}"
             Text="{Binding ErrorMessage}"
             Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
 
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <Grid>
-                    <ItemsControl
-                        ItemsSource="{Binding Accounts}"
-                        Visibility="{Binding HasAccounts, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Grid.Row="3" Style="{StaticResource PageContentGrid}">
+            <ScrollViewer
+                VerticalScrollBarVisibility="Auto"
+                Visibility="{Binding HasAccounts, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <ItemsControl ItemsSource="{Binding Accounts}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:RetirementRowViewModel}">
                                 <Border
@@ -183,12 +178,12 @@
                                                 ToolTip="{DynamicResource Common.Edit}">
                                                 <ui:SymbolIcon FontSize="14" Symbol="Edit24" />
                                             </ui:Button>
-                                            <ui:Button
-                                                Margin="0,0,4,0"
-                                                Command="{Binding DataContext.ProjectCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                CommandParameter="{Binding}"
-                                                Content="{DynamicResource Retirement.Action.Project}"
-                                                Appearance="Secondary" />
+                                <ui:Button
+                                    Margin="0,0,4,0"
+                                    Command="{Binding DataContext.ProjectCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    CommandParameter="{Binding}"
+                                    Content="{DynamicResource Retirement.Action.Project}"
+                                    Style="{StaticResource PageSecondaryButton}" />
                                             <ui:Button
                                                 Width="32"
                                                 Height="32"
@@ -269,57 +264,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <ui:Card
-                        MinHeight="240"
-                        Padding="32"
-                        Visibility="{Binding HasNoAccounts, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <ui:SymbolIcon
-                                HorizontalAlignment="Center"
-                                FontSize="44"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Symbol="PersonClock24" />
-                            <TextBlock
-                                Margin="0,12,0,0"
-                                HorizontalAlignment="Center"
-                                FontSize="{StaticResource FontSizeMd}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{DynamicResource Retirement.Empty.Title}" />
-                            <TextBlock
-                                Margin="0,6,0,0"
-                                HorizontalAlignment="Center"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{DynamicResource Retirement.Empty.Hint}"
-                                TextAlignment="Center"
-                                TextWrapping="Wrap" />
-                            <ui:Button
-                                Margin="0,16,0,0"
-                                HorizontalAlignment="Center"
-                                Command="{Binding OpenAddFormCommand}"
-                                Appearance="Primary"
-                                Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                <StackPanel Orientation="Horizontal">
-                                    <ui:SymbolIcon
-                                        Margin="0,0,4,0"
-                                        VerticalAlignment="Center"
-                                        FontSize="{StaticResource FontSizeXs}"
-                                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                        Symbol="Add24" />
-                                    <TextBlock
-                                        VerticalAlignment="Center"
-                                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                        Text="{DynamicResource Retirement.Action.Add}" />
-                                </StackPanel>
-                            </ui:Button>
-                        </StackPanel>
-                    </ui:Card>
-                </Grid>
-
-                <ui:Card
-                    Margin="0,16,0,0"
-                    Padding="20"
-                    Visibility="{Binding HasAccounts, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ui:Card Margin="0,16,0,0" Padding="20">
                     <StackPanel>
                         <TextBlock Style="{StaticResource FormSectionTitle}" Text="{DynamicResource Retirement.Projection.Title}" />
                         <UniformGrid Columns="4" Rows="1">
@@ -345,8 +290,34 @@
                         </UniformGrid>
                     </StackPanel>
                 </ui:Card>
+                </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel
+                Style="{StaticResource EmptyStatePanel}"
+                Visibility="{Binding HasNoAccounts, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ui:SymbolIcon Style="{StaticResource EmptyStateIcon}" Symbol="PersonClock24" />
+                <TextBlock Style="{StaticResource EmptyStateTitle}" Text="{DynamicResource Retirement.Empty.Title}" />
+                <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Retirement.Empty.Hint}" />
+                <ui:Button
+                    Command="{Binding OpenAddFormCommand}"
+                    Style="{StaticResource EmptyStateActionButton}"
+                    Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon
+                            Margin="0,0,4,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeXs}"
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                            Symbol="Add24" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                            Text="{DynamicResource Retirement.Action.Add}" />
+                    </StackPanel>
+                </ui:Button>
             </StackPanel>
-        </ScrollViewer>
+        </Grid>
 
         <Border
             Grid.Row="0"
@@ -432,7 +403,11 @@
                     </StackPanel>
                     <StackPanel Margin="0,0,12,12">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.OpenedDate}" />
-                        <ui:CalendarDatePicker Date="{Binding FormOpenedDate, Mode=TwoWay}" />
+                        <ui:CalendarDatePicker
+                            MinWidth="132"
+                            HorizontalContentAlignment="Left"
+                            Content="{Binding FormOpenedDate, Converter={StaticResource DateDisplayConverter}}"
+                            Date="{Binding FormOpenedDate, Mode=TwoWay}" />
                     </StackPanel>
                     <StackPanel Margin="0,0,0,12">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Currency}" />
@@ -460,8 +435,8 @@
                         Margin="0,0,8,0"
                         Command="{Binding CancelEditCommand}"
                         Content="{DynamicResource Common.Cancel}"
-                        Appearance="Secondary" />
-                    <ui:Button Command="{Binding SaveCommand}" Appearance="Primary">
+                        Style="{StaticResource PageSecondaryButton}" />
+                    <ui:Button Command="{Binding SaveCommand}" Style="{StaticResource PagePrimaryButton}">
                         <TextBlock
                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                             Text="{DynamicResource Common.Save}" />

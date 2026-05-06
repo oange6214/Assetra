@@ -20,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SkiaSharp;
 using Velopack;
+using Velopack.Sources;
 using Wpf.Ui.Appearance;
 
 namespace Assetra.WPF;

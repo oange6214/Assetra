@@ -879,6 +879,7 @@
     <sys:String x:Key="Dashboard.Budget.Expense">支出</sys:String>
     <sys:String x:Key="Dashboard.Budget.Net">淨流量</sys:String>
     <sys:String x:Key="Dashboard.Budget.Budget">總預算</sys:String>
+    <sys:String x:Key="Dashboard.Budget.Empty">本月尚無現金收支紀錄；投資買賣不列入此卡。</sys:String>
 
     <sys:String x:Key="Common.Delete">刪除</sys:String>
 
@@ -1067,6 +1068,7 @@
     <sys:String x:Key="Reports.Performance.Mwr">資金加權報酬率</sys:String>
     <sys:String x:Key="Reports.Performance.Benchmark">指標（0050.TW）</sys:String>
     <sys:String x:Key="Reports.Performance.Alpha">超額報酬</sys:String>
+    <sys:String x:Key="Reports.Performance.Attribution">績效拆解</sys:String>
     <sys:String x:Key="Reports.Risk.AnnualizedVolatility">年化波動率</sys:String>
     <sys:String x:Key="Reports.Risk.MaxDrawdown">最大回撤</sys:String>
     <sys:String x:Key="Reports.Risk.SharpeRatio">夏普比率</sys:String>

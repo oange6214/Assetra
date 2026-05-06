@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:alloccontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:controls="clr-namespace:Assetra.WPF.Infrastructure.Controls"
     xmlns:conv="clr-namespace:Assetra.WPF.Infrastructure.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -40,13 +41,13 @@
                     Command="{Binding SwitchToOverviewCommand}"
                     Content="{DynamicResource Allocation.Tab.Overview}"
                     GroupName="AllocTabs"
-                    IsChecked="{Binding IsOverviewTab}"
+                    IsChecked="{Binding IsOverviewTab, Mode=OneWay}"
                     Style="{StaticResource NavTabBtn}" />
                 <RadioButton
                     Command="{Binding SwitchToRebalanceCommand}"
                     Content="{DynamicResource Allocation.Tab.Rebalance}"
                     GroupName="AllocTabs"
-                    IsChecked="{Binding IsRebalanceTab}"
+                    IsChecked="{Binding IsRebalanceTab, Mode=OneWay}"
                     Style="{StaticResource NavTabBtn}" />
             </StackPanel>
         </Border>
@@ -787,6 +788,7 @@
                             Margin="0,0,0,8"
                             HorizontalContentAlignment="Right"
                             FontFamily="{StaticResource FontBase}"
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                             Text="{Binding CashFlowInput, UpdateSourceTrigger=PropertyChanged}"
                             Typography.NumeralAlignment="Tabular" />
                     </WrapPanel>

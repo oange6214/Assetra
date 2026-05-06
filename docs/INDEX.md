@@ -49,6 +49,8 @@
 - [Roadmap v0.14 to v1.0](planning/Roadmap-v0.14-to-v1.0.md)
   - v0.14–v1.0 各 sprint 詳細 task breakdown。Phase 4
     （多元資產 + 情境模擬）已於 **v0.22.0** 一次 ship。
+- [Assetra WPF Native UI Task List](planning/Assetra-WPF-Native-UI-Task-List.md)
+  - 逐步建立 Assetra 原生 WPF Design System，並移除 WPF-UI 依賴的完整 task list。
 
 ### Phase 4 已 ship（v0.22.0）
 

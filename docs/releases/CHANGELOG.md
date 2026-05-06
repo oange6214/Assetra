@@ -1,5 +1,40 @@
 # Changelog
 
+## v0.23.0 - 2026-05-07
+
+「UI/UX consistency hardening + DesignSystem roadmap」release。
+
+### UI / UX 整理
+
+- 多個 feature page 統一按鈕、空狀態與 page layout pattern，讓空資料提示置中、有資料列表延展。
+- 收支分類、不動產、保險保單、退休專戶、實物資產、FIRE、Monte Carlo、財務目標、訂閱排程、警示、資產趨勢等頁面持續收斂至共用 DesignSystem styles。
+- 財務目標與訂閱排程的新增/編輯互動改往一致的 dialog/overlay flow 靠攏，降低 inline form 造成的視覺干擾。
+- 月結報告投資績效與風險指標改為較易掃讀的資訊結構。
+
+### 輸入與日期體驗
+
+- 金額輸入欄位擴大套用千分位格式化 behavior，涵蓋交易記錄、FIRE、Monte Carlo、財務目標、多元資產、訂閱排程、配置分析等主要金額欄位。
+- `CalendarDatePicker` 日期顯示固定為 `yyyy-MM-dd`，並新增 date-only normalization，避免時間成分讓 popup 無法對應選取日期。
+- 交易記錄日期不再強制限制為今天以前，允許使用者建立未來日期記錄。
+- 日曆 popup 的日期格新增 Assetra selected/today 樣式：選取日使用 accent 實心標示，今天未選取時使用 accent 外框標示。
+
+### 報表與資料正確性
+
+- 月度預算摘要納入年度預算攤提，避免年度預算建立後沒有進入月度摘要。
+- 投資組合儀表板本月收支接上預算摘要資料，避免卡片一直顯示 0。
+- 配置分析子分頁改成單向 tab state binding，避免 RadioButton group 把兩個分頁狀態同時寫成 false 後內容空白。
+
+### DesignSystem 規劃
+
+- 新增 `docs/planning/Assetra-WPF-Native-UI-Task-List.md`，規劃以 Tailwind-inspired tokens + WPF native control ownership 逐步取代 WPF-UI 依賴。
+- `docs/INDEX.md` 新增 Native WPF UI task list 入口。
+
+### 測試
+
+- 更新 `TransactionDialogViewModelTests`，鎖定未來交易日期可被保留並同步至買入日期。
+
+---
+
 ## v0.22.0 - 2026-05-02
 
 「Phase 4 多元資產 + 情境模擬 + Wpf.Ui-first UX 重塑」整合 release。

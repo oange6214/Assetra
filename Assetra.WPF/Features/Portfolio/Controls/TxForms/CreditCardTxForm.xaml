@@ -2,6 +2,7 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.TxForms.CreditCardTxForm"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:controls="clr-namespace:Assetra.WPF.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -50,7 +51,10 @@
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.Amount}" />
-                <ui:TextBox Margin="0,0,0,6" Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
+                <ui:TextBox
+                    Margin="0,0,0,6"
+                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                    Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     FontSize="{StaticResource FontSizeXs}"
                     Foreground="{DynamicResource AppDown}"

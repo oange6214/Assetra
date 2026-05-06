@@ -31,9 +31,11 @@ public sealed class MonthlyBudgetSummaryService
     {
         ct.ThrowIfCancellationRequested();
 
-        var monthStart = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc);
-        var monthEnd = monthStart.AddMonths(1).AddTicks(-1);
-        var monthTrades = (await _tradeRepository.GetByPeriodAsync(monthStart, monthEnd, ct).ConfigureAwait(false)).ToList();
+        var monthStart = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Local);
+        var monthEndExclusive = monthStart.AddMonths(1);
+        var from = monthStart.ToUniversalTime();
+        var to = monthEndExclusive.ToUniversalTime().AddTicks(-1);
+        var monthTrades = (await _tradeRepository.GetByPeriodAsync(from, to, ct).ConfigureAwait(false)).ToList();
 
         var totalIncome = monthTrades
             .Where(IsIncomeTrade)
