@@ -287,31 +287,57 @@
 
                 <!--
                     Hamburger toggle:
-                    * Margin 6,8,0,8 puts the 40px button at x=6 so the icon
-                      center sits at x=26, matching the nav-item icon column
-                      (4px indicator + 10px content margin + 12px half-icon).
+                    * Stretches full rail width and uses Padding 17,0,0,0 so
+                      the 18px icon (FontSize Md) sits with its center at
+                      x=26, matching the nav-item icon column (4px indicator
+                      + 10px content margin + 12px half of 24-wide icon column)
+                      in both expanded (200px) and collapsed (56px) modes.
                     * Symbol swaps between ChevronLeft (expanded → click to
                       collapse) and ChevronRight (collapsed → click to expand)
                       so the affordance reflects state.
+                    * AppIcon style uses BasedOn so the default Viewbox+Path
+                      template is preserved.
+                    * Custom Template removes the default ToggleButton chrome
+                      so IsChecked state does not paint a blue rectangle.
                 -->
                 <ToggleButton
                     x:Name="PaneToggle"
                     Grid.Row="0"
-                    Width="40"
                     Height="40"
-                    Margin="6,8,0,8"
-                    HorizontalAlignment="Left"
+                    Margin="0,8,0,8"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    Padding="17,0,0,0"
                     Background="Transparent"
                     BorderThickness="0"
+                    Cursor="Hand"
                     IsChecked="True"
                     ToolTip="{DynamicResource Nav.Toggle}">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                            <Border
+                                x:Name="Chrome"
+                                Padding="{TemplateBinding Padding}"
+                                Background="Transparent"
+                                SnapsToDevicePixels="True">
+                                <ContentPresenter
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
                     <ds:AppIcon
-                        HorizontalAlignment="Center"
+                        HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         FontSize="{StaticResource Font.Size.Md}"
                         Foreground="{DynamicResource AppTextMuted}">
                         <ds:AppIcon.Style>
-                            <Style TargetType="{x:Type ds:AppIcon}">
+                            <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
                                 <Setter Property="Symbol" Value="ChevronLeft24" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding ElementName=PaneToggle, Path=IsChecked}" Value="False">
