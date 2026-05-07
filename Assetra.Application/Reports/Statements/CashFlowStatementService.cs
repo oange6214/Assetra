@@ -27,11 +27,10 @@ public sealed class CashFlowStatementService : ICashFlowStatementService
         ArgumentNullException.ThrowIfNull(period);
         var all = await _trades.GetAllAsync().ConfigureAwait(false);
 
-        var startDt = period.Start.ToDateTime(TimeOnly.MinValue);
-        var endDt = period.End.ToDateTime(TimeOnly.MaxValue);
-
-        var opening = all.Where(t => t.TradeDate < startDt).Sum(CashDelta);
-        var inPeriod = all.Where(t => t.TradeDate >= startDt && t.TradeDate <= endDt).ToList();
+        var opening = all
+            .Where(t => ReportPeriod.ToPeriodDate(t.TradeDate) < period.Start)
+            .Sum(CashDelta);
+        var inPeriod = all.Where(t => period.Contains(t.TradeDate)).ToList();
 
         var operating = BuildSection("Operating", inPeriod.Where(IsOperating));
         var investing = BuildSection("Investing", inPeriod.Where(IsInvesting));

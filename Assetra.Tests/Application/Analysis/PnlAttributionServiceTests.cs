@@ -69,6 +69,20 @@ public class PnlAttributionServiceTests
         Assert.Equal(0m, buckets.Single(b => b.Label == "Realized").Amount);
     }
 
+    [Fact]
+    public async Task ComputeAsync_UtcStoredLocalMonthStart_IsIncludedInLocalMonth()
+    {
+        var trades = new FakeTradeRepo();
+        var storedUtc = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Local).ToUniversalTime();
+        trades.Store.Add(new Trade(Guid.NewGuid(), "X", "TW", "x",
+            TradeType.Sell, storedUtc, 0m, 0, 1200m, null));
+        var svc = new PnlAttributionService(trades, new FakeSnapshotRepo());
+
+        var buckets = await svc.ComputeAsync(PerformancePeriod.Month(2026, 5));
+
+        Assert.Equal(1200m, buckets.Single(b => b.Label == "Realized").Amount);
+    }
+
     private sealed class FakeTradeRepo : ITradeRepository
     {
         public List<Trade> Store { get; } = new();

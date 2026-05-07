@@ -5,6 +5,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using Assetra.WPF.Controls;
 using Assetra.WPF.Infrastructure.Converters;
+using Assetra.WPF.Infrastructure.Behaviors;
 using Xunit;
 
 namespace Assetra.Tests.WPF;
@@ -67,6 +68,101 @@ public sealed class ControlsBehaviorTests
         });
     }
 
+    [Fact]
+    public void DatePickerDateOnlyBehavior_NormalizesTextAndSelectedDate()
+    {
+        StaRun(() =>
+        {
+            var picker = new DatePicker
+            {
+                SelectedDate = new DateTime(2026, 5, 6, 23, 15, 0),
+            };
+
+            picker.ApplyTemplate();
+            DatePickerDateOnlyBehavior.SetIsEnabled(picker, true);
+
+            Assert.Equal(new DateTime(2026, 5, 6), picker.SelectedDate);
+            Assert.Equal(new DateTime(2026, 5, 6), picker.DisplayDate.Date);
+        });
+    }
+
+    [Fact]
+    public void DatePickerDateOnlyBehavior_AllowsFutureDatesByDefault()
+    {
+        StaRun(() =>
+        {
+            var futureDate = DateTime.Today.AddDays(7).Date;
+            var picker = new DatePicker();
+
+            picker.ApplyTemplate();
+            DatePickerDateOnlyBehavior.SetIsEnabled(picker, true);
+            picker.SelectedDate = futureDate.AddHours(12);
+
+            Assert.Equal(futureDate, picker.SelectedDate);
+            Assert.Equal(futureDate, picker.DisplayDate.Date);
+        });
+    }
+
+    [Fact]
+    public void DatePickerDateOnlyBehavior_PastOnlySetsDisplayDateEndToToday()
+    {
+        StaRun(() =>
+        {
+            var picker = new DatePicker();
+
+            DatePickerDateOnlyBehavior.SetConstraint(picker, DatePickerDateConstraint.PastOnly);
+            DatePickerDateOnlyBehavior.SetIsEnabled(picker, true);
+
+            Assert.Equal(DateTime.Today.Date, picker.DisplayDateEnd?.Date);
+        });
+    }
+
+    [Fact]
+    public void DatePickerDateOnlyBehavior_FutureOnlySetsDisplayDateStartToToday()
+    {
+        StaRun(() =>
+        {
+            var picker = new DatePicker();
+
+            DatePickerDateOnlyBehavior.SetConstraint(picker, DatePickerDateConstraint.FutureOnly);
+            DatePickerDateOnlyBehavior.SetIsEnabled(picker, true);
+
+            Assert.Equal(DateTime.Today.Date, picker.DisplayDateStart?.Date);
+            Assert.Null(picker.DisplayDateEnd);
+        });
+    }
+
+    [Fact]
+    public void ThousandSeparatorBehavior_FormatsMoneyTextAsUserTypes()
+    {
+        StaRun(() =>
+        {
+            var textBox = new TextBox();
+
+            ThousandSeparatorBehavior.SetIsEnabled(textBox, true);
+            textBox.Text = "22211";
+
+            Assert.Equal("22,211", textBox.Text);
+
+            textBox.Text = "-1234567.89";
+
+            Assert.Equal("-1,234,567.89", textBox.Text);
+        });
+    }
+
+    [Fact]
+    public void ThousandSeparatorBehavior_AlignsNumericInputToTheRight()
+    {
+        StaRun(() =>
+        {
+            var textBox = new TextBox();
+
+            ThousandSeparatorBehavior.SetIsEnabled(textBox, true);
+
+            Assert.Equal(HorizontalAlignment.Right, textBox.HorizontalContentAlignment);
+        });
+    }
+
     private static void StaRun(Action action)
     {
         Exception? caught = null;
@@ -88,12 +184,12 @@ public sealed class ControlsBehaviorTests
         var resources = app.Resources;
 
         AddMissing(resources, "FocusVisual", new Style(typeof(Control)));
-        AddMissing(resources, "RadiusSm", new CornerRadius(4));
-        AddMissing(resources, "RadiusMd", new CornerRadius(8));
-        AddMissing(resources, "FontBase", new FontFamily("Segoe UI"));
-        AddMissing(resources, "FontSizeXs", 11d);
-        AddMissing(resources, "FontSizeSm", 12d);
-        AddMissing(resources, "FontSizeBase", 14d);
+        AddMissing(resources, "Radius.Sm", new CornerRadius(4));
+        AddMissing(resources, "Radius.Md", new CornerRadius(6));
+        AddMissing(resources, "Font.Family.Base", new FontFamily("Segoe UI"));
+        AddMissing(resources, "Font.Size.Xs", 11d);
+        AddMissing(resources, "Font.Size.Sm", 12d);
+        AddMissing(resources, "Font.Size.Base", 14d);
         AddMissing(resources, "BooleanToVisibilityConverter", new BooleanToVisibilityConverter());
         AddMissing(resources, "HexToBrushConverter", new HexToBrushConverter());
     }

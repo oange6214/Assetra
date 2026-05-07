@@ -5,7 +5,6 @@ using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models;
 using Assetra.WPF.Features.Settings;
 using Assetra.WPF.Infrastructure;
-using Wpf.Ui.Appearance;
 using Xunit;
 
 namespace Assetra.Tests.WPF;

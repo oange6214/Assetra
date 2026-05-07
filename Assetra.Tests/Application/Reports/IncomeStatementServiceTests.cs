@@ -66,6 +66,25 @@ public class IncomeStatementServiceTests
     }
 
     [Fact]
+    public async Task GenerateAsync_UtcStoredLocalMonthStart_IsIncludedInLocalMonth()
+    {
+        var salaryCat = Guid.NewGuid();
+        var trades = new FakeTradeRepo();
+        var categories = new FakeCategoryRepo
+        {
+            Items = { new ExpenseCategory(salaryCat, "Salary", CategoryKind.Income) },
+        };
+        var storedUtc = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Local).ToUniversalTime();
+        trades.Store.Add(MakeIncome(storedUtc, 1000m, salaryCat));
+        var svc = new IncomeStatementService(trades, categories);
+
+        var report = await svc.GenerateAsync(ReportPeriod.Month(2026, 5));
+
+        Assert.Equal(1000m, report.Income.Total);
+        Assert.Equal(0m, report.Prior!.Income.Total);
+    }
+
+    [Fact]
     public async Task GenerateAsync_UncategorizedWithdrawal_IsIncludedAsExpense()
     {
         var trades = new FakeTradeRepo();

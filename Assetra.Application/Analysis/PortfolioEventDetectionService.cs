@@ -32,7 +32,7 @@ public static class PortfolioEventDetectionService
                 {
                     events.Add(new PortfolioEvent(
                         Id: Guid.NewGuid(),
-                        Date: DateOnly.FromDateTime(t.TradeDate),
+                        Date: ToLocalDate(t.TradeDate),
                         Kind: PortfolioEventKind.LargeTrade,
                         Label: $"{t.Type} {t.Symbol} × {t.Quantity}",
                         Description: $"成交金額 {grossAmount:N0}",
@@ -47,7 +47,7 @@ public static class PortfolioEventDetectionService
                     var amount = t.CashAmount ?? (t.Price * t.Quantity);
                     events.Add(new PortfolioEvent(
                         Id: Guid.NewGuid(),
-                        Date: DateOnly.FromDateTime(t.TradeDate),
+                        Date: ToLocalDate(t.TradeDate),
                         Kind: PortfolioEventKind.FirstDividend,
                         Label: $"{t.Symbol} 首次配息",
                         Description: $"配息金額 {amount:N0}",
@@ -103,5 +103,11 @@ public static class PortfolioEventDetectionService
         }
 
         return events;
+    }
+
+    private static DateOnly ToLocalDate(DateTime value)
+    {
+        var local = value.Kind == DateTimeKind.Utc ? value.ToLocalTime() : value;
+        return DateOnly.FromDateTime(local);
     }
 }

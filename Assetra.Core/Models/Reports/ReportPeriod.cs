@@ -25,5 +25,11 @@ public sealed record ReportPeriod(DateOnly Start, DateOnly End)
     }
 
     public bool Contains(DateOnly date) => date >= Start && date <= End;
-    public bool Contains(DateTime dt) => Contains(DateOnly.FromDateTime(dt));
+    public bool Contains(DateTime dt) => Contains(ToPeriodDate(dt));
+
+    public static DateOnly ToPeriodDate(DateTime dt)
+    {
+        var local = dt.Kind == DateTimeKind.Utc ? dt.ToLocalTime() : dt;
+        return DateOnly.FromDateTime(local);
+    }
 }

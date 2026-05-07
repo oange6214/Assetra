@@ -127,6 +127,32 @@ public class MonthlyBudgetSummaryServiceTests
         Assert.Equal(1000m, summary.TotalExpense);
     }
 
+    [Fact]
+    public async Task BuildAsync_CreditCardChargeAndCashFlows_CountsCurrentMonthTotals()
+    {
+        var foodCat = Guid.NewGuid();
+        var trades = new FakeTradeRepo();
+        var budgets = new FakeBudgetRepo();
+        var categories = new FakeCategoryRepo
+        {
+            Items = { new ExpenseCategory(foodCat, "餐飲", CategoryKind.Expense) }
+        };
+
+        trades.Store.Add(MakeIncome(new DateTime(2026, 5, 1), 147m));
+        trades.Store.Add(MakeWithdrawal(new DateTime(2026, 5, 6), 21224m, foodCat));
+        trades.Store.Add(new Trade(
+            Guid.NewGuid(), "", "", "台新", TradeType.CreditCardCharge,
+            new DateTime(2026, 5, 6), 0m, 1, null, null,
+            CashAmount: 22211m));
+
+        var svc = new MonthlyBudgetSummaryService(trades, budgets, categories);
+        var summary = await svc.BuildAsync(2026, 5);
+
+        Assert.Equal(147m, summary.TotalIncome);
+        Assert.Equal(43435m, summary.TotalExpense);
+        Assert.Equal(-43288m, summary.NetCashFlow);
+    }
+
     private static Trade MakeIncome(DateTime date, decimal amount) =>
         new(Guid.NewGuid(), "", "", "收入", TradeType.Income, date,
             0m, 1, null, null, CashAmount: amount);

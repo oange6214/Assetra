@@ -45,6 +45,21 @@ public class CashFlowStatementServiceTests
         Assert.Equal(0m, stmt.ClosingCash);
     }
 
+    [Fact]
+    public async Task GenerateAsync_UtcStoredLocalMonthStart_IsNotCountedAsOpening()
+    {
+        var trades = new FakeTradeRepo();
+        var storedUtc = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Local).ToUniversalTime();
+        trades.Store.Add(MakeIncome(storedUtc, 5000m));
+
+        var svc = new CashFlowStatementService(trades);
+        var stmt = await svc.GenerateAsync(ReportPeriod.Month(2026, 5));
+
+        Assert.Equal(0m, stmt.OpeningCash);
+        Assert.Equal(5000m, stmt.Operating.Total);
+        Assert.Equal(5000m, stmt.ClosingCash);
+    }
+
     private static Trade MakeIncome(DateTime when, decimal amt) =>
         new(Guid.NewGuid(), "", "", "i", TradeType.Income, when, 0m, 1, null, null, CashAmount: amt);
     private static Trade MakeWithdrawal(DateTime when, decimal amt) =>

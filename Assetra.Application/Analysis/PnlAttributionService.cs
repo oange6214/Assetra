@@ -24,11 +24,7 @@ public sealed class PnlAttributionService : IPnlAttributionService
     {
         var trades = await _trades.GetAllAsync().ConfigureAwait(false);
         var inPeriod = trades
-            .Where(t =>
-            {
-                var d = DateOnly.FromDateTime(t.TradeDate);
-                return d >= period.Start && d <= period.End;
-            })
+            .Where(t => period.Contains(t.TradeDate))
             .ToList();
 
         var realized = inPeriod

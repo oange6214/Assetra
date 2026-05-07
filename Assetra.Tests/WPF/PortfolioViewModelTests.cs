@@ -429,6 +429,54 @@ public class PortfolioViewModelTests
     }
 
 
+    // ── Tab navigation regression tests ─────────────────────────────────────
+    // Verify that tab commands always leave exactly one tab active and that
+    // programmatic navigation (from dashboard / add-liability shortcuts) sets
+    // the expected tab, not "all inactive".
+
+    [Fact]
+    public void SelectedTab_DefaultsToPositions()
+    {
+        var (vm, _) = CreateVm();
+        Assert.Equal(PortfolioTab.Positions, vm.SelectedTab);
+    }
+
+    [Fact]
+    public void OpenAddAccountDialog_SwitchesToAccountsTab()
+    {
+        var (vm, _) = CreateVm();
+        vm.OpenAddAccountDialogCommand.Execute(null);
+        Assert.Equal(PortfolioTab.Accounts, vm.SelectedTab);
+    }
+
+    [Fact]
+    public void OpenAddLiabilityDialog_SwitchesToLiabilityTab()
+    {
+        var (vm, _) = CreateVm();
+        vm.OpenAddLiabilityDialogCommand.Execute(null);
+        Assert.Equal(PortfolioTab.Liability, vm.SelectedTab);
+    }
+
+    [Fact]
+    public void SelectedTab_CanBeSetToEveryValidTab()
+    {
+        var (vm, _) = CreateVm();
+        foreach (var tab in Enum.GetValues<PortfolioTab>())
+        {
+            vm.SelectedTab = tab;
+            Assert.Equal(tab, vm.SelectedTab);
+        }
+    }
+
+    [Fact]
+    public void OpenAddAccountDialog_ThenOpenAddLiability_LeavesLiabilityTabActive()
+    {
+        var (vm, _) = CreateVm();
+        vm.OpenAddAccountDialogCommand.Execute(null);
+        vm.OpenAddLiabilityDialogCommand.Execute(null);
+        Assert.Equal(PortfolioTab.Liability, vm.SelectedTab);
+    }
+
     // Liability ⇄ 借款/還款 balance adjustment
     //
     // These tests reproduce the user report:

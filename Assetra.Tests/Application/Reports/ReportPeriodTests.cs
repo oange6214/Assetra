@@ -38,4 +38,15 @@ public class ReportPeriodTests
         Assert.True(p.Contains(new DateOnly(2026, 4, 15)));
         Assert.False(p.Contains(new DateOnly(2026, 5, 1)));
     }
+
+    [Fact]
+    public void Contains_UtcStoredLocalMidnight_UsesLocalCalendarDate()
+    {
+        var p = ReportPeriod.Month(2026, 5);
+        var localMidnight = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Local);
+        var storedUtc = localMidnight.ToUniversalTime();
+
+        Assert.True(p.Contains(storedUtc));
+        Assert.False(ReportPeriod.Month(2026, 4).Contains(storedUtc));
+    }
 }

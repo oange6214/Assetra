@@ -130,8 +130,8 @@ public sealed class MoneyWeightedReturnCalculator : IMoneyWeightedReturnCalculat
         var flows = new List<CashFlow>();
         foreach (var t in trades)
         {
-            var d = DateOnly.FromDateTime(t.TradeDate);
-            if (d < period.Start || d > period.End) continue;
+            var d = PerformancePeriod.ToPeriodDate(t.TradeDate);
+            if (!period.Contains(d)) continue;
 
             var amt = t.Type switch
             {
