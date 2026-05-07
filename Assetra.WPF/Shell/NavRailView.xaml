@@ -59,7 +59,7 @@
                                     Height="18"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
-                                    Background="{DynamicResource AppDanger}"
+                                    Background="{DynamicResource AppAccent}"
                                     CornerRadius="0,2,2,0"
                                     Visibility="Collapsed" />
                                 <ContentPresenter
@@ -225,8 +225,37 @@
                 <Style TargetType="{x:Type Border}">
                     <Setter Property="Width" Value="{StaticResource Size.Sidebar.Width}" />
                     <Style.Triggers>
+                        <!--
+                            NavRail collapse/expand uses Motion.Fast (120ms) and
+                            Motion.Easing.Standard per the Fluent + Carbon plan.
+                            Storyboards run with FillBehavior=HoldEnd so the
+                            animated Width persists after the transition ends.
+                        -->
                         <DataTrigger Binding="{Binding ElementName=PaneToggle, Path=IsChecked}" Value="False">
-                            <Setter Property="Width" Value="56" />
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetProperty="Width"
+                                            To="56"
+                                            Duration="0:0:0.12"
+                                            EasingFunction="{StaticResource Motion.Easing.Standard}"
+                                            FillBehavior="HoldEnd" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetProperty="Width"
+                                            To="{StaticResource Size.Sidebar.Width}"
+                                            Duration="0:0:0.12"
+                                            EasingFunction="{StaticResource Motion.Easing.Standard}"
+                                            FillBehavior="HoldEnd" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>

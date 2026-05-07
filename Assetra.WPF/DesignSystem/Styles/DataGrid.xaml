@@ -88,7 +88,12 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="VerticalAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <!--
+            Keyboard focus visual restored per the Fluent + Carbon plan.
+            Tab/Shift+Tab navigation now lands on cells with a visible
+            focus ring instead of a silent navigation move.
+        -->
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource FocusVisual}" />
         <!--
             必須設 Transparent（非 null）：WPF 的 null 背景不參與 hit testing，
             點擊 TextBlock 之間的空白區域事件會穿透，DataGridRow 選取不觸發。
