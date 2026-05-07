@@ -31,6 +31,25 @@
 3. 它應該先落在哪一層？
 4. 專案裡有沒有相近的 service / workflow / query 可延用？
 
+## UI Work Workflow
+
+要做 UI 重構或 DesignSystem 變更時，照下列順序使用文件：
+
+1. **計畫（why & what）** → [Assetra Fluent + Carbon UI Plan](planning/Assetra-Fluent-Carbon-UI-Plan.md)
+   - 設計決策（Fluent 主、Carbon 輔）、Phase 0–8、頁面模式、Acceptance Rules。
+2. **範圍檢查（避免重做）** → [Native UI Baseline Migration Completion](reviews/Assetra-WPF-Native-UI-Migration-Completion.md)
+   - 確認 native baseline 已完成哪些事；這不是最終 UI 品質門檻，後續仍以 Fluent + Carbon plan 為準。
+3. **資源歸屬（資源在哪）** → [DesignSystem README](../Assetra.WPF/DesignSystem/README.md)
+   - Fluent-first / Carbon-assisted 的資源歸屬、canonical 檔案、命名規則、migration rules。
+4. **實作參考（最常查）** → [DesignSystem USAGE](../Assetra.WPF/DesignSystem/USAGE.md)
+   - 寫 XAML 時的 page、form rhythm、dialog、empty state、data grid、report、analysis、shared product pattern。
+5. **驗收（每批變更後）** → [UI Release Gate](reviews/Assetra-WPF-UI-Release-Gate.md)
+   - 自動化 / 手動 / control state / pattern state / blockers 五道關卡。
+6. **收尾（release note）** → [Changelog](releases/CHANGELOG.md)
+   - 每完成一個 phase 或重要 batch 後補上版本紀錄。
+
+> 一句話總結：**計畫看 Plan，scope 看 Migration Completion，實作看 README + USAGE，驗收看 Release Gate，收尾寫 Changelog。**
+
 ## Architecture
 - [Architecture](architecture/Architecture.md)
   - 目前的分層原則與依賴方向。
@@ -42,6 +61,8 @@
   - 未來可拆分的業務 context 邊界。
 
 ## Planning
+- [Assetra Fluent + Carbon UI Plan](planning/Assetra-Fluent-Carbon-UI-Plan.md)
+  - Assetra WPF 以 Fluent Design 為主、Carbon 為輔的 UI 設計決策、頁面模式與分階段重構計畫。
 - [Assetra Feature Blueprint and Roadmap](planning/Assetra-Feature-Blueprint-and-Roadmap.md)
   - 產品功能藍圖與 P0 / P1 / P2 優先級。
 - [Implementation Roadmap](planning/Implementation-Roadmap.md)
@@ -49,8 +70,6 @@
 - [Roadmap v0.14 to v1.0](planning/Roadmap-v0.14-to-v1.0.md)
   - v0.14–v1.0 各 sprint 詳細 task breakdown。Phase 4
     （多元資產 + 情境模擬）已於 **v0.22.0** 一次 ship。
-- [Assetra WPF Native UI Task List](planning/Assetra-WPF-Native-UI-Task-List.md)
-  - 逐步建立 Assetra 原生 WPF Design System，並移除 WPF-UI 依賴的完整 task list。
 
 ### Phase 4 已 ship（v0.22.0）
 
@@ -69,10 +88,10 @@ context 與架構決策仍可讀：
   - 雲端同步啟用、加密模型、Conflict 解決與 troubleshooting（v0.20.0–v0.21.0）。
 
 ## Reviews
-- [Responsive UI Review](reviews/Responsive-UI-Review.md)
-  - 響應式 UI 整修結果與剩餘待改善項目。
-- [Docs Gap Review](reviews/Docs-Gap-Review.md)
-  - 對照文件與實作現況的成熟度差距檢查。
+- [Assetra WPF Native UI Baseline Migration Completion](reviews/Assetra-WPF-Native-UI-Migration-Completion.md)
+  - 原生 WPF DesignSystem baseline 收斂完成狀態、已知缺口、gallery 截圖與驗證命令。
+- [Assetra WPF UI Release Gate](reviews/Assetra-WPF-UI-Release-Gate.md)
+  - DesignSystem 或主要 XAML 變更進 release 前的自動、手動與失敗訊號驗收 gate。
 
 ## Releases
 - [Changelog](releases/CHANGELOG.md)
