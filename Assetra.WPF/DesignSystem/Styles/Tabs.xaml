@@ -24,8 +24,8 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="14,0" />
         <Setter Property="Height" Value="36" />
-        <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
         <Setter Property="Template">
@@ -69,14 +69,17 @@
         </Setter>
     </Style>
 
+    <Style x:Key="AppTopTab" BasedOn="{StaticResource NavTabBtn}" TargetType="{x:Type RadioButton}" />
+    <Style x:Key="AppSubTab" BasedOn="{StaticResource NavTabBtn}" TargetType="{x:Type RadioButton}" />
+
     <!--  ── SegmentBtn — RadioButton-based pill segment ──  -->
     <Style x:Key="SegmentBtn" TargetType="RadioButton">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="12,5" />
-        <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
             <Setter.Value>
@@ -87,7 +90,7 @@
                         Background="{TemplateBinding Background}"
                         BorderBrush="Transparent"
                         BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}">
+                        CornerRadius="{StaticResource Radius.Sm}">
                         <TextBlock
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
@@ -124,6 +127,8 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style x:Key="AppSegmentButton" BasedOn="{StaticResource SegmentBtn}" TargetType="{x:Type RadioButton}" />
 
     <!--  ── TabControl (implicit) ──  -->
     <Style TargetType="{x:Type TabControl}">
@@ -171,12 +176,17 @@
         <Setter Property="Padding" Value="16,10" />
         <Setter Property="Margin" Value="0,0,4,0" />
         <Setter Property="MinWidth" Value="0" />
-        <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <!--
+            These alignment values are also used by TabControl for the
+            selected content. Keep them Stretch so tab pages fill the available
+            workspace; the header template centers its label explicitly below.
+        -->
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -188,8 +198,8 @@
                             Background="{TemplateBinding Background}">
                             <ContentPresenter
                                 x:Name="Content"
-                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
                                 ContentSource="Header"
                                 RecognizesAccessKey="True"
                                 TextElement.FontWeight="{TemplateBinding FontWeight}"

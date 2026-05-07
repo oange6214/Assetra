@@ -1,0 +1,30 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- WPF-native elevation tokens. Keep shadows subtle for finance workflows. -->
+    <DropShadowEffect
+        x:Key="Shadow.Sm"
+        BlurRadius="8"
+        Direction="270"
+        Opacity="0.10"
+        ShadowDepth="1"
+        Color="#0F172A" />
+
+    <DropShadowEffect
+        x:Key="Shadow.Md"
+        BlurRadius="18"
+        Direction="270"
+        Opacity="0.14"
+        ShadowDepth="4"
+        Color="#0F172A" />
+
+    <DropShadowEffect
+        x:Key="Shadow.Dialog"
+        BlurRadius="28"
+        Direction="270"
+        Opacity="0.18"
+        ShadowDepth="8"
+        Color="#0F172A" />
+
+</ResourceDictionary>

@@ -4,14 +4,20 @@
 
     <!-- Control styles depend on tokens and semantic theme brushes. -->
     <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/Icon.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/PageLayout.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Buttons.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Focus.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Inputs.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Tabs.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/DataGrid.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Cards.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/EmptyState.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/Button.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/CheckBox.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/RadioButton.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/DatePicker.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/Expander.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/Dialog.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>

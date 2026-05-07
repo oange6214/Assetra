@@ -1,0 +1,10 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:Double x:Key="Motion.Fast">120</sys:Double>
+    <sys:Double x:Key="Motion.Normal">180</sys:Double>
+    <sys:Double x:Key="Motion.Slow">240</sys:Double>
+
+</ResourceDictionary>

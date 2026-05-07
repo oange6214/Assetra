@@ -6,7 +6,7 @@
         ════════════════════════════════════════════════════════════
         FormCard         : Border ready-to-use as a form container —
         16 px padding, AppSurface bg, 1 px AppBorder,
-        RadiusLg (8) corners.
+        Radius.Lg (8) corners.
         FormSectionTitle : 20 px SemiBold AppTextPrimary heading with
         12 px bottom margin, for section labels
         inside a form.
@@ -17,12 +17,12 @@
         <Setter Property="Background" Value="{DynamicResource AppSurface}" />
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource RadiusLg}" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Lg}" />
     </Style>
 
     <Style x:Key="FormSectionTitle" TargetType="TextBlock">
         <Setter Property="Margin" Value="0,0,0,12" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeLg}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Lg}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
     </Style>

@@ -17,9 +17,20 @@
         <Setter Property="LastChildFill" Value="True" />
     </Style>
 
+    <Style x:Key="PageTitleRow" TargetType="StackPanel">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Orientation" Value="Horizontal" />
+    </Style>
+
+    <Style x:Key="PageActionBar" TargetType="StackPanel">
+        <Setter Property="Margin" Value="0,16,0,0" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="Orientation" Value="Horizontal" />
+    </Style>
+
     <Style x:Key="PageTitleText" TargetType="TextBlock">
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeXl}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Xl}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="TextTrimming" Value="CharacterEllipsis" />
@@ -27,13 +38,79 @@
 
     <Style x:Key="PageSubtitleText" TargetType="TextBlock">
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeBase}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Base}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 
     <Style x:Key="PageMetricsGrid" TargetType="UniformGrid">
         <Setter Property="Margin" Value="{StaticResource PageSectionGapMargin}" />
+    </Style>
+
+    <Style x:Key="DashboardMetricGrid" BasedOn="{StaticResource PageMetricsGrid}" TargetType="UniformGrid" />
+
+    <Style x:Key="PageTabHost" TargetType="Grid">
+        <Setter Property="Margin" Value="0,0,0,16" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+    </Style>
+
+    <Style x:Key="PageFormGrid" TargetType="UniformGrid">
+        <Setter Property="Rows" Value="1" />
+    </Style>
+
+    <Style x:Key="FormSection" TargetType="Border">
+        <Setter Property="Padding" Value="{StaticResource Padding.Card}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Lg}" />
+    </Style>
+
+    <Style x:Key="FormSectionHeader" TargetType="TextBlock">
+        <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Md}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+    </Style>
+
+    <Style x:Key="FormField" TargetType="StackPanel">
+        <Setter Property="Margin" Value="0,0,16,0" />
+    </Style>
+
+    <Style x:Key="FormFieldLast" BasedOn="{StaticResource FormField}" TargetType="StackPanel">
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <Style x:Key="FormFieldLabel" TargetType="TextBlock">
+        <Setter Property="Margin" Value="0,0,0,4" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <Style x:Key="MetricCard" TargetType="Border">
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Lg}" />
+    </Style>
+
+    <Style x:Key="MetricLabel" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <Style x:Key="MetricValue" TargetType="TextBlock">
+        <Setter Property="Margin" Value="0,8,0,0" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Xl}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
     </Style>
 
     <Style x:Key="PageErrorText" TargetType="TextBlock">
@@ -43,6 +120,60 @@
     </Style>
 
     <Style x:Key="PageContentGrid" TargetType="Grid">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+    </Style>
+
+    <Style x:Key="PageContentHost" BasedOn="{StaticResource PageContentGrid}" TargetType="Grid" />
+
+    <!--  Canonical aliases for task-list naming  -->
+    <Style x:Key="PageHeader" BasedOn="{StaticResource PageHeaderDock}" TargetType="DockPanel" />
+    <Style x:Key="FormGrid"   BasedOn="{StaticResource PageFormGrid}"   TargetType="UniformGrid" />
+
+    <Style x:Key="ListContentHost" TargetType="ScrollViewer">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+    </Style>
+
+    <!--  List page pattern  -->
+    <Style x:Key="ListPageHeader" BasedOn="{StaticResource PageHeaderDock}" TargetType="DockPanel" />
+    <Style x:Key="ListPageActionBar" BasedOn="{StaticResource PageActionBar}" TargetType="StackPanel" />
+    <Style x:Key="ListPageLoadedHost" BasedOn="{StaticResource PageContentGrid}" TargetType="Grid" />
+
+    <Style x:Key="ListPageEmptyHost" TargetType="Grid">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="MinHeight" Value="280" />
+    </Style>
+
+    <Style x:Key="ListRowActions" TargetType="StackPanel">
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Orientation" Value="Horizontal" />
+    </Style>
+
+    <Style x:Key="ListFilterBar" TargetType="DockPanel">
+        <Setter Property="Margin" Value="0,0,0,16" />
+        <Setter Property="LastChildFill" Value="True" />
+    </Style>
+
+    <!--  Analysis page pattern  -->
+    <Style x:Key="AnalysisInputPanel" BasedOn="{StaticResource FormSection}" TargetType="Border" />
+    <Style x:Key="AnalysisResultHost" BasedOn="{StaticResource PageContentGrid}" TargetType="Grid" />
+    <Style x:Key="AnalysisEmptyHost" BasedOn="{StaticResource ListPageEmptyHost}" TargetType="Grid" />
+
+    <!--  Report page pattern  -->
+    <Style x:Key="ReportToolbar" BasedOn="{StaticResource PageHeaderDock}" TargetType="DockPanel" />
+    <Style x:Key="ReportSection" BasedOn="{StaticResource FormSection}" TargetType="Border" />
+    <Style x:Key="ReportExportBar" BasedOn="{StaticResource PageActionBar}" TargetType="StackPanel" />
+
+    <Style x:Key="ReportChartSection" BasedOn="{StaticResource ReportSection}" TargetType="Border">
+        <Setter Property="MinHeight" Value="280" />
+    </Style>
+
+    <Style x:Key="ReportTableSection" BasedOn="{StaticResource ReportSection}" TargetType="Border">
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="VerticalAlignment" Value="Stretch" />
     </Style>

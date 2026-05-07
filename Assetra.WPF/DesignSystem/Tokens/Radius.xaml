@@ -12,10 +12,12 @@
         Card.Radius (16, in DesignTokens.xaml) : page-level hero cards
     -->
 
-    <CornerRadius x:Key="RadiusXs">2</CornerRadius>
-    <CornerRadius x:Key="RadiusSm">4</CornerRadius>
-    <CornerRadius x:Key="RadiusMd">6</CornerRadius>
-    <CornerRadius x:Key="RadiusLg">8</CornerRadius>
-    <CornerRadius x:Key="RadiusXl">12</CornerRadius>
+    <CornerRadius x:Key="Radius.None">0</CornerRadius>
+    <CornerRadius x:Key="Radius.Xs">2</CornerRadius>
+    <CornerRadius x:Key="Radius.Sm">4</CornerRadius>
+    <CornerRadius x:Key="Radius.Md">6</CornerRadius>
+    <CornerRadius x:Key="Radius.Lg">8</CornerRadius>
+    <CornerRadius x:Key="Radius.Xl">12</CornerRadius>
+    <CornerRadius x:Key="Radius.Full">999</CornerRadius>
 
 </ResourceDictionary>

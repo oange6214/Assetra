@@ -13,15 +13,17 @@
         (Segoe UI) -> CJK (微軟正黑體 / 雅黑體) -> generic sans.
     -->
 
-    <FontFamily x:Key="FontBase">Segoe UI Variable Display, Segoe UI, Microsoft JhengHei UI, Microsoft YaHei UI, sans-serif</FontFamily>
-
-    <sys:Double x:Key="FontSizeXs">12</sys:Double>
-    <sys:Double x:Key="FontSizeSm">14</sys:Double>
-    <sys:Double x:Key="FontSizeBase">16</sys:Double>
-    <sys:Double x:Key="FontSizeMd">18</sys:Double>
-    <sys:Double x:Key="FontSizeLg">20</sys:Double>
-    <sys:Double x:Key="FontSizeXl">24</sys:Double>
-    <sys:Double x:Key="FontSize2xl">32</sys:Double>
-    <sys:Double x:Key="FontSize3xl">48</sys:Double>
+    <FontFamily x:Key="Font.Family.Base">Segoe UI Variable Display, Segoe UI, Microsoft JhengHei UI, Microsoft YaHei UI, sans-serif</FontFamily>
+    <sys:Double x:Key="Font.Size.Xs">12</sys:Double>
+    <sys:Double x:Key="Font.Size.Sm">14</sys:Double>
+    <sys:Double x:Key="Font.Size.Base">16</sys:Double>
+    <sys:Double x:Key="Font.Size.Md">18</sys:Double>
+    <sys:Double x:Key="Font.Size.Lg">20</sys:Double>
+    <sys:Double x:Key="Font.Size.Xl">24</sys:Double>
+    <sys:Double x:Key="Font.Size.2xl">32</sys:Double>
+    <sys:Double x:Key="Font.Size.3xl">48</sys:Double>
+    <FontWeight x:Key="Font.Weight.Regular">Regular</FontWeight>
+    <FontWeight x:Key="Font.Weight.Medium">Medium</FontWeight>
+    <FontWeight x:Key="Font.Weight.Semibold">SemiBold</FontWeight>
 
 </ResourceDictionary>

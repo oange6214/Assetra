@@ -1,9 +1,18 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:Assetra.WPF.Infrastructure.Converters"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls">
+
+    <converters:DisplayOptionTextConverter x:Key="DisplayOptionTextConverter" />
+
+    <DataTemplate x:Key="AppComboBoxDisplayTemplate">
+        <TextBlock
+            Text="{Binding Converter={StaticResource DisplayOptionTextConverter}}"
+            TextTrimming="CharacterEllipsis" />
+    </DataTemplate>
 
     <!--
         ════════════════════════════════════════════════════════════
@@ -21,8 +30,8 @@
 
     <!--  ── Global TextBlock ──  -->
     <Style TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeBase}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Base}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
         <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
@@ -35,8 +44,8 @@
         fonts so Chinese characters render correctly.
     -->
     <Style TargetType="ToolTip">
-        <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="Background" Value="{DynamicResource AppSurface}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
@@ -44,17 +53,76 @@
         <Setter Property="Padding" Value="8,4" />
     </Style>
 
-    <!--
-        ── Global TextBox ──
-        CaretBrush must be set explicitly; it never inherits Foreground
-        in WPF.
-    -->
-    <Style TargetType="TextBox">
+    <!--  ── TextBox shell + variants ──  -->
+    <Style x:Key="AppTextBox" TargetType="{x:Type TextBox}">
+        <Setter Property="MinHeight" Value="{StaticResource Control.Height.Md}" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+        <Setter Property="Background" Value="{DynamicResource Brush.Surface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+        <Setter Property="BorderThickness" Value="{StaticResource Border.Input}" />
         <Setter Property="CaretBrush" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TextBox}">
+                    <Border
+                        x:Name="Chrome"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{StaticResource Radius.Sm}"
+                        SnapsToDevicePixels="True">
+                        <ScrollViewer
+                            x:Name="PART_ContentHost"
+                            Margin="{TemplateBinding Padding}"
+                            Focusable="False"
+                            HorizontalScrollBarVisibility="Hidden"
+                            VerticalScrollBarVisibility="Hidden" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.BorderStrong}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.FocusRing}" />
+                        </Trigger>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.Danger}" />
+                        </Trigger>
+                        <Trigger Property="IsReadOnly" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource Brush.SurfaceRaised}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <Style BasedOn="{StaticResource {x:Type ui:CalendarDatePicker}}" TargetType="{x:Type ui:CalendarDatePicker}">
-        <Setter Property="behaviors:CalendarDatePickerDateOnlyBehavior.IsEnabled" Value="True" />
+    <Style BasedOn="{StaticResource AppTextBox}" TargetType="{x:Type TextBox}" />
+
+    <Style x:Key="AppNumberTextBox" BasedOn="{StaticResource AppTextBox}" TargetType="{x:Type TextBox}">
+        <Setter Property="HorizontalContentAlignment" Value="Right" />
+    </Style>
+
+    <Style x:Key="AppMoneyTextBox" BasedOn="{StaticResource AppNumberTextBox}" TargetType="{x:Type TextBox}">
+        <Setter Property="behaviors:ThousandSeparatorBehavior.IsEnabled" Value="True" />
+    </Style>
+
+    <Style x:Key="AppRateTextBox" BasedOn="{StaticResource AppNumberTextBox}" TargetType="{x:Type TextBox}">
+        <Setter Property="MinWidth" Value="96" />
+        <Setter Property="ToolTip" Value="Use decimal form, for example 0.05 for 5%." />
+    </Style>
+
+    <Style x:Key="AppPercentTextBox" BasedOn="{StaticResource AppNumberTextBox}" TargetType="{x:Type TextBox}">
+        <Setter Property="MinWidth" Value="96" />
+        <Setter Property="ToolTip" Value="Use percent form, for example 5 for 5%." />
     </Style>
 
     <Style TargetType="{x:Type primitives:CalendarDayButton}">
@@ -66,8 +134,8 @@
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-        <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -128,7 +196,7 @@
 
     <!--  ── Form Field Validation Error ──  -->
     <Style x:Key="FormFieldError" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="{StaticResource FontSizeXs}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
         <Setter Property="Foreground" Value="{DynamicResource AppDanger}" />
         <Setter Property="Margin" Value="0,2,0,0" />
         <Setter Property="TextWrapping" Value="Wrap" />
@@ -139,8 +207,8 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="Padding" Value="10,6" />
-        <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -178,8 +246,8 @@
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Background" Value="{DynamicResource AppBackground}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-        <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource FormComboBoxItem}" />
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
@@ -201,14 +269,14 @@
                                         Background="{DynamicResource AppBackground}"
                                         BorderBrush="{DynamicResource AppBorder}"
                                         BorderThickness="1"
-                                        CornerRadius="{StaticResource RadiusSm}">
+                                        CornerRadius="{StaticResource Radius.Sm}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="24" />
                                             </Grid.ColumnDefinitions>
                                             <Rectangle Grid.Column="0" Fill="Transparent" />
-                                            <ui:SymbolIcon
+                                            <ds:AppIcon
                                                 Grid.Column="1"
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center"
@@ -239,7 +307,7 @@
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             Content="{TemplateBinding SelectionBoxItem}"
-                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                            ContentTemplate="{TemplateBinding ItemTemplate}"
                             IsHitTestVisible="False" />
 
                         <TextBox
@@ -268,7 +336,7 @@
                                 Background="{DynamicResource AppSurface}"
                                 BorderBrush="{DynamicResource AppBorder}"
                                 BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusSm}">
+                                CornerRadius="{StaticResource Radius.Sm}">
                                 <ScrollViewer Focusable="False">
                                     <ItemsPresenter />
                                 </ScrollViewer>
@@ -284,6 +352,12 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style x:Key="AppComboBox" BasedOn="{StaticResource FormComboBox}" TargetType="{x:Type ComboBox}">
+        <Setter Property="MinHeight" Value="{StaticResource Control.Height.Md}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+        <Setter Property="ItemTemplate" Value="{StaticResource AppComboBoxDisplayTemplate}" />
     </Style>
 
 </ResourceDictionary>

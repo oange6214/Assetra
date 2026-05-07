@@ -1,0 +1,14 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Thickness x:Key="Border.None">0</Thickness>
+    <Thickness x:Key="Border.Hairline">1</Thickness>
+    <Thickness x:Key="Border.Strong">2</Thickness>
+
+    <Thickness x:Key="Border.Input">1</Thickness>
+    <Thickness x:Key="Border.Card">1</Thickness>
+    <Thickness x:Key="Border.Dialog">1</Thickness>
+    <Thickness x:Key="Border.FocusRing">2</Thickness>
+
+</ResourceDictionary>
