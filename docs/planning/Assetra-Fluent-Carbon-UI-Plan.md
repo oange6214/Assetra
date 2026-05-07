@@ -262,28 +262,33 @@ Add or clarify these token groups before major page consolidation begins:
 - [ ] Confirm DatePicker selected day, today hint, and future date behavior.
 - [ ] Confirm button foreground and disabled contrast in both themes.
 - [ ] Confirm dialog overlay opacity prevents background visual competition.
-- [ ] Replace the NavRail active indicator's current danger/destructive brush
+- [x] Replace the NavRail active indicator's current danger/destructive brush
       with the accent/selection semantic brush. The selected navigation marker
-      should not use `AppDanger`.
-- [ ] Restore keyboard focus behavior for `AppDataGrid` cells and rows. A
+      should not use `AppDanger`. *(Done in commit 92dcbb0.)*
+- [x] Restore keyboard focus behavior for `AppDataGrid` cells and rows. A
       `FocusVisualStyle="{x:Null}"` default conflicts with Fluent native
       Windows expectations when Tab/Shift+Tab navigation reaches tabular data.
-- [ ] Wire existing motion tokens into at least one real control state or
+      *(Done in commit 92dcbb0: AppDataGridCell uses `{DynamicResource FocusVisual}`.)*
+- [x] Wire existing motion tokens into at least one real control state or
       document that motion is intentionally disabled for a specific component.
+      *(Done in commit 92dcbb0: NavRail collapse animates with Motion.Fast +
+      Motion.Easing.Standard.)*
 
 ### Phase 1.5: Token Additions
 
-- [ ] Add `Gap.Xs`, `Gap.Sm`, `Gap.Md`, `Gap.Lg`, and `Gap.Xl` tokens and map
-      them to the canonical form/page rhythm.
-- [ ] Add `LineHeight.Tight`, `LineHeight.Normal`, and `LineHeight.Relaxed`.
-- [ ] Add `Motion.Easing.Standard`, `Motion.Easing.Enter`, and
-      `Motion.Easing.Exit`.
-- [ ] Add composite text style resources for headings, body text, and
-      captions.
-- [ ] Add a tabular numeric text style (`TextStyle.Numeric` or
+- [x] Add `Gap.Xs`, `Gap.Sm`, `Gap.Md`, `Gap.Lg`, and `Gap.Xl` tokens and map
+      them to the canonical form/page rhythm. *(Done in commit 10698a5.)*
+- [x] Add `LineHeight.Tight`, `LineHeight.Normal`, and `LineHeight.Relaxed`.
+      *(Done in commit 10698a5.)*
+- [x] Add `Motion.Easing.Standard`, `Motion.Easing.Enter`, and
+      `Motion.Easing.Exit`. *(Done in commit 10698a5: CubicEase + Spline KeySpline counterparts.)*
+- [x] Add composite text style resources for headings, body text, and
+      captions. *(Done in commit 10698a5: TextStyle.Heading.{Lg,Md,Sm}, Body.{Lg,Md,Sm,Strong.Md}, Caption.)*
+- [x] Add a tabular numeric text style (`TextStyle.Numeric` or
       `TextStyle.Body.Numeric`) with `FontFeatureSettings` for tabular figures
       where the font fallback chain supports them. Required for column-aligned
-      financial values in tables and metric grids.
+      financial values in tables and metric grids. *(Done in commit 10698a5:
+      TextStyle.Numeric.{Display,Body,Caption} with Typography.NumeralAlignment=Tabular.)*
 - [ ] Replace recurring local spacing literals with token references during
       page migration instead of adding new one-off margins.
 
@@ -302,14 +307,17 @@ These components are required by the feature-page migrations in Phase 3-6.
 Build them before page migration so each page consumes the canonical version
 instead of inventing a local one that has to be replaced later.
 
-- [ ] Add or standardize `StatusBadge` for state labels such as active,
+- [x] Add or standardize `StatusBadge` for state labels such as active,
       archived, pending, healthy, warning, and destructive states.
-- [ ] Add or standardize pagination controls for transaction/report-style
-      lists.
-- [ ] Add a first-class filter toolbar pattern for search, date range, type
+      *(Done in commit 33c92ec: Styles/Badges.xaml with 8 variants.)*
+- [x] Add or standardize pagination controls for transaction/report-style
+      lists. *(Done in commit 33c92ec: Styles/Pagination.xaml + PaginationNavButton variant.)*
+- [x] Add a first-class filter toolbar pattern for search, date range, type
       filter, asset filter, and right-aligned actions.
-- [ ] Add reusable validation text and helper text patterns that follow the
-      Form Vertical Rhythm rules.
+      *(Done in commit 33c92ec: Styles/FilterToolbar.xaml.)*
+- [x] Add reusable validation text and helper text patterns that follow the
+      Form Vertical Rhythm rules. *(Done in commit 33c92ec: Styles/FormText.xaml
+      with Form.{FieldLabel,HelperText,ErrorText,SectionHeader,SectionGap}.)*
 
 ### Phase 3: Portfolio Pages
 
@@ -349,11 +357,13 @@ instead of inventing a local one that has to be replaced later.
 
 ### Phase 7: QA and Release Gate
 
-- [ ] Run `tools/Scan-XamlResources.ps1 -FailOnExternalBasedOn`.
-- [ ] Run `tools/Scan-MoneyInputs.ps1 -FailOnFinding`.
-- [ ] Run `tools/Capture-ControlGallery.ps1`.
-- [ ] Build `Assetra.slnx`.
-- [ ] Run `Assetra.Tests`.
+- [x] Run `tools/Scan-XamlResources.ps1 -FailOnExternalBasedOn`. *(Pass: all
+      BasedOn StaticResource references local to their dictionary.)*
+- [x] Run `tools/Scan-MoneyInputs.ps1 -FailOnFinding`. *(Pass: no money-like
+      bindings missing thousand-separator behavior.)*
+- [ ] Run `tools/Capture-ControlGallery.ps1`. *(Pending: requires running app.)*
+- [x] Build `Assetra.slnx`. *(Pass: 0 warnings, 0 errors.)*
+- [x] Run `Assetra.Tests`. *(Pass: 1161/1161.)*
 - [ ] Smoke test app startup.
 - [ ] Check Visual Studio XAML Binding Failures panel.
 - [ ] Manually verify all release gate pages in light and dark themes.
