@@ -5,49 +5,48 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     x:Name="Root"
     mc:Ignorable="d">
 
     <StackPanel>
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeSm}"
+            FontSize="{StaticResource Font.Size.Sm}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextPrimary}"
             Text="{DynamicResource Portfolio.AssetDialog.SectionInfo}" />
         <TextBlock
             Margin="0,0,0,12"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextMuted}"
             Text="{DynamicResource Portfolio.AssetDialog.LoanInfoHint}"
             TextWrapping="Wrap" />
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Liability.Subtype}" />
-        <ui:TextBox
+        <TextBox
             Margin="0,0,0,10"
             Text="{Binding AddSubtype, UpdateSourceTrigger=PropertyChanged}"
             ToolTip="{DynamicResource Portfolio.Liability.SubtypeHint}" />
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Loan.Name}" />
-        <ui:TextBox Margin="0,0,0,10" Text="{Binding AddLoanName, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox Margin="0,0,0,10" Text="{Binding AddLoanName, UpdateSourceTrigger=PropertyChanged}" />
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Loan.Amount}" />
-        <ui:TextBox
+        <TextBox
             Margin="0,0,0,10"
             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
             Text="{Binding AddLoanAmount, UpdateSourceTrigger=PropertyChanged}" />
@@ -77,20 +76,20 @@
             <StackPanel Grid.Column="0">
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
-                <ui:TextBox Text="{Binding AddLoanAnnualRate, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding AddLoanAnnualRate, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
             <StackPanel Grid.Column="2">
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Loan.TermMonths}" />
-                <ui:TextBox Text="{Binding AddLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding AddLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
         </Grid>
 
@@ -113,38 +112,36 @@
             </StackPanel.Style>
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
-            <ui:TextBox Margin="0,0,0,10" Text="{Binding AddLoanAnnualRate, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Margin="0,0,0,10" Text="{Binding AddLoanAnnualRate, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Loan.TermMonths}" />
-            <ui:TextBox Text="{Binding AddLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Text="{Binding AddLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Loan.StartDate}" />
-        <ui:CalendarDatePicker
+        <DatePicker
             Margin="0,0,0,10"
-            FontSize="{StaticResource FontSizeSm}"
-            Foreground="{DynamicResource AppTextPrimary}"
             MinWidth="132"
             HorizontalContentAlignment="Left"
-            Content="{Binding AddLoanStartDate, Converter={StaticResource DateDisplayConverter}}"
-            Date="{Binding AddLoanStartDate, Mode=TwoWay}" />
+            SelectedDate="{Binding AddLoanStartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Style="{StaticResource AppDatePicker}" />
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Loan.CashAccount}" />
@@ -157,11 +154,11 @@
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Loan.HandlingFee}" />
-        <ui:TextBox
+        <TextBox
             Margin="0,0,0,8"
             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
             Text="{Binding AddLoanHandlingFee, UpdateSourceTrigger=PropertyChanged}" />
@@ -172,12 +169,12 @@
             Background="{DynamicResource AppBackground}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
-            CornerRadius="{StaticResource RadiusSm}">
+            CornerRadius="{StaticResource Radius.Sm}">
             <StackPanel>
                 <DockPanel Margin="0,0,0,8" LastChildFill="False">
                     <TextBlock
                         VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeSm}"
+                        FontSize="{StaticResource Font.Size.Sm}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Portfolio.AssetDialog.LoanBorrowRecord}" />
@@ -187,10 +184,10 @@
                         Background="{DynamicResource AppAccentSoft}"
                         BorderBrush="{DynamicResource AppAccent}"
                         BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusLg}"
+                        CornerRadius="{StaticResource Radius.Lg}"
                         DockPanel.Dock="Right">
                         <TextBlock
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppAccentText}"
                             Text="{DynamicResource Portfolio.AssetDialog.Required}" />
@@ -198,12 +195,12 @@
                 </DockPanel>
                 <TextBlock
                     Margin="0,0,0,8"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{DynamicResource Portfolio.AssetDialog.LoanBorrowRecordHint}"
                     TextWrapping="Wrap" />
                 <TextBlock
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{DynamicResource Portfolio.Liability.AddHint}"
                     TextWrapping="Wrap" />

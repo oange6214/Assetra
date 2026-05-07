@@ -35,6 +35,9 @@ public partial class RecurringViewModel : ObservableObject
 
     [ObservableProperty] private string _runStatus = string.Empty;
     [ObservableProperty] private bool _isAddFormOpen;
+    [ObservableProperty] private bool _isDeleteConfirmOpen;
+    [ObservableProperty] private string _deleteTargetName = string.Empty;
+    private RecurringRowViewModel? _pendingDelete;
     public bool HasNoSubscriptions => Subscriptions.Count == 0;
     public bool HasSubscriptions   => Subscriptions.Count > 0;
 
@@ -214,6 +217,32 @@ public partial class RecurringViewModel : ObservableObject
         Subscriptions.Remove(row);
         _snackbar.Success(string.Format(
             GetString("Recurring.Toast.Deleted", "已刪除「{0}」"), row.Name));
+    }
+
+    [RelayCommand]
+    private void RequestDeleteSubscription(RecurringRowViewModel row)
+    {
+        if (row is null) return;
+        _pendingDelete = row;
+        DeleteTargetName = row.Name;
+        IsDeleteConfirmOpen = true;
+    }
+
+    [RelayCommand]
+    private async Task ConfirmDeleteAsync()
+    {
+        var row = _pendingDelete;
+        CancelDelete();
+        if (row is not null)
+            await DeleteSubscriptionAsync(row).ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private void CancelDelete()
+    {
+        _pendingDelete = null;
+        DeleteTargetName = string.Empty;
+        IsDeleteConfirmOpen = false;
     }
 
     private bool CanRunScheduler() => !IsBusy;

@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
@@ -39,15 +39,15 @@
                 Margin="0,0,24,0"
                 VerticalAlignment="Center">
         <TextBlock
-                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
-                    FontSize="{StaticResource FontSizeMd}"
+                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
+                    FontSize="{StaticResource Font.Size.Md}"
                     FontWeight="Bold"
                     Foreground="{DynamicResource AppDown}"
                     Text="{Binding SellingRow.Symbol}" />
         <TextBlock
                     Margin="0,2,0,0"
-                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}">
                     <Run Text="{DynamicResource Portfolio.Sell.CostLabel}" /><Run Text=" " /><Run Text="{Binding SellingRow.BuyPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}" />
         </TextBlock>
@@ -60,11 +60,11 @@
                 VerticalAlignment="Center">
         <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.SellConfirmLabel}" />
-        <ui:TextBox
+        <TextBox
                     Width="110"
 
                     behaviors:ThousandSeparatorBehavior.IsEnabled="True"
@@ -93,15 +93,15 @@
                     Grid.Row="0"
                     Grid.Column="0"
                     Margin="0,0,12,2"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{DynamicResource Portfolio.Sell.GrossAmount}" />
         <TextBlock
                     Grid.Row="0"
                     Grid.Column="1"
                     HorizontalAlignment="Right"
-                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{Binding SellGrossAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
 
@@ -110,15 +110,15 @@
                     Grid.Row="1"
                     Grid.Column="0"
                     Margin="0,0,12,2"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{DynamicResource Portfolio.Sell.Commission}" />
         <TextBlock
                     Grid.Row="1"
                     Grid.Column="1"
                     HorizontalAlignment="Right"
-                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppDown}"
                     Text="{Binding SellCommission, Converter={StaticResource CurrencyConverter}, ConverterParameter=deduct}" />
 
@@ -127,15 +127,15 @@
                     Grid.Row="2"
                     Grid.Column="0"
                     Margin="0,0,12,2"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{DynamicResource Portfolio.Sell.TransactionTax}" />
         <TextBlock
                     Grid.Row="2"
                     Grid.Column="1"
                     HorizontalAlignment="Right"
-                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppDown}"
                     Text="{Binding SellTransactionTax, Converter={StaticResource CurrencyConverter}, ConverterParameter=deduct}" />
 
@@ -154,7 +154,7 @@
                     Margin="0,0,12,0"
                     VerticalAlignment="Center">
           <TextBlock
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Sell.EstPnL}" />
@@ -164,8 +164,8 @@
                     Grid.Column="1"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
-                    FontSize="{StaticResource FontSizeSm}"
+                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
+                    FontSize="{StaticResource Font.Size.Sm}"
                     FontWeight="SemiBold"
                     Text="{Binding SellEstimatedPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}">
           <TextBlock.Style>
@@ -188,7 +188,7 @@
                 VerticalAlignment="Center">
         <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Sell.CashAccount}" />
@@ -204,7 +204,7 @@
         </ComboBox>
         <TextBlock
                     Margin="0,2,0,0"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{DynamicResource Portfolio.Sell.NoCashLink}" />
       </StackPanel>
@@ -222,29 +222,29 @@
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
                     Visibility="{Binding SellPanelError, Converter={StaticResource StringToVisibilityConverter}}">
-          <ui:SymbolIcon Symbol="Warning24" Margin="0,0,4,0" VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource AppDown}" />
+          <ds:AppIcon Symbol="Warning24" Margin="0,0,4,0" VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource AppDown}" />
           <TextBlock
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppDown}"
                         Text="{Binding SellPanelError}" />
         </StackPanel>
-        <ui:Button
+        <Button
                     Height="30"
                     Margin="0,0,8,0"
                     Padding="14,0"
                     VerticalAlignment="Center"
                     Command="{Binding ConfirmSellCommand}"
-                    Appearance="Danger">
+                    Style="{StaticResource AppDangerButton}">
           <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.SellConfirm}" />
-        </ui:Button>
-        <ui:Button
+        </Button>
+        <Button
                     Height="30"
                     Padding="10,0"
                     VerticalAlignment="Center"
                     Command="{Binding CancelSellCommand}"
-                    Appearance="Secondary">
+                    Style="{StaticResource AppSecondaryButton}">
           <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Cancel}" />
-        </ui:Button>
+        </Button>
       </StackPanel>
     </Grid>
 
@@ -256,24 +256,24 @@
         </MultiBinding>
       </StackPanel.Visibility>
 
-      <ui:Card
+      <Border Style="{StaticResource FormCard}"
                 Padding="14,12">
         <StackPanel>
           <TextBlock
-                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
-                        FontSize="{StaticResource FontSizeLg}"
+                        FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
+                        FontSize="{StaticResource Font.Size.Lg}"
                         FontWeight="Bold"
                         Foreground="{DynamicResource AppDown}"
                         Text="{Binding SellingRow.Symbol}" />
           <TextBlock
                         Margin="0,4,0,0"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{Binding SellingRow.Name}" />
           <TextBlock
                         Margin="0,2,0,0"
-                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}">
                         <Run Text="{DynamicResource Portfolio.Sell.CostLabel}" /><Run Text=" " /><Run Text="{Binding SellingRow.BuyPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}" />
           </TextBlock>
@@ -287,18 +287,18 @@
             <StackPanel Grid.Column="0">
               <TextBlock
                                 Margin="0,0,0,4"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource Portfolio.SellConfirmLabel}" />
-              <ui:TextBox
+              <TextBox
                                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                                 Text="{Binding SellPriceInput, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
             <StackPanel Grid.Column="2">
               <TextBlock
                                 Margin="0,0,0,4"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource Portfolio.Sell.CashAccount}" />
@@ -321,15 +321,15 @@
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            CornerRadius="{StaticResource RadiusSm}">
+                            CornerRadius="{StaticResource Radius.Sm}">
               <StackPanel>
                 <TextBlock
-                                    FontSize="{StaticResource FontSizeXs}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{DynamicResource Portfolio.Sell.GrossAmount}" />
                 <TextBlock
                                     Margin="0,2,0,0"
-                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
+                                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
                                     FontWeight="SemiBold"
                                     Text="{Binding SellGrossAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
               </StackPanel>
@@ -340,15 +340,15 @@
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            CornerRadius="{StaticResource RadiusSm}">
+                            CornerRadius="{StaticResource Radius.Sm}">
               <StackPanel>
                 <TextBlock
-                                    FontSize="{StaticResource FontSizeXs}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{DynamicResource Portfolio.Sell.Commission}" />
                 <TextBlock
                                     Margin="0,2,0,0"
-                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
+                                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppDown}"
                                     Text="{Binding SellCommission, Converter={StaticResource CurrencyConverter}, ConverterParameter=deduct}" />
@@ -360,15 +360,15 @@
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            CornerRadius="{StaticResource RadiusSm}">
+                            CornerRadius="{StaticResource Radius.Sm}">
               <StackPanel>
                 <TextBlock
-                                    FontSize="{StaticResource FontSizeXs}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{DynamicResource Portfolio.Sell.TransactionTax}" />
                 <TextBlock
                                     Margin="0,2,0,0"
-                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
+                                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppDown}"
                                     Text="{Binding SellTransactionTax, Converter={StaticResource CurrencyConverter}, ConverterParameter=deduct}" />
@@ -380,15 +380,15 @@
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            CornerRadius="{StaticResource RadiusSm}">
+                            CornerRadius="{StaticResource Radius.Sm}">
               <StackPanel>
                 <TextBlock
-                                    FontSize="{StaticResource FontSizeXs}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{DynamicResource Portfolio.Sell.EstPnL}" />
                 <TextBlock
                                     Margin="0,2,0,0"
-                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
+                                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
                                     FontWeight="SemiBold"
                                     Text="{Binding SellEstimatedPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}">
                   <TextBlock.Style>
@@ -408,7 +408,7 @@
 
           <TextBlock
                         Margin="0,2,0,0"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource Portfolio.Sell.NoCashLink}" />
 
@@ -417,31 +417,31 @@
                         Orientation="Vertical"
                         Visibility="{Binding SellPanelError, Converter={StaticResource StringToVisibilityConverter}}">
             <StackPanel Orientation="Horizontal">
-              <ui:SymbolIcon Symbol="Warning24" Margin="0,0,4,0" VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource AppDown}" />
+              <ds:AppIcon Symbol="Warning24" Margin="0,0,4,0" VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource AppDown}" />
               <TextBlock
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppDown}"
                                 Text="{Binding SellPanelError}" />
             </StackPanel>
           </StackPanel>
 
           <StackPanel Margin="0,14,0,0">
-            <ui:Button
+            <Button
                             Height="34"
                             Command="{Binding ConfirmSellCommand}"
-                            Appearance="Danger">
+                            Style="{StaticResource AppDangerButton}">
               <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.SellConfirm}" />
-            </ui:Button>
-            <ui:Button
+            </Button>
+            <Button
                             Height="34"
                             Margin="0,8,0,0"
                             Command="{Binding CancelSellCommand}"
-                            Appearance="Secondary">
+                            Style="{StaticResource AppSecondaryButton}">
               <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Cancel}" />
-            </ui:Button>
+            </Button>
           </StackPanel>
         </StackPanel>
-      </ui:Card>
+      </Border>
     </StackPanel>
   </Grid>
 </UserControl>

@@ -6,7 +6,7 @@
     <Style x:Key="PortfolioBadgeText" TargetType="TextBlock">
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="FontSize" Value="{DynamicResource FontSizeXs}" />
+        <Setter Property="FontSize" Value="{DynamicResource Font.Size.Xs}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
     </Style>
@@ -17,7 +17,7 @@
         <Setter Property="Padding" Value="8,0" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="CornerRadius" Value="{DynamicResource RadiusSm}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Radius.Sm}" />
     </Style>
 
     <Style

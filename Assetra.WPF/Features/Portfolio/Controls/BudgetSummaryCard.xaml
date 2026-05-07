@@ -18,14 +18,14 @@
             <DockPanel Margin="0,0,0,10">
                 <TextBlock
                     DockPanel.Dock="Left"
-                    FontSize="{StaticResource FontSizeMd}"
+                    FontSize="{StaticResource Font.Size.Md}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Dashboard.Budget.Title}" />
                 <TextBlock
                     HorizontalAlignment="Right"
                     DockPanel.Dock="Right"
-                    FontSize="{StaticResource FontSizeSm}"
+                    FontSize="{StaticResource Font.Size.Sm}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{Binding PeriodDisplay}" />
             </DockPanel>
@@ -44,11 +44,11 @@
 
                 <StackPanel Grid.Column="0">
                     <TextBlock
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource Dashboard.Budget.Income}" />
                     <TextBlock
-                        FontSize="{StaticResource FontSizeLg}"
+                        FontSize="{StaticResource Font.Size.Lg}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppUp}"
                         Text="{Binding TotalIncomeDisplay}" />
@@ -56,11 +56,11 @@
 
                 <StackPanel Grid.Column="2">
                     <TextBlock
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource Dashboard.Budget.Expense}" />
                     <TextBlock
-                        FontSize="{StaticResource FontSizeLg}"
+                        FontSize="{StaticResource Font.Size.Lg}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppDown}"
                         Text="{Binding TotalExpenseDisplay}" />
@@ -68,11 +68,11 @@
 
                 <StackPanel Grid.Column="4">
                     <TextBlock
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource Dashboard.Budget.Net}" />
                     <TextBlock
-                        FontSize="{StaticResource FontSizeLg}"
+                        FontSize="{StaticResource Font.Size.Lg}"
                         FontWeight="SemiBold"
                         Text="{Binding NetCashFlowDisplay}">
                         <TextBlock.Style>
@@ -90,11 +90,11 @@
 
                 <StackPanel Grid.Column="6">
                     <TextBlock
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource Dashboard.Budget.Budget}" />
                     <TextBlock
-                        FontSize="{StaticResource FontSizeLg}"
+                        FontSize="{StaticResource Font.Size.Lg}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding TotalBudgetDisplay}" />
@@ -103,7 +103,7 @@
 
             <!--  Budget bar  -->
             <Grid Height="6" Margin="0,0,0,10">
-                <Border Background="{DynamicResource AppBorderLight}" CornerRadius="{StaticResource RadiusXs}" />
+                <Border Background="{DynamicResource AppBorderLight}" CornerRadius="{StaticResource Radius.Xs}" />
                 <ProgressBar
                     Background="Transparent"
                     BorderThickness="0"
@@ -115,7 +115,7 @@
 
             <TextBlock
                 Margin="0,0,0,2"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{DynamicResource Dashboard.Budget.Empty}"
                 TextWrapping="Wrap">
@@ -143,22 +143,22 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock
                                 Grid.Column="0"
-                                FontSize="{StaticResource FontSizeSm}"
+                                FontSize="{StaticResource Font.Size.Sm}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{Binding CategoryName}"
                                 TextTrimming="CharacterEllipsis" />
                             <TextBlock
                                 Grid.Column="1"
                                 Margin="8,0,0,0"
-                                FontFamily="{StaticResource FontBase}"
-                                FontSize="{StaticResource FontSizeSm}"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Sm}"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{Binding Spent, StringFormat=NT\{0:N0\}}"
                                 Typography.NumeralAlignment="Tabular" />
                             <TextBlock
                                 Grid.Column="2"
                                 Margin="8,0,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{Binding BudgetAmount, StringFormat=/NT\{0:N0\}}" />
                         </Grid>

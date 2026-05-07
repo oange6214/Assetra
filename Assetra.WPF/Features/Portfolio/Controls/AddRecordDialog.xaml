@@ -2,10 +2,11 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.AddRecordDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:txforms="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel}}"
@@ -14,19 +15,18 @@
 
     <Grid>
         <!--  半透明背景幕  -->
-        <Border Background="{DynamicResource AppModalOverlay}" />
+        <Grid Style="{StaticResource AppDialogOverlay}" />
 
         <!--  Dialog card：固定舒適閱讀寬度 + 內容滾動。  -->
         <!--  寬度跟隨視窗易讓表單欄位過寬難讀；採固定 600px 配合 ScrollViewer 高度上限。  -->
         <Border
             Width="600"
             MaxHeight="{StaticResource DialogMaxHeight}"
+            Padding="0"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="{StaticResource RadiusMd}">
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding CloseTxDialogCommand}"
+            Style="{StaticResource AppDialogShell}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -47,7 +47,7 @@
                         <StackPanel>
                             <TextBlock
                                 VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeSm}"
+                                FontSize="{StaticResource Font.Size.Sm}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextPrimary}">
                                 <TextBlock.Style>
@@ -69,7 +69,7 @@
                             </TextBlock>
                             <TextBlock
                                 Margin="0,2,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 TextWrapping="Wrap">
                                 <TextBlock.Style>
@@ -93,20 +93,20 @@
                                 </TextBlock.Style>
                             </TextBlock>
                         </StackPanel>
-                        <ui:Button
+                        <Button
                             Width="28"
                             Height="28"
                             Padding="0"
                             HorizontalAlignment="Right"
-                            Appearance="Transparent"
                             Command="{Binding CloseTxDialogCommand}"
                             DockPanel.Dock="Right"
+                            Style="{StaticResource AppIconButton}"
                             ToolTip="{DynamicResource Common.Close}">
-                            <ui:SymbolIcon
+                            <ds:AppIcon
                                 FontSize="12"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Symbol="Dismiss24" />
-                        </ui:Button>
+                        </Button>
                     </DockPanel>
                 </Border>
 
@@ -125,12 +125,12 @@
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            CornerRadius="{StaticResource RadiusSm}"
+                            CornerRadius="{StaticResource Radius.Sm}"
                             Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel>
                                 <TextBlock
                                     Margin="0,0,0,8"
-                                    FontSize="{StaticResource FontSizeXs}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextSecondary}"
                                     Text="{DynamicResource Portfolio.Record.CoreLocked}"
                                     TextWrapping="Wrap" />
@@ -150,14 +150,14 @@
                                         Grid.Row="0"
                                         Grid.Column="0"
                                         Margin="0,0,10,6"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="{DynamicResource Portfolio.Record.Summary.Type}" />
                                     <TextBlock
                                         Grid.Row="0"
                                         Grid.Column="1"
                                         Margin="0,0,0,6"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding EditSummaryType}" />
@@ -166,14 +166,14 @@
                                         Grid.Row="1"
                                         Grid.Column="0"
                                         Margin="0,0,10,6"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="{DynamicResource Portfolio.Record.Summary.Target}" />
                                     <TextBlock
                                         Grid.Row="1"
                                         Grid.Column="1"
                                         Margin="0,0,0,6"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding EditSummaryTarget}"
@@ -183,15 +183,15 @@
                                         Grid.Row="2"
                                         Grid.Column="0"
                                         Margin="0,0,10,6"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="{DynamicResource Portfolio.Record.Summary.Amount}" />
                                     <TextBlock
                                         Grid.Row="2"
                                         Grid.Column="1"
                                         Margin="0,0,0,6"
-                                        FontFamily="{StaticResource FontBase}"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding EditSummaryAmount}"
                                         Typography.NumeralAlignment="Tabular" />
@@ -200,14 +200,14 @@
                                         Grid.Row="3"
                                         Grid.Column="0"
                                         Margin="0,0,10,0"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="{DynamicResource Portfolio.Record.Summary.Quantity}" />
                                     <TextBlock
                                         Grid.Row="3"
                                         Grid.Column="1"
-                                        FontFamily="{StaticResource FontBase}"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding EditSummaryQuantity}"
                                         Typography.NumeralAlignment="Tabular" />
@@ -221,10 +221,10 @@
                             Background="{DynamicResource AppSurface}"
                             BorderBrush="{DynamicResource AppAccent}"
                             BorderThickness="3,0,0,0"
-                            CornerRadius="{StaticResource RadiusSm}"
+                            CornerRadius="{StaticResource Radius.Sm}"
                             Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource Portfolio.Record.ReviseHint}"
                                 TextWrapping="Wrap" />
@@ -236,10 +236,10 @@
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            CornerRadius="{StaticResource RadiusSm}"
+                            CornerRadius="{StaticResource Radius.Sm}"
                             Visibility="{Binding IsRevisionMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource Portfolio.Record.RevisionModeHint}"
                                 TextWrapping="Wrap" />
@@ -252,10 +252,10 @@
                             Background="{DynamicResource AppSurface}"
                             BorderBrush="{DynamicResource AppAccent}"
                             BorderThickness="3,0,0,0"
-                            CornerRadius="{StaticResource RadiusSm}"
+                            CornerRadius="{StaticResource Radius.Sm}"
                             Visibility="{Binding IsEditingMetaOnly, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource Portfolio.Tx.MetaOnlyHint}"
                                 TextWrapping="Wrap" />
@@ -268,18 +268,18 @@
                                 Background="{DynamicResource AppBackground}"
                                 BorderBrush="{DynamicResource AppBorder}"
                                 BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusSm}">
+                                CornerRadius="{StaticResource Radius.Sm}">
                                 <DockPanel LastChildFill="True">
                                     <TextBlock
                                         DockPanel.Dock="Top"
-                                        FontSize="{StaticResource FontSizeSm}"
+                                        FontSize="{StaticResource Font.Size.Sm}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{DynamicResource Portfolio.Record.Section.Basic}" />
                                     <TextBlock
                                         Margin="0,4,0,12"
                                         DockPanel.Dock="Top"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="{DynamicResource Portfolio.Record.Section.BasicHint}"
                                         TextWrapping="Wrap"
@@ -293,36 +293,36 @@
                                         <StackPanel>
                                             <TextBlock
                                                 Margin="0,0,0,4"
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{DynamicResource Portfolio.Tx.Date}" />
-                                            <ui:CalendarDatePicker
+                                            <DatePicker
                                                 MinWidth="132"
                                                 HorizontalContentAlignment="Left"
-                                                Content="{Binding TxDate, Converter={StaticResource DateDisplayConverter}}"
-                                                Date="{Binding TxDate, Mode=TwoWay}" />
+                                                SelectedDate="{Binding TxDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource AppDatePicker}" />
                                         </StackPanel>
                                     </Border>
 
                                     <StackPanel Visibility="{Binding IsEditMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                         <TextBlock
                                             Margin="0,0,0,4"
-                                            FontSize="{StaticResource FontSizeXs}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{DynamicResource Portfolio.TradeHistory.Type}" />
-                                        <ui:Card Padding="10">
+                                        <Border Padding="10" Style="{StaticResource FormCard}">
                                             <StackPanel>
                                                 <Border
                                                     Padding="8"
                                                     Background="Transparent"
                                                     BorderBrush="{DynamicResource AppBorder}"
                                                     BorderThickness="1"
-                                                    CornerRadius="{StaticResource RadiusSm}">
+                                                    CornerRadius="{StaticResource Radius.Sm}">
                                                     <StackPanel>
                                                         <TextBlock
-                                                            FontSize="{StaticResource FontSizeXs}"
+                                                            FontSize="{StaticResource Font.Size.Xs}"
                                                             FontWeight="SemiBold"
                                                             Foreground="{DynamicResource AppTextMuted}"
                                                             Text="{DynamicResource Portfolio.Record.Group.Investment}" />
@@ -362,10 +362,10 @@
                                                     Background="Transparent"
                                                     BorderBrush="{DynamicResource AppBorder}"
                                                     BorderThickness="1"
-                                                    CornerRadius="{StaticResource RadiusSm}">
+                                                    CornerRadius="{StaticResource Radius.Sm}">
                                                     <StackPanel>
                                                         <TextBlock
-                                                            FontSize="{StaticResource FontSizeXs}"
+                                                            FontSize="{StaticResource Font.Size.Xs}"
                                                             FontWeight="SemiBold"
                                                             Foreground="{DynamicResource AppTextMuted}"
                                                             Text="{DynamicResource Portfolio.Record.Group.Cash}" />
@@ -398,10 +398,10 @@
                                                     Background="Transparent"
                                                     BorderBrush="{DynamicResource AppBorder}"
                                                     BorderThickness="1"
-                                                    CornerRadius="{StaticResource RadiusSm}">
+                                                    CornerRadius="{StaticResource Radius.Sm}">
                                                     <StackPanel>
                                                         <TextBlock
-                                                            FontSize="{StaticResource FontSizeXs}"
+                                                            FontSize="{StaticResource Font.Size.Xs}"
                                                             FontWeight="SemiBold"
                                                             Foreground="{DynamicResource AppTextMuted}"
                                                             Text="{DynamicResource Portfolio.Record.Group.Liability}" />
@@ -430,7 +430,7 @@
                                                     </StackPanel>
                                                 </Border>
                                             </StackPanel>
-                                        </ui:Card>
+                                        </Border>
                                     </StackPanel>
                                 </DockPanel>
                             </Border>
@@ -440,16 +440,16 @@
                                 Background="{DynamicResource AppBackground}"
                                 BorderBrush="{DynamicResource AppBorder}"
                                 BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusSm}">
+                                CornerRadius="{StaticResource Radius.Sm}">
                                 <StackPanel>
                                     <TextBlock
-                                        FontSize="{StaticResource FontSizeSm}"
+                                        FontSize="{StaticResource Font.Size.Sm}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{DynamicResource Portfolio.Record.Section.Details}" />
                                     <TextBlock
                                         Margin="0,4,0,12"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="{DynamicResource Portfolio.Record.Section.DetailsHint}"
                                         TextWrapping="Wrap"
@@ -488,17 +488,17 @@
                                     <StackPanel Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <TextBlock
                                             Margin="0,0,0,4"
-                                            FontSize="{StaticResource FontSizeXs}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{DynamicResource Portfolio.Tx.Note}" />
-                                        <ui:TextBox Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
+                                        <TextBox Style="{StaticResource AppTextBox}" Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
 
                                     <!--  Error  -->
                                     <TextBlock
                                         Margin="0,12,0,0"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppDown}"
                                         Text="{Binding TxError}"
                                         Visibility="{Binding TxError, Converter={StaticResource StringToVisibilityConverter}}" />
@@ -513,16 +513,16 @@
                                 Background="{DynamicResource AppBackground}"
                                 BorderBrush="{DynamicResource AppBorder}"
                                 BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusSm}">
+                                CornerRadius="{StaticResource Radius.Sm}">
                                 <StackPanel>
                                     <TextBlock
                                         Margin="0,0,0,8"
-                                        FontSize="{StaticResource FontSizeSm}"
+                                        FontSize="{StaticResource Font.Size.Sm}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{DynamicResource Portfolio.Record.ReplacePromptTitle}" />
                                     <TextBlock
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="{DynamicResource Portfolio.Record.ReplacePrompt}"
                                         TextWrapping="Wrap" />
@@ -530,7 +530,7 @@
                             </Border>
                             <TextBlock
                                 Margin="0,0,0,12"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppDown}"
                                 Text="{Binding RevisionReplacePromptError}"
                                 Visibility="{Binding RevisionReplacePromptError, Converter={StaticResource StringToVisibilityConverter}}" />
@@ -564,58 +564,58 @@
                             </Grid.Style>
                             <DockPanel>
                                 <!--  刪除按鈕（僅編輯模式）  -->
-                                <ui:Button
+                                <Button
                                     Height="30"
                                     Padding="14,0"
-                                    Appearance="Danger"
-                                    Command="{Binding DeleteTradeCommand}"
+                                    Command="{Binding RequestDeleteTradeCommand}"
                                     DockPanel.Dock="Left"
+                                    Style="{StaticResource AppDangerButton}"
                                     Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Tx.Delete}" />
-                                </ui:Button>
-                                <ui:Button
+                                </Button>
+                                <Button
                                     Height="30"
                                     Margin="8,0,0,0"
                                     Padding="14,0"
-                                    Appearance="Secondary"
                                     Command="{Binding CreateRevisionCommand}"
                                     DockPanel.Dock="Left"
+                                    Style="{StaticResource AppSecondaryButton}"
                                     Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.CreateRevision}" />
-                                </ui:Button>
+                                </Button>
                                 <!--  取消 / 儲存（靠右）  -->
                                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
                                     <StackPanel Orientation="Horizontal" Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <ui:Button
+                                        <Button
                                             Height="30"
                                             Margin="0,0,8,0"
                                             Padding="14,0"
-                                            Appearance="Secondary"
-                                            Command="{Binding KeepBothRecordsCommand}">
+                                            Command="{Binding KeepBothRecordsCommand}"
+                                            Style="{StaticResource AppSecondaryButton}">
                                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.KeepBoth}" />
-                                        </ui:Button>
-                                        <ui:Button
+                                        </Button>
+                                        <Button
                                             Height="30"
                                             Padding="14,0"
-                                            Appearance="Primary"
-                                            Command="{Binding ReplaceOriginalRecordCommand}">
+                                            Command="{Binding ReplaceOriginalRecordCommand}"
+                                            Style="{StaticResource AppPrimaryButton}">
                                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.ReplaceAndDelete}" />
-                                        </ui:Button>
+                                        </Button>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                        <ui:Button
+                                        <Button
                                             Height="30"
                                             Margin="0,0,8,0"
                                             Padding="14,0"
-                                            Appearance="Secondary"
-                                            Command="{Binding CloseTxDialogCommand}">
+                                            Command="{Binding CloseTxDialogCommand}"
+                                            Style="{StaticResource AppSecondaryButton}">
                                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Cancel}" />
-                                        </ui:Button>
-                                        <ui:Button
+                                        </Button>
+                                        <Button
                                             Height="30"
                                             Padding="14,0"
-                                            Appearance="Primary"
-                                            Command="{Binding ConfirmTxCommand}">
+                                            Command="{Binding ConfirmTxCommand}"
+                                            Style="{StaticResource AppPrimaryButton}">
                                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -628,7 +628,7 @@
                                                     </Style>
                                                 </TextBlock.Style>
                                             </TextBlock>
-                                        </ui:Button>
+                                        </Button>
                                     </StackPanel>
                                 </StackPanel>
                             </DockPanel>
@@ -652,57 +652,57 @@
                                 </Style>
                             </StackPanel.Style>
                             <StackPanel Orientation="Horizontal" Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <ui:Button
+                                <Button
                                     Height="30"
                                     Margin="0,0,8,8"
                                     Padding="14,0"
-                                    Appearance="Danger"
-                                    Command="{Binding DeleteTradeCommand}">
+                                    Command="{Binding RequestDeleteTradeCommand}"
+                                    Style="{StaticResource AppDangerButton}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Tx.Delete}" />
-                                </ui:Button>
-                                <ui:Button
+                                </Button>
+                                <Button
                                     Height="30"
                                     Margin="0,0,0,8"
                                     Padding="14,0"
-                                    Appearance="Secondary"
-                                    Command="{Binding CreateRevisionCommand}">
+                                    Command="{Binding CreateRevisionCommand}"
+                                    Style="{StaticResource AppSecondaryButton}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.CreateRevision}" />
-                                </ui:Button>
+                                </Button>
                             </StackPanel>
                             <StackPanel Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <ui:Button
+                                <Button
                                     Height="30"
                                     Margin="0,0,0,8"
                                     Padding="14,0"
-                                    Appearance="Primary"
-                                    Command="{Binding ReplaceOriginalRecordCommand}">
+                                    Command="{Binding ReplaceOriginalRecordCommand}"
+                                    Style="{StaticResource AppPrimaryButton}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.ReplaceAndDelete}" />
-                                </ui:Button>
-                                <ui:Button
+                                </Button>
+                                <Button
                                     Height="30"
                                     Padding="14,0"
-                                    Appearance="Secondary"
-                                    Command="{Binding KeepBothRecordsCommand}">
+                                    Command="{Binding KeepBothRecordsCommand}"
+                                    Style="{StaticResource AppSecondaryButton}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.KeepBoth}" />
-                                </ui:Button>
+                                </Button>
                             </StackPanel>
                             <StackPanel
                                 HorizontalAlignment="Right"
                                 Orientation="Horizontal"
                                 Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                <ui:Button
+                                <Button
                                     Height="30"
                                     Margin="0,0,8,0"
                                     Padding="14,0"
-                                    Appearance="Secondary"
-                                    Command="{Binding CloseTxDialogCommand}">
+                                    Command="{Binding CloseTxDialogCommand}"
+                                    Style="{StaticResource AppSecondaryButton}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Cancel}" />
-                                </ui:Button>
-                                <ui:Button
+                                </Button>
+                                <Button
                                     Height="30"
                                     Padding="14,0"
-                                    Appearance="Primary"
-                                    Command="{Binding ConfirmTxCommand}">
+                                    Command="{Binding ConfirmTxCommand}"
+                                    Style="{StaticResource AppPrimaryButton}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
@@ -715,11 +715,53 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                </ui:Button>
+                                </Button>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
                 </Border>
+            </Grid>
+        </Border>
+
+        <Grid
+            Panel.ZIndex="200"
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Border
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Panel.ZIndex="201"
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding CancelDeleteTradeCommand}"
+            Style="{StaticResource AppDestructiveDialogShell}"
+            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
+                <TextBlock
+                    Grid.Row="1"
+                    Style="{StaticResource AppDialogSubtitle}">
+                    <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
+                    <Run Text="{Binding DeleteTargetName}" />
+                    <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />
+                </TextBlock>
+
+                <StackPanel Grid.Row="2" Style="{StaticResource AppDialogFooter}">
+                    <Button
+                        Margin="0,0,8,0"
+                        Command="{Binding CancelDeleteTradeCommand}"
+                        Content="{DynamicResource Common.Cancel}"
+                        Style="{StaticResource AppSecondaryButton}" />
+                    <Button
+                        Command="{Binding ConfirmDeleteTradeCommand}"
+                        Content="{DynamicResource Common.Delete}"
+                        Style="{StaticResource AppDangerButton}" />
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>

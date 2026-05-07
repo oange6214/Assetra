@@ -5,7 +5,6 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Reconciliation"
     d:DataContext="{d:DesignInstance Type={x:Type vm:ReconciliationViewModel},
                                      IsDesignTimeCreatable=False}"
@@ -15,7 +14,9 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <Style BasedOn="{StaticResource FormComboBox}" TargetType="ComboBox" />
+        <Style BasedOn="{StaticResource AppSecondaryButton}" TargetType="Button" />
+        <Style BasedOn="{StaticResource AppTextBox}" TargetType="TextBox" />
+        <Style BasedOn="{StaticResource AppComboBox}" TargetType="ComboBox" />
     </UserControl.Resources>
 
     <Grid Margin="16">
@@ -36,7 +37,7 @@
         </StackPanel>
 
         <!--  Toolbar  -->
-        <ui:Card
+        <Border Style="{StaticResource FormCard}"
             Grid.Row="1"
             Margin="0,0,0,12"
             Padding="12">
@@ -67,7 +68,7 @@
                     Grid.Column="1"
                     Margin="16,0,0,0"
                     VerticalAlignment="Center"
-                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
+                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{Binding SummaryDisplay}" />
 
@@ -75,24 +76,24 @@
                     Grid.Column="2"
                     Orientation="Horizontal"
                     VerticalAlignment="Center">
-                    <ui:Button
+                    <Button
                         Margin="0,0,8,0"
                         Command="{Binding ToggleNewSessionPanelCommand}"
                         Content="{DynamicResource Reconciliation.NewSession}" />
-                    <ui:Button
+                    <Button
                         Margin="0,0,8,0"
                         Command="{Binding RecomputeCommand}"
                         Content="{DynamicResource Reconciliation.Recompute}" />
-                    <ui:Button
-                        Appearance="Primary"
+                    <Button
+                        Style="{StaticResource AppPrimaryButton}"
                         Command="{Binding SignOffCommand}"
                         Content="{DynamicResource Reconciliation.SignOff}" />
                 </StackPanel>
             </Grid>
-        </ui:Card>
+        </Border>
 
         <!--  New Session Panel (collapsible)  -->
-        <ui:Card
+        <Border Style="{StaticResource FormCard}"
             Grid.Row="2"
             Margin="0,0,0,12"
             Padding="12"
@@ -131,17 +132,17 @@
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Reconciliation.NewSession.Period}" />
                 <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,8">
-                    <ui:CalendarDatePicker
+                    <DatePicker
                         MinWidth="132"
                         HorizontalContentAlignment="Left"
-                        Content="{Binding NewPeriodStart, Converter={StaticResource DateDisplayConverter}}"
-                        Date="{Binding NewPeriodStart, Mode=TwoWay}" />
+                        SelectedDate="{Binding NewPeriodStart, Mode=TwoWay}"
+                        Style="{StaticResource AppDatePicker}" />
                     <TextBlock Margin="8,0,8,0" VerticalAlignment="Center" Text="–" />
-                    <ui:CalendarDatePicker
+                    <DatePicker
                         MinWidth="132"
                         HorizontalContentAlignment="Left"
-                        Content="{Binding NewPeriodEnd, Converter={StaticResource DateDisplayConverter}}"
-                        Date="{Binding NewPeriodEnd, Mode=TwoWay}" />
+                        SelectedDate="{Binding NewPeriodEnd, Mode=TwoWay}"
+                        Style="{StaticResource AppDatePicker}" />
                 </StackPanel>
 
                 <TextBlock
@@ -170,7 +171,7 @@
                             Margin="0,0,16,0"
                             IsChecked="{Binding UseUploadedFile, Mode=TwoWay}"
                             Content="{DynamicResource Reconciliation.NewSession.Source.Upload}" />
-                        <ui:Button
+                        <Button
                             Margin="0,0,8,0"
                             Command="{Binding BrowseFileCommand}"
                             Content="{DynamicResource Reconciliation.NewSession.Browse}" />
@@ -187,7 +188,7 @@
                     VerticalAlignment="Center"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Reconciliation.NewSession.EndingBalance}" />
-                <ui:TextBox
+                <TextBox
                     Grid.Row="3" Grid.Column="1"
                     Margin="0,0,0,8"
                     HorizontalAlignment="Left"
@@ -200,17 +201,17 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom">
-                    <ui:Button
+                    <Button
                         Margin="0,0,8,0"
                         Command="{Binding ToggleNewSessionPanelCommand}"
                         Content="{DynamicResource Reconciliation.NewSession.Cancel}" />
-                    <ui:Button
-                        Appearance="Primary"
+                    <Button
+                        Style="{StaticResource AppPrimaryButton}"
                         Command="{Binding CreateSessionCommand}"
                         Content="{DynamicResource Reconciliation.NewSession.Create}" />
                 </StackPanel>
             </Grid>
-        </ui:Card>
+        </Border>
 
         <!--  Body: DataGrid + Balance panel  -->
         <Grid Grid.Row="3">
@@ -225,7 +226,7 @@
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
                 CornerRadius="{StaticResource Card.Radius}">
-                <ui:DataGrid
+                <DataGrid Style="{StaticResource AppDataGrid}"
                     AutoGenerateColumns="False"
                     Background="Transparent"
                     BorderThickness="0"
@@ -237,7 +238,7 @@
                     IsReadOnly="True"
                     ItemsSource="{Binding GroupedDiffs}"
                     SelectionMode="Single">
-                    <ui:DataGrid.GroupStyle>
+                    <DataGrid.GroupStyle>
                         <GroupStyle>
                             <GroupStyle.HeaderTemplate>
                                 <DataTemplate>
@@ -249,8 +250,8 @@
                                 </DataTemplate>
                             </GroupStyle.HeaderTemplate>
                         </GroupStyle>
-                    </ui:DataGrid.GroupStyle>
-                    <ui:DataGrid.Columns>
+                    </DataGrid.GroupStyle>
+                    <DataGrid.Columns>
                         <DataGridTextColumn
                             Width="120"
                             Binding="{Binding KindDisplay}">
@@ -302,34 +303,34 @@
                                     <StackPanel
                                         Orientation="Horizontal"
                                         IsEnabled="{Binding IsPending}">
-                                        <ui:Button
+                                        <Button
                                             Margin="0,0,4,0"
                                             Padding="8,2,8,2"
                                             Command="{Binding DataContext.CreateTradeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
                                             Content="{DynamicResource Reconciliation.Action.CreateTrade}"
                                             Visibility="{Binding IsMissing, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                        <ui:Button
+                                        <Button
                                             Margin="0,0,4,0"
                                             Padding="8,2,8,2"
                                             Command="{Binding DataContext.OverwriteFromStatementCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
                                             Content="{DynamicResource Reconciliation.Action.Overwrite}"
                                             Visibility="{Binding IsAmountMismatch, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                        <ui:Button
+                                        <Button
                                             Margin="0,0,4,0"
                                             Padding="8,2,8,2"
-                                            Command="{Binding DataContext.DeleteTradeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Command="{Binding DataContext.RequestDeleteTradeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
                                             Content="{DynamicResource Reconciliation.Action.DeleteTrade}"
                                             Visibility="{Binding IsExtra, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                        <ui:Button
+                                        <Button
                                             Margin="0,0,4,0"
                                             Padding="8,2,8,2"
                                             Command="{Binding DataContext.MarkResolvedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
                                             Content="{DynamicResource Reconciliation.Action.MarkResolved}" />
-                                        <ui:Button
+                                        <Button
                                             Padding="8,2,8,2"
                                             Command="{Binding DataContext.IgnoreCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
@@ -338,11 +339,11 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                    </ui:DataGrid.Columns>
-                </ui:DataGrid>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Border>
 
-            <ui:Card
+            <Border Style="{StaticResource FormCard}"
                 Grid.Column="1"
                 Width="260"
                 Margin="12,0,0,0"
@@ -354,12 +355,12 @@
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Reconciliation.Balance.Title}" />
                     <TextBlock
-                        FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
+                        FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
                         Foreground="{DynamicResource AppTextSecondary}"
                         TextWrapping="Wrap"
                         Text="{Binding BalancePanelDisplay}" />
                 </StackPanel>
-            </ui:Card>
+            </Border>
         </Grid>
 
         <!--  Status footer  -->
@@ -368,5 +369,50 @@
             Margin="0,8,0,0"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{Binding StatusMessage}" />
+
+        <Grid
+            Grid.RowSpan="5"
+            Margin="-16"
+            Panel.ZIndex="190"
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Border
+            Grid.RowSpan="5"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Panel.ZIndex="191"
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding CancelDeleteCommand}"
+            Style="{StaticResource AppDestructiveDialogShell}"
+            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
+                <TextBlock
+                    Grid.Row="1"
+                    Style="{StaticResource AppDialogSubtitle}">
+                    <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
+                    <Run Text="{Binding DeleteTargetName}" />
+                    <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />
+                </TextBlock>
+
+                <StackPanel Grid.Row="2" Style="{StaticResource AppDialogFooter}">
+                    <Button
+                        Margin="0,0,8,0"
+                        Command="{Binding CancelDeleteCommand}"
+                        Content="{DynamicResource Common.Cancel}"
+                        Style="{StaticResource AppSecondaryButton}" />
+                    <Button
+                        Command="{Binding ConfirmDeleteCommand}"
+                        Content="{DynamicResource Common.Delete}"
+                        Style="{StaticResource AppDangerButton}" />
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

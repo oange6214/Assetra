@@ -5,7 +5,6 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel},
                                      IsDesignTimeCreatable=False}"
@@ -19,9 +18,9 @@
             Background="{DynamicResource AppBackground}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
-            CornerRadius="{StaticResource RadiusSm}">
+            CornerRadius="{StaticResource Radius.Sm}">
             <TextBlock
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{Binding TxTransferHint}"
                 TextWrapping="Wrap" />
@@ -29,7 +28,7 @@
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.TransferSourceAccount}" />
@@ -48,18 +47,18 @@
         </ComboBox>
         <TextBlock
             Margin="0,2,0,8"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             Foreground="{DynamicResource AppAccent}"
             Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
             Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.TransferSourceAmount}" />
-        <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Margin="0,0,0,12"
             Style="{StaticResource FormFieldError}"
@@ -68,7 +67,7 @@
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.TransferTargetAccount}" />
@@ -87,25 +86,25 @@
         </ComboBox>
         <TextBlock
             Margin="0,2,0,8"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             Foreground="{DynamicResource AppAccent}"
             Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
             Visibility="{Binding IsNewTransferTarget, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.TransferTargetAmount}" />
-        <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxTransferTargetAmount, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxTransferTargetAmount, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Style="{StaticResource FormFieldError}"
             Text="{Binding TxTransferTargetAmountError}"
             Visibility="{Binding TxTransferTargetAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
         <TextBlock
             Margin="0,2,0,12"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextMuted}">
             <Run Text="{DynamicResource Portfolio.Tx.TransferImpliedRate}" />
             <Run Text=": " />
@@ -114,11 +113,11 @@
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Fee}" />
-        <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Margin="0,0,0,12"
             Style="{StaticResource FormFieldError}"
@@ -127,10 +126,10 @@
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Note}" />
-        <ui:TextBox Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
     </StackPanel>
 </UserControl>

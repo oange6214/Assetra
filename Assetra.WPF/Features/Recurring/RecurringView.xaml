@@ -6,7 +6,7 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Recurring"
     d:DataContext="{d:DesignInstance Type={x:Type vm:RecurringViewModel}, IsDesignTimeCreatable=False}"
     d:DesignHeight="700"
@@ -24,7 +24,7 @@
 
             <DockPanel Grid.Row="0" Style="{StaticResource PageHeaderDock}">
                     <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                        <ui:SymbolIcon
+                        <ds:AppIcon
                             Margin="0,0,8,0"
                             VerticalAlignment="Center"
                             Foreground="{DynamicResource AppTextMuted}"
@@ -40,54 +40,54 @@
                 Columns="3"
                 Rows="1"
                 Style="{StaticResource PageMetricsGrid}">
-                <ui:Card Margin="0,0,8,0" Padding="16">
+                <Border Style="{StaticResource FormCard}" Margin="0,0,8,0" Padding="16">
                     <StackPanel>
                         <TextBlock
-                            FontSize="{DynamicResource FontSizeXs}"
+                            FontSize="{DynamicResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Recurring.SubscriptionCount}" />
                         <TextBlock
                             Margin="0,8,0,0"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{DynamicResource FontSizeXl}"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{DynamicResource Font.Size.Xl}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding SubscriptionCount}"
                             Typography.NumeralAlignment="Tabular" />
                     </StackPanel>
-                </ui:Card>
-                <ui:Card Margin="8,0" Padding="16">
+                </Border>
+                <Border Style="{StaticResource FormCard}" Margin="8,0" Padding="16">
                     <StackPanel>
                         <TextBlock
-                            FontSize="{DynamicResource FontSizeXs}"
+                            FontSize="{DynamicResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Recurring.EnabledCount}" />
                         <TextBlock
                             Margin="0,8,0,0"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{DynamicResource FontSizeXl}"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{DynamicResource Font.Size.Xl}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppAccent}"
                             Text="{Binding EnabledSubscriptionCount}"
                             Typography.NumeralAlignment="Tabular" />
                     </StackPanel>
-                </ui:Card>
-                <ui:Card Margin="8,0,0,0" Padding="16">
+                </Border>
+                <Border Style="{StaticResource FormCard}" Margin="8,0,0,0" Padding="16">
                     <StackPanel>
                         <TextBlock
-                            FontSize="{DynamicResource FontSizeXs}"
+                            FontSize="{DynamicResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Recurring.PendingCount}" />
                         <TextBlock
                             Margin="0,8,0,0"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{DynamicResource FontSizeXl}"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{DynamicResource Font.Size.Xl}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding PendingCount}"
                             Typography.NumeralAlignment="Tabular" />
                     </StackPanel>
-                </ui:Card>
+                </Border>
             </UniformGrid>
 
             <TabControl
@@ -98,13 +98,6 @@
                 HorizontalContentAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 VerticalContentAlignment="Stretch">
-                <TabControl.ItemContainerStyle>
-                    <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="{x:Type TabItem}">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="VerticalContentAlignment" Value="Stretch" />
-                    </Style>
-                </TabControl.ItemContainerStyle>
-
                 <TabItem Header="{DynamicResource Recurring.Tab.Subscriptions}">
                     <Grid Margin="0,16,0,0">
                         <Grid.RowDefinitions>
@@ -113,15 +106,15 @@
                         </Grid.RowDefinitions>
 
                         <DockPanel Grid.Row="0" Style="{StaticResource PageHeaderDock}">
-                                    <ui:Button
+                                    <Button
                                         DockPanel.Dock="Right"
                                         Command="{Binding OpenAddFormCommand}"
-                                        Style="{StaticResource PagePrimaryButton}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ui:SymbolIcon
-                                                Margin="0,0,4,0"
+                                        Style="{StaticResource AppPrimaryButton}">
+                                        <StackPanel Style="{StaticResource AppButtonContent}">
+                                            <ds:AppIcon
+                                                Style="{StaticResource AppButtonLeadingIcon}"
                                                 VerticalAlignment="Center"
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                 Symbol="Add24" />
                                             <TextBlock
@@ -129,11 +122,11 @@
                                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                 Text="{DynamicResource Recurring.Add}" />
                                         </StackPanel>
-                                    </ui:Button>
+                                    </Button>
 
                                     <StackPanel>
                                         <TextBlock
-                                            FontSize="{DynamicResource FontSizeMd}"
+                                            FontSize="{DynamicResource Font.Size.Md}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{DynamicResource Recurring.Tab.Subscriptions}" />
@@ -148,17 +141,17 @@
                             <StackPanel
                                 Style="{StaticResource EmptyStatePanel}"
                                 Visibility="{Binding HasNoSubscriptions, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <ui:SymbolIcon Style="{StaticResource EmptyStateIcon}" Symbol="ArrowRepeatAll24" />
+                                <ds:AppIcon Style="{StaticResource EmptyStateIcon}" Symbol="ArrowRepeatAll24" />
                                 <TextBlock Style="{StaticResource EmptyStateTitle}" Text="{DynamicResource Recurring.Empty}" />
                                 <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Recurring.Empty.Hint}" />
-                                <ui:Button
+                                <Button
                                     Command="{Binding OpenAddFormCommand}"
-                                    Style="{StaticResource EmptyStateActionButton}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <ui:SymbolIcon
-                                            Margin="0,0,4,0"
+                                    Style="{StaticResource AppPrimaryButton}">
+                                    <StackPanel Style="{StaticResource AppButtonContent}">
+                                        <ds:AppIcon
+                                            Style="{StaticResource AppButtonLeadingIcon}"
                                             VerticalAlignment="Center"
-                                            FontSize="{StaticResource FontSizeXs}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
                                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                             Symbol="Add24" />
                                         <TextBlock
@@ -166,7 +159,7 @@
                                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                             Text="{DynamicResource Recurring.Add}" />
                                     </StackPanel>
-                                </ui:Button>
+                                </Button>
                             </StackPanel>
 
                             <ScrollViewer
@@ -176,7 +169,7 @@
                                 <ItemsControl ItemsSource="{Binding Subscriptions}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate DataType="{x:Type vm:RecurringRowViewModel}">
-                                        <ui:Card Margin="0,0,0,8" Padding="14">
+                                        <Border Style="{StaticResource FormCard}" Margin="0,0,0,8" Padding="14">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="2*" />
@@ -189,13 +182,13 @@
 
                                                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                                     <TextBlock
-                                                        FontSize="{StaticResource FontSizeBase}"
+                                                        FontSize="{StaticResource Font.Size.Base}"
                                                         FontWeight="SemiBold"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding Name}" />
                                                     <TextBlock
                                                         Margin="0,3,0,0"
-                                                        FontSize="{StaticResource FontSizeXs}"
+                                                        FontSize="{StaticResource Font.Size.Xs}"
                                                         Foreground="{DynamicResource AppTextMuted}"
                                                         Text="{Binding Note}"
                                                         TextTrimming="CharacterEllipsis" />
@@ -203,12 +196,12 @@
 
                                                 <StackPanel Grid.Column="1" MinWidth="120" Margin="16,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock
-                                                        FontSize="{DynamicResource FontSizeXs}"
+                                                        FontSize="{DynamicResource Font.Size.Xs}"
                                                         Foreground="{DynamicResource AppTextSecondary}"
                                                         Text="{DynamicResource Recurring.Field.Amount}" />
                                                     <TextBlock
                                                         Margin="0,3,0,0"
-                                                        FontFamily="{StaticResource FontBase}"
+                                                        FontFamily="{StaticResource Font.Family.Base}"
                                                         FontWeight="SemiBold"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding AmountDisplay}"
@@ -217,7 +210,7 @@
 
                                                 <StackPanel Grid.Column="2" MinWidth="120" Margin="16,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock
-                                                        FontSize="{DynamicResource FontSizeXs}"
+                                                        FontSize="{DynamicResource Font.Size.Xs}"
                                                         Foreground="{DynamicResource AppTextSecondary}"
                                                         Text="{DynamicResource Recurring.Field.Frequency}" />
                                                     <TextBlock
@@ -228,7 +221,7 @@
 
                                                 <StackPanel Grid.Column="3" MinWidth="120" Margin="16,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock
-                                                        FontSize="{DynamicResource FontSizeXs}"
+                                                        FontSize="{DynamicResource Font.Size.Xs}"
                                                         Foreground="{DynamicResource AppTextSecondary}"
                                                         Text="{DynamicResource Recurring.Field.Mode}" />
                                                     <TextBlock
@@ -239,40 +232,41 @@
 
                                                 <StackPanel Grid.Column="4" MinWidth="130" Margin="16,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock
-                                                        FontSize="{DynamicResource FontSizeXs}"
+                                                        FontSize="{DynamicResource Font.Size.Xs}"
                                                         Foreground="{DynamicResource AppTextSecondary}"
                                                         Text="{DynamicResource Recurring.NextDue}" />
                                                     <TextBlock
                                                         Margin="0,3,0,0"
-                                                        FontFamily="{StaticResource FontBase}"
+                                                        FontFamily="{StaticResource Font.Family.Base}"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding NextDueDisplay}"
                                                         Typography.NumeralAlignment="Tabular" />
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="5" Margin="16,0,0,0" VerticalAlignment="Center" Orientation="Horizontal">
-                                                    <ui:ToggleSwitch
+                                                    <CheckBox
                                                         Margin="0,0,8,0"
                                                         VerticalAlignment="Center"
                                                         Command="{Binding DataContext.ToggleEnabledCommand, ElementName=Root}"
                                                         CommandParameter="{Binding}"
-                                                        IsChecked="{Binding IsEnabled, Mode=OneWay}" />
-                                                    <ui:Button
+                                                        IsChecked="{Binding IsEnabled, Mode=OneWay}"
+                                                        Style="{StaticResource AppSwitch}" />
+                                                    <Button
                                                         Width="32"
                                                         Height="32"
                                                         Padding="0"
-                                                        Appearance="Transparent"
-                                                        Command="{Binding DataContext.DeleteSubscriptionCommand, ElementName=Root}"
+                                                        Style="{StaticResource AppIconButton}"
+                                                Command="{Binding DataContext.RequestDeleteSubscriptionCommand, ElementName=Root}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Delete}">
-                                                        <ui:SymbolIcon
+                                                        <ds:AppIcon
                                                             FontSize="14"
                                                             Foreground="{DynamicResource AppDanger}"
                                                             Symbol="Delete24" />
-                                                    </ui:Button>
+                                                    </Button>
                                                 </StackPanel>
                                             </Grid>
-                                        </ui:Card>
+                                        </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                                 </ItemsControl>
@@ -289,15 +283,15 @@
                         </Grid.RowDefinitions>
 
                         <DockPanel Grid.Row="0" Style="{StaticResource PageHeaderDock}">
-                                   <ui:Button
+                                   <Button
                                        DockPanel.Dock="Right"
                                         Command="{Binding RunSchedulerCommand}"
-                                        Style="{StaticResource PagePrimaryButton}">
+                                        Style="{StaticResource AppPrimaryButton}">
                                         <StackPanel Orientation="Horizontal">
-                                            <ui:SymbolIcon
+                                            <ds:AppIcon
                                                 Margin="0,0,4,0"
                                                 VerticalAlignment="Center"
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                 Symbol="ArrowRepeatAll24" />
                                             <TextBlock
@@ -305,11 +299,11 @@
                                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                 Text="{DynamicResource Recurring.Run}" />
                                         </StackPanel>
-                                    </ui:Button>
+                                    </Button>
 
                                     <StackPanel>
                                         <TextBlock
-                                            FontSize="{DynamicResource FontSizeMd}"
+                                            FontSize="{DynamicResource Font.Size.Md}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{DynamicResource Recurring.Tab.Pending}" />
@@ -319,7 +313,7 @@
                                             Text="{DynamicResource Recurring.Pending.Hint}" />
                                         <TextBlock
                                             Margin="0,6,0,0"
-                                            FontSize="{DynamicResource FontSizeXs}"
+                                            FontSize="{DynamicResource Font.Size.Xs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{Binding RunStatus}"
                                             Visibility="{Binding RunStatus, Converter={StaticResource StringToVisibilityConverter}}" />
@@ -330,7 +324,7 @@
                             <StackPanel
                                 Style="{StaticResource EmptyStatePanel}"
                                 Visibility="{Binding HasNoPending, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <ui:SymbolIcon Style="{StaticResource EmptyStateIcon}" Symbol="CheckmarkCircle24" />
+                                <ds:AppIcon Style="{StaticResource EmptyStateIcon}" Symbol="CheckmarkCircle24" />
                                 <TextBlock Style="{StaticResource EmptyStateTitle}" Text="{DynamicResource Recurring.Pending.Empty}" />
                                 <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Recurring.Pending.Empty.Hint}" />
                             </StackPanel>
@@ -342,7 +336,7 @@
                                 <ItemsControl ItemsSource="{Binding Pending}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate DataType="{x:Type vm:PendingRecurringRowViewModel}">
-                                        <ui:Card Margin="0,0,0,8" Padding="14">
+                                        <Border Style="{StaticResource FormCard}" Margin="0,0,0,8" Padding="14">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="2*" />
@@ -353,13 +347,13 @@
 
                                                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                                     <TextBlock
-                                                        FontSize="{StaticResource FontSizeBase}"
+                                                        FontSize="{StaticResource Font.Size.Base}"
                                                         FontWeight="SemiBold"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding SourceDisplay}" />
                                                     <TextBlock
                                                         Margin="0,3,0,0"
-                                                        FontSize="{StaticResource FontSizeXs}"
+                                                        FontSize="{StaticResource Font.Size.Xs}"
                                                         Foreground="{DynamicResource AppTextMuted}"
                                                         Text="{Binding Note}"
                                                         TextTrimming="CharacterEllipsis" />
@@ -367,12 +361,12 @@
 
                                                 <StackPanel Grid.Column="1" MinWidth="130" Margin="16,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock
-                                                        FontSize="{DynamicResource FontSizeXs}"
+                                                        FontSize="{DynamicResource Font.Size.Xs}"
                                                         Foreground="{DynamicResource AppTextSecondary}"
                                                         Text="{DynamicResource Recurring.Field.StartDate}" />
                                                     <TextBlock
                                                         Margin="0,3,0,0"
-                                                        FontFamily="{StaticResource FontBase}"
+                                                        FontFamily="{StaticResource Font.Family.Base}"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding DueDateDisplay}"
                                                         Typography.NumeralAlignment="Tabular" />
@@ -380,12 +374,12 @@
 
                                                 <StackPanel Grid.Column="2" MinWidth="120" Margin="16,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock
-                                                        FontSize="{DynamicResource FontSizeXs}"
+                                                        FontSize="{DynamicResource Font.Size.Xs}"
                                                         Foreground="{DynamicResource AppTextSecondary}"
                                                         Text="{DynamicResource Recurring.Field.Amount}" />
                                                     <TextBlock
                                                         Margin="0,3,0,0"
-                                                        FontFamily="{StaticResource FontBase}"
+                                                        FontFamily="{StaticResource Font.Family.Base}"
                                                         FontWeight="SemiBold"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding AmountDisplay}"
@@ -393,20 +387,20 @@
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="3" Margin="16,0,0,0" VerticalAlignment="Center" Orientation="Horizontal">
-                                                    <ui:Button
+                                                    <Button
                                                         Margin="0,0,8,0"
                                                         Command="{Binding DataContext.ConfirmPendingCommand, ElementName=Root}"
                                                         CommandParameter="{Binding}"
                                                         Content="{DynamicResource Recurring.Pending.Confirm}"
-                                                        Style="{StaticResource PagePrimaryButton}" />
-                                                    <ui:Button
+                                                        Style="{StaticResource AppPrimaryButton}" />
+                                                    <Button
                                                         Command="{Binding DataContext.SkipPendingCommand, ElementName=Root}"
                                                         CommandParameter="{Binding}"
                                                         Content="{DynamicResource Recurring.Pending.Skip}"
-                                                        Style="{StaticResource PageSecondaryButton}" />
+                                                        Style="{StaticResource AppSecondaryButton}" />
                                                 </StackPanel>
                                             </Grid>
-                                        </ui:Card>
+                                        </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                                 </ItemsControl>
@@ -416,38 +410,27 @@
                 </TabItem>
             </TabControl>
 
-            <Border
+            <Grid
                 Grid.Row="0"
                 Grid.RowSpan="3"
                 Margin="-24"
                 Panel.ZIndex="180"
-                Background="#99000000"
+                Style="{StaticResource AppDialogOverlay}"
                 Visibility="{Binding IsAddFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
             <Border
                 Grid.Row="0"
                 Grid.RowSpan="3"
+                Style="{StaticResource AppDialogShell}"
                 Width="680"
                 MaxWidth="760"
                 MaxHeight="720"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Panel.ZIndex="181"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource RadiusLg}"
+                behaviors:EscapeKeyCommandBehavior.Command="{Binding CloseAddFormCommand}"
                 SnapsToDevicePixels="True"
                 Visibility="{Binding IsAddFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Border.Effect>
-                    <DropShadowEffect
-                        BlurRadius="32"
-                        Direction="270"
-                        Opacity="0.18"
-                        ShadowDepth="10"
-                        Color="#000000" />
-                </Border.Effect>
-
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -456,41 +439,33 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <StackPanel Margin="24,22,24,18">
+                    <StackPanel Style="{StaticResource AppDialogHeader}">
                         <TextBlock
-                            FontSize="{StaticResource FontSizeLg}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextPrimary}"
+                            Style="{StaticResource AppDialogTitle}"
                             Text="{DynamicResource Recurring.AddForm.Title}" />
                         <TextBlock
-                            Margin="0,6,0,0"
-                            Foreground="{DynamicResource AppTextSecondary}"
+                            Style="{StaticResource AppDialogSubtitle}"
                             Text="{DynamicResource Recurring.AddForm.Hint}"
                             TextWrapping="Wrap" />
                     </StackPanel>
 
                     <Border
                         Grid.Row="1"
-                        Margin="20,0,20,0"
-                        Padding="16"
-                        Background="{DynamicResource AppSurfaceAlt}"
-                        BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusLg}">
+                        Style="{StaticResource FormSection}">
                         <Grid>
                         <Grid.Resources>
                             <Style x:Key="FormFieldLabel" TargetType="TextBlock">
                                 <Setter Property="Margin" Value="0,0,0,6" />
-                                <Setter Property="FontSize" Value="{DynamicResource FontSizeXs}" />
+                                <Setter Property="FontSize" Value="{DynamicResource Font.Size.Xs}" />
                                 <Setter Property="FontWeight" Value="SemiBold" />
                                 <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
                             </Style>
-                            <Style BasedOn="{StaticResource {x:Type ui:TextBox}}" TargetType="{x:Type ui:TextBox}">
+                            <Style BasedOn="{StaticResource AppTextBox}" TargetType="{x:Type TextBox}">
                                 <Setter Property="MinHeight" Value="40" />
                             </Style>
                             <Style
                                 x:Key="SheetComboBox"
-                                BasedOn="{StaticResource FormComboBox}"
+                                BasedOn="{StaticResource AppComboBox}"
                                 TargetType="ComboBox">
                                 <Setter Property="MinHeight" Value="40" />
                             </Style>
@@ -514,7 +489,7 @@
                             Grid.ColumnSpan="3"
                             Margin="0,0,0,14">
                             <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Recurring.Field.Name}" />
-                            <ui:TextBox
+                            <TextBox
                                 Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}"
                                 ToolTip="{DynamicResource Recurring.NameHint}" />
                         </StackPanel>
@@ -558,7 +533,7 @@
                             Grid.Column="2"
                             Margin="0,0,0,14">
                             <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Recurring.Field.Amount}" />
-                            <ui:TextBox
+                            <TextBox
                                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                                 Text="{Binding AddAmount, UpdateSourceTrigger=PropertyChanged}"
                                 ToolTip="{DynamicResource Recurring.AmountHint}" />
@@ -569,12 +544,12 @@
                             Grid.Column="0"
                             Margin="0,0,0,14">
                             <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Recurring.Field.StartDate}" />
-                            <ui:CalendarDatePicker
+                            <DatePicker
                                 MinHeight="40"
                                 MinWidth="132"
                                 HorizontalContentAlignment="Left"
-                                Content="{Binding AddStartDate, Converter={StaticResource DateDisplayConverter}}"
-                                Date="{Binding AddStartDate, Mode=TwoWay}" />
+                                SelectedDate="{Binding AddStartDate, Mode=TwoWay}"
+                                Style="{StaticResource AppDatePicker}" />
                         </StackPanel>
 
                         <StackPanel
@@ -622,7 +597,7 @@
                             Grid.Column="0"
                             Margin="0,0,0,14">
                             <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Recurring.Field.Interval}" />
-                            <ui:TextBox
+                            <TextBox
                                 Text="{Binding AddInterval, UpdateSourceTrigger=PropertyChanged}"
                                 ToolTip="{DynamicResource Recurring.IntervalHint}" />
                         </StackPanel>
@@ -657,7 +632,7 @@
 
                         <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3">
                             <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Recurring.Field.Note}" />
-                            <ui:TextBox Text="{Binding AddNote, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBox Text="{Binding AddNote, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                     </Grid>
                     </Border>
@@ -665,33 +640,75 @@
                     <TextBlock
                         Grid.Row="2"
                         Margin="24,10,24,0"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppDown}"
                         Text="{Binding AddError}"
                         Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                     <Border
                         Grid.Row="3"
-                        Margin="0,18,0,0"
-                        Padding="20,16"
+                        Margin="0,16,0,0"
+                        Padding="0"
                         BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="0,1,0,0">
-                        <DockPanel LastChildFill="False">
-                            <ui:Button
-                                Margin="8,0,0,0"
-                                DockPanel.Dock="Right"
-                                Command="{Binding AddSubscriptionCommand}"
-                                Content="{DynamicResource Recurring.Add}"
-                                Style="{StaticResource PagePrimaryButton}" />
-                            <ui:Button
-                                DockPanel.Dock="Right"
+                        BorderThickness="0">
+                        <StackPanel Style="{StaticResource AppDialogFooter}">
+                            <Button
+                                Margin="0,0,8,0"
                                 Command="{Binding CloseAddFormCommand}"
                                 Content="{DynamicResource Common.Cancel}"
-                                Style="{StaticResource PageSecondaryButton}" />
-                        </DockPanel>
+                                Style="{StaticResource AppSecondaryButton}" />
+                            <Button
+                                Command="{Binding AddSubscriptionCommand}"
+                                Content="{DynamicResource Recurring.Add}"
+                                Style="{StaticResource AppPrimaryButton}" />
+                        </StackPanel>
                     </Border>
                 </Grid>
             </Border>
         </Grid>
+
+        <Grid
+            Grid.RowSpan="3"
+            Panel.ZIndex="190"
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Border
+            Grid.RowSpan="3"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Panel.ZIndex="191"
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding CancelDeleteCommand}"
+            Style="{StaticResource AppDestructiveDialogShell}"
+            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
+                <TextBlock
+                    Grid.Row="1"
+                    Style="{StaticResource AppDialogSubtitle}">
+                    <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
+                    <Run Text="{Binding DeleteTargetName}" />
+                    <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />
+                </TextBlock>
+
+                <StackPanel Grid.Row="2" Style="{StaticResource AppDialogFooter}">
+                    <Button
+                        Margin="0,0,8,0"
+                        Command="{Binding CancelDeleteCommand}"
+                        Content="{DynamicResource Common.Cancel}"
+                        Style="{StaticResource AppSecondaryButton}" />
+                    <Button
+                        Command="{Binding ConfirmDeleteCommand}"
+                        Content="{DynamicResource Common.Delete}"
+                        Style="{StaticResource AppDangerButton}" />
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

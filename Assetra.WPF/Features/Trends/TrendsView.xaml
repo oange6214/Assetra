@@ -7,7 +7,7 @@
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:portfolio="clr-namespace:Assetra.WPF.Features.Portfolio"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     d:DataContext="{d:DesignInstance Type={x:Type portfolio:PortfolioHistoryViewModel},
                                      IsDesignTimeCreatable=False}"
     d:DesignHeight="776"
@@ -92,7 +92,7 @@
             <StackPanel
                 Style="{StaticResource EmptyStatePanel}"
                 Visibility="{Binding HasHistory, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                <ui:SymbolIcon Style="{StaticResource EmptyStateIcon}" Symbol="DataTrending24" />
+                <ds:AppIcon Style="{StaticResource EmptyStateIcon}" Symbol="DataTrending24" />
                 <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Trends.Empty}" />
             </StackPanel>
         </Grid>
@@ -101,7 +101,7 @@
         <TextBlock
             Grid.Row="2"
             Margin="0,12,0,0"
-            FontSize="{DynamicResource FontSizeXs}"
+            FontSize="{DynamicResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Trends.Hint}" />
     </Grid>

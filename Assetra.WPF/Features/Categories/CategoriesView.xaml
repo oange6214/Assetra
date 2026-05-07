@@ -6,7 +6,7 @@
     xmlns:ctrl="clr-namespace:Assetra.WPF.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Categories"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:CategoriesViewModel},
@@ -19,7 +19,7 @@
     <UserControl.Resources>
         <Style x:Key="InlineFormLabel" TargetType="TextBlock">
             <Setter Property="Margin" Value="0,0,0,6" />
-            <Setter Property="FontSize" Value="{StaticResource FontSizeXs}" />
+            <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
             <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
         </Style>
 
@@ -30,15 +30,15 @@
 
         <Style
             x:Key="InlineTextBox"
-            BasedOn="{StaticResource {x:Type ui:TextBox}}"
-            TargetType="ui:TextBox">
+            BasedOn="{StaticResource AppTextBox}"
+            TargetType="TextBox">
             <Setter Property="MinHeight" Value="36" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
 
         <Style
             x:Key="InlineComboBox"
-            BasedOn="{StaticResource FormComboBox}"
+            BasedOn="{StaticResource AppComboBox}"
             TargetType="ComboBox">
             <Setter Property="MinHeight" Value="36" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -46,11 +46,11 @@
 
         <Style
             x:Key="InlineNumericTextBox"
-            BasedOn="{StaticResource {x:Type ui:TextBox}}"
-            TargetType="ui:TextBox">
+            BasedOn="{StaticResource AppTextBox}"
+            TargetType="TextBox">
             <Setter Property="MinHeight" Value="36" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="FontFamily" Value="{StaticResource FontBase}" />
+            <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
             <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
         </Style>
 
@@ -79,7 +79,7 @@
                             Background="Transparent"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            CornerRadius="{StaticResource RadiusMd}">
+                            CornerRadius="{StaticResource Radius.Md}">
                             <ContentPresenter />
                         </Border>
                         <ControlTemplate.Triggers>
@@ -97,7 +97,7 @@
         </Style>
 
         <DataTemplate x:Key="CategoryRowTemplate" DataType="{x:Type vm:CategoryRowViewModel}">
-            <ui:Card Margin="0,0,0,6" Padding="10,8">
+            <Border Style="{StaticResource FormCard}" Margin="0,0,0,6" Padding="10,8">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -122,18 +122,18 @@
                         <TextBlock
                             Margin="0,0,8,0"
                             VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeMd}"
+                            FontSize="{StaticResource Font.Size.Md}"
                             Text="{Binding Icon}" />
                         <TextBlock
                             VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeBase}"
+                            FontSize="{StaticResource Font.Size.Base}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding Name}" />
                         <TextBlock
                             Margin="8,0,0,0"
                             VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Categories.ArchivedTag}"
                             Visibility="{Binding IsArchived, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -165,11 +165,11 @@
                                                 <TextBlock
                                                     Margin="0,0,8,0"
                                                     VerticalAlignment="Center"
-                                                    FontSize="{StaticResource FontSizeMd}"
+                                                    FontSize="{StaticResource Font.Size.Md}"
                                                     Text="{Binding Value}" />
                                                 <TextBlock
                                                     VerticalAlignment="Center"
-                                                    FontSize="{StaticResource FontSizeSm}"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{Binding Label}" />
                                             </StackPanel>
@@ -180,7 +180,7 @@
 
                             <StackPanel Width="280" Margin="0,0,12,8">
                                 <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Name}" />
-                                <ui:TextBox Style="{StaticResource InlineTextBox}" Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBox Style="{StaticResource InlineTextBox}" Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
 
                             <StackPanel Width="196" Margin="0,0,0,8">
@@ -193,7 +193,7 @@
                         </WrapPanel>
                         <TextBlock
                             Margin="0,4,0,0"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppDown}"
                             Text="{Binding EditError}"
                             Visibility="{Binding EditError, Converter={StaticResource StringToVisibilityConverter}}" />
@@ -205,7 +205,7 @@
                         VerticalAlignment="Center"
                         Orientation="Horizontal">
                         <!--  View mode buttons  -->
-                        <ui:Button
+                        <Button
                             Width="32"
                             Height="32"
                             Margin="0,0,4,0"
@@ -213,9 +213,8 @@
                             Command="{Binding DataContext.BeginEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             ToolTip="{DynamicResource Common.Edit}">
-                            <ui:Button.Style>
-                                <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                    <Setter Property="Appearance" Value="Transparent" />
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -223,14 +222,14 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </ui:Button.Style>
-                            <ui:SymbolIcon
-                                FontSize="{StaticResource FontSizeXs}"
+                            </Button.Style>
+                            <ds:AppIcon
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Symbol="Edit24" />
-                        </ui:Button>
+                        </Button>
 
-                        <ui:Button
+                        <Button
                             Width="32"
                             Height="32"
                             Margin="0,0,4,0"
@@ -238,9 +237,8 @@
                             Command="{Binding DataContext.ToggleArchiveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             ToolTip="{DynamicResource Categories.ToggleArchive}">
-                            <ui:Button.Style>
-                                <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                    <Setter Property="Appearance" Value="Transparent" />
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -248,23 +246,22 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </ui:Button.Style>
-                            <ui:SymbolIcon
-                                FontSize="{StaticResource FontSizeXs}"
+                            </Button.Style>
+                            <ds:AppIcon
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Symbol="Money24" />
-                        </ui:Button>
+                        </Button>
 
-                        <ui:Button
+                        <Button
                             Width="32"
                             Height="32"
                             Padding="0"
-                            Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    Command="{Binding DataContext.RequestDeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             ToolTip="{DynamicResource Common.Delete}">
-                            <ui:Button.Style>
-                                <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                    <Setter Property="Appearance" Value="Transparent" />
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -272,15 +269,15 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </ui:Button.Style>
-                            <ui:SymbolIcon
-                                FontSize="{StaticResource FontSizeXs}"
+                            </Button.Style>
+                            <ds:AppIcon
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppDanger}"
                                 Symbol="Delete24" />
-                        </ui:Button>
+                        </Button>
 
                         <!--  Edit mode buttons  -->
-                        <ui:Button
+                        <Button
                             Width="32"
                             Height="32"
                             Margin="0,0,4,0"
@@ -288,9 +285,8 @@
                             Command="{Binding DataContext.SaveEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             ToolTip="{DynamicResource Common.Save}">
-                            <ui:Button.Style>
-                                <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                    <Setter Property="Appearance" Value="Transparent" />
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -298,23 +294,22 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </ui:Button.Style>
-                            <ui:SymbolIcon
-                                FontSize="{StaticResource FontSizeSm}"
+                            </Button.Style>
+                            <ds:AppIcon
+                                FontSize="{StaticResource Font.Size.Sm}"
                                 Foreground="{DynamicResource AppUp}"
                                 Symbol="Checkmark24" />
-                        </ui:Button>
+                        </Button>
 
-                        <ui:Button
+                        <Button
                             Width="32"
                             Height="32"
                             Padding="0"
                             Command="{Binding DataContext.CancelEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
                             ToolTip="{DynamicResource Common.Cancel}">
-                            <ui:Button.Style>
-                                <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                    <Setter Property="Appearance" Value="Transparent" />
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -322,15 +317,15 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </ui:Button.Style>
-                            <ui:SymbolIcon
-                                FontSize="{StaticResource FontSizeXs}"
+                            </Button.Style>
+                            <ds:AppIcon
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Symbol="Dismiss24" />
-                        </ui:Button>
+                        </Button>
                     </StackPanel>
                 </Grid>
-            </ui:Card>
+            </Border>
         </DataTemplate>
     </UserControl.Resources>
 
@@ -365,12 +360,6 @@
             VerticalContentAlignment="Stretch"
             Background="Transparent"
             BorderThickness="0">
-            <TabControl.ItemContainerStyle>
-                <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="{x:Type TabItem}">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
-                </Style>
-            </TabControl.ItemContainerStyle>
             <TabItem Header="{DynamicResource Categories.Tab.Categories}">
                 <Grid Margin="0,4,0,0">
                     <Grid.RowDefinitions>
@@ -384,23 +373,23 @@
                         Grid.Row="0"
                         Margin="0,0,0,8"
                         LastChildFill="False">
-                        <ui:Button
+                        <Button
                             Command="{Binding OpenAddCategoryCommand}"
                             DockPanel.Dock="Right"
-                            Style="{StaticResource PagePrimaryButton}"
+                            Style="{StaticResource AppPrimaryButton}"
                             Visibility="{Binding IsAddCategoryOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                            <StackPanel Orientation="Horizontal">
-                                <ui:SymbolIcon
-                                    Margin="0,0,4,0"
+                            <StackPanel Style="{StaticResource AppButtonContent}">
+                                <ds:AppIcon
+                                    Style="{StaticResource AppButtonLeadingIcon}"
                                     VerticalAlignment="Center"
-                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
                                     Symbol="Add24" />
                                 <TextBlock
                                     VerticalAlignment="Center"
-                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
                                     Text="{DynamicResource Categories.AddForm.Title}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                     </DockPanel>
 
                     <!--  Two-column list  -->
@@ -412,13 +401,11 @@
                         </Grid.ColumnDefinitions>
 
                         <!--  Expense  -->
-                        <ui:Card
+                        <Border Style="{StaticResource FormCard}"
                             Grid.Column="0"
                             Padding="12"
                             HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            HorizontalContentAlignment="Stretch"
-                            VerticalContentAlignment="Stretch">
+                            VerticalAlignment="Stretch">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -427,7 +414,7 @@
                                 <TextBlock
                                     Grid.Row="0"
                                     Margin="0,0,0,8"
-                                    FontSize="{StaticResource FontSizeMd}"
+                                    FontSize="{StaticResource Font.Size.Md}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Categories.Expense}" />
@@ -441,16 +428,14 @@
                                     </ItemsControl>
                                 </ScrollViewer>
                             </Grid>
-                        </ui:Card>
+                        </Border>
 
                         <!--  Income  -->
-                        <ui:Card
+                        <Border Style="{StaticResource FormCard}"
                             Grid.Column="2"
                             Padding="12"
                             HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            HorizontalContentAlignment="Stretch"
-                            VerticalContentAlignment="Stretch">
+                            VerticalAlignment="Stretch">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -459,7 +444,7 @@
                                 <TextBlock
                                     Grid.Row="0"
                                     Margin="0,0,0,8"
-                                    FontSize="{StaticResource FontSizeMd}"
+                                    FontSize="{StaticResource Font.Size.Md}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Categories.Income}" />
@@ -473,7 +458,7 @@
                                     </ItemsControl>
                                 </ScrollViewer>
                             </Grid>
-                        </ui:Card>
+                        </Border>
                     </Grid>
 
                 </Grid>
@@ -491,33 +476,33 @@
                         Grid.Row="0"
                         Margin="0,0,0,8"
                         LastChildFill="True">
-                        <ui:Button
+                        <Button
                             Margin="12,0,0,0"
                             Command="{Binding OpenAddRuleCommand}"
                             DockPanel.Dock="Right"
-                            Style="{StaticResource PagePrimaryButton}"
+                            Style="{StaticResource AppPrimaryButton}"
                             Visibility="{Binding IsAddRuleOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
-                                <ui:SymbolIcon
+                                <ds:AppIcon
                                     Margin="0,0,4,0"
                                     VerticalAlignment="Center"
-                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
                                     Symbol="Add24" />
                                 <TextBlock
                                     VerticalAlignment="Center"
-                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
                                     Text="{DynamicResource Categories.Rule.AddTitle}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                         <TextBlock
                             VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeBase}"
+                            FontSize="{StaticResource Font.Size.Base}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Categories.Rule.Hint}"
                             TextWrapping="Wrap" />
                     </DockPanel>
 
-                    <ui:Card
+                    <Border Style="{StaticResource FormCard}"
                         Grid.Row="1"
                         Padding="12"
                         HorizontalAlignment="Stretch"
@@ -537,7 +522,7 @@
                                             Background="{DynamicResource AppBackground}"
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
-                                            CornerRadius="{StaticResource RadiusSm}">
+                                            CornerRadius="{StaticResource Radius.Sm}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
@@ -571,8 +556,8 @@
                                                     </StackPanel.Style>
                                                     <TextBlock
                                                         VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontBase}"
-                                                        FontSize="{StaticResource FontSizeBase}"
+                                                        FontFamily="{StaticResource Font.Family.Base}"
+                                                        FontSize="{StaticResource Font.Size.Base}"
                                                         FontWeight="SemiBold"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding KeywordPattern}"
@@ -580,19 +565,19 @@
                                                     <TextBlock
                                                         Margin="10,0,0,0"
                                                         VerticalAlignment="Center"
-                                                        FontSize="{StaticResource FontSizeXs}"
+                                                        FontSize="{StaticResource Font.Size.Xs}"
                                                         Foreground="{DynamicResource AppTextMuted}"
                                                         Text="→" />
                                                     <TextBlock
                                                         Margin="6,0,0,0"
                                                         VerticalAlignment="Center"
-                                                        FontSize="{StaticResource FontSizeSm}"
+                                                        FontSize="{StaticResource Font.Size.Sm}"
                                                         Foreground="{DynamicResource AppTextSecondary}"
                                                         Text="{Binding CategoryDisplay}" />
                                                     <TextBlock
                                                         Margin="10,0,0,0"
                                                         VerticalAlignment="Center"
-                                                        FontSize="{StaticResource FontSizeXs}"
+                                                        FontSize="{StaticResource Font.Size.Xs}"
                                                         Foreground="{DynamicResource AppTextMuted}"
                                                         Text="{Binding Priority, StringFormat={}P:{0}}" />
                                                 </StackPanel>
@@ -619,7 +604,7 @@
                                                             <ColumnDefinition Width="6" />
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
-                                                        <ui:TextBox
+                                                        <TextBox
                                                             Grid.Column="0"
                                                             Style="{StaticResource InlineTextBox}"
                                                             Text="{Binding EditKeyword, UpdateSourceTrigger=PropertyChanged}" />
@@ -630,7 +615,7 @@
                                                             SelectedValue="{Binding EditCategoryId}"
                                                             SelectedValuePath="Id"
                                                             Style="{StaticResource InlineComboBox}" />
-                                                        <ui:TextBox
+                                                        <TextBox
                                                             Grid.Column="4"
                                                             Style="{StaticResource InlineNumericTextBox}"
                                                             Text="{Binding EditPriority, UpdateSourceTrigger=PropertyChanged}" />
@@ -642,7 +627,7 @@
                                                             IsChecked="{Binding EditCaseSensitive}" />
                                                     </Grid>
 
-                                                    <ui:CardExpander
+                                                    <Expander Style="{StaticResource AppExpander}"
                                                         Margin="0,8,0,0"
                                                         Foreground="{DynamicResource AppTextSecondary}"
                                                         Header="{DynamicResource Categories.Rule.Advanced}">
@@ -655,17 +640,17 @@
                                                                 <TextBlock
                                                                     Grid.Column="0"
                                                                     VerticalAlignment="Center"
-                                                                    FontSize="{StaticResource FontSizeXs}"
+                                                                    FontSize="{StaticResource Font.Size.Xs}"
                                                                     Foreground="{DynamicResource AppTextMuted}"
                                                                     Text="{DynamicResource Categories.Rule.Name}" />
-                                                                <ui:TextBox
+                                                                <TextBox
                                                                     Grid.Column="1"
                                                                     Style="{StaticResource InlineTextBox}"
                                                                     Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}" />
                                                             </Grid>
 
                                                             <TextBlock
-                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                FontSize="{StaticResource Font.Size.Xs}"
                                                                 Foreground="{DynamicResource AppTextMuted}"
                                                                 Text="{DynamicResource Categories.Rule.MatchField}" />
                                                             <StackPanel Margin="0,4,0,8" Orientation="Horizontal">
@@ -685,7 +670,7 @@
                                                             </StackPanel>
 
                                                             <TextBlock
-                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                FontSize="{StaticResource Font.Size.Xs}"
                                                                 Foreground="{DynamicResource AppTextMuted}"
                                                                 Text="{DynamicResource Categories.Rule.MatchType}" />
                                                             <StackPanel Margin="0,4,0,8" Orientation="Horizontal">
@@ -705,7 +690,7 @@
                                                             </StackPanel>
 
                                                             <TextBlock
-                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                FontSize="{StaticResource Font.Size.Xs}"
                                                                 Foreground="{DynamicResource AppTextMuted}"
                                                                 Text="{DynamicResource Categories.Rule.AppliesTo}" />
                                                             <StackPanel Margin="0,4,0,8" Orientation="Horizontal">
@@ -716,10 +701,10 @@
                                                                 <CheckBox Content="{DynamicResource Categories.Rule.AppliesTo.Import}" IsChecked="{Binding EditAppliesToImport}" />
                                                             </StackPanel>
 
-                                                            <ui:Card Margin="0,8,0,0" Padding="10,8">
+                                                            <Border Style="{StaticResource FormCard}" Margin="0,8,0,0" Padding="10,8">
                                                                 <StackPanel>
                                                                     <TextBlock
-                                                                        FontSize="{StaticResource FontSizeXs}"
+                                                                        FontSize="{StaticResource Font.Size.Xs}"
                                                                         FontWeight="SemiBold"
                                                                         Foreground="{DynamicResource AppTextSecondary}"
                                                                         Text="{DynamicResource Categories.Rule.LiveTest}" />
@@ -732,20 +717,20 @@
                                                                         <TextBlock
                                                                             Grid.Column="0"
                                                                             VerticalAlignment="Center"
-                                                                            FontSize="{StaticResource FontSizeXs}"
+                                                                            FontSize="{StaticResource Font.Size.Xs}"
                                                                             Foreground="{DynamicResource AppTextMuted}"
                                                                             Text="{DynamicResource Categories.Rule.LiveTest.Counterparty}" />
-                                                                        <ui:TextBox
+                                                                        <TextBox
                                                                             Grid.Column="1"
                                                                             Style="{StaticResource InlineTextBox}"
                                                                             Text="{Binding LiveTestCounterparty, UpdateSourceTrigger=PropertyChanged}" />
-                                                                        <ui:SymbolIcon
+                                                                        <ds:AppIcon
                                                                             Grid.Column="2"
                                                                             HorizontalAlignment="Center"
                                                                             VerticalAlignment="Center"
-                                                                            FontSize="{StaticResource FontSizeBase}">
-                                                                            <ui:SymbolIcon.Style>
-                                                                                <Style TargetType="ui:SymbolIcon">
+                                                                            FontSize="{StaticResource Font.Size.Base}">
+                                                                            <ds:AppIcon.Style>
+                                                                                <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
                                                                                     <Setter Property="Symbol" Value="Dismiss24" />
                                                                                     <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
                                                                                     <Style.Triggers>
@@ -755,8 +740,8 @@
                                                                                         </DataTrigger>
                                                                                     </Style.Triggers>
                                                                                 </Style>
-                                                                            </ui:SymbolIcon.Style>
-                                                                        </ui:SymbolIcon>
+                                                                            </ds:AppIcon.Style>
+                                                                        </ds:AppIcon>
                                                                     </Grid>
                                                                     <Grid Margin="0,6,0,0">
                                                                         <Grid.ColumnDefinitions>
@@ -767,20 +752,20 @@
                                                                         <TextBlock
                                                                             Grid.Column="0"
                                                                             VerticalAlignment="Center"
-                                                                            FontSize="{StaticResource FontSizeXs}"
+                                                                            FontSize="{StaticResource Font.Size.Xs}"
                                                                             Foreground="{DynamicResource AppTextMuted}"
                                                                             Text="{DynamicResource Categories.Rule.LiveTest.Memo}" />
-                                                                        <ui:TextBox
+                                                                        <TextBox
                                                                             Grid.Column="1"
                                                                             Style="{StaticResource InlineTextBox}"
                                                                             Text="{Binding LiveTestMemo, UpdateSourceTrigger=PropertyChanged}" />
-                                                                        <ui:SymbolIcon
+                                                                        <ds:AppIcon
                                                                             Grid.Column="2"
                                                                             HorizontalAlignment="Center"
                                                                             VerticalAlignment="Center"
-                                                                            FontSize="{StaticResource FontSizeBase}">
-                                                                            <ui:SymbolIcon.Style>
-                                                                                <Style TargetType="ui:SymbolIcon">
+                                                                            FontSize="{StaticResource Font.Size.Base}">
+                                                                            <ds:AppIcon.Style>
+                                                                                <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
                                                                                     <Setter Property="Symbol" Value="Dismiss24" />
                                                                                     <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
                                                                                     <Style.Triggers>
@@ -790,13 +775,13 @@
                                                                                         </DataTrigger>
                                                                                     </Style.Triggers>
                                                                                 </Style>
-                                                                            </ui:SymbolIcon.Style>
-                                                                        </ui:SymbolIcon>
+                                                                            </ds:AppIcon.Style>
+                                                                        </ds:AppIcon>
                                                                     </Grid>
                                                                 </StackPanel>
-                                                            </ui:Card>
+                                                            </Border>
                                                         </StackPanel>
-                                                    </ui:CardExpander>
+                                                    </Expander>
                                                 </StackPanel>
 
                                                 <!--  Buttons  -->
@@ -804,7 +789,7 @@
                                                     Grid.Column="2"
                                                     VerticalAlignment="Center"
                                                     Orientation="Horizontal">
-                                                    <ui:Button
+                                                    <Button
                                                         Width="32"
                                                         Height="32"
                                                         Margin="0,0,4,0"
@@ -812,9 +797,8 @@
                                                         Command="{Binding DataContext.BeginEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Edit}">
-                                                        <ui:Button.Style>
-                                                            <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                                <Setter Property="Appearance" Value="Transparent" />
+                                                        <Button.Style>
+                                                            <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                                                 <Setter Property="Visibility" Value="Visible" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -822,23 +806,22 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </ui:Button.Style>
-                                                        <ui:SymbolIcon
-                                                            FontSize="{StaticResource FontSizeXs}"
+                                                        </Button.Style>
+                                                        <ds:AppIcon
+                                                            FontSize="{StaticResource Font.Size.Xs}"
                                                             Foreground="{DynamicResource AppTextPrimary}"
                                                             Symbol="Edit24" />
-                                                    </ui:Button>
+                                                    </Button>
 
-                                                    <ui:Button
+                                                    <Button
                                                         Width="32"
                                                         Height="32"
                                                         Padding="0"
-                                                        Command="{Binding DataContext.DeleteRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                Command="{Binding DataContext.RequestDeleteRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Delete}">
-                                                        <ui:Button.Style>
-                                                            <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                                <Setter Property="Appearance" Value="Transparent" />
+                                                        <Button.Style>
+                                                            <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                                                 <Setter Property="Visibility" Value="Visible" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -846,14 +829,14 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </ui:Button.Style>
-                                                        <ui:SymbolIcon
-                                                            FontSize="{StaticResource FontSizeXs}"
+                                                        </Button.Style>
+                                                        <ds:AppIcon
+                                                            FontSize="{StaticResource Font.Size.Xs}"
                                                             Foreground="{DynamicResource AppDanger}"
                                                             Symbol="Delete24" />
-                                                    </ui:Button>
+                                                    </Button>
 
-                                                    <ui:Button
+                                                    <Button
                                                         Width="32"
                                                         Height="32"
                                                         Margin="0,0,4,0"
@@ -861,9 +844,8 @@
                                                         Command="{Binding DataContext.SaveEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Save}">
-                                                        <ui:Button.Style>
-                                                            <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                                <Setter Property="Appearance" Value="Transparent" />
+                                                        <Button.Style>
+                                                            <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                                                 <Setter Property="Visibility" Value="Collapsed" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -871,23 +853,22 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </ui:Button.Style>
-                                                        <ui:SymbolIcon
-                                                            FontSize="{StaticResource FontSizeSm}"
+                                                        </Button.Style>
+                                                        <ds:AppIcon
+                                                            FontSize="{StaticResource Font.Size.Sm}"
                                                             Foreground="{DynamicResource AppUp}"
                                                             Symbol="Checkmark24" />
-                                                    </ui:Button>
+                                                    </Button>
 
-                                                    <ui:Button
+                                                    <Button
                                                         Width="32"
                                                         Height="32"
                                                         Padding="0"
                                                         Command="{Binding DataContext.CancelEditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Cancel}">
-                                                        <ui:Button.Style>
-                                                            <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                                <Setter Property="Appearance" Value="Transparent" />
+                                                        <Button.Style>
+                                                            <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                                                 <Setter Property="Visibility" Value="Collapsed" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -895,19 +876,19 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </ui:Button.Style>
-                                                        <ui:SymbolIcon
-                                                            FontSize="{StaticResource FontSizeXs}"
+                                                        </Button.Style>
+                                                        <ds:AppIcon
+                                                            FontSize="{StaticResource Font.Size.Xs}"
                                                             Foreground="{DynamicResource AppTextSecondary}"
                                                             Symbol="Dismiss24" />
-                                                    </ui:Button>
+                                                    </Button>
                                                 </StackPanel>
 
                                                 <TextBlock
                                                     Grid.Row="1"
                                                     Grid.Column="1"
                                                     Margin="0,4,0,0"
-                                                    FontSize="{StaticResource FontSizeXs}"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
                                                     Foreground="{DynamicResource AppDown}"
                                                     Text="{Binding EditError}"
                                                     Visibility="{Binding EditError, Converter={StaticResource StringToVisibilityConverter}}" />
@@ -917,181 +898,8 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
-                    </ui:Card>
+                    </Border>
 
-                    <!--  Add rule form (collapsible)  -->
-                    <ui:Card
-                        Grid.Row="2"
-                        Margin="0,12,0,0"
-                        Padding="14,12"
-                        Visibility="{Binding IsAddRuleOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel>
-                            <TextBlock
-                                FontSize="{StaticResource FontSizeMd}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{DynamicResource Categories.Rule.AddForm.Title}" />
-                            <TextBlock
-                                Margin="0,4,0,12"
-                                FontSize="{StaticResource FontSizeSm}"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{DynamicResource Categories.Rule.AddForm.Hint}"
-                                TextWrapping="Wrap" />
-                            <WrapPanel Orientation="Horizontal">
-                                <StackPanel Style="{StaticResource InlineFormField}">
-                                    <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Keyword}" />
-                                    <ui:TextBox
-                                        Width="280"
-                                        Style="{StaticResource InlineTextBox}"
-                                        Text="{Binding AddRuleKeyword, UpdateSourceTrigger=PropertyChanged}"
-                                        ToolTip="{DynamicResource Categories.Rule.KeywordHint}" />
-                                </StackPanel>
-
-                                <StackPanel Style="{StaticResource InlineFormField}">
-                                    <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Category}" />
-                                    <ComboBox
-                                        Width="200"
-                                        DisplayMemberPath="Name"
-                                        ItemsSource="{Binding AvailableCategories}"
-                                        SelectedItem="{Binding AddRuleCategory}"
-                                        Style="{StaticResource InlineComboBox}"
-                                        ToolTip="{DynamicResource Categories.Rule.CategoryHint}" />
-                                </StackPanel>
-
-                                <StackPanel Style="{StaticResource InlineFormField}">
-                                    <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Priority}" />
-                                    <ui:TextBox
-                                        Width="88"
-                                        Style="{StaticResource InlineNumericTextBox}"
-                                        Text="{Binding AddRulePriority, UpdateSourceTrigger=PropertyChanged}"
-                                        ToolTip="{DynamicResource Categories.Rule.PriorityHint}" />
-                                </StackPanel>
-
-                                <StackPanel
-                                    Width="160"
-                                    VerticalAlignment="Bottom"
-                                    Style="{StaticResource InlineFormField}">
-                                    <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.CaseSensitive}" />
-                                    <CheckBox
-                                        VerticalAlignment="Center"
-                                        Content="{DynamicResource Categories.Rule.CaseSensitive}"
-                                        Foreground="{DynamicResource AppTextSecondary}"
-                                        IsChecked="{Binding AddRuleCaseSensitive}" />
-                                </StackPanel>
-                            </WrapPanel>
-                            <Border
-                                Margin="0,4,0,0"
-                                Padding="0,10,0,0"
-                                BorderBrush="{DynamicResource AppBorder}"
-                                BorderThickness="0,1,0,0">
-                                <DockPanel LastChildFill="False">
-                                    <ui:Button
-                                        Command="{Binding AddRuleCommand}"
-                                        DockPanel.Dock="Right"
-                                        Style="{StaticResource PagePrimaryButton}">
-                                        <TextBlock Text="{DynamicResource Categories.Rule.Add}" />
-                                    </ui:Button>
-                                    <ui:Button
-                                        Margin="0,0,8,0"
-                                        Command="{Binding CloseAddRuleCommand}"
-                                        Content="{DynamicResource Common.Cancel}"
-                                        DockPanel.Dock="Right"
-                                        Style="{StaticResource PageSecondaryButton}" />
-                                </DockPanel>
-                            </Border>
-                            <ui:CardExpander
-                                Margin="0,10,0,0"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Header="{DynamicResource Categories.Rule.Advanced}">
-                                <StackPanel Margin="0,8,0,0">
-                                    <Grid Margin="0,0,0,6">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock
-                                            Grid.Column="0"
-                                            VerticalAlignment="Center"
-                                            FontSize="{StaticResource FontSizeXs}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{DynamicResource Categories.Rule.Name}" />
-                                        <ui:TextBox
-                                            Grid.Column="1"
-                                            Style="{StaticResource InlineTextBox}"
-                                            Text="{Binding AddRuleName, UpdateSourceTrigger=PropertyChanged}" />
-                                    </Grid>
-                                    <TextBlock
-                                        FontSize="{StaticResource FontSizeXs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{DynamicResource Categories.Rule.MatchField}" />
-                                    <StackPanel Margin="0,4,0,8" Orientation="Horizontal">
-                                        <RadioButton
-                                            Margin="0,0,12,0"
-                                            Content="{DynamicResource Categories.Rule.MatchField.Counterparty}"
-                                            GroupName="AddRuleField"
-                                            IsChecked="{Binding AddRuleMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Counterparty}" />
-                                        <RadioButton
-                                            Margin="0,0,12,0"
-                                            Content="{DynamicResource Categories.Rule.MatchField.Memo}"
-                                            GroupName="AddRuleField"
-                                            IsChecked="{Binding AddRuleMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Memo}" />
-                                        <RadioButton
-                                            Margin="0,0,12,0"
-                                            Content="{DynamicResource Categories.Rule.MatchField.Either}"
-                                            GroupName="AddRuleField"
-                                            IsChecked="{Binding AddRuleMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Either}" />
-                                        <RadioButton
-                                            Content="{DynamicResource Categories.Rule.MatchField.AnyText}"
-                                            GroupName="AddRuleField"
-                                            IsChecked="{Binding AddRuleMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=AnyText}" />
-                                    </StackPanel>
-                                    <TextBlock
-                                        FontSize="{StaticResource FontSizeXs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{DynamicResource Categories.Rule.MatchType}" />
-                                    <StackPanel Margin="0,4,0,8" Orientation="Horizontal">
-                                        <RadioButton
-                                            Margin="0,0,12,0"
-                                            Content="{DynamicResource Categories.Rule.MatchType.Contains}"
-                                            GroupName="AddRuleType"
-                                            IsChecked="{Binding AddRuleMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Contains}" />
-                                        <RadioButton
-                                            Margin="0,0,12,0"
-                                            Content="{DynamicResource Categories.Rule.MatchType.Equals}"
-                                            GroupName="AddRuleType"
-                                            IsChecked="{Binding AddRuleMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Equals}" />
-                                        <RadioButton
-                                            Margin="0,0,12,0"
-                                            Content="{DynamicResource Categories.Rule.MatchType.StartsWith}"
-                                            GroupName="AddRuleType"
-                                            IsChecked="{Binding AddRuleMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=StartsWith}" />
-                                        <RadioButton
-                                            Content="{DynamicResource Categories.Rule.MatchType.Regex}"
-                                            GroupName="AddRuleType"
-                                            IsChecked="{Binding AddRuleMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Regex}" />
-                                    </StackPanel>
-                                    <TextBlock
-                                        FontSize="{StaticResource FontSizeXs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{DynamicResource Categories.Rule.AppliesTo}" />
-                                    <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
-                                        <CheckBox
-                                            Margin="0,0,12,0"
-                                            Content="{DynamicResource Categories.Rule.AppliesTo.Manual}"
-                                            IsChecked="{Binding AddRuleAppliesToManual}" />
-                                        <CheckBox Content="{DynamicResource Categories.Rule.AppliesTo.Import}" IsChecked="{Binding AddRuleAppliesToImport}" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </ui:CardExpander>
-
-                            <TextBlock
-                                Margin="0,8,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
-                                Foreground="{DynamicResource AppDown}"
-                                Text="{Binding AddRuleError}"
-                                Visibility="{Binding AddRuleError, Converter={StaticResource StringToVisibilityConverter}}" />
-                        </StackPanel>
-                    </ui:Card>
                 </Grid>
             </TabItem>
 
@@ -1107,33 +915,33 @@
                         Grid.Row="0"
                         Margin="0,0,0,8"
                         LastChildFill="True">
-                        <ui:Button
+                        <Button
                             Margin="12,0,0,0"
                             Command="{Binding OpenAddBudgetCommand}"
                             DockPanel.Dock="Right"
-                            Style="{StaticResource PagePrimaryButton}"
+                            Style="{StaticResource AppPrimaryButton}"
                             Visibility="{Binding IsAddBudgetOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
-                                <ui:SymbolIcon
+                                <ds:AppIcon
                                     Margin="0,0,4,0"
                                     VerticalAlignment="Center"
-                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
                                     Symbol="Add24" />
                                 <TextBlock
                                     VerticalAlignment="Center"
-                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
                                     Text="{DynamicResource Categories.Budget.AddTitle}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                         <TextBlock
                             VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeBase}"
+                            FontSize="{StaticResource Font.Size.Base}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Categories.Budget.Hint}"
                             TextWrapping="Wrap" />
                     </DockPanel>
 
-                    <ui:Card
+                    <Border Style="{StaticResource FormCard}"
                         Grid.Row="1"
                         Padding="12"
                         HorizontalAlignment="Stretch"
@@ -1153,7 +961,7 @@
                                             Background="{DynamicResource AppBackground}"
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
-                                            CornerRadius="{StaticResource RadiusSm}">
+                                            CornerRadius="{StaticResource Radius.Sm}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="120" />
@@ -1165,8 +973,8 @@
                                                 <TextBlock
                                                     Grid.Column="0"
                                                     VerticalAlignment="Center"
-                                                    FontFamily="{StaticResource FontBase}"
-                                                    FontSize="{StaticResource FontSizeBase}"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Base}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{Binding PeriodDisplay}"
@@ -1189,13 +997,13 @@
                                                     </StackPanel.Style>
                                                     <TextBlock
                                                         VerticalAlignment="Center"
-                                                        FontSize="{StaticResource FontSizeBase}"
+                                                        FontSize="{StaticResource Font.Size.Base}"
                                                         Foreground="{DynamicResource AppTextSecondary}"
                                                         Text="{Binding CategoryDisplay}" />
                                                     <TextBlock
                                                         Margin="12,0,0,0"
                                                         VerticalAlignment="Center"
-                                                        FontSize="{StaticResource FontSizeBase}"
+                                                        FontSize="{StaticResource Font.Size.Base}"
                                                         Foreground="{DynamicResource AppTextMuted}"
                                                         Text="{Binding Note}" />
                                                 </StackPanel>
@@ -1215,7 +1023,7 @@
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
-                                                    <ui:TextBox
+                                                    <TextBox
                                                         Grid.Column="0"
                                                         Style="{StaticResource InlineTextBox}"
                                                         Text="{Binding EditNote, UpdateSourceTrigger=PropertyChanged}" />
@@ -1229,8 +1037,8 @@
                                                     Orientation="Horizontal">
                                                     <TextBlock
                                                         VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource FontBase}"
-                                                        FontSize="{StaticResource FontSizeBase}"
+                                                        FontFamily="{StaticResource Font.Family.Base}"
+                                                        FontSize="{StaticResource Font.Size.Base}"
                                                         FontWeight="SemiBold"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding Amount, StringFormat=NT$\{0:N0\}}"
@@ -1246,14 +1054,14 @@
                                                             </Style>
                                                         </TextBlock.Style>
                                                     </TextBlock>
-                                                    <ui:TextBox
+                                                    <TextBox
                                                         Width="120"
                                                         MinHeight="36"
                                                         VerticalContentAlignment="Center"
                                                         behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                                                         Text="{Binding EditAmount, UpdateSourceTrigger=PropertyChanged}">
-                                                        <ui:TextBox.Style>
-                                                            <Style BasedOn="{StaticResource {x:Type ui:TextBox}}" TargetType="ui:TextBox">
+                                                        <TextBox.Style>
+                                                            <Style BasedOn="{StaticResource AppTextBox}" TargetType="TextBox">
                                                                 <Setter Property="Visibility" Value="Collapsed" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -1261,8 +1069,8 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </ui:TextBox.Style>
-                                                    </ui:TextBox>
+                                                        </TextBox.Style>
+                                                    </TextBox>
                                                 </StackPanel>
 
                                                 <!--  Buttons  -->
@@ -1270,7 +1078,7 @@
                                                     Grid.Column="3"
                                                     VerticalAlignment="Center"
                                                     Orientation="Horizontal">
-                                                    <ui:Button
+                                                    <Button
                                                         Width="32"
                                                         Height="32"
                                                         Margin="0,0,4,0"
@@ -1278,9 +1086,8 @@
                                                         Command="{Binding DataContext.BeginEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Edit}">
-                                                        <ui:Button.Style>
-                                                            <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                                <Setter Property="Appearance" Value="Transparent" />
+                                                        <Button.Style>
+                                                            <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                                                 <Setter Property="Visibility" Value="Visible" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -1288,22 +1095,21 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </ui:Button.Style>
-                                                        <ui:SymbolIcon
-                                                            FontSize="{StaticResource FontSizeXs}"
+                                                        </Button.Style>
+                                                        <ds:AppIcon
+                                                            FontSize="{StaticResource Font.Size.Xs}"
                                                             Foreground="{DynamicResource AppTextPrimary}"
                                                             Symbol="Edit24" />
-                                                    </ui:Button>
-                                                    <ui:Button
+                                                    </Button>
+                                                    <Button
                                                         Width="32"
                                                         Height="32"
                                                         Padding="0"
-                                                        Command="{Binding DataContext.DeleteBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        Command="{Binding DataContext.RequestDeleteBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Delete}">
-                                                        <ui:Button.Style>
-                                                            <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                                <Setter Property="Appearance" Value="Transparent" />
+                                                        <Button.Style>
+                                                            <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                                                 <Setter Property="Visibility" Value="Visible" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -1311,13 +1117,13 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </ui:Button.Style>
-                                                        <ui:SymbolIcon
-                                                            FontSize="{StaticResource FontSizeXs}"
+                                                        </Button.Style>
+                                                        <ds:AppIcon
+                                                            FontSize="{StaticResource Font.Size.Xs}"
                                                             Foreground="{DynamicResource AppDanger}"
                                                             Symbol="Delete24" />
-                                                    </ui:Button>
-                                                    <ui:Button
+                                                    </Button>
+                                                    <Button
                                                         Width="32"
                                                         Height="32"
                                                         Margin="0,0,4,0"
@@ -1325,9 +1131,8 @@
                                                         Command="{Binding DataContext.SaveEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Save}">
-                                                        <ui:Button.Style>
-                                                            <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                                <Setter Property="Appearance" Value="Transparent" />
+                                                        <Button.Style>
+                                                            <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                                                 <Setter Property="Visibility" Value="Collapsed" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -1335,22 +1140,21 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </ui:Button.Style>
-                                                        <ui:SymbolIcon
-                                                            FontSize="{StaticResource FontSizeSm}"
+                                                        </Button.Style>
+                                                        <ds:AppIcon
+                                                            FontSize="{StaticResource Font.Size.Sm}"
                                                             Foreground="{DynamicResource AppUp}"
                                                             Symbol="Checkmark24" />
-                                                    </ui:Button>
-                                                    <ui:Button
+                                                    </Button>
+                                                    <Button
                                                         Width="32"
                                                         Height="32"
                                                         Padding="0"
                                                         Command="{Binding DataContext.CancelEditBudgetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="{DynamicResource Common.Cancel}">
-                                                        <ui:Button.Style>
-                                                            <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                                <Setter Property="Appearance" Value="Transparent" />
+                                                        <Button.Style>
+                                                            <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                                                 <Setter Property="Visibility" Value="Collapsed" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -1358,12 +1162,12 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </ui:Button.Style>
-                                                        <ui:SymbolIcon
-                                                            FontSize="{StaticResource FontSizeXs}"
+                                                        </Button.Style>
+                                                        <ds:AppIcon
+                                                            FontSize="{StaticResource Font.Size.Xs}"
                                                             Foreground="{DynamicResource AppTextSecondary}"
                                                             Symbol="Dismiss24" />
-                                                    </ui:Button>
+                                                    </Button>
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
@@ -1371,165 +1175,33 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
-                    </ui:Card>
+                    </Border>
 
-                    <!--  Add budget form (collapsible)  -->
-                    <ui:Card
-                        Grid.Row="2"
-                        Margin="0,12,0,0"
-                        Padding="14,12"
-                        Visibility="{Binding IsAddBudgetOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel>
-                            <TextBlock
-                                FontSize="{StaticResource FontSizeMd}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{DynamicResource Categories.Budget.AddForm.Title}" />
-                            <TextBlock
-                                Margin="0,4,0,12"
-                                FontSize="{StaticResource FontSizeSm}"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{DynamicResource Categories.Budget.AddForm.Hint}"
-                                TextWrapping="Wrap" />
-                            <WrapPanel Orientation="Horizontal">
-                                <StackPanel Style="{StaticResource InlineFormField}">
-                                    <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.BudgetMode}" />
-                                    <ComboBox
-                                        Width="120"
-                                        ItemsSource="{Binding BudgetModeOptions}"
-                                        SelectedItem="{Binding AddBudgetMode}"
-                                        Style="{StaticResource InlineComboBox}">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock>
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Text" Value="{DynamicResource Categories.Budget.Mode.Monthly}" />
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding}" Value="Yearly">
-                                                                    <Setter Property="Text" Value="{DynamicResource Categories.Budget.Mode.Yearly}" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
-                                </StackPanel>
-
-                                <StackPanel Style="{StaticResource InlineFormField}">
-                                    <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Year}" />
-                                    <ui:TextBox
-                                        Width="84"
-                                        Style="{StaticResource InlineNumericTextBox}"
-                                        Text="{Binding AddBudgetYear, UpdateSourceTrigger=PropertyChanged}"
-                                        ToolTip="{DynamicResource Categories.Budget.YearHint}" />
-                                </StackPanel>
-
-                                <StackPanel Style="{StaticResource InlineFormField}">
-                                    <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Month}" />
-                                    <ui:TextBox
-                                        Width="72"
-                                        Style="{StaticResource InlineNumericTextBox}"
-                                        Text="{Binding AddBudgetMonth, UpdateSourceTrigger=PropertyChanged}"
-                                        ToolTip="{DynamicResource Categories.Budget.MonthHint}" />
-                                </StackPanel>
-
-                                <StackPanel Style="{StaticResource InlineFormField}">
-                                    <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Category}" />
-                                    <ComboBox
-                                        Width="240"
-                                        DisplayMemberPath="Name"
-                                        ItemsSource="{Binding AvailableCategories}"
-                                        SelectedItem="{Binding AddBudgetCategory}"
-                                        Style="{StaticResource InlineComboBox}"
-                                        ToolTip="{DynamicResource Categories.Budget.CategoryHint}" />
-                                </StackPanel>
-
-                                <StackPanel Style="{StaticResource InlineFormField}">
-                                    <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Amount}" />
-                                    <ui:TextBox
-                                        Width="120"
-                                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                                        Style="{StaticResource InlineNumericTextBox}"
-                                        Text="{Binding AddBudgetAmount, UpdateSourceTrigger=PropertyChanged}"
-                                        ToolTip="{DynamicResource Categories.Budget.AmountHint}" />
-                                </StackPanel>
-
-                                <StackPanel Style="{StaticResource InlineFormField}">
-                                    <TextBlock Style="{StaticResource InlineFormLabel}" Text="{DynamicResource Categories.Field.Note}" />
-                                    <ui:TextBox
-                                        Width="240"
-                                        Style="{StaticResource InlineTextBox}"
-                                        Text="{Binding AddBudgetNote, UpdateSourceTrigger=PropertyChanged}"
-                                        ToolTip="{DynamicResource Categories.Budget.NoteHint}" />
-                                </StackPanel>
-                            </WrapPanel>
-                            <Border
-                                Margin="0,4,0,0"
-                                Padding="0,10,0,0"
-                                BorderBrush="{DynamicResource AppBorder}"
-                                BorderThickness="0,1,0,0">
-                                <DockPanel LastChildFill="False">
-                                    <ui:Button
-                                        Command="{Binding AddBudgetCommand}"
-                                        DockPanel.Dock="Right"
-                                        Style="{StaticResource PagePrimaryButton}">
-                                        <TextBlock Text="{DynamicResource Categories.Budget.Add}" />
-                                    </ui:Button>
-                                    <ui:Button
-                                        Margin="0,0,8,0"
-                                        Command="{Binding CloseAddBudgetCommand}"
-                                        Content="{DynamicResource Common.Cancel}"
-                                        DockPanel.Dock="Right"
-                                        Style="{StaticResource PageSecondaryButton}" />
-                                </DockPanel>
-                            </Border>
-                            <TextBlock
-                                Margin="0,8,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
-                                Foreground="{DynamicResource AppDown}"
-                                Text="{Binding AddBudgetError}"
-                                Visibility="{Binding AddBudgetError, Converter={StaticResource StringToVisibilityConverter}}" />
-                        </StackPanel>
-                    </ui:Card>
                 </Grid>
             </TabItem>
         </TabControl>
 
-        <Border
+        <Grid
             Grid.Row="0"
             Grid.RowSpan="2"
             Margin="-24"
             Panel.ZIndex="180"
-            Background="#99000000"
+            Style="{StaticResource AppDialogOverlay}"
             Visibility="{Binding IsAddCategoryOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
         <Border
             Grid.Row="0"
             Grid.RowSpan="2"
+            Style="{StaticResource AppDialogShell}"
             Width="640"
             MaxWidth="720"
             MaxHeight="620"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Panel.ZIndex="181"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="{StaticResource RadiusLg}"
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding CloseAddCategoryCommand}"
             SnapsToDevicePixels="True"
             Visibility="{Binding IsAddCategoryOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <Border.Effect>
-                <DropShadowEffect
-                    BlurRadius="32"
-                    Direction="270"
-                    Opacity="0.18"
-                    ShadowDepth="10"
-                    Color="#000000" />
-            </Border.Effect>
-
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -1538,41 +1210,33 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Margin="24,22,24,18">
+                <StackPanel Style="{StaticResource AppDialogHeader}">
                     <TextBlock
-                        FontSize="{StaticResource FontSizeLg}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextPrimary}"
+                        Style="{StaticResource AppDialogTitle}"
                         Text="{DynamicResource Categories.AddForm.Title}" />
                     <TextBlock
-                        Margin="0,6,0,0"
-                        Foreground="{DynamicResource AppTextSecondary}"
+                        Style="{StaticResource AppDialogSubtitle}"
                         Text="{DynamicResource Categories.AddForm.Hint}"
                         TextWrapping="Wrap" />
                 </StackPanel>
 
                 <Border
                     Grid.Row="1"
-                    Margin="20,0,20,0"
-                    Padding="16"
-                    Background="{DynamicResource AppSurfaceAlt}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusLg}">
+                    Style="{StaticResource FormSection}">
                     <Grid>
                         <Grid.Resources>
                             <Style x:Key="SheetFieldLabel" TargetType="TextBlock">
                                 <Setter Property="Margin" Value="0,0,0,6" />
-                                <Setter Property="FontSize" Value="{DynamicResource FontSizeXs}" />
+                                <Setter Property="FontSize" Value="{DynamicResource Font.Size.Xs}" />
                                 <Setter Property="FontWeight" Value="SemiBold" />
                                 <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
                             </Style>
-                            <Style BasedOn="{StaticResource {x:Type ui:TextBox}}" TargetType="{x:Type ui:TextBox}">
+                            <Style BasedOn="{StaticResource AppTextBox}" TargetType="{x:Type TextBox}">
                                 <Setter Property="MinHeight" Value="40" />
                             </Style>
                             <Style
                                 x:Key="SheetComboBox"
-                                BasedOn="{StaticResource FormComboBox}"
+                                BasedOn="{StaticResource AppComboBox}"
                                 TargetType="ComboBox">
                                 <Setter Property="MinHeight" Value="40" />
                             </Style>
@@ -1626,11 +1290,11 @@
                                             <TextBlock
                                                 Margin="0,0,8,0"
                                                 VerticalAlignment="Center"
-                                                FontSize="{StaticResource FontSizeMd}"
+                                                FontSize="{StaticResource Font.Size.Md}"
                                                 Text="{Binding Value}" />
                                             <TextBlock
                                                 VerticalAlignment="Center"
-                                                FontSize="{StaticResource FontSizeSm}"
+                                                FontSize="{StaticResource Font.Size.Sm}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{Binding Label}" />
                                         </StackPanel>
@@ -1641,7 +1305,7 @@
 
                         <StackPanel Grid.Row="1" Grid.Column="0">
                             <TextBlock Style="{StaticResource SheetFieldLabel}" Text="{DynamicResource Categories.Field.Name}" />
-                            <ui:TextBox
+                            <TextBox
                                 Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}"
                                 ToolTip="{DynamicResource Categories.NameHint}" />
                         </StackPanel>
@@ -1660,34 +1324,432 @@
                 <TextBlock
                     Grid.Row="2"
                     Margin="24,10,24,0"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppDown}"
                     Text="{Binding AddError}"
                     Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <Border
                     Grid.Row="3"
-                    Margin="0,18,0,0"
-                    Padding="20,16"
+                    Margin="0,16,0,0"
+                    Padding="0"
                     BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="0,1,0,0">
-                    <DockPanel LastChildFill="False">
-                        <ui:Button
-                            Margin="8,0,0,0"
-                            Command="{Binding AddCategoryCommand}"
-                            DockPanel.Dock="Right"
-                            Style="{StaticResource PagePrimaryButton}">
-                            <TextBlock
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Text="{DynamicResource Categories.Add}" />
-                        </ui:Button>
-                        <ui:Button
+                    BorderThickness="0">
+                    <StackPanel Style="{StaticResource AppDialogFooter}">
+                        <Button
+                            Margin="0,0,8,0"
                             Command="{Binding CloseAddCategoryCommand}"
                             Content="{DynamicResource Common.Cancel}"
-                            DockPanel.Dock="Right"
-                            Style="{StaticResource PageSecondaryButton}" />
-                    </DockPanel>
+                            Style="{StaticResource AppSecondaryButton}" />
+                        <Button
+                            Command="{Binding AddCategoryCommand}"
+                            Content="{DynamicResource Categories.Add}"
+                            Style="{StaticResource AppPrimaryButton}" />
+                    </StackPanel>
                 </Border>
+            </Grid>
+        </Border>
+
+        <Grid
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            Margin="-24"
+            Panel.ZIndex="182"
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsAddRuleOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Border
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            Style="{StaticResource AppDialogShell}"
+            Width="760"
+            MaxWidth="820"
+            MaxHeight="720"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Panel.ZIndex="183"
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding CloseAddRuleCommand}"
+            SnapsToDevicePixels="True"
+            Visibility="{Binding IsAddRuleOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Style="{StaticResource AppDialogHeader}">
+                    <TextBlock
+                        Style="{StaticResource AppDialogTitle}"
+                        Text="{DynamicResource Categories.Rule.AddForm.Title}" />
+                    <TextBlock
+                        Style="{StaticResource AppDialogSubtitle}"
+                        Text="{DynamicResource Categories.Rule.AddForm.Hint}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <ScrollViewer
+                    Grid.Row="1"
+                    MaxHeight="500"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Border Style="{StaticResource FormSection}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="120" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,14">
+                                    <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Keyword}" />
+                                    <TextBox
+                                        Style="{StaticResource AppTextBox}"
+                                        Text="{Binding AddRuleKeyword, UpdateSourceTrigger=PropertyChanged}"
+                                        ToolTip="{DynamicResource Categories.Rule.KeywordHint}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,14">
+                                    <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Category}" />
+                                    <ComboBox
+                                        ItemsSource="{Binding AvailableCategories}"
+                                        SelectedItem="{Binding AddRuleCategory}"
+                                        Style="{StaticResource AppComboBox}"
+                                        ToolTip="{DynamicResource Categories.Rule.CategoryHint}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="0" Grid.Column="4" Margin="0,0,0,14">
+                                    <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Priority}" />
+                                    <TextBox
+                                        Style="{StaticResource AppNumberTextBox}"
+                                        Text="{Binding AddRulePriority, UpdateSourceTrigger=PropertyChanged}"
+                                        ToolTip="{DynamicResource Categories.Rule.PriorityHint}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="0">
+                                    <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.CaseSensitive}" />
+                                    <CheckBox
+                                        Content="{DynamicResource Categories.Rule.CaseSensitive}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        IsChecked="{Binding AddRuleCaseSensitive}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Expander
+                            Margin="0,12,0,0"
+                            Header="{DynamicResource Categories.Rule.Advanced}"
+                            Style="{StaticResource AppExpander}">
+                            <Border
+                                Margin="0,10,0,0"
+                                Style="{StaticResource FormSection}">
+                                <StackPanel>
+                                    <StackPanel Margin="0,0,0,14">
+                                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Rule.Name}" />
+                                        <TextBox
+                                            Style="{StaticResource AppTextBox}"
+                                            Text="{Binding AddRuleName, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+
+                                    <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Rule.MatchField}" />
+                                    <WrapPanel Margin="0,0,0,14">
+                                        <RadioButton
+                                            Margin="0,0,12,8"
+                                            Content="{DynamicResource Categories.Rule.MatchField.Counterparty}"
+                                            GroupName="AddRuleField"
+                                            IsChecked="{Binding AddRuleMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Counterparty}"
+                                            Style="{StaticResource AppRadioButton}" />
+                                        <RadioButton
+                                            Margin="0,0,12,8"
+                                            Content="{DynamicResource Categories.Rule.MatchField.Memo}"
+                                            GroupName="AddRuleField"
+                                            IsChecked="{Binding AddRuleMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Memo}"
+                                            Style="{StaticResource AppRadioButton}" />
+                                        <RadioButton
+                                            Margin="0,0,12,8"
+                                            Content="{DynamicResource Categories.Rule.MatchField.Either}"
+                                            GroupName="AddRuleField"
+                                            IsChecked="{Binding AddRuleMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Either}"
+                                            Style="{StaticResource AppRadioButton}" />
+                                        <RadioButton
+                                            Margin="0,0,12,8"
+                                            Content="{DynamicResource Categories.Rule.MatchField.AnyText}"
+                                            GroupName="AddRuleField"
+                                            IsChecked="{Binding AddRuleMatchField, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=AnyText}"
+                                            Style="{StaticResource AppRadioButton}" />
+                                    </WrapPanel>
+
+                                    <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Rule.MatchType}" />
+                                    <WrapPanel Margin="0,0,0,14">
+                                        <RadioButton
+                                            Margin="0,0,12,8"
+                                            Content="{DynamicResource Categories.Rule.MatchType.Contains}"
+                                            GroupName="AddRuleType"
+                                            IsChecked="{Binding AddRuleMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Contains}"
+                                            Style="{StaticResource AppRadioButton}" />
+                                        <RadioButton
+                                            Margin="0,0,12,8"
+                                            Content="{DynamicResource Categories.Rule.MatchType.Equals}"
+                                            GroupName="AddRuleType"
+                                            IsChecked="{Binding AddRuleMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Equals}"
+                                            Style="{StaticResource AppRadioButton}" />
+                                        <RadioButton
+                                            Margin="0,0,12,8"
+                                            Content="{DynamicResource Categories.Rule.MatchType.StartsWith}"
+                                            GroupName="AddRuleType"
+                                            IsChecked="{Binding AddRuleMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=StartsWith}"
+                                            Style="{StaticResource AppRadioButton}" />
+                                        <RadioButton
+                                            Margin="0,0,12,8"
+                                            Content="{DynamicResource Categories.Rule.MatchType.Regex}"
+                                            GroupName="AddRuleType"
+                                            IsChecked="{Binding AddRuleMatchType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Regex}"
+                                            Style="{StaticResource AppRadioButton}" />
+                                    </WrapPanel>
+
+                                    <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Rule.AppliesTo}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox
+                                            Margin="0,0,12,0"
+                                            Content="{DynamicResource Categories.Rule.AppliesTo.Manual}"
+                                            IsChecked="{Binding AddRuleAppliesToManual}" />
+                                        <CheckBox
+                                            Content="{DynamicResource Categories.Rule.AppliesTo.Import}"
+                                            IsChecked="{Binding AddRuleAppliesToImport}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Expander>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <TextBlock
+                    Grid.Row="2"
+                    Margin="24,10,24,0"
+                    Style="{StaticResource FormFieldError}"
+                    Text="{Binding AddRuleError}"
+                    Visibility="{Binding AddRuleError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+                <StackPanel Grid.Row="3" Style="{StaticResource AppDialogFooter}">
+                    <Button
+                        Margin="0,0,8,0"
+                        Command="{Binding CloseAddRuleCommand}"
+                        Content="{DynamicResource Common.Cancel}"
+                        Style="{StaticResource AppSecondaryButton}" />
+                    <Button
+                        Command="{Binding AddRuleCommand}"
+                        Content="{DynamicResource Categories.Rule.Add}"
+                        Style="{StaticResource AppPrimaryButton}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            Margin="-24"
+            Panel.ZIndex="184"
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsAddBudgetOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Border
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            Style="{StaticResource AppDialogShell}"
+            Width="720"
+            MaxWidth="780"
+            MaxHeight="620"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Panel.ZIndex="185"
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding CloseAddBudgetCommand}"
+            SnapsToDevicePixels="True"
+            Visibility="{Binding IsAddBudgetOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Style="{StaticResource AppDialogHeader}">
+                    <TextBlock
+                        Style="{StaticResource AppDialogTitle}"
+                        Text="{DynamicResource Categories.Budget.AddForm.Title}" />
+                    <TextBlock
+                        Style="{StaticResource AppDialogSubtitle}"
+                        Text="{DynamicResource Categories.Budget.AddForm.Hint}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <Border
+                    Grid.Row="1"
+                    Style="{StaticResource FormSection}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,14">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.BudgetMode}" />
+                            <ComboBox
+                                ItemsSource="{Binding BudgetModeOptions}"
+                                SelectedItem="{Binding AddBudgetMode}"
+                                Style="{StaticResource AppComboBox}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="{DynamicResource Categories.Budget.Mode.Monthly}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding}" Value="Yearly">
+                                                            <Setter Property="Text" Value="{DynamicResource Categories.Budget.Mode.Yearly}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,14">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Year}" />
+                            <TextBox
+                                Style="{StaticResource AppNumberTextBox}"
+                                Text="{Binding AddBudgetYear, UpdateSourceTrigger=PropertyChanged}"
+                                ToolTip="{DynamicResource Categories.Budget.YearHint}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="4" Margin="0,0,0,14">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Month}" />
+                            <TextBox
+                                Style="{StaticResource AppNumberTextBox}"
+                                Text="{Binding AddBudgetMonth, UpdateSourceTrigger=PropertyChanged}"
+                                ToolTip="{DynamicResource Categories.Budget.MonthHint}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,14">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Category}" />
+                            <ComboBox
+                                ItemsSource="{Binding AvailableCategories}"
+                                SelectedItem="{Binding AddBudgetCategory}"
+                                Style="{StaticResource AppComboBox}"
+                                ToolTip="{DynamicResource Categories.Budget.CategoryHint}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="4" Margin="0,0,0,14">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Amount}" />
+                            <TextBox
+                                Style="{StaticResource AppMoneyTextBox}"
+                                Text="{Binding AddBudgetAmount, UpdateSourceTrigger=PropertyChanged}"
+                                ToolTip="{DynamicResource Categories.Budget.AmountHint}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Note}" />
+                            <TextBox
+                                Style="{StaticResource AppTextBox}"
+                                Text="{Binding AddBudgetNote, UpdateSourceTrigger=PropertyChanged}"
+                                ToolTip="{DynamicResource Categories.Budget.NoteHint}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <TextBlock
+                    Grid.Row="2"
+                    Margin="24,10,24,0"
+                    Style="{StaticResource FormFieldError}"
+                    Text="{Binding AddBudgetError}"
+                    Visibility="{Binding AddBudgetError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+                <StackPanel Grid.Row="3" Style="{StaticResource AppDialogFooter}">
+                    <Button
+                        Margin="0,0,8,0"
+                        Command="{Binding CloseAddBudgetCommand}"
+                        Content="{DynamicResource Common.Cancel}"
+                        Style="{StaticResource AppSecondaryButton}" />
+                    <Button
+                        Command="{Binding AddBudgetCommand}"
+                        Content="{DynamicResource Categories.Budget.Add}"
+                        Style="{StaticResource AppPrimaryButton}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid
+            Grid.RowSpan="2"
+            Panel.ZIndex="190"
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Border
+            Grid.RowSpan="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Panel.ZIndex="191"
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding CancelDeleteCommand}"
+            Style="{StaticResource AppDestructiveDialogShell}"
+            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
+                <TextBlock
+                    Grid.Row="1"
+                    Style="{StaticResource AppDialogSubtitle}">
+                    <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
+                    <Run Text="{Binding DeleteTargetName}" />
+                    <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />
+                </TextBlock>
+
+                <StackPanel Grid.Row="2" Style="{StaticResource AppDialogFooter}">
+                    <Button
+                        Margin="0,0,8,0"
+                        Command="{Binding CancelDeleteCommand}"
+                        Content="{DynamicResource Common.Cancel}"
+                        Style="{StaticResource AppSecondaryButton}" />
+                    <Button
+                        Command="{Binding ConfirmDeleteCommand}"
+                        Content="{DynamicResource Common.Delete}"
+                        Style="{StaticResource AppDangerButton}" />
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>

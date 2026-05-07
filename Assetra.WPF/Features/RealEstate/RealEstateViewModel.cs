@@ -40,6 +40,9 @@ public sealed partial class RealEstateViewModel : ObservableObject
     [ObservableProperty] private string _formNotes = string.Empty;
     [ObservableProperty] private string? _formError;
     [ObservableProperty] private bool _isFormOpen;
+    [ObservableProperty] private bool _isDeleteConfirmOpen;
+    [ObservableProperty] private string _deleteTargetName = string.Empty;
+    private RealEstateRowViewModel? _pendingDelete;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditing))]
@@ -142,13 +145,37 @@ public sealed partial class RealEstateViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task DeleteAsync(RealEstateRowViewModel row)
+    private void Delete(RealEstateRowViewModel row)
     {
+        _pendingDelete = row;
+        DeleteTargetName = row.Name;
+        IsDeleteConfirmOpen = true;
+    }
+
+    [RelayCommand]
+    private async Task ConfirmDeleteAsync()
+    {
+        var row = _pendingDelete;
+        if (row is null)
+        {
+            CancelDelete();
+            return;
+        }
+
         await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
         if (EditingId == row.Id)
             ClearForm();
 
+        CancelDelete();
         await LoadAsync().ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private void CancelDelete()
+    {
+        _pendingDelete = null;
+        DeleteTargetName = string.Empty;
+        IsDeleteConfirmOpen = false;
     }
 
     [RelayCommand]
@@ -168,6 +195,7 @@ public sealed partial class RealEstateViewModel : ObservableObject
         FormNotes = string.Empty;
         FormError = null;
         IsFormOpen = false;
+        CancelDelete();
     }
 
     private void NotifyListStateChanged()

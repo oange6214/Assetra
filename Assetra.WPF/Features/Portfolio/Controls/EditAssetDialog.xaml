@@ -2,10 +2,11 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.EditAssetDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:subvm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     d:DataContext="{d:DesignInstance Type={x:Type subvm:AccountDialogViewModel}}"
     Visibility="{Binding IsEditAssetDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}"
@@ -13,17 +14,16 @@
 
     <Grid>
         <!--  半透明背景幕  -->
-        <Border Background="{DynamicResource AppModalOverlay}" />
+        <Grid Style="{StaticResource AppDialogOverlay}" />
 
         <!--  Dialog card  -->
         <Border
             Width="{StaticResource DialogWidth}"
+            Padding="0"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="{StaticResource RadiusMd}">
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding CloseEditAssetCommand}"
+            Style="{StaticResource AppDialogShell}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -39,29 +39,29 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="0,0,0,1">
                     <DockPanel>
-                        <ui:Button
+                        <Button
                             Width="28"
                             Height="28"
                             Padding="0"
                             HorizontalAlignment="Right"
-                            Appearance="Transparent"
+                            Style="{StaticResource AppIconButton}"
                             Command="{Binding CloseEditAssetCommand}"
                             DockPanel.Dock="Right"
                             ToolTip="{DynamicResource Common.Close}">
-                            <ui:SymbolIcon
+                            <ds:AppIcon
                                 FontSize="12"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Symbol="Dismiss24" />
-                        </ui:Button>
+                        </Button>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock
-                                FontSize="{StaticResource FontSizeSm}"
+                                FontSize="{StaticResource Font.Size.Sm}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{DynamicResource Portfolio.EditAsset.Title}" />
                             <TextBlock
                                 Margin="0,2,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Portfolio.EditAsset.Subtitle}" />
                         </StackPanel>
@@ -74,7 +74,7 @@
                     <!--  Type (read-only badge)  -->
                     <TextBlock
                         Margin="0,0,0,6"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.EditAsset.TypeLabel}" />
@@ -82,9 +82,9 @@
                         Padding="10,5"
                         HorizontalAlignment="Left"
                         Background="{DynamicResource AppBorder}"
-                        CornerRadius="{StaticResource RadiusSm}">
+                        CornerRadius="{StaticResource Radius.Sm}">
                         <TextBlock
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{Binding EditAssetTypeLabel}" />
                     </Border>
@@ -93,17 +93,17 @@
                     <StackPanel Visibility="{Binding EditAssetIsStock, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <TextBlock
                             Margin="0,14,0,6"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.EditAsset.Symbol}" />
                         <Border
                             Padding="10,7"
                             Background="{DynamicResource AppBorder}"
-                            CornerRadius="{StaticResource RadiusSm}">
+                            CornerRadius="{StaticResource Radius.Sm}">
                             <TextBlock
-                                FontFamily="{StaticResource FontBase}"
-                                FontSize="{StaticResource FontSizeSm}"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Sm}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{Binding EditAssetSymbol}"
                                 Typography.NumeralAlignment="Tabular" />
@@ -113,22 +113,22 @@
                     <!--  Name  -->
                     <TextBlock
                         Margin="0,14,0,6"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Common.Name}" />
-                    <ui:TextBox Text="{Binding EditAssetName, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Text="{Binding EditAssetName, UpdateSourceTrigger=PropertyChanged}" />
 
                     <!--  Currency  -->
                     <TextBlock
                         Margin="0,14,0,6"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.EditAsset.Currency}" />
                     <TextBlock
                         Margin="0,0,0,6"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource Portfolio.EditAsset.CurrencyHint}"
                         TextWrapping="Wrap" />
@@ -145,7 +145,7 @@
                 <TextBlock
                     Grid.Row="2"
                     Margin="20,8,20,0"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppDown}"
                     Text="{Binding EditAssetError}"
                     Visibility="{Binding EditAssetError, Converter={StaticResource StringToVisibilityConverter}}" />
@@ -158,21 +158,21 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="0,1,0,0">
                     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                        <ui:Button
+                        <Button
                             Height="30"
                             Margin="0,0,8,0"
                             Padding="14,0"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Command="{Binding CloseEditAssetCommand}">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Common.Cancel}" />
-                        </ui:Button>
-                        <ui:Button
+                        </Button>
+                        <Button
                             Height="30"
                             Padding="14,0"
-                            Appearance="Primary"
+                            Style="{StaticResource AppPrimaryButton}"
                             Command="{Binding SaveEditAssetCommand}">
                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.EditAsset.Update}" />
-                        </ui:Button>
+                        </Button>
                     </StackPanel>
                 </Border>
 

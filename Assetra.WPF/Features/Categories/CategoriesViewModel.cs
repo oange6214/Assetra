@@ -85,6 +85,9 @@ public partial class CategoriesViewModel : ObservableObject
     [ObservableProperty] private bool _isAddCategoryOpen;
     [ObservableProperty] private bool _isAddRuleOpen;
     [ObservableProperty] private bool _isAddBudgetOpen;
+    [ObservableProperty] private bool _isDeleteConfirmOpen;
+    [ObservableProperty] private string _deleteTargetName = string.Empty;
+    private Func<Task>? _pendingDeleteAction;
 
     // Empty-state predicates per tab
     public bool HasNoExpense => Categories.Count(c => c.Kind == CategoryKind.Expense && (ShowArchived || !c.IsArchived)) == 0;
@@ -100,6 +103,26 @@ public partial class CategoriesViewModel : ObservableObject
     [RelayCommand] private void CloseAddRule() { IsAddRuleOpen = false; AddRuleError = string.Empty; }
     [RelayCommand] private void OpenAddBudget() { AddBudgetError = string.Empty; IsAddBudgetOpen = true; }
     [RelayCommand] private void CloseAddBudget() { IsAddBudgetOpen = false; AddBudgetError = string.Empty; }
+    [RelayCommand]
+    private void RequestDelete(CategoryRowViewModel row)
+    {
+        if (row is null) return;
+        OpenDeleteConfirm(row.Name, () => DeleteAsync(row));
+    }
+
+    [RelayCommand]
+    private void RequestDeleteRule(AutoCategorizationRuleRowViewModel row)
+    {
+        if (row is null) return;
+        OpenDeleteConfirm(row.KeywordPattern, () => DeleteRuleAsync(row));
+    }
+
+    [RelayCommand]
+    private void RequestDeleteBudget(BudgetRowViewModel row)
+    {
+        if (row is null) return;
+        OpenDeleteConfirm(row.CategoryDisplay, () => DeleteBudgetAsync(row));
+    }
 
     public IReadOnlyList<BudgetMode> BudgetModeOptions { get; } =
         [BudgetMode.Monthly, BudgetMode.Yearly];
@@ -624,6 +647,33 @@ public partial class CategoriesViewModel : ObservableObject
 
     private static string? NullIfBlank(string? s) =>
         string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+
+    [RelayCommand]
+    private async Task ConfirmDeleteAsync()
+    {
+        var action = _pendingDeleteAction;
+        CancelDelete();
+        if (action is not null)
+            await action().ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private void CancelDelete()
+    {
+        _pendingDeleteAction = null;
+        DeleteTargetName = string.Empty;
+        IsDeleteConfirmOpen = false;
+    }
+
+    private void OpenDeleteConfirm(string? targetName, Func<Task> action)
+    {
+        if (string.IsNullOrWhiteSpace(targetName))
+            return;
+
+        _pendingDeleteAction = action;
+        DeleteTargetName = targetName.Trim();
+        IsDeleteConfirmOpen = true;
+    }
 
     private string GetDeleteBlockedMessage(string categoryName, int budgetRefs, int ruleRefs, int tradeRefs, int recurringRefs, int pendingRefs)
     {

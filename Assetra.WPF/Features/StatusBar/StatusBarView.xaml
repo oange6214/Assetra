@@ -34,7 +34,7 @@
                     Fill="{Binding IsMarketOpen, Converter={StaticResource BooleanToBrushConverter}}" />
                 <TextBlock
                     VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{Binding MarketStatusText}" />
             </StackPanel>
@@ -43,8 +43,8 @@
             <TextBlock
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
-                FontSize="{StaticResource FontSizeXs}"
+                FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
+                FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{Binding ClockText}" />
 

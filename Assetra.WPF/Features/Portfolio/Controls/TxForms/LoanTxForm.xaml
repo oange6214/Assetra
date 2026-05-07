@@ -5,7 +5,6 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel}}"
@@ -17,7 +16,7 @@
         <!--  貸款名稱（共用，先填）  -->
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.LoanLabel}" />
@@ -36,11 +35,11 @@
         <StackPanel Visibility="{Binding TxTypeIsLoanBorrow, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.Amount}" />
-            <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,12"
                 Style="{StaticResource FormFieldError}"
@@ -62,11 +61,11 @@
                 <StackPanel Grid.Column="0">
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
-                    <ui:TextBox Text="{Binding TxLoanRate, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Text="{Binding TxLoanRate, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Margin="0,0,0,12"
                         Style="{StaticResource FormFieldError}"
@@ -75,26 +74,24 @@
 
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Loan.StartDate}" />
-                    <ui:CalendarDatePicker
-                        FontSize="{StaticResource FontSizeSm}"
-                        Foreground="{DynamicResource AppTextPrimary}"
+                    <DatePicker
                         MinWidth="132"
                         HorizontalContentAlignment="Left"
-                        Content="{Binding TxLoanStartDate, Converter={StaticResource DateDisplayConverter}}"
-                        Date="{Binding TxLoanStartDate, Mode=TwoWay}" />
+                        SelectedDate="{Binding TxLoanStartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource AppDatePicker}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2">
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Loan.TermMonths}" />
-                    <ui:TextBox Text="{Binding TxLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Text="{Binding TxLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Margin="0,0,0,12"
                         Style="{StaticResource FormFieldError}"
@@ -106,9 +103,9 @@
                         Background="{DynamicResource AppBackground}"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}">
+                        CornerRadius="{StaticResource Radius.Sm}">
                         <TextBlock
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Loan.RateHint}"
                             TextWrapping="Wrap" />
@@ -124,11 +121,11 @@
                 </StackPanel.Visibility>
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
-                <ui:TextBox Text="{Binding TxLoanRate, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding TxLoanRate, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Margin="0,0,0,12"
                     Style="{StaticResource FormFieldError}"
@@ -137,11 +134,11 @@
 
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Loan.TermMonths}" />
-                <ui:TextBox Text="{Binding TxLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding TxLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Margin="0,0,0,12"
                     Style="{StaticResource FormFieldError}"
@@ -150,20 +147,18 @@
 
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Loan.StartDate}" />
-                <ui:CalendarDatePicker
-                    FontSize="{StaticResource FontSizeSm}"
-                    Foreground="{DynamicResource AppTextPrimary}"
+                <DatePicker
                     MinWidth="132"
                     HorizontalContentAlignment="Left"
-                    Content="{Binding TxLoanStartDate, Converter={StaticResource DateDisplayConverter}}"
-                    Date="{Binding TxLoanStartDate, Mode=TwoWay}" />
+                    SelectedDate="{Binding TxLoanStartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource AppDatePicker}" />
                 <TextBlock
                     Margin="0,4,0,0"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="填寫年利率與期數可自動產生攤還表"
                     TextWrapping="Wrap" />
@@ -187,11 +182,11 @@
                 <StackPanel Grid.Column="0">
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Tx.Principal}" />
-                    <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Margin="0,0,0,0"
                         Style="{StaticResource FormFieldError}"
@@ -201,11 +196,11 @@
                 <StackPanel Grid.Column="2">
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Tx.InterestPaid}" />
-                    <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Style="{StaticResource FormFieldError}"
                         Text="{Binding TxInterestPaidError}"
@@ -221,11 +216,11 @@
                 </StackPanel.Visibility>
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.Principal}" />
-                <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Margin="0,0,0,12"
                     Style="{StaticResource FormFieldError}"
@@ -234,11 +229,11 @@
 
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.InterestPaid}" />
-                <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Style="{StaticResource FormFieldError}"
                     Text="{Binding TxInterestPaidError}"
@@ -246,7 +241,7 @@
             </StackPanel>
             <TextBlock
                 Margin="0,2,0,12"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{DynamicResource Portfolio.Tx.LoanRepayTotalHint}"
                 TextWrapping="Wrap" />
@@ -255,11 +250,11 @@
         <!--  手續費（選填）  -->
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Fee}" />
-        <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Margin="0,0,0,12"
             Style="{StaticResource FormFieldError}"
@@ -270,14 +265,14 @@
         <CheckBox
             Margin="0,0,0,4"
             Content="{Binding TxUseCashAccountLabel}"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextSecondary}"
             IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
 
         <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{Binding TxCashAccountLabel}" />
@@ -293,7 +288,7 @@
             </ComboBox>
             <TextBlock
                 Margin="0,0,0,12"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{DynamicResource Portfolio.Tx.LoanCashAccountHint}"
                 TextWrapping="Wrap" />
@@ -302,10 +297,10 @@
         <!--  備註  -->
         <TextBlock
             Margin="0,8,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Note}" />
-        <ui:TextBox Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
     </StackPanel>
 </UserControl>

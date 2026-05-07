@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Assetra.Core.Interfaces;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.Contracts;
@@ -17,6 +18,7 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     private readonly IPortfolioPositionFeed _portfolio;
     private readonly INotifyCollectionChanged? _positionsObservable;
     private readonly IAppSettingsService? _settings;
+    private readonly Dispatcher _dispatcher;
 
     // Color palette (assigned by order of appearance) + neutral cash brush
     private static readonly SolidColorBrush CashBrush = Brush("#6B7280");
@@ -163,6 +165,7 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         _portfolio = portfolio;
         _settings = settings;
         _localization = localization;
+        _dispatcher = Dispatcher.CurrentDispatcher;
 
         _positionsObservable = portfolio.Positions as INotifyCollectionChanged;
         if (_positionsObservable is not null)
@@ -217,9 +220,9 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
 
     private void Rebuild()
     {
-        if (System.Windows.Application.Current?.Dispatcher.CheckAccess() == false)
+        if (_dispatcher.CheckAccess() == false)
         {
-            System.Windows.Application.Current.Dispatcher.InvokeAsync(Rebuild);
+            _dispatcher.InvokeAsync(Rebuild);
             return;
         }
 

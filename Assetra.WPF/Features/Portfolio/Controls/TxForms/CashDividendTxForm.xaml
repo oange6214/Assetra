@@ -5,7 +5,6 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel}}"
     mc:Ignorable="d">
@@ -14,7 +13,7 @@
     <StackPanel Visibility="{Binding TxTypeIsCashDiv, Converter={StaticResource BooleanToVisibilityConverter}}">
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Stock}" />
@@ -28,7 +27,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock
                             Margin="0,0,8,0"
-                            FontFamily="{StaticResource FontBase}"
+                            FontFamily="{StaticResource Font.Family.Base}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppAccent}"
                             Text="{Binding Symbol}"
@@ -42,7 +41,7 @@
         <!--  輸入模式 toggle: 每股股利 vs 總股息金額  -->
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.DivInputMode}" />
@@ -64,11 +63,11 @@
         <StackPanel Visibility="{Binding TxDivIsPerShareMode, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.DivPerShare}" />
-            <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxDivPerShare, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxDivPerShare, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,12"
                 Style="{StaticResource FormFieldError}"
@@ -80,11 +79,11 @@
         <StackPanel Visibility="{Binding TxDivIsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.DivTotalAmount}" />
-            <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxDivTotalInput, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxDivTotalInput, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,12"
                 Style="{StaticResource FormFieldError}"
@@ -99,7 +98,7 @@
             Background="{DynamicResource AppBackground}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
-            CornerRadius="{StaticResource RadiusSm}"
+            CornerRadius="{StaticResource Radius.Sm}"
             Visibility="{Binding HasDivPreview, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -114,14 +113,14 @@
                 <TextBlock
                     Grid.Row="0"
                     Grid.Column="0"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{DynamicResource Portfolio.Tx.HeldShares}" />
                 <TextBlock
                     Grid.Row="0"
                     Grid.Column="1"
-                    FontFamily="{StaticResource FontBase}"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontFamily="{StaticResource Font.Family.Base}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{Binding TxDivPosition.Quantity, StringFormat={}{0:N0}}"
                     Typography.NumeralAlignment="Tabular" />
@@ -134,15 +133,15 @@
                 <TextBlock
                     Grid.Row="2"
                     Grid.Column="0"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.DivTotal}" />
                 <TextBlock
                     Grid.Row="2"
                     Grid.Column="1"
-                    FontFamily="{StaticResource FontBase}"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontFamily="{StaticResource Font.Family.Base}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppUp}"
                     Text="{Binding TxDivTotal, StringFormat={}{0:N0}}"
@@ -153,11 +152,11 @@
         <!--  手續費 (e.g. 二代健保補充費 1.91%)  -->
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Fee}" />
-        <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Margin="0,0,0,12"
             Style="{StaticResource FormFieldError}"
@@ -168,13 +167,13 @@
         <CheckBox
             Margin="0,0,0,4"
             Content="{Binding TxUseCashAccountLabel}"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextSecondary}"
             IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
         <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{Binding TxCashAccountLabel}" />
@@ -193,7 +192,7 @@
             </ComboBox>
             <TextBlock
                 Margin="0,2,0,0"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppAccent}"
                 Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
                 Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />

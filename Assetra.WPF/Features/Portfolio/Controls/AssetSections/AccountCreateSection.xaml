@@ -5,45 +5,44 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     x:Name="Root"
     mc:Ignorable="d">
 
     <StackPanel>
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeSm}"
+            FontSize="{StaticResource Font.Size.Sm}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextPrimary}"
             Text="{DynamicResource Portfolio.AssetDialog.SectionInfo}" />
         <TextBlock
             Margin="0,0,0,12"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextMuted}"
             Text="{DynamicResource Portfolio.AssetDialog.AccountInfoHint}"
             TextWrapping="Wrap" />
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Account.Subtype}" />
-        <ui:TextBox
+        <TextBox
             Margin="0,0,0,10"
             Text="{Binding AddSubtype, UpdateSourceTrigger=PropertyChanged}"
             ToolTip="{DynamicResource Portfolio.Account.SubtypeHint}" />
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Cash.Name}" />
-        <ui:TextBox Margin="0,0,0,8" Text="{Binding AddAccountName, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox Margin="0,0,0,8" Text="{Binding AddAccountName, UpdateSourceTrigger=PropertyChanged}" />
 
         <TextBlock
             Margin="0,0,0,12"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextMuted}"
             Text="{DynamicResource Portfolio.Cash.AddHint}"
             TextWrapping="Wrap" />
@@ -54,60 +53,58 @@
             Background="{DynamicResource AppBackground}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
-            CornerRadius="{StaticResource RadiusSm}">
+            CornerRadius="{StaticResource Radius.Sm}">
             <StackPanel>
                 <TextBlock
                     Margin="0,0,0,2"
-                    FontSize="{StaticResource FontSizeSm}"
+                    FontSize="{StaticResource Font.Size.Sm}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Portfolio.AssetDialog.InitialRecord}" />
                 <TextBlock
                     Margin="0,0,0,10"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{DynamicResource Portfolio.AssetDialog.InitialRecordOptionalHint}"
                     TextWrapping="Wrap" />
                 <CheckBox IsChecked="{Binding AddInitialDepositEnabled, Mode=TwoWay}">
                     <TextBlock
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Portfolio.Cash.InitialDeposit.Toggle}" />
                 </CheckBox>
                 <StackPanel Margin="0,12,0,0" Visibility="{Binding AddInitialDepositEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Cash.InitialDeposit.Amount}" />
-                    <ui:TextBox
+                    <TextBox
                         Margin="0,0,0,10"
                         behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                         Text="{Binding AddInitialDepositAmount, UpdateSourceTrigger=PropertyChanged}" />
 
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Cash.InitialDeposit.Date}" />
-                    <ui:CalendarDatePicker
+                    <DatePicker
                         Margin="0,0,0,10"
-                        FontSize="{StaticResource FontSizeSm}"
-                        Foreground="{DynamicResource AppTextPrimary}"
                         MinWidth="132"
                         HorizontalContentAlignment="Left"
-                        Content="{Binding AddInitialDepositDate, Converter={StaticResource DateDisplayConverter}}"
-                        Date="{Binding AddInitialDepositDate, Mode=TwoWay}" />
+                        SelectedDate="{Binding AddInitialDepositDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource AppDatePicker}" />
 
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Tx.Note}" />
-                    <ui:TextBox
+                    <TextBox
                         Height="64"
                         AcceptsReturn="True"
                         Text="{Binding AddInitialDepositNote, UpdateSourceTrigger=PropertyChanged}"

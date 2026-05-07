@@ -5,7 +5,6 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel}}"
@@ -16,7 +15,7 @@
         <!--  Asset type selector (ComboBox)  -->
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.AssetType}" />
@@ -40,7 +39,7 @@
             <!--  Dual-mode toggle: full Buy trade vs. metadata-only (Task 18 Option B) — Stock only  -->
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.BuyMode}" />
@@ -71,12 +70,12 @@
 
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Symbol}" />
             <Grid Margin="0,0,0,12">
-                <ui:TextBox
+                <TextBox
                     x:Name="TxSymbolBox"
                     IsEnabled="{Binding AreEconomicFieldsEditable}"
                     Text="{Binding AddAssetDialog.AddSymbol, UpdateSourceTrigger=PropertyChanged}" />
@@ -91,7 +90,7 @@
                         Background="{DynamicResource AppSurface}"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}">
+                        CornerRadius="{StaticResource Radius.Sm}">
                         <ListBox
                             MaxHeight="240"
                             Background="Transparent"
@@ -121,7 +120,7 @@
                 <!--  價格輸入模式 toggle: 單價 vs 總額 (AscentPortfolio pattern)  -->
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.PriceMode}" />
@@ -156,11 +155,11 @@
                 <StackPanel d:Visibility="Visible" Visibility="{Binding TxBuyIsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.AddPrice}" />
-                    <ui:TextBox
+                    <TextBox
                         behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
                         Text="{Binding AddAssetDialog.AddPrice, UpdateSourceTrigger=PropertyChanged}" />
@@ -170,7 +169,7 @@
                         Visibility="{Binding AddAssetDialog.AddPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
                     <TextBlock
                         Margin="0,2,0,8"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{Binding AddAssetDialog.ClosePriceHint}"
                         Visibility="{Binding AddAssetDialog.ClosePriceHint, Converter={StaticResource StringToVisibilityConverter}}" />
@@ -180,11 +179,11 @@
                 <StackPanel d:Visibility="Collapsed" Visibility="{Binding TxBuyIsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Tx.TotalAmount}" />
-                    <ui:TextBox
+                    <TextBox
                         behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
                         Text="{Binding TxBuyTotalCost, UpdateSourceTrigger=PropertyChanged}" />
@@ -197,11 +196,11 @@
 
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.AddQuantity}" />
-                <ui:TextBox
+                <TextBox
                     behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                     IsEnabled="{Binding AreEconomicFieldsEditable}"
                     Text="{Binding AddAssetDialog.AddQuantity, UpdateSourceTrigger=PropertyChanged}" />
@@ -213,7 +212,7 @@
 
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.CommissionDiscount}" />
@@ -228,12 +227,12 @@
                         <ColumnDefinition Width="80" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <ui:TextBox Grid.Column="0" Text="{Binding TxCommissionDiscount, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Grid.Column="0" Text="{Binding TxCommissionDiscount, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Grid.Column="1"
                         Margin="8,0,0,0"
                         VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource Portfolio.Tx.CommissionDiscountHint}" />
                 </Grid>
@@ -244,13 +243,13 @@
                             <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                         </MultiBinding>
                     </StackPanel.Visibility>
-                    <ui:TextBox
+                    <TextBox
                         Width="96"
                         HorizontalAlignment="Left"
                         Text="{Binding TxCommissionDiscount, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Margin="0,6,0,0"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource Portfolio.Tx.CommissionDiscountHint}"
                         TextWrapping="Wrap" />
@@ -268,7 +267,7 @@
                     Background="{DynamicResource AppBackground}"
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusSm}"
+                    CornerRadius="{StaticResource Radius.Sm}"
                     Visibility="{Binding AddAssetDialog.HasAddPreview, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -285,28 +284,28 @@
                         <TextBlock
                             Grid.Row="0"
                             Grid.Column="0"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Add.GrossAmount}" />
                         <TextBlock
                             Grid.Row="0"
                             Grid.Column="1"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{Binding AddAssetDialog.AddGrossAmount, StringFormat={}{0:N0}}"
                             Typography.NumeralAlignment="Tabular" />
                         <TextBlock
                             Grid.Row="1"
                             Grid.Column="0"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Add.Commission}" />
                         <TextBlock
                             Grid.Row="1"
                             Grid.Column="1"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppDown}"
                             Text="{Binding AddAssetDialog.AddCommission, StringFormat=+{0:N0}}"
                             Typography.NumeralAlignment="Tabular" />
@@ -319,15 +318,15 @@
                         <TextBlock
                             Grid.Row="3"
                             Grid.Column="0"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.Add.TotalCost}" />
                         <TextBlock
                             Grid.Row="3"
                             Grid.Column="1"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding AddAssetDialog.AddTotalCost, StringFormat={}{0:N0}}"
@@ -336,15 +335,15 @@
                             Grid.Row="4"
                             Grid.Column="0"
                             Margin="0,2,0,0"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Add.CostPerShare}" />
                         <TextBlock
                             Grid.Row="4"
                             Grid.Column="1"
                             Margin="0,2,0,0"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{Binding AddAssetDialog.AddCostPerShare, StringFormat={}{0:F4}}"
                             Typography.NumeralAlignment="Tabular" />
@@ -357,18 +356,18 @@
         <StackPanel Visibility="{Binding TxBuyIsNonStock, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Dialog.AddName}" />
-            <ui:TextBox Margin="0,0,0,12" Text="{Binding AddAssetDialog.AddName, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Margin="0,0,0,12" Text="{Binding AddAssetDialog.AddName, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Dialog.AddCost}" />
-            <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding AddAssetDialog.AddCost, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding AddAssetDialog.AddCost, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Style="{StaticResource FormFieldError}"
                 Text="{Binding AddAssetDialog.AddCostError}"
@@ -379,29 +378,29 @@
         <StackPanel Visibility="{Binding TxBuyIsCrypto, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Dialog.CryptoSymbol}" />
-            <ui:TextBox Margin="0,0,0,12" Text="{Binding AddAssetDialog.AddCryptoSymbol, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Margin="0,0,0,12" Text="{Binding AddAssetDialog.AddCryptoSymbol, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Dialog.CryptoQty}" />
-            <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding AddAssetDialog.AddCryptoQty, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding AddAssetDialog.AddCryptoQty, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Style="{StaticResource FormFieldError}"
                 Text="{Binding AddAssetDialog.AddCryptoQtyError}"
                 Visibility="{Binding AddAssetDialog.AddCryptoQtyError, Converter={StaticResource StringToVisibilityConverter}}" />
             <TextBlock
                 Margin="0,12,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Dialog.CryptoPrice}" />
-            <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding AddAssetDialog.AddCryptoPrice, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding AddAssetDialog.AddCryptoPrice, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Style="{StaticResource FormFieldError}"
                 Text="{Binding AddAssetDialog.AddCryptoPriceError}"
@@ -424,18 +423,18 @@
             <!--  手續費 (manual override; 留空 → 走 TxCommissionDiscount 自動計算)  -->
             <TextBlock
                 Margin="0,12,0,4"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.Fee}" />
-            <ui:TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Style="{StaticResource FormFieldError}"
                 Text="{Binding TxFeeError}"
                 Visibility="{Binding TxFeeError, Converter={StaticResource StringToVisibilityConverter}}" />
             <TextBlock
                 Margin="0,2,0,12"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{DynamicResource Portfolio.Tx.FeeOverrideHint}"
                 TextWrapping="Wrap" />
@@ -444,13 +443,13 @@
             <CheckBox
                 Margin="0,0,0,4"
                 Content="{Binding TxUseCashAccountLabel}"
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppTextSecondary}"
                 IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
             <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{Binding TxCashAccountLabel}" />
@@ -469,7 +468,7 @@
                 </ComboBox>
                 <TextBlock
                     Margin="0,2,0,0"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppAccent}"
                     Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
                     Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />

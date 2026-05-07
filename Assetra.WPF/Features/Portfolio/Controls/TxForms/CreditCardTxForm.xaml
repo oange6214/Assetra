@@ -6,7 +6,6 @@
     xmlns:controls="clr-namespace:Assetra.WPF.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     mc:Ignorable="d">
 
     <StackPanel Visibility="{Binding TxTypeIsCreditCard, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -16,9 +15,9 @@
             Background="{DynamicResource AppBackground}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
-            CornerRadius="{StaticResource RadiusSm}">
+            CornerRadius="{StaticResource Radius.Sm}">
             <TextBlock
-                FontSize="{StaticResource FontSizeXs}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{Binding TxCreditCardHint}"
                 TextWrapping="Wrap" />
@@ -26,7 +25,7 @@
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.CreditCard}" />
@@ -47,16 +46,16 @@
             <StackPanel Grid.Column="0">
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.Amount}" />
-                <ui:TextBox
+                <TextBox
                     Margin="0,0,0,6"
                     behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                     Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppDown}"
                     Text="{Binding TxAmountError}"
                     Visibility="{Binding TxAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
@@ -65,7 +64,7 @@
             <StackPanel Grid.Column="2" Visibility="{Binding TxTypeIsCreditCardPayment, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.CreditCardPaymentAccount}" />
@@ -79,10 +78,10 @@
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Note}" />
-        <ui:TextBox Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
     </StackPanel>
 </UserControl>

@@ -6,7 +6,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     d:DataContext="{d:DesignInstance Type={x:Type vm:DashboardViewModel}}"
     mc:Ignorable="d">
@@ -45,12 +44,12 @@
                     CornerRadius="{StaticResource Card.Radius}">
                     <StackPanel>
                         <TextBlock
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Header.NetWorth}" />
                         <TextBlock
                             Margin="0,4,0,0"
-                            FontSize="{StaticResource FontSize2xl}"
+                            FontSize="{StaticResource Font.Size.2xl}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding NetWorthDisplay}" />
@@ -62,13 +61,13 @@
                             Visibility="{Binding HasDayPnl, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock
                                 VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeSm}"
+                                FontSize="{StaticResource Font.Size.Sm}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Portfolio.Header.DailyPnL}" />
                             <TextBlock
                                 Margin="4,0,0,0"
                                 VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeBase}"
+                                FontSize="{StaticResource Font.Size.Base}"
                                 FontWeight="SemiBold">
                                 <TextBlock.Style>
                                     <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
@@ -98,12 +97,12 @@
                     CornerRadius="{StaticResource Card.Radius}">
                     <StackPanel>
                         <TextBlock
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.PnL}" />
                         <TextBlock
                             Margin="0,6,0,0"
-                            FontSize="{StaticResource FontSizeXl}"
+                            FontSize="{StaticResource Font.Size.Xl}"
                             FontWeight="SemiBold"
                             Text="{Binding TotalPnlDisplay}">
                             <TextBlock.Style>
@@ -119,7 +118,7 @@
                         </TextBlock>
                         <TextBlock
                             Margin="0,2,0,0"
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{Binding TotalPnlPercent, StringFormat={}{0:+0.00;-0.00}%}" />
                     </StackPanel>
@@ -135,12 +134,12 @@
                     CornerRadius="{StaticResource Card.Radius}">
                     <StackPanel>
                         <TextBlock
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.TotalAssets}" />
                         <TextBlock
                             Margin="0,6,0,0"
-                            FontSize="{StaticResource FontSizeXl}"
+                            FontSize="{StaticResource Font.Size.Xl}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding TotalAssetsDisplay}" />
@@ -157,18 +156,18 @@
                     CornerRadius="{StaticResource Card.Radius}">
                     <StackPanel>
                         <TextBlock
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Header.Liabilities}" />
                         <TextBlock
                             Margin="0,6,0,0"
-                            FontSize="{StaticResource FontSizeXl}"
+                            FontSize="{StaticResource Font.Size.Xl}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppDown}"
                             Text="{Binding TotalLiabilitiesDisplay}" />
                         <TextBlock
                             Margin="0,2,0,0"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}">
                             <Run Text="{DynamicResource Portfolio.Liability.DebtRatio}" />
                             <Run Text=" " />
@@ -198,7 +197,7 @@
                     <TextBlock
                         Grid.Row="0"
                         Margin="0,0,0,8"
-                        FontSize="{StaticResource FontSizeMd}"
+                        FontSize="{StaticResource Font.Size.Md}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Dashboard.TenDayTrend}" />
@@ -233,15 +232,16 @@
                         <DockPanel Margin="0,0,0,8">
                             <TextBlock
                                 DockPanel.Dock="Left"
-                                FontSize="{StaticResource FontSizeMd}"
+                                FontSize="{StaticResource Font.Size.Md}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{DynamicResource Dashboard.TopHoldings}" />
-                            <ui:HyperlinkButton
+                            <Button
                                 HorizontalAlignment="Right"
                                 Command="{Binding NavigateToPositionsCommand}"
                                 Content="{DynamicResource Dashboard.ViewDetail}"
-                                DockPanel.Dock="Right" />
+                                DockPanel.Dock="Right"
+                                Style="{StaticResource AppGhostButton}" />
                         </DockPanel>
 
                         <ItemsControl ItemsSource="{Binding TopPositions}">
@@ -259,12 +259,12 @@
 
                                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                                 <TextBlock
-                                                    FontSize="{StaticResource FontSizeMd}"
+                                                    FontSize="{StaticResource Font.Size.Md}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{Binding Symbol}" />
                                                 <TextBlock
-                                                    FontSize="{StaticResource FontSizeSm}"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{Binding Name}"
                                                     TextTrimming="CharacterEllipsis" />
@@ -276,7 +276,7 @@
                                                 VerticalAlignment="Center">
                                                 <TextBlock
                                                     HorizontalAlignment="Right"
-                                                    FontSize="{StaticResource FontSizeSm}"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
                                                     Text="{Binding DayChangePercent, StringFormat={}{0:+0.00;-0.00;0.00}%}">
                                                     <TextBlock.Style>
                                                         <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
@@ -294,13 +294,13 @@
                                                 </TextBlock>
                                                 <TextBlock
                                                     HorizontalAlignment="Right"
-                                                    FontSize="{StaticResource FontSizeMd}"
+                                                    FontSize="{StaticResource Font.Size.Md}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{Binding MarketValue, StringFormat=NT\{0:N0\}}" />
                                                 <TextBlock
                                                     HorizontalAlignment="Right"
-                                                    FontSize="{StaticResource FontSizeSm}"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{Binding CurrentPrice, StringFormat=NT\{0:N2\}}" />
                                             </StackPanel>
@@ -324,15 +324,16 @@
                         <DockPanel Margin="0,0,0,8">
                             <TextBlock
                                 DockPanel.Dock="Left"
-                                FontSize="{StaticResource FontSizeMd}"
+                                FontSize="{StaticResource Font.Size.Md}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{DynamicResource Dashboard.RecentTrades}" />
-                            <ui:HyperlinkButton
+                            <Button
                                 HorizontalAlignment="Right"
                                 Command="{Binding NavigateToTradesCommand}"
                                 Content="{DynamicResource Dashboard.ViewDetail}"
-                                DockPanel.Dock="Right" />
+                                DockPanel.Dock="Right"
+                                Style="{StaticResource AppGhostButton}" />
                         </DockPanel>
 
                         <ItemsControl ItemsSource="{Binding RecentTrades}">
@@ -359,13 +360,13 @@
 
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                 <TextBlock
-                                                    FontSize="{StaticResource FontSizeMd}"
+                                                    FontSize="{StaticResource Font.Size.Md}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{Binding DisplayAsset}"
                                                     TextTrimming="CharacterEllipsis" />
                                                 <TextBlock
-                                                    FontSize="{StaticResource FontSizeSm}"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{Binding TradeDateLocal, StringFormat={}{0:MMM dd}}" />
                                             </StackPanel>
@@ -373,7 +374,7 @@
                                             <TextBlock
                                                 Grid.Column="2"
                                                 VerticalAlignment="Center"
-                                                FontSize="{StaticResource FontSizeMd}"
+                                                FontSize="{StaticResource Font.Size.Md}"
                                                 FontWeight="SemiBold"
                                                 Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}">
                                                 <TextBlock.Style>

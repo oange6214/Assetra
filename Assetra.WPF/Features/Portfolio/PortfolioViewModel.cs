@@ -19,7 +19,6 @@ using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using Serilog;
 using SkiaSharp;
-using Wpf.Ui.Appearance;
 
 namespace Assetra.WPF.Features.Portfolio;
 
@@ -59,6 +58,11 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
     public ObservableCollection<TradeRowViewModel> Trades { get; } = [];
     public ObservableCollection<CashAccountRowViewModel> CashAccounts { get; } = [];
     public ObservableCollection<LiabilityRowViewModel> Liabilities { get; } = [];
+
+    // Tab-specific view models are built by the shell and attached once all
+    // singleton VMs exist, avoiding circular construction inside PortfolioViewModel.
+    public DashboardViewModel? Dashboard { get; private set; }
+    public Controls.AllocationViewModel? AllocationAnalysis { get; private set; }
 
     // Asset allocation (pie chart) — owned by AllocationPanelViewModel.
     public AllocationPanelViewModel Allocation { get; }
@@ -417,6 +421,19 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
             .ObserveOn(ui.Scheduler)
             .Subscribe(UpdatePrices)
             .DisposeWith(_disposables);
+    }
+
+    public void AttachTabViewModels(
+        DashboardViewModel dashboard,
+        Controls.AllocationViewModel allocationAnalysis)
+    {
+        ArgumentNullException.ThrowIfNull(dashboard);
+        ArgumentNullException.ThrowIfNull(allocationAnalysis);
+
+        Dashboard = dashboard;
+        AllocationAnalysis = allocationAnalysis;
+        OnPropertyChanged(nameof(Dashboard));
+        OnPropertyChanged(nameof(AllocationAnalysis));
     }
 
     public PortfolioViewModel(

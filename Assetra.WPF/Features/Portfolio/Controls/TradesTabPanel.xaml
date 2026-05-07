@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
@@ -28,7 +28,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="Transparent"
                             BorderThickness="1"
-                            CornerRadius="{StaticResource RadiusSm}">
+                            CornerRadius="{StaticResource Radius.Sm}">
                             <ContentPresenter
                                 x:Name="Icon"
                                 HorizontalAlignment="Center"
@@ -84,9 +84,9 @@
                         VerticalAlignment="Center"
                         IsChecked="{Binding DivCalendar.IsExpanded, Mode=TwoWay}"
                         Style="{StaticResource DividendCalendarToggleButtonStyle}">
-                        <ui:SymbolIcon FontSize="10" Foreground="{DynamicResource AppTextMuted}">
-                            <ui:SymbolIcon.Style>
-                                <Style TargetType="ui:SymbolIcon">
+                        <ds:AppIcon FontSize="10" Foreground="{DynamicResource AppTextMuted}">
+                            <ds:AppIcon.Style>
+                                <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
                                     <Setter Property="Symbol" Value="ChevronUp24" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding DivCalendar.IsExpanded}" Value="False">
@@ -94,13 +94,13 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </ui:SymbolIcon.Style>
-                        </ui:SymbolIcon>
+                            </ds:AppIcon.Style>
+                        </ds:AppIcon>
                     </ToggleButton>
                     <TextBlock
                         Margin="4,0,0,0"
                         VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeSm}"
+                        FontSize="{StaticResource Font.Size.Sm}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.DivCalendar.Title}" />
@@ -131,25 +131,25 @@
                         Margin="12,0,0,0"
                         VerticalAlignment="Center"
                         DockPanel.Dock="Right"
-                        FontFamily="{StaticResource FontBase}"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{Binding TradeFilter.TradePageDisplay}"
                         Typography.NumeralAlignment="Tabular" />
 
                     <!--  清除篩選（有啟用中篩選時才顯示）  -->
-                    <ui:Button
+                    <Button
                         Height="36"
                         Margin="8,0,0,0"
                         Padding="8,0"
                         VerticalAlignment="Center"
                         VerticalContentAlignment="Center"
-                        Appearance="Secondary"
+                        Style="{StaticResource AppSecondaryButton}"
                         Command="{Binding TradeFilter.ClearTradeFiltersCommand}"
                         DockPanel.Dock="Right"
                         Visibility="{Binding TradeFilter.HasActiveTradeFilter, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                            <ui:SymbolIcon
+                            <ds:AppIcon
                                 Margin="0,0,4,0"
                                 VerticalAlignment="Center"
                                 FontSize="10"
@@ -157,11 +157,11 @@
                                 Symbol="Dismiss24" />
                             <TextBlock
                                 VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource Portfolio.Filter.Clear}" />
                         </StackPanel>
-                    </ui:Button>
+                    </Button>
 
                     <!--  資產 — ToggleButton + Popup 多選（依投資/現金/負債分組）  -->
                     <Grid
@@ -183,9 +183,9 @@
                             BorderThickness="1"
                             Content="{Binding TradeFilter.TradeAssetFiltersDisplay}"
                             Cursor="Hand"
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextPrimary}" />
-                        <ui:SymbolIcon
+                        <ds:AppIcon
                             Width="12"
                             Height="12"
                             Margin="0,0,10,0"
@@ -207,7 +207,7 @@
                                 Background="{DynamicResource AppSurface}"
                                 BorderBrush="{DynamicResource AppBorder}"
                                 BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusSm}">
+                                CornerRadius="{StaticResource Radius.Sm}">
                                 <Grid Margin="8">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
@@ -223,13 +223,13 @@
                                         Background="{DynamicResource AppBackground}"
                                         BorderBrush="{DynamicResource AppBorder}"
                                         BorderThickness="1"
-                                        CornerRadius="{StaticResource RadiusSm}">
+                                        CornerRadius="{StaticResource Radius.Sm}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <ui:SymbolIcon
+                                            <ds:AppIcon
                                                 Grid.Column="0"
                                                 Width="12"
                                                 Height="12"
@@ -238,27 +238,27 @@
                                                 FontSize="12"
                                                 Foreground="{DynamicResource AppTextMuted}"
                                                 Symbol="Search24" />
-                                            <ui:TextBox
+                                            <TextBox
                                                 Grid.Column="1"
                                                 Margin="4,0,8,0"
                                                 VerticalContentAlignment="Center"
                                                 Background="Transparent"
                                                 BorderThickness="0"
-                                                FontSize="{StaticResource FontSizeSm}"
+                                                FontSize="{StaticResource Font.Size.Sm}"
                                                 Foreground="{DynamicResource AppTextPrimary}"
                                                 Text="{Binding TradeFilter.TradeAssetFiltersSearch, UpdateSourceTrigger=PropertyChanged}" />
                                         </Grid>
                                     </Border>
 
-                                    <ui:Button
+                                    <Button
                                         Grid.Row="1"
                                         Height="36"
                                         Margin="0,0,0,8"
                                         HorizontalContentAlignment="Center"
-                                        Appearance="Secondary"
+                                        Style="{StaticResource AppSecondaryButton}"
                                         Command="{Binding TradeFilter.ClearTradeAssetFiltersCommand}"
                                         Content="{DynamicResource Portfolio.Filter.ClearInPopup}"
-                                        FontSize="{StaticResource FontSizeSm}" />
+                                        FontSize="{StaticResource Font.Size.Sm}" />
 
                                     <!--  分組清單（投資/現金/負債 header + 勾選 item）  -->
                                     <ScrollViewer
@@ -276,7 +276,7 @@
                                                     <CheckBox
                                                         Margin="4,4"
                                                         Content="{Binding Symbol}"
-                                                        FontSize="{StaticResource FontSizeSm}"
+                                                        FontSize="{StaticResource Font.Size.Sm}"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         IsChecked="{Binding IsChecked, Mode=TwoWay}" />
                                                 </DataTemplate>
@@ -287,7 +287,7 @@
                                                         <DataTemplate>
                                                             <TextBlock
                                                                 Margin="4,8,4,2"
-                                                                FontSize="{StaticResource FontSizeXs}"
+                                                                FontSize="{StaticResource Font.Size.Xs}"
                                                                 FontWeight="SemiBold"
                                                                 Foreground="{DynamicResource AppTextMuted}"
                                                                 Text="{Binding Name}" />
@@ -322,10 +322,10 @@
                             BorderThickness="1"
                             Content="{Binding TradeFilter.TradeTypeFiltersDisplay}"
                             Cursor="Hand"
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextPrimary}" />
                         <!--  Caret (chevron)  -->
-                        <ui:SymbolIcon
+                        <ds:AppIcon
                             Width="12"
                             Height="12"
                             Margin="0,0,10,0"
@@ -348,7 +348,7 @@
                                 Background="{DynamicResource AppSurface}"
                                 BorderBrush="{DynamicResource AppBorder}"
                                 BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusSm}">
+                                CornerRadius="{StaticResource Radius.Sm}">
                                 <Grid Margin="8">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
@@ -367,13 +367,13 @@
                                         Background="{DynamicResource AppBackground}"
                                         BorderBrush="{DynamicResource AppBorder}"
                                         BorderThickness="1"
-                                        CornerRadius="{StaticResource RadiusSm}">
+                                        CornerRadius="{StaticResource Radius.Sm}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <ui:SymbolIcon
+                                            <ds:AppIcon
                                                 Grid.Column="0"
                                                 Width="12"
                                                 Height="12"
@@ -382,28 +382,28 @@
                                                 FontSize="12"
                                                 Foreground="{DynamicResource AppTextMuted}"
                                                 Symbol="Search24" />
-                                            <ui:TextBox
+                                            <TextBox
                                                 Grid.Column="1"
                                                 Margin="4,0,8,0"
                                                 VerticalContentAlignment="Center"
                                                 Background="Transparent"
                                                 BorderThickness="0"
-                                                FontSize="{StaticResource FontSizeSm}"
+                                                FontSize="{StaticResource Font.Size.Sm}"
                                                 Foreground="{DynamicResource AppTextPrimary}"
                                                 Text="{Binding TradeFilter.TradeTypeFiltersSearch, UpdateSourceTrigger=PropertyChanged}" />
                                         </Grid>
                                     </Border>
 
                                     <!--  Clear filters 按鈕  -->
-                                    <ui:Button
+                                    <Button
                                         Grid.Row="1"
                                         Height="36"
                                         Margin="0,0,0,8"
                                         HorizontalContentAlignment="Center"
-                                        Appearance="Secondary"
+                                        Style="{StaticResource AppSecondaryButton}"
                                         Command="{Binding TradeFilter.ClearTradeTypeFiltersCommand}"
                                         Content="{DynamicResource Portfolio.Filter.ClearInPopup}"
-                                        FontSize="{StaticResource FontSizeSm}" />
+                                        FontSize="{StaticResource Font.Size.Sm}" />
 
                                     <!--  勾選清單（search text 過濾後的 view）  -->
                                     <ScrollViewer
@@ -416,7 +416,7 @@
                                                     <CheckBox
                                                         Margin="4,4"
                                                         Content="{Binding Label}"
-                                                        FontSize="{StaticResource FontSizeSm}"
+                                                        FontSize="{StaticResource Font.Size.Sm}"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         IsChecked="{Binding IsChecked, Mode=TwoWay}" />
                                                 </DataTemplate>
@@ -476,22 +476,22 @@
                 </ListBox.Style>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <ui:Button
+                        <Button
                             Margin="0,0,0,10"
                             Padding="0"
                             HorizontalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="Transparent"
                             BorderThickness="0"
                             Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}">
-                            <ui:Card Padding="14,12">
+                            <Border Style="{StaticResource FormCard}" Padding="14,12">
                                 <StackPanel>
                                     <DockPanel LastChildFill="True">
                                         <TextBlock
                                             DockPanel.Dock="Left"
-                                            FontFamily="{StaticResource FontBase}"
-                                            FontSize="{StaticResource FontSizeXs}"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{Binding TradeDateLocal, StringFormat=yyyy/MM/dd HH:mm}"
                                             Typography.NumeralAlignment="Tabular" />
@@ -499,18 +499,18 @@
                                             Margin="8,0,0,0"
                                             Padding="6,2"
                                             Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
-                                            CornerRadius="{StaticResource RadiusSm}"
+                                            CornerRadius="{StaticResource Radius.Sm}"
                                             DockPanel.Dock="Right">
                                             <TextBlock
                                                 HorizontalAlignment="Center"
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppTextOnAccent}"
                                                 Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}"
                                                 TextAlignment="Center" />
                                         </Border>
                                         <TextBlock
-                                            FontSize="{StaticResource FontSizeSm}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{Binding DisplayAsset}"
@@ -520,36 +520,36 @@
                                     <WrapPanel Margin="0,10,0,0" ItemWidth="150">
                                         <StackPanel Margin="0,0,12,8">
                                             <TextBlock
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 Foreground="{DynamicResource AppTextMuted}"
                                                 Text="{DynamicResource Portfolio.Shares}" />
                                             <TextBlock
-                                                FontFamily="{StaticResource FontBase}"
-                                                FontSize="{StaticResource FontSizeSm}"
+                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                FontSize="{StaticResource Font.Size.Sm}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{Binding DisplayQuantityText}"
                                                 Typography.NumeralAlignment="Tabular" />
                                         </StackPanel>
                                         <StackPanel Margin="0,0,12,8">
                                             <TextBlock
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 Foreground="{DynamicResource AppTextMuted}"
                                                 Text="{DynamicResource Portfolio.TradeHistory.UnitPrice}" />
                                             <TextBlock
-                                                FontFamily="{StaticResource FontBase}"
-                                                FontSize="{StaticResource FontSizeSm}"
+                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                FontSize="{StaticResource Font.Size.Sm}"
                                                 Foreground="{DynamicResource AppTextPrimary}"
                                                 Text="{Binding Price, Converter={StaticResource CurrencyConverter}, ConverterParameter=price-dash}"
                                                 Typography.NumeralAlignment="Tabular" />
                                         </StackPanel>
                                         <StackPanel Margin="0,0,12,8">
                                             <TextBlock
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 Foreground="{DynamicResource AppTextMuted}"
                                                 Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
                                             <TextBlock
-                                                FontFamily="{StaticResource FontBase}"
-                                                FontSize="{StaticResource FontSizeSm}"
+                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                FontSize="{StaticResource Font.Size.Sm}"
                                                 FontWeight="SemiBold"
                                                 Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}"
                                                 Typography.NumeralAlignment="Tabular">
@@ -570,12 +570,12 @@
                                         </StackPanel>
                                         <StackPanel Margin="0,0,12,8">
                                             <TextBlock
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 Foreground="{DynamicResource AppTextMuted}"
                                                 Text="{DynamicResource Portfolio.TradeHistory.Commission}" />
                                             <TextBlock
-                                                FontFamily="{StaticResource FontBase}"
-                                                FontSize="{StaticResource FontSizeSm}"
+                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                FontSize="{StaticResource Font.Size.Sm}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{Binding CommissionDisplay}"
                                                 Typography.NumeralAlignment="Tabular" />
@@ -583,13 +583,13 @@
                                     </WrapPanel>
 
                                 </StackPanel>
-                            </ui:Card>
-                        </ui:Button>
+                            </Border>
+                        </Button>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <ui:DataGrid
+            <DataGrid
                 AlternationCount="2"
                 AutoGenerateColumns="False"
                 Background="{DynamicResource AppBackground}"
@@ -599,17 +599,17 @@
                 CanUserReorderColumns="False"
                 CanUserResizeColumns="False"
                 CanUserSortColumns="True"
-                ColumnHeaderHeight="{StaticResource DataGridHeaderHeight}"
+                ColumnHeaderHeight="{StaticResource DataGrid.HeaderHeight}"
                 EnableRowVirtualization="True"
-                FontFamily="{StaticResource FontBase}"
-                FontSize="{StaticResource FontSizeSm}"
+                FontFamily="{StaticResource Font.Family.Base}"
+                FontSize="{StaticResource Font.Size.Sm}"
                 Foreground="{DynamicResource AppTextPrimary}"
                 GridLinesVisibility="None"
                 HeadersVisibility="Column"
                 HorizontalScrollBarVisibility="Auto"
                 IsReadOnly="True"
                 ItemsSource="{Binding TradeFilter.TradesView}"
-                RowHeight="{StaticResource DataGridRowHeight}"
+                RowHeight="{StaticResource DataGrid.RowHeight}"
                 SelectionMode="Single"
                 VirtualizingPanel.IsVirtualizing="True"
                 VirtualizingPanel.VirtualizationMode="Recycling">
@@ -657,8 +657,8 @@
                             <DataTemplate>
                                 <TextBlock
                                     VerticalAlignment="Center"
-                                    FontFamily="{StaticResource FontBase}"
-                                    FontSize="{StaticResource FontSizeSm}"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
                                     Foreground="{DynamicResource AppTextSecondary}"
                                     Text="{Binding TradeDateLocal, StringFormat=yyyy/MM/dd HH:mm}"
                                     Typography.NumeralAlignment="Tabular" />
@@ -676,7 +676,7 @@
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
-                                <Setter Property="FontSize" Value="{StaticResource FontSizeSm}" />
+                                <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
                                 <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
                                 <Setter Property="VerticalAlignment" Value="Center" />
                                 <Setter Property="TextTrimming" Value="CharacterEllipsis" />
@@ -701,11 +701,11 @@
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                     Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
-                                    CornerRadius="{StaticResource RadiusSm}">
+                                    CornerRadius="{StaticResource Radius.Sm}">
                                     <TextBlock
                                         HorizontalAlignment="Center"
-                                        FontFamily="{StaticResource FontBase}"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextOnAccent}"
                                         Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}"
@@ -733,8 +733,8 @@
                                 <TextBlock
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
-                                    FontFamily="{StaticResource FontBase}"
-                                    FontSize="{StaticResource FontSizeSm}"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{Binding Price, Converter={StaticResource CurrencyConverter}, ConverterParameter=price-dash}"
                                     Typography.NumeralAlignment="Tabular" />
@@ -760,8 +760,8 @@
                                 <TextBlock
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
-                                    FontFamily="{StaticResource FontBase}"
-                                    FontSize="{StaticResource FontSizeSm}"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
                                     Foreground="{DynamicResource AppTextSecondary}"
                                     Text="{Binding DisplayQuantityText}"
                                     Typography.NumeralAlignment="Tabular" />
@@ -787,8 +787,8 @@
                                 <TextBlock
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
-                                    FontFamily="{StaticResource FontBase}"
-                                    FontSize="{StaticResource FontSizeSm}"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
                                     FontWeight="SemiBold"
                                     Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}"
                                     Typography.NumeralAlignment="Tabular">
@@ -829,8 +829,8 @@
                                 <TextBlock
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
-                                    FontFamily="{StaticResource FontBase}"
-                                    FontSize="{StaticResource FontSizeSm}"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
                                     Foreground="{DynamicResource AppTextSecondary}"
                                     Text="{Binding CommissionDisplay}"
                                     Typography.NumeralAlignment="Tabular" />
@@ -839,7 +839,7 @@
                     </DataGridTemplateColumn>
 
                 </DataGrid.Columns>
-            </ui:DataGrid>
+            </DataGrid>
 
             <!--  Empty state  -->
             <Border Visibility="{Binding HasNoTrades, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -850,11 +850,11 @@
                     <TextBlock
                         Margin="0,0,0,8"
                         HorizontalAlignment="Center"
-                        FontSize="{StaticResource FontSize2xl}"
+                        FontSize="{StaticResource Font.Size.2xl}"
                         Text="&#x1F4CB;" />
                     <TextBlock
                         HorizontalAlignment="Center"
-                        FontSize="{StaticResource FontSizeSm}"
+                        FontSize="{StaticResource Font.Size.Sm}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.TradeHistory.Empty}" />
                 </StackPanel>
@@ -893,7 +893,7 @@
                         </ComboBox>
                         <TextBlock
                             VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{Binding TradeFilter.TradePageDisplay}" />
                     </StackPanel>
@@ -903,22 +903,22 @@
                         VerticalAlignment="Center"
                         DockPanel.Dock="Right"
                         Orientation="Horizontal">
-                        <!--  上一頁 — 用 WPF-UI SymbolIcon (內建 Fluent Icons 字型，不依賴系統字型)  -->
-                        <ui:Button
+                        <!--  上一頁  -->
+                        <Button
                             Width="30"
                             Height="36"
                             Margin="0,0,4,0"
                             Padding="0"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Command="{Binding TradeFilter.TradePagePrevCommand}"
                             ToolTip="{DynamicResource Common.Previous}">
-                            <ui:SymbolIcon
+                            <ds:AppIcon
                                 Width="14"
                                 Height="14"
                                 FontSize="14"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Symbol="ChevronLeft24" />
-                        </ui:Button>
+                        </Button>
 
                         <!--  頁碼按鈕（動態生成，當前頁高亮；省略號為純顯示）  -->
                         <ItemsControl VerticalAlignment="Center" ItemsSource="{Binding TradeFilter.TradePageNumbers}">
@@ -934,88 +934,88 @@
                                         <TextBlock
                                             MinWidth="28"
                                             VerticalAlignment="Center"
-                                            FontFamily="{StaticResource FontBase}"
-                                            FontSize="{StaticResource FontSizeSm}"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="…"
                                             TextAlignment="Center"
                                             Typography.NumeralAlignment="Tabular"
                                             Visibility="{Binding IsEllipsis, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                         <!--  頁碼按鈕 — 當前頁高亮；Padding=0 避免窄按鈕內容被切  -->
-                                        <ui:Button
+                                        <Button
                                             Height="36"
                                             MinWidth="30"
                                             Padding="4,0"
                                             Command="{Binding DataContext.TradeFilter.GoToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding Number}"
                                             Content="{Binding Number}"
-                                            FontFamily="{StaticResource FontBase}"
-                                            FontSize="{StaticResource FontSizeSm}"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
                                             Typography.NumeralAlignment="Tabular">
-                                            <ui:Button.Style>
-                                                <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                    <Setter Property="Appearance" Value="Secondary" />
+                                            <Button.Style>
+                                                <Style BasedOn="{StaticResource AppSecondaryButton}" TargetType="{x:Type Button}">
                                                     <Setter Property="Visibility" Value="Visible" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsEllipsis}" Value="True">
                                                             <Setter Property="Visibility" Value="Collapsed" />
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                                                            <Setter Property="Appearance" Value="Primary" />
+                                                            <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
                                                             <Setter Property="FontWeight" Value="SemiBold" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </ui:Button.Style>
-                                        </ui:Button>
+                                            </Button.Style>
+                                        </Button>
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-                        <!--  下一頁 — SymbolIcon 同上理由  -->
-                        <ui:Button
+                        <Button
                             Width="30"
                             Height="36"
                             Margin="4,0,0,0"
                             Padding="0"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Command="{Binding TradeFilter.TradePageNextCommand}"
                             ToolTip="{DynamicResource Common.Next}">
-                            <ui:SymbolIcon
+                            <ds:AppIcon
                                 Width="14"
                                 Height="14"
                                 FontSize="14"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Symbol="ChevronRight24" />
-                        </ui:Button>
+                        </Button>
 
                         <!--  跳頁輸入：頁碼: [input] / total  -->
                         <TextBlock
                             Margin="16,0,6,0"
                             VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource Portfolio.Pagination.JumpTo}" />
-                        <ui:TextBox
+                        <TextBox
                             Width="48"
                             Height="30"
                             Padding="4,0"
                             VerticalContentAlignment="Center"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Text="{Binding TradeFilter.TradeJumpPageInput, UpdateSourceTrigger=PropertyChanged}"
                             TextAlignment="Center"
                             Typography.NumeralAlignment="Tabular">
                             <TextBox.InputBindings>
                                 <KeyBinding Key="Enter" Command="{Binding TradeFilter.JumpToPageCommand}" />
                             </TextBox.InputBindings>
-                        </ui:TextBox>
+                        </TextBox>
                         <TextBlock
                             Margin="6,0,0,0"
                             VerticalAlignment="Center"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Typography.NumeralAlignment="Tabular">
                             <Run Text="/" />
@@ -1044,27 +1044,27 @@
                         </ComboBox>
                         <TextBlock
                             VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{Binding TradeFilter.TradePageDisplay}" />
                     </StackPanel>
 
                     <WrapPanel Margin="0,10,0,0" VerticalAlignment="Center">
-                        <ui:Button
+                        <Button
                             Width="30"
                             Height="36"
                             Margin="0,0,4,4"
                             Padding="0"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Command="{Binding TradeFilter.TradePagePrevCommand}"
                             ToolTip="{DynamicResource Common.Previous}">
-                            <ui:SymbolIcon
+                            <ds:AppIcon
                                 Width="14"
                                 Height="14"
                                 FontSize="14"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Symbol="ChevronLeft24" />
-                        </ui:Button>
+                        </Button>
 
                         <ItemsControl VerticalAlignment="Center" ItemsSource="{Binding TradeFilter.TradePageNumbers}">
                             <ItemsControl.ItemsPanel>
@@ -1078,59 +1078,60 @@
                                         <TextBlock
                                             MinWidth="28"
                                             VerticalAlignment="Center"
-                                            FontFamily="{StaticResource FontBase}"
-                                            FontSize="{StaticResource FontSizeSm}"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="…"
                                             TextAlignment="Center"
                                             Typography.NumeralAlignment="Tabular"
                                             Visibility="{Binding IsEllipsis, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                        <ui:Button
+                                        <Button
                                             Height="36"
                                             MinWidth="30"
                                             Padding="4,0"
                                             Command="{Binding DataContext.TradeFilter.GoToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding Number}"
                                             Content="{Binding Number}"
-                                            FontFamily="{StaticResource FontBase}"
-                                            FontSize="{StaticResource FontSizeSm}"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
                                             Typography.NumeralAlignment="Tabular">
-                                            <ui:Button.Style>
-                                                <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                    <Setter Property="Appearance" Value="Secondary" />
+                                            <Button.Style>
+                                                <Style BasedOn="{StaticResource AppSecondaryButton}" TargetType="{x:Type Button}">
                                                     <Setter Property="Visibility" Value="Visible" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsEllipsis}" Value="True">
                                                             <Setter Property="Visibility" Value="Collapsed" />
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                                                            <Setter Property="Appearance" Value="Primary" />
+                                                            <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
                                                             <Setter Property="FontWeight" Value="SemiBold" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </ui:Button.Style>
-                                        </ui:Button>
+                                            </Button.Style>
+                                        </Button>
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-                        <ui:Button
+                        <Button
                             Width="30"
                             Height="36"
                             Margin="4,0,0,4"
                             Padding="0"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Command="{Binding TradeFilter.TradePageNextCommand}"
                             ToolTip="{DynamicResource Common.Next}">
-                            <ui:SymbolIcon
+                            <ds:AppIcon
                                 Width="14"
                                 Height="14"
                                 FontSize="14"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Symbol="ChevronRight24" />
-                        </ui:Button>
+                        </Button>
 
                         <StackPanel
                             Margin="12,0,0,4"
@@ -1139,28 +1140,28 @@
                             <TextBlock
                                 Margin="0,0,6,0"
                                 VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Portfolio.Pagination.JumpTo}" />
-                            <ui:TextBox
+                            <TextBox
                                 Width="48"
                                 Height="30"
                                 Padding="4,0"
                                 VerticalContentAlignment="Center"
-                                FontFamily="{StaticResource FontBase}"
-                                FontSize="{StaticResource FontSizeSm}"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Sm}"
                                 Text="{Binding TradeFilter.TradeJumpPageInput, UpdateSourceTrigger=PropertyChanged}"
                                 TextAlignment="Center"
                                 Typography.NumeralAlignment="Tabular">
                                 <TextBox.InputBindings>
                                     <KeyBinding Key="Enter" Command="{Binding TradeFilter.JumpToPageCommand}" />
                                 </TextBox.InputBindings>
-                            </ui:TextBox>
+                            </TextBox>
                             <TextBlock
                                 Margin="6,0,0,0"
                                 VerticalAlignment="Center"
-                                FontFamily="{StaticResource FontBase}"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Typography.NumeralAlignment="Tabular">
                                 <Run Text="/" />

@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sub="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type sub:DividendCalendarViewModel}, IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
@@ -83,7 +83,7 @@
                             VerticalAlignment="Center"
                             Fill="{DynamicResource AppUp}" />
                         <TextBlock
-                            FontFamily="{DynamicResource FontBase}"
+                            FontFamily="{DynamicResource Font.Family.Base}"
                             FontSize="12"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppUp}"
@@ -117,7 +117,7 @@
                 <TextBlock
                     Grid.Column="0"
                     VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSizeSm}"
+                    FontSize="{StaticResource Font.Size.Sm}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Portfolio.DivCalendar.Title}" />
@@ -125,8 +125,8 @@
                     Grid.Column="1"
                     Margin="10,0,0,0"
                     VerticalAlignment="Center"
-                    FontFamily="{DynamicResource FontBase}"
-                    FontSize="{StaticResource FontSizeSm}"
+                    FontFamily="{DynamicResource Font.Family.Base}"
+                    FontSize="{StaticResource Font.Size.Sm}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppAccent}"
                     Text="{Binding Year}"
@@ -136,36 +136,36 @@
                     Grid.Column="2"
                     Margin="12,0,0,0"
                     VerticalAlignment="Center"
-                    FontFamily="{DynamicResource FontBase}"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontFamily="{DynamicResource Font.Family.Base}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppUp}"
                     Text="{Binding YearTotalDisplay}"
                     Typography.NumeralAlignment="Tabular" />
 
                 <StackPanel Grid.Column="4" Orientation="Horizontal">
-                    <ui:Button
-                        Width="24"
-                        Height="24"
+                    <Button
+                        Width="32"
+                        Height="32"
                         Margin="0,0,4,0"
-                        Appearance="Secondary"
                         Command="{Binding PrevYearCommand}"
+                        Style="{StaticResource AppIconButton}"
                         ToolTip="{DynamicResource Common.Previous}">
-                        <ui:SymbolIcon
+                        <ds:AppIcon
                             FontSize="10"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Symbol="ChevronLeft24" />
-                    </ui:Button>
-                    <ui:Button
-                        Width="24"
-                        Height="24"
-                        Appearance="Secondary"
+                    </Button>
+                    <Button
+                        Width="32"
+                        Height="32"
                         Command="{Binding NextYearCommand}"
+                        Style="{StaticResource AppIconButton}"
                         ToolTip="{DynamicResource Common.Next}">
-                        <ui:SymbolIcon
+                        <ds:AppIcon
                             FontSize="10"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Symbol="ChevronRight24" />
-                    </ui:Button>
+                    </Button>
                 </StackPanel>
             </Grid>
 

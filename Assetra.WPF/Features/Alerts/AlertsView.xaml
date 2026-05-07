@@ -5,7 +5,7 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Alerts"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:AlertsViewModel}, IsDesignTimeCreatable=False}"
@@ -15,7 +15,8 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <Style BasedOn="{StaticResource FormComboBox}" TargetType="ComboBox" />
+        <Style BasedOn="{StaticResource AppTextBox}" TargetType="TextBox" />
+        <Style BasedOn="{StaticResource AppComboBox}" TargetType="ComboBox" />
     </UserControl.Resources>
 
     <Grid Style="{StaticResource PageRootGrid}">
@@ -27,16 +28,16 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" Style="{StaticResource PageHeaderDock}">
-            <ui:Button
+            <Button
                 DockPanel.Dock="Right"
                 Command="{Binding OpenAddFormCommand}"
-                Style="{StaticResource PagePrimaryButton}"
+                Style="{StaticResource AppPrimaryButton}"
                 Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal">
-                    <ui:SymbolIcon
+                    <ds:AppIcon
                         Margin="0,0,4,0"
                         VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                         Symbol="Add24" />
                     <TextBlock
@@ -44,7 +45,7 @@
                         Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                         Text="{DynamicResource Alerts.AddAlert}" />
                 </StackPanel>
-            </ui:Button>
+            </Button>
 
             <TextBlock
                 Style="{StaticResource PageTitleText}"
@@ -52,56 +53,56 @@
         </DockPanel>
 
         <UniformGrid Grid.Row="1" Columns="3" Style="{StaticResource PageMetricsGrid}">
-            <ui:Card Margin="0,0,12,0" Padding="16">
+            <Border Style="{StaticResource FormCard}" Margin="0,0,12,0" Padding="16">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <ui:SymbolIcon
+                        <ds:AppIcon
                             Margin="0,0,8,0"
                             Foreground="{DynamicResource AppTextMuted}"
                             Symbol="Alert24" />
                         <TextBlock
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Alerts.Count}" />
                     </StackPanel>
                     <TextBlock
                         Margin="0,8,0,0"
-                        FontSize="{StaticResource FontSizeXl}"
+                        FontSize="{StaticResource Font.Size.Xl}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding AlertCount}" />
                 </StackPanel>
-            </ui:Card>
+            </Border>
 
-            <ui:Card Margin="0,0,12,0" Padding="16">
+            <Border Style="{StaticResource FormCard}" Margin="0,0,12,0" Padding="16">
                 <StackPanel>
                     <TextBlock
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Alerts.MonitoringCount}" />
                     <TextBlock
                         Margin="0,8,0,0"
-                        FontSize="{StaticResource FontSizeXl}"
+                        FontSize="{StaticResource Font.Size.Xl}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding MonitoringCount}" />
                 </StackPanel>
-            </ui:Card>
+            </Border>
 
-            <ui:Card Padding="16">
+            <Border Style="{StaticResource FormCard}" Padding="16">
                 <StackPanel>
                     <TextBlock
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Alerts.TriggeredCount}" />
                     <TextBlock
                         Margin="0,8,0,0"
-                        FontSize="{StaticResource FontSizeXl}"
+                        FontSize="{StaticResource Font.Size.Xl}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding TriggeredCount}" />
                 </StackPanel>
-            </ui:Card>
+            </Border>
         </UniformGrid>
 
         <Grid Grid.Row="3" Style="{StaticResource PageContentGrid}">
@@ -117,7 +118,7 @@
                                 Background="{DynamicResource AppSurface}"
                                 BorderBrush="{DynamicResource AppBorder}"
                                 BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusMd}">
+                                CornerRadius="{StaticResource Radius.Md}">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
@@ -132,7 +133,7 @@
                                     <StackPanel Grid.Row="0" Grid.Column="0">
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock
-                                                FontSize="{StaticResource FontSizeMd}"
+                                                FontSize="{StaticResource Font.Size.Md}"
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppTextPrimary}"
                                                 Text="{Binding Symbol}" />
@@ -141,16 +142,16 @@
                                                 Padding="8,2"
                                                 VerticalAlignment="Center"
                                                 Background="{DynamicResource AppHover}"
-                                                CornerRadius="{StaticResource RadiusSm}">
+                                                CornerRadius="{StaticResource Radius.Sm}">
                                                 <TextBlock
-                                                    FontSize="{StaticResource FontSizeXs}"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{Binding Exchange}" />
                                             </Border>
                                         </StackPanel>
                                         <TextBlock
                                             Margin="0,4,0,0"
-                                            FontSize="{StaticResource FontSizeSm}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{Binding Name}"
                                             TextTrimming="CharacterEllipsis" />
@@ -160,16 +161,15 @@
                                         Grid.Row="0"
                                         Grid.Column="1"
                                         Orientation="Horizontal">
-                                        <ui:Button
+                                        <Button
                                             Width="32"
                                             Height="32"
                                             Margin="0,0,4,0"
                                             Padding="0"
                                             Command="{Binding BeginEditCommand}"
                                             ToolTip="{DynamicResource Alerts.Edit}">
-                                            <ui:Button.Style>
-                                                <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                    <Setter Property="Appearance" Value="Transparent" />
+                                            <Button.Style>
+                                                <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                                     <Setter Property="Visibility" Value="Visible" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -177,20 +177,19 @@
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </ui:Button.Style>
-                                            <ui:SymbolIcon FontSize="14" Symbol="Edit24" />
-                                        </ui:Button>
-                                        <ui:Button
+                                            </Button.Style>
+                                            <ds:AppIcon FontSize="14" Symbol="Edit24" />
+                                        </Button>
+                                        <Button
                                             Width="32"
                                             Height="32"
                                             Margin="0,0,4,0"
                                             Padding="0"
-                                            Command="{Binding DataContext.RemoveRuleCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                            CommandParameter="{Binding Id}"
+                                            Command="{Binding DataContext.RequestRemoveRuleCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
                                             ToolTip="{DynamicResource Alerts.Delete}">
-                                            <ui:Button.Style>
-                                                <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                    <Setter Property="Appearance" Value="Transparent" />
+                                            <Button.Style>
+                                                <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                                     <Setter Property="Visibility" Value="Visible" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -198,13 +197,13 @@
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </ui:Button.Style>
-                                            <ui:SymbolIcon
+                                            </Button.Style>
+                                            <ds:AppIcon
                                                 FontSize="14"
                                                 Foreground="{DynamicResource AppDanger}"
                                                 Symbol="Delete24" />
-                                        </ui:Button>
-                                        <ui:Button
+                                        </Button>
+                                        <Button
                                             Width="32"
                                             Height="32"
                                             Margin="0,0,4,0"
@@ -212,9 +211,8 @@
                                             Command="{Binding DataContext.SaveRuleCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"
                                             ToolTip="{DynamicResource Alerts.Save}">
-                                            <ui:Button.Style>
-                                                <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                    <Setter Property="Appearance" Value="Transparent" />
+                                            <Button.Style>
+                                                <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                                     <Setter Property="Visibility" Value="Collapsed" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -222,21 +220,20 @@
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </ui:Button.Style>
-                                            <ui:SymbolIcon
+                                            </Button.Style>
+                                            <ds:AppIcon
                                                 FontSize="14"
                                                 Foreground="{DynamicResource AppUp}"
                                                 Symbol="Checkmark24" />
-                                        </ui:Button>
-                                        <ui:Button
+                                        </Button>
+                                        <Button
                                             Width="32"
                                             Height="32"
                                             Padding="0"
                                             Command="{Binding CancelEditCommand}"
                                             ToolTip="{DynamicResource Alerts.Cancel}">
-                                            <ui:Button.Style>
-                                                <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="{x:Type ui:Button}">
-                                                    <Setter Property="Appearance" Value="Transparent" />
+                                            <Button.Style>
+                                                <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
                                                     <Setter Property="Visibility" Value="Collapsed" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -244,9 +241,9 @@
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </ui:Button.Style>
-                                            <ui:SymbolIcon FontSize="14" Symbol="Dismiss24" />
-                                        </ui:Button>
+                                            </Button.Style>
+                                            <ds:AppIcon FontSize="14" Symbol="Dismiss24" />
+                                        </Button>
                                     </StackPanel>
 
                                     <UniformGrid
@@ -257,7 +254,7 @@
                                         Columns="4">
                                         <StackPanel Margin="0,0,16,0">
                                             <TextBlock
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{DynamicResource Alerts.Condition}" />
                                             <TextBlock
@@ -301,7 +298,7 @@
                                                     </DataTemplate>
                                                 </ComboBox.ItemTemplate>
                                                 <ComboBox.Style>
-                                                    <Style BasedOn="{StaticResource FormComboBox}" TargetType="ComboBox">
+                                                    <Style BasedOn="{StaticResource AppComboBox}" TargetType="ComboBox">
                                                         <Setter Property="Visibility" Value="Collapsed" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -315,7 +312,7 @@
 
                                         <StackPanel Margin="0,0,16,0">
                                             <TextBlock
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{DynamicResource Alerts.TargetPrice}" />
                                             <TextBlock
@@ -335,7 +332,7 @@
                                                     </Style>
                                                 </TextBlock.Style>
                                             </TextBlock>
-                                            <ui:TextBox
+                                            <TextBox
                                                 MinWidth="140"
                                                 Margin="0,4,0,0"
                                                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
@@ -350,12 +347,12 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </TextBox.Style>
-                                            </ui:TextBox>
+                                            </TextBox>
                                         </StackPanel>
 
                                         <StackPanel Margin="0,0,16,0">
                                             <TextBlock
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{DynamicResource Alerts.CurrentPrice}" />
                                             <TextBlock
@@ -377,7 +374,7 @@
 
                                         <StackPanel>
                                             <TextBlock
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{DynamicResource Alerts.Status}" />
                                             <TextBlock
@@ -402,7 +399,7 @@
                                         Grid.Column="0"
                                         Grid.ColumnSpan="2"
                                         Margin="0,10,0,0"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppDown}"
                                         Text="{Binding EditError}"
                                         Visibility="{Binding EditError, Converter={StaticResource StringToVisibilityConverter}}" />
@@ -416,18 +413,18 @@
             <StackPanel
                 Style="{StaticResource EmptyStatePanel}"
                 Visibility="{Binding HasNoRules, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <ui:SymbolIcon Style="{StaticResource EmptyStateIcon}" Symbol="Alert24" />
+                <ds:AppIcon Style="{StaticResource EmptyStateIcon}" Symbol="Alert24" />
                 <TextBlock Style="{StaticResource EmptyStateTitle}" Text="{DynamicResource Alerts.Empty}" />
                 <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Alerts.Empty.Hint}" />
-                <ui:Button
+                <Button
                     Command="{Binding OpenAddFormCommand}"
-                    Style="{StaticResource EmptyStateActionButton}"
+                    Style="{StaticResource AppPrimaryButton}"
                     Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <ui:SymbolIcon
-                            Margin="0,0,4,0"
+                    <StackPanel Style="{StaticResource AppButtonContent}">
+                        <ds:AppIcon
+                            Style="{StaticResource AppButtonLeadingIcon}"
                             VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                             Symbol="Add24" />
                         <TextBlock
@@ -435,16 +432,16 @@
                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                             Text="{DynamicResource Alerts.AddAlert}" />
                     </StackPanel>
-                </ui:Button>
+                </Button>
             </StackPanel>
         </Grid>
 
-        <Border
+        <Grid
             Grid.Row="0"
             Grid.RowSpan="4"
             Margin="-24"
             Panel.ZIndex="180"
-            Background="{DynamicResource AppModalOverlay}"
+            Style="{StaticResource AppDialogOverlay}"
             Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
         <Border
@@ -455,7 +452,8 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Panel.ZIndex="181"
-            Style="{StaticResource FormCard}"
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding CancelAddFormCommand}"
+            Style="{StaticResource AppDialogShell}"
             Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid>
                 <Grid.RowDefinitions>
@@ -466,21 +464,21 @@
                 </Grid.RowDefinitions>
 
                 <DockPanel Grid.Row="0" Margin="0,0,0,16">
-                    <ui:Button
+                    <Button
                         Width="32"
                         Height="32"
                         Padding="0"
                         Command="{Binding CancelAddFormCommand}"
                         DockPanel.Dock="Right"
-                        Appearance="Transparent"
+                        Style="{StaticResource AppIconButton}"
                         ToolTip="{DynamicResource Common.Close}">
-                        <ui:SymbolIcon FontSize="12" Symbol="Dismiss24" />
-                    </ui:Button>
+                        <ds:AppIcon FontSize="12" Symbol="Dismiss24" />
+                    </Button>
                     <StackPanel>
                         <TextBlock Style="{StaticResource FormSectionTitle}" Text="{DynamicResource Alerts.Form.Title}" />
                         <TextBlock
                             Margin="0,4,0,0"
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Alerts.Form.Hint}" />
                     </StackPanel>
@@ -490,7 +488,7 @@
                     <StackPanel Margin="0,0,12,12">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Alerts.Symbol}" />
                         <Grid>
-                            <ui:TextBox
+                            <TextBox
                                 x:Name="AddAlertSymbolBox"
                                 Text="{Binding AddSymbol, UpdateSourceTrigger=PropertyChanged}" />
                             <Popup
@@ -504,7 +502,7 @@
                                     Background="{DynamicResource AppSurface}"
                                     BorderBrush="{DynamicResource AppBorder}"
                                     BorderThickness="1"
-                                    CornerRadius="{StaticResource RadiusSm}">
+                                    CornerRadius="{StaticResource Radius.Sm}">
                                     <ListBox
                                         MaxHeight="240"
                                         Background="Transparent"
@@ -521,7 +519,10 @@
 
                     <StackPanel Margin="0,0,0,12">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Alerts.Condition}" />
-                        <ComboBox ItemsSource="{Binding Conditions}" SelectedItem="{Binding AddCondition}">
+                        <ComboBox
+                            ItemsSource="{Binding Conditions}"
+                            SelectedItem="{Binding AddCondition}"
+                            Style="{StaticResource AppComboBox}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock>
@@ -543,7 +544,7 @@
 
                     <StackPanel Margin="0,0,12,0">
                         <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Alerts.TargetPrice}" />
-                        <ui:TextBox
+                        <TextBox
                             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                             Text="{Binding AddTargetPrice, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
@@ -561,16 +562,61 @@
                     Margin="0,16,0,0"
                     HorizontalAlignment="Right"
                     Orientation="Horizontal">
-                    <ui:Button
+                    <Button
                         Margin="0,0,8,0"
                         Command="{Binding CancelAddFormCommand}"
                         Content="{DynamicResource Common.Cancel}"
-                        Style="{StaticResource PageSecondaryButton}" />
-                    <ui:Button Command="{Binding AddRuleCommand}" Style="{StaticResource PagePrimaryButton}">
+                        Style="{StaticResource AppSecondaryButton}" />
+                    <Button Command="{Binding AddRuleCommand}" Style="{StaticResource AppPrimaryButton}">
                         <TextBlock
                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                             Text="{DynamicResource Alerts.AddAlert}" />
-                    </ui:Button>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid
+            Grid.RowSpan="4"
+            Margin="-24"
+            Panel.ZIndex="190"
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Border
+            Grid.RowSpan="4"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Panel.ZIndex="191"
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding CancelDeleteCommand}"
+            Style="{StaticResource AppDestructiveDialogShell}"
+            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
+                <TextBlock
+                    Grid.Row="1"
+                    Style="{StaticResource AppDialogSubtitle}">
+                    <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
+                    <Run Text="{Binding DeleteTargetName}" />
+                    <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />
+                </TextBlock>
+
+                <StackPanel Grid.Row="2" Style="{StaticResource AppDialogFooter}">
+                    <Button
+                        Margin="0,0,8,0"
+                        Command="{Binding CancelDeleteCommand}"
+                        Content="{DynamicResource Common.Cancel}"
+                        Style="{StaticResource AppSecondaryButton}" />
+                    <Button
+                        Command="{Binding ConfirmDeleteCommand}"
+                        Content="{DynamicResource Common.Delete}"
+                        Style="{StaticResource AppDangerButton}" />
                 </StackPanel>
             </Grid>
         </Border>

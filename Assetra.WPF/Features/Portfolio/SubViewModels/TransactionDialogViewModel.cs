@@ -169,6 +169,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     [ObservableProperty] private bool _isRevisionMode;
     [ObservableProperty] private bool _isRevisionReplacePromptOpen;
     [ObservableProperty] private string _revisionReplacePromptError = string.Empty;
+    [ObservableProperty] private bool _isDeleteConfirmOpen;
+    [ObservableProperty] private string _deleteTargetName = string.Empty;
     private Guid? _revisionSourceTradeId;
     private bool _preserveRevisionSourceOnClose;
 
@@ -196,6 +198,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(ShowEditLockedSummary));
         CreateRevisionCommand.NotifyCanExecuteChanged();
         DeleteTradeCommand.NotifyCanExecuteChanged();
+        RequestDeleteTradeCommand.NotifyCanExecuteChanged();
+
+        if (!EditingTradeId.HasValue)
+        {
+            IsDeleteConfirmOpen = false;
+            DeleteTargetName = string.Empty;
+        }
     }
 
     [ObservableProperty] private string _editSummaryType = string.Empty;
@@ -1127,6 +1136,32 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// 刪除目前正在編輯的交易。只在 <see cref="IsEditMode"/> 為 true 時可執行。
     /// Buy / Sell / StockDividend 會同步清理關聯的 <see cref="PortfolioEntry"/>。
     /// </summary>
+    [RelayCommand(CanExecute = nameof(IsEditMode))]
+    private void RequestDeleteTrade()
+    {
+        if (EditingTradeId is not { } id)
+            return;
+
+        var row = Trades.FirstOrDefault(t => t.Id == id);
+        DeleteTargetName = row?.DisplayAsset ?? EditSummaryTarget;
+        IsDeleteConfirmOpen = true;
+    }
+
+    [RelayCommand]
+    private void CancelDeleteTrade()
+    {
+        IsDeleteConfirmOpen = false;
+        DeleteTargetName = string.Empty;
+    }
+
+    [RelayCommand]
+    private async Task ConfirmDeleteTradeAsync()
+    {
+        IsDeleteConfirmOpen = false;
+        await DeleteTradeAsync();
+        DeleteTargetName = string.Empty;
+    }
+
     [RelayCommand(CanExecute = nameof(IsEditMode))]
     private async Task DeleteTradeAsync()
     {

@@ -1,8 +1,7 @@
 <UserControl
     x:Class="Assetra.WPF.Features.Portfolio.Controls.PortfolioSetupNoticePanel"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Border
         Padding="20,14"
         Background="{DynamicResource AppSurface}"
@@ -16,24 +15,24 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                 <TextBlock
-                    FontSize="{StaticResource FontSizeMd}"
+                    FontSize="{StaticResource Font.Size.Md}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{Binding SetupNotice.Title}" />
                 <TextBlock
                     Margin="0,4,0,0"
-                    FontSize="{StaticResource FontSizeBase}"
+                    FontSize="{StaticResource Font.Size.Base}"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{Binding SetupNotice.Message}"
                     TextWrapping="Wrap" />
             </StackPanel>
-            <ui:Button
+            <Button
                 Grid.Column="1"
                 Margin="12,0,0,0"
                 VerticalAlignment="Center"
-                Appearance="Secondary"
                 Command="{Binding SetupNotice.ExecuteCommand}"
-                Content="{Binding SetupNotice.ActionText}" />
+                Content="{Binding SetupNotice.ActionText}"
+                Style="{StaticResource AppSecondaryButton}" />
         </Grid>
     </Border>
 </UserControl>

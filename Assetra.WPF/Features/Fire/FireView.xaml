@@ -5,7 +5,7 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Fire"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FireViewModel}, IsDesignTimeCreatable=False}"
     d:DesignHeight="800"
@@ -27,69 +27,72 @@
                 Text="{DynamicResource Fire.Title}" />
         </DockPanel>
 
-        <ui:Card Grid.Row="1" Padding="20">
+        <Border
+            Grid.Row="1"
+            Padding="20"
+            Style="{StaticResource FormCard}">
             <StackPanel>
-                <UniformGrid Columns="5" Rows="1">
-                    <StackPanel Margin="0,0,16,0">
+                <UniformGrid
+                    Columns="5"
+                    Style="{StaticResource PageFormGrid}">
+                    <StackPanel Style="{StaticResource FormField}">
                         <TextBlock
-                            Margin="0,0,0,4"
-                            Foreground="{DynamicResource AppTextSecondary}"
+                            Style="{StaticResource FormFieldLabel}"
                             Text="{DynamicResource Fire.Input.NetWorth}" />
-                        <ui:TextBox
+                        <TextBox
+                            Style="{StaticResource AppTextBox}"
                             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                             Text="{Binding CurrentNetWorth, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,16,0">
+                    <StackPanel Style="{StaticResource FormField}">
                         <TextBlock
-                            Margin="0,0,0,4"
-                            Foreground="{DynamicResource AppTextSecondary}"
+                            Style="{StaticResource FormFieldLabel}"
                             Text="{DynamicResource Fire.Input.AnnualExpenses}" />
-                        <ui:TextBox
+                        <TextBox
+                            Style="{StaticResource AppTextBox}"
                             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                             Text="{Binding AnnualExpenses, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,16,0">
+                    <StackPanel Style="{StaticResource FormField}">
                         <TextBlock
-                            Margin="0,0,0,4"
-                            Foreground="{DynamicResource AppTextSecondary}"
+                            Style="{StaticResource FormFieldLabel}"
                             Text="{DynamicResource Fire.Input.AnnualSavings}" />
-                        <ui:TextBox
+                        <TextBox
+                            Style="{StaticResource AppTextBox}"
                             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                             Text="{Binding AnnualSavings, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Margin="0,0,16,0">
+                    <StackPanel Style="{StaticResource FormField}">
                         <TextBlock
-                            Margin="0,0,0,4"
-                            Foreground="{DynamicResource AppTextSecondary}"
+                            Style="{StaticResource FormFieldLabel}"
                             Text="{DynamicResource Fire.Input.Return}" />
-                        <ui:TextBox Text="{Binding ExpectedAnnualReturn, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox
+                            Style="{StaticResource AppTextBox}"
+                            Text="{Binding ExpectedAnnualReturn, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel>
+                    <StackPanel Style="{StaticResource FormFieldLast}">
                         <TextBlock
-                            Margin="0,0,0,4"
-                            Foreground="{DynamicResource AppTextSecondary}"
+                            Style="{StaticResource FormFieldLabel}"
                             Text="{DynamicResource Fire.Input.WithdrawalRate}" />
-                        <ui:TextBox Text="{Binding WithdrawalRate, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox
+                            Style="{StaticResource AppTextBox}"
+                            Text="{Binding WithdrawalRate, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </UniformGrid>
 
-                <StackPanel
-                    Margin="0,16,0,0"
-                    HorizontalAlignment="Right"
-                    Orientation="Horizontal">
-                    <ui:Button
+                <StackPanel Style="{StaticResource PageActionBar}">
+                    <Button
                         Margin="0,0,8,0"
                         Command="{Binding SaveToGoalsCommand}"
                         Content="{DynamicResource Fire.SaveToGoals}"
-                        Style="{StaticResource PageSecondaryButton}" />
-                    <ui:Button Command="{Binding CalculateCommand}" Style="{StaticResource PagePrimaryButton}">
-                        <TextBlock
-                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                            Text="{DynamicResource Fire.Calculate}" />
-                    </ui:Button>
+                        Style="{StaticResource AppSecondaryButton}" />
+                    <Button
+                        Command="{Binding CalculateCommand}"
+                        Content="{DynamicResource Fire.Calculate}"
+                        Style="{StaticResource AppPrimaryButton}" />
                 </StackPanel>
             </StackPanel>
-        </ui:Card>
+        </Border>
 
         <TextBlock
             Grid.Row="2"
@@ -104,73 +107,65 @@
             <StackPanel
                 Style="{StaticResource EmptyStatePanel}"
                 Visibility="{Binding HasCalculatedResult, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                <ui:SymbolIcon Style="{StaticResource EmptyStateIcon}" Symbol="Calculator24" />
+                <ds:AppIcon Style="{StaticResource EmptyStateIcon}" Symbol="Calculator24" />
                 <TextBlock Style="{StaticResource EmptyStateTitle}" Text="{DynamicResource Fire.Empty.Title}" />
                 <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Fire.Result.NotCalculated}" />
-                <ui:Button
+                <Button
                     Command="{Binding CalculateCommand}"
-                    Style="{StaticResource EmptyStateActionButton}">
-                    <TextBlock
-                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                        Text="{DynamicResource Fire.Calculate}" />
-                </ui:Button>
+                    Content="{DynamicResource Fire.Calculate}"
+                    Margin="0,16,0,0"
+                    HorizontalAlignment="Center"
+                    Style="{StaticResource AppPrimaryButton}" />
             </StackPanel>
 
             <ScrollViewer
-                VerticalScrollBarVisibility="Auto"
+                Style="{StaticResource ListContentHost}"
                 Visibility="{Binding HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel>
                     <UniformGrid Columns="3">
-                    <ui:Card Margin="0,0,12,0" Padding="16">
+                    <Border
+                        Margin="0,0,12,0"
+                        Style="{StaticResource MetricCard}">
                         <StackPanel>
                             <TextBlock
-                                FontSize="{StaticResource FontSizeXs}"
-                                Foreground="{DynamicResource AppTextSecondary}"
+                                Style="{StaticResource MetricLabel}"
                                 Text="{DynamicResource Fire.Result.FireNumber}" />
                             <TextBlock
-                                Margin="0,8,0,0"
-                                FontSize="{StaticResource FontSizeXl}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextPrimary}"
+                                Style="{StaticResource MetricValue}"
                                 Text="{Binding FireNumber, StringFormat=N0}"
                                 Typography.NumeralAlignment="Tabular" />
                         </StackPanel>
-                    </ui:Card>
-                    <ui:Card Margin="0,0,12,0" Padding="16">
+                    </Border>
+                    <Border
+                        Margin="0,0,12,0"
+                        Style="{StaticResource MetricCard}">
                         <StackPanel>
                             <TextBlock
-                                FontSize="{StaticResource FontSizeXs}"
-                                Foreground="{DynamicResource AppTextSecondary}"
+                                Style="{StaticResource MetricLabel}"
                                 Text="{DynamicResource Fire.Result.YearsToFire}" />
                             <TextBlock
-                                Margin="0,8,0,0"
-                                FontSize="{StaticResource FontSizeXl}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextPrimary}"
+                                Style="{StaticResource MetricValue}"
                                 Text="{Binding YearsToFire}" />
                         </StackPanel>
-                    </ui:Card>
-                    <ui:Card Padding="16">
+                    </Border>
+                    <Border
+                        Style="{StaticResource MetricCard}">
                         <StackPanel>
                             <TextBlock
-                                FontSize="{StaticResource FontSizeXs}"
-                                Foreground="{DynamicResource AppTextSecondary}"
+                                Style="{StaticResource MetricLabel}"
                                 Text="{DynamicResource Fire.Result.Projected}" />
                             <TextBlock
-                                Margin="0,8,0,0"
-                                FontSize="{StaticResource FontSizeXl}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextPrimary}"
+                                Style="{StaticResource MetricValue}"
                                 Text="{Binding ProjectedNetWorthAtFire, StringFormat=N0}"
                                 Typography.NumeralAlignment="Tabular" />
                         </StackPanel>
-                    </ui:Card>
+                    </Border>
                 </UniformGrid>
 
                     <StackPanel Margin="0,16,0,0">
                     <TextBlock
                         Margin="0,0,0,8"
-                        FontSize="{StaticResource FontSizeMd}"
+                        FontSize="{StaticResource Font.Size.Md}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Fire.Path.Title}" />
@@ -183,7 +178,7 @@
                                     Background="{DynamicResource AppSurface}"
                                     BorderBrush="{DynamicResource AppBorder}"
                                     BorderThickness="1"
-                                    CornerRadius="{StaticResource RadiusMd}">
+                                    CornerRadius="{StaticResource Radius.Md}">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -191,7 +186,7 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock
-                                                FontSize="{StaticResource FontSizeXs}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{DynamicResource Fire.Path.Year}" />
                                             <TextBlock

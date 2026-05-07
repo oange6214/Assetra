@@ -2,11 +2,12 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.AccountsTabPanel"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:controls="clr-namespace:Assetra.WPF.Controls"
     xmlns:conv="clr-namespace:Assetra.WPF.Infrastructure.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
     mc:Ignorable="d">
@@ -42,16 +43,16 @@
                         Background="{DynamicResource AppBackground}"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}">
+                        CornerRadius="{StaticResource Radius.Sm}">
                         <StackPanel>
                             <TextBlock
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource Portfolio.Cash.Emergency.Title}" />
                             <StackPanel Margin="0,4,0,6" Orientation="Horizontal">
                                 <TextBlock
-                                    FontFamily="{StaticResource FontBase}"
-                                    FontSize="{StaticResource FontSizeLg}"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Lg}"
                                     FontWeight="SemiBold"
                                     Foreground="{Binding Financial.EmergencyStatusTag, Converter={StaticResource StatusTagToBrush}}"
                                     Typography.NumeralAlignment="Tabular">
@@ -60,7 +61,7 @@
                                 <TextBlock
                                     Margin="4,0,0,0"
                                     VerticalAlignment="Bottom"
-                                    FontSize="{StaticResource FontSizeXs}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextSecondary}"
                                     Text="{DynamicResource Portfolio.Cash.Emergency.Months}"
                                     Visibility="{Binding Financial.IsMonthlyExpenseSet, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -69,12 +70,12 @@
                                 <Border
                                     Height="4"
                                     Background="{DynamicResource AppBorder}"
-                                    CornerRadius="{StaticResource RadiusXs}" />
+                                    CornerRadius="{StaticResource Radius.Xs}" />
                                 <Border
                                     Height="4"
                                     HorizontalAlignment="Left"
                                     Background="{Binding Financial.EmergencyStatusTag, Converter={StaticResource StatusTagToBrush}}"
-                                    CornerRadius="{StaticResource RadiusXs}">
+                                    CornerRadius="{StaticResource Radius.Xs}">
                                     <Border.Width>
                                         <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
                                             <Binding Path="Financial.EmergencyFundBarValue" />
@@ -94,14 +95,16 @@
                         Background="{DynamicResource AppBackground}"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}">
+                        CornerRadius="{StaticResource Radius.Sm}">
                         <StackPanel>
                             <TextBlock
                                 Margin="0,0,0,4"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource Portfolio.Cash.Emergency.MonthlyExpense}" />
-                            <ui:TextBox Text="{Binding Financial.MonthlyExpense, UpdateSourceTrigger=PropertyChanged, StringFormat='{}{0:0.##}'}" />
+                            <TextBox
+                                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                                Text="{Binding Financial.MonthlyExpense, UpdateSourceTrigger=PropertyChanged, StringFormat='{}{0:N0}'}" />
                         </StackPanel>
                     </Border>
 
@@ -113,15 +116,15 @@
                         Background="{DynamicResource AppBackground}"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}">
+                        CornerRadius="{StaticResource Radius.Sm}">
                         <StackPanel>
                             <TextBlock
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource Portfolio.Cash.Emergency.MonthlyExpenseHint}" />
                             <TextBlock
                                 Margin="0,4,0,0"
-                                FontSize="{StaticResource FontSizeLg}"
+                                FontSize="{StaticResource Font.Size.Lg}"
                                 FontWeight="SemiBold"
                                 Foreground="{Binding Financial.EmergencyStatusTag, Converter={StaticResource StatusTagToBrush}}"
                                 Visibility="{Binding Financial.IsMonthlyExpenseSet, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -141,7 +144,7 @@
                             </TextBlock>
                             <TextBlock
                                 Margin="0,4,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Portfolio.Cash.Emergency.NotSet}"
                                 Visibility="{Binding Financial.IsMonthlyExpenseSet, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
@@ -162,24 +165,24 @@
                         VerticalAlignment="Center"
                         IsChecked="{Binding Account.ShowArchivedAccounts}">
                         <TextBlock
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.Account.ShowArchived}" />
                     </CheckBox>
-                    <ui:Button
+                    <Button
                         MinHeight="32"
                         Padding="10,0"
-                        Appearance="Secondary"
-                        Command="{Binding OpenAddAccountDialogCommand}">
+                        Command="{Binding OpenAddAccountDialogCommand}"
+                        Style="{StaticResource AppSecondaryButton}">
                         <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon
+                            <ds:AppIcon
                                 Margin="0,0,6,0"
                                 VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Symbol="Add24" />
                             <TextBlock VerticalAlignment="Center" Text="{DynamicResource Portfolio.AddCash}" />
                         </StackPanel>
-                    </ui:Button>
+                    </Button>
                 </StackPanel>
             </controls:SearchBox.RightContent>
         </controls:SearchBox>
@@ -196,27 +199,27 @@
                         <TextBlock
                             Margin="0,0,0,6"
                             HorizontalAlignment="Center"
-                            FontSize="{StaticResource FontSize2xl}"
+                            FontSize="{StaticResource Font.Size.2xl}"
                             Text="&#x1F4B0;" />
                         <TextBlock
                             HorizontalAlignment="Center"
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.Cash.Empty}" />
                     </StackPanel>
-                    <ui:Button
+                    <Button
                         Height="36"
                         Margin="0,16,0,0"
                         Padding="20,0"
                         HorizontalAlignment="Center"
-                        Appearance="Primary"
-                        Command="{Binding OpenAddAccountDialogCommand}">
+                        Command="{Binding OpenAddAccountDialogCommand}"
+                        Style="{StaticResource AppPrimaryButton}">
                         <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.AddCash}" />
-                    </ui:Button>
+                    </Button>
                 </StackPanel>
             </Border>
 
-            <ui:DataGrid
+            <DataGrid
                 x:Name="CashGrid"
                 AlternationCount="2"
                 AutoGenerateColumns="False"
@@ -227,10 +230,10 @@
                 CanUserReorderColumns="False"
                 CanUserResizeColumns="False"
                 CanUserSortColumns="True"
-                ColumnHeaderHeight="{StaticResource DataGridHeaderHeight}"
+                ColumnHeaderHeight="{StaticResource DataGrid.HeaderHeight}"
                 EnableRowVirtualization="True"
-                FontFamily="{StaticResource FontBase}"
-                FontSize="{StaticResource FontSizeSm}"
+                FontFamily="{StaticResource Font.Family.Base}"
+                FontSize="{StaticResource Font.Size.Sm}"
                 Foreground="{DynamicResource AppTextPrimary}"
                 GridLinesVisibility="None"
                 HeadersVisibility="Column"
@@ -238,7 +241,7 @@
                 IsReadOnly="True"
                 ItemsSource="{Binding CashAccountsView}"
                 PreviewMouseDown="OnGridPreviewMouseDown"
-                RowHeight="{StaticResource DataGridRowHeight}"
+                RowHeight="{StaticResource DataGrid.RowHeight}"
                 SelectedItem="{Binding SelectedCashRow, Mode=TwoWay}"
                 SelectionMode="Single"
                 VirtualizingPanel.IsVirtualizing="True"
@@ -293,8 +296,8 @@
                                             TextTrimming="CharacterEllipsis" />
                                         <TextBlock
                                             Margin="0,4,0,0"
-                                            FontFamily="{StaticResource FontBase}"
-                                            FontSize="{StaticResource FontSizeXs}"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{Binding Currency}"
                                             Typography.NumeralAlignment="Tabular" />
@@ -329,7 +332,7 @@
                             <DataTemplate>
                                 <TextBlock
                                     VerticalAlignment="Center"
-                                    FontFamily="{StaticResource FontBase}"
+                                    FontFamily="{StaticResource Font.Family.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{Binding Balance, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
@@ -348,8 +351,8 @@
                             <DataTemplate>
                                 <TextBlock
                                     VerticalAlignment="Center"
-                                    FontFamily="{StaticResource FontBase}"
-                                    FontSize="{StaticResource FontSizeSm}"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
                                     Foreground="{DynamicResource AppTextSecondary}"
                                     Text="{Binding CreatedDate, StringFormat=yyyy/MM/dd}"
                                     Typography.NumeralAlignment="Tabular" />
@@ -364,29 +367,29 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ui:Button
+                                <Button
                                     Width="32"
-                                    Height="28"
+                                    Height="32"
                                     Padding="0"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    Appearance="Secondary"
                                     Background="Transparent"
                                     BorderThickness="0"
                                     Command="{Binding DataContext.Account.ArchiveAccountCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     CommandParameter="{Binding}"
+                                    Style="{StaticResource AppIconButton}"
                                     ToolTip="{DynamicResource Portfolio.Account.Archive}">
-                                    <ui:SymbolIcon
+                                    <ds:AppIcon
                                         VerticalAlignment="Center"
-                                        FontSize="{StaticResource FontSizeXs}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Symbol="Call24" />
-                                </ui:Button>
+                                </Button>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
-            </ui:DataGrid>
+            </DataGrid>
         </Grid>
     </Grid>
 </UserControl>

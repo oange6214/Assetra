@@ -11,86 +11,96 @@
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
 
-    <Grid>
+    <Grid Style="{StaticResource PageRootGrid}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <!--  ── KPI Bar ─────────────────────────────────────────────────────  -->
-        <Border
+        <UniformGrid
             Grid.Row="0"
-            Margin="24,24,24,0"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="{StaticResource Card.Radius}">
-            <Grid Margin="20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            Margin="0,0,0,16"
+            Columns="4"
+            Rows="1">
 
-                <!--  總淨資產  -->
-                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+            <!--  總淨資產  -->
+            <Border Margin="0,0,8,0" Style="{StaticResource FormCard}">
+                <StackPanel>
                     <TextBlock
-                        FontSize="{StaticResource FontSizeSm}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource FinancialOverview.Header.NetWorth}" />
                     <TextBlock
-                        FontSize="{StaticResource FontSizeLg}"
+                        Margin="0,8,0,0"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        Typography.NumeralAlignment="Tabular"
+                        FontSize="{StaticResource Font.Size.Lg}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding TotalNetWorthDisplay}" />
                 </StackPanel>
+            </Border>
 
-                <!--  資產  -->
-                <StackPanel Grid.Column="1" Margin="8,0">
+            <!--  資產  -->
+            <Border Margin="8,0" Style="{StaticResource FormCard}">
+                <StackPanel>
                     <TextBlock
-                        FontSize="{StaticResource FontSizeSm}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource FinancialOverview.Header.Assets}" />
                     <TextBlock
-                        FontSize="{StaticResource FontSizeLg}"
+                        Margin="0,8,0,0"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        Typography.NumeralAlignment="Tabular"
+                        FontSize="{StaticResource Font.Size.Lg}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppUp}"
                         Text="{Binding TotalAssetsDisplay}" />
                 </StackPanel>
+            </Border>
 
-                <!--  投資  -->
-                <StackPanel Grid.Column="2" Margin="8,0">
+            <!--  投資  -->
+            <Border Margin="8,0" Style="{StaticResource FormCard}">
+                <StackPanel>
                     <TextBlock
-                        FontSize="{StaticResource FontSizeSm}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource FinancialOverview.Header.Investments}" />
                     <TextBlock
-                        FontSize="{StaticResource FontSizeLg}"
+                        Margin="0,8,0,0"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        Typography.NumeralAlignment="Tabular"
+                        FontSize="{StaticResource Font.Size.Lg}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppAccent}"
                         Text="{Binding TotalInvestmentsDisplay}" />
                 </StackPanel>
+            </Border>
 
-                <!--  負債  -->
-                <StackPanel Grid.Column="3" Margin="8,0,0,0">
+            <!--  負債  -->
+            <Border Margin="8,0,0,0" Style="{StaticResource FormCard}">
+                <StackPanel>
                     <TextBlock
-                        FontSize="{StaticResource FontSizeSm}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource FinancialOverview.Header.Liabilities}" />
                     <TextBlock
-                        FontSize="{StaticResource FontSizeLg}"
+                        Margin="0,8,0,0"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        Typography.NumeralAlignment="Tabular"
+                        FontSize="{StaticResource Font.Size.Lg}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppDown}"
                         Text="{Binding TotalLiabilitiesDisplay}" />
                 </StackPanel>
-            </Grid>
-        </Border>
+            </Border>
+        </UniformGrid>
 
         <!--  ── Accordion  ───────────────────────────────────────────────────  -->
         <ScrollViewer
             Grid.Row="1"
-            Margin="24,16,24,24"
+            Margin="0"
             VerticalScrollBarVisibility="Auto">
             <StackPanel>
 
@@ -104,7 +114,7 @@
                     IsExpanded="True">
                     <Expander.Header>
                         <TextBlock
-                            FontSize="{StaticResource FontSizeMd}"
+                            FontSize="{StaticResource Font.Size.Md}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppUp}"
                             Text="{DynamicResource FinancialOverview.Section.Assets}" />
@@ -120,13 +130,13 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock
                                             Grid.Column="0"
-                                            FontSize="{StaticResource FontSizeBase}"
+                                            FontSize="{StaticResource Font.Size.Base}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{Binding Name}" />
                                         <TextBlock
                                             Grid.Column="1"
-                                            FontSize="{StaticResource FontSizeBase}"
+                                            FontSize="{StaticResource Font.Size.Base}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{Binding SubtotalDisplay}" />
                                     </Grid>
@@ -140,12 +150,12 @@
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock
                                                         Grid.Column="0"
-                                                        FontSize="{StaticResource FontSizeBase}"
+                                                        FontSize="{StaticResource Font.Size.Base}"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding Name}" />
                                                     <TextBlock
                                                         Grid.Column="1"
-                                                        FontSize="{StaticResource FontSizeBase}"
+                                                        FontSize="{StaticResource Font.Size.Base}"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding CurrentValueDisplay}" />
                                                 </Grid>
@@ -168,7 +178,7 @@
                     IsExpanded="True">
                     <Expander.Header>
                         <TextBlock
-                            FontSize="{StaticResource FontSizeMd}"
+                            FontSize="{StaticResource Font.Size.Md}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppAccent}"
                             Text="{DynamicResource FinancialOverview.Section.Investments}" />
@@ -184,13 +194,13 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock
                                             Grid.Column="0"
-                                            FontSize="{StaticResource FontSizeBase}"
+                                            FontSize="{StaticResource Font.Size.Base}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{Binding Name}" />
                                         <TextBlock
                                             Grid.Column="1"
-                                            FontSize="{StaticResource FontSizeBase}"
+                                            FontSize="{StaticResource Font.Size.Base}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{Binding SubtotalDisplay}" />
                                     </Grid>
@@ -204,12 +214,12 @@
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock
                                                         Grid.Column="0"
-                                                        FontSize="{StaticResource FontSizeBase}"
+                                                        FontSize="{StaticResource Font.Size.Base}"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding Name}" />
                                                     <TextBlock
                                                         Grid.Column="1"
-                                                        FontSize="{StaticResource FontSizeBase}"
+                                                        FontSize="{StaticResource Font.Size.Base}"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding CurrentValueDisplay}" />
                                                 </Grid>
@@ -232,7 +242,7 @@
                     IsExpanded="True">
                     <Expander.Header>
                         <TextBlock
-                            FontSize="{StaticResource FontSizeMd}"
+                            FontSize="{StaticResource Font.Size.Md}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppDown}"
                             Text="{DynamicResource FinancialOverview.Section.Liabilities}" />
@@ -248,13 +258,13 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock
                                             Grid.Column="0"
-                                            FontSize="{StaticResource FontSizeBase}"
+                                            FontSize="{StaticResource Font.Size.Base}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{Binding Name}" />
                                         <TextBlock
                                             Grid.Column="1"
-                                            FontSize="{StaticResource FontSizeBase}"
+                                            FontSize="{StaticResource Font.Size.Base}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{Binding SubtotalDisplay}" />
                                     </Grid>
@@ -268,12 +278,12 @@
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock
                                                         Grid.Column="0"
-                                                        FontSize="{StaticResource FontSizeBase}"
+                                                        FontSize="{StaticResource Font.Size.Base}"
                                                         Foreground="{DynamicResource AppTextPrimary}"
                                                         Text="{Binding Name}" />
                                                     <TextBlock
                                                         Grid.Column="1"
-                                                        FontSize="{StaticResource FontSizeBase}"
+                                                        FontSize="{StaticResource Font.Size.Base}"
                                                         Foreground="{DynamicResource AppDown}"
                                                         Text="{Binding CurrentValueDisplay}" />
                                                 </Grid>

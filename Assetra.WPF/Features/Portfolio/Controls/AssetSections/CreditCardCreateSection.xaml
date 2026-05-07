@@ -5,59 +5,61 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     x:Name="Root"
     mc:Ignorable="d">
 
     <StackPanel>
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeSm}"
+            FontSize="{StaticResource Font.Size.Sm}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextPrimary}"
             Text="{DynamicResource Portfolio.AssetDialog.SectionInfo}" />
         <TextBlock
             Margin="0,0,0,12"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextMuted}"
             Text="{DynamicResource Portfolio.AssetDialog.CreditCardInfoHint}"
             TextWrapping="Wrap" />
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Liability.Subtype}" />
-        <ui:TextBox
+        <TextBox
             Margin="0,0,0,10"
             Text="{Binding AddSubtype, UpdateSourceTrigger=PropertyChanged}"
             ToolTip="{DynamicResource Portfolio.Liability.SubtypeHint}" />
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.CreditCard.Name}" />
-        <ui:TextBox Margin="0,0,0,10" Text="{Binding AddCreditCardName, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox Margin="0,0,0,10" Text="{Binding AddCreditCardName, UpdateSourceTrigger=PropertyChanged}" />
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.CreditCard.Issuer}" />
-        <ui:TextBox Margin="0,0,0,10" Text="{Binding AddCreditCardIssuer, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox Margin="0,0,0,10" Text="{Binding AddCreditCardIssuer, UpdateSourceTrigger=PropertyChanged}" />
 
-        <ui:CardExpander Margin="0,0,0,10" IsExpanded="False">
-            <ui:CardExpander.Header>
+        <Expander
+            Margin="0,0,0,10"
+            IsExpanded="False"
+            Style="{StaticResource AppExpander}">
+            <Expander.Header>
                 <TextBlock
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.AssetDialog.Advanced}" />
-            </ui:CardExpander.Header>
-            <StackPanel Margin="0,8,0,0">
+            </Expander.Header>
+            <StackPanel>
                 <Grid Margin="0,0,0,10">
                     <Grid.Style>
                         <Style TargetType="Grid">
@@ -83,20 +85,20 @@
                     <StackPanel Grid.Column="0">
                         <TextBlock
                             Margin="0,0,0,4"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.CreditCard.BillingDay}" />
-                        <ui:TextBox Text="{Binding AddCreditCardBillingDay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Text="{Binding AddCreditCardBillingDay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Grid.Column="2">
                         <TextBlock
                             Margin="0,0,0,4"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.CreditCard.DueDay}" />
-                        <ui:TextBox Text="{Binding AddCreditCardDueDay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Text="{Binding AddCreditCardDueDay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </Grid>
 
@@ -119,36 +121,36 @@
                     </StackPanel.Style>
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.CreditCard.BillingDay}" />
-                    <ui:TextBox Margin="0,0,0,10" Text="{Binding AddCreditCardBillingDay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Margin="0,0,0,10" Text="{Binding AddCreditCardBillingDay, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.CreditCard.DueDay}" />
-                    <ui:TextBox Text="{Binding AddCreditCardDueDay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Text="{Binding AddCreditCardDueDay, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
 
                 <TextBlock
                     Margin="0,0,0,4"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.CreditCard.CreditLimit}" />
-                <ui:TextBox
+                <TextBox
                     Margin="0,0,0,8"
                     behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                     Text="{Binding AddCreditCardLimit, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
-        </ui:CardExpander>
+        </Expander>
 
         <TextBlock
             Margin="0,0,0,12"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextMuted}"
             Text="{DynamicResource Portfolio.CreditCard.AddHint}"
             TextWrapping="Wrap" />
@@ -159,60 +161,58 @@
             Background="{DynamicResource AppBackground}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
-            CornerRadius="{StaticResource RadiusSm}">
+            CornerRadius="{StaticResource Radius.Sm}">
             <StackPanel>
                 <TextBlock
                     Margin="0,0,0,2"
-                    FontSize="{StaticResource FontSizeSm}"
+                    FontSize="{StaticResource Font.Size.Sm}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Portfolio.AssetDialog.InitialRecord}" />
                 <TextBlock
                     Margin="0,0,0,10"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{DynamicResource Portfolio.AssetDialog.InitialRecordOptionalHint}"
                     TextWrapping="Wrap" />
                 <CheckBox IsChecked="{Binding AddInitialCreditCardBalanceEnabled, Mode=TwoWay}">
                     <TextBlock
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Portfolio.CreditCard.InitialBalance.Toggle}" />
                 </CheckBox>
                 <StackPanel Margin="0,12,0,0" Visibility="{Binding AddInitialCreditCardBalanceEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.CreditCard.InitialBalance.Amount}" />
-                    <ui:TextBox
+                    <TextBox
                         Margin="0,0,0,10"
                         behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                         Text="{Binding AddInitialCreditCardBalanceAmount, UpdateSourceTrigger=PropertyChanged}" />
 
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.CreditCard.InitialBalance.Date}" />
-                    <ui:CalendarDatePicker
+                    <DatePicker
                         Margin="0,0,0,10"
-                        FontSize="{StaticResource FontSizeSm}"
-                        Foreground="{DynamicResource AppTextPrimary}"
                         MinWidth="132"
                         HorizontalContentAlignment="Left"
-                        Content="{Binding AddInitialCreditCardBalanceDate, Converter={StaticResource DateDisplayConverter}}"
-                        Date="{Binding AddInitialCreditCardBalanceDate, Mode=TwoWay}" />
+                        SelectedDate="{Binding AddInitialCreditCardBalanceDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource AppDatePicker}" />
 
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Tx.Note}" />
-                    <ui:TextBox
+                    <TextBox
                         Height="64"
                         AcceptsReturn="True"
                         Text="{Binding AddInitialCreditCardBalanceNote, UpdateSourceTrigger=PropertyChanged}"

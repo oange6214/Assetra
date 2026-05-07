@@ -30,9 +30,12 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _addError = string.Empty;
     [ObservableProperty] private bool _hasNoRules = true;
     [ObservableProperty] private bool _isFormOpen;
+    [ObservableProperty] private bool _isDeleteConfirmOpen;
+    [ObservableProperty] private string _deleteTargetName = string.Empty;
     [ObservableProperty] private bool _isSuggestionsOpen;
     [ObservableProperty] private StockSearchResult? _selectedSuggestion;
     [ObservableProperty] private IReadOnlyList<StockSearchResult> _symbolSuggestions = [];
+    private AlertRowViewModel? _pendingDelete;
 
     // NavRail badge
     [ObservableProperty]
@@ -209,6 +212,32 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         }
         HasNoRules = Rules.Count == 0;
         NotifyRuleCountsChanged();
+    }
+
+    [RelayCommand]
+    private void RequestRemoveRule(AlertRowViewModel row)
+    {
+        if (row is null) return;
+        _pendingDelete = row;
+        DeleteTargetName = $"{row.Symbol} {row.ConditionText}";
+        IsDeleteConfirmOpen = true;
+    }
+
+    [RelayCommand]
+    private async Task ConfirmDeleteAsync()
+    {
+        var row = _pendingDelete;
+        CancelDelete();
+        if (row is not null)
+            await RemoveRule(row.Id).ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private void CancelDelete()
+    {
+        _pendingDelete = null;
+        DeleteTargetName = string.Empty;
+        IsDeleteConfirmOpen = false;
     }
 
     private async Task CheckAlertsAsync(IReadOnlyList<StockQuote> quotes)

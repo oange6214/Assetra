@@ -5,7 +5,6 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel},
                                      IsDesignTimeCreatable=False}"
@@ -15,7 +14,7 @@
     <StackPanel Visibility="{Binding TxTypeIsStockDiv, Converter={StaticResource BooleanToVisibilityConverter}}">
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Stock}" />
@@ -30,7 +29,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock
                             Margin="0,0,8,0"
-                            FontFamily="{StaticResource FontBase}"
+                            FontFamily="{StaticResource Font.Family.Base}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppAccent}"
                             Text="{Binding Symbol}"
@@ -43,11 +42,11 @@
 
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource FontSizeXs}"
+            FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.NewShares}" />
-        <ui:TextBox
+        <TextBox
             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
             IsEnabled="{Binding AreEconomicFieldsEditable}"
             Text="{Binding TxStockDivNewShares, UpdateSourceTrigger=PropertyChanged}" />

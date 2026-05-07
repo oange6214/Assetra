@@ -6,7 +6,7 @@
     xmlns:imp="clr-namespace:Assetra.Core.Models.Import;assembly=Assetra.Core"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Import"
     d:DataContext="{d:DesignInstance Type={x:Type vm:ImportViewModel}}"
     d:DesignHeight="776"
@@ -18,6 +18,9 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
+        <Style BasedOn="{StaticResource AppSecondaryButton}" TargetType="Button" />
+        <Style BasedOn="{StaticResource AppComboBox}" TargetType="ComboBox" />
+
         <ObjectDataProvider
             x:Key="ResolutionValues"
             MethodName="GetValues"
@@ -54,7 +57,7 @@
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1.5"
-            CornerRadius="{StaticResource RadiusXl}">
+            CornerRadius="{StaticResource Radius.Xl}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -63,8 +66,8 @@
 
                 <StackPanel Grid.Column="0">
                     <TextBlock
-                        FontFamily="{StaticResource FontBase}"
-                        FontSize="{DynamicResource FontSizeLg}"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        FontSize="{DynamicResource Font.Size.Lg}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{DynamicResource Import.DropZone.Title}"
@@ -85,11 +88,11 @@
                     Grid.Column="1"
                     VerticalAlignment="Center"
                     Orientation="Horizontal">
-                    <ui:Button
-                        Appearance="Primary"
+                    <Button
+                        Style="{StaticResource AppPrimaryButton}"
                         Command="{Binding BrowseCommand}"
                         Content="{DynamicResource Import.Button.Browse}" />
-                    <ui:Button
+                    <Button
                         Margin="8,0,0,0"
                         Command="{Binding ClearCommand}"
                         Content="{DynamicResource Import.Button.Clear}"
@@ -153,7 +156,7 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Visibility="{Binding HasNoRows, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <ui:SymbolIcon
+                    <ds:AppIcon
                         HorizontalAlignment="Center"
                         FontSize="48"
                         Foreground="{DynamicResource AppTextMuted}"
@@ -161,22 +164,22 @@
                     <TextBlock
                         Margin="0,12,0,0"
                         HorizontalAlignment="Center"
-                        FontSize="{DynamicResource FontSizeSm}"
+                        FontSize="{DynamicResource Font.Size.Sm}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Import.Empty}" />
                 </StackPanel>
 
                 <!--  Loading  -->
-                <ui:ProgressRing
-                    Width="48"
-                    Height="48"
+                <ProgressBar
+                    Width="180"
+                    Height="4"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     IsIndeterminate="True"
                     Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <!--  Preview grid  -->
-                <ui:DataGrid
+                <DataGrid Style="{StaticResource AppDataGrid}"
                     AutoGenerateColumns="False"
                     Background="Transparent"
                     BorderThickness="0"
@@ -189,7 +192,7 @@
                     ItemsSource="{Binding Rows}"
                     SelectionMode="Single"
                     Visibility="{Binding HasRows, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <ui:DataGrid.Columns>
+                    <DataGrid.Columns>
                         <DataGridTextColumn
                             Width="40"
                             Binding="{Binding RowIndex}"
@@ -268,8 +271,8 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                    </ui:DataGrid.Columns>
-                </ui:DataGrid>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
         </Border>
 
@@ -295,16 +298,16 @@
                     Visibility="{Binding ApplySummary, Converter={StaticResource StringToVisibilityConverter}}" />
             </StackPanel>
 
-            <ui:Button
+            <Button
                 Grid.Column="1"
-                Appearance="Primary"
+                Style="{StaticResource AppPrimaryButton}"
                 Command="{Binding ApplyCommand}"
                 Content="{DynamicResource Import.Button.Apply}"
                 ToolTip="{DynamicResource Import.Apply.Tooltip}" />
         </Grid>
 
         <!--  ── History ──  -->
-        <ui:Card
+        <Border Style="{StaticResource FormCard}"
             Grid.Row="5"
             Margin="0,16,0,0"
             Padding="16,12,16,12"
@@ -347,14 +350,14 @@
                                     Grid.Column="3"
                                     Margin="0,0,12,0"
                                     VerticalAlignment="Center"
-                                    FontFamily="{StaticResource FontBase}"
+                                    FontFamily="{StaticResource Font.Family.Base}"
                                     Foreground="{DynamicResource AppTextSecondary}"
                                     Text="{Binding CountsDisplay}"
                                     Typography.NumeralAlignment="Tabular" />
-                                <ui:Button
+                                <Button
                                     Grid.Column="4"
                                     Padding="10,4,10,4"
-                                    Appearance="Secondary"
+                                    Style="{StaticResource AppSecondaryButton}"
                                     Command="{Binding DataContext.RollbackCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     CommandParameter="{Binding}"
                                     Content="{DynamicResource Import.Button.Rollback}"
@@ -364,6 +367,6 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </StackPanel>
-        </ui:Card>
+        </Border>
     </Grid>
 </UserControl>

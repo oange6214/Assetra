@@ -2,7 +2,7 @@
     x:Class="Assetra.WPF.Features.Settings.SettingsView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:controls="clr-namespace:Assetra.WPF.Features.Settings.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -22,19 +22,17 @@
             VerticalScrollBarVisibility="Auto">
 
             <!--
-                HorizontalAlignment="Stretch" 讓 Grid 星號欄能正確撐開；
-                MaxWidth 限制最大寬度避免過寬。
-                Grid.IsSharedSizeScope="True" 讓兩個 section 的 label 欄共享同一寬度。
+                Stretch the settings surface like the other app pages. Individual
+                controls still keep sensible field widths inside each section.
             -->
             <StackPanel
-                MaxWidth="680"
                 HorizontalAlignment="Stretch"
                 Grid.IsSharedSizeScope="True">
 
                 <!--  Page title  -->
                 <TextBlock
                     Margin="0,0,0,20"
-                    FontSize="{StaticResource FontSizeLg}"
+                    FontSize="{StaticResource Font.Size.Lg}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Settings.Title}" />
@@ -42,12 +40,12 @@
                 <!--  ── 外觀 ──  -->
                 <TextBlock
                     Margin="0,0,0,8"
-                    FontSize="{StaticResource FontSizeMd}"
+                    FontSize="{StaticResource Font.Size.Md}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Settings.Section.Appearance}" />
 
-                <ui:Card
+                <Border Style="{StaticResource FormCard}"
                     Margin="0,0,0,24"
                     Padding="16,12">
                     <StackPanel>
@@ -79,7 +77,7 @@
                             <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.UiScale}" />
                             <TextBlock
                                 Margin="0,8,0,6"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Settings.UiScaleDesc}"
                                 TextWrapping="Wrap" />
@@ -105,8 +103,8 @@
                                     Grid.Column="1"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Center"
-                                    FontFamily="{StaticResource FontBase}" Typography.NumeralAlignment="Tabular"
-                                    FontSize="{StaticResource FontSizeSm}"
+                                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
+                                    FontSize="{StaticResource Font.Size.Sm}"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{Binding UiScaleDisplay}"
                                     TextAlignment="Right" />
@@ -117,28 +115,28 @@
                                 LastChildFill="False">
                                 <TextBlock
                                     DockPanel.Dock="Left"
-                                    FontSize="{StaticResource FontSizeXs}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="0.75×" />
                                 <TextBlock
                                     DockPanel.Dock="Right"
-                                    FontSize="{StaticResource FontSizeXs}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="1.50×" />
                             </DockPanel>
                         </StackPanel>
                     </StackPanel>
-                </ui:Card>
+                </Border>
 
                 <!--  ── 語言與區域  ──  -->
                 <TextBlock
                     Margin="0,0,0,8"
-                    FontSize="{StaticResource FontSizeMd}"
+                    FontSize="{StaticResource Font.Size.Md}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Settings.Section.Language}" />
 
-                <ui:Card
+                <Border Style="{StaticResource FormCard}"
                     Margin="0,0,0,24"
                     Padding="16,12">
                     <StackPanel>
@@ -178,17 +176,17 @@
                                 ToolTip="{DynamicResource Settings.BaseCurrency.Tooltip}" />
                         </StackPanel>
                     </StackPanel>
-                </ui:Card>
+                </Border>
 
                 <!--  ── 資料 ──  -->
                 <TextBlock
                     Margin="0,0,0,8"
-                    FontSize="{StaticResource FontSizeMd}"
+                    FontSize="{StaticResource Font.Size.Md}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Settings.Section.Data}" />
 
-                <ui:Card
+                <Border Style="{StaticResource FormCard}"
                     Margin="0,0,0,24"
                     Padding="16,12">
                     <StackPanel>
@@ -197,15 +195,14 @@
                             <StackPanel Margin="0,8,0,0">
                                 <TextBlock
                                     Margin="0,0,0,8"
-                                    FontSize="{StaticResource FontSizeXs}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{Binding DataFolderPath}"
                                     TextWrapping="Wrap" />
-                                <ui:Button
+                                <Button
                                     HorizontalAlignment="Left"
                                     Command="{Binding OpenDataFolderCommand}"
-                                    Content="{DynamicResource Settings.OpenDir}"
-                                    Appearance="Secondary" />
+                                    Content="{DynamicResource Settings.OpenDir}" Style="{StaticResource AppSecondaryButton}" />
                             </StackPanel>
                         </StackPanel>
 
@@ -249,14 +246,13 @@
                                     VerticalAlignment="Center"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Settings.FugleApiKey}" />
-                                <ui:Button
+                                <Button
                                     Margin="6,-2,0,0"
                                     Command="{Binding OpenFugleHelpCommand}"
-                                    Padding="0"
-                                    Appearance="Transparent"
+                                    Padding="0" Style="{StaticResource AppGhostButton}"
                                     ToolTip="{DynamicResource Settings.FugleHelp.Tooltip}">
-                                    <ui:SymbolIcon Symbol="Info24" FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}" />
-                                </ui:Button>
+                                    <ds:AppIcon Symbol="Info24" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" />
+                                </Button>
                             </StackPanel>
                             <StackPanel MaxWidth="420" Margin="0,8,0,0">
                                 <PasswordBox
@@ -266,37 +262,36 @@
                                     Margin="0,0,0,8"
                                     HorizontalAlignment="Stretch"
                                     PasswordChanged="FugleApiKeyBox_OnPasswordChanged" />
-                                <ui:Button
+                                <Button
                                     Margin="0,0,0,8"
                                     HorizontalAlignment="Left"
                                     Command="{Binding SaveDataSourceSettingsCommand}"
-                                    Content="{DynamicResource Common.Save}"
-                                    Appearance="Secondary" />
+                                    Content="{DynamicResource Common.Save}" Style="{StaticResource AppSecondaryButton}" />
                             </StackPanel>
                             <TextBlock
                                 Margin="0,0,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Settings.FugleApiKeyHint}"
                                 TextWrapping="Wrap" />
                             <TextBlock
                                 Margin="0,4,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{Binding DataSourceSaveStatus}"
                                 TextWrapping="Wrap" />
                         </StackPanel>
                     </StackPanel>
-                </ui:Card>
+                </Border>
 
                 <TextBlock
                     Margin="0,0,0,8"
-                    FontSize="{StaticResource FontSizeMd}"
+                    FontSize="{StaticResource Font.Size.Md}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Settings.Section.Ocr}" />
 
-                <ui:Card
+                <Border Style="{StaticResource FormCard}"
                     Margin="0,0,0,24"
                     Padding="16,12">
                     <StackPanel>
@@ -306,18 +301,17 @@
                                 MaxWidth="520"
                                 Margin="0,8,0,0"
                                 Orientation="Horizontal">
-                                <ui:TextBox
+                                <TextBox
                                     MinWidth="320"
                                     Margin="0,0,8,0"
                                     Text="{Binding OcrTessdataPath, UpdateSourceTrigger=LostFocus}" />
-                                <ui:Button
+                                <Button
                                     Command="{Binding BrowseOcrTessdataCommand}"
-                                    Content="{DynamicResource Common.Browse}"
-                                    Appearance="Secondary" />
+                                    Content="{DynamicResource Common.Browse}" Style="{StaticResource AppSecondaryButton}" />
                             </StackPanel>
                             <TextBlock
                                 Margin="0,4,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Settings.Ocr.TessdataPath.Hint}"
                                 TextWrapping="Wrap" />
@@ -325,7 +319,7 @@
 
                         <StackPanel>
                             <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Ocr.Language}" />
-                            <ui:TextBox
+                            <TextBox
                                 MinWidth="220"
                                 MaxWidth="320"
                                 Margin="0,8,0,0"
@@ -333,23 +327,23 @@
                                 Text="{Binding OcrLanguage, UpdateSourceTrigger=LostFocus}" />
                             <TextBlock
                                 Margin="0,4,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Settings.Ocr.Language.Hint}"
                                 TextWrapping="Wrap" />
                         </StackPanel>
                     </StackPanel>
-                </ui:Card>
+                </Border>
 
                 <!--  ── 雲端同步 ──  -->
                 <TextBlock
                     Margin="0,0,0,8"
-                    FontSize="{StaticResource FontSizeMd}"
+                    FontSize="{StaticResource Font.Size.Md}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{DynamicResource Settings.Section.Sync}" />
 
-                <ui:Card
+                <Border Style="{StaticResource FormCard}"
                     Margin="0,0,0,24"
                     Padding="16,12">
                     <StackPanel DataContext="{Binding Sync}">
@@ -360,14 +354,14 @@
 
                         <StackPanel Margin="0,0,0,12">
                             <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Sync.BackendUrl}" />
-                            <ui:TextBox
+                            <TextBox
                                 MinWidth="320"
                                 Margin="0,8,0,0"
                                 HorizontalAlignment="Left"
                                 Text="{Binding BackendUrl, UpdateSourceTrigger=LostFocus}" />
                             <TextBlock
                                 Margin="0,4,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Settings.Sync.BackendUrl.Hint}"
                                 TextWrapping="Wrap" />
@@ -375,7 +369,7 @@
 
                         <StackPanel Margin="0,0,0,12">
                             <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Sync.AuthToken}" />
-                            <ui:TextBox
+                            <TextBox
                                 MinWidth="320"
                                 Margin="0,8,0,0"
                                 HorizontalAlignment="Left"
@@ -392,7 +386,7 @@
                                 PasswordChanged="SyncPassphrase_Changed" />
                             <TextBlock
                                 Margin="0,4,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Settings.Sync.Passphrase.Hint}"
                                 TextWrapping="Wrap" />
@@ -400,14 +394,14 @@
 
                         <StackPanel Margin="0,0,0,12">
                             <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Sync.IntervalMinutes}" />
-                            <ui:TextBox
+                            <TextBox
                                 MinWidth="80"
                                 Margin="0,8,0,0"
                                 HorizontalAlignment="Left"
                                 Text="{Binding IntervalMinutes, UpdateSourceTrigger=LostFocus}" />
                             <TextBlock
                                 Margin="0,4,0,0"
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Settings.Sync.IntervalMinutes.Hint}"
                                 TextWrapping="Wrap" />
@@ -420,20 +414,18 @@
                             ToolTip="{DynamicResource Settings.Sync.CachePassphrase.Hint}" />
 
                         <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
-                            <ui:Button
+                            <Button
                                 Margin="0,0,8,0"
                                 Command="{Binding SaveSettingsCommand}"
-                                Content="{DynamicResource Common.Save}"
-                                Appearance="Secondary" />
-                            <ui:Button
+                                Content="{DynamicResource Common.Save}" Style="{StaticResource AppSecondaryButton}" />
+                            <Button
                                 Command="{Binding SyncNowCommand}"
-                                Content="{DynamicResource Settings.Sync.SyncNow}"
-                                Appearance="Secondary" />
+                                Content="{DynamicResource Settings.Sync.SyncNow}" Style="{StaticResource AppSecondaryButton}" />
                         </StackPanel>
 
                         <TextBlock
                             Margin="0,4,0,0"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{Binding StatusMessage}"
                             TextWrapping="Wrap" />
@@ -445,14 +437,14 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeXs}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{DynamicResource Settings.Sync.LastSync}" />
                                 <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{Binding LastSyncAt, TargetNullValue='—'}" />
                             </StackPanel>
                             <StackPanel Grid.Column="1">
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeXs}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{DynamicResource Settings.Sync.LastResult}" />
                                 <TextBlock Foreground="{DynamicResource AppTextPrimary}">
@@ -468,7 +460,7 @@
 
                         <TextBlock
                             Margin="0,8,0,0"
-                            FontSize="{StaticResource FontSizeXs}"
+                            FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}">
                             <Run Text="{DynamicResource Settings.Sync.DeviceId}" />
                             <Run Text=": " />
@@ -482,11 +474,10 @@
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Settings.Sync.Conflicts}" />
-                                <ui:Button
+                                <Button
                                     Margin="12,0,0,0"
                                     Command="{Binding ReloadCommand}"
-                                    Content="{DynamicResource Settings.Sync.Conflicts.Reload}"
-                                    Appearance="Secondary" />
+                                    Content="{DynamicResource Settings.Sync.Conflicts.Reload}" Style="{StaticResource AppSecondaryButton}" />
                             </StackPanel>
                             <ItemsControl ItemsSource="{Binding Items}">
                                 <ItemsControl.ItemTemplate>
@@ -496,31 +487,29 @@
                                             Padding="8"
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
-                                            CornerRadius="{StaticResource RadiusXs}">
+                                            CornerRadius="{StaticResource Radius.Xs}">
                                             <StackPanel>
-                                                <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextMuted}">
+                                                <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}">
                                                     <Run Text="{Binding EntityType, Mode=OneWay}" />
                                                     <Run Text=" / " />
                                                     <Run Text="{Binding EntityId, Mode=OneWay}" />
                                                 </TextBlock>
-                                                <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource AppTextPrimary}">
+                                                <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextPrimary}">
                                                     <Run Text="local v" /><Run Text="{Binding LocalVersion, Mode=OneWay}" />
                                                     <Run Text=" @ " /><Run Text="{Binding LocalAt, Mode=OneWay}" />
                                                     <Run Text=" / remote v" /><Run Text="{Binding RemoteVersion, Mode=OneWay}" />
                                                     <Run Text=" @ " /><Run Text="{Binding RemoteAt, Mode=OneWay}" />
                                                 </TextBlock>
                                                 <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
-                                                    <ui:Button
+                                                    <Button
                                                         Margin="0,0,6,0"
                                                         Command="{Binding DataContext.KeepLocalCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}"
-                                                        Content="{DynamicResource Settings.Sync.Conflicts.KeepLocal}"
-                                                        Appearance="Secondary" />
-                                                    <ui:Button
+                                                        Content="{DynamicResource Settings.Sync.Conflicts.KeepLocal}" Style="{StaticResource AppSecondaryButton}" />
+                                                    <Button
                                                         Command="{Binding DataContext.UseRemoteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}"
-                                                        Content="{DynamicResource Settings.Sync.Conflicts.UseRemote}"
-                                                        Appearance="Secondary" />
+                                                        Content="{DynamicResource Settings.Sync.Conflicts.UseRemote}" Style="{StaticResource AppSecondaryButton}" />
                                                 </StackPanel>
                                             </StackPanel>
                                         </Border>
@@ -528,12 +517,12 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                             <TextBlock
-                                FontSize="{StaticResource FontSizeXs}"
+                                FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{Binding StatusMessage}" />
                         </StackPanel>
                     </StackPanel>
-                </ui:Card>
+                </Border>
 
             </StackPanel>
         </ScrollViewer>

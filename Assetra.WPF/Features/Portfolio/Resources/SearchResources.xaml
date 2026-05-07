@@ -28,7 +28,7 @@
                 Grid.Column="0"
                 VerticalAlignment="Center"
                 FontFamily="{DynamicResource FontTabular}"
-                FontSize="{DynamicResource FontSizeSm}"
+                FontSize="{DynamicResource Font.Size.Sm}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextPrimary}"
                 Text="{Binding Symbol}" />
@@ -45,7 +45,7 @@
                 <TextBlock
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    FontSize="{DynamicResource FontSizeXs}"
+                    FontSize="{DynamicResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="White"
                     Text="股">
@@ -64,13 +64,13 @@
 
             <StackPanel Grid.Column="2">
                 <TextBlock
-                    FontSize="{DynamicResource FontSizeSm}"
+                    FontSize="{DynamicResource Font.Size.Sm}"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{Binding Name}"
                     TextTrimming="CharacterEllipsis" />
                 <TextBlock
                     Margin="0,2,0,0"
-                    FontSize="{DynamicResource FontSizeXs}"
+                    FontSize="{DynamicResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{Binding Exchange}"
                     TextTrimming="CharacterEllipsis" />

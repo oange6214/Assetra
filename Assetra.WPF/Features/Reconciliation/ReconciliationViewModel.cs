@@ -56,6 +56,14 @@ public partial class ReconciliationViewModel : ObservableObject
     [ObservableProperty]
     private bool _isBusy;
 
+    [ObservableProperty]
+    private bool _isDeleteConfirmOpen;
+
+    [ObservableProperty]
+    private string _deleteTargetName = string.Empty;
+
+    private ReconciliationDiffRowViewModel? _pendingDeleteTrade;
+
     // ─── 新建 session 面板狀態 ───
     [ObservableProperty]
     private bool _isNewSessionPanelOpen;
@@ -337,6 +345,34 @@ public partial class ReconciliationViewModel : ObservableObject
         => row is null || row.Kind != ReconciliationDiffKind.Extra
             ? Task.CompletedTask
             : ApplySimpleResolutionAsync(row.Id, ReconciliationDiffResolution.Deleted);
+
+    [RelayCommand]
+    public void RequestDeleteTrade(ReconciliationDiffRowViewModel? row)
+    {
+        if (row is null || row.Kind != ReconciliationDiffKind.Extra)
+            return;
+
+        _pendingDeleteTrade = row;
+        DeleteTargetName = row.CounterpartyDisplay;
+        IsDeleteConfirmOpen = true;
+    }
+
+    [RelayCommand]
+    public async Task ConfirmDeleteAsync()
+    {
+        var row = _pendingDeleteTrade;
+        CancelDelete();
+        if (row is not null)
+            await DeleteTradeAsync(row).ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    public void CancelDelete()
+    {
+        _pendingDeleteTrade = null;
+        DeleteTargetName = string.Empty;
+        IsDeleteConfirmOpen = false;
+    }
 
     [RelayCommand]
     public async Task CreateTradeAsync(ReconciliationDiffRowViewModel? row)

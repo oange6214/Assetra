@@ -3,9 +3,10 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:assetSections="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.AssetSections"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
@@ -14,17 +15,16 @@
 
     <Grid>
         <!--  半透明背景幕  -->
-        <Border Background="{DynamicResource AppModalOverlay}" />
+        <Grid Style="{StaticResource AppDialogOverlay}" />
 
         <!--  Dialog card  -->
         <Border
             MaxHeight="{StaticResource DialogMaxHeight}"
+            Padding="0"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="{StaticResource RadiusMd}">
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding AddAssetDialog.CloseAddDialogCommand}"
+            Style="{StaticResource AppDialogShell}">
             <Border.Width>
                 <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.62|400|560">
                     <Binding ElementName="Root" Path="ActualWidth" />
@@ -52,39 +52,39 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="0,0,0,1">
                     <DockPanel>
-                        <ui:Button
+                        <Button
                             Width="28"
                             Height="28"
                             Margin="0,0,8,0"
                             Padding="0"
                             VerticalAlignment="Center"
-                            Appearance="Transparent"
+                            Style="{StaticResource AppIconButton}"
                             Command="{Binding AddAssetDialog.BackToTypePickerCommand}"
                             DockPanel.Dock="Left"
                             ToolTip="{DynamicResource Common.Back}"
                             Visibility="{Binding AddAssetDialog.IsLiabilityFormStep, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <ui:SymbolIcon
+                            <ds:AppIcon
                                 FontSize="12"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Symbol="ChevronUp24" />
-                        </ui:Button>
-                        <ui:Button
+                        </Button>
+                        <Button
                             Width="28"
                             Height="28"
                             Padding="0"
                             HorizontalAlignment="Right"
-                            Appearance="Transparent"
+                            Style="{StaticResource AppIconButton}"
                             Command="{Binding AddAssetDialog.CloseAddDialogCommand}"
                             DockPanel.Dock="Right"
                             ToolTip="{DynamicResource Common.Close}">
-                            <ui:SymbolIcon
+                            <ds:AppIcon
                                 FontSize="12"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Symbol="Dismiss24" />
-                        </ui:Button>
+                        </Button>
                         <TextBlock
                             VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{DynamicResource Portfolio.Account.Title}">
@@ -115,7 +115,7 @@
                     <TextBlock
                         Grid.Row="0"
                         Margin="0,0,0,12"
-                        FontSize="{StaticResource FontSizeSm}"
+                        FontSize="{StaticResource Font.Size.Sm}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Liability.PickType.Heading}"
@@ -123,7 +123,7 @@
                     <TextBlock
                         Grid.Row="0"
                         Margin="0,0,0,12"
-                        FontSize="{StaticResource FontSizeSm}"
+                        FontSize="{StaticResource Font.Size.Sm}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Account.PickType.Heading}"
@@ -133,12 +133,12 @@
                         Columns="3"
                         Visibility="{Binding AddAssetDialog.IsLiabilityDialogMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <!--  Card: 信用卡  -->
-                        <ui:Button
+                        <Button
                             Margin="0,0,4,8"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -147,22 +147,22 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F4B3;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.CreditCard}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                         <!--  Card: 分期付款  -->
-                        <ui:Button
+                        <Button
                             Margin="4,0,4,8"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -171,22 +171,22 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F4C5;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.Installment}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                         <!--  Card: 預借現金  -->
-                        <ui:Button
+                        <Button
                             Margin="4,0,0,8"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -195,22 +195,22 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F9FE;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.CashAdvance}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                         <!--  Card: 房屋貸款  -->
-                        <ui:Button
+                        <Button
                             Margin="0,0,4,8"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -219,22 +219,22 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F3E0;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.Mortgage}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                         <!--  Card: 車輛貸款  -->
-                        <ui:Button
+                        <Button
                             Margin="4,0,4,8"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -243,22 +243,22 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F697;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.CarLoan}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                         <!--  Card: 助學貸款  -->
-                        <ui:Button
+                        <Button
                             Margin="4,0,0,8"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -267,22 +267,22 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F393;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.StudentLoan}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                         <!--  Card: 信用貸款  -->
-                        <ui:Button
+                        <Button
                             Margin="0,0,4,0"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -291,22 +291,22 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F4B0;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.PersonalLoan}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                         <!--  Card: 親友借款  -->
-                        <ui:Button
+                        <Button
                             Margin="4,0,4,0"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -315,22 +315,22 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F465;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.FriendLoan}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                         <!--  Card: 自訂  -->
-                        <ui:Button
+                        <Button
                             Margin="4,0,0,0"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -339,27 +339,27 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x2795;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Liability.Preset.Custom}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                     </UniformGrid>
                     <!--  Account preset picker (mode=account)  -->
                     <UniformGrid
                         Grid.Row="1"
                         Columns="3"
                         Visibility="{Binding AddAssetDialog.IsAccountDialogMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <ui:Button
+                        <Button
                             Margin="0,0,4,8"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -368,21 +368,21 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F4B5;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.Cash}" />
                             </StackPanel>
-                        </ui:Button>
-                        <ui:Button
+                        </Button>
+                        <Button
                             Margin="4,0,4,8"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -391,21 +391,21 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F3E6;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.Bank}" />
                             </StackPanel>
-                        </ui:Button>
-                        <ui:Button
+                        </Button>
+                        <Button
                             Margin="4,0,0,8"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -414,21 +414,21 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F4F1;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.Digital}" />
                             </StackPanel>
-                        </ui:Button>
-                        <ui:Button
+                        </Button>
+                        <Button
                             Margin="0,0,4,8"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -437,21 +437,21 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F512;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.TimeDeposit}" />
                             </StackPanel>
-                        </ui:Button>
-                        <ui:Button
+                        </Button>
+                        <Button
                             Margin="4,0,4,8"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -460,21 +460,21 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F4B1;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.Foreign}" />
                             </StackPanel>
-                        </ui:Button>
-                        <ui:Button
+                        </Button>
+                        <Button
                             Margin="4,0,0,8"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -483,21 +483,21 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F4C8;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.Brokerage}" />
                             </StackPanel>
-                        </ui:Button>
-                        <ui:Button
+                        </Button>
+                        <Button
                             Margin="0,0,4,0"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -506,21 +506,21 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F4F2;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.EWallet}" />
                             </StackPanel>
-                        </ui:Button>
-                        <ui:Button
+                        </Button>
+                        <Button
                             Margin="4,0,4,0"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -529,21 +529,21 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x1F381;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.PrepaidCard}" />
                             </StackPanel>
-                        </ui:Button>
-                        <ui:Button
+                        </Button>
+                        <Button
                             Margin="4,0,0,0"
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
@@ -552,15 +552,15 @@
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource FontSize2xl}"
+                                    FontSize="{StaticResource Font.Size.2xl}"
                                     Text="&#x2795;" />
                                 <TextBlock
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.Account.Preset.Custom}" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                     </UniformGrid>
                 </Grid>
 
@@ -583,7 +583,7 @@
                 <TextBlock
                     Grid.Row="3"
                     Margin="20,8,20,0"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppDown}"
                     Text="{Binding AddAssetDialog.AddError}">
                     <TextBlock.Style>
@@ -609,21 +609,21 @@
                     BorderThickness="0,1,0,0"
                     Visibility="{Binding AddAssetDialog.IsFormStep, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                        <ui:Button
+                        <Button
                             Height="30"
                             Margin="0,0,8,0"
                             Padding="14,0"
-                            Appearance="Secondary"
+                            Style="{StaticResource AppSecondaryButton}"
                             Command="{Binding AddAssetDialog.CloseAddDialogCommand}">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Common.Cancel}" />
-                        </ui:Button>
-                        <ui:Button
+                        </Button>
+                        <Button
                             Height="30"
                             Padding="14,0"
-                            Appearance="Primary"
+                            Style="{StaticResource AppPrimaryButton}"
                             Command="{Binding AddAssetDialog.ConfirmAddCommand}">
                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Common.Confirm}" />
-                        </ui:Button>
+                        </Button>
                     </StackPanel>
                 </Border>
             </Grid>

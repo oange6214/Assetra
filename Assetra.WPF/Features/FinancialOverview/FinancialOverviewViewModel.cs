@@ -25,6 +25,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 {
     private readonly IFinancialOverviewQueryService _queryService;
     private readonly IPortfolioPositionFeed _portfolio;
+    private readonly SynchronizationContext? _uiContext;
 
     // ── KPI bar ──────────────────────────────────────────────────────────
 
@@ -65,6 +66,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     {
         _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
         _portfolio = portfolio ?? throw new ArgumentNullException(nameof(portfolio));
+        _uiContext = SynchronizationContext.Current;
 
         // Stock prices arrive asynchronously after Portfolio.LoadAsync() completes.
         // Subscribing to TotalMarketValue lets FinancialOverview re-snapshot once
@@ -108,7 +110,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
                 .ToList())
             .ConfigureAwait(true);
 
-        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+        void ApplyResult()
         {
             AssetGroups.Clear();
             foreach (var g in result.AssetGroups)
@@ -127,7 +129,28 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
             TotalInvestments = result.TotalInvestments;
             TotalLiabilities = result.TotalLiabilities;
             TotalNetWorth = result.TotalAssets + result.TotalInvestments - result.TotalLiabilities;
-        });
+        }
+
+        if (_uiContext is null || SynchronizationContext.Current == _uiContext)
+        {
+            ApplyResult();
+            return;
+        }
+
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _uiContext.Post(_ =>
+        {
+            try
+            {
+                ApplyResult();
+                completion.SetResult();
+            }
+            catch (Exception ex)
+            {
+                completion.SetException(ex);
+            }
+        }, null);
+        await completion.Task.ConfigureAwait(false);
     }
 
     private static AssetGroupVm ToGroupVm(FinancialOverviewGroup group)

@@ -6,7 +6,6 @@ using Assetra.Core.Interfaces;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Wpf.Ui.Appearance;
 
 namespace Assetra.WPF.Features.Settings;
 

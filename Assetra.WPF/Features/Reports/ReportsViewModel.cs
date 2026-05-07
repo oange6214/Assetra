@@ -42,10 +42,14 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasPerformance))]
+    [NotifyPropertyChangedFor(nameof(PerformanceAttributionRows))]
+    [NotifyPropertyChangedFor(nameof(HasPerformanceAttribution))]
     private PerformanceResult? _performance;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasRisk))]
+    [NotifyPropertyChangedFor(nameof(RiskTopHoldingRows))]
+    [NotifyPropertyChangedFor(nameof(HasRiskTopHoldings))]
     private RiskMetrics? _risk;
 
     [ObservableProperty]
@@ -159,6 +163,8 @@ public sealed partial class ReportsViewModel : ObservableObject
     public bool HasCashFlowStatement => CashFlowStatement is not null;
     public bool HasPerformance => Performance is not null;
     public bool HasRisk => Risk is not null;
+    public bool HasPerformanceAttribution => PerformanceAttributionRows.Count > 0;
+    public bool HasRiskTopHoldings => RiskTopHoldingRows.Count > 0;
 
     public string IncomeDisplay  => Report is null ? "—" : FormatAmount(Report.Current.TotalIncome);
     public string ExpenseDisplay => Report is null ? "—" : FormatAmount(Report.Current.TotalExpense);
@@ -199,6 +205,25 @@ public sealed partial class ReportsViewModel : ObservableObject
                 row.DueDate,
                 FormatAmount(row.Amount)))
             .ToArray();
+
+    public IReadOnlyList<PerformanceAttributionRowViewModel> PerformanceAttributionRows =>
+        Performance?.Attribution
+            .Select(row => new PerformanceAttributionRowViewModel(
+                LocalizeAttributionLabel(row.Label),
+                FormatSignedAmount(row.Amount),
+                row.Amount >= 0m))
+            .ToArray()
+        ?? [];
+
+    public IReadOnlyList<RiskTopHoldingRowViewModel> RiskTopHoldingRows =>
+        Risk?.TopHoldings
+            .Select(row => new RiskTopHoldingRowViewModel(
+                row.Label,
+                FormatAmount(row.MarketValue),
+                $"{row.Weight:P2}",
+                row.Weight))
+            .ToArray()
+        ?? [];
 
     [RelayCommand]
     private async Task LoadAsync()
@@ -458,6 +483,10 @@ public sealed partial class ReportsViewModel : ObservableObject
     private string FormatAmount(decimal value) =>
         _currency?.FormatAmount(value) ?? $"NT${value:N0}";
 
+    private string FormatSignedAmount(decimal value) =>
+        _currency?.FormatSigned(value)
+        ?? (value >= 0 ? $"+NT${Math.Abs(value):N0}" : $"-NT${Math.Abs(value):N0}");
+
     private void OnCurrencyChanged() => RaiseDisplayStrings();
 
     private void OnLanguageChanged(object? sender, EventArgs e) => RaiseDisplayStrings();
@@ -478,10 +507,22 @@ public sealed partial class ReportsViewModel : ObservableObject
         OnPropertyChanged(nameof(NetDeltaDisplay));
         OnPropertyChanged(nameof(OverBudgetRows));
         OnPropertyChanged(nameof(UpcomingRows));
+        OnPropertyChanged(nameof(PerformanceAttributionRows));
+        OnPropertyChanged(nameof(RiskTopHoldingRows));
     }
 
     private string GetString(string key, string fallback) =>
         _localization?.Get(key, fallback) ?? fallback;
+
+    private string LocalizeAttributionLabel(string label) =>
+        label switch
+        {
+            "Realized" => GetString("Reports.Performance.Attribution.Realized", "已實現損益"),
+            "Dividend" => GetString("Reports.Performance.Attribution.Dividend", "股利"),
+            "Commission" => GetString("Reports.Performance.Attribution.Commission", "手續費"),
+            "Unrealized Δ" => GetString("Reports.Performance.Attribution.Unrealized", "未實現變動"),
+            _ => label,
+        };
 
     private async Task<decimal?> ComputeXirrAsync(PerformancePeriod period)
     {
@@ -578,8 +619,8 @@ public sealed partial class ReportsViewModel : ObservableObject
         var flows = new List<CashFlow>();
         foreach (var trade in trades)
         {
-            var date = DateOnly.FromDateTime(trade.TradeDate);
-            if (date < period.Start || date > period.End) continue;
+            var date = PerformancePeriod.ToPeriodDate(trade.TradeDate);
+            if (!period.Contains(date)) continue;
 
             var amount = trade.Type switch
             {
@@ -616,4 +657,18 @@ public sealed partial class ReportsViewModel : ObservableObject
         string Name,
         DateTime DueDate,
         string AmountDisplay);
+
+    public sealed record PerformanceAttributionRowViewModel(
+        string Label,
+        string AmountDisplay,
+        bool IsPositive);
+
+    public sealed record RiskTopHoldingRowViewModel(
+        string Label,
+        string MarketValueDisplay,
+        string WeightDisplay,
+        decimal Weight)
+    {
+        public decimal WeightPercent => Weight * 100m;
+    }
 }
