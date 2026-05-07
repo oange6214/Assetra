@@ -18,6 +18,11 @@
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/DatePicker.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/Expander.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/Dialog.xaml" />
+        <!--  Phase 2.5 component foundations  -->
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Badges.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Pagination.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/FilterToolbar.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/FormText.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>

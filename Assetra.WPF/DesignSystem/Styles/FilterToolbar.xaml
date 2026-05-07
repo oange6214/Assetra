@@ -1,0 +1,72 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        ══════════════════════════════════════════════════════════
+        FilterToolbar — search/filter row that sits above lists
+        ══════════════════════════════════════════════════════════
+        Carbon-inspired structure: left side hosts search + filter
+        controls, right side hosts table-level actions (export,
+        density, refresh). Visual styling uses Assetra brushes.
+
+        Reference layout:
+
+            <DockPanel Style="{StaticResource FilterToolbar.Container}">
+                <StackPanel DockPanel.Dock="Right"
+                            Style="{StaticResource FilterToolbar.ActionGroup}">
+                    <Button Style="{StaticResource AppToolbarButton}" .../>
+                    <Button Style="{StaticResource AppToolbarButton}" .../>
+                </StackPanel>
+                <StackPanel Style="{StaticResource FilterToolbar.FilterGroup}">
+                    <controls:SearchBox .../>
+                    <ComboBox Style="{StaticResource AppComboBox}" .../>
+                    <ComboBox Style="{StaticResource AppComboBox}" .../>
+                </StackPanel>
+            </DockPanel>
+
+        Use Gap.Sm (8 px) between adjacent filter controls; the
+        styles below pre-set Margin to that gap so consumers can
+        just drop controls in.
+    -->
+
+    <Style x:Key="FilterToolbar.Container" TargetType="DockPanel">
+        <Setter Property="LastChildFill" Value="True" />
+        <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <Style x:Key="FilterToolbar.FilterGroup" TargetType="StackPanel">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="FilterToolbar.ActionGroup" TargetType="StackPanel">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+
+    <!--
+        Margin helper styles for filter children. Apply directly to
+        each control inside FilterGroup/ActionGroup so consumers don't
+        hand-pick Margin per filter.
+    -->
+    <Style x:Key="FilterToolbar.FilterItem" TargetType="FrameworkElement">
+        <Setter Property="Margin" Value="0,0,8,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="FilterToolbar.ActionItem" TargetType="FrameworkElement">
+        <Setter Property="Margin" Value="8,0,0,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="FilterToolbar.Divider" TargetType="Border">
+        <Setter Property="Width" Value="1" />
+        <Setter Property="Margin" Value="4,4" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="Background" Value="{DynamicResource Brush.Border}" />
+    </Style>
+
+</ResourceDictionary>

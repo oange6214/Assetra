@@ -166,4 +166,19 @@
         <Setter Property="MinWidth" Value="120" />
     </Style>
 
+    <!--
+        Pagination prev/next button — square ghost variant for chevron
+        glyphs. Disabled state should rely on Command.CanExecute instead
+        of a separate visual.
+    -->
+    <Style x:Key="PaginationNavButton" BasedOn="{StaticResource AppGhostButton}" TargetType="{x:Type Button}">
+        <Setter Property="MinWidth" Value="32" />
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Lg}" />
+        <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Regular}" />
+    </Style>
+
 </ResourceDictionary>
