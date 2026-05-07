@@ -107,11 +107,8 @@
                 <!--  資產 Expander  -->
                 <Expander
                     Margin="0,0,0,16"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    Foreground="{DynamicResource AppTextPrimary}"
-                    IsExpanded="True">
+                    IsExpanded="True"
+                    Style="{StaticResource AppExpander}">
                     <Expander.Header>
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Md}"
@@ -171,11 +168,8 @@
                 <!--  投資 Expander  -->
                 <Expander
                     Margin="0,0,0,16"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    Foreground="{DynamicResource AppTextPrimary}"
-                    IsExpanded="True">
+                    IsExpanded="True"
+                    Style="{StaticResource AppExpander}">
                     <Expander.Header>
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Md}"
@@ -235,11 +229,8 @@
                 <!--  負債 Expander  -->
                 <Expander
                     Margin="0,0,0,16"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    Foreground="{DynamicResource AppTextPrimary}"
-                    IsExpanded="True">
+                    IsExpanded="True"
+                    Style="{StaticResource AppExpander}">
                     <Expander.Header>
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Md}"
