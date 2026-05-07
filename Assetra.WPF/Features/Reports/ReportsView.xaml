@@ -48,14 +48,34 @@
                     ToolTip="{DynamicResource Reports.PrevMonth}">
                     <ds:AppIcon FontSize="16" Symbol="ChevronLeft24" />
                 </Button>
-                <TextBlock
-                    Margin="12,0"
+
+                <!--
+                    Direct year/month selection — replaces the prev/next-only
+                    pattern that made jumping across years tedious.
+                    Auto-loads on selection via ReportsViewModel.OnYearChanged
+                    / OnMonthChanged.
+                -->
+                <ComboBox
+                    Margin="12,0,4,0"
+                    Width="84"
                     VerticalAlignment="Center"
-                    FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
-                    FontSize="{DynamicResource Font.Size.Lg}"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource AppTextPrimary}"
-                    Text="{Binding MonthHeader}" />
+                    ItemsSource="{Binding YearOptions}"
+                    SelectedItem="{Binding Year}"
+                    Style="{StaticResource AppComboBox}" />
+                <ComboBox
+                    Margin="0,0,12,0"
+                    Width="60"
+                    VerticalAlignment="Center"
+                    ItemsSource="{Binding MonthOptions}"
+                    SelectedItem="{Binding Month}"
+                    Style="{StaticResource AppComboBox}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding StringFormat={}{0:D2}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
                 <Button
                     Width="32"
                     Height="32"

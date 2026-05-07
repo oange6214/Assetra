@@ -148,12 +148,39 @@ public sealed partial class ReportsViewModel : ObservableObject
         _year = today.Year;
         _month = today.Month;
 
+        // Year picker covers 10 years back to 1 year forward — wide enough
+        // for historical review yet tight enough to keep the dropdown short.
+        YearOptions = Enumerable.Range(today.Year - 10, 12).ToList();
+        MonthOptions = Enumerable.Range(1, 12).ToList();
+
         if (_currency is not null)
             _currency.CurrencyChanged += OnCurrencyChanged;
         if (_localization is not null)
             _localization.LanguageChanged += OnLanguageChanged;
         if (_appSettings is not null)
             _appSettings.Changed += OnSettingsChanged;
+    }
+
+    public IReadOnlyList<int> YearOptions { get; }
+    public IReadOnlyList<int> MonthOptions { get; }
+
+    /// <summary>
+    /// Suppresses auto-reload while the prev/next month commands mutate
+    /// both Year and Month — without this, going from Jan to Dec of the
+    /// previous year would trigger two reloads.
+    /// </summary>
+    private bool _suppressAutoLoad;
+
+    partial void OnYearChanged(int value)
+    {
+        if (_suppressAutoLoad) return;
+        _ = LoadAsync();
+    }
+
+    partial void OnMonthChanged(int value)
+    {
+        if (_suppressAutoLoad) return;
+        _ = LoadAsync();
     }
 
     public string MonthHeader => $"{Year}-{Month:D2}";
@@ -460,16 +487,26 @@ public sealed partial class ReportsViewModel : ObservableObject
     [RelayCommand]
     private async Task PrevMonthAsync()
     {
-        if (Month == 1) { Year--; Month = 12; }
-        else            { Month--; }
+        _suppressAutoLoad = true;
+        try
+        {
+            if (Month == 1) { Year--; Month = 12; }
+            else            { Month--; }
+        }
+        finally { _suppressAutoLoad = false; }
         await LoadAsync().ConfigureAwait(true);
     }
 
     [RelayCommand]
     private async Task NextMonthAsync()
     {
-        if (Month == 12) { Year++; Month = 1; }
-        else             { Month++; }
+        _suppressAutoLoad = true;
+        try
+        {
+            if (Month == 12) { Year++; Month = 1; }
+            else             { Month++; }
+        }
+        finally { _suppressAutoLoad = false; }
         await LoadAsync().ConfigureAwait(true);
     }
 
