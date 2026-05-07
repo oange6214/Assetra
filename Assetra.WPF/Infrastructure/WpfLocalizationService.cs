@@ -1,4 +1,7 @@
+using System.Globalization;
+using System.Threading;
 using System.Windows;
+using System.Windows.Markup;
 using Assetra.Core.Interfaces;
 using Serilog;
 
@@ -31,15 +34,28 @@ public sealed class WpfLocalizationService : ILocalizationService
 
     public event EventHandler? LanguageChanged;
 
+    public WpfLocalizationService()
+    {
+        ApplyCulture(CurrentLanguage);
+    }
+
     public string Get(string key, string fallback = "")
         => System.Windows.Application.Current?.Resources[key] as string ?? fallback;
 
     public void SetLanguage(string languageCode)
     {
-        if (string.IsNullOrWhiteSpace(languageCode) || CurrentLanguage == languageCode)
+        if (string.IsNullOrWhiteSpace(languageCode))
             return;
         try
         {
+            ApplyCulture(languageCode);
+
+            if (CurrentLanguage == languageCode)
+            {
+                LanguageChanged?.Invoke(this, EventArgs.Empty);
+                return;
+            }
+
             var uri = new Uri(string.Format(DictUriFormat, languageCode));
             var dict = new ResourceDictionary { Source = uri };
 
@@ -56,6 +72,23 @@ public sealed class WpfLocalizationService : ILocalizationService
         catch (Exception ex)
         {
             Log.Warning(ex, "Failed to switch language to {LanguageCode}", languageCode);
+        }
+    }
+
+    private static void ApplyCulture(string languageCode)
+    {
+        var culture = CultureInfo.GetCultureInfo(languageCode);
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
+        Thread.CurrentThread.CurrentCulture = culture;
+        Thread.CurrentThread.CurrentUICulture = culture;
+
+        if (System.Windows.Application.Current is { } app)
+        {
+            var language = XmlLanguage.GetLanguage(culture.IetfLanguageTag);
+            app.MainWindow?.SetValue(FrameworkElement.LanguageProperty, language);
+            foreach (Window window in app.Windows)
+                window.SetValue(FrameworkElement.LanguageProperty, language);
         }
     }
 }

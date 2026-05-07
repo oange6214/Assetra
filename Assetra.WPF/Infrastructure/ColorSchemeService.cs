@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Media;
-using Wpf.Ui.Appearance;
 
 namespace Assetra.WPF.Infrastructure;
 

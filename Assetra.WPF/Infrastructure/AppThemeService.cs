@@ -1,6 +1,5 @@
 using System.IO;
 using System.Windows;
-using Wpf.Ui.Appearance;
 
 namespace Assetra.WPF.Infrastructure;
 
@@ -9,10 +8,6 @@ public sealed class AppThemeService : IThemeService
     private static readonly string ThemeFile = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "Assetra", "theme.txt");
-
-    /// <summary>WPF-UI theme dictionary URI prefix.</summary>
-    private const string WpfUiThemePath =
-        "pack://application:,,,/Wpf.Ui;component/Resources/Theme/";
 
     public ApplicationTheme CurrentTheme { get; private set; }
 
@@ -35,65 +30,11 @@ public sealed class AppThemeService : IThemeService
 
     private static void ApplyInternal(ApplicationTheme theme)
     {
-        // 1. Swap WPF-UI's own ThemesDictionary (Light / Dark control styles).
-        // Keep this resource-only for now: ApplicationThemeManager.Apply()
-        // also takes over the FluentWindow chrome/backdrop and requires
-        // ExtendsContentIntoTitleBar=True. Assetra still has a custom shell
-        // (TitleBar + NavRail + content grid), so that runtime chrome handoff
-        // can collapse the shell into a blank/unstyled surface.
-        SwapWpfUiThemeDictionary(theme);
-
-        // 2. Swap Assetra's semantic palette (Dark.xaml <-> Light.xaml). These
-        // tokens intentionally stay as aliases above WPF-UI's control resources,
-        // and also override AccentFillColor* / SystemAccentColor* keys so Wpf.Ui
-        // controls (Primary button, NavView indicator, ToggleSwitch focus, ...)
-        // pin to AppAccent instead of the Windows colorization color.
-        //
-        // ApplicationAccentColorManager.Apply() is intentionally NOT called:
-        // it sets accent brushes directly on Application.Resources (not in a
-        // MergedDictionary), which would beat our overrides and re-introduce
-        // the Light/Dark shade drift on every toggle.
+        // 1. Swap Assetra's semantic palette (Dark.xaml <-> Light.xaml).
         SwapCustomDictionary(theme);
 
-        // 3. Re-apply colour-scheme convention (Taiwan / International).
+        // 2. Re-apply colour-scheme convention (Taiwan / International).
         ColorSchemeService.ReapplyCurrentScheme(theme);
-    }
-
-    // WPF-UI ThemesDictionary resource-only swap
-
-    /// <summary>
-    /// In-place replacement of the WPF-UI theme resource dictionary.
-    /// </summary>
-    private static void SwapWpfUiThemeDictionary(ApplicationTheme theme)
-    {
-        var themeName = theme == ApplicationTheme.Light ? "Light" : "Dark";
-        var newUri = new Uri(WpfUiThemePath + themeName + ".xaml", UriKind.Absolute);
-        var dicts = System.Windows.Application.Current.Resources.MergedDictionaries;
-
-        for (var i = 0; i < dicts.Count; i++)
-        {
-            var src = dicts[i].Source?.ToString();
-            if (src is not null
-                && src.Contains("wpf.ui;", StringComparison.OrdinalIgnoreCase)
-                && src.Contains("theme", StringComparison.OrdinalIgnoreCase))
-            {
-                dicts[i] = new ResourceDictionary { Source = newUri };
-                return;
-            }
-
-            // Also check nested merged dictionaries (ThemesDictionary nests its content)
-            for (var j = 0; j < dicts[i].MergedDictionaries.Count; j++)
-            {
-                var innerSrc = dicts[i].MergedDictionaries[j]?.Source?.ToString();
-                if (innerSrc is not null
-                    && innerSrc.Contains("wpf.ui;", StringComparison.OrdinalIgnoreCase)
-                    && innerSrc.Contains("theme", StringComparison.OrdinalIgnoreCase))
-                {
-                    dicts[i].MergedDictionaries[j] = new ResourceDictionary { Source = newUri };
-                    return;
-                }
-            }
-        }
     }
 
     // Custom palette swap

@@ -21,7 +21,6 @@ using Microsoft.Extensions.Hosting;
 using SkiaSharp;
 using Velopack;
 using Velopack.Sources;
-using Wpf.Ui.Appearance;
 
 namespace Assetra.WPF;
 
@@ -56,6 +55,7 @@ public partial class App : System.Windows.Application
         }
         catch (Exception ex)
         {
+            LogStartupFailure(ex);
 #if !DEBUG
             if (await TryApplyRecoveryUpdateAsync().ConfigureAwait(true))
             {
@@ -259,6 +259,21 @@ public partial class App : System.Windows.Application
         }
     }
 
+    private static void LogStartupFailure(Exception exception)
+    {
+        try
+        {
+            var logDir = Path.Combine(AppRuntimePaths.Resolve().DataDir, "logs");
+            Directory.CreateDirectory(logDir);
+            var logPath = Path.Combine(logDir, $"startup-failure-{DateTimeOffset.Now:yyyyMMdd-HHmmss}.log");
+            File.WriteAllText(logPath, exception.ToString());
+        }
+        catch
+        {
+            // Startup failure logging must never mask the original startup exception.
+        }
+    }
+
     /// <summary>
     /// Read saved theme and language from disk and apply them to the
     /// Application ResourceDictionaries before any window is shown.
@@ -277,24 +292,7 @@ public partial class App : System.Windows.Application
             if (File.Exists(themeFile)
                 && Enum.TryParse<ApplicationTheme>(File.ReadAllText(themeFile).Trim(), out var theme))
             {
-                // Swap WPF-UI's own ThemesDictionary (resource-only, no DWM ops)
-                var wpfUiThemeName = theme == ApplicationTheme.Light ? "Light" : "Dark";
-                var wpfUiUri = new Uri(
-                    $"pack://application:,,,/Wpf.Ui;component/Resources/Theme/{wpfUiThemeName}.xaml",
-                    UriKind.Absolute);
                 var dicts = Current.Resources.MergedDictionaries;
-                for (var i = 0; i < dicts.Count; i++)
-                {
-                    var src = dicts[i].Source?.ToString();
-                    if (src is not null
-                        && src.Contains("wpf.ui;", StringComparison.OrdinalIgnoreCase)
-                        && src.Contains("theme", StringComparison.OrdinalIgnoreCase))
-                    {
-                        dicts[i] = new ResourceDictionary { Source = wpfUiUri };
-                        break;
-                    }
-                }
-
                 // In-place swap of our custom palette (Dark.xaml ↔ Light.xaml)
                 var paletteName = theme == ApplicationTheme.Light ? "Light" : "Dark";
                 var newDict = new ResourceDictionary

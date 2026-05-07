@@ -32,6 +32,9 @@ public static class ThousandSeparatorBehavior
             tb.TextChanged += OnTextChanged;
             tb.Loaded += OnLoaded;
 
+            if (tb.ReadLocalValue(Control.HorizontalContentAlignmentProperty) == DependencyProperty.UnsetValue)
+                tb.HorizontalContentAlignment = HorizontalAlignment.Right;
+
             if (tb.IsLoaded)
                 _ = tb.Dispatcher.BeginInvoke(() => FormatTextBox(tb), DispatcherPriority.Loaded);
         }

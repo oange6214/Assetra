@@ -1,5 +1,3 @@
-using Wpf.Ui.Appearance;
-
 namespace Assetra.WPF.Infrastructure;
 
 public interface IThemeService
