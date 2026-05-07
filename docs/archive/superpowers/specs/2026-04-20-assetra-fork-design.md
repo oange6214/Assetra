@@ -345,7 +345,7 @@ public static async Task EnsureSchemaAsync(SqliteConnection conn)
 ### Risks
 
 1. **`StockScheduler` 移除 `IWatchlistRepository` 相依**
-   - 現有程式碼在 [StockScheduler.cs:57](Stockra.Infrastructure/Scheduling/StockScheduler.cs:57) 合併 watchlist 與 portfolio symbols
+   - 現有程式碼在 `Stockra.Infrastructure/Scheduling/StockScheduler.cs:57` 合併 watchlist 與 portfolio symbols
    - Assetra 要改成只讀 portfolio；建構子也要拔掉 `IWatchlistRepository` 參數
    - 測試要同步更新
 
