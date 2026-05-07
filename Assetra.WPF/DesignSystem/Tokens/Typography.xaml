@@ -26,4 +26,14 @@
     <FontWeight x:Key="Font.Weight.Medium">Medium</FontWeight>
     <FontWeight x:Key="Font.Weight.Semibold">SemiBold</FontWeight>
 
+    <!--
+        Line-height tokens — multiplied with font-size at consume time.
+        Tight    : single-line dense displays (numerics, badges).
+        Normal   : default body and most UI text.
+        Relaxed  : long-form descriptive text (helper text, paragraphs).
+    -->
+    <sys:Double x:Key="LineHeight.Tight">1.0</sys:Double>
+    <sys:Double x:Key="LineHeight.Normal">1.4</sys:Double>
+    <sys:Double x:Key="LineHeight.Relaxed">1.6</sys:Double>
+
 </ResourceDictionary>

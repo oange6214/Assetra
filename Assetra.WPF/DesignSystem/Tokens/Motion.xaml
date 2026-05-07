@@ -7,4 +7,23 @@
     <sys:Double x:Key="Motion.Normal">180</sys:Double>
     <sys:Double x:Key="Motion.Slow">240</sys:Double>
 
+    <!--
+        Easing curves — Fluent 2 approximations.
+        Use the IEasingFunction resources with DoubleAnimation.EasingFunction etc.
+        Use the KeySpline resources with SplineDoubleKeyFrame.KeySpline when
+        finer control over the cubic-bezier curve is needed.
+
+        Standard : decelerating, default for most UI transitions.
+        Enter    : entry/expand transitions (overlays opening, drawers sliding in).
+        Exit     : exit/collapse transitions (overlays closing, drawers sliding out).
+    -->
+    <CubicEase x:Key="Motion.Easing.Standard" EasingMode="EaseOut" />
+    <CubicEase x:Key="Motion.Easing.Enter" EasingMode="EaseOut" />
+    <CubicEase x:Key="Motion.Easing.Exit" EasingMode="EaseIn" />
+
+    <!--  Fluent 2 cubic-bezier specs for SplineDoubleKeyFrame.KeySpline.  -->
+    <KeySpline x:Key="Motion.Easing.Standard.Spline">0.55,0.55,0,1</KeySpline>
+    <KeySpline x:Key="Motion.Easing.Enter.Spline">0.1,0.9,0.2,1</KeySpline>
+    <KeySpline x:Key="Motion.Easing.Exit.Spline">0.7,0,1,0.5</KeySpline>
+
 </ResourceDictionary>

@@ -8,6 +8,7 @@
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/DesignTokens.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/Spacing.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/Typography.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/TextStyles.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/Sizes.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/Radius.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens/Border.xaml" />

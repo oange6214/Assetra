@@ -24,4 +24,16 @@
     <Thickness x:Key="Margin.Section">0,16,0,0</Thickness>
     <Thickness x:Key="Gap.Form">12</Thickness>
 
+    <!--
+        Gap tokens — used for inter-element spacing in StackPanel children,
+        Grid column/row gutters, and any place where a literal margin is
+        otherwise hard-coded. Mirrors the form rhythm rules in the
+        Fluent + Carbon plan.
+    -->
+    <sys:Double x:Key="Gap.Xs">4</sys:Double>
+    <sys:Double x:Key="Gap.Sm">8</sys:Double>
+    <sys:Double x:Key="Gap.Md">12</sys:Double>
+    <sys:Double x:Key="Gap.Lg">16</sys:Double>
+    <sys:Double x:Key="Gap.Xl">24</sys:Double>
+
 </ResourceDictionary>
