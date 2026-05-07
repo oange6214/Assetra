@@ -134,6 +134,59 @@ will have to be replaced later.
 - Use `ReportToolbar`, `ReportSection`, `ReportChartSection`, `ReportTableSection`, and `ReportExportBar` for monthly report sections.
 - Report sections should group financial figures into readable grids instead of long unstructured text blocks.
 
+## Motion
+
+Motion is calm and brief in finance UI: every transition should feel like
+acknowledgement, not entertainment. Reach for animation only when the
+movement makes a state change easier to follow.
+
+### Tokens
+
+- `Motion.Fast` (120 ms) — small, immediate feedback (focus rings, hover
+  brightening, selection acknowledgement, NavRail pane collapse).
+- `Motion.Normal` (180 ms) — most layout changes (drawer / dialog open
+  and close, expander toggle).
+- `Motion.Slow` (240 ms) — deliberate emphasis (overlay scrim fade-in,
+  full-page transition).
+- `Motion.Easing.Standard` — default decelerating curve. Use for the
+  overwhelming majority of transitions.
+- `Motion.Easing.Enter` — entry / expand transitions where content slides
+  or fades into view.
+- `Motion.Easing.Exit` — exit / collapse transitions where content slides
+  out or fades away.
+- `Motion.Easing.*.Spline` — `KeySpline` counterparts of the easings
+  above for `SplineDoubleKeyFrame.KeySpline` consumers.
+
+### When to use motion
+
+- Use motion for state changes that the user is already paying attention
+  to: a panel opening, a dialog appearing, a list collapsing, an item
+  being added or removed.
+- Use motion to make a non-obvious change visible: tab switching where
+  the new tab content can fade in over `Motion.Fast`, expander
+  expanding height with `Motion.Normal`.
+
+### When NOT to use motion
+
+- Repeated background updates: portfolio tickers, table cell value
+  refreshes, P/L numbers ticking — these should not animate. The user is
+  monitoring values; motion adds noise.
+- DataGrid row selection / hover: keep instant. Hover delay or animated
+  selection makes tables feel laggy under keyboard navigation.
+- Chart redraws: chart libraries already have their own motion; do not
+  layer additional animation on top.
+- Anything triggered by polling or background sync: no animation on
+  arrival.
+
+### Reference: NavRail collapse
+
+The reference implementation lives in `Shell/NavRailView.xaml`. The
+NavPane width animates between `Size.Sidebar.Width` and `56` over
+`Motion.Fast` with `Motion.Easing.Standard`, using
+`DataTrigger.EnterActions` and `DataTrigger.ExitActions` Storyboards
+with `FillBehavior=HoldEnd`. Replicate this pattern for any other pane
+toggle.
+
 ## Do Not
 
 - Do not introduce new `ui:` controls.

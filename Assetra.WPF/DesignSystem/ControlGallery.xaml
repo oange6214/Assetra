@@ -174,6 +174,95 @@
                     </StackPanel>
                 </StackPanel>
             </Grid>
+
+            <!--  Phase 2.5 component foundations  -->
+            <Border Style="{StaticResource FormSection}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource FormSectionHeader}" Text="Status Badges" />
+                    <StackPanel Orientation="Horizontal">
+                        <Border Style="{StaticResource StatusBadge.Neutral}" Margin="0,0,8,0">
+                            <TextBlock Style="{StaticResource StatusBadge.Text}" Text="Neutral" />
+                        </Border>
+                        <Border Style="{StaticResource StatusBadge.Success}" Margin="0,0,8,0">
+                            <TextBlock Style="{StaticResource StatusBadge.Text}" Text="Active" />
+                        </Border>
+                        <Border Style="{StaticResource StatusBadge.Warning}" Margin="0,0,8,0">
+                            <TextBlock Style="{StaticResource StatusBadge.Text}" Text="Pending" />
+                        </Border>
+                        <Border Style="{StaticResource StatusBadge.Danger}" Margin="0,0,8,0">
+                            <TextBlock Style="{StaticResource StatusBadge.Text}" Text="Overdue" />
+                        </Border>
+                        <Border Style="{StaticResource StatusBadge.Info}" Margin="0,0,8,0">
+                            <TextBlock Style="{StaticResource StatusBadge.Text}" Text="Info" />
+                        </Border>
+                        <Border Style="{StaticResource StatusBadge.Special}" Margin="0,0,8,0">
+                            <TextBlock Style="{StaticResource StatusBadge.Text}" Text="Special" />
+                        </Border>
+                        <Border Style="{StaticResource StatusBadge.Accent}" Margin="0,0,8,0">
+                            <TextBlock Style="{StaticResource StatusBadge.Text}" Text="Selected" />
+                        </Border>
+                        <Border Style="{StaticResource StatusBadge.Muted}">
+                            <TextBlock Style="{StaticResource StatusBadge.Text}" Text="Archived" />
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource FormSection}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource FormSectionHeader}" Text="Pagination" />
+                    <DockPanel Style="{StaticResource Pagination.Container}">
+                        <Button DockPanel.Dock="Left" Style="{StaticResource PaginationNavButton}" Content="‹" />
+                        <Button DockPanel.Dock="Right" Style="{StaticResource PaginationNavButton}" Content="›" />
+                        <TextBlock Style="{StaticResource Pagination.Indicator}" Text="Page 3 of 12" />
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource FormSection}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource FormSectionHeader}" Text="Form Vertical Rhythm" />
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource Form.FieldLabel}" Text="Amount" />
+                        <TextBox Style="{StaticResource AppMoneyTextBox}" Text="12,345.00" />
+                        <TextBlock Style="{StaticResource Form.HelperText}" Text="Enter the transaction amount in TWD." />
+                    </StackPanel>
+                    <Border Style="{StaticResource Form.SectionGap}" />
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource Form.FieldLabel}" Text="Currency" />
+                        <ComboBox Style="{StaticResource AppComboBox}">
+                            <ComboBoxItem Content="TWD" IsSelected="True" />
+                            <ComboBoxItem Content="USD" />
+                            <ComboBoxItem Content="JPY" />
+                        </ComboBox>
+                        <TextBlock Style="{StaticResource Form.ErrorText}" Text="Currency does not match account base currency." />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource FormSection}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource FormSectionHeader}" Text="Filter Toolbar" />
+                    <DockPanel Style="{StaticResource FilterToolbar.Container}">
+                        <StackPanel DockPanel.Dock="Right" Style="{StaticResource FilterToolbar.ActionGroup}">
+                            <Button Style="{StaticResource AppToolbarButton}" Margin="0,0,0,0">
+                                <ds:AppIcon Symbol="ArrowDownload24" />
+                            </Button>
+                            <Button Style="{StaticResource AppToolbarButton}" Margin="8,0,0,0">
+                                <ds:AppIcon Symbol="Settings24" />
+                            </Button>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource FilterToolbar.FilterGroup}">
+                            <TextBox Style="{StaticResource AppTextBox}" MinWidth="200" Margin="0,0,8,0" Text="Search…" />
+                            <ComboBox Style="{StaticResource AppComboBox}" MinWidth="120">
+                                <ComboBoxItem Content="All types" IsSelected="True" />
+                                <ComboBoxItem Content="Buy" />
+                                <ComboBoxItem Content="Sell" />
+                            </ComboBox>
+                        </StackPanel>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

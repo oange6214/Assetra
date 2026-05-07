@@ -290,16 +290,28 @@ Add or clarify these token groups before major page consolidation begins:
       financial values in tables and metric grids. *(Done in commit 10698a5:
       TextStyle.Numeric.{Display,Body,Caption} with Typography.NumeralAlignment=Tabular.)*
 - [ ] Replace recurring local spacing literals with token references during
-      page migration instead of adding new one-off margins.
+      page migration instead of adding new one-off margins. *(Open: ~29
+      candidate `<ColumnDefinition Width="N">` / `<RowDefinition Height="N">`
+      sites identified across feature pages where N matches a Gap token.
+      Deferred to per-page migration in Phase 3-6 to keep diffs focused.)*
 
 ### Phase 2: Layout Foundation
 
-- [ ] Audit feature pages for page-level `MaxWidth`.
-- [ ] Audit feature pages for root-level `HorizontalAlignment="Center"`.
-- [ ] Audit feature pages for root-level `VerticalAlignment="Center"`.
-- [ ] Replace page-local layout wrappers with canonical page hosts.
-- [ ] Ensure tabs stretch selected content horizontally and vertically.
-- [ ] Ensure loaded list/table content stretches to available space.
+- [x] Audit feature pages for page-level `MaxWidth`. *(Done: no page-level
+      `MaxWidth` violations. All `MaxWidth` instances in Categories, Goals,
+      Recurring, Settings are inner-form readability constraints, not page roots.)*
+- [x] Audit feature pages for root-level `HorizontalAlignment="Center"`.
+      *(Done: zero matches across Features/.)*
+- [x] Audit feature pages for root-level `VerticalAlignment="Center"`.
+      *(Done: zero matches across Features/.)*
+- [x] Replace page-local layout wrappers with canonical page hosts. *(Done as
+      part of v0.22-v0.23 native UI migration: 12/12 feature pages use
+      `PageRootGrid` + `PageHeaderDock`/`ListPageHeader` + `AppDialogShell`.)*
+- [x] Ensure tabs stretch selected content horizontally and vertically. *(Done
+      via `PageTabHost` style in PageLayout.xaml.)*
+- [x] Ensure loaded list/table content stretches to available space. *(Done:
+      8 pages consume `AppDataGrid`; lists use `ListContentHost` for vertical
+      stretch.)*
 
 ### Phase 2.5: Component Foundations
 
@@ -380,10 +392,17 @@ adoption and visual regression coverage. Component primitives themselves were
 delivered in Phase 2.5; this phase wires them up across the gallery and adds
 motion behavior.
 
-- [ ] Add motion usage guidance and consume motion tokens where transitions
+- [x] Add motion usage guidance and consume motion tokens where transitions
       improve clarity without making finance workflows feel noisy.
-- [ ] Extend ControlGallery to cover badges, pagination, validation states,
-      filter toolbar, and motion-capable controls.
+      *(Done: DesignSystem/USAGE.md "Motion" section documents tokens, when
+      to use, when NOT to use, and the NavRail collapse reference
+      implementation. NavRail is the first wired consumer.)*
+- [x] Extend ControlGallery to cover badges, pagination, validation states,
+      filter toolbar, and motion-capable controls. *(Done: ControlGallery.xaml
+      now showcases StatusBadge.{Neutral,Success,Warning,Danger,Info,Special,
+      Accent,Muted}, Pagination layout, Form Vertical Rhythm with helper +
+      error states, and FilterToolbar pattern. NavRail collapse animation is
+      visible in the live shell.)*
 
 ## Acceptance Rules
 
