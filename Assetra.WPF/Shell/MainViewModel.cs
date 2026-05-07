@@ -25,7 +25,6 @@ using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Wpf.Ui.Appearance;
 
 namespace Assetra.WPF.Shell;
 
@@ -183,6 +182,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _themeService = themeService;
         _searchService = searchService;
         CurrentTheme = themeService.CurrentTheme;
+
+        Portfolio.AttachTabViewModels(Dashboard, Allocation);
     }
 
     public void Dispose()

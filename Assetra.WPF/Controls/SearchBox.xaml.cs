@@ -67,4 +67,10 @@ public partial class SearchBox : UserControl
     }
 
     public SearchBox() => InitializeComponent();
+
+    private void ClearButton_Click(object sender, RoutedEventArgs e)
+    {
+        Text = string.Empty;
+        e.Handled = true;
+    }
 }

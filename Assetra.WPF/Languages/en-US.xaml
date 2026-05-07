@@ -877,7 +877,10 @@
     <sys:String x:Key="Dashboard.Budget.Budget">Budget</sys:String>
     <sys:String x:Key="Dashboard.Budget.Empty">No cash income or spending records this month. Investment trades are not included here.</sys:String>
 
-    <sys:String x:Key="Common.Delete">Delete</sys:String>
+  <sys:String x:Key="Common.Delete">Delete</sys:String>
+  <sys:String x:Key="Common.DeleteConfirmTitle">Delete item</sys:String>
+  <sys:String x:Key="Common.DeleteConfirmPrefix">Delete "</sys:String>
+  <sys:String x:Key="Common.DeleteConfirmSuffix">"? This cannot be undone.</sys:String>
 
     <!-- Recurring transactions / subscriptions -->
     <sys:String x:Key="Nav.Recurring">Subscriptions</sys:String>
@@ -1065,10 +1068,16 @@
     <sys:String x:Key="Reports.Performance.Benchmark">Benchmark (0050.TW)</sys:String>
     <sys:String x:Key="Reports.Performance.Alpha">Alpha</sys:String>
     <sys:String x:Key="Reports.Performance.Attribution">Performance Attribution</sys:String>
+    <sys:String x:Key="Reports.Performance.Attribution.Empty">No investment P&amp;L attribution is available for this period.</sys:String>
+    <sys:String x:Key="Reports.Performance.Attribution.Realized">Realized P&amp;L</sys:String>
+    <sys:String x:Key="Reports.Performance.Attribution.Dividend">Dividends</sys:String>
+    <sys:String x:Key="Reports.Performance.Attribution.Commission">Commissions</sys:String>
+    <sys:String x:Key="Reports.Performance.Attribution.Unrealized">Unrealized change</sys:String>
     <sys:String x:Key="Reports.Risk.AnnualizedVolatility">Annualized Volatility</sys:String>
     <sys:String x:Key="Reports.Risk.MaxDrawdown">Max Drawdown</sys:String>
     <sys:String x:Key="Reports.Risk.SharpeRatio">Sharpe Ratio</sys:String>
     <sys:String x:Key="Reports.Risk.Hhi">Concentration HHI</sys:String>
+    <sys:String x:Key="Reports.Risk.TopHoldings.Empty">No concentration data is available yet.</sys:String>
     <sys:String x:Key="Portfolio.Allocation.Header.MarketValue">Market Value</sys:String>
     <sys:String x:Key="Portfolio.Allocation.Header.ActualWeight">Actual Weight</sys:String>
     <sys:String x:Key="Portfolio.Allocation.Header.Pnl">P&amp;L</sys:String>

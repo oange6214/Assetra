@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Assetra.WPF.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     x:Name="Root"
     mc:Ignorable="d">
 
@@ -27,7 +27,7 @@
                         <Border
                             x:Name="Bd"
                             Background="{TemplateBinding Background}"
-                            CornerRadius="{StaticResource RadiusSm}">
+                            CornerRadius="{StaticResource Radius.Sm}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
@@ -70,6 +70,84 @@
             <Setter Property="FontSize" Value="11" />
             <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
         </Style>
+
+        <Style x:Key="DateRangeIconButton" TargetType="Button">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Chrome"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DateRangeSecondaryButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+            <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+            <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Chrome"
+                            MinHeight="{TemplateBinding MinHeight}"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                            <ContentPresenter
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                RecognizesAccessKey="True"
+                                TextElement.Foreground="{TemplateBinding Foreground}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <!--
@@ -93,7 +171,7 @@
                         Background="{DynamicResource AppBackground}"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusSm}">
+                        CornerRadius="{StaticResource Radius.Sm}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -102,7 +180,7 @@
                             </Grid.ColumnDefinitions>
 
                             <!--  左：行事曆圖示（Material Design 的 CalendarBlank）  -->
-                            <ui:SymbolIcon
+                            <ds:AppIcon
                                 Grid.Column="0"
                                 Width="14"
                                 Height="14"
@@ -117,7 +195,7 @@
                                 Grid.Column="1"
                                 Margin="0,0,4,0"
                                 VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeSm}"
+                                FontSize="{StaticResource Font.Size.Sm}"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{Binding DisplayText}"
                                 TextTrimming="CharacterEllipsis" />
@@ -134,24 +212,26 @@
         </ToggleButton>
 
         <!--  清除 X — 疊在 ToggleButton 之上、右側；獨立 Button 以不觸發外層 toggle  -->
-        <ui:Button
+        <Button
             Width="22"
             Height="22"
             Margin="0,0,6,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
-            Appearance="Transparent"
+            Background="Transparent"
+            BorderBrush="Transparent"
             Click="ClearButton_Click"
             Cursor="Hand"
             FocusVisualStyle="{StaticResource FocusVisual}"
+            Style="{StaticResource DateRangeIconButton}"
             Visibility="{Binding HasValue, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <ui:SymbolIcon
+            <ds:AppIcon
                 Width="10"
                 Height="10"
                 FontSize="10"
                 Foreground="{DynamicResource AppTextMuted}"
                 Symbol="Dismiss24" />
-        </ui:Button>
+        </Button>
 
         <!--  Popup：兩個月份行事曆  -->
         <Popup
@@ -166,7 +246,7 @@
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
-                CornerRadius="{StaticResource RadiusSm}">
+                CornerRadius="{StaticResource Radius.Sm}">
                 <StackPanel>
                     <!--  起迄輸入 + 重設  -->
                     <Grid Margin="0,0,0,12">
@@ -184,8 +264,8 @@
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding StartDateText, UpdateSourceTrigger=LostFocus}"
                             Typography.NumeralAlignment="Tabular" />
@@ -198,19 +278,19 @@
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding EndDateText, UpdateSourceTrigger=LostFocus}"
                             Typography.NumeralAlignment="Tabular" />
-                        <ui:Button
+                        <Button
                             Grid.Column="2"
                             Height="30"
                             Padding="12,0"
-                            Appearance="Secondary"
                             Click="Reset_Click"
                             Content="{DynamicResource DateRangePicker.Reset}"
-                            FontSize="{StaticResource FontSizeSm}" />
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            Style="{StaticResource DateRangeSecondaryButton}" />
                     </Grid>
 
                     <!--  兩月並排  -->
@@ -229,27 +309,29 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <ui:Button
+                                <Button
                                     Grid.Column="0"
                                     Width="24"
                                     Height="24"
                                     Padding="0"
-                                    Appearance="Transparent"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent"
                                     Click="PrevMonth_Click"
                                     Cursor="Hand"
-                                    FocusVisualStyle="{StaticResource FocusVisual}">
-                                    <ui:SymbolIcon
+                                    FocusVisualStyle="{StaticResource FocusVisual}"
+                                    Style="{StaticResource DateRangeIconButton}">
+                                    <ds:AppIcon
                                         Width="12"
                                         Height="12"
                                         FontSize="12"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Symbol="ChevronLeft24" />
-                                </ui:Button>
+                                </Button>
                                 <TextBlock
                                     Grid.Column="1"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{Binding LeftMonthLabel}" />
@@ -294,26 +376,28 @@
                                     Grid.Column="1"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    FontSize="{StaticResource FontSizeBase}"
+                                    FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{Binding RightMonthLabel}" />
-                                <ui:Button
+                                <Button
                                     Grid.Column="2"
                                     Width="24"
                                     Height="24"
                                     Padding="0"
-                                    Appearance="Transparent"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent"
                                     Click="NextMonth_Click"
                                     Cursor="Hand"
-                                    FocusVisualStyle="{StaticResource FocusVisual}">
-                                    <ui:SymbolIcon
+                                    FocusVisualStyle="{StaticResource FocusVisual}"
+                                    Style="{StaticResource DateRangeIconButton}">
+                                    <ds:AppIcon
                                         Width="12"
                                         Height="12"
                                         FontSize="12"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Symbol="ChevronRight24" />
-                                </ui:Button>
+                                </Button>
                             </Grid>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource WeekdayHeader}" Text="Su" />

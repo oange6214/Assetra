@@ -4,8 +4,43 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style x:Key="SearchBoxClearButton" TargetType="Button">
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="Padding" Value="6" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Chrome"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
 
     <!--
         Outer filter bar — 獨立模式時有 AppSurface 背景 + 底線分隔；
@@ -38,19 +73,88 @@
                 Content="{Binding RightContent, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 DockPanel.Dock="Right" />
 
-            <ui:TextBox
+            <Border
                 MinHeight="34"
-                ClearButtonEnabled="True"
-                FontFamily="{StaticResource FontBase}"
-                FontSize="{StaticResource FontSizeSm}"
-                PlaceholderText="{Binding Placeholder, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}">
-                <ui:TextBox.Icon>
-                    <ui:IconSourceElement>
-                        <ui:SymbolIconSource Symbol="Search24" />
-                    </ui:IconSourceElement>
-                </ui:TextBox.Icon>
-            </ui:TextBox>
+                Background="{DynamicResource AppBackground}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource Radius.Sm}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="32" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="30" />
+                    </Grid.ColumnDefinitions>
+
+                    <ds:AppIcon
+                        Grid.Column="0"
+                        Width="14"
+                        Height="14"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        IsHitTestVisible="False"
+                        Symbol="Search24" />
+
+                    <TextBox
+                        x:Name="InputBox"
+                        Grid.Column="1"
+                        MinHeight="0"
+                        Padding="0"
+                        VerticalContentAlignment="Center"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="0,0,4,0"
+                        VerticalAlignment="Center"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        IsHitTestVisible="False"
+                        Text="{Binding Placeholder, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=InputBox}" Value="">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <Button
+                        Grid.Column="2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Click="ClearButton_Click">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource SearchBoxClearButton}" TargetType="Button">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=InputBox}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <ds:AppIcon
+                            Width="10"
+                            Height="10"
+                            FontSize="10"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Symbol="Dismiss24" />
+                    </Button>
+                </Grid>
+            </Border>
         </DockPanel>
     </Border>
 </UserControl>

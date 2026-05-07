@@ -881,7 +881,10 @@
     <sys:String x:Key="Dashboard.Budget.Budget">總預算</sys:String>
     <sys:String x:Key="Dashboard.Budget.Empty">本月尚無現金收支紀錄；投資買賣不列入此卡。</sys:String>
 
-    <sys:String x:Key="Common.Delete">刪除</sys:String>
+  <sys:String x:Key="Common.Delete">刪除</sys:String>
+  <sys:String x:Key="Common.DeleteConfirmTitle">刪除項目</sys:String>
+  <sys:String x:Key="Common.DeleteConfirmPrefix">確定要刪除「</sys:String>
+  <sys:String x:Key="Common.DeleteConfirmSuffix">」嗎？此動作無法復原。</sys:String>
 
     <!--  Recurring transactions / subscriptions  -->
     <sys:String x:Key="Nav.Recurring">訂閱排程</sys:String>
@@ -1069,10 +1072,16 @@
     <sys:String x:Key="Reports.Performance.Benchmark">指標（0050.TW）</sys:String>
     <sys:String x:Key="Reports.Performance.Alpha">超額報酬</sys:String>
     <sys:String x:Key="Reports.Performance.Attribution">績效拆解</sys:String>
+    <sys:String x:Key="Reports.Performance.Attribution.Empty">本期沒有可拆解的投資損益。</sys:String>
+    <sys:String x:Key="Reports.Performance.Attribution.Realized">已實現損益</sys:String>
+    <sys:String x:Key="Reports.Performance.Attribution.Dividend">股利</sys:String>
+    <sys:String x:Key="Reports.Performance.Attribution.Commission">手續費</sys:String>
+    <sys:String x:Key="Reports.Performance.Attribution.Unrealized">未實現變動</sys:String>
     <sys:String x:Key="Reports.Risk.AnnualizedVolatility">年化波動率</sys:String>
     <sys:String x:Key="Reports.Risk.MaxDrawdown">最大回撤</sys:String>
     <sys:String x:Key="Reports.Risk.SharpeRatio">夏普比率</sys:String>
     <sys:String x:Key="Reports.Risk.Hhi">集中度 HHI</sys:String>
+    <sys:String x:Key="Reports.Risk.TopHoldings.Empty">目前沒有持股集中度資料。</sys:String>
     <sys:String x:Key="Portfolio.Allocation.Header.MarketValue">市值</sys:String>
     <sys:String x:Key="Portfolio.Allocation.Header.ActualWeight">實際比例</sys:String>
     <sys:String x:Key="Portfolio.Allocation.Header.Pnl">損益</sys:String>

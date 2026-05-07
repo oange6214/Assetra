@@ -1,13 +1,14 @@
-<ui:FluentWindow
+<Window
     x:Class="Assetra.WPF.Shell.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:chrome="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:shell="clr-namespace:Assetra.WPF.Shell"
     xmlns:snackbar="clr-namespace:Assetra.WPF.Features.Snackbar"
     xmlns:statusbar="clr-namespace:Assetra.WPF.Features.StatusBar"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     x:Name="MainShell"
     Title="{DynamicResource App.Title}"
     Width="1600"
@@ -15,13 +16,23 @@
     MinWidth="1280"
     MinHeight="800"
     Background="{DynamicResource AppBackground}"
-    ExtendsContentIntoTitleBar="False"
     Icon="pack://application:,,,/Assetra.WPF;component/Assets/windows/assetra-app.ico"
+    ResizeMode="CanResize"
+    WindowStyle="None"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 
+    <chrome:WindowChrome.WindowChrome>
+        <chrome:WindowChrome
+            CaptionHeight="48"
+            CornerRadius="0"
+            GlassFrameThickness="0"
+            ResizeBorderThickness="6"
+            UseAeroCaptionButtons="False" />
+    </chrome:WindowChrome.WindowChrome>
+
     <!--  Keyboard shortcuts  -->
-    <ui:FluentWindow.InputBindings>
+    <Window.InputBindings>
         <KeyBinding
             Key="K"
             Command="{Binding ToggleSearchCommand}"
@@ -34,7 +45,7 @@
             Key="Right"
             Command="{Binding NavRail.GoForwardCommand}"
             Modifiers="Alt" />
-    </ui:FluentWindow.InputBindings>
+    </Window.InputBindings>
 
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.LayoutTransform>
@@ -55,115 +66,163 @@
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorderLight}"
             BorderThickness="0,0,0,1">
-            <ui:TitleBar
-                x:Name="AppTitleBar"
-                Title="{DynamicResource App.Title}"
-                Background="Transparent"
-                Foreground="{DynamicResource AppTextPrimary}">
+            <Grid Height="48" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-                <ui:TitleBar.Icon>
-                    <ui:ImageIcon Source="{StaticResource AssetraLogo}" />
-                </ui:TitleBar.Icon>
+                <Image
+                    Grid.Column="0"
+                    Width="24"
+                    Height="24"
+                    Margin="14,0,10,0"
+                    VerticalAlignment="Center"
+                    Source="{StaticResource AssetraLogo}" />
 
-                <ui:TitleBar.Header>
-                    <!--
-                        Grid (Auto | * | Auto) prevents DockPanel clipping when the
-                        WPF-UI header region is narrower than expected.  The centre
-                        column absorbs all slack; neither side ever gets clipped.
-                    -->
-                    <Grid VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                <!--  Left: Back / Forward / Search  -->
+                <StackPanel
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    chrome:WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button
+                        Width="32"
+                        Height="32"
+                        Margin="0,0,0,0"
+                        Padding="0"
+                        Command="{Binding NavRail.GoBackCommand}"
+                        IsEnabled="{Binding NavRail.CanGoBack}"
+                        Style="{StaticResource AppIconButton}"
+                        ToolTip="{DynamicResource Nav.GoBack}"
+                        ToolTipService.ShowOnDisabled="True">
+                        <ds:AppIcon
+                            FontSize="{StaticResource Font.Size.Base}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Symbol="ChevronLeft24" />
+                    </Button>
+                    <Button
+                        Width="32"
+                        Height="32"
+                        Margin="2,0,0,0"
+                        Padding="0"
+                        Command="{Binding NavRail.GoForwardCommand}"
+                        IsEnabled="{Binding NavRail.CanGoForward}"
+                        Style="{StaticResource AppIconButton}"
+                        ToolTip="{DynamicResource Nav.GoForward}"
+                        ToolTipService.ShowOnDisabled="True">
+                        <ds:AppIcon
+                            FontSize="{StaticResource Font.Size.Base}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Symbol="ChevronRight24" />
+                    </Button>
+                    <Button
+                        x:Name="SearchIconBtn"
+                        Width="32"
+                        Height="32"
+                        Margin="8,0,0,0"
+                        Padding="0"
+                        Command="{Binding ToggleSearchCommand}"
+                        Style="{StaticResource AppIconButton}"
+                        ToolTip="Ctrl+K">
+                        <ds:AppIcon
+                            FontSize="{StaticResource Font.Size.Md}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Symbol="Search24" />
+                    </Button>
+                </StackPanel>
 
-                        <!--  Left: Back / Forward / Search  -->
-                        <StackPanel
-                            Grid.Column="0"
-                            Margin="-4,0,0,0"
-                            Orientation="Horizontal">
-                            <ui:Button
-                                Width="32"
-                                Height="32"
-                                Margin="4,0,0,0"
-                                Padding="0"
-                                Appearance="Transparent"
-                                Command="{Binding NavRail.GoBackCommand}"
-                                IsEnabled="{Binding NavRail.CanGoBack}"
-                                ToolTip="{DynamicResource Nav.GoBack}"
-                                ToolTipService.ShowOnDisabled="True">
-                                <ui:SymbolIcon
-                                    FontSize="{StaticResource FontSizeBase}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Symbol="ChevronLeft24" />
-                            </ui:Button>
-                            <ui:Button
-                                Width="32"
-                                Height="32"
-                                Margin="2,0,0,0"
-                                Padding="0"
-                                Appearance="Transparent"
-                                Command="{Binding NavRail.GoForwardCommand}"
-                                IsEnabled="{Binding NavRail.CanGoForward}"
-                                ToolTip="{DynamicResource Nav.GoForward}"
-                                ToolTipService.ShowOnDisabled="True">
-                                <ui:SymbolIcon
-                                    FontSize="{StaticResource FontSizeBase}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Symbol="ChevronRight24" />
-                            </ui:Button>
-                            <ui:Button
-                                x:Name="SearchIconBtn"
-                                Width="32"
-                                Height="32"
-                                Margin="8,0,0,0"
-                                Padding="0"
-                                Appearance="Transparent"
-                                Command="{Binding ToggleSearchCommand}"
-                                ToolTip="Ctrl+K">
-                                <ui:SymbolIcon
-                                    FontSize="{StaticResource FontSizeMd}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Symbol="Search24" />
-                            </ui:Button>
-                        </StackPanel>
+                <TextBlock
+                    Grid.Column="2"
+                    Margin="14,0"
+                    VerticalAlignment="Center"
+                    FontFamily="{StaticResource Font.Family.Base}"
+                    FontSize="{StaticResource Font.Size.Base}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    Text="{DynamicResource App.Title}" />
 
-                        <!--  Center column reserved for layout balance; section name lives in the NavRail.  -->
-
-                        <!--  Right: Theme toggle (Settings moved to NavRail bottom)  -->
-                        <StackPanel
-                            Grid.Column="2"
-                            Margin="0,0,8,0"
-                            Orientation="Horizontal">
-                            <ui:Button
-                                Width="32"
-                                Height="32"
-                                Padding="0"
-                                Appearance="Transparent"
-                                Command="{Binding ToggleThemeCommand}"
-                                ToolTip="{Binding ThemeToggleLabel}">
-                                <ui:SymbolIcon FontSize="{StaticResource FontSizeMd}" Foreground="{DynamicResource AppTextMuted}">
-                                    <ui:SymbolIcon.Style>
-                                        <Style TargetType="ui:SymbolIcon">
-                                            <Setter Property="Symbol" Value="WeatherSunny24" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding CurrentTheme}" Value="Dark">
-                                                    <Setter Property="Symbol" Value="WeatherMoon24" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ui:SymbolIcon.Style>
-                                </ui:SymbolIcon>
-                            </ui:Button>
-                        </StackPanel>
-
-                    </Grid>
-                </ui:TitleBar.Header>
-            </ui:TitleBar>
+                <!--  Right: Theme toggle + native window commands  -->
+                <StackPanel
+                    Grid.Column="3"
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    chrome:WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button
+                        Width="32"
+                        Height="32"
+                        Padding="0"
+                        Command="{Binding ToggleThemeCommand}"
+                        Style="{StaticResource AppIconButton}"
+                        ToolTip="{Binding ThemeToggleLabel}">
+                        <ds:AppIcon FontSize="{StaticResource Font.Size.Md}" Foreground="{DynamicResource AppTextMuted}">
+                            <ds:AppIcon.Style>
+                                <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
+                                    <Setter Property="Symbol" Value="WeatherSunny24" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CurrentTheme}" Value="Dark">
+                                            <Setter Property="Symbol" Value="WeatherMoon24" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ds:AppIcon.Style>
+                        </ds:AppIcon>
+                    </Button>
+                    <Button
+                        Width="40"
+                        Height="32"
+                        Margin="8,0,0,0"
+                        Padding="0"
+                        Click="MinimizeButton_Click"
+                        Style="{StaticResource AppIconButton}"
+                        ToolTip="Minimize">
+                        <ds:AppIcon
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Symbol="Subtract24" />
+                    </Button>
+                    <Button
+                        Width="40"
+                        Height="32"
+                        Margin="2,0,0,0"
+                        Padding="0"
+                        Click="MaximizeRestoreButton_Click"
+                        Style="{StaticResource AppIconButton}"
+                        ToolTip="Maximize">
+                        <ds:AppIcon FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextMuted}">
+                            <ds:AppIcon.Style>
+                                <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
+                                    <Setter Property="Symbol" Value="Square24" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding WindowState, ElementName=MainShell}" Value="Maximized">
+                                            <Setter Property="Symbol" Value="DualScreenSpan24" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ds:AppIcon.Style>
+                        </ds:AppIcon>
+                    </Button>
+                    <Button
+                        Width="40"
+                        Height="32"
+                        Margin="2,0,0,0"
+                        Padding="0"
+                        Click="CloseButton_Click"
+                        Style="{StaticResource AppIconButton}"
+                        ToolTip="Close">
+                        <ds:AppIcon
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Symbol="Dismiss24" />
+                    </Button>
+                </StackPanel>
+            </Grid>
         </Border>
 
-        <!--  ── Row 1: NavRailView (Wpf.Ui NavigationView pane + section content) ──  -->
+        <!--  ── Row 1: NavRailView pane + section content ──  -->
         <shell:NavRailView Grid.Row="1" />
 
         <!--  Search backdrop — sits above content, behind the popup HWnd  -->
@@ -192,7 +251,7 @@
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
-                CornerRadius="{StaticResource RadiusLg}">
+                CornerRadius="{StaticResource Radius.Lg}">
                 <Border.Width>
                     <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.52|360|620">
                         <Binding ElementName="MainShell" Path="ActualWidth" />
@@ -212,22 +271,22 @@
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,0,0,1">
                         <DockPanel>
-                            <ui:SymbolIcon
+                            <ds:AppIcon
                                 Margin="0,0,10,0"
                                 VerticalAlignment="Center"
                                 DockPanel.Dock="Left"
-                                FontSize="{StaticResource FontSizeLg}"
+                                FontSize="{StaticResource Font.Size.Lg}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 IsHitTestVisible="False"
                                 Symbol="Search24" />
-                            <ui:TextBox
+                            <TextBox
                                 x:Name="SearchPaletteInput"
                                 VerticalContentAlignment="Center"
                                 Background="Transparent"
                                 BorderThickness="0"
                                 FocusVisualStyle="{x:Null}"
-                                FontFamily="{StaticResource FontBase}"
-                                FontSize="{StaticResource FontSizeMd}"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Md}"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
                                 <TextBox.Style>
@@ -242,8 +301,8 @@
                                                             Stretch="None">
                                                             <VisualBrush.Visual>
                                                                 <TextBlock
-                                                                    FontFamily="{StaticResource FontBase}"
-                                                                    FontSize="{StaticResource FontSizeMd}"
+                                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                                    FontSize="{StaticResource Font.Size.Md}"
                                                                     Foreground="{DynamicResource AppTextMuted}"
                                                                     Text="{DynamicResource TitleBar.Search.Placeholder}" />
                                                             </VisualBrush.Visual>
@@ -254,7 +313,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </TextBox.Style>
-                            </ui:TextBox>
+                            </TextBox>
                         </DockPanel>
                     </Border>
 
@@ -263,8 +322,8 @@
                         <!--  Empty hint — shown when no results  -->
                         <TextBlock
                             Margin="16,16"
-                            FontFamily="{StaticResource FontBase}"
-                            FontSize="{StaticResource FontSizeSm}"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{DynamicResource TitleBar.Search.Hint}"
                             Visibility="{Binding SearchResults.Count, Converter={StaticResource ZeroToVisibleConverter}}" />
@@ -289,8 +348,8 @@
                                                 <TextBlock
                                                     Grid.Column="0"
                                                     MinWidth="60"
-                                                    FontFamily="{StaticResource FontBase}"
-                                                    FontSize="{StaticResource FontSizeBase}"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Base}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{Binding Symbol}" />
@@ -298,8 +357,8 @@
                                                     Grid.Column="1"
                                                     Margin="12,0,0,0"
                                                     VerticalAlignment="Center"
-                                                    FontFamily="{StaticResource FontBase}"
-                                                    FontSize="{StaticResource FontSizeSm}"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{Binding Name}"
                                                     TextTrimming="CharacterEllipsis" />
@@ -307,8 +366,8 @@
                                                     Grid.Column="2"
                                                     Margin="8,0,0,0"
                                                     VerticalAlignment="Center"
-                                                    FontFamily="{StaticResource FontBase}"
-                                                    FontSize="{StaticResource FontSizeXs}"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
                                                     Foreground="{DynamicResource AppTextMuted}"
                                                     Text="{Binding Exchange}" />
                                             </Grid>
@@ -335,4 +394,4 @@
         <statusbar:StatusBarView Grid.Row="2" DataContext="{Binding StatusBar}" />
 
     </Grid>
-</ui:FluentWindow>
+</Window>

@@ -16,7 +16,7 @@
         Background="{DynamicResource AppBackground}"
         BorderBrush="{DynamicResource AppBorder}"
         BorderThickness="1"
-        CornerRadius="{StaticResource RadiusXl}">
+        CornerRadius="{StaticResource Radius.Xl}">
         <StackPanel
             HorizontalAlignment="Center"
             VerticalAlignment="Center">
@@ -32,8 +32,8 @@
             <TextBlock
                 Margin="0,14,0,0"
                 HorizontalAlignment="Center"
-                FontFamily="{StaticResource FontBase}"
-                FontSize="{StaticResource FontSizeXl}"
+                FontFamily="{StaticResource Font.Family.Base}"
+                FontSize="{StaticResource Font.Size.Xl}"
                 FontWeight="Bold"
                 Foreground="{DynamicResource AppTextPrimary}"
                 Text="Assetra" />
@@ -42,8 +42,8 @@
             <TextBlock
                 Margin="0,4,0,0"
                 HorizontalAlignment="Center"
-                FontFamily="{StaticResource FontBase}"
-                FontSize="{StaticResource FontSizeSm}"
+                FontFamily="{StaticResource Font.Family.Base}"
+                FontSize="{StaticResource Font.Size.Sm}"
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{DynamicResource About.Description}" />
 
@@ -63,8 +63,8 @@
                 x:Name="StatusText"
                 Margin="0,8,0,0"
                 HorizontalAlignment="Center"
-                FontFamily="{StaticResource FontBase}"
-                FontSize="{StaticResource FontSizeXs}"
+                FontFamily="{StaticResource Font.Family.Base}"
+                FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppTextMuted}" />
         </StackPanel>
     </Border>

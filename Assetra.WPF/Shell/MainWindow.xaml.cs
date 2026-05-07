@@ -1,11 +1,10 @@
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using Wpf.Ui.Controls;
 
 namespace Assetra.WPF.Shell;
 
-public partial class MainWindow : FluentWindow
+public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel;
 
@@ -21,6 +20,17 @@ public partial class MainWindow : FluentWindow
 
     private void SearchBackdrop_MouseDown(object sender, MouseButtonEventArgs e) =>
         _viewModel.ToggleSearchCommand.Execute(null);
+
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e) =>
+        WindowState = WindowState.Minimized;
+
+    private void MaximizeRestoreButton_Click(object sender, RoutedEventArgs e) =>
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e) =>
+        Close();
 
     // Horizontally centers the search popup near the top of the window, matching
     // the previous command-palette placement.

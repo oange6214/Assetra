@@ -4,25 +4,134 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     x:Name="Root"
     mc:Ignorable="d">
 
+    <UserControl.Resources>
+        <Style x:Key="HexPickerButtonBase" TargetType="Button">
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+            <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+            <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Chrome"
+                            MinHeight="{TemplateBinding MinHeight}"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                            <ContentPresenter
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                RecognizesAccessKey="True"
+                                TextElement.Foreground="{TemplateBinding Foreground}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="HexPickerSecondaryButton" BasedOn="{StaticResource HexPickerButtonBase}" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AppHover}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="HexPickerPrimaryButton" BasedOn="{StaticResource HexPickerButtonBase}" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+            <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.92" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="HexPickerTextBox" TargetType="TextBox">
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+            <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+            <Setter Property="Background" Value="{DynamicResource AppBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CaretBrush" Value="{DynamicResource AppTextPrimary}" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border
+                            x:Name="Chrome"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                            <ScrollViewer
+                                x:Name="PART_ContentHost"
+                                Margin="{TemplateBinding Padding}"
+                                Focusable="False"
+                                HorizontalScrollBarVisibility="Hidden"
+                                VerticalScrollBarVisibility="Hidden" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            </Trigger>
+                            <Trigger Property="Validation.HasError" Value="True">
+                                <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AppDown}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <Grid>
-        <ui:Button
+        <Button
             x:Name="OpenButton"
             MinHeight="{Binding MinHeight, RelativeSource={RelativeSource AncestorType=UserControl}}"
             Padding="6,4"
             HorizontalContentAlignment="Stretch"
-            Appearance="Secondary"
             Click="OpenButton_OnClick"
-            Cursor="Hand">
+            Cursor="Hand"
+            Style="{StaticResource HexPickerSecondaryButton}">
             <DockPanel>
-                <ui:SymbolIcon
+                <ds:AppIcon
                     Margin="6,0,0,0"
                     VerticalAlignment="Center"
                     DockPanel.Dock="Right"
-                    FontSize="{StaticResource FontSizeXs}"
+                    FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Symbol="ChevronDown24" />
                 <Border
@@ -31,18 +140,18 @@
                     Background="{Binding SelectedColorHex, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource HexToBrushConverter}}"
                     BorderBrush="#33000000"
                     BorderThickness="1"
-                    CornerRadius="{StaticResource RadiusSm}"
+                    CornerRadius="{StaticResource Radius.Sm}"
                     DockPanel.Dock="Left" />
                 <TextBlock
                     Margin="8,0,0,0"
                     VerticalAlignment="Center"
-                    FontFamily="{StaticResource FontBase}"
-                    FontSize="{StaticResource FontSizeSm}"
+                    FontFamily="{StaticResource Font.Family.Base}"
+                    FontSize="{StaticResource Font.Size.Sm}"
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{Binding SelectedColorHex, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     Typography.NumeralAlignment="Tabular" />
             </DockPanel>
-        </ui:Button>
+        </Button>
 
         <Popup
             x:Name="PickerPopup"
@@ -57,7 +166,7 @@
                 Background="{DynamicResource AppSurface}"
                 BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
-                CornerRadius="{StaticResource RadiusMd}">
+                CornerRadius="{StaticResource Radius.Md}">
                 <Border.Effect>
                     <DropShadowEffect
                         BlurRadius="16"
@@ -68,7 +177,7 @@
                 <StackPanel MinWidth="220">
                     <TextBlock
                         Margin="0,0,0,8"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource HexColorPicker.Presets}" />
@@ -80,32 +189,32 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <ui:Button
+                                <Button
                                     Width="26"
                                     Height="26"
                                     Margin="0,0,6,6"
                                     Click="Swatch_OnClick"
                                     Cursor="Hand"
                                     Tag="{Binding}">
-                                    <ui:Button.Template>
-                                        <ControlTemplate TargetType="ui:Button">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
                                             <Border
                                                 Background="{Binding Converter={StaticResource HexToBrushConverter}}"
                                                 BorderBrush="#33000000"
                                                 BorderThickness="1"
-                                                CornerRadius="{StaticResource RadiusSm}">
+                                                CornerRadius="{StaticResource Radius.Sm}">
                                                 <ContentPresenter />
                                             </Border>
                                         </ControlTemplate>
-                                    </ui:Button.Template>
-                                </ui:Button>
+                                    </Button.Template>
+                                </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
                     <TextBlock
                         Margin="0,8,0,4"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="HEX" />
@@ -115,30 +224,50 @@
                             <ColumnDefinition Width="6" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <ui:TextBox
-                            x:Name="HexInput"
-                            Grid.Column="0"
-                            MinHeight="32"
-                            FontFamily="{StaticResource FontBase}"
-                            KeyDown="HexInput_OnKeyDown"
-                            MaxLength="7"
-                            PlaceholderText="#RRGGBB"
-                            Typography.NumeralAlignment="Tabular" />
-                        <ui:Button
+                        <Grid Grid.Column="0">
+                            <TextBox
+                                x:Name="HexInput"
+                                MinHeight="32"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                KeyDown="HexInput_OnKeyDown"
+                                MaxLength="7"
+                                Style="{StaticResource HexPickerTextBox}"
+                                Typography.NumeralAlignment="Tabular" />
+                            <TextBlock
+                                Margin="10,0"
+                                VerticalAlignment="Center"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                IsHitTestVisible="False"
+                                Text="#RRGGBB">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=HexInput}" Value="">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                        <Button
                             Grid.Column="2"
                             MinWidth="56"
                             MinHeight="32"
                             Padding="10,0"
-                            Appearance="Primary"
-                            Click="ApplyHex_OnClick">
+                            Click="ApplyHex_OnClick"
+                            Style="{StaticResource HexPickerPrimaryButton}">
                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource HexColorPicker.Apply}" />
-                        </ui:Button>
+                        </Button>
                     </Grid>
 
                     <TextBlock
                         x:Name="HexError"
                         Margin="0,4,0,0"
-                        FontSize="{StaticResource FontSizeXs}"
+                        FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppDown}"
                         Text="{DynamicResource HexColorPicker.HexInvalid}"
                         Visibility="Collapsed" />
