@@ -20,6 +20,11 @@
     <!--  Card defaults  -->
     <Thickness x:Key="Card.Padding">24</Thickness>
     <Thickness x:Key="Card.Padding.Compact">16</Thickness>
-    <CornerRadius x:Key="Card.Radius">16</CornerRadius>
+    <!--
+        Card.Radius aligned to Radius.Lg (8 px) so Dashboard hero/metric
+        cards, FormCard / FormSection containers, and AppExpander all
+        share one corner radius. Was 16 px historically.
+    -->
+    <CornerRadius x:Key="Card.Radius">8</CornerRadius>
 
 </ResourceDictionary>
