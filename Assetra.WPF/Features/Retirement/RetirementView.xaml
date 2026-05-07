@@ -301,7 +301,8 @@
                 <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Retirement.Empty.Hint}" />
                 <Button
                     Command="{Binding OpenAddFormCommand}"
-                    Style="{StaticResource AppPrimaryButton}"
+                    HorizontalAlignment="Center"
+                    Style="{StaticResource AppEmptyStatePrimaryAction}"
                     Visibility="{Binding IsFormOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                     <StackPanel Style="{StaticResource AppButtonContent}">
                         <ds:AppIcon

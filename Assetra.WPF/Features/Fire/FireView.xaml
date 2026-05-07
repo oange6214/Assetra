@@ -113,9 +113,8 @@
                 <Button
                     Command="{Binding CalculateCommand}"
                     Content="{DynamicResource Fire.Calculate}"
-                    Margin="0,16,0,0"
                     HorizontalAlignment="Center"
-                    Style="{StaticResource AppPrimaryButton}" />
+                    Style="{StaticResource AppEmptyStatePrimaryAction}" />
             </StackPanel>
 
             <ScrollViewer

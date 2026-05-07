@@ -158,12 +158,20 @@
         <Setter Property="Background" Value="{DynamicResource Brush.Surface}" />
     </Style>
 
+    <!--
+        Empty-state action buttons include a built-in top margin so they
+        sit comfortably below the description text. 24 px = Gap.Xl,
+        matching AppEmptyStateActionBar for pages that don't wrap the
+        button in the ActionBar StackPanel.
+    -->
     <Style x:Key="AppEmptyStatePrimaryAction" BasedOn="{StaticResource AppPrimaryButton}" TargetType="{x:Type Button}">
         <Setter Property="MinWidth" Value="120" />
+        <Setter Property="Margin" Value="0,24,0,0" />
     </Style>
 
     <Style x:Key="AppEmptyStateSecondaryAction" BasedOn="{StaticResource AppSecondaryButton}" TargetType="{x:Type Button}">
         <Setter Property="MinWidth" Value="120" />
+        <Setter Property="Margin" Value="0,24,0,0" />
     </Style>
 
     <!--

@@ -47,7 +47,12 @@
     </Style>
 
     <Style x:Key="EmptyStateHint" TargetType="TextBlock">
-        <Setter Property="Margin" Value="0,6,0,0" />
+        <!--
+            Title -> description gap: 8 px (Gap.Sm) for comfortable
+            two-line readability. Was 6 px which felt cramped against
+            the SemiBold title.
+        -->
+        <Setter Property="Margin" Value="0,8,0,0" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
         <Setter Property="TextAlignment" Value="Center" />
@@ -59,7 +64,13 @@
     <Style x:Key="AppEmptyStateDescription" BasedOn="{StaticResource EmptyStateHint}" TargetType="{x:Type TextBlock}" />
 
     <Style x:Key="AppEmptyStateActionBar" TargetType="{x:Type StackPanel}">
-        <Setter Property="Margin" Value="0,16,0,0" />
+        <!--
+            Description -> action gap: 24 px (Gap.Xl). Per the Fluent +
+            Carbon plan's form rhythm, the gap before a primary CTA is
+            larger than inter-text gaps so the action feels deliberate
+            rather than crammed under the body copy. Was 16 px.
+        -->
+        <Setter Property="Margin" Value="0,24,0,0" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="Orientation" Value="Horizontal" />
     </Style>
