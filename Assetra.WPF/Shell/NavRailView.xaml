@@ -124,6 +124,23 @@
             <Setter Property="CornerRadius" Value="9" />
         </Style>
 
+        <!--
+            Group divider — only visible when the rail is collapsed. Provides
+            the visual section break that text headers (NavRailHeaderText)
+            give in expanded mode but disappear in collapsed mode.
+        -->
+        <Style x:Key="NavRailGroupDivider" TargetType="{x:Type Border}">
+            <Setter Property="Height" Value="1" />
+            <Setter Property="Margin" Value="12,12,12,8" />
+            <Setter Property="Background" Value="{DynamicResource AppBorderLight}" />
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=PaneToggle, Path=IsChecked}" Value="False">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <!--  ── Section view templates (resolved by ContentControl DataTrigger) ──  -->
         <DataTemplate x:Key="PortfolioContentTemplate">
             <portfolio:PortfolioView DataContext="{Binding Portfolio}" />
@@ -268,12 +285,21 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
+                <!--
+                    Hamburger toggle:
+                    * Margin 6,8,0,8 puts the 40px button at x=6 so the icon
+                      center sits at x=26, matching the nav-item icon column
+                      (4px indicator + 10px content margin + 12px half-icon).
+                    * Symbol swaps between ChevronLeft (expanded → click to
+                      collapse) and ChevronRight (collapsed → click to expand)
+                      so the affordance reflects state.
+                -->
                 <ToggleButton
                     x:Name="PaneToggle"
                     Grid.Row="0"
                     Width="40"
                     Height="40"
-                    Margin="0,8,0,8"
+                    Margin="6,8,0,8"
                     HorizontalAlignment="Left"
                     Background="Transparent"
                     BorderThickness="0"
@@ -283,8 +309,18 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         FontSize="{StaticResource Font.Size.Md}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Symbol="Navigation24" />
+                        Foreground="{DynamicResource AppTextMuted}">
+                        <ds:AppIcon.Style>
+                            <Style TargetType="{x:Type ds:AppIcon}">
+                                <Setter Property="Symbol" Value="ChevronLeft24" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=PaneToggle, Path=IsChecked}" Value="False">
+                                        <Setter Property="Symbol" Value="ChevronRight24" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ds:AppIcon.Style>
+                    </ds:AppIcon>
                 </ToggleButton>
 
                 <ScrollViewer
@@ -386,6 +422,7 @@
                             </Grid>
                         </ToggleButton>
 
+                        <Border Style="{StaticResource NavRailGroupDivider}" />
                         <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.Cashflow}" />
 
                         <ToggleButton
@@ -418,7 +455,8 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="ArrowRepeatAll24" />
+                                <!--  CalendarLtr maps cleanly to "subscription / recurring schedule" — matches the 訂閱排程 label and avoids the swap-arrow misread of ArrowRepeatAll.  -->
+                                <ds:AppIcon Symbol="CalendarLtr24" />
                                 <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Recurring}" />
                                 <Border Grid.Column="2" Style="{StaticResource NavRailBadge}" Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock
@@ -431,6 +469,7 @@
                             </Grid>
                         </ToggleButton>
 
+                        <Border Style="{StaticResource NavRailGroupDivider}" />
                         <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.Planning}" />
 
                         <ToggleButton
@@ -479,11 +518,13 @@
                                     <ColumnDefinition Width="24" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="ChartMultiple24" />
+                                <!--  Calculator differentiates Monte Carlo from the pie/line chart icons of FinancialOverview / Trends; conveys "simulation / computation" semantics.  -->
+                                <ds:AppIcon Symbol="Calculator24" />
                                 <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource MonteCarlo.Title}" />
                             </Grid>
                         </ToggleButton>
 
+                        <Border Style="{StaticResource NavRailGroupDivider}" />
                         <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.MultiAsset}" />
 
                         <ToggleButton
