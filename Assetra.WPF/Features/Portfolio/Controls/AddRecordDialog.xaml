@@ -227,7 +227,7 @@
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="{DynamicResource Portfolio.Record.Section.BasicHint}"
                                         TextWrapping="Wrap"
-                                        Visibility="{Binding IsEditMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                        Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                                     <Border
                                         Width="172"
                                         Margin="0,0,12,0"
@@ -249,7 +249,14 @@
                                         </StackPanel>
                                     </Border>
 
-                                    <StackPanel Visibility="{Binding IsEditMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                    <!--
+                                        Type picker — shown for new records and direct-edit
+                                        types (Income / CashDividend / Buy w/ entry / etc.).
+                                        Hidden ONLY for meta-only edits where changing type
+                                        would be meaningless (the locked summary already
+                                        states the immutable type).
+                                    -->
+                                    <StackPanel Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                         <TextBlock
                                             Margin="0,0,0,4"
                                             FontSize="{StaticResource Font.Size.Xs}"
@@ -397,9 +404,16 @@
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="{DynamicResource Portfolio.Record.Section.DetailsHint}"
                                         TextWrapping="Wrap"
-                                        Visibility="{Binding IsEditMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                        Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
 
-                                    <StackPanel Visibility="{Binding IsEditMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                    <!--
+                                        Per-type form panel — shown for new records and
+                                        direct-edit types so users can change economic
+                                        fields. Hidden ONLY for meta-only edits where the
+                                        compact lock card + note-only fallback below
+                                        replaces it.
+                                    -->
+                                    <StackPanel Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                         <Border Height="2" Background="Transparent" />
                                         <!--  ======== 買入欄位 ========  -->
                                         <txforms:BuyTxForm />
