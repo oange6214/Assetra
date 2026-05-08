@@ -407,7 +407,9 @@ public class PortfolioViewModelTests
 
         Assert.Equal(900_000m, row.Cost);
         Assert.Equal(950_000m, row.MarketValue);
-        Assert.Equal(50_000m, row.Pnl);
+        Assert.Equal(4_203m, row.EstimatedSellFee);
+        Assert.Equal(945_797m, row.NetValue);
+        Assert.Equal(45_797m, row.Pnl);
         Assert.True(row.IsPnlPositive);
     }
 
@@ -424,7 +426,8 @@ public class PortfolioViewModelTests
         row.CurrentPrice = 80m;
         row.Refresh();
 
-        Assert.Equal(-20_000m, row.Pnl);
+        Assert.Equal(354m, row.EstimatedSellFee);
+        Assert.Equal(-20_354m, row.Pnl);
         Assert.False(row.IsPnlPositive);
     }
 
@@ -1810,6 +1813,81 @@ public class PortfolioViewModelTests
 
         Assert.True(vm.Transaction.IsRevisionReplacePromptOpen);
         Assert.NotEmpty(vm.Transaction.RevisionReplacePromptError);
+    }
+
+    [Fact]
+    public async Task ApplyTrades_NotifiesSelectedPositionTrades()
+    {
+        var (vm, _, tradeRepo) = await CreateVmWithCashAsync(0m);
+        var position = new PortfolioRowViewModel
+        {
+            Id = Guid.NewGuid(),
+            Symbol = "0056",
+            Exchange = "TWSE",
+            Name = "元大高股息",
+            Quantity = 1000,
+            BuyPrice = 35m,
+        };
+        vm.Positions.Add(position);
+        vm.SelectedPositionRow = position;
+
+        var changed = new List<string>();
+        vm.PropertyChanged += (_, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.PropertyName))
+                changed.Add(e.PropertyName);
+        };
+
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: "0056", Exchange: "TWSE", Name: "元大高股息",
+            Type: TradeType.CashDividend, TradeDate: DateTime.UtcNow,
+            Price: 1.2m, Quantity: 1000,
+            RealizedPnl: null, RealizedPnlPct: null,
+            CashAmount: 1200m));
+
+        await vm.LoadTradesAsyncForTest();
+
+        Assert.Contains(nameof(vm.SelectedPositionTrades), changed);
+        Assert.Single(vm.SelectedPositionTrades);
+    }
+
+    [Fact]
+    public async Task ConfirmTx_StaleEditTarget_DoesNotCreateDuplicateTrade()
+    {
+        var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);
+        var cash = vm.CashAccounts.First();
+        var position = new PortfolioRowViewModel
+        {
+            Id = Guid.NewGuid(),
+            Symbol = "0056",
+            Exchange = "TWSE",
+            Name = "元大高股息",
+            Quantity = 1000,
+            BuyPrice = 35m,
+        };
+        vm.Positions.Add(position);
+
+        var originalId = Guid.NewGuid();
+        await tradeRepo.AddAsync(new Trade(
+            Id: originalId, Symbol: "0056", Exchange: "TWSE", Name: "元大高股息",
+            Type: TradeType.CashDividend, TradeDate: DateTime.UtcNow,
+            Price: 1.2m, Quantity: 1000,
+            RealizedPnl: null, RealizedPnlPct: null,
+            CashAmount: 1200m,
+            CashAccountId: cash.Id));
+        await vm.LoadTradesAsyncForTest();
+
+        var staleRow = vm.Trades.Single(t => t.Id == originalId);
+        tradeRepo.Store.RemoveAll(t => t.Id == originalId);
+        await vm.LoadTradesAsyncForTest();
+
+        vm.Transaction.EditTradeCommand.Execute(staleRow);
+        vm.Transaction.TxDivPerShare = "2.0";
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
+
+        Assert.DoesNotContain(tradeRepo.Store, t => t.Type == TradeType.CashDividend);
+        Assert.False(vm.Transaction.IsTxDialogOpen);
+        Assert.Contains("不存在", vm.Transaction.TxError);
     }
 
     [Fact]

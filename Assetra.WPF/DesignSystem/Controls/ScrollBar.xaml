@@ -49,9 +49,7 @@
     <!--  Vertical ScrollBar template  -->
     <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
         <Grid x:Name="Bg" Background="Transparent">
-            <Track
-                x:Name="PART_Track"
-                IsDirectionReversed="True">
+            <Track x:Name="PART_Track" IsDirectionReversed="True">
                 <Track.DecreaseRepeatButton>
                     <RepeatButton Command="ScrollBar.PageUpCommand" Style="{StaticResource ScrollBarPageButton}" />
                 </Track.DecreaseRepeatButton>

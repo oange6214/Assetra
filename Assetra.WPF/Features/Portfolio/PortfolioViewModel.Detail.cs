@@ -176,6 +176,21 @@ public partial class PortfolioViewModel
     public decimal SelectedPositionRealizedTotal =>
         SelectedPositionDividendIncome + SelectedPositionCapitalGain;
 
+    private void NotifyTradeDependentDetailPropertiesChanged()
+    {
+        OnPropertyChanged(nameof(SelectedCashTrades));
+        OnPropertyChanged(nameof(SelectedCashTotalDeposits));
+        OnPropertyChanged(nameof(SelectedCashTotalWithdrawals));
+        OnPropertyChanged(nameof(SelectedLiabilityTrades));
+        OnPropertyChanged(nameof(SelectedLiabilityTotalBorrows));
+        OnPropertyChanged(nameof(SelectedLiabilityTotalRepays));
+        OnPropertyChanged(nameof(SelectedPositionTrades));
+        OnPropertyChanged(nameof(SelectedPositionDividendIncome));
+        OnPropertyChanged(nameof(SelectedPositionRealizedTotal));
+        OnPropertyChanged(nameof(SelectedPositionTradeAvgPrice));
+        OnPropertyChanged(nameof(HasSelectedPositionRealized));
+    }
+
     [RelayCommand]
     private void CloseCashDetail() => SelectedCashRow = null;
 

@@ -1,6 +1,4 @@
-<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Thickness x:Key="PageChromeMargin">24</Thickness>
     <Thickness x:Key="PageHeaderMargin">0,0,0,16</Thickness>
@@ -47,7 +45,10 @@
         <Setter Property="Margin" Value="{StaticResource PageSectionGapMargin}" />
     </Style>
 
-    <Style x:Key="DashboardMetricGrid" BasedOn="{StaticResource PageMetricsGrid}" TargetType="UniformGrid" />
+    <Style
+        x:Key="DashboardMetricGrid"
+        BasedOn="{StaticResource PageMetricsGrid}"
+        TargetType="UniformGrid" />
 
     <Style x:Key="PageTabHost" TargetType="Grid">
         <Setter Property="Margin" Value="0,0,0,16" />
@@ -78,7 +79,10 @@
         <Setter Property="Margin" Value="0,0,16,0" />
     </Style>
 
-    <Style x:Key="FormFieldLast" BasedOn="{StaticResource FormField}" TargetType="StackPanel">
+    <Style
+        x:Key="FormFieldLast"
+        BasedOn="{StaticResource FormField}"
+        TargetType="StackPanel">
         <Setter Property="Margin" Value="0" />
     </Style>
 
@@ -124,11 +128,20 @@
         <Setter Property="VerticalAlignment" Value="Stretch" />
     </Style>
 
-    <Style x:Key="PageContentHost" BasedOn="{StaticResource PageContentGrid}" TargetType="Grid" />
+    <Style
+        x:Key="PageContentHost"
+        BasedOn="{StaticResource PageContentGrid}"
+        TargetType="Grid" />
 
     <!--  Canonical aliases for task-list naming  -->
-    <Style x:Key="PageHeader" BasedOn="{StaticResource PageHeaderDock}" TargetType="DockPanel" />
-    <Style x:Key="FormGrid"   BasedOn="{StaticResource PageFormGrid}"   TargetType="UniformGrid" />
+    <Style
+        x:Key="PageHeader"
+        BasedOn="{StaticResource PageHeaderDock}"
+        TargetType="DockPanel" />
+    <Style
+        x:Key="FormGrid"
+        BasedOn="{StaticResource PageFormGrid}"
+        TargetType="UniformGrid" />
 
     <Style x:Key="ListContentHost" TargetType="ScrollViewer">
         <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -138,9 +151,18 @@
     </Style>
 
     <!--  List page pattern  -->
-    <Style x:Key="ListPageHeader" BasedOn="{StaticResource PageHeaderDock}" TargetType="DockPanel" />
-    <Style x:Key="ListPageActionBar" BasedOn="{StaticResource PageActionBar}" TargetType="StackPanel" />
-    <Style x:Key="ListPageLoadedHost" BasedOn="{StaticResource PageContentGrid}" TargetType="Grid" />
+    <Style
+        x:Key="ListPageHeader"
+        BasedOn="{StaticResource PageHeaderDock}"
+        TargetType="DockPanel" />
+    <Style
+        x:Key="ListPageActionBar"
+        BasedOn="{StaticResource PageActionBar}"
+        TargetType="StackPanel" />
+    <Style
+        x:Key="ListPageLoadedHost"
+        BasedOn="{StaticResource PageContentGrid}"
+        TargetType="Grid" />
 
     <Style x:Key="ListPageEmptyHost" TargetType="Grid">
         <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -160,20 +182,44 @@
     </Style>
 
     <!--  Analysis page pattern  -->
-    <Style x:Key="AnalysisInputPanel" BasedOn="{StaticResource FormSection}" TargetType="Border" />
-    <Style x:Key="AnalysisResultHost" BasedOn="{StaticResource PageContentGrid}" TargetType="Grid" />
-    <Style x:Key="AnalysisEmptyHost" BasedOn="{StaticResource ListPageEmptyHost}" TargetType="Grid" />
+    <Style
+        x:Key="AnalysisInputPanel"
+        BasedOn="{StaticResource FormSection}"
+        TargetType="Border" />
+    <Style
+        x:Key="AnalysisResultHost"
+        BasedOn="{StaticResource PageContentGrid}"
+        TargetType="Grid" />
+    <Style
+        x:Key="AnalysisEmptyHost"
+        BasedOn="{StaticResource ListPageEmptyHost}"
+        TargetType="Grid" />
 
     <!--  Report page pattern  -->
-    <Style x:Key="ReportToolbar" BasedOn="{StaticResource PageHeaderDock}" TargetType="DockPanel" />
-    <Style x:Key="ReportSection" BasedOn="{StaticResource FormSection}" TargetType="Border" />
-    <Style x:Key="ReportExportBar" BasedOn="{StaticResource PageActionBar}" TargetType="StackPanel" />
+    <Style
+        x:Key="ReportToolbar"
+        BasedOn="{StaticResource PageHeaderDock}"
+        TargetType="DockPanel" />
+    <Style
+        x:Key="ReportSection"
+        BasedOn="{StaticResource FormSection}"
+        TargetType="Border" />
+    <Style
+        x:Key="ReportExportBar"
+        BasedOn="{StaticResource PageActionBar}"
+        TargetType="StackPanel" />
 
-    <Style x:Key="ReportChartSection" BasedOn="{StaticResource ReportSection}" TargetType="Border">
+    <Style
+        x:Key="ReportChartSection"
+        BasedOn="{StaticResource ReportSection}"
+        TargetType="Border">
         <Setter Property="MinHeight" Value="280" />
     </Style>
 
-    <Style x:Key="ReportTableSection" BasedOn="{StaticResource ReportSection}" TargetType="Border">
+    <Style
+        x:Key="ReportTableSection"
+        BasedOn="{StaticResource ReportSection}"
+        TargetType="Border">
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="VerticalAlignment" Value="Stretch" />
     </Style>

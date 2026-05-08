@@ -12,7 +12,7 @@
         Use the IEasingFunction resources with DoubleAnimation.EasingFunction etc.
         Use the KeySpline resources with SplineDoubleKeyFrame.KeySpline when
         finer control over the cubic-bezier curve is needed.
-
+        
         Standard : decelerating, default for most UI transitions.
         Enter    : entry/expand transitions (overlays opening, drawers sliding in).
         Exit     : exit/collapse transitions (overlays closing, drawers sliding out).

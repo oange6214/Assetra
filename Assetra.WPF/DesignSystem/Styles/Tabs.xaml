@@ -69,8 +69,14 @@
         </Setter>
     </Style>
 
-    <Style x:Key="AppTopTab" BasedOn="{StaticResource NavTabBtn}" TargetType="{x:Type RadioButton}" />
-    <Style x:Key="AppSubTab" BasedOn="{StaticResource NavTabBtn}" TargetType="{x:Type RadioButton}" />
+    <Style
+        x:Key="AppTopTab"
+        BasedOn="{StaticResource NavTabBtn}"
+        TargetType="{x:Type RadioButton}" />
+    <Style
+        x:Key="AppSubTab"
+        BasedOn="{StaticResource NavTabBtn}"
+        TargetType="{x:Type RadioButton}" />
 
     <!--  ── SegmentBtn — RadioButton-based pill segment ──  -->
     <Style x:Key="SegmentBtn" TargetType="RadioButton">
@@ -128,7 +134,10 @@
         </Setter>
     </Style>
 
-    <Style x:Key="AppSegmentButton" BasedOn="{StaticResource SegmentBtn}" TargetType="{x:Type RadioButton}" />
+    <Style
+        x:Key="AppSegmentButton"
+        BasedOn="{StaticResource SegmentBtn}"
+        TargetType="{x:Type RadioButton}" />
 
     <!--  ── TabControl (implicit) ──  -->
     <Style TargetType="{x:Type TabControl}">

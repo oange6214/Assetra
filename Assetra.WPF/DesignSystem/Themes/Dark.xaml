@@ -11,82 +11,82 @@
     -->
 
     <!--  Backgrounds — Slate scale (dark)  -->
-    <SolidColorBrush x:Key="AppBackground"     Color="{StaticResource Color.Slate.900}" />
-    <SolidColorBrush x:Key="AppSurface"        Color="{StaticResource Color.Slate.800}" />
-    <SolidColorBrush x:Key="AppSurfaceAlt"     Color="{StaticResource Color.Slate.700}" />
+    <SolidColorBrush x:Key="AppBackground" Color="{StaticResource Color.Slate.900}" />
+    <SolidColorBrush x:Key="AppSurface" Color="{StaticResource Color.Slate.800}" />
+    <SolidColorBrush x:Key="AppSurfaceAlt" Color="{StaticResource Color.Slate.700}" />
     <SolidColorBrush x:Key="AppCardBackground" Color="{StaticResource Color.Slate.800}" />
-    <SolidColorBrush x:Key="AppHover"          Color="{StaticResource Color.Slate.700}" />
+    <SolidColorBrush x:Key="AppHover" Color="{StaticResource Color.Slate.700}" />
 
     <!--  Borders  -->
-    <SolidColorBrush x:Key="AppBorder"      Color="{StaticResource Color.Slate.700}" />
+    <SolidColorBrush x:Key="AppBorder" Color="{StaticResource Color.Slate.700}" />
     <SolidColorBrush x:Key="AppBorderLight" Color="{StaticResource Color.Slate.800}" />
 
     <!--  Text — Slate ramp (dark)  -->
-    <SolidColorBrush x:Key="AppTextPrimary"   Color="{StaticResource Color.Slate.50}" />
+    <SolidColorBrush x:Key="AppTextPrimary" Color="{StaticResource Color.Slate.50}" />
     <SolidColorBrush x:Key="AppTextSecondary" Color="{StaticResource Color.Slate.300}" />
-    <SolidColorBrush x:Key="AppTextMuted"     Color="{StaticResource Color.Slate.400}" />
-    <SolidColorBrush x:Key="AppTextOnAccent"  Color="{StaticResource Color.White}" />
+    <SolidColorBrush x:Key="AppTextMuted" Color="{StaticResource Color.Slate.400}" />
+    <SolidColorBrush x:Key="AppTextOnAccent" Color="{StaticResource Color.White}" />
 
     <!--  Semantic — price direction (brightened for dark surfaces)  -->
-    <SolidColorBrush x:Key="AppUp"      Color="{StaticResource Color.Green.500}" />
-    <SolidColorBrush x:Key="AppDown"    Color="{StaticResource Color.Red.500}" />
+    <SolidColorBrush x:Key="AppUp" Color="{StaticResource Color.Green.500}" />
+    <SolidColorBrush x:Key="AppDown" Color="{StaticResource Color.Red.500}" />
     <SolidColorBrush x:Key="AppNeutral" Color="{StaticResource Color.Slate.400}" />
 
     <!--  Semantic — status  -->
-    <SolidColorBrush x:Key="AppWarning"   Color="{StaticResource Color.Amber.400}" />
-    <SolidColorBrush x:Key="AppSuccess"   Color="{StaticResource Color.Green.500}" />
+    <SolidColorBrush x:Key="AppWarning" Color="{StaticResource Color.Amber.400}" />
+    <SolidColorBrush x:Key="AppSuccess" Color="{StaticResource Color.Green.500}" />
     <SolidColorBrush x:Key="AppFocusRing" Color="{StaticResource Color.Blue.400}" />
 
     <!--  Semantic — destructive  -->
     <SolidColorBrush x:Key="AppDanger" Color="{StaticResource Color.Red.500}" />
 
     <!--  Brand primary — Dark variant  -->
-    <SolidColorBrush x:Key="AppAccent"       Color="{StaticResource Color.Blue.500}" />
-    <SolidColorBrush x:Key="AppAccentHover"  Color="{StaticResource Color.Blue.400}" />
+    <SolidColorBrush x:Key="AppAccent" Color="{StaticResource Color.Blue.500}" />
+    <SolidColorBrush x:Key="AppAccentHover" Color="{StaticResource Color.Blue.400}" />
     <SolidColorBrush x:Key="AppAccentSubtle" Color="{StaticResource Color.Brand.NavySubtle.Dark}" />
-    <SolidColorBrush x:Key="AppAccentSoft"   Color="{StaticResource Color.Brand.NavySubtle.Dark}" />
-    <SolidColorBrush x:Key="AppAccentText"   Color="{StaticResource Color.Blue.300}" />
+    <SolidColorBrush x:Key="AppAccentSoft" Color="{StaticResource Color.Brand.NavySubtle.Dark}" />
+    <SolidColorBrush x:Key="AppAccentText" Color="{StaticResource Color.Blue.300}" />
 
     <!--  Canonical semantic DesignSystem brushes  -->
-    <SolidColorBrush x:Key="Brush.Background"     Color="{StaticResource Color.Slate.900}" />
-    <SolidColorBrush x:Key="Brush.Surface"        Color="{StaticResource Color.Slate.800}" />
-    <SolidColorBrush x:Key="Brush.SurfaceRaised"  Color="{StaticResource Color.Slate.700}" />
-    <SolidColorBrush x:Key="Brush.Text.Primary"   Color="{StaticResource Color.Slate.50}" />
+    <SolidColorBrush x:Key="Brush.Background" Color="{StaticResource Color.Slate.900}" />
+    <SolidColorBrush x:Key="Brush.Surface" Color="{StaticResource Color.Slate.800}" />
+    <SolidColorBrush x:Key="Brush.SurfaceRaised" Color="{StaticResource Color.Slate.700}" />
+    <SolidColorBrush x:Key="Brush.Text.Primary" Color="{StaticResource Color.Slate.50}" />
     <SolidColorBrush x:Key="Brush.Text.Secondary" Color="{StaticResource Color.Slate.300}" />
-    <SolidColorBrush x:Key="Brush.Text.Muted"     Color="{StaticResource Color.Slate.400}" />
-    <SolidColorBrush x:Key="Brush.Text.OnAccent"  Color="{StaticResource Color.White}" />
-    <SolidColorBrush x:Key="Brush.Border"         Color="{StaticResource Color.Slate.700}" />
-    <SolidColorBrush x:Key="Brush.BorderStrong"   Color="{StaticResource Color.Slate.600}" />
-    <SolidColorBrush x:Key="Brush.Accent"         Color="{StaticResource Color.Blue.500}" />
-    <SolidColorBrush x:Key="Brush.AccentHover"    Color="{StaticResource Color.Blue.400}" />
-    <SolidColorBrush x:Key="Brush.AccentSubtle"   Color="{StaticResource Color.Brand.NavySubtle.Dark}" />
-    <SolidColorBrush x:Key="Brush.Danger"         Color="{StaticResource Color.Red.500}" />
-    <SolidColorBrush x:Key="Brush.Warning"        Color="{StaticResource Color.Amber.400}" />
-    <SolidColorBrush x:Key="Brush.Success"        Color="{StaticResource Color.Green.500}" />
-    <SolidColorBrush x:Key="Brush.FocusRing"      Color="{StaticResource Color.Blue.400}" />
-    <SolidColorBrush x:Key="Brush.Up"             Color="{StaticResource Color.Green.500}" />
-    <SolidColorBrush x:Key="Brush.Down"           Color="{StaticResource Color.Red.500}" />
-    <SolidColorBrush x:Key="Brush.Neutral"        Color="{StaticResource Color.Slate.400}" />
-    <SolidColorBrush x:Key="Brush.Info"           Color="{StaticResource Color.Cyan.400}" />
-    <SolidColorBrush x:Key="Brush.Special"        Color="{StaticResource Color.Violet.400}" />
-    <SolidColorBrush x:Key="Brush.Risk"           Color="{StaticResource Color.Amber.400}" />
-    <SolidColorBrush x:Key="Brush.Budget"         Color="{StaticResource Color.Brand.GoldDark}" />
+    <SolidColorBrush x:Key="Brush.Text.Muted" Color="{StaticResource Color.Slate.400}" />
+    <SolidColorBrush x:Key="Brush.Text.OnAccent" Color="{StaticResource Color.White}" />
+    <SolidColorBrush x:Key="Brush.Border" Color="{StaticResource Color.Slate.700}" />
+    <SolidColorBrush x:Key="Brush.BorderStrong" Color="{StaticResource Color.Slate.600}" />
+    <SolidColorBrush x:Key="Brush.Accent" Color="{StaticResource Color.Blue.500}" />
+    <SolidColorBrush x:Key="Brush.AccentHover" Color="{StaticResource Color.Blue.400}" />
+    <SolidColorBrush x:Key="Brush.AccentSubtle" Color="{StaticResource Color.Brand.NavySubtle.Dark}" />
+    <SolidColorBrush x:Key="Brush.Danger" Color="{StaticResource Color.Red.500}" />
+    <SolidColorBrush x:Key="Brush.Warning" Color="{StaticResource Color.Amber.400}" />
+    <SolidColorBrush x:Key="Brush.Success" Color="{StaticResource Color.Green.500}" />
+    <SolidColorBrush x:Key="Brush.FocusRing" Color="{StaticResource Color.Blue.400}" />
+    <SolidColorBrush x:Key="Brush.Up" Color="{StaticResource Color.Green.500}" />
+    <SolidColorBrush x:Key="Brush.Down" Color="{StaticResource Color.Red.500}" />
+    <SolidColorBrush x:Key="Brush.Neutral" Color="{StaticResource Color.Slate.400}" />
+    <SolidColorBrush x:Key="Brush.Info" Color="{StaticResource Color.Cyan.400}" />
+    <SolidColorBrush x:Key="Brush.Special" Color="{StaticResource Color.Violet.400}" />
+    <SolidColorBrush x:Key="Brush.Risk" Color="{StaticResource Color.Amber.400}" />
+    <SolidColorBrush x:Key="Brush.Budget" Color="{StaticResource Color.Brand.GoldDark}" />
 
     <!--  Brand accent — Gold (dark variant)  -->
-    <SolidColorBrush x:Key="AppGold"       Color="{StaticResource Color.Brand.GoldDark}" />
-    <SolidColorBrush x:Key="AppGoldHover"  Color="{StaticResource Color.Brand.GoldHover.Dark}" />
+    <SolidColorBrush x:Key="AppGold" Color="{StaticResource Color.Brand.GoldDark}" />
+    <SolidColorBrush x:Key="AppGoldHover" Color="{StaticResource Color.Brand.GoldHover.Dark}" />
     <SolidColorBrush x:Key="AppGoldSubtle" Color="{StaticResource Color.Brand.GoldSubtle.Dark}" />
 
     <!--  DataGrid  -->
     <SolidColorBrush x:Key="AppSelectedRow" Color="{StaticResource Color.Brand.NavySubtle.Dark}" />
-    <SolidColorBrush x:Key="AppGridLines"   Color="{StaticResource Color.Slate.700}" />
+    <SolidColorBrush x:Key="AppGridLines" Color="{StaticResource Color.Slate.700}" />
 
     <!--  Modal overlay  -->
-    <SolidColorBrush x:Key="AppModalOverlay"    Color="#99000000" />
+    <SolidColorBrush x:Key="AppModalOverlay" Color="#99000000" />
     <SolidColorBrush x:Key="Brush.ModalOverlay" Color="#99000000" />
 
     <!--  Error banner  -->
-    <SolidColorBrush x:Key="AppErrorBg"     Color="#3B1F1F" />
+    <SolidColorBrush x:Key="AppErrorBg" Color="#3B1F1F" />
     <SolidColorBrush x:Key="AppErrorBorder" Color="{StaticResource Color.Red.500}" />
 
     <!--  Legacy aliases  -->

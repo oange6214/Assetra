@@ -202,6 +202,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
                 HasAnyDividendTrades = Trades.Any(t => t.IsCashDividend);
                 RebuildRealizedPnl();
                 TradeFilter.RefreshTradesView();
+                NotifyTradeDependentDetailPropertiesChanged();
                 await ReloadAccountBalancesAsync();
                 RebuildTotals();
             }
@@ -400,6 +401,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         // See IBuyExecutionContext for rationale.
         AddAssetDialog.BuyContext = new TransactionBuyContext(Transaction);
         AddAssetDialog.GetCashAccounts = () => CashAccounts;
+        // Multi-currency default: new account creation defaults to the user's
+        // primary currency from Settings instead of hard-coded "TWD".
+        AddAssetDialog.GetDefaultCurrency = () =>
+            _settingsService?.Current.PrimaryCurrency ?? "TWD";
         SellPanel.GetTxCommissionDiscountValue = () => Transaction.TxCommissionDiscountValue;
         SellPanel.GetTxFee = () => Transaction.TxFee;
 
@@ -737,6 +742,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
 
             // 以最新一筆 Buy 的折扣套到對應持倉，讓預估賣出費用反映當前券商折扣
             ApplyLatestTradeDiscounts();
+            NotifyTradeDependentDetailPropertiesChanged();
         }
         catch (Exception ex)
         {

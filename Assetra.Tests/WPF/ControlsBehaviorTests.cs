@@ -1,4 +1,6 @@
 using System.Reflection;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -179,12 +181,37 @@ public sealed class ControlsBehaviorTests
                 Assert.Equal(HorizontalAlignment.Stretch, yearElement.HorizontalAlignment);
                 Assert.Equal(VerticalAlignment.Stretch, yearElement.VerticalAlignment);
                 Assert.True(yearElement.Height >= 214d);
+                Assert.True(yearElement.Width >= 240d);
+                if (yearElement is Grid yearGrid)
+                {
+                    Assert.All(yearGrid.ColumnDefinitions, column =>
+                        Assert.Equal(GridUnitType.Star, column.Width.GridUnitType));
+                    Assert.All(yearGrid.RowDefinitions, row =>
+                        Assert.Equal(GridUnitType.Star, row.Height.GridUnitType));
+                }
+
+                var yearButtons = FindVisualChildren<CalendarButton>(yearElement).ToList();
+                Assert.NotEmpty(yearButtons);
+                Assert.All(yearButtons, button =>
+                {
+                    Assert.Equal(HorizontalAlignment.Stretch, button.HorizontalAlignment);
+                    Assert.Equal(VerticalAlignment.Stretch, button.VerticalAlignment);
+                    Assert.Equal(HorizontalAlignment.Center, button.HorizontalContentAlignment);
+                    Assert.Equal(VerticalAlignment.Center, button.VerticalContentAlignment);
+                });
+
+                yearButtons[0].ApplyTemplate();
+                var contentPresenter = FindVisualChild<ContentPresenter>(yearButtons[0]);
+                Assert.NotNull(contentPresenter);
+                Assert.Equal(HorizontalAlignment.Center, contentPresenter!.HorizontalAlignment);
+                Assert.Equal(VerticalAlignment.Center, contentPresenter.VerticalAlignment);
 
                 calendar.DisplayMode = CalendarMode.Month;
                 PumpDispatcher();
 
                 Assert.True(double.IsNaN(calendar.Height));
                 Assert.True(double.IsNaN(yearElement.Height));
+                Assert.True(double.IsNaN(yearElement.Width));
             }
             finally
             {
@@ -309,6 +336,20 @@ public sealed class ControlsBehaviorTests
         }
 
         return null;
+    }
+
+    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject root)
+        where T : DependencyObject
+    {
+        if (root is T match)
+            yield return match;
+
+        var children = VisualTreeHelper.GetChildrenCount(root);
+        for (var i = 0; i < children; i++)
+        {
+            foreach (var child in FindVisualChildren<T>(VisualTreeHelper.GetChild(root, i)))
+                yield return child;
+        }
     }
 
     private static void PumpDispatcher()

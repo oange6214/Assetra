@@ -1,9 +1,9 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
-    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls">
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework">
 
     <!--
         ════════════════════════════════════════════════════════════
@@ -13,28 +13,28 @@
         chrome + month/year/decade view container) but multiple iterations
         triggered hard-to-debug timing issues with WPF's internal
         OnApplyTemplate / GetTemplateChild / UpdateAppearance pipeline:
-
-          * Custom wrapper Grid → _monthView ref came back null, view
-            switching no-op'd.
-          * Both PARTs Visibility=Collapsed → UpdateMonths() early-returned
-            (Owner == null in some timing paths) and body stayed blank.
-          * Both PARTs Visibility=Visible → click header swapped header
-            text but old grid remained, views stacked.
-
+        
+        * Custom wrapper Grid → _monthView ref came back null, view
+        switching no-op'd.
+        * Both PARTs Visibility=Collapsed → UpdateMonths() early-returned
+        (Owner == null in some timing paths) and body stayed blank.
+        * Both PARTs Visibility=Visible → click header swapped header
+        text but old grid remained, views stacked.
+        
         WPF Calendar has a tight coupling between CalendarItem template
         layout, view-population timing, and the Visibility toggle in
         UpdateAppearance. Maintaining a custom CalendarItem template
         without breaking that pipeline is high-risk for low visual gain.
-
+        
         Compromise (this file): rely on the WPF default CalendarItem
         template (so view switching just works), and theme appearance
         only via:
-          * CalendarDayButton template (full custom — single day cell
-            shape + accent colors).
-          * CalendarButton template (full custom — month/year cell shape).
-          * Calendar background / border (themed via Calendar's own
-            templated properties, no need to override CalendarItemStyle).
-
+        * CalendarDayButton template (full custom — single day cell
+        shape + accent colors).
+        * CalendarButton template (full custom — month/year cell shape).
+        * Calendar background / border (themed via Calendar's own
+        templated properties, no need to override CalendarItemStyle).
+        
         Side effect: the popup chrome (◀ ▶ chevron arrows, "May 2026"
         header button) shows OS-default Aero2/Win11 styling rather than
         full Fluent. This is acceptable — those are minor surface details
@@ -266,21 +266,21 @@
         ════════════════════════════════════════════════════════════
         Custom CalendarItem template has been attempted FIVE times now,
         each iteration broke a different aspect of view-switching:
-
-          v1  wrapper Grid                → _monthView ref null, no toggle
-          v2  Collapsed initial            → UpdateMonths early-return, blank
-          v3  no Visibility set            → both Visible, views stack
-          v4  mirror default w/ Visible/Hidden → click header → header text
-              changes but Decade/Year view still shows Month grid
-          v5  逐字 mirror reference source → SAME as v4 (year view click
-              shows day grid)
-
+        
+        v1  wrapper Grid                → _monthView ref null, no toggle
+        v2  Collapsed initial            → UpdateMonths early-return, blank
+        v3  no Visibility set            → both Visible, views stack
+        v4  mirror default w/ Visible/Hidden → click header → header text
+        changes but Decade/Year view still shows Month grid
+        v5  逐字 mirror reference source → SAME as v4 (year view click
+        shows day grid)
+        
         Conclusion: WPF Calendar's OnApplyTemplate / GetTemplateChild /
         UpdateAppearance pipeline has internal coupling we cannot
         reproduce reliably from XAML alone. Cell-level theming
         (CalendarDayButton + CalendarButton) is sufficient for the
         actual content; popup chrome remains OS default but functional.
-
+        
         Tradeoff accepted: the ◀ ▶ chevrons and "May 2026" header
         button keep WPF Aero2 styling, but view-switching works.
     -->
@@ -387,8 +387,8 @@
                                 x:Name="PART_TextBox"
                                 Grid.Column="0"
                                 BorderThickness="0"
-                                Foreground="{TemplateBinding Foreground}"
-                                Focusable="{TemplateBinding Focusable}" />
+                                Focusable="{TemplateBinding Focusable}"
+                                Foreground="{TemplateBinding Foreground}" />
 
                             <Button
                                 x:Name="PART_Button"

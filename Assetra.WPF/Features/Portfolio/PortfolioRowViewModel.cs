@@ -79,8 +79,8 @@ public partial class PortfolioRowViewModel : ObservableObject
 
     /// <summary>
     /// 賣出時估算費用 = 賣出手續費 + 證交稅 (僅股票/ETF；其他資產類型為 0)。
-    /// 不再於 <see cref="Pnl"/> 中扣除（毛損益與券商對齊），
-    /// 但被 <see cref="NetValue"/> 使用以顯示「現在賣掉真的能拿到」的金額。
+    /// 會被 <see cref="NetValue"/> 與 <see cref="Pnl"/> 使用，以呈現
+    /// 「現在賣掉真的能拿到」的淨值與淨損益。
     /// </summary>
     [ObservableProperty] private decimal _estimatedSellFee;
 
@@ -135,9 +135,8 @@ public partial class PortfolioRowViewModel : ObservableObject
             ? CalcEstimatedSellFee()
             : 0m;
 
-        // 毛損益 = 市值 − 成本（與券商「未實現損益」欄位對齊；EstimatedSellFee 不納入此計算）。
-        // 「如果現在賣掉真正到手」用 NetValue（= 市值 − 估算賣出費）欄位呈現。
-        Pnl = MarketValue - Cost;
+        // 淨損益 = 淨值 − 成本。成本已含買入手續費，淨值已扣預估賣出手續費與證交稅。
+        Pnl = NetValue - Cost;
         PnlPercent = Cost > 0 ? Pnl / Cost * 100m : 0m;
         IsPnlPositive = Pnl >= 0;
 

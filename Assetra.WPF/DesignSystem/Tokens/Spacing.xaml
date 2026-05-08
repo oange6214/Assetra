@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Tailwind-inspired spacing scale. Values are device-independent pixels. -->
+    <!--  Tailwind-inspired spacing scale. Values are device-independent pixels.  -->
     <sys:Double x:Key="Space.0">0</sys:Double>
     <sys:Double x:Key="Space.1">4</sys:Double>
     <sys:Double x:Key="Space.2">8</sys:Double>

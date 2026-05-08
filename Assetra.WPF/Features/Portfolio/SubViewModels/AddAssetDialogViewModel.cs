@@ -339,6 +339,15 @@ public partial class AddAssetDialogViewModel : ObservableObject
     // ── Cash account field ───────────────────────────────────────────────────────────
 
     [ObservableProperty] private string _addAccountName = string.Empty;
+
+    /// <summary>
+    /// Currency for the new cash account. Defaults to "TWD" but the WPF parent
+    /// VM resets it to <c>AppSettings.PrimaryCurrency</c> when the dialog opens
+    /// so multi-currency users don't have to change it on every account.
+    /// Sourced from <see cref="AccountDialogViewModel.SupportedCurrencies"/>
+    /// for the dropdown.
+    /// </summary>
+    [ObservableProperty] private string _addAccountCurrency = "TWD";
     [ObservableProperty] private bool _addInitialDepositEnabled;
     [ObservableProperty] private string _addInitialDepositAmount = string.Empty;
     [ObservableProperty] private DateTime? _addInitialDepositDate = DateTime.Today;
@@ -631,7 +640,9 @@ public partial class AddAssetDialogViewModel : ObservableObject
         // and only gains value once the user records a Deposit / Income / etc. trade.
         var created = await _accountUpsertWorkflow.CreateAsync(new CreateAccountRequest(
             AddAccountName.Trim(),
-            "TWD",
+            // User's selected currency (was hard-coded "TWD"). Falls back to
+            // "TWD" if the picker default was somehow cleared.
+            string.IsNullOrWhiteSpace(AddAccountCurrency) ? "TWD" : AddAccountCurrency,
             DateOnly.FromDateTime(DateTime.Today),
             Subtype: string.IsNullOrWhiteSpace(AddSubtype) ? null : AddSubtype.Trim()));
 
@@ -653,6 +664,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
         }
 
         AddAccountName = string.Empty;
+        AddAccountCurrency = "TWD";  // reset to fallback; reopen will refresh from Settings
         AddInitialDepositEnabled = false;
         AddInitialDepositAmount = string.Empty;
         AddInitialDepositDate = DateTime.Today;
@@ -837,11 +849,28 @@ public partial class AddAssetDialogViewModel : ObservableObject
         AddError = string.Empty;
         AddSubtype = string.Empty;
         AddAccountName = string.Empty;
+        // Default to the user's primary currency (set in Settings) so a JPY
+        // user doesn't have to flip the picker for every account. Falls back
+        // to "TWD" when no provider is wired (test fixtures, etc.).
+        AddAccountCurrency = ResolveDefaultCurrency();
         AddInitialDepositEnabled = false;
         AddInitialDepositAmount = string.Empty;
         AddInitialDepositDate = DateTime.Today;
         AddInitialDepositNote = string.Empty;
         IsAddDialogOpen = true;
+    }
+
+    /// <summary>
+    /// Returns the user's preferred default currency for new accounts. Wired
+    /// by the parent VM via <see cref="GetDefaultCurrency"/>; defaults to "TWD"
+    /// when not provided.
+    /// </summary>
+    public Func<string> GetDefaultCurrency { get; set; } = () => "TWD";
+
+    private string ResolveDefaultCurrency()
+    {
+        var c = GetDefaultCurrency();
+        return string.IsNullOrWhiteSpace(c) ? "TWD" : c;
     }
 
     /// <summary>

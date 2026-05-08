@@ -260,12 +260,19 @@ public static class DatePickerDateOnlyBehavior
             return;
 
         calendar.DisplayModeChanged += OnCalendarDisplayModeChanged;
+        calendar.SizeChanged += OnCalendarSizeChanged;
         calendar.SetValue(IsCalendarRepairAttachedProperty, true);
     }
 
     private static void OnCalendarDisplayModeChanged(object? sender, CalendarModeChangedEventArgs e)
     {
         if (sender is Calendar calendar)
+            QueueCalendarViewRepair(calendar);
+    }
+
+    private static void OnCalendarSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (sender is Calendar { DisplayMode: not CalendarMode.Month } calendar)
             QueueCalendarViewRepair(calendar);
     }
 
@@ -302,6 +309,12 @@ public static class DatePickerDateOnlyBehavior
         yearView.SetCurrentValue(
             FrameworkElement.HeightProperty,
             isMonthMode ? double.NaN : ResolveExpandedCalendarViewHeight(monthView, item));
+        yearView.SetCurrentValue(
+            FrameworkElement.WidthProperty,
+            isMonthMode ? double.NaN : ResolveExpandedCalendarViewWidth(monthView, item, calendar));
+
+        if (!isMonthMode)
+            StretchCalendarView(yearView);
 
         if (monthView.Visibility != desiredMonthVisibility)
             monthView.SetCurrentValue(UIElement.VisibilityProperty, desiredMonthVisibility);
@@ -319,6 +332,85 @@ public static class DatePickerDateOnlyBehavior
             height = calendarItem.ActualHeight;
 
         return Math.Max(MinimumExpandedCalendarViewHeight, height);
+    }
+
+    private static double ResolveExpandedCalendarViewWidth(
+        FrameworkElement monthView,
+        FrameworkElement calendarItem,
+        FrameworkElement calendar)
+    {
+        var width = monthView.ActualWidth;
+        if (width <= 0)
+            width = monthView.DesiredSize.Width;
+        if (width <= 0)
+            width = calendarItem.ActualWidth;
+        if (width <= 0)
+            width = calendar.ActualWidth;
+
+        return Math.Max(240d, width);
+    }
+
+    private static void StretchCalendarView(FrameworkElement view)
+    {
+        view.SetCurrentValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
+        view.SetCurrentValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Stretch);
+
+        if (view is Grid grid)
+        {
+            foreach (var column in grid.ColumnDefinitions)
+                column.SetCurrentValue(ColumnDefinition.WidthProperty, new GridLength(1, GridUnitType.Star));
+            foreach (var row in grid.RowDefinitions)
+                row.SetCurrentValue(RowDefinition.HeightProperty, new GridLength(1, GridUnitType.Star));
+        }
+
+        foreach (var child in EnumerateDescendants<FrameworkElement>(view))
+        {
+            switch (child)
+            {
+                case CalendarButton button:
+                    button.SetCurrentValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
+                    button.SetCurrentValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Stretch);
+                    button.SetCurrentValue(Control.HorizontalContentAlignmentProperty, HorizontalAlignment.Center);
+                    button.SetCurrentValue(Control.VerticalContentAlignmentProperty, VerticalAlignment.Center);
+                    break;
+                case ContentPresenter presenter:
+                    presenter.SetCurrentValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+                    presenter.SetCurrentValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
+                    break;
+                case TextBlock textBlock:
+                    textBlock.SetCurrentValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+                    textBlock.SetCurrentValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
+                    textBlock.SetCurrentValue(TextBlock.TextAlignmentProperty, TextAlignment.Center);
+                    break;
+            }
+        }
+    }
+
+    private static IEnumerable<T> EnumerateDescendants<T>(DependencyObject root)
+        where T : DependencyObject
+    {
+        var visualChildren = root is Visual or Visual3D
+            ? VisualTreeHelper.GetChildrenCount(root)
+            : 0;
+
+        for (var i = 0; i < visualChildren; i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+            if (child is T match)
+                yield return match;
+
+            foreach (var descendant in EnumerateDescendants<T>(child))
+                yield return descendant;
+        }
+
+        foreach (var logicalChild in LogicalTreeHelper.GetChildren(root).OfType<DependencyObject>())
+        {
+            if (logicalChild is T match)
+                yield return match;
+
+            foreach (var descendant in EnumerateDescendants<T>(logicalChild))
+                yield return descendant;
+        }
     }
 
     private static void QueuePopupCalendarSync(DatePicker picker)

@@ -398,7 +398,7 @@
                                 <UniformGrid
                                     Margin="0,10,0,0"
                                     Columns="3"
-                                    Rows="2">
+                                    Rows="3">
                                     <StackPanel Margin="0,0,12,4">
                                         <TextBlock
                                             FontSize="{StaticResource Font.Size.Xs}"
@@ -427,6 +427,18 @@
                                         <TextBlock
                                             FontSize="{StaticResource Font.Size.Xs}"
                                             Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{DynamicResource Portfolio.TotalCostPaid}" />
+                                        <TextBlock
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding Cost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,8,12,0">
+                                        <TextBlock
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
                                             Text="{DynamicResource Portfolio.Price}" />
                                         <TextBlock
                                             FontFamily="{StaticResource Font.Family.Base}"
@@ -439,7 +451,31 @@
                                         <TextBlock
                                             FontSize="{StaticResource Font.Size.Xs}"
                                             Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{DynamicResource Common.TotalPnL}" />
+                                            Text="{DynamicResource Common.MarketValue}" />
+                                        <TextBlock
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding MarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,8,0,0">
+                                        <TextBlock
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{DynamicResource Portfolio.NetVal}" />
+                                        <TextBlock
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding NetValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,8,12,0">
+                                        <TextBlock
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{DynamicResource Portfolio.PnL}" />
                                         <TextBlock
                                             FontFamily="{StaticResource Font.Family.Base}"
                                             FontSize="{StaticResource Font.Size.Sm}"
@@ -460,18 +496,6 @@
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
-                                    </StackPanel>
-                                    <StackPanel Margin="0,8,12,0">
-                                        <TextBlock
-                                            FontSize="{StaticResource Font.Size.Xs}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{DynamicResource Portfolio.NetVal}" />
-                                        <TextBlock
-                                            FontFamily="{StaticResource Font.Family.Base}"
-                                            FontSize="{StaticResource Font.Size.Sm}"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding NetValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
-                                            Typography.NumeralAlignment="Tabular" />
                                     </StackPanel>
                                     <StackPanel Margin="0,8,0,0">
                                         <TextBlock
@@ -639,6 +663,30 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
+                    <!--  付出成本（含買入手續費）  -->
+                    <DataGridTemplateColumn Width="150" SortMemberPath="Cost">
+                        <DataGridTemplateColumn.HeaderStyle>
+                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                                <Setter Property="HorizontalContentAlignment" Value="Right" />
+                            </Style>
+                        </DataGridTemplateColumn.HeaderStyle>
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="{DynamicResource Portfolio.TotalCostPaid}" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding Cost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                                    Typography.NumeralAlignment="Tabular" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                     <!--  現價（合併今日漲跌% 小字）  -->
                     <DataGridTemplateColumn Width="120" SortMemberPath="CurrentPrice">
                         <DataGridTemplateColumn.HeaderStyle>
@@ -711,8 +759,45 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <!--  淨損益（合併 $ + % 垂直疊合）  -->
-                    <DataGridTemplateColumn Width="200" SortMemberPath="Pnl">
+                    <!--  市值（未扣預估賣出費/稅）  -->
+                    <DataGridTemplateColumn Width="150" SortMemberPath="MarketValue">
+                        <DataGridTemplateColumn.HeaderStyle>
+                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                                <Setter Property="HorizontalContentAlignment" Value="Right" />
+                            </Style>
+                        </DataGridTemplateColumn.HeaderStyle>
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="{DynamicResource Common.MarketValue}" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                                        <TextBlock
+                                            HorizontalAlignment="Right"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding MarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontSize="{StaticResource Font.Size.Sm}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="…"
+                                        Typography.NumeralAlignment="Tabular"
+                                        Visibility="{Binding IsLoadingPrice, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!--  淨值（市值扣預估賣出費/稅）  -->
+                    <DataGridTemplateColumn Width="150" SortMemberPath="NetValue">
                         <DataGridTemplateColumn.HeaderStyle>
                             <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Right" />
@@ -720,7 +805,48 @@
                         </DataGridTemplateColumn.HeaderStyle>
                         <DataGridTemplateColumn.Header>
                             <TextBlock
-                                Text="{DynamicResource Common.TotalPnL}"
+                                Text="{DynamicResource Portfolio.NetVal}"
+                                ToolTip="{DynamicResource Portfolio.NetVal.Tooltip}"
+                                ToolTipService.InitialShowDelay="300"
+                                ToolTipService.ShowDuration="20000" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid ToolTip="{DynamicResource Portfolio.NetVal.Tooltip}" ToolTipService.InitialShowDelay="500">
+                                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                                        <TextBlock
+                                            HorizontalAlignment="Right"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding NetValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontSize="{StaticResource Font.Size.Sm}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="…"
+                                        Typography.NumeralAlignment="Tabular"
+                                        Visibility="{Binding IsLoadingPrice, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!--  淨損益試算（淨值 - 付出成本）  -->
+                    <DataGridTemplateColumn Width="180" SortMemberPath="Pnl">
+                        <DataGridTemplateColumn.HeaderStyle>
+                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                                <Setter Property="HorizontalContentAlignment" Value="Right" />
+                            </Style>
+                        </DataGridTemplateColumn.HeaderStyle>
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock
+                                Text="{DynamicResource Portfolio.PnL}"
                                 ToolTip="{DynamicResource Portfolio.PnL.NetTooltip}"
                                 ToolTipService.InitialShowDelay="300"
                                 ToolTipService.ShowDuration="20000" />
@@ -770,54 +896,6 @@
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
-                                    </StackPanel>
-                                    <TextBlock
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Center"
-                                        FontFamily="{StaticResource Font.Family.Base}"
-                                        FontSize="{StaticResource Font.Size.Sm}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="…"
-                                        Typography.NumeralAlignment="Tabular"
-                                        Visibility="{Binding IsLoadingPrice, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                </Grid>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <!--  淨值（主數字）+ 成本（次級小字，合併原「付出成本」欄）  -->
-                    <DataGridTemplateColumn Width="200" SortMemberPath="NetValue">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock
-                                Text="{DynamicResource Portfolio.NetVal}"
-                                ToolTip="{DynamicResource Portfolio.NetVal.Tooltip}"
-                                ToolTipService.InitialShowDelay="300"
-                                ToolTipService.ShowDuration="20000" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Grid ToolTip="{DynamicResource Portfolio.NetVal.Tooltip}" ToolTipService.InitialShowDelay="500">
-                                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
-                                        <TextBlock
-                                            HorizontalAlignment="Right"
-                                            FontFamily="{StaticResource Font.Family.Base}"
-                                            FontSize="{StaticResource Font.Size.Sm}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding NetValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
-                                            Typography.NumeralAlignment="Tabular" />
-                                        <TextBlock
-                                            HorizontalAlignment="Right"
-                                            FontFamily="{StaticResource Font.Family.Base}"
-                                            FontSize="{StaticResource Font.Size.Xs}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{Binding Cost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
-                                            Typography.NumeralAlignment="Tabular" />
                                     </StackPanel>
                                     <TextBlock
                                         HorizontalAlignment="Right"

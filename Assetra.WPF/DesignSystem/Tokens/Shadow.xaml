@@ -1,8 +1,6 @@
-<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- WPF-native elevation tokens. Keep shadows subtle for finance workflows. -->
+    <!--  WPF-native elevation tokens. Keep shadows subtle for finance workflows.  -->
     <DropShadowEffect
         x:Key="Shadow.Sm"
         BlurRadius="8"

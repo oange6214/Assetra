@@ -5,6 +5,7 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:portfolio="clr-namespace:Assetra.WPF.Features.Portfolio"
     x:Name="Root"
     mc:Ignorable="d">
 
@@ -39,6 +40,25 @@
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Cash.Name}" />
         <TextBox Margin="0,0,0,8" Text="{Binding AddAccountName, UpdateSourceTrigger=PropertyChanged}" />
+
+        <!--
+            Currency picker for multi-currency users. Defaults to the user's
+            primary currency (Settings → PrimaryCurrency) when the dialog
+            opens; was previously hard-coded "TWD" with no UI.
+        -->
+        <TextBlock
+            Margin="0,0,0,4"
+            FontSize="{StaticResource Font.Size.Xs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Portfolio.Cash.Currency}" />
+        <ComboBox
+            Margin="0,0,0,12"
+            DisplayMemberPath="Display"
+            ItemsSource="{x:Static portfolio:PortfolioViewModel.SupportedCurrencies}"
+            SelectedValue="{Binding AddAccountCurrency, Mode=TwoWay}"
+            SelectedValuePath="Code"
+            Style="{StaticResource FormComboBox}" />
 
         <TextBlock
             Margin="0,0,0,12"

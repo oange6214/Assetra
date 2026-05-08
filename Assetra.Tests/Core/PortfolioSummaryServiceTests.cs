@@ -72,6 +72,22 @@ public sealed class PortfolioSummaryServiceTests
     }
 
     [Fact]
+    public void Calculate_TotalPnl_UsesNetValueAfterEstimatedSellFees()
+    {
+        var id = Guid.NewGuid();
+        var positions = new List<PositionSummaryInput>
+        {
+            new(id, AssetType.Stock, 10m, 1000m, 1200m, 1180m, 120m, 100m, false),
+        };
+        var input = new PortfolioSummaryInput(positions, [], [], 0m);
+
+        var result = _sut.Calculate(input);
+
+        Assert.Equal(180m, result.TotalPnl);
+        Assert.Equal(18m, result.TotalPnlPercent);
+    }
+
+    [Fact]
     public void Calculate_NetWorth_EqualsAssetsMinusLiabilities()
     {
         var posId = Guid.NewGuid();

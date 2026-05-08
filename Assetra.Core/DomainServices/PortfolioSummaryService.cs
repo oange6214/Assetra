@@ -10,7 +10,7 @@ public sealed class PortfolioSummaryService : IPortfolioSummaryService
 
         var totalCost = input.Positions.Sum(p => p.Cost);
         var totalMarketValue = input.Positions.Sum(p => p.MarketValue);
-        var totalPnl = input.Positions.Sum(p => p.MarketValue - p.Cost);
+        var totalPnl = input.Positions.Sum(p => p.NetValue - p.Cost);
         var totalPnlPercent = totalCost > 0 ? totalPnl / totalCost * 100m : 0m;
         var isTotalPositive = totalPnl >= 0;
 

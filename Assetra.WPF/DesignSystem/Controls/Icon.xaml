@@ -14,14 +14,14 @@
                     <Viewbox
                         Width="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
                         Height="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
-                        Stretch="Uniform"
-                        SnapsToDevicePixels="True">
+                        SnapsToDevicePixels="True"
+                        Stretch="Uniform">
                         <fi:FluentIcon
-                            Icon="{Binding IconElement, RelativeSource={RelativeSource TemplatedParent}}"
-                            IconVariant="{Binding IconVariant, RelativeSource={RelativeSource TemplatedParent}}"
-                            IconSize="Size24"
                             FontSize="24"
-                            Foreground="{TemplateBinding Foreground}" />
+                            Foreground="{TemplateBinding Foreground}"
+                            Icon="{Binding IconElement, RelativeSource={RelativeSource TemplatedParent}}"
+                            IconSize="Size24"
+                            IconVariant="{Binding IconVariant, RelativeSource={RelativeSource TemplatedParent}}" />
                     </Viewbox>
                 </ControlTemplate>
             </Setter.Value>
@@ -38,14 +38,14 @@
                     <Viewbox
                         Width="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
                         Height="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
-                        Stretch="Uniform"
-                        SnapsToDevicePixels="True">
+                        SnapsToDevicePixels="True"
+                        Stretch="Uniform">
                         <fi:FluentIcon
-                            Icon="{Binding IconElement, RelativeSource={RelativeSource TemplatedParent}}"
-                            IconVariant="{Binding IconVariant, RelativeSource={RelativeSource TemplatedParent}}"
-                            IconSize="Size24"
                             FontSize="24"
-                            Foreground="{TemplateBinding Foreground}" />
+                            Foreground="{TemplateBinding Foreground}"
+                            Icon="{Binding IconElement, RelativeSource={RelativeSource TemplatedParent}}"
+                            IconSize="Size24"
+                            IconVariant="{Binding IconVariant, RelativeSource={RelativeSource TemplatedParent}}" />
                     </Viewbox>
                 </ControlTemplate>
             </Setter.Value>
@@ -58,9 +58,10 @@
         cross-file BasedOn StaticResource is forbidden by the project
         convention (see DesignSystem/README.md "Migration Rules").
     -->
-    <Style x:Key="EmptyStateIcon"
-           BasedOn="{StaticResource AppIcon}"
-           TargetType="{x:Type controls:AppIcon}">
+    <Style
+        x:Key="EmptyStateIcon"
+        BasedOn="{StaticResource AppIcon}"
+        TargetType="{x:Type controls:AppIcon}">
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="FontSize" Value="44" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />

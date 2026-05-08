@@ -164,6 +164,7 @@
     <sys:String x:Key="Portfolio.Filter.SearchLiabilities">Search liabilities…</sys:String>
     <sys:String x:Key="Portfolio.Filter.SearchTrades">Search trades…</sys:String>
     <sys:String x:Key="Portfolio.TotalCostPaid">Total Cost</sys:String>
+    <sys:String x:Key="Portfolio.TotalCostPaid.Hint">Includes buy-side commission; used for estimated net P&amp;L.</sys:String>
     <sys:String x:Key="Portfolio.SellConfirmLabel">Sell price</sys:String>
     <sys:String x:Key="Portfolio.SellConfirm">Confirm Sell</sys:String>
     <!--  Portfolio.TradeHistory.RealizedPnL / PnLPct removed — see zh-TW for note.  -->
@@ -255,6 +256,7 @@
     <sys:String x:Key="Portfolio.Setup.NoTrades.Message">Start with a record to build your investment, cash, and liability timeline. Charts and analysis will appear after that.</sys:String>
     <sys:String x:Key="Portfolio.Setup.NoTrades.Action">Add Record</sys:String>
     <sys:String x:Key="Portfolio.Cash.Name">Account name</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Currency">Currency</sys:String>
     <sys:String x:Key="Portfolio.Cash.Amount">Balance</sys:String>
     <sys:String x:Key="Portfolio.Cash.Default">Default</sys:String>
     <sys:String x:Key="Portfolio.Cash.SetDefault">Set as Default</sys:String>

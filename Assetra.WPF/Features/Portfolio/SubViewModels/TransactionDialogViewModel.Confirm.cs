@@ -25,7 +25,23 @@ public partial class TransactionDialogViewModel
         // This replaces the former "delete old before dispatch" pattern which could leave
         // the ledger in a corrupt state when validation failed (old gone, new never created).
         var pendingEditId = EditingTradeId;
-        var oldRow = pendingEditId is { } id ? Trades.FirstOrDefault(t => t.Id == id) : null;
+        TradeRowViewModel? oldRow = pendingEditId is { } id
+            ? Trades.FirstOrDefault(t => t.Id == id)
+            : null;
+
+        if (pendingEditId is { } editId && oldRow is null)
+        {
+            await _loadTradesAsync();
+            oldRow = Trades.FirstOrDefault(t => t.Id == editId);
+            if (oldRow is null)
+            {
+                TxError = L("Portfolio.Trade.EditTargetMissing",
+                    "原交易記錄已不存在，交易清單已重新整理，請重新開啟最新紀錄再編輯。");
+                _snackbar?.Warning(TxError);
+                CloseTxDialog();
+                return;
+            }
+        }
 
         // Clear EditingTradeId so downstream handlers (e.g. inline "which symbol is this
         // buy for" logic) don't mistake this for an in-progress edit loop.
