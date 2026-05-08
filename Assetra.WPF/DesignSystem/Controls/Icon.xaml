@@ -1,7 +1,8 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="clr-namespace:Assetra.WPF.DesignSystem.Controls">
+    xmlns:controls="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:fi="clr-namespace:FluentIcons.Wpf;assembly=FluentIcons.Wpf">
 
     <Style x:Key="AppIcon" TargetType="{x:Type controls:AppIcon}">
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}" />
@@ -15,12 +16,12 @@
                         Height="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
                         Stretch="Uniform"
                         SnapsToDevicePixels="True">
-                        <Path
-                            Width="24"
-                            Height="24"
-                            Data="{TemplateBinding Data}"
-                            Fill="{TemplateBinding Foreground}"
-                            Stretch="Uniform" />
+                        <fi:FluentIcon
+                            Icon="{Binding IconElement, RelativeSource={RelativeSource TemplatedParent}}"
+                            IconVariant="{Binding IconVariant, RelativeSource={RelativeSource TemplatedParent}}"
+                            IconSize="Size24"
+                            FontSize="24"
+                            Foreground="{TemplateBinding Foreground}" />
                     </Viewbox>
                 </ControlTemplate>
             </Setter.Value>
@@ -39,12 +40,12 @@
                         Height="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
                         Stretch="Uniform"
                         SnapsToDevicePixels="True">
-                        <Path
-                            Width="24"
-                            Height="24"
-                            Data="{TemplateBinding Data}"
-                            Fill="{TemplateBinding Foreground}"
-                            Stretch="Uniform" />
+                        <fi:FluentIcon
+                            Icon="{Binding IconElement, RelativeSource={RelativeSource TemplatedParent}}"
+                            IconVariant="{Binding IconVariant, RelativeSource={RelativeSource TemplatedParent}}"
+                            IconSize="Size24"
+                            FontSize="24"
+                            Foreground="{TemplateBinding Foreground}" />
                     </Viewbox>
                 </ControlTemplate>
             </Setter.Value>

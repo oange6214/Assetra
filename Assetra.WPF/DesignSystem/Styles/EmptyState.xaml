@@ -3,30 +3,17 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls">
 
-    <Style x:Key="EmptyStateIcon" TargetType="{x:Type ds:AppIcon}">
+    <!--
+        EmptyStateIcon now BasedOn the canonical AppIcon style so the
+        FluentIcons-backed template is reused. Only the empty-state
+        specific tweaks (size 44, centered, muted foreground) remain here.
+    -->
+    <Style x:Key="EmptyStateIcon"
+           BasedOn="{StaticResource AppIcon}"
+           TargetType="{x:Type ds:AppIcon}">
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="FontSize" Value="44" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-        <Setter Property="IsHitTestVisible" Value="False" />
-        <Setter Property="SnapsToDevicePixels" Value="True" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type ds:AppIcon}">
-                    <Viewbox
-                        Width="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
-                        Height="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
-                        Stretch="Uniform"
-                        SnapsToDevicePixels="True">
-                        <Path
-                            Width="24"
-                            Height="24"
-                            Data="{TemplateBinding Data}"
-                            Fill="{TemplateBinding Foreground}"
-                            Stretch="Uniform" />
-                    </Viewbox>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
     </Style>
 
     <Style x:Key="EmptyStatePanel" TargetType="StackPanel">
