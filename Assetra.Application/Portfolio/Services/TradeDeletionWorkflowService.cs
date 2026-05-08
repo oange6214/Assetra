@@ -72,11 +72,19 @@ public sealed class TradeDeletionWorkflowService : ITradeDeletionWorkflowService
                 Note: null);
             await _auditRepository.AppendAsync(entry, ct).ConfigureAwait(false);
         }
-        catch
+        catch (OperationCanceledException)
         {
-            // Audit write must never abort a deletion — swallow any failure.
-            // A persistent failure mode would surface as a missing audit row,
-            // which is preferable to losing the user's intended delete.
+            // Caller requested cancellation — propagate so CT semantics are honoured.
+            throw;
+        }
+        catch (Exception ex)
+        {
+            // Audit write must never abort a deletion — but DO surface the failure
+            // so a 100%-failure mode (e.g. schema migration regression, JSON
+            // serialisation breaking on a new Trade field) is observable in the
+            // dev output instead of disappearing silently.
+            System.Diagnostics.Debug.WriteLine(
+                $"[TradeAudit] Append failed for {tradeId}: {ex.GetType().Name}: {ex.Message}");
         }
     }
 

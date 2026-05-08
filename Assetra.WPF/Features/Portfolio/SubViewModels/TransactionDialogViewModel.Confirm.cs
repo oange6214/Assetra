@@ -131,6 +131,11 @@ public partial class TransactionDialogViewModel
         // data fields are still valid for the stock-lot cleanup below.
         if (oldRow is not null)
         {
+            // Track delete failures so we can surface a persistent (non-snackbar)
+            // error to the user. With both "old trade in ledger" + "new trade in
+            // ledger" the projection double-counts — silently using a snackbar
+            // alone would let the user keep working unaware of the inconsistency.
+            var deleteFailed = false;
             try
             {
                 var result = await _tradeDeletionWorkflowService.DeleteAsync(ToTradeDeletionRequest(oldRow));
@@ -141,14 +146,23 @@ public partial class TransactionDialogViewModel
                     EditingTradeId = pendingEditId;
                     return;
                 }
+                if (!result.Success)
+                {
+                    deleteFailed = true;
+                    Log.Error("Old trade deletion returned Success=false during edit replace ({TradeId}) — possible ledger inconsistency", oldRow.Id);
+                }
             }
             catch (Exception ex)
             {
-                // The new trade was already written; failing to delete the old one would
-                // leave both records in the ledger and show a duplicate entry to the user.
+                deleteFailed = true;
+                // The new trade was already written; failing to delete the old one
+                // leaves both records in the ledger so projections double-count.
+                // Log the underlying error and keep the dialog open with a persistent
+                // error banner (TxError) so the user knows manual reconciliation is
+                // needed and doesn't silently miss the inconsistency.
                 Log.Error(ex, "Failed to remove old trade {TradeId} during edit — possible duplicate entry", oldRow.Id);
-                _snackbar?.Error(L("Portfolio.Trade.OldDeleteFailed", "舊交易記錄刪除失敗，資料庫可能存在重複筆數，建議重新整理或重啟應用程式"));
             }
+
             // L1 perf: previously three back-to-back _loadService.LoadAsync
             // round-trips. ReloadAllAsync (when wired) does a single load and
             // applies every slice; falls back to the per-slice path for older
@@ -164,6 +178,18 @@ public partial class TransactionDialogViewModel
                 await _reloadAccountBalancesAsync();
             }
             _rebuildTotals();
+
+            if (deleteFailed)
+            {
+                // Keep dialog open with a blocking error message so the user
+                // can't silently miss the duplicate. Snackbar (transient) is
+                // also fired for parity with the existing UX expectation.
+                TxError = L("Portfolio.Trade.OldDeleteFailed",
+                    "舊交易記錄刪除失敗，新紀錄已寫入但舊紀錄仍在 — 資料可能重複，請重新整理或刪除舊紀錄。");
+                _snackbar?.Error(TxError);
+                EditingTradeId = pendingEditId;
+                return;
+            }
         }
 
         TransactionCompleted?.Invoke(this, EventArgs.Empty);

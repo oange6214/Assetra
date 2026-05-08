@@ -30,6 +30,36 @@ public sealed class TransactionWorkflowServiceTests
             Times.Once);
     }
 
+    /// <summary>
+    /// Verifies the 7fe6647 decoupling: Income's <see cref="Trade.Name"/> must
+    /// reflect the cash account name (mirrors Deposit/Withdrawal convention) so
+    /// the trade-list "資產" column shows the account, NOT the user's note.
+    /// Trade.Note must remain a free-form user note, NOT auto-copied from the
+    /// account name. Without this assertion the regression is silent.
+    /// </summary>
+    [Fact]
+    public async Task RecordIncomeAsync_TradeNameEqualsAccountName_NoteIsPreserved()
+    {
+        var txService = new Mock<ITransactionService>();
+        var sut = new TransactionWorkflowService(txService.Object);
+        var request = new IncomeTransactionRequest(
+            Amount: 5000m,
+            TradeDate: new DateTime(2026, 1, 1),
+            CashAccountId: Guid.NewGuid(),
+            AccountName: "台新 Richart",
+            Note: "六月薪水",
+            Fee: 0m);
+
+        await sut.RecordIncomeAsync(request);
+
+        txService.Verify(s => s.RecordAsync(
+            It.Is<Trade>(t =>
+                t.Type == TradeType.Income &&
+                t.Name == "台新 Richart" &&
+                t.Note == "六月薪水")),
+            Times.Once);
+    }
+
     [Fact]
     public async Task RecordIncomeAsync_WithFee_RecordsMainTradeAndFeeTrade()
     {

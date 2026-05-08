@@ -25,6 +25,10 @@ internal static class TradeAuditSchemaMigrator
             );
             CREATE INDEX IF NOT EXISTS idx_trade_audit_trade_id  ON trade_audit (trade_id);
             CREATE INDEX IF NOT EXISTS idx_trade_audit_recorded  ON trade_audit (recorded_at DESC);
+            -- Compound index for the common per-trade history query
+            -- (SELECT * FROM trade_audit WHERE trade_id = ? ORDER BY recorded_at DESC).
+            CREATE INDEX IF NOT EXISTS idx_trade_audit_trade_recorded
+                ON trade_audit (trade_id, recorded_at DESC);
             """;
         cmd.ExecuteNonQuery();
     }

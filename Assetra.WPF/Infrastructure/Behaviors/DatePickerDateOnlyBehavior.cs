@@ -21,7 +21,7 @@ public enum DatePickerDateConstraint
 /// </summary>
 public static class DatePickerDateOnlyBehavior
 {
-    private const double CompactCalendarModeHeight = 196d;
+    private const double MinimumExpandedCalendarViewHeight = 214d;
 
     private static readonly DependencyProperty IsCalendarRepairAttachedProperty =
         DependencyProperty.RegisterAttached(
@@ -286,8 +286,8 @@ public static class DatePickerDateOnlyBehavior
 
         item.ApplyTemplate();
 
-        if (item.Template?.FindName("PART_MonthView", item) is not UIElement monthView
-            || item.Template?.FindName("PART_YearView", item) is not UIElement yearView)
+        if (item.Template?.FindName("PART_MonthView", item) is not FrameworkElement monthView
+            || item.Template?.FindName("PART_YearView", item) is not FrameworkElement yearView)
         {
             return;
         }
@@ -296,15 +296,29 @@ public static class DatePickerDateOnlyBehavior
         var desiredMonthVisibility = isMonthMode ? Visibility.Visible : Visibility.Hidden;
         var desiredYearVisibility = isMonthMode ? Visibility.Hidden : Visibility.Visible;
 
-        calendar.SetCurrentValue(
+        calendar.SetCurrentValue(FrameworkElement.HeightProperty, double.NaN);
+        yearView.SetCurrentValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
+        yearView.SetCurrentValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Stretch);
+        yearView.SetCurrentValue(
             FrameworkElement.HeightProperty,
-            isMonthMode ? double.NaN : CompactCalendarModeHeight);
+            isMonthMode ? double.NaN : ResolveExpandedCalendarViewHeight(monthView, item));
 
         if (monthView.Visibility != desiredMonthVisibility)
             monthView.SetCurrentValue(UIElement.VisibilityProperty, desiredMonthVisibility);
 
         if (yearView.Visibility != desiredYearVisibility)
             yearView.SetCurrentValue(UIElement.VisibilityProperty, desiredYearVisibility);
+    }
+
+    private static double ResolveExpandedCalendarViewHeight(FrameworkElement monthView, FrameworkElement calendarItem)
+    {
+        var height = monthView.ActualHeight;
+        if (height <= 0)
+            height = monthView.DesiredSize.Height;
+        if (height <= 0)
+            height = calendarItem.ActualHeight;
+
+        return Math.Max(MinimumExpandedCalendarViewHeight, height);
     }
 
     private static void QueuePopupCalendarSync(DatePicker picker)

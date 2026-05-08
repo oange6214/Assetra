@@ -173,12 +173,18 @@ public sealed class ControlsBehaviorTests
                 Assert.NotNull(yearView);
                 Assert.NotEqual(Visibility.Visible, monthView!.Visibility);
                 Assert.Equal(Visibility.Visible, yearView!.Visibility);
-                Assert.InRange(calendar.Height, 180d, 220d);
+                Assert.True(double.IsNaN(calendar.Height));
+
+                var yearElement = Assert.IsAssignableFrom<FrameworkElement>(yearView);
+                Assert.Equal(HorizontalAlignment.Stretch, yearElement.HorizontalAlignment);
+                Assert.Equal(VerticalAlignment.Stretch, yearElement.VerticalAlignment);
+                Assert.True(yearElement.Height >= 214d);
 
                 calendar.DisplayMode = CalendarMode.Month;
                 PumpDispatcher();
 
                 Assert.True(double.IsNaN(calendar.Height));
+                Assert.True(double.IsNaN(yearElement.Height));
             }
             finally
             {
