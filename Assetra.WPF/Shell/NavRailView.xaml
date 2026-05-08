@@ -338,10 +338,11 @@
                         Foreground="{DynamicResource AppTextMuted}">
                         <ds:AppIcon.Style>
                             <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
-                                <Setter Property="Symbol" Value="ChevronLeft24" />
+                                <!--  Hamburger toggles the pane regardless of state — single recognisable affordance.  -->
+                                <Setter Property="Symbol" Value="Navigation24" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding ElementName=PaneToggle, Path=IsChecked}" Value="False">
-                                        <Setter Property="Symbol" Value="ChevronRight24" />
+                                        <Setter Property="Symbol" Value="Navigation24" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>

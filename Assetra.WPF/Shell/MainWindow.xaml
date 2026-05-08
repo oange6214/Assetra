@@ -198,7 +198,8 @@
                                     <Setter Property="Symbol" Value="Square24" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding WindowState, ElementName=MainShell}" Value="Maximized">
-                                            <Setter Property="Symbol" Value="DualScreenSpan24" />
+                                            <!--  Two overlapping squares = restore-down (Windows 11 standard).  -->
+                                            <Setter Property="Symbol" Value="WindowMultiple24" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
