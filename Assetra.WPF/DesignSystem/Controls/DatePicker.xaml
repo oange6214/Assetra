@@ -52,14 +52,299 @@
 
     <Style BasedOn="{StaticResource AppDatePickerTextBox}" TargetType="{x:Type primitives:DatePickerTextBox}" />
 
+    <!--
+        ════════════════════════════════════════════════════════════
+        AppCalendarButton — month / year header nav buttons
+        ════════════════════════════════════════════════════════════
+        Drives:
+        * PART_HeaderButton (the centered "May 2026" text button)
+        * PART_PreviousButton / PART_NextButton (◀ ▶ chevrons)
+        * Year/decade view month-cell buttons
+    -->
+    <Style x:Key="AppCalendarButton" TargetType="{x:Type primitives:CalendarButton}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="MinWidth" Value="40" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="6,4" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type primitives:CalendarButton}">
+                    <Border
+                        x:Name="Chrome"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{StaticResource Radius.Sm}"
+                        SnapsToDevicePixels="True">
+                        <ContentPresenter
+                            Margin="{TemplateBinding Padding}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            TextElement.Foreground="{TemplateBinding Foreground}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppAccent}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                        </Trigger>
+                        <Trigger Property="HasSelectedDays" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            <Setter TargetName="Chrome" Property="BorderThickness" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsInactive" Value="True">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style BasedOn="{StaticResource AppCalendarButton}" TargetType="{x:Type primitives:CalendarButton}" />
+
+    <!--
+        ════════════════════════════════════════════════════════════
+        Chevron-button style for previous/next nav (◀ ▶)
+        ════════════════════════════════════════════════════════════
+        Used inside the CalendarItem template; bare 28×28 circular
+        hover affordance. Path data is the standard left/right chevron.
+    -->
+    <Style x:Key="AppCalendarNavButton" TargetType="{x:Type Button}">
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border
+                        x:Name="Chrome"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="{StaticResource Radius.Full}"
+                        SnapsToDevicePixels="True">
+                        <ContentPresenter
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            TextElement.Foreground="{TemplateBinding Foreground}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--
+        ════════════════════════════════════════════════════════════
+        AppCalendarItem — the popup body of a Calendar
+        ════════════════════════════════════════════════════════════
+        Full template that:
+        * Wraps the calendar in an AppSurface card with rounded corners
+        * Centers "May 2026" header (PART_HeaderButton) flanked by ◀ ▶
+        * Renders day-of-week strip + Month/Year/Decade views
+        * Drops the default WPF white-with-grey-border chrome that
+          previously leaked through the popup
+    -->
+    <Style x:Key="AppCalendarItem" TargetType="{x:Type primitives:CalendarItem}">
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type primitives:CalendarItem}">
+                    <ControlTemplate.Resources>
+                        <DataTemplate x:Key="{x:Static CalendarItem.DayTitleTemplateResourceKey}">
+                            <TextBlock
+                                Margin="0,0,0,4"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{Binding}" />
+                        </DataTemplate>
+                    </ControlTemplate.Resources>
+                    <Border
+                        Padding="10,10,10,8"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{StaticResource Radius.Md}"
+                        SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <!--  Header row : ◀  May 2026  ▶  -->
+                            <Grid Grid.Row="0" Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Button
+                                    x:Name="PART_PreviousButton"
+                                    Grid.Column="0"
+                                    Focusable="False"
+                                    Style="{StaticResource AppCalendarNavButton}">
+                                    <Path
+                                        Width="6"
+                                        Height="10"
+                                        Data="M 6 0 L 0 5 L 6 10"
+                                        Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                        StrokeEndLineCap="Round"
+                                        StrokeStartLineCap="Round"
+                                        StrokeThickness="1.6" />
+                                </Button>
+                                <Button
+                                    x:Name="PART_HeaderButton"
+                                    Grid.Column="1"
+                                    Margin="6,0"
+                                    Padding="6,4"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Center"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Cursor="Hand"
+                                    FocusVisualStyle="{x:Null}"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border
+                                                x:Name="Chrome"
+                                                Padding="{TemplateBinding Padding}"
+                                                Background="{TemplateBinding Background}"
+                                                CornerRadius="{StaticResource Radius.Sm}">
+                                                <ContentPresenter
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button
+                                    x:Name="PART_NextButton"
+                                    Grid.Column="2"
+                                    Focusable="False"
+                                    Style="{StaticResource AppCalendarNavButton}">
+                                    <Path
+                                        Width="6"
+                                        Height="10"
+                                        Data="M 0 0 L 6 5 L 0 10"
+                                        Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                        StrokeEndLineCap="Round"
+                                        StrokeStartLineCap="Round"
+                                        StrokeThickness="1.6" />
+                                </Button>
+                            </Grid>
+
+                            <!--  Body : Month / Year / Decade views — only one is visible at a time.  -->
+                            <Grid Grid.Row="1">
+                                <Grid x:Name="PART_MonthView" Visibility="Visible">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                </Grid>
+                                <Grid x:Name="PART_YearView" Visibility="Hidden">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="DisplayMode" Value="Year">
+                            <Setter TargetName="PART_MonthView" Property="Visibility" Value="Hidden" />
+                            <Setter TargetName="PART_YearView" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="DisplayMode" Value="Decade">
+                            <Setter TargetName="PART_MonthView" Property="Visibility" Value="Hidden" />
+                            <Setter TargetName="PART_YearView" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style BasedOn="{StaticResource AppCalendarItem}" TargetType="{x:Type primitives:CalendarItem}" />
+
     <Style x:Key="AppCalendar" TargetType="{x:Type Calendar}">
-        <Setter Property="Background" Value="{DynamicResource Brush.Surface}" />
-        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
-        <Setter Property="BorderThickness" Value="{StaticResource Border.Card}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
     </Style>
+
+    <Style BasedOn="{StaticResource AppCalendar}" TargetType="{x:Type Calendar}" />
 
     <Style x:Key="AppCalendarDayButton" TargetType="{x:Type primitives:CalendarDayButton}">
         <Setter Property="MinWidth" Value="34" />
@@ -141,5 +426,7 @@
         <Setter Property="behaviors:DatePickerDateOnlyBehavior.IsEnabled" Value="True" />
         <Setter Property="behaviors:DatePickerDateOnlyBehavior.Constraint" Value="None" />
     </Style>
+
+    <Style BasedOn="{StaticResource AppDatePicker}" TargetType="{x:Type DatePicker}" />
 
 </ResourceDictionary>
