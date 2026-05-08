@@ -217,13 +217,19 @@ public sealed class TradeRowViewModel : ObservableObject
     /// <item><description><b>Sell</b>: lot is gone by the time we edit.</description></item>
     /// <item><description><b>Buy / StockDividend without <see cref="PortfolioEntryId"/></b>:
     /// legacy trades that can't be safely replaced.</description></item>
-    /// <item><description><b>Transfer leg</b>: editing would break the source/target pair.</description></item>
+    /// <item><description><b>Cross-currency Transfer leg</b> (paired Withdrawal/Deposit with
+    /// "轉帳 →"/"轉帳 ←" note prefix): the partner leg is a separate record without a FK
+    /// link, so editing one would leave the other orphaned. Pair-aware deletion is a
+    /// schema-level concern; until that lands, legs stay locked.</description></item>
     /// </list>
+    /// Native Transfer records (single trade with <see cref="ToCashAccountId"/>) ARE
+    /// directly editable — ConfirmTx falls through to ConfirmTransferAsync which creates
+    /// a fresh trade (or pair, if the user changed amounts to differ), and the post-success
+    /// block deletes the single old record.
     /// </summary>
     public bool IsMetaOnlyEditType => Type == TradeType.Sell ||
         ((Type == TradeType.Buy || Type == TradeType.StockDividend) && PortfolioEntryId is null) ||
-        IsTransferLeg ||
-        IsTransfer;  // native Transfer record — edit requires paired-record update flow
+        IsTransferLeg;
 
     /// <summary>
     /// 貨幣切換時由 PortfolioViewModel 呼叫，強制金額欄位重新通知。

@@ -1095,8 +1095,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 break;
 
             case TradeType.Transfer:
-                // Meta-only edit: show transfer values for reference; only date/note are editable.
-                // IsMetaOnlyEditType is true for Transfer, so ConfirmTx takes the meta-only path.
+                // Direct edit (since 2026-05 refactor): all fields shown editable. On Save,
+                // ConfirmTx falls through to ConfirmTransferAsync which records a new
+                // single-record (same amount) or paired (cross-currency) transfer, and the
+                // post-success block deletes the original single Transfer trade. Cross-currency
+                // LEG edits remain meta-only (IsTransferLeg covers that).
                 TxAmount = row.CashAmount?.ToString("F0") ?? string.Empty;
                 TxTransferTargetAmount = row.CashAmount?.ToString("F0") ?? string.Empty;
                 TxCashAccount = row.CashAccountId is { } txSrcAcc
