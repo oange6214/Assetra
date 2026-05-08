@@ -286,56 +286,54 @@
                             </Grid>
 
                             <!--
-                                Body : Month / Year / Decade views, stacked in
-                                a single body cell. Calendar.UpdateAppearance()
-                                toggles Visibility on PART_MonthView /
-                                PART_YearView based on DisplayMode.
+                                Body : Month / Year / Decade views.
+                                Layout mirrors the WPF Aero2 default CalendarItem
+                                template exactly to maximise compatibility with
+                                Calendar.OnApplyTemplate / UpdateAppearance:
 
-                                Wrapped in an unnamed Grid (NOT just Grid.Row
-                                siblings) — flat sibling layout caused stale
-                                _monthView refs after first mode swap and the
-                                Decade view stacked over the Month grid.
-
-                                Each PART starts with collapsed Visibility so
-                                only the one Calendar makes Visible renders;
-                                without this initial state both render at
-                                first Measure and the user sees stacked grids
-                                until the first mode swap.
+                                  * Both PARTs are direct siblings of the outer
+                                    Grid at Grid.Row="1" (NOT inside a wrapper
+                                    Grid — wrappers caused GetTemplateChild
+                                    timing issues that left _monthView null).
+                                  * PART_MonthView starts Visibility="Visible",
+                                    PART_YearView starts "Hidden" — this matches
+                                    the initial DisplayMode=Month state. Calendar
+                                    will SetValue at runtime when the user
+                                    clicks the header, overriding the local
+                                    value (later-set local value wins).
                             -->
-                            <Grid Grid.Row="1">
-                                <Grid x:Name="PART_MonthView" Visibility="Collapsed">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
-                                </Grid>
-                                <Grid x:Name="PART_YearView" Visibility="Collapsed">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
-                                </Grid>
+                            <Grid x:Name="PART_MonthView" Grid.Row="1" Visibility="Visible">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                            </Grid>
+                            <Grid x:Name="PART_YearView" Grid.Row="1" Visibility="Hidden">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
                             </Grid>
                         </Grid>
                     </Border>
