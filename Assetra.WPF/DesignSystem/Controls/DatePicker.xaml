@@ -344,6 +344,18 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+        <!--
+            Explicitly bind sub-part styles so Calendar uses our themed
+            templates. Without these, the implicit CalendarDayButton /
+            CalendarButton / CalendarItem fallbacks may be skipped — Calendar
+            internally instantiates these via FrameworkElement.Style which
+            doesn't always honour ambient implicit styles when nested in
+            a popup. The CalendarItemStyle in particular is required for the
+            ◀ ▶ chevron paths and rounded popup chrome to appear.
+        -->
+        <Setter Property="CalendarDayButtonStyle" Value="{StaticResource AppCalendarDayButton}" />
+        <Setter Property="CalendarButtonStyle" Value="{StaticResource AppCalendarButton}" />
+        <Setter Property="CalendarItemStyle" Value="{StaticResource AppCalendarItem}" />
     </Style>
 
     <Style BasedOn="{StaticResource AppCalendar}" TargetType="{x:Type Calendar}" />
