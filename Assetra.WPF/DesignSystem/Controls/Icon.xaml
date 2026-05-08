@@ -51,4 +51,18 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!--
+        EmptyStateIcon lives here (not in Styles/EmptyState.xaml) so its
+        BasedOn lookup of AppIcon stays inside one ResourceDictionary —
+        cross-file BasedOn StaticResource is forbidden by the project
+        convention (see DesignSystem/README.md "Migration Rules").
+    -->
+    <Style x:Key="EmptyStateIcon"
+           BasedOn="{StaticResource AppIcon}"
+           TargetType="{x:Type controls:AppIcon}">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="44" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+    </Style>
 </ResourceDictionary>

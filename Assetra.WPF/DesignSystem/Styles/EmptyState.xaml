@@ -1,20 +1,15 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
-        EmptyStateIcon now BasedOn the canonical AppIcon style so the
-        FluentIcons-backed template is reused. Only the empty-state
-        specific tweaks (size 44, centered, muted foreground) remain here.
+        EmptyStateIcon lives in DesignSystem/Controls/Icon.xaml so its
+        BasedOn lookup of AppIcon stays inside one ResourceDictionary
+        (cross-file BasedOn StaticResource is forbidden — see
+        DesignSystem/README.md). This file owns the layout / panel /
+        text styles only.
     -->
-    <Style x:Key="EmptyStateIcon"
-           BasedOn="{StaticResource AppIcon}"
-           TargetType="{x:Type ds:AppIcon}">
-        <Setter Property="HorizontalAlignment" Value="Center" />
-        <Setter Property="FontSize" Value="44" />
-        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-    </Style>
+
 
     <Style x:Key="EmptyStatePanel" TargetType="StackPanel">
         <Setter Property="Width" Value="420" />
