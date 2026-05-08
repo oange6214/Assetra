@@ -220,12 +220,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Border
-                Grid.Column="0"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource Card.Radius}">
+            <Border Grid.Column="0" Style="{StaticResource FormCard}">
                 <DataGrid Style="{StaticResource AppDataGrid}"
                     AutoGenerateColumns="False"
                     Background="Transparent"

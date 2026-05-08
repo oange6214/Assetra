@@ -144,12 +144,7 @@
         </Grid>
 
         <!--  ── Preview area ──  -->
-        <Border
-            Grid.Row="3"
-            Background="{DynamicResource AppSurface}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="{StaticResource Card.Radius}">
+        <Border Grid.Row="3" Style="{StaticResource FormCard}">
             <Grid>
                 <!--  Empty state  -->
                 <StackPanel
