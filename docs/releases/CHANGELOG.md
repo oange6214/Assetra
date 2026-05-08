@@ -1,5 +1,57 @@
 # Changelog
 
+## Unreleased
+
+「Fluent + Carbon UI 規範落地 + Card pattern sweep」work。
+
+### Fluent + Carbon 設計方向 (Phase 0 lock)
+
+- 新增 `docs/planning/Assetra-Fluent-Carbon-UI-Plan.md`：完整定義 Assetra Native UI = Fluent visual + Carbon data patterns，包含 ownership matrix、non-goals、頁面模式、form vertical rhythm、acceptance rules，分 9 個 phase。
+- `docs/INDEX.md` 新增 UI Work Workflow section，列出 Plan / Migration Completion / README / USAGE / Release Gate / Changelog 的閱讀順序。
+- `Assetra.WPF/DesignSystem/README.md` 加入 Design Direction 章節，明確 Fluent-first / Carbon-assisted / Assetra-owned 三層責任。
+- `Assetra.WPF/DesignSystem/USAGE.md` 加入 Form Rhythm、Standard List Page Hosts、Shared Product Patterns、Motion 章節。
+- `docs/reviews/Assetra-WPF-UI-Release-Gate.md` 加入 Required Pattern States 章節 + 鍵盤導航 checks + NavRail/DataGrid blockers。
+
+### Token 整理
+
+- `Tokens/Colors.xaml` 重整為 Tailwind v4-aligned 完整色階（Slate 50-950、Green/Red/Amber/Blue/Cyan/Violet scale、Brand 色板）。
+- `DesignTokens.xaml` 從 92 行精簡到 22，移除重複的 Slate/Space/Thickness/Brand/Semantic/Motion.Duration token。
+- `Themes/Light.xaml`、`Dark.xaml` 全面改用 `{StaticResource Color.*}` 引用，不再硬編碼 hex。
+- `Tokens.xaml` 修正 load order：Colors 先於 DesignTokens。
+- 新增 `Gap.Xs/Sm/Md/Lg/Xl`、`LineHeight.*`、`Motion.Easing.Standard/Enter/Exit` (CubicEase + Spline KeySpline)、`TextStyle.Heading/Body/Caption/Numeric` 複合 token。
+- **Card.Radius 16 → 8 px**：harmonize 跟 Radius.Lg / FormCard / AppExpander 一致，Dashboard 卡片不再是異類。
+- **AppExpander template Radius.Sm → Radius.Lg**：expander 與 card 同樣 8 px 圓角。
+
+### 新增元件 (Phase 2.5)
+
+- `StatusBadge` 8 個變體（Neutral/Success/Warning/Danger/Info/Special/Accent/Muted）。
+- `Pagination` 樣式組（Container、Indicator、PageSizeLabel）+ `PaginationNavButton` 變體。
+- `FilterToolbar` pattern（Container、FilterGroup、ActionGroup、FilterItem、ActionItem、Divider）。
+- `Form.FieldLabel/HelperText/ErrorText/SectionHeader/SectionGap` 表單垂直節奏 token。
+
+### 已知 bug 修復 (Phase 1)
+
+- NavRail active indicator 從 `AppDanger`（紅）改為 `AppAccent`。selected 不該用 destructive 色。
+- `AppDataGridCell` 恢復鍵盤 focus visual（從 `{x:Null}` 改為 `{DynamicResource FocusVisual}`）。
+- NavRail 折疊動畫接上 `Motion.Fast` + `Motion.Easing.Standard` Storyboard。
+
+### Card pattern sweep (B1-B5)
+
+針對 feature 頁面的內嵌 card 樣式做系統性替換，全部改用 `Style="{StaticResource FormCard}"`：
+
+- B1: DashboardTabPanel（7 cards）、TrendsView（chart 包進 FormCard）、FinancialOverview（Expander 改 AppExpander）、AllocationView（右側 DataGrid 包進 FormCard）。
+- B2: BudgetSummaryCard。
+- B5: ImportView preview area、ReconciliationView DataGrid wrapper。
+
+Multi-asset / Planning / FIRE / MonteCarlo / Reports 已是 canonical FormCard 用法，不需修改。
+
+### ControlGallery + 文件
+
+- ControlGallery 加入 StatusBadge / Pagination / Form Rhythm / FilterToolbar 展示區。
+- USAGE.md 新增 Motion section，文件 motion token 用法、何時用 / 何時不用、NavRail collapse 範例。
+
+---
+
 ## v0.23.0 - 2026-05-07
 
 「UI/UX consistency hardening + DesignSystem roadmap」release。

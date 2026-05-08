@@ -360,10 +360,10 @@ instead of inventing a local one that has to be replaced later.
 
 ### Phase 6: Multi-Asset and Simulation Pages
 
-- [ ] Real estate: list stretches when data exists; empty state is centered.
-- [ ] Insurance: list stretches when data exists; empty state is centered.
-- [ ] Retirement: list stretches when data exists; empty state is centered.
-- [ ] Physical assets: list stretches when data exists; empty state is centered.
+- [x] Real estate: list stretches when data exists; empty state is centered.
+- [x] Insurance: list stretches when data exists; empty state is centered.
+- [x] Retirement: list stretches when data exists; empty state is centered.
+- [x] Physical assets: list stretches when data exists; empty state is centered.
 - [ ] FIRE: inputs and result states follow analysis page pattern.
 - [ ] Monte Carlo: inputs and result states follow analysis page pattern.
 

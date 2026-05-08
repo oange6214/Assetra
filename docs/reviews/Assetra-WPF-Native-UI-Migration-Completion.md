@@ -89,6 +89,30 @@ The gallery currently covers:
 - Reports use first-class report section styles instead of unstructured long
   text blocks.
 
+## Card Pattern Sweep (post v0.23)
+
+A follow-up sweep replaced every inline card chrome
+(`Background="{DynamicResource AppSurface}"` + `BorderBrush=...` +
+`BorderThickness="1"` + `CornerRadius="..."`) with the canonical
+`Style="{StaticResource FormCard}"`. The sweep covered:
+
+- B1: `DashboardTabPanel`, `TrendsView` (plus earlier `FinancialOverviewView`,
+  `AllocationView`).
+- B2: `BudgetSummaryCard`. Other Portfolio sub-pages had only directional
+  Border patterns (dividers) and chip/badge patterns — left as-is because they
+  are not cards.
+- B3 (multi-asset): `RealEstateView`, `InsurancePolicyView`, `RetirementView`,
+  `PhysicalAssetView` — already on FormCard.
+- B4 (planning): `GoalsView`, `RecurringView`, `CategoriesView`, `AlertsView` —
+  no inline card patterns to replace.
+- B5 (analysis): `ImportView`, `ReconciliationView`. `FireView`,
+  `MonteCarloView`, `ReportsView` — no inline card patterns to replace.
+
+The Card.Radius token was harmonized 16 → 8 px so it matches Radius.Lg /
+FormCard. AppExpander template radius was lifted Radius.Sm → Radius.Lg so
+expander panels share the same corner radius as cards. After the sweep no
+feature page hard-codes card chrome.
+
 ## Verification
 
 Run this gate after future UI changes. The complete release checklist lives in
