@@ -2,12 +2,77 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!--
+        ════════════════════════════════════════════════════════════
+        AppRadioButton — Fluent-style 16 px circle with inner dot
+        ════════════════════════════════════════════════════════════
+        Same state palette as AppCheckBox (hover / checked / focus /
+        disabled). Inner dot fades in via Opacity trigger.
+    -->
     <Style x:Key="AppRadioButton" TargetType="{x:Type RadioButton}">
         <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
-        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RadioButton}">
+                    <Grid Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0" VerticalAlignment="Center">
+                            <Ellipse
+                                x:Name="Outer"
+                                Width="16"
+                                Height="16"
+                                Fill="{TemplateBinding Background}"
+                                Stroke="{TemplateBinding BorderBrush}"
+                                StrokeThickness="1" />
+                            <Ellipse
+                                x:Name="Dot"
+                                Width="6"
+                                Height="6"
+                                Fill="{DynamicResource AppTextOnAccent}"
+                                Opacity="0" />
+                        </Grid>
+                        <ContentPresenter
+                            Grid.Column="1"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            RecognizesAccessKey="True"
+                            TextElement.Foreground="{TemplateBinding Foreground}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Outer" Property="Stroke" Value="{DynamicResource AppTextSecondary}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Outer" Property="Fill" Value="{DynamicResource AppAccent}" />
+                            <Setter TargetName="Outer" Property="Stroke" Value="{DynamicResource AppAccent}" />
+                            <Setter TargetName="Dot" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
+
+    <!--
+        Implicit default. Note: keyed RadioButton variants in Tabs.xaml
+        (NavTabBtn, AppTopTab, AppSubTab, AppSegmentButton) override this
+        explicitly via Style="..." so the tab look stays unaffected.
+    -->
+    <Style BasedOn="{StaticResource AppRadioButton}" TargetType="{x:Type RadioButton}" />
 
 </ResourceDictionary>

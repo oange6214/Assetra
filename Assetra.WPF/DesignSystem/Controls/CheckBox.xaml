@@ -2,14 +2,110 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!--
+        ════════════════════════════════════════════════════════════
+        AppCheckBox — Fluent-style 16 px square box with check glyph
+        ════════════════════════════════════════════════════════════
+        States:
+        * Unchecked  : 1 px AppBorder ring, transparent fill
+        * Hover      : ring → AppBorderStrong
+        * Checked    : AppAccent fill + white check
+        * Indeterm.  : AppAccent fill + horizontal bar
+        * Focus      : visible ring (FocusVisual)
+        * Disabled   : opacity 0.45
+    -->
     <Style x:Key="AppCheckBox" TargetType="{x:Type CheckBox}">
         <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
-        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <Grid Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border
+                            x:Name="Box"
+                            Grid.Column="0"
+                            Width="16"
+                            Height="16"
+                            VerticalAlignment="Center"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="3"
+                            SnapsToDevicePixels="True">
+                            <Grid>
+                                <!--  Check glyph (visible when IsChecked=True)  -->
+                                <Path
+                                    x:Name="CheckGlyph"
+                                    Width="10"
+                                    Height="10"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Data="M 1.5 5 L 4 7.5 L 8.5 2.5"
+                                    Stretch="None"
+                                    Stroke="{DynamicResource AppTextOnAccent}"
+                                    StrokeEndLineCap="Round"
+                                    StrokeStartLineCap="Round"
+                                    StrokeThickness="1.6"
+                                    Visibility="Collapsed" />
+                                <!--  Indeterminate bar  -->
+                                <Rectangle
+                                    x:Name="IndeterminateBar"
+                                    Width="8"
+                                    Height="2"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Fill="{DynamicResource AppTextOnAccent}"
+                                    RadiusX="1"
+                                    RadiusY="1"
+                                    Visibility="Collapsed" />
+                            </Grid>
+                        </Border>
+                        <ContentPresenter
+                            Grid.Column="1"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            RecognizesAccessKey="True"
+                            TextElement.Foreground="{TemplateBinding Foreground}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource AppTextSecondary}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Box" Property="Background" Value="{DynamicResource AppAccent}" />
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            <Setter TargetName="CheckGlyph" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}">
+                            <Setter TargetName="Box" Property="Background" Value="{DynamicResource AppAccent}" />
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            <Setter TargetName="IndeterminateBar" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
+    <!--  Implicit default — bare <CheckBox/> picks up AppCheckBox automatically.  -->
+    <Style BasedOn="{StaticResource AppCheckBox}" TargetType="{x:Type CheckBox}" />
+
+    <!--  ────────  AppSwitch — toggle pill (track + thumb)  ────────  -->
     <Style x:Key="AppSwitch" TargetType="{x:Type CheckBox}">
         <Setter Property="Width" Value="42" />
         <Setter Property="Height" Value="24" />
@@ -21,7 +117,7 @@
                     <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
                         <Border
                             x:Name="Track"
-                            Background="{DynamicResource Brush.BorderStrong}"
+                            Background="{DynamicResource AppBorder}"
                             CornerRadius="12" />
                         <Ellipse
                             x:Name="Thumb"
@@ -29,11 +125,11 @@
                             Height="18"
                             Margin="3"
                             HorizontalAlignment="Left"
-                            Fill="{DynamicResource Brush.Surface}" />
+                            Fill="{DynamicResource AppSurface}" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource Brush.Accent}" />
+                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource AppAccent}" />
                             <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
