@@ -18,6 +18,8 @@
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/PasswordBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/ScrollBar.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/ProgressBar.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/Slider.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/Menu.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/DatePicker.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/Expander.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/Dialog.xaml" />
