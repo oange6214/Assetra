@@ -66,10 +66,15 @@
                 </TabItem>
             </TabControl>
 
-            <!--  Floating Add Record button overlaid on the tab header strip  -->
+            <!--
+                Floating Add Record button overlaid on the tab header strip.
+                Height 32 + Margin top 4 fits inside the tab strip with
+                ~4 px breathing room top and bottom.
+            -->
             <Button
-                Height="36"
-                Margin="0,8,12,8"
+                Height="32"
+                MinHeight="32"
+                Margin="0,4,12,0"
                 Padding="14,0"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
