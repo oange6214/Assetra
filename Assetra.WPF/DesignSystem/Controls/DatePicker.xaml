@@ -452,12 +452,18 @@
                         Background="{TemplateBinding Background}"
                         CornerRadius="0,3,3,0"
                         SnapsToDevicePixels="True">
+                        <!--
+                            Symbol "Calendar24" 是 FluentSystemIcons 在所有版本中都
+                            存在的基本月曆圖示。CalendarLtr24 在某些 FluentIcons.Wpf
+                            版本上會解析失敗，AppIcon 會 fallback 成 Info（驚嘆號），
+                            產生「ⓘ」誤導使用者。
+                        -->
                         <ds:AppIcon
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             FontSize="14"
                             Foreground="{TemplateBinding Foreground}"
-                            Symbol="CalendarLtr24" />
+                            Symbol="Calendar24" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
