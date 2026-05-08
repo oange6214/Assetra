@@ -443,6 +443,40 @@
                                         <txforms:TransferTxForm />
                                     </StackPanel>
 
+                                    <!--
+                                        Impact preview — projects the post-save balance of
+                                        the selected cash account so the user can sanity-check
+                                        before clicking Save. Computed in
+                                        TransactionDialogViewModel.Preview.cs; visible only
+                                        when HasImpactPreview is true (i.e. supported type
+                                        + parseable amount + balance actually changes).
+                                        Hidden for meta-only edits since the form is hidden.
+                                    -->
+                                    <Border
+                                        Margin="0,12,0,0"
+                                        Padding="10,8"
+                                        Background="{DynamicResource AppAccentSubtle}"
+                                        BorderBrush="{DynamicResource AppAccent}"
+                                        BorderThickness="3,0,0,0"
+                                        CornerRadius="{StaticResource Radius.Sm}"
+                                        Visibility="{Binding HasImpactPreview, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ds:AppIcon
+                                                Margin="0,1,8,0"
+                                                VerticalAlignment="Top"
+                                                FontSize="13"
+                                                Foreground="{DynamicResource AppAccent}"
+                                                Symbol="DataPie24" />
+                                            <TextBlock
+                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding ImpactPreviewText}"
+                                                TextWrapping="Wrap"
+                                                Typography.NumeralAlignment="Tabular" />
+                                        </StackPanel>
+                                    </Border>
+
                                     <StackPanel Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <TextBlock
                                             Margin="0,0,0,4"

@@ -211,6 +211,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(IsEditingMetaOnly));
         OnPropertyChanged(nameof(AreEconomicFieldsEditable));
         OnPropertyChanged(nameof(ShowEditLockedSummary));
+        // Edit-mode toggle changes the preview baseline (original delta is now
+        // either applicable or zeroed).
+        NotifyImpactPreviewChanged();
         CreateRevisionCommand.NotifyCanExecuteChanged();
         DeleteTradeCommand.NotifyCanExecuteChanged();
         RequestDeleteTradeCommand.NotifyCanExecuteChanged();
@@ -510,6 +513,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxAmountError = ValidatePositiveDecimalOrEmpty(value);
         OnPropertyChanged(nameof(TxTransferImpliedRateDisplay));
         UpdateSellTxPreview();
+        NotifyImpactPreviewChanged();
     }
 
     partial void OnTxFeeChanged(string value)
@@ -694,6 +698,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxError = string.Empty;
         ApplyAutoCategoryFromNote();
         UpdateSellTxPreview();
+        NotifyImpactPreviewChanged();
         if (TxTypeIsLoanRepay)
             _ = AutoFillLoanRepayAsync(TxLoanLabel);
     }
@@ -722,7 +727,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     }
 
     public bool HasDivPreview => TxDivTotal > 0;
-    partial void OnTxDivTotalChanged(decimal _) => OnPropertyChanged(nameof(HasDivPreview));
+    partial void OnTxDivTotalChanged(decimal _)
+    {
+        OnPropertyChanged(nameof(HasDivPreview));
+        NotifyImpactPreviewChanged();
+    }
 
     // Buy 價格輸入模式 + 總額
     /// <summary>
@@ -809,11 +818,17 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     [ObservableProperty] private string _txPrincipal = string.Empty;
     [ObservableProperty] private string _txInterestPaid = string.Empty;
 
-    partial void OnTxPrincipalChanged(string value) =>
+    partial void OnTxPrincipalChanged(string value)
+    {
         TxPrincipalError = ValidatePositiveDecimalOrEmpty(value);
+        NotifyImpactPreviewChanged();
+    }
 
-    partial void OnTxInterestPaidChanged(string value) =>
+    partial void OnTxInterestPaidChanged(string value)
+    {
         TxInterestPaidError = ValidateNonNegativeDecimalOrEmpty(value);
+        NotifyImpactPreviewChanged();
+    }
 
     // LoanBorrow 攤還欄位（選填；填寫後自動建立攤還表）
     [ObservableProperty] private string _txLoanRate = string.Empty;

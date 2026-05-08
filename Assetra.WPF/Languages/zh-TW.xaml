@@ -503,6 +503,7 @@
     <sys:String x:Key="Portfolio.Tx.CreditCardPayment.NoBalance">這張信用卡目前沒有未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款」。</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCardPayment.ExceedsBalance">繳款金額不可超過目前未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款」。</sys:String>
     <sys:String x:Key="Portfolio.Tx.EditTitle">編輯紀錄</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Preview.BalanceLabel">餘額</sys:String>
     <sys:String x:Key="Portfolio.Tx.Buy">買入</sys:String>
     <sys:String x:Key="Portfolio.Tx.Sell">賣出</sys:String>
     <sys:String x:Key="Portfolio.Tx.SellPosition">選擇持倉</sys:String>
