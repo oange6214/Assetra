@@ -322,16 +322,14 @@
                             </Grid>
                         </Grid>
                     </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="DisplayMode" Value="Year">
-                            <Setter TargetName="PART_MonthView" Property="Visibility" Value="Hidden" />
-                            <Setter TargetName="PART_YearView" Property="Visibility" Value="Visible" />
-                        </Trigger>
-                        <Trigger Property="DisplayMode" Value="Decade">
-                            <Setter TargetName="PART_MonthView" Property="Visibility" Value="Hidden" />
-                            <Setter TargetName="PART_YearView" Property="Visibility" Value="Visible" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
+                    <!--
+                        Visibility of PART_MonthView / PART_YearView is driven
+                        internally by Calendar based on its DisplayMode (Month /
+                        Year / Decade) — CalendarItem does not expose DisplayMode
+                        as a TemplatedParent property, so triggers here would fail
+                        to compile. WPF will toggle each PART's Visibility for us
+                        as long as the named parts exist in the template.
+                    -->
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
