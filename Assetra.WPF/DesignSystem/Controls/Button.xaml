@@ -30,6 +30,7 @@
         <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
     </Style>
 
+    <!--  Implicit default — bare <Button/> picks up AppButtonBase chrome (no MinWidth lock so dense UIs aren't disturbed).  -->
     <Style x:Key="AppButtonBase" TargetType="{x:Type Button}">
         <Setter Property="MinHeight" Value="{StaticResource Control.Height.Md}" />
         <Setter Property="Padding" Value="{StaticResource Padding.Button}" />
@@ -188,5 +189,8 @@
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Lg}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Regular}" />
     </Style>
+
+    <!--  Implicit default for bare <Button/>.  -->
+    <Style BasedOn="{StaticResource AppButtonBase}" TargetType="{x:Type Button}" />
 
 </ResourceDictionary>

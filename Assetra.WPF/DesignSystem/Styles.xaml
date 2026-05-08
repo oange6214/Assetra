@@ -26,11 +26,6 @@
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Pagination.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/FilterToolbar.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/FormText.xaml" />
-        <!--
-            Implicit-default overrides — must load LAST so its BasedOn
-            references resolve against the keyed styles loaded above.
-        -->
-        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/ImplicitDefaults.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>

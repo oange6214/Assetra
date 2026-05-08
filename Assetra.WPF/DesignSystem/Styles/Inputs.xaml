@@ -360,4 +360,7 @@
         <Setter Property="ItemTemplate" Value="{StaticResource AppComboBoxDisplayTemplate}" />
     </Style>
 
+    <!--  Implicit default for bare <ComboBox/>.  -->
+    <Style BasedOn="{StaticResource AppComboBox}" TargetType="{x:Type ComboBox}" />
+
 </ResourceDictionary>

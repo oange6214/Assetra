@@ -97,4 +97,7 @@
         </Setter>
     </Style>
 
+    <!--  Implicit default for bare <Expander/>.  -->
+    <Style BasedOn="{StaticResource AppExpander}" TargetType="{x:Type Expander}" />
+
 </ResourceDictionary>
