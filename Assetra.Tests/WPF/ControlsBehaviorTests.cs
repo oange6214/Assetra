@@ -168,6 +168,17 @@ public sealed class ControlsBehaviorTests
                 PumpDispatcher();
 
                 Assert.Equal(CalendarMode.Decade, calendar.DisplayMode);
+                var (monthView, yearView) = GetCalendarViews(calendar);
+                Assert.NotNull(monthView);
+                Assert.NotNull(yearView);
+                Assert.NotEqual(Visibility.Visible, monthView!.Visibility);
+                Assert.Equal(Visibility.Visible, yearView!.Visibility);
+                Assert.InRange(calendar.Height, 180d, 220d);
+
+                calendar.DisplayMode = CalendarMode.Month;
+                PumpDispatcher();
+
+                Assert.True(double.IsNaN(calendar.Height));
             }
             finally
             {
@@ -263,6 +274,18 @@ public sealed class ControlsBehaviorTests
             DependencyObject child => FindVisualChild<Calendar>(child),
             _ => null,
         };
+    }
+
+    private static (UIElement? MonthView, UIElement? YearView) GetCalendarViews(Calendar calendar)
+    {
+        calendar.ApplyTemplate();
+        var item = FindVisualChild<CalendarItem>(calendar);
+        Assert.NotNull(item);
+        item!.ApplyTemplate();
+
+        var monthView = item.Template?.FindName("PART_MonthView", item) as UIElement;
+        var yearView = item.Template?.FindName("PART_YearView", item) as UIElement;
+        return (monthView, yearView);
     }
 
     private static T? FindVisualChild<T>(DependencyObject root)

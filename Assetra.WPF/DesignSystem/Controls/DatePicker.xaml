@@ -100,14 +100,14 @@
     <Style x:Key="AppCalendarButton" TargetType="{x:Type primitives:CalendarButton}">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
-        <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="MinWidth" Value="40" />
-        <Setter Property="MinHeight" Value="32" />
-        <Setter Property="Padding" Value="6,4" />
+        <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Medium}" />
+        <Setter Property="MinWidth" Value="46" />
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Padding" Value="6,5" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Cursor" Value="Hand" />
@@ -117,11 +117,11 @@
                 <ControlTemplate TargetType="{x:Type primitives:CalendarButton}">
                     <Border
                         x:Name="Chrome"
-                        Margin="2"
+                        Margin="2,3"
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="{StaticResource Radius.Sm}"
+                        CornerRadius="{StaticResource Radius.Md}"
                         SnapsToDevicePixels="True">
                         <ContentPresenter
                             Margin="{TemplateBinding Padding}"
@@ -138,15 +138,26 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.BorderStrong}" />
                         </Trigger>
                         <Trigger Property="HasSelectedDays" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppAccentSubtle}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppAccent}" />
                             <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
-                            <Setter TargetName="Chrome" Property="BorderThickness" Value="1" />
-                            <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
                         </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="HasSelectedDays" Value="True" />
+                                <Condition Property="IsMouseOver" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppAccentHover}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AppAccentHover}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                        </MultiTrigger>
                         <Trigger Property="IsInactive" Value="True">
-                            <Setter Property="Opacity" Value="0.45" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                            <Setter Property="Opacity" Value="0.62" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.45" />

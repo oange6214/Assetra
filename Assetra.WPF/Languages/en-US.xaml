@@ -487,6 +487,8 @@
     <sys:String x:Key="Portfolio.Tx.PriceModeUnit">Unit price</sys:String>
     <sys:String x:Key="Portfolio.Tx.PriceModeTotal">Total</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalAmount">Total amount</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TotalIncludesFee">Total already includes commission</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TotalIncludesFee.Tooltip">When checked, the total is recorded as the actual cost basis with no extra 0.1425% commission added on top. Most broker confirmations already include the fee, so this is enabled by default.</sys:String>
     <sys:String x:Key="Portfolio.Tx.Subtotal">Subtotal</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivInputMode">Input mode</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivModePerShare">Per share</sys:String>

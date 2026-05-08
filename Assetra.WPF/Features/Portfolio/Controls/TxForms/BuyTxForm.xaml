@@ -188,10 +188,21 @@
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
                         Text="{Binding TxBuyTotalCost, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
-                        Margin="0,0,0,8"
+                        Margin="0,0,0,4"
                         Style="{StaticResource FormFieldError}"
                         Text="{Binding TxBuyTotalCostError}"
                         Visibility="{Binding TxBuyTotalCostError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    <!--
+                        多數券商的成交回報是「含手續費的最終扣款金額」，
+                        因此預設勾選。勾選時 record 進 Trade 的 Commission=0，
+                        持倉成本就是使用者輸入的總額（不會再加 0.1425% 上去）。
+                    -->
+                    <CheckBox
+                        Margin="0,0,0,8"
+                        Content="{DynamicResource Portfolio.Tx.TotalIncludesFee}"
+                        IsChecked="{Binding TxBuyTotalIncludesFee, Mode=TwoWay}"
+                        IsEnabled="{Binding AreEconomicFieldsEditable}"
+                        ToolTip="{DynamicResource Portfolio.Tx.TotalIncludesFee.Tooltip}" />
                 </StackPanel>
 
                 <TextBlock

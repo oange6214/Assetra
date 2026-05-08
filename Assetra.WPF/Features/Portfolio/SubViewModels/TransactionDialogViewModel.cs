@@ -769,10 +769,31 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public bool TxBuyIsUnitMode => TxBuyPriceMode == "unit";
     public bool TxBuyIsTotalMode => TxBuyPriceMode == "total";
 
-    /// <summary>「總額」模式下使用者輸入的總成交金額（不含手續費）。</summary>
+    /// <summary>「總額」模式下使用者輸入的總成交金額。是否含手續費由
+    /// <see cref="TxBuyTotalIncludesFee"/> 決定（預設含）。</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TxBuyComputedTotalDisplay))]
     private string _txBuyTotalCost = string.Empty;
+
+    /// <summary>
+    /// 「總額」模式下，使用者輸入的總成交金額是否已包含手續費。
+    /// 預設 <c>true</c>（多數券商給的成交回報是含手續費的最終扣款金額）。
+    ///
+    /// 勾選時：record 進 Trade 的 Commission = 0、Price = total/qty，
+    /// 確保 CashAmount = -total 與使用者期望一致；持倉成本即為使用者
+    /// 看到的金額，不會再多加 0.1425% 手續費。
+    ///
+    /// 取消時：總額視為 gross only，Commission 由 TaiwanTradeFeeCalculator
+    /// 額外算（與單價模式相同行為）。
+    /// </summary>
+    [ObservableProperty] private bool _txBuyTotalIncludesFee = true;
+
+    partial void OnTxBuyTotalIncludesFeeChanged(bool _)
+    {
+        // 切換含/不含手續費會改變 preview 的總計算法。
+        AddAssetDialog.UpdateBuyPreview();
+        OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
+    }
 
     /// <summary>
     /// 總計顯示文字：<c>「總計：NT$X」</c>。
@@ -902,6 +923,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxBuyAssetType = state.TxBuyAssetType;
         TxBuyPriceMode = state.TxBuyPriceMode;
         TxBuyTotalCost = string.Empty;
+        TxBuyTotalIncludesFee = true;  // Reset to default — most broker totals include fee.
         TxBuyMetaOnly = false;
         TxDivInputMode = state.TxDivInputMode;
         TxDivTotalInput = string.Empty;
@@ -1007,6 +1029,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxBuyAssetType = "stock";
         TxBuyPriceMode = "unit";
         TxBuyTotalCost = string.Empty;
+        TxBuyTotalIncludesFee = true;  // Reset to default — most broker totals include fee.
         TxBuyMetaOnly = false;
         TxDivInputMode = "perShare";
         TxDivTotalInput = string.Empty;

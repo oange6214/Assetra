@@ -21,6 +21,15 @@ public enum DatePickerDateConstraint
 /// </summary>
 public static class DatePickerDateOnlyBehavior
 {
+    private const double CompactCalendarModeHeight = 196d;
+
+    private static readonly DependencyProperty IsCalendarRepairAttachedProperty =
+        DependencyProperty.RegisterAttached(
+            "IsCalendarRepairAttached",
+            typeof(bool),
+            typeof(DatePickerDateOnlyBehavior),
+            new PropertyMetadata(false));
+
     public static readonly DependencyProperty IsEnabledProperty =
         DependencyProperty.RegisterAttached(
             "IsEnabled",
@@ -102,6 +111,12 @@ public static class DatePickerDateOnlyBehavior
             return;
 
         Normalize(picker);
+        if (FindPopupCalendar(picker) is { } calendar)
+        {
+            EnsureCalendarRepairAttached(calendar);
+            QueueCalendarViewRepair(calendar);
+        }
+
         SyncPopupCalendar(picker);
         QueuePopupCalendarSync(picker);
     }
@@ -184,6 +199,9 @@ public static class DatePickerDateOnlyBehavior
         if (calendar is null)
             return;
 
+        EnsureCalendarRepairAttached(calendar);
+        RepairCalendarDisplayMode(calendar);
+
         if (calendar.DisplayMode != CalendarMode.Month)
             return;
 
@@ -234,6 +252,59 @@ public static class DatePickerDateOnlyBehavior
         }
 
         return null;
+    }
+
+    private static void EnsureCalendarRepairAttached(Calendar calendar)
+    {
+        if ((bool)calendar.GetValue(IsCalendarRepairAttachedProperty))
+            return;
+
+        calendar.DisplayModeChanged += OnCalendarDisplayModeChanged;
+        calendar.SetValue(IsCalendarRepairAttachedProperty, true);
+    }
+
+    private static void OnCalendarDisplayModeChanged(object? sender, CalendarModeChangedEventArgs e)
+    {
+        if (sender is Calendar calendar)
+            QueueCalendarViewRepair(calendar);
+    }
+
+    private static void QueueCalendarViewRepair(Calendar calendar)
+    {
+        _ = calendar.Dispatcher.BeginInvoke(
+            () => RepairCalendarDisplayMode(calendar),
+            DispatcherPriority.ContextIdle);
+    }
+
+    private static void RepairCalendarDisplayMode(Calendar calendar)
+    {
+        calendar.ApplyTemplate();
+
+        var item = FindDescendant<CalendarItem>(calendar);
+        if (item is null)
+            return;
+
+        item.ApplyTemplate();
+
+        if (item.Template?.FindName("PART_MonthView", item) is not UIElement monthView
+            || item.Template?.FindName("PART_YearView", item) is not UIElement yearView)
+        {
+            return;
+        }
+
+        var isMonthMode = calendar.DisplayMode == CalendarMode.Month;
+        var desiredMonthVisibility = isMonthMode ? Visibility.Visible : Visibility.Hidden;
+        var desiredYearVisibility = isMonthMode ? Visibility.Hidden : Visibility.Visible;
+
+        calendar.SetCurrentValue(
+            FrameworkElement.HeightProperty,
+            isMonthMode ? double.NaN : CompactCalendarModeHeight);
+
+        if (monthView.Visibility != desiredMonthVisibility)
+            monthView.SetCurrentValue(UIElement.VisibilityProperty, desiredMonthVisibility);
+
+        if (yearView.Visibility != desiredYearVisibility)
+            yearView.SetCurrentValue(UIElement.VisibilityProperty, desiredYearVisibility);
     }
 
     private static void QueuePopupCalendarSync(DatePicker picker)

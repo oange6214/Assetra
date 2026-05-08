@@ -51,6 +51,22 @@ public partial class AddAssetDialogViewModel : ObservableObject
     /// <summary>Returns whether to use a cash account for the buy.</summary>
     public Func<bool> GetTxUseCashAccount { get; set; } = () => false;
 
+    /// <summary>
+    /// True when the Tx dialog is in "total cost" buy-price mode (vs "unit price"
+    /// mode). Combined with <see cref="GetTxBuyTotalIncludesFee"/> to decide
+    /// whether the recorded Trade should carry a separately-computed commission.
+    /// </summary>
+    public Func<bool> GetTxBuyIsTotalMode { get; set; } = () => false;
+
+    /// <summary>
+    /// True when the user marked the total-cost field as already including the
+    /// broker commission. Defaults to true because most broker confirmations
+    /// quote the all-in number. When true (and we're in total mode), buy
+    /// recording forces commission=0 so the trade's CashAmount matches the
+    /// figure the user typed.
+    /// </summary>
+    public Func<bool> GetTxBuyTotalIncludesFee { get; set; } = () => true;
+
     public AddAssetDialogViewModel(
         IAddAssetWorkflowService addAssetWorkflow,
         IAccountUpsertWorkflowService accountUpsertWorkflow,
@@ -291,16 +307,30 @@ public partial class AddAssetDialogViewModel : ObservableObject
             return;
         }
 
-        var txFee = GetTxFee();
+        // Total-mode + "金額已含手續費" → record Trade with Commission=0 so the
+        // total cash out equals exactly what the user typed. Pass manualFee=0
+        // here so the preview also reflects this (no double-fee illusion).
+        decimal? overrideManualFee = null;
+        if (GetTxBuyIsTotalMode() && GetTxBuyTotalIncludesFee())
+        {
+            overrideManualFee = 0m;
+        }
+        else
+        {
+            var txFee = GetTxFee();
+            if (!string.IsNullOrWhiteSpace(txFee) &&
+                ParseHelpers.TryParseDecimal(txFee, out var manualFee) && manualFee >= 0)
+            {
+                overrideManualFee = manualFee;
+            }
+        }
+
         var preview = _addAssetWorkflow.BuildBuyPreview(new BuyPreviewRequest(
             AddSymbol.Trim(),
             price,
             qty,
             GetTxCommissionDiscountValue(),
-            !string.IsNullOrWhiteSpace(txFee) &&
-            ParseHelpers.TryParseDecimal(txFee, out var manualFee) && manualFee >= 0
-                ? manualFee
-                : null));
+            overrideManualFee));
 
         AddGrossAmount = preview.GrossAmount;
         AddCommission = preview.Commission;
@@ -507,9 +537,22 @@ public partial class AddAssetDialogViewModel : ObservableObject
         { AddError = "成交價無效"; return; }
 
         var symbol = AddSymbol.Trim().ToUpper();
-        var txFee = GetTxFee();
-        if (!TryResolveManualFee(txFee, out var manualFee))
-        { AddError = "手續費無效"; return; }
+
+        // Total-mode + "金額已含手續費" → force commission=0 so the recorded
+        // Trade.CashAmount equals exactly the user-typed total (price × qty).
+        // Otherwise resolve manualFee from the optional TxFee field (may be
+        // null → service auto-computes via TaiwanTradeFeeCalculator).
+        decimal? manualFee;
+        if (GetTxBuyIsTotalMode() && GetTxBuyTotalIncludesFee())
+        {
+            manualFee = 0m;
+        }
+        else
+        {
+            var txFee = GetTxFee();
+            if (!TryResolveManualFee(txFee, out manualFee))
+            { AddError = "手續費無效"; return; }
+        }
 
         var cashAccId = GetTxUseCashAccount() ? GetTxCashAccountId() : null;
         await _addAssetWorkflow.ExecuteStockBuyAsync(new StockBuyRequest(

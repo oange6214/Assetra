@@ -401,6 +401,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         AddAssetDialog.GetTxBuyMetaOnly = () => Transaction.TxBuyMetaOnly;
         AddAssetDialog.GetTxCashAccountId = () => Transaction.TxCashAccount?.Id;
         AddAssetDialog.GetTxUseCashAccount = () => Transaction.TxUseCashAccount;
+        AddAssetDialog.GetTxBuyIsTotalMode = () => Transaction.TxBuyIsTotalMode;
+        AddAssetDialog.GetTxBuyTotalIncludesFee = () => Transaction.TxBuyTotalIncludesFee;
         AddAssetDialog.GetCashAccounts = () => CashAccounts;
         SellPanel.GetTxCommissionDiscountValue = () => Transaction.TxCommissionDiscountValue;
         SellPanel.GetTxFee = () => Transaction.TxFee;

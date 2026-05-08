@@ -488,6 +488,8 @@
     <sys:String x:Key="Portfolio.Tx.PriceModeUnit">單價</sys:String>
     <sys:String x:Key="Portfolio.Tx.PriceModeTotal">總額</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalAmount">總成交金額</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TotalIncludesFee">金額已含手續費</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TotalIncludesFee.Tooltip">勾選時將總額直接視為持倉成本，不再額外加 0.1425% 手續費；多數券商的成交回報已含手續費，預設勾選。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Subtotal">總計</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivInputMode">輸入方式</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivModePerShare">每股股利</sys:String>
