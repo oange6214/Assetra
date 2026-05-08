@@ -93,16 +93,20 @@
                             TextElement.Foreground="{TemplateBinding Foreground}" />
                     </Border>
                     <ControlTemplate.Triggers>
+                        <!--
+                            CalendarButton properties: IsInactive, HasSelectedDays,
+                            IsFocused (no IsSelected — that's on CalendarDayButton).
+                            "Currently displayed" cells use HasSelectedDays for the
+                            ring; mouse hover paints the fill.
+                        -->
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
                         </Trigger>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppAccent}" />
-                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
-                        </Trigger>
                         <Trigger Property="HasSelectedDays" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppAccentSubtle}" />
                             <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
                             <Setter TargetName="Chrome" Property="BorderThickness" Value="1" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
                         </Trigger>
                         <Trigger Property="IsInactive" Value="True">
                             <Setter Property="Opacity" Value="0.45" />
