@@ -91,11 +91,16 @@ internal static class PortfolioServiceCollectionExtensions
             new PortfolioHistoryMaintenanceService(
                 sp.GetRequiredService<PortfolioSnapshotService>(),
                 sp.GetRequiredService<PortfolioBackfillService>()));
+        // Append-only audit log: optional dependency of TradeDeletionWorkflowService.
+        // Deletes capture a JSON snapshot of the trade BEFORE removal so users can
+        // recover from accidental edits / deletes via raw SQL inspection. No UI yet.
+        services.AddSingleton<ITradeAuditRepository>(_ => new TradeAuditSqliteRepository(dbPath));
         services.AddSingleton<ITradeDeletionWorkflowService>(sp =>
             new TradeDeletionWorkflowService(
                 sp.GetRequiredService<ITradeRepository>(),
                 sp.GetRequiredService<IPortfolioRepository>(),
-                sp.GetRequiredService<IPositionQueryService>()));
+                sp.GetRequiredService<IPositionQueryService>(),
+                sp.GetRequiredService<ITradeAuditRepository>()));
         services.AddSingleton<ITradeMetadataWorkflowService>(sp =>
             new TradeMetadataWorkflowService(
                 sp.GetRequiredService<ITradeRepository>()));

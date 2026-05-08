@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
@@ -11,14 +12,23 @@ public sealed class TradeDeletionWorkflowService : ITradeDeletionWorkflowService
     private readonly IPortfolioRepository _portfolioRepository;
     private readonly IPositionQueryService _positionQueryService;
 
+    /// <summary>
+    /// Optional. When supplied, every successful deletion writes a JSON snapshot
+    /// of the deleted trade so the user has a recovery trail. Null in test/null-
+    /// service contexts where audit is irrelevant.
+    /// </summary>
+    private readonly ITradeAuditRepository? _auditRepository;
+
     public TradeDeletionWorkflowService(
         ITradeRepository tradeRepository,
         IPortfolioRepository portfolioRepository,
-        IPositionQueryService positionQueryService)
+        IPositionQueryService positionQueryService,
+        ITradeAuditRepository? auditRepository = null)
     {
         _tradeRepository = tradeRepository;
         _portfolioRepository = portfolioRepository;
         _positionQueryService = positionQueryService;
+        _auditRepository = auditRepository;
     }
 
     public async Task<TradeDeletionResult> DeleteAsync(
@@ -30,11 +40,44 @@ public sealed class TradeDeletionWorkflowService : ITradeDeletionWorkflowService
         if (await WouldRemovalCauseNegativeQtyAsync(request).ConfigureAwait(false))
             return new TradeDeletionResult(Success: false, BlockedBySell: true);
 
+        // Capture pre-deletion snapshot for the audit log. Best-effort —
+        // a missing trade or audit-write failure must not block the deletion.
+        await TryWriteAuditAsync(request.TradeId, ct).ConfigureAwait(false);
+
         await ApplyTradeRemovalOnPositionAsync(request, ct).ConfigureAwait(false);
         await _tradeRepository.RemoveChildrenAsync(request.TradeId).ConfigureAwait(false);
         await _tradeRepository.RemoveAsync(request.TradeId).ConfigureAwait(false);
 
         return new TradeDeletionResult(Success: true);
+    }
+
+    private async Task TryWriteAuditAsync(Guid tradeId, CancellationToken ct)
+    {
+        if (_auditRepository is null)
+            return;
+
+        try
+        {
+            var trade = await _tradeRepository.GetByIdAsync(tradeId, ct).ConfigureAwait(false);
+            if (trade is null)
+                return;
+
+            var json = JsonSerializer.Serialize(trade);
+            var entry = new TradeAuditEntry(
+                Id: Guid.NewGuid(),
+                TradeId: tradeId,
+                Action: "delete",
+                TradeJson: json,
+                RecordedAt: DateTime.UtcNow,
+                Note: null);
+            await _auditRepository.AppendAsync(entry, ct).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Audit write must never abort a deletion — swallow any failure.
+            // A persistent failure mode would surface as a missing audit row,
+            // which is preferable to losing the user's intended delete.
+        }
     }
 
     private async Task<bool> WouldRemovalCauseNegativeQtyAsync(TradeDeletionRequest request)
