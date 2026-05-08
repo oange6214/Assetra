@@ -503,6 +503,7 @@
     <sys:String x:Key="Portfolio.Tx.CreditCardPayment.ExceedsBalance">Payment cannot exceed the current outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdraw”.</sys:String>
     <sys:String x:Key="Portfolio.Tx.EditTitle">Edit Record</sys:String>
     <sys:String x:Key="Portfolio.Tx.Preview.BalanceLabel">Balance</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Preview.LiabilityLabel">Balance</sys:String>
     <sys:String x:Key="Portfolio.Tx.Buy">Buy</sys:String>
     <sys:String x:Key="Portfolio.Tx.Sell">Sell</sys:String>
     <sys:String x:Key="Portfolio.Tx.SellPosition">Select position</sys:String>

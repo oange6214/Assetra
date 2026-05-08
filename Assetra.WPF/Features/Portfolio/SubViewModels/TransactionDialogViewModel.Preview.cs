@@ -4,66 +4,94 @@ using Assetra.WPF.Infrastructure;
 namespace Assetra.WPF.Features.Portfolio.SubViewModels;
 
 /// <summary>
-/// Impact preview — computes the post-transaction cash-account balance based
-/// on the dialog's current state and exposes it as bindable strings for the
-/// inline preview panel.
+/// Impact preview — projects the post-save state of any account / liability
+/// the dialog will touch, and exposes it as a single multi-line string for
+/// the inline preview banner.
 ///
-/// MVP scope (Phase 1): only preview the SELECTED cash account's balance for
-/// trade types whose primary effect is a cash inflow/outflow:
+/// Coverage by trade type:
+///
+///   Cash account balance line
+///   ─────────────────────────
 ///   * Income / CashDividend / Deposit / LoanBorrow → +amount
-///   * Withdrawal / CreditCardPayment / LoanRepay   → −amount
+///   * Withdrawal / CreditCardPayment              → −amount
+///   * LoanRepay                                    → −(principal + interest)
+///   * Buy                                          → −(price × qty)  (fees ignored, see note)
 ///
-/// Out of scope for Phase 1 (return false from <see cref="HasImpactPreview"/>):
-///   * Buy / Sell — fees and commission discount make the math noisier; deferred
-///   * Transfer  — meta-only edit, panel hidden anyway
-///   * StockDividend / CreditCardCharge — no cash impact
+///   Liability balance line
+///   ──────────────────────
+///   * LoanBorrow                                   → +amount  (TxLoanLabel)
+///   * LoanRepay                                    → −principal (TxLoanLabel)
+///   * CreditCardCharge                             → +amount  (TxCreditCard)
+///   * CreditCardPayment                            → −amount  (TxCreditCard)
 ///
-/// Edit-mode correctness: in edit mode the displayed account.Balance ALREADY
-/// includes the original trade's effect. We back out the original delta and
-/// apply the new one so the preview reflects what the balance will be AFTER
-/// save.
+///   Skipped (no preview):
+///   * Sell                  — meta-only edit; form hidden
+///   * Transfer              — meta-only edit; form hidden
+///   * StockDividend         — share count change rather than balance; deferred
+///
+/// Edit-mode correctness: in edit mode the displayed account / liability
+/// Balance ALREADY includes the original trade's effect. The original delta
+/// is backed out (per the same-target-vs-different-target rule) and the new
+/// delta is then applied so the projection reflects post-save state.
+///
+/// Buy fee caveat: commission and tax depend on the discount mode + manual
+/// override path. The preview deliberately uses the gross (price × qty) figure
+/// to keep the math obvious; it understates the actual cash decrease by the
+/// commission (typically 0.05–0.1% of gross). Acceptable for sanity-check UX.
 /// </summary>
 public partial class TransactionDialogViewModel
 {
-    /// <summary>True when there is enough info to render the preview line.</summary>
+    /// <summary>True when the panel should render at least one preview line.</summary>
     public bool HasImpactPreview => !string.IsNullOrEmpty(ImpactPreviewText);
 
     /// <summary>
-    /// Single-line preview text. Empty when the panel should hide.
-    /// Format: "現金帳戶 OOO 餘額：NT$50,000 → NT$48,000"
-    /// (or just "→ NT$48,000" when the new value equals current — i.e. nothing
-    /// to show — the property returns empty in that case).
+    /// Multi-line preview text. Each line covers one affected target
+    /// (cash account or liability). Empty when no line applies.
     /// </summary>
     public string ImpactPreviewText
     {
         get
         {
-            if (TxCashAccount is not { } acct)
-                return string.Empty;
+            var lines = new List<string>(2);
 
-            if (!TryComputeNewSignedDelta(out var newDelta))
-                return string.Empty;
+            if (TryBuildCashLine() is { Length: > 0 } cashLine)
+                lines.Add(cashLine);
 
-            var originalDelta = ComputeOriginalDeltaForCurrentAccount(acct);
-            var projected = acct.Balance - originalDelta + newDelta;
+            if (TryBuildLiabilityLine() is { Length: > 0 } liabLine)
+                lines.Add(liabLine);
 
-            // Skip when the projected balance is identical to current (e.g. user
-            // edited only date/note while leaving amount unchanged). Avoids
-            // showing a "X → X" line that adds no information.
-            if (projected == acct.Balance)
-                return string.Empty;
-
-            return $"{acct.Name} {L("Portfolio.Tx.Preview.BalanceLabel", "餘額")}：" +
-                   $"{acct.Balance:N0} → {projected:N0}";
+            return lines.Count == 0 ? string.Empty : string.Join('\n', lines);
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // Cash account line
+    // ─────────────────────────────────────────────────────────────
+
+    private string TryBuildCashLine()
+    {
+        if (TxCashAccount is not { } acct)
+            return string.Empty;
+
+        if (!TryComputeNewCashDelta(out var newDelta))
+            return string.Empty;
+
+        var originalDelta = ComputeOriginalCashDelta(acct);
+        var projected = acct.Balance - originalDelta + newDelta;
+
+        if (projected == acct.Balance)
+            return string.Empty;
+
+        return $"{acct.Name} {L("Portfolio.Tx.Preview.BalanceLabel", "餘額")}：" +
+               $"{acct.Balance:N0} → {projected:N0}";
+    }
+
     /// <summary>
-    /// Computes the signed cash impact of the trade if it were saved right now.
-    /// Returns false when the type isn't supported by Phase 1 or the amount
-    /// can't be parsed.
+    /// Computes the signed cash impact of the in-flight trade. Buy is included
+    /// here (Phase 2) using gross (price × qty) — fees are intentionally
+    /// excluded for math clarity; see file-level comment.
     /// </summary>
-    private bool TryComputeNewSignedDelta(out decimal delta)
+    private bool TryComputeNewCashDelta(out decimal delta)
     {
         delta = 0;
         switch (TxType)
@@ -84,16 +112,12 @@ public partial class TransactionDialogViewModel
                 return true;
 
             case "cashDiv":
-                // TxDivTotal is computed by the dividend form (per-share × position
-                // shares OR total-input mode). When zero/negative, no preview.
                 if (TxDivTotal <= 0)
                     return false;
                 delta = TxDivTotal;
                 return true;
 
             case "loanRepay":
-                // Both fields are strings; either may be empty (e.g. interest-free
-                // micro-loans). Sum what's there.
                 ParseHelpers.TryParseDecimal(TxPrincipal, out var principal);
                 ParseHelpers.TryParseDecimal(TxInterestPaid, out var interest);
                 var totalCashOut = principal + interest;
@@ -102,20 +126,39 @@ public partial class TransactionDialogViewModel
                 delta = -totalCashOut;
                 return true;
 
+            case "buy":
+                if (!TryReadBuyGrossCost(out var grossCost) || grossCost <= 0)
+                    return false;
+                delta = -grossCost;
+                return true;
+
             default:
-                // Buy/Sell/Transfer/StockDiv/CreditCardCharge — out of MVP scope.
+                // Sell / Transfer / StockDiv / CreditCardCharge: no cash line.
                 return false;
         }
     }
 
     /// <summary>
-    /// In edit mode, derive how much the original trade contributed to the
-    /// CURRENTLY-selected cash account. If the account changed during this
-    /// edit (oldRow used a different account), the contribution to this
-    /// account is zero — it never received the original delta.
-    /// In new-trade mode this is always zero.
+    /// Reads gross Buy cost from the AddAssetDialog sub-VM, supporting both
+    /// "unit price × quantity" and "total cost" input modes.
     /// </summary>
-    private decimal ComputeOriginalDeltaForCurrentAccount(CashAccountRowViewModel acct)
+    private bool TryReadBuyGrossCost(out decimal gross)
+    {
+        gross = 0;
+        if (TxBuyPriceMode == "total")
+        {
+            return ParseHelpers.TryParseDecimal(TxBuyTotalCost, out gross) && gross > 0;
+        }
+
+        if (!ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var price) || price <= 0 ||
+            !ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) || qty <= 0)
+            return false;
+
+        gross = price * qty;
+        return true;
+    }
+
+    private decimal ComputeOriginalCashDelta(CashAccountRowViewModel acct)
     {
         if (!IsEditMode || EditingTradeId is not { } id)
             return 0;
@@ -124,7 +167,6 @@ public partial class TransactionDialogViewModel
         if (oldRow is null)
             return 0;
 
-        // Only same-account edits affect the displayed Balance baseline.
         if (oldRow.CashAccountId is not { } accId || accId != acct.Id)
             return 0;
 
@@ -138,27 +180,138 @@ public partial class TransactionDialogViewModel
             TradeType.Withdrawal
                 or TradeType.CreditCardPayment
                 or TradeType.LoanRepay => -oldAmount,
+            TradeType.Buy => -oldAmount,
             _ => 0,
         };
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // Liability balance line
+    // ─────────────────────────────────────────────────────────────
+
+    private string TryBuildLiabilityLine()
+    {
+        if (!TryComputeNewLiabilityDelta(out var liability, out var newDelta))
+            return string.Empty;
+
+        var originalDelta = ComputeOriginalLiabilityDelta(liability);
+        var projected = liability.Balance - originalDelta + newDelta;
+
+        if (projected == liability.Balance)
+            return string.Empty;
+
+        return $"{liability.Name} {L("Portfolio.Tx.Preview.LiabilityLabel", "餘額")}：" +
+               $"{liability.Balance:N0} → {projected:N0}";
+    }
+
     /// <summary>
-    /// Forces the inline preview to recompute. Called from existing partial
-    /// On*Changed hooks for fields that feed into the delta calculation.
-    /// Cheaper than wiring a dedicated event since the preview is just a
-    /// computed string.
+    /// Computes the signed liability-balance impact. The signed convention
+    /// matches "remaining debt" — positive delta means the user owes more.
     /// </summary>
+    private bool TryComputeNewLiabilityDelta(out LiabilityRowViewModel liability, out decimal delta)
+    {
+        liability = null!;
+        delta = 0;
+
+        switch (TxType)
+        {
+            case "loanBorrow":
+                if (!ParseHelpers.TryParseDecimal(TxAmount, out var borrowed) || borrowed <= 0)
+                    return false;
+                if (FindLiabilityByLabel(TxLoanLabel) is not { } borrowLiab)
+                    return false;
+                liability = borrowLiab;
+                delta = borrowed;
+                return true;
+
+            case "loanRepay":
+                // Only the principal portion reduces remaining debt; interest
+                // is a pure expense on the cash side.
+                if (!ParseHelpers.TryParseDecimal(TxPrincipal, out var principalPaid) || principalPaid <= 0)
+                    return false;
+                if (FindLiabilityByLabel(TxLoanLabel) is not { } repayLiab)
+                    return false;
+                liability = repayLiab;
+                delta = -principalPaid;
+                return true;
+
+            case "creditCardCharge":
+                if (!ParseHelpers.TryParseDecimal(TxAmount, out var charged) || charged <= 0)
+                    return false;
+                if (TxCreditCard is null)
+                    return false;
+                liability = TxCreditCard;
+                delta = charged;
+                return true;
+
+            case "creditCardPayment":
+                if (!ParseHelpers.TryParseDecimal(TxAmount, out var paid) || paid <= 0)
+                    return false;
+                if (TxCreditCard is null)
+                    return false;
+                liability = TxCreditCard;
+                delta = -paid;
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    private LiabilityRowViewModel? FindLiabilityByLabel(string label) =>
+        string.IsNullOrWhiteSpace(label)
+            ? null
+            : Liabilities.FirstOrDefault(l =>
+                string.Equals(l.Label, label, StringComparison.OrdinalIgnoreCase));
+
+    private decimal ComputeOriginalLiabilityDelta(LiabilityRowViewModel liability)
+    {
+        if (!IsEditMode || EditingTradeId is not { } id)
+            return 0;
+
+        var oldRow = Trades.FirstOrDefault(t => t.Id == id);
+        if (oldRow is null)
+            return 0;
+
+        // Match by label/credit-card link. Loans use Symbol or Label string;
+        // credit-card trades carry the issuer asset id via LiabilityAssetId.
+        var sameTarget = oldRow.Type switch
+        {
+            TradeType.LoanBorrow or TradeType.LoanRepay =>
+                string.Equals(oldRow.Symbol ?? oldRow.Name, liability.Label, StringComparison.OrdinalIgnoreCase),
+            TradeType.CreditCardCharge or TradeType.CreditCardPayment =>
+                liability.AssetId.HasValue && oldRow.LiabilityAssetId == liability.AssetId,
+            _ => false,
+        };
+        if (!sameTarget)
+            return 0;
+
+        return oldRow.Type switch
+        {
+            TradeType.LoanBorrow => oldRow.CashAmount ?? 0m,
+            TradeType.LoanRepay =>
+                // Principal portion only — the row may not store split, so use the
+                // best available figure (Principal field if available, else CashAmount).
+                -(oldRow.Principal ?? oldRow.CashAmount ?? 0m),
+            TradeType.CreditCardCharge => oldRow.CashAmount ?? 0m,
+            TradeType.CreditCardPayment => -(oldRow.CashAmount ?? 0m),
+            _ => 0,
+        };
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Recompute hooks
+    // ─────────────────────────────────────────────────────────────
+
     private void NotifyImpactPreviewChanged()
     {
         OnPropertyChanged(nameof(ImpactPreviewText));
         OnPropertyChanged(nameof(HasImpactPreview));
     }
 
-    /// <summary>
-    /// Hook for the [ObservableProperty] generated TxCashAccount setter so
-    /// switching account in the dropdown immediately re-projects the preview
-    /// against the newly-selected account's Balance.
-    /// </summary>
     partial void OnTxCashAccountChanged(CashAccountRowViewModel? value) =>
+        NotifyImpactPreviewChanged();
+
+    partial void OnTxCreditCardChanged(LiabilityRowViewModel? value) =>
         NotifyImpactPreviewChanged();
 }

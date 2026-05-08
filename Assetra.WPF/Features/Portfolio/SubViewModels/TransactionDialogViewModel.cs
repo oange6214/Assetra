@@ -136,6 +136,18 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         AddAssetDialog = deps.AddAssetDialog;
         SellPanel = deps.SellPanel;
 
+        // The Buy form's price / quantity / total-cost fields live on the
+        // AddAssetDialog sub-VM. Surface their changes to the impact preview
+        // via PropertyChanged subscription so the preview banner re-projects
+        // as the user types — mirroring how UpdateBuyPreview already wires.
+        AddAssetDialog.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(AddAssetDialog.AddPrice)
+                              or nameof(AddAssetDialog.AddQuantity)
+                              or nameof(AddAssetDialog.AddCost))
+                NotifyImpactPreviewChanged();
+        };
+
         _getDefaultCashAccount = deps.GetDefaultCashAccount;
         _loadLoanScheduleAsync = deps.LoadLoanScheduleAsync;
         _loadLiabilitiesAsync = deps.LoadLiabilitiesAsync;
@@ -462,6 +474,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         if (TxTypeIsLoanRepay)
             _ = AutoFillLoanRepayAsync(value);
+        // Liability balance preview hinges on which loan label is selected.
+        NotifyImpactPreviewChanged();
     }
 
     /// <summary>
