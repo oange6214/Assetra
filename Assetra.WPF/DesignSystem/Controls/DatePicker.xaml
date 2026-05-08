@@ -126,8 +126,14 @@
                         <ContentPresenter
                             Margin="{TemplateBinding Padding}"
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                            TextElement.Foreground="{TemplateBinding Foreground}" />
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                            <!--  Same TextBlock-style override as CalendarDayButton — see comment there.  -->
+                            <ContentPresenter.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type primitives:CalendarButton}}}" />
+                                </Style>
+                            </ContentPresenter.Resources>
+                        </ContentPresenter>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -188,8 +194,23 @@
                         <ContentPresenter
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                            RecognizesAccessKey="True"
-                            TextElement.Foreground="{TemplateBinding Foreground}" />
+                            RecognizesAccessKey="True">
+                            <!--
+                                Local TextBlock style overrides the global
+                                Inputs.xaml implicit TextBlock style. Without
+                                this, the day-number TextBlock created by
+                                ContentPresenter inherits Foreground=AppTextPrimary
+                                from the global style — which has higher
+                                precedence than the TemplateBinding inheritance,
+                                so the IsToday / IsSelected trigger Foreground
+                                changes wouldn't reach the rendered text.
+                            -->
+                            <ContentPresenter.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type primitives:CalendarDayButton}}}" />
+                                </Style>
+                            </ContentPresenter.Resources>
+                        </ContentPresenter>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
