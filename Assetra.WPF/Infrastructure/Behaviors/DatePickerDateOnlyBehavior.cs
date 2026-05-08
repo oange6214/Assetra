@@ -1,6 +1,9 @@
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
+using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 
 namespace Assetra.WPF.Infrastructure.Behaviors;
@@ -177,13 +180,60 @@ public static class DatePickerDateOnlyBehavior
         if (!IsWithinConfiguredRange(picker, dateOnly))
             return;
 
-        picker.ApplyTemplate();
+        var calendar = FindPopupCalendar(picker);
+        if (calendar is null)
+            return;
 
-        if (picker.Template?.FindName("PART_Calendar", picker) is not Calendar calendar)
+        if (calendar.DisplayMode != CalendarMode.Month)
             return;
 
         calendar.SetCurrentValue(Calendar.DisplayDateProperty, dateOnly);
         calendar.SetCurrentValue(Calendar.SelectedDateProperty, dateOnly);
+    }
+
+    private static Calendar? FindPopupCalendar(DatePicker picker)
+    {
+        picker.ApplyTemplate();
+
+        if (picker.Template?.FindName("PART_Calendar", picker) is Calendar calendar)
+            return calendar;
+
+        if (picker.Template?.FindName("PART_Popup", picker) is not Popup popup)
+            return null;
+
+        if (popup.Child is Calendar popupCalendar)
+            return popupCalendar;
+
+        return popup.Child is DependencyObject child
+            ? FindDescendant<Calendar>(child)
+            : null;
+    }
+
+    private static T? FindDescendant<T>(DependencyObject root)
+        where T : DependencyObject
+    {
+        if (root is T match)
+            return match;
+
+        var visualChildren = root is Visual or Visual3D
+            ? VisualTreeHelper.GetChildrenCount(root)
+            : 0;
+
+        for (var i = 0; i < visualChildren; i++)
+        {
+            var found = FindDescendant<T>(VisualTreeHelper.GetChild(root, i));
+            if (found is not null)
+                return found;
+        }
+
+        foreach (var logicalChild in LogicalTreeHelper.GetChildren(root).OfType<DependencyObject>())
+        {
+            var found = FindDescendant<T>(logicalChild);
+            if (found is not null)
+                return found;
+        }
+
+        return null;
     }
 
     private static void QueuePopupCalendarSync(DatePicker picker)

@@ -1,8 +1,10 @@
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Assetra.WPF.Controls;
 using Assetra.WPF.Infrastructure.Converters;
 using Assetra.WPF.Infrastructure.Behaviors;
@@ -133,6 +135,48 @@ public sealed class ControlsBehaviorTests
     }
 
     [Fact]
+    public void DatePickerDateOnlyBehavior_DoesNotInterruptYearSelectionMode()
+    {
+        StaRun(() =>
+        {
+            var picker = new DatePicker
+            {
+                SelectedDate = new DateTime(2026, 5, 8),
+            };
+
+            var window = new Window
+            {
+                Content = picker,
+                Width = 320,
+                Height = 240,
+                ShowInTaskbar = false,
+                WindowStyle = WindowStyle.ToolWindow,
+            };
+
+            try
+            {
+                window.Show();
+                DatePickerDateOnlyBehavior.SetIsEnabled(picker, true);
+                picker.IsDropDownOpen = true;
+                PumpDispatcher();
+
+                var calendar = GetPopupCalendar(picker);
+                Assert.NotNull(calendar);
+
+                calendar!.DisplayMode = CalendarMode.Decade;
+                picker.SelectedDate = new DateTime(2026, 5, 9);
+                PumpDispatcher();
+
+                Assert.Equal(CalendarMode.Decade, calendar.DisplayMode);
+            }
+            finally
+            {
+                window.Close();
+            }
+        });
+    }
+
+    [Fact]
     public void ThousandSeparatorBehavior_FormatsMoneyTextAsUserTypes()
     {
         StaRun(() =>
@@ -205,6 +249,42 @@ public sealed class ControlsBehaviorTests
         var field = instance.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
         Assert.NotNull(field);
         return Assert.IsType<T>(field!.GetValue(instance));
+    }
+
+    private static Calendar? GetPopupCalendar(DatePicker picker)
+    {
+        picker.ApplyTemplate();
+        if (picker.Template?.FindName("PART_Popup", picker) is not Popup popup)
+            return null;
+
+        return popup.Child switch
+        {
+            Calendar calendar => calendar,
+            DependencyObject child => FindVisualChild<Calendar>(child),
+            _ => null,
+        };
+    }
+
+    private static T? FindVisualChild<T>(DependencyObject root)
+        where T : DependencyObject
+    {
+        if (root is T match)
+            return match;
+
+        var children = VisualTreeHelper.GetChildrenCount(root);
+        for (var i = 0; i < children; i++)
+        {
+            var found = FindVisualChild<T>(VisualTreeHelper.GetChild(root, i));
+            if (found is not null)
+                return found;
+        }
+
+        return null;
+    }
+
+    private static void PumpDispatcher()
+    {
+        Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
     }
 
 }
