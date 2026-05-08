@@ -5,6 +5,42 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls">
 
+    <!--
+        ════════════════════════════════════════════════════════════
+        DESIGN NOTE — Calendar / CalendarItem theming policy
+        ════════════════════════════════════════════════════════════
+        We attempted full Fluent re-templating of CalendarItem (the popup
+        chrome + month/year/decade view container) but multiple iterations
+        triggered hard-to-debug timing issues with WPF's internal
+        OnApplyTemplate / GetTemplateChild / UpdateAppearance pipeline:
+
+          * Custom wrapper Grid → _monthView ref came back null, view
+            switching no-op'd.
+          * Both PARTs Visibility=Collapsed → UpdateMonths() early-returned
+            (Owner == null in some timing paths) and body stayed blank.
+          * Both PARTs Visibility=Visible → click header swapped header
+            text but old grid remained, views stacked.
+
+        WPF Calendar has a tight coupling between CalendarItem template
+        layout, view-population timing, and the Visibility toggle in
+        UpdateAppearance. Maintaining a custom CalendarItem template
+        without breaking that pipeline is high-risk for low visual gain.
+
+        Compromise (this file): rely on the WPF default CalendarItem
+        template (so view switching just works), and theme appearance
+        only via:
+          * CalendarDayButton template (full custom — single day cell
+            shape + accent colors).
+          * CalendarButton template (full custom — month/year cell shape).
+          * Calendar background / border (themed via Calendar's own
+            templated properties, no need to override CalendarItemStyle).
+
+        Side effect: the popup chrome (◀ ▶ chevron arrows, "May 2026"
+        header button) shows OS-default Aero2/Win11 styling rather than
+        full Fluent. This is acceptable — those are minor surface details
+        compared to the functional view-switching breakage.
+    -->
+
     <Style x:Key="AppDatePickerTextBox" TargetType="{x:Type primitives:DatePickerTextBox}">
         <Setter Property="MinHeight" Value="{StaticResource Control.Height.Md}" />
         <Setter Property="Padding" Value="10,6" />
@@ -54,13 +90,12 @@
     <Style BasedOn="{StaticResource AppDatePickerTextBox}" TargetType="{x:Type primitives:DatePickerTextBox}" />
 
     <!--
-        ════════════════════════════════════════════════════════════
-        AppCalendarButton — month / year header nav buttons
-        ════════════════════════════════════════════════════════════
-        Drives:
-        * PART_HeaderButton (the centered "May 2026" text button)
-        * PART_PreviousButton / PART_NextButton (◀ ▶ chevrons)
-        * Year/decade view month-cell buttons
+        AppCalendarButton — month/year/decade cell button.
+        Uses CalendarButton's actual properties: IsInactive (out-of-range
+        cells), HasSelectedDays (the cell containing the selected date),
+        IsFocused. There's NO IsSelected on CalendarButton (that's
+        CalendarDayButton). Removing the IsSelected trigger from earlier
+        broken iterations.
     -->
     <Style x:Key="AppCalendarButton" TargetType="{x:Type primitives:CalendarButton}">
         <Setter Property="Background" Value="Transparent" />
@@ -82,6 +117,7 @@
                 <ControlTemplate TargetType="{x:Type primitives:CalendarButton}">
                     <Border
                         x:Name="Chrome"
+                        Margin="2"
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
@@ -94,12 +130,6 @@
                             TextElement.Foreground="{TemplateBinding Foreground}" />
                     </Border>
                     <ControlTemplate.Triggers>
-                        <!--
-                            CalendarButton properties: IsInactive, HasSelectedDays,
-                            IsFocused (no IsSelected — that's on CalendarDayButton).
-                            "Currently displayed" cells use HasSelectedDays for the
-                            ring; mouse hover paints the fill.
-                        -->
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
                         </Trigger>
@@ -125,256 +155,11 @@
     <Style BasedOn="{StaticResource AppCalendarButton}" TargetType="{x:Type primitives:CalendarButton}" />
 
     <!--
-        ════════════════════════════════════════════════════════════
-        Chevron-button style for previous/next nav (◀ ▶)
-        ════════════════════════════════════════════════════════════
-        Used inside the CalendarItem template; bare 28×28 circular
-        hover affordance. Path data is the standard left/right chevron.
+        AppCalendarDayButton — single day cell.
+        Full template: 34×34 circular chrome with hover / today / selected
+        states. Selected → AppAccent fill + white text. Today → AppAccent
+        ring + AppAccent text. IsBlackedOut / IsInactive fade.
     -->
-    <Style x:Key="AppCalendarNavButton" TargetType="{x:Type Button}">
-        <Setter Property="Width" Value="28" />
-        <Setter Property="Height" Value="28" />
-        <Setter Property="Padding" Value="0" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
-        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type Button}">
-                    <Border
-                        x:Name="Chrome"
-                        Background="{TemplateBinding Background}"
-                        CornerRadius="{StaticResource Radius.Full}"
-                        SnapsToDevicePixels="True">
-                        <ContentPresenter
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            TextElement.Foreground="{TemplateBinding Foreground}" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
-                            <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Opacity" Value="0.45" />
-                            <Setter Property="Cursor" Value="Arrow" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!--
-        ════════════════════════════════════════════════════════════
-        AppCalendarItem — the popup body of a Calendar
-        ════════════════════════════════════════════════════════════
-        Full template that:
-        * Wraps the calendar in an AppSurface card with rounded corners
-        * Centers "May 2026" header (PART_HeaderButton) flanked by ◀ ▶
-        * Renders day-of-week strip + Month/Year/Decade views
-        * Drops the default WPF white-with-grey-border chrome that
-          previously leaked through the popup
-    -->
-    <Style x:Key="AppCalendarItem" TargetType="{x:Type primitives:CalendarItem}">
-        <Setter Property="Margin" Value="0" />
-        <Setter Property="Background" Value="{DynamicResource AppSurface}" />
-        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type primitives:CalendarItem}">
-                    <ControlTemplate.Resources>
-                        <DataTemplate x:Key="{x:Static CalendarItem.DayTitleTemplateResourceKey}">
-                            <TextBlock
-                                Margin="0,0,0,4"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                FontFamily="{StaticResource Font.Family.Base}"
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Text="{Binding}" />
-                        </DataTemplate>
-                    </ControlTemplate.Resources>
-                    <Border
-                        Padding="10,10,10,8"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="{StaticResource Radius.Md}"
-                        SnapsToDevicePixels="True">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-
-                            <!--  Header row : ◀  May 2026  ▶  -->
-                            <Grid Grid.Row="0" Margin="0,0,0,6">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <Button
-                                    x:Name="PART_PreviousButton"
-                                    Grid.Column="0"
-                                    Focusable="False"
-                                    Style="{StaticResource AppCalendarNavButton}">
-                                    <Path
-                                        Width="6"
-                                        Height="10"
-                                        Data="M 6 0 L 0 5 L 6 10"
-                                        Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                        StrokeEndLineCap="Round"
-                                        StrokeStartLineCap="Round"
-                                        StrokeThickness="1.6" />
-                                </Button>
-                                <Button
-                                    x:Name="PART_HeaderButton"
-                                    Grid.Column="1"
-                                    Margin="6,0"
-                                    Padding="6,4"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Center"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Cursor="Hand"
-                                    FocusVisualStyle="{x:Null}"
-                                    FontFamily="{StaticResource Font.Family.Base}"
-                                    FontSize="{StaticResource Font.Size.Sm}"
-                                    FontWeight="SemiBold"
-                                    Foreground="{DynamicResource AppTextPrimary}">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border
-                                                x:Name="Chrome"
-                                                Padding="{TemplateBinding Padding}"
-                                                Background="{TemplateBinding Background}"
-                                                CornerRadius="{StaticResource Radius.Sm}">
-                                                <ContentPresenter
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center" />
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                                <Button
-                                    x:Name="PART_NextButton"
-                                    Grid.Column="2"
-                                    Focusable="False"
-                                    Style="{StaticResource AppCalendarNavButton}">
-                                    <Path
-                                        Width="6"
-                                        Height="10"
-                                        Data="M 0 0 L 6 5 L 0 10"
-                                        Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                        StrokeEndLineCap="Round"
-                                        StrokeStartLineCap="Round"
-                                        StrokeThickness="1.6" />
-                                </Button>
-                            </Grid>
-
-                            <!--
-                                Body : Month / Year / Decade views.
-                                Layout mirrors the WPF Aero2 default CalendarItem
-                                template exactly to maximise compatibility with
-                                Calendar.OnApplyTemplate / UpdateAppearance:
-
-                                  * Both PARTs are direct siblings of the outer
-                                    Grid at Grid.Row="1" (NOT inside a wrapper
-                                    Grid — wrappers caused GetTemplateChild
-                                    timing issues that left _monthView null).
-                                  * PART_MonthView starts Visibility="Visible",
-                                    PART_YearView starts "Hidden" — this matches
-                                    the initial DisplayMode=Month state. Calendar
-                                    will SetValue at runtime when the user
-                                    clicks the header, overriding the local
-                                    value (later-set local value wins).
-                            -->
-                            <Grid x:Name="PART_MonthView" Grid.Row="1" Visibility="Visible">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-                            </Grid>
-                            <Grid x:Name="PART_YearView" Grid.Row="1" Visibility="Hidden">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-                            </Grid>
-                        </Grid>
-                    </Border>
-                    <!--
-                        Visibility of PART_MonthView / PART_YearView is driven
-                        internally by Calendar based on its DisplayMode (Month /
-                        Year / Decade) — CalendarItem does not expose DisplayMode
-                        as a TemplatedParent property, so triggers here would fail
-                        to compile. WPF will toggle each PART's Visibility for us
-                        as long as the named parts exist in the template.
-                    -->
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style BasedOn="{StaticResource AppCalendarItem}" TargetType="{x:Type primitives:CalendarItem}" />
-
-    <Style x:Key="AppCalendar" TargetType="{x:Type Calendar}">
-        <Setter Property="Background" Value="{DynamicResource AppSurface}" />
-        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
-        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
-        <!--
-            Explicitly bind sub-part styles so Calendar uses our themed
-            templates. Without these, the implicit CalendarDayButton /
-            CalendarButton / CalendarItem fallbacks may be skipped — Calendar
-            internally instantiates these via FrameworkElement.Style which
-            doesn't always honour ambient implicit styles when nested in
-            a popup. The CalendarItemStyle in particular is required for the
-            ◀ ▶ chevron paths and rounded popup chrome to appear.
-        -->
-        <Setter Property="CalendarDayButtonStyle" Value="{StaticResource AppCalendarDayButton}" />
-        <Setter Property="CalendarButtonStyle" Value="{StaticResource AppCalendarButton}" />
-        <Setter Property="CalendarItemStyle" Value="{StaticResource AppCalendarItem}" />
-    </Style>
-
-    <Style BasedOn="{StaticResource AppCalendar}" TargetType="{x:Type Calendar}" />
-
     <Style x:Key="AppCalendarDayButton" TargetType="{x:Type primitives:CalendarDayButton}">
         <Setter Property="MinWidth" Value="34" />
         <Setter Property="MinHeight" Value="34" />
@@ -383,12 +168,13 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Medium}" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type primitives:CalendarDayButton}">
@@ -407,24 +193,23 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Brush.SurfaceRaised}" />
-                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.BorderStrong}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
                         </Trigger>
                         <Trigger Property="IsToday" Value="True">
-                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.Accent}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Brush.Accent}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Brush.Accent}" />
-                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.Accent}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.OnAccent}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppAccent}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsSelected" Value="True" />
                                 <Condition Property="IsToday" Value="True" />
                             </MultiTrigger.Conditions>
-                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.FocusRing}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
                         </MultiTrigger>
                         <Trigger Property="IsInactive" Value="True">
                             <Setter Property="Opacity" Value="0.45" />
@@ -442,9 +227,26 @@
     <Style BasedOn="{StaticResource AppCalendarDayButton}" TargetType="{x:Type primitives:CalendarDayButton}" />
 
     <!--
-        Drop-down trigger button — replaces the OS default "15"-on-calendar
-        glyph with a Fluent CalendarLtr icon. Embedded inside the DatePicker
-        template below; not exposed as a public key.
+        AppCalendar — only colors and sub-styles; NO Template override.
+        WPF default CalendarItem template handles popup chrome + view
+        switching. We bind day/year/month cell styles via the relevant
+        properties so theme colors leak through.
+    -->
+    <Style x:Key="AppCalendar" TargetType="{x:Type Calendar}">
+        <Setter Property="Background" Value="{DynamicResource AppSurface}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+        <Setter Property="CalendarDayButtonStyle" Value="{StaticResource AppCalendarDayButton}" />
+        <Setter Property="CalendarButtonStyle" Value="{StaticResource AppCalendarButton}" />
+    </Style>
+
+    <Style BasedOn="{StaticResource AppCalendar}" TargetType="{x:Type Calendar}" />
+
+    <!--
+        Drop-down trigger button — Fluent CalendarLtr / Calendar glyph.
     -->
     <Style x:Key="DatePickerDropDownButton" TargetType="{x:Type Button}">
         <Setter Property="Width" Value="32" />
@@ -466,12 +268,6 @@
                         Background="{TemplateBinding Background}"
                         CornerRadius="0,3,3,0"
                         SnapsToDevicePixels="True">
-                        <!--
-                            Symbol "Calendar24" 是 FluentSystemIcons 在所有版本中都
-                            存在的基本月曆圖示。CalendarLtr24 在某些 FluentIcons.Wpf
-                            版本上會解析失敗，AppIcon 會 fallback 成 Info（驚嘆號），
-                            產生「ⓘ」誤導使用者。
-                        -->
                         <ds:AppIcon
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
@@ -495,15 +291,10 @@
     </Style>
 
     <!--
-        AppDatePicker — full template overrides the DatePicker root so the
-        drop-down button uses our Fluent calendar glyph (CalendarLtr) instead
-        of the WPF default "15"-on-frame XAML path.
-        Required PARTs (per WPF DatePicker contract):
-          PART_Root      Grid container
-          PART_TextBox   DatePickerTextBox for display + edit
-          PART_Button    Drop-down trigger
-          PART_Popup     Hosts the auto-generated Calendar control
-          PART_DisabledVisual  Mask shown when IsEnabled=False
+        AppDatePicker — full template overrides only the OUTER DatePicker
+        (textbox + drop-down button + popup placeholder). The popup hosts
+        a Calendar that renders via WPF's default template, themed by
+        AppCalendar's color/sub-style setters.
     -->
     <Style x:Key="AppDatePicker" TargetType="{x:Type DatePicker}">
         <Setter Property="MinHeight" Value="{StaticResource Control.Height.Md}" />
@@ -534,7 +325,6 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <!--  Inner text box. Border 0 because chrome is on the outer Border.  -->
                             <primitives:DatePickerTextBox
                                 x:Name="PART_TextBox"
                                 Grid.Column="0"
@@ -542,7 +332,6 @@
                                 Foreground="{TemplateBinding Foreground}"
                                 Focusable="{TemplateBinding Focusable}" />
 
-                            <!--  Drop-down button: Fluent CalendarLtr icon.  -->
                             <Button
                                 x:Name="PART_Button"
                                 Grid.Column="1"
@@ -550,7 +339,6 @@
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Style="{StaticResource DatePickerDropDownButton}" />
 
-                            <!--  Popup: hosts the Calendar created by DatePicker code.  -->
                             <Popup
                                 x:Name="PART_Popup"
                                 AllowsTransparency="True"
@@ -558,7 +346,6 @@
                                 PlacementTarget="{Binding ElementName=PART_TextBox}"
                                 StaysOpen="False" />
 
-                            <!--  Disabled-state overlay — used when IsEnabled=False.  -->
                             <ContentControl
                                 x:Name="PART_DisabledVisual"
                                 Grid.ColumnSpan="2"
