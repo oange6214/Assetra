@@ -31,10 +31,17 @@ public partial class TransactionDialogViewModel
         // buy for" logic) don't mistake this for an in-progress edit loop.
         EditingTradeId = null;
 
-        // Edit mode is intentionally limited to metadata-only updates. Core trade fields are
-        // shown as a read-only summary in the dialog; users should create a revision instead
-        // of mutating the economic shape of an existing record in place.
-        if (oldRow is not null)
+        // Edit-mode dispatch:
+        //   * meta-only types (Sell / Transfer / legacy Buy/StockDiv without entry) →
+        //     in-place UPDATE preserving Trade.Id and economic fields. This is the only
+        //     safe path for trades whose downstream state (FIFO lots, paired transfer
+        //     legs) depends on the original values.
+        //   * direct-editable types (Income / CashDividend / Buy with PortfolioEntryId /
+        //     Deposit / Withdrawal / loan + credit card variants) → fall through to the
+        //     standard create-new flow below; the post-success block (line ~125) deletes
+        //     the old row and re-projects balances. Equivalent to the legacy "建立修正版"
+        //     amendment flow but invoked transparently by Save instead of a separate button.
+        if (oldRow is { IsMetaOnlyEditType: true })
         {
             await UpdateTradeMetaOnlyAsync(oldRow);
             return;

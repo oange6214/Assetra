@@ -186,9 +186,24 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         EditingTradeId.HasValue &&
         Trades.FirstOrDefault(t => t.Id == EditingTradeId.Value) is { IsMetaOnlyEditType: true };
 
-    /// <summary>Inverse of <see cref="IsEditingMetaOnly"/>; bindable from XAML without a converter.</summary>
-    public bool AreEconomicFieldsEditable => !IsEditMode;
-    public bool ShowEditLockedSummary => IsEditMode;
+    /// <summary>
+    /// True when the user can directly edit economic fields (price / quantity / amount /
+    /// account / etc.) on the dialog. Two cases enable it:
+    /// <list type="bullet">
+    /// <item>Not editing — i.e. creating a new trade.</item>
+    /// <item>Editing a non-meta-only type (Income / CashDividend / Buy with PortfolioEntryId / …)
+    /// where the underlying ConfirmTx flow safely supports delete-old + create-new.</item>
+    /// </list>
+    /// Locks down to false only for meta-only types (Sell / Transfer / legacy Buy without entry),
+    /// where the trade has dependent state that direct editing would corrupt.
+    /// </summary>
+    public bool AreEconomicFieldsEditable => !IsEditMode || !IsEditingMetaOnly;
+
+    /// <summary>
+    /// True when the dialog should show the locked-core summary card. Only meta-only edits
+    /// need this — direct-edit flows show their normal form fields with live values pre-filled.
+    /// </summary>
+    public bool ShowEditLockedSummary => IsEditMode && IsEditingMetaOnly;
 
     partial void OnEditingTradeIdChanged(Guid? _)
     {
