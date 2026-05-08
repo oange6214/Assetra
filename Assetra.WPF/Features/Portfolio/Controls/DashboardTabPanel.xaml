@@ -12,10 +12,14 @@
 
     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
         <Grid Margin="24">
+            <!--
+                Slimmed dashboard (Portfolio Option A refactor): 10-day trend
+                chart moved to Trends page; Recent Trades moved to top-level
+                TransactionLog page. Dashboard keeps Hero + KPI metrics +
+                Top Holdings + Budget Summary so it stays portfolio-focused.
+            -->
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="16" />
-                <RowDefinition Height="220" />
                 <RowDefinition Height="16" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="16" />
@@ -165,45 +169,10 @@
                 </Border>
             </Grid>
 
-            <!--  ═══ Row 2: 10-day Trend Chart (full width) ═══  -->
+            <!--  ═══ Row 2: Top Holdings (full width) ═══  -->
             <Border
                 Grid.Row="2"
                 Style="{StaticResource FormCard}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <TextBlock
-                        Grid.Row="0"
-                        Margin="0,0,0,8"
-                        FontSize="{StaticResource Font.Size.Md}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{DynamicResource Dashboard.TenDayTrend}" />
-                    <lvc:CartesianChart
-                        Grid.Row="1"
-                        Background="Transparent"
-                        Series="{Binding TenDaySeries}"
-                        TooltipPosition="Top"
-                        TooltipTextSize="12"
-                        XAxes="{Binding TenDayXAxes}"
-                        YAxes="{Binding TenDayYAxes}" />
-                </Grid>
-            </Border>
-
-            <!--  ═══ Row 4: Top Holdings (1/2) + Recent Trades (1/2) ═══  -->
-            <Grid Grid.Row="4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <!--  Top Holdings  -->
-                <Border
-                    Grid.Column="0"
-                    Style="{StaticResource FormCard}">
                     <StackPanel>
                         <DockPanel Margin="0,0,0,8">
                             <TextBlock
@@ -288,92 +257,8 @@
                     </StackPanel>
                 </Border>
 
-                <!--  Recent Trades  -->
-                <Border
-                    Grid.Column="2"
-                    Style="{StaticResource FormCard}">
-                    <StackPanel>
-                        <DockPanel Margin="0,0,0,8">
-                            <TextBlock
-                                DockPanel.Dock="Left"
-                                FontSize="{StaticResource Font.Size.Md}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{DynamicResource Dashboard.RecentTrades}" />
-                            <Button
-                                HorizontalAlignment="Right"
-                                Command="{Binding NavigateToTradesCommand}"
-                                Content="{DynamicResource Dashboard.ViewDetail}"
-                                DockPanel.Dock="Right"
-                                Style="{StaticResource AppGhostButton}" />
-                        </DockPanel>
-
-                        <ItemsControl ItemsSource="{Binding RecentTrades}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border
-                                        Padding="0,6"
-                                        BorderBrush="{DynamicResource AppBorderLight}"
-                                        BorderThickness="0,0,0,1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="28" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <Ellipse
-                                                Grid.Column="0"
-                                                Width="10"
-                                                Height="10"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                                Fill="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}" />
-
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                <TextBlock
-                                                    FontSize="{StaticResource Font.Size.Md}"
-                                                    FontWeight="SemiBold"
-                                                    Foreground="{DynamicResource AppTextPrimary}"
-                                                    Text="{Binding DisplayAsset}"
-                                                    TextTrimming="CharacterEllipsis" />
-                                                <TextBlock
-                                                    FontSize="{StaticResource Font.Size.Sm}"
-                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                    Text="{Binding TradeDateLocal, StringFormat={}{0:MMM dd}}" />
-                                            </StackPanel>
-
-                                            <TextBlock
-                                                Grid.Column="2"
-                                                VerticalAlignment="Center"
-                                                FontSize="{StaticResource Font.Size.Md}"
-                                                FontWeight="SemiBold"
-                                                Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}">
-                                                <TextBlock.Style>
-                                                    <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsAmountPositive}" Value="True">
-                                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding TotalAmount}" Value="0">
-                                                                <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-                </Border>
-            </Grid>
-
-            <!--  ═══ Row 6: Budget Summary Card ═══  -->
-            <ctrl:BudgetSummaryCard Grid.Row="6" DataContext="{Binding BudgetSummary}" />
+            <!--  ═══ Row 4: Budget Summary Card ═══  -->
+            <ctrl:BudgetSummaryCard Grid.Row="4" DataContext="{Binding BudgetSummary}" />
 
         </Grid>
     </ScrollViewer>
