@@ -286,48 +286,56 @@
                             </Grid>
 
                             <!--
-                                Body : Month / Year / Decade views.
-                                Visibility is controlled exclusively by Calendar
-                                (see CalendarItem.UpdateAppearance) — DO NOT set
-                                explicit Visibility values here, they would lock
-                                the wrong view and clicking the header (Month →
-                                Year) would only update the header text, leaving
-                                the day grid still visible.
-                                Both views are direct children of the Row 1 Grid
-                                cell so GetTemplateChild can find them by name.
+                                Body : Month / Year / Decade views, stacked in
+                                a single body cell. Calendar.UpdateAppearance()
+                                toggles Visibility on PART_MonthView /
+                                PART_YearView based on DisplayMode.
+
+                                Wrapped in an unnamed Grid (NOT just Grid.Row
+                                siblings) — flat sibling layout caused stale
+                                _monthView refs after first mode swap and the
+                                Decade view stacked over the Month grid.
+
+                                Each PART starts with collapsed Visibility so
+                                only the one Calendar makes Visible renders;
+                                without this initial state both render at
+                                first Measure and the user sees stacked grids
+                                until the first mode swap.
                             -->
-                            <Grid x:Name="PART_MonthView" Grid.Row="1">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-                            </Grid>
-                            <Grid x:Name="PART_YearView" Grid.Row="1">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
+                            <Grid Grid.Row="1">
+                                <Grid x:Name="PART_MonthView" Visibility="Collapsed">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                </Grid>
+                                <Grid x:Name="PART_YearView" Visibility="Collapsed">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                </Grid>
                             </Grid>
                         </Grid>
                     </Border>
