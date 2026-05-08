@@ -223,8 +223,13 @@
                                     <Setter Property="Symbol" Value="Square24" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding WindowState, ElementName=MainShell}" Value="Maximized">
-                                            <!--  Two overlapping squares = restore-down (Windows 11 standard).  -->
-                                            <Setter Property="Symbol" Value="WindowMultiple24" />
+                                            <!--
+                                                Two overlapping squares = restore-down (Win 11 standard).
+                                                Use SquareMultiple — the FluentSystemIcons enum has
+                                                no "WindowMultiple", which previously fell through to
+                                                the empty-glyph branch and rendered nothing.
+                                            -->
+                                            <Setter Property="Symbol" Value="SquareMultiple24" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
