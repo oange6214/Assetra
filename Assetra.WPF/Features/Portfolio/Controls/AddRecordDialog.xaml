@@ -73,10 +73,16 @@
                                 Foreground="{DynamicResource AppTextMuted}"
                                 TextWrapping="Wrap">
                                 <TextBlock.Style>
+                                    <!--
+                                        Subtitle: only meta-only edits and revision /
+                                        replace flows show subtitle text. Direct-edit
+                                        types skip it because their form fields make
+                                        editability self-evident.
+                                    -->
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Collapsed" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                            <DataTrigger Binding="{Binding IsEditingMetaOnly}" Value="True">
                                                 <Setter Property="Visibility" Value="Visible" />
                                                 <Setter Property="Text" Value="{DynamicResource Portfolio.Record.EditSubtitle}" />
                                             </DataTrigger>
@@ -118,118 +124,72 @@
                     VerticalScrollBarVisibility="Auto">
                     <StackPanel>
 
-                        <!--  Edit-mode summary and guardrail  -->
+                        <!--
+                            Compact meta-only edit banner. Replaces the previous trio of
+                            stacked banners (locked summary card + ReviseHint + MetaOnlyHint)
+                            with a single inline lock-card. Shown ONLY for meta-only edits
+                            (Sell / Transfer / legacy Buy/StockDiv); direct-editable types
+                            see no banner — their fields are pre-filled and editable inline.
+
+                            Layout: 🔒 icon (left) | summary line + lock reason (right)
+                        -->
                         <Border
                             Margin="0,0,0,12"
-                            Padding="12"
-                            Background="{DynamicResource AppBackground}"
+                            Padding="12,10"
+                            Background="{DynamicResource AppSurfaceAlt}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             CornerRadius="{StaticResource Radius.Sm}"
                             Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <StackPanel>
-                                <TextBlock
-                                    Margin="0,0,0,8"
-                                    FontSize="{StaticResource Font.Size.Xs}"
-                                    Foreground="{DynamicResource AppTextSecondary}"
-                                    Text="{DynamicResource Portfolio.Record.CoreLocked}"
-                                    TextWrapping="Wrap" />
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ds:AppIcon
+                                    Grid.Column="0"
+                                    Margin="0,1,10,0"
+                                    VerticalAlignment="Top"
+                                    FontSize="14"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Symbol="LockClosed24" />
+                                <StackPanel Grid.Column="1">
+                                    <!--  Summary line: 類型 · 對象 · 金額 × 數量  -->
                                     <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="0"
-                                        Margin="0,0,10,6"
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{DynamicResource Portfolio.Record.Summary.Type}" />
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="1"
-                                        Margin="0,0,0,6"
-                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        FontSize="{StaticResource Font.Size.Sm}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding EditSummaryType}" />
-
+                                        TextWrapping="Wrap">
+                                        <Run Text="{Binding EditSummaryType, Mode=OneWay}" />
+                                        <Run Foreground="{DynamicResource AppTextMuted}" Text=" · " />
+                                        <Run Text="{Binding EditSummaryTarget, Mode=OneWay}" />
+                                    </TextBlock>
                                     <TextBlock
-                                        Grid.Row="1"
-                                        Grid.Column="0"
-                                        Margin="0,0,10,6"
+                                        Margin="0,2,0,0"
+                                        FontFamily="{StaticResource Font.Family.Base}"
                                         FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{DynamicResource Portfolio.Record.Summary.Target}" />
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Typography.NumeralAlignment="Tabular">
+                                        <Run Text="{Binding EditSummaryAmount, Mode=OneWay}" />
+                                        <Run Foreground="{DynamicResource AppTextMuted}" Text=" × " />
+                                        <Run Text="{Binding EditSummaryQuantity, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <!--  Lock reason — single line, replaces CoreLocked + MetaOnlyHint  -->
                                     <TextBlock
-                                        Grid.Row="1"
-                                        Grid.Column="1"
-                                        Margin="0,0,0,6"
+                                        Margin="0,8,0,0"
                                         FontSize="{StaticResource Font.Size.Xs}"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding EditSummaryTarget}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{DynamicResource Portfolio.Record.CoreLocked}"
                                         TextWrapping="Wrap" />
-
-                                    <TextBlock
-                                        Grid.Row="2"
-                                        Grid.Column="0"
-                                        Margin="0,0,10,6"
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{DynamicResource Portfolio.Record.Summary.Amount}" />
-                                    <TextBlock
-                                        Grid.Row="2"
-                                        Grid.Column="1"
-                                        Margin="0,0,0,6"
-                                        FontFamily="{StaticResource Font.Family.Base}"
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding EditSummaryAmount}"
-                                        Typography.NumeralAlignment="Tabular" />
-
-                                    <TextBlock
-                                        Grid.Row="3"
-                                        Grid.Column="0"
-                                        Margin="0,0,10,0"
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{DynamicResource Portfolio.Record.Summary.Quantity}" />
-                                    <TextBlock
-                                        Grid.Row="3"
-                                        Grid.Column="1"
-                                        FontFamily="{StaticResource Font.Family.Base}"
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding EditSummaryQuantity}"
-                                        Typography.NumeralAlignment="Tabular" />
-                                </Grid>
-                            </StackPanel>
+                                </StackPanel>
+                            </Grid>
                         </Border>
 
-                        <Border
-                            Margin="0,0,0,12"
-                            Padding="10,8"
-                            Background="{DynamicResource AppSurface}"
-                            BorderBrush="{DynamicResource AppAccent}"
-                            BorderThickness="3,0,0,0"
-                            CornerRadius="{StaticResource Radius.Sm}"
-                            Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{DynamicResource Portfolio.Record.ReviseHint}"
-                                TextWrapping="Wrap" />
-                        </Border>
-
+                        <!--
+                            Revision-mode hint — kept only for the legacy "建立修正版"
+                            (now "刪除此筆並新增") flow on meta-only edits, where the user
+                            explicitly clicked the recreate button.
+                        -->
                         <Border
                             Margin="0,0,0,12"
                             Padding="10,8"
@@ -242,22 +202,6 @@
                                 FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource Portfolio.Record.RevisionModeHint}"
-                                TextWrapping="Wrap" />
-                        </Border>
-
-                        <!--  Meta-only edit banner: shown for Sell / legacy-unlinked Buy/StockDiv  -->
-                        <Border
-                            Margin="0,0,0,12"
-                            Padding="10,8"
-                            Background="{DynamicResource AppSurface}"
-                            BorderBrush="{DynamicResource AppAccent}"
-                            BorderThickness="3,0,0,0"
-                            CornerRadius="{StaticResource Radius.Sm}"
-                            Visibility="{Binding IsEditingMetaOnly, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{DynamicResource Portfolio.Tx.MetaOnlyHint}"
                                 TextWrapping="Wrap" />
                         </Border>
 
