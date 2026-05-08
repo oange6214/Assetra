@@ -1,3 +1,4 @@
+using Assetra.Core.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -9,9 +10,29 @@ public partial class NavRailViewModel : ObservableObject
     private readonly Stack<NavSection> _forwardStack = new();
     private bool _isHistoryNavigation;
 
+    public NavRailViewModel() { }
+
+    /// <summary>
+    /// DI-friendly constructor. Initial section is read from
+    /// <see cref="AppSettings.DefaultHomeSection"/> so each user can pin
+    /// their preferred startup landing page (default = FinancialOverview).
+    /// </summary>
+    public NavRailViewModel(IAppSettingsService settings)
+    {
+        _activeSection = ResolveInitialSection(settings.Current.DefaultHomeSection);
+    }
+
+    private static NavSection ResolveInitialSection(string raw)
+    {
+        if (!string.IsNullOrWhiteSpace(raw)
+            && Enum.TryParse<NavSection>(raw, ignoreCase: true, out var parsed))
+            return parsed;
+        return NavSection.FinancialOverview;
+    }
+
     // Manual property so the setter routes through NavigateTo(),
     // keeping history stacks in sync regardless of how callers set the section.
-    private NavSection _activeSection = NavSection.Portfolio;
+    private NavSection _activeSection = NavSection.FinancialOverview;
     public NavSection ActiveSection
     {
         get => _activeSection;

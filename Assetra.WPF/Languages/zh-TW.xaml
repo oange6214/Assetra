@@ -27,6 +27,8 @@
     <sys:String x:Key="Nav.Alerts.Tooltip">價格警示</sys:String>
     <sys:String x:Key="Nav.Import">匯入</sys:String>
     <sys:String x:Key="Nav.Settings">設定</sys:String>
+    <sys:String x:Key="Nav.Overview">總覽</sys:String>
+    <sys:String x:Key="Nav.Assets">資產</sys:String>
     <sys:String x:Key="Nav.Cashflow">收支</sys:String>
     <sys:String x:Key="Nav.Insights">分析報表</sys:String>
     <sys:String x:Key="Nav.Planning">規劃</sys:String>
@@ -703,6 +705,8 @@
     <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnlPercent.Desc">投資報酬率（市值 / 成本 - 1）</sys:String>
     <sys:String x:Key="Settings.OverviewKpis.Title">財務總覽 KPI</sys:String>
     <sys:String x:Key="Settings.OverviewKpis.Description">勾選 3-6 個指標顯示在財務總覽頁面頂部</sys:String>
+    <sys:String x:Key="Settings.DefaultHome">預設首頁</sys:String>
+    <sys:String x:Key="Settings.DefaultHomeDesc">App 啟動時預設打開的頁面</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Assets">資產</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Investments">投資</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Liabilities">負債</sys:String>

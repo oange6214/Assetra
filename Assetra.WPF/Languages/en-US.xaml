@@ -27,6 +27,8 @@
     <sys:String x:Key="Nav.Alerts.Tooltip">Price Alerts</sys:String>
     <sys:String x:Key="Nav.Import">Import</sys:String>
     <sys:String x:Key="Nav.Settings">Settings</sys:String>
+    <sys:String x:Key="Nav.Overview">Overview</sys:String>
+    <sys:String x:Key="Nav.Assets">Assets</sys:String>
     <sys:String x:Key="Nav.Cashflow">Cash Flow</sys:String>
     <sys:String x:Key="Nav.Insights">Insights</sys:String>
     <sys:String x:Key="Nav.Planning">Planning</sys:String>
@@ -701,6 +703,8 @@
     <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnlPercent.Desc">Investment return rate (market value / cost - 1)</sys:String>
     <sys:String x:Key="Settings.OverviewKpis.Title">Financial Overview KPIs</sys:String>
     <sys:String x:Key="Settings.OverviewKpis.Description">Pick 3-6 metrics to display at the top of the Financial Overview page</sys:String>
+    <sys:String x:Key="Settings.DefaultHome">Default Home Page</sys:String>
+    <sys:String x:Key="Settings.DefaultHomeDesc">Page opened by default when the app starts</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Assets">Assets</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Investments">Investments</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Liabilities">Liabilities</sys:String>

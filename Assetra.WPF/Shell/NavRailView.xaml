@@ -355,22 +355,8 @@
                     HorizontalScrollBarVisibility="Disabled"
                     VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <ToggleButton
-                            x:Name="NavPortfolio"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Portfolio, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Portfolio}"
-                            ToolTip="{DynamicResource Nav.Portfolio}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Briefcase24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Portfolio}" />
-                            </Grid>
-                        </ToggleButton>
+                        <!--  ─── Overview group ───  -->
+                        <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.Overview}" />
 
                         <ToggleButton
                             x:Name="NavFinancialOverview"
@@ -423,136 +409,26 @@
                             </Grid>
                         </ToggleButton>
 
-                        <ToggleButton
-                            x:Name="NavAlerts"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Alerts, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Alerts}"
-                            ToolTip="{DynamicResource Nav.Alerts.Tooltip}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Alert24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Alerts}" />
-                                <Border Grid.Column="2" Style="{StaticResource NavRailBadge}" Visibility="{Binding Alerts.HasTriggeredAlerts, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextOnAccent}"
-                                        Text="{Binding Alerts.TriggeredCount}" />
-                                </Border>
-                            </Grid>
-                        </ToggleButton>
-
+                        <!--  ─── Assets group (was MultiAsset; now also hosts Portfolio) ───  -->
                         <Border Style="{StaticResource NavRailGroupDivider}" />
-                        <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.Cashflow}" />
+                        <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.Assets}" />
 
                         <ToggleButton
-                            x:Name="NavCategories"
+                            x:Name="NavPortfolio"
                             Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Categories, Mode=OneWay}"
+                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Portfolio, Mode=OneWay}"
                             Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Categories}"
-                            ToolTip="{DynamicResource Nav.Categories}">
+                            Tag="{x:Static shell:NavSection.Portfolio}"
+                            ToolTip="{DynamicResource Nav.Portfolio}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="24" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Tag24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Categories}" />
+                                <ds:AppIcon Symbol="Briefcase24" />
+                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Portfolio}" />
                             </Grid>
                         </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavRecurring"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Recurring, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Recurring}"
-                            ToolTip="{DynamicResource Nav.Recurring}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <!--  CalendarLtr maps cleanly to "subscription / recurring schedule" — matches the 訂閱排程 label and avoids the swap-arrow misread of ArrowRepeatAll.  -->
-                                <ds:AppIcon Symbol="CalendarLtr24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Recurring}" />
-                                <Border Grid.Column="2" Style="{StaticResource NavRailBadge}" Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextOnAccent}"
-                                        Text="{Binding Recurring.PendingCount}" />
-                                </Border>
-                            </Grid>
-                        </ToggleButton>
-
-                        <Border Style="{StaticResource NavRailGroupDivider}" />
-                        <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.Planning}" />
-
-                        <ToggleButton
-                            x:Name="NavGoals"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Goals, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Goals}"
-                            ToolTip="{DynamicResource Nav.Goals}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Target24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Goals}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavFire"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Fire, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Fire}"
-                            ToolTip="{DynamicResource Fire.Title}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Flash24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Fire.Title}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavMonteCarlo"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=MonteCarlo, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.MonteCarlo}"
-                            ToolTip="{DynamicResource MonteCarlo.Title}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <!--  Calculator differentiates Monte Carlo from the pie/line chart icons of FinancialOverview / Trends; conveys "simulation / computation" semantics.  -->
-                                <ds:AppIcon Symbol="Calculator24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource MonteCarlo.Title}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <Border Style="{StaticResource NavRailGroupDivider}" />
-                        <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.MultiAsset}" />
 
                         <ToggleButton
                             x:Name="NavRealEstate"
@@ -619,6 +495,134 @@
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="Box24" />
                                 <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource PhysicalAsset.Title}" />
+                            </Grid>
+                        </ToggleButton>
+
+                        <Border Style="{StaticResource NavRailGroupDivider}" />
+                        <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.Cashflow}" />
+
+                        <ToggleButton
+                            x:Name="NavCategories"
+                            Click="NavItem_Click"
+                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Categories, Mode=OneWay}"
+                            Style="{StaticResource NavRailItemButton}"
+                            Tag="{x:Static shell:NavSection.Categories}"
+                            ToolTip="{DynamicResource Nav.Categories}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ds:AppIcon Symbol="Tag24" />
+                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Categories}" />
+                            </Grid>
+                        </ToggleButton>
+
+                        <ToggleButton
+                            x:Name="NavRecurring"
+                            Click="NavItem_Click"
+                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Recurring, Mode=OneWay}"
+                            Style="{StaticResource NavRailItemButton}"
+                            Tag="{x:Static shell:NavSection.Recurring}"
+                            ToolTip="{DynamicResource Nav.Recurring}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <!--  CalendarLtr maps cleanly to "subscription / recurring schedule" — matches the 訂閱排程 label and avoids the swap-arrow misread of ArrowRepeatAll.  -->
+                                <ds:AppIcon Symbol="CalendarLtr24" />
+                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Recurring}" />
+                                <Border Grid.Column="2" Style="{StaticResource NavRailBadge}" Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextOnAccent}"
+                                        Text="{Binding Recurring.PendingCount}" />
+                                </Border>
+                            </Grid>
+                        </ToggleButton>
+
+                        <ToggleButton
+                            x:Name="NavAlerts"
+                            Click="NavItem_Click"
+                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Alerts, Mode=OneWay}"
+                            Style="{StaticResource NavRailItemButton}"
+                            Tag="{x:Static shell:NavSection.Alerts}"
+                            ToolTip="{DynamicResource Nav.Alerts.Tooltip}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ds:AppIcon Symbol="Alert24" />
+                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Alerts}" />
+                                <Border Grid.Column="2" Style="{StaticResource NavRailBadge}" Visibility="{Binding Alerts.HasTriggeredAlerts, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextOnAccent}"
+                                        Text="{Binding Alerts.TriggeredCount}" />
+                                </Border>
+                            </Grid>
+                        </ToggleButton>
+
+                        <Border Style="{StaticResource NavRailGroupDivider}" />
+                        <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.Planning}" />
+
+                        <ToggleButton
+                            x:Name="NavGoals"
+                            Click="NavItem_Click"
+                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Goals, Mode=OneWay}"
+                            Style="{StaticResource NavRailItemButton}"
+                            Tag="{x:Static shell:NavSection.Goals}"
+                            ToolTip="{DynamicResource Nav.Goals}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ds:AppIcon Symbol="Target24" />
+                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Goals}" />
+                            </Grid>
+                        </ToggleButton>
+
+                        <ToggleButton
+                            x:Name="NavFire"
+                            Click="NavItem_Click"
+                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Fire, Mode=OneWay}"
+                            Style="{StaticResource NavRailItemButton}"
+                            Tag="{x:Static shell:NavSection.Fire}"
+                            ToolTip="{DynamicResource Fire.Title}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ds:AppIcon Symbol="Flash24" />
+                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Fire.Title}" />
+                            </Grid>
+                        </ToggleButton>
+
+                        <ToggleButton
+                            x:Name="NavMonteCarlo"
+                            Click="NavItem_Click"
+                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=MonteCarlo, Mode=OneWay}"
+                            Style="{StaticResource NavRailItemButton}"
+                            Tag="{x:Static shell:NavSection.MonteCarlo}"
+                            ToolTip="{DynamicResource MonteCarlo.Title}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <!--  Calculator differentiates Monte Carlo from the pie/line chart icons of FinancialOverview / Trends; conveys "simulation / computation" semantics.  -->
+                                <ds:AppIcon Symbol="Calculator24" />
+                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource MonteCarlo.Title}" />
                             </Grid>
                         </ToggleButton>
                     </StackPanel>

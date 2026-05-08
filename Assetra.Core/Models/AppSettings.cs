@@ -71,4 +71,9 @@ public sealed record AppSettings(
     /// 空字串 = 使用預設組合（Plan B 推薦：淨資產 / 投資組合 / 投資淨損益 / 負債比率）。
     /// 未知名稱在載入時靜默丟棄。
     /// </summary>
-    string OverviewKpis = "");
+    string OverviewKpis = "",
+    /// <summary>
+    /// 預設啟動分頁 — NavSection 列舉名稱字串（例：<c>"FinancialOverview"</c>、
+    /// <c>"Portfolio"</c>）。空字串 / 未知名稱 = fallback 至 FinancialOverview。
+    /// </summary>
+    string DefaultHomeSection = "FinancialOverview");

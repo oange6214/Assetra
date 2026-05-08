@@ -49,6 +49,20 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         new("fugle", "Fugle"),
     ];
 
+    /// <summary>
+    /// Pages eligible to be the user's default startup landing.
+    /// Code matches NavSection enum names so it round-trips into AppSettings
+    /// without an extra mapping. Display strings are loaded at first use
+    /// from the active language ResourceDictionary.
+    /// </summary>
+    public static IReadOnlyList<ProviderOption> SupportedHomeSections { get; } =
+    [
+        new("FinancialOverview", "財務總覽"),
+        new("Portfolio", "投資組合"),
+        new("Trends", "資產趨勢"),
+        new("Reports", "月結報告"),
+    ];
+
     public static IReadOnlyList<ProviderOption> SupportedHistoryProviders { get; } =
     [
         new("twse", "TWSE / TPEX"),
@@ -91,6 +105,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isFugleHelpOpen;
     [ObservableProperty] private string _ocrTessdataPath = string.Empty;
     [ObservableProperty] private string _ocrLanguage = "eng";
+    [ObservableProperty] private string _defaultHomeSection = "FinancialOverview";
 
     public ObservableCollection<string> SupportedCurrencies { get; } = [];
 
@@ -167,6 +182,9 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             FugleApiKey = s.FugleApiKey ?? string.Empty;
             OcrTessdataPath = s.OcrTessdataPath ?? string.Empty;
             OcrLanguage = string.IsNullOrWhiteSpace(s.OcrLanguage) ? "eng" : s.OcrLanguage;
+            DefaultHomeSection = string.IsNullOrWhiteSpace(s.DefaultHomeSection)
+                ? "FinancialOverview"
+                : s.DefaultHomeSection;
             DataSourceSaveStatus = string.Empty;
         }
         finally
@@ -341,8 +359,17 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             FugleApiKey = FugleApiKey.Trim(),
             OcrTessdataPath = OcrTessdataPath?.Trim() ?? string.Empty,
             OcrLanguage = string.IsNullOrWhiteSpace(OcrLanguage) ? "eng" : OcrLanguage.Trim(),
+            DefaultHomeSection = string.IsNullOrWhiteSpace(DefaultHomeSection)
+                ? "FinancialOverview"
+                : DefaultHomeSection,
         };
         await _settings.SaveAsync(updated).ConfigureAwait(true);
+    }
+
+    partial void OnDefaultHomeSectionChanged(string value)
+    {
+        if (_isLoading) return;
+        _ = SaveAsync();
     }
 
     private void ShowSaveFailure(Exception ex)

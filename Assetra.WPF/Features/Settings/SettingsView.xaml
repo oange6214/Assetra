@@ -125,6 +125,25 @@
                                     Text="1.50×" />
                             </DockPanel>
                         </StackPanel>
+
+                        <StackPanel>
+                            <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.DefaultHome}" />
+                            <TextBlock
+                                Margin="0,8,0,6"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Settings.DefaultHomeDesc}"
+                                TextWrapping="Wrap" />
+                            <ComboBox
+                                MinWidth="220"
+                                MaxWidth="320"
+                                HorizontalAlignment="Left"
+                                Style="{StaticResource AppComboBox}"
+                                DisplayMemberPath="Display"
+                                ItemsSource="{Binding SupportedHomeSections}"
+                                SelectedValuePath="Code"
+                                SelectedValue="{Binding DefaultHomeSection, Mode=TwoWay}" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
