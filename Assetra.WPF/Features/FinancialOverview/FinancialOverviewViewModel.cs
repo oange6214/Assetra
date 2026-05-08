@@ -213,6 +213,21 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
     private void RebuildKpiCards()
     {
+        // Triggered from multiple sources, some of which fire on background
+        // threads (IPortfolioPositionFeed.PropertyChanged after a quote-fetch
+        // worker, IAppSettingsService.Changed after a save Task). Marshal to
+        // the UI thread before mutating the ObservableCollection — WPF's
+        // CollectionView throws NotSupportedException on cross-thread edits.
+        if (_uiContext is not null && SynchronizationContext.Current != _uiContext)
+        {
+            _uiContext.Post(_ => RebuildKpiCardsCore(), null);
+            return;
+        }
+        RebuildKpiCardsCore();
+    }
+
+    private void RebuildKpiCardsCore()
+    {
         var persisted = _settings?.Current.OverviewKpis;
         var ids = string.IsNullOrWhiteSpace(persisted)
             ? KpiMetricCatalog.Default
