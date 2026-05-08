@@ -78,24 +78,26 @@
             </StackPanel>
         </DockPanel>
 
-        <!--  ── Chart / empty state ──  -->
-        <Grid Grid.Row="1" Style="{StaticResource PageContentGrid}">
-            <lvc:CartesianChart
-                Background="Transparent"
-                Series="{Binding ValueSeries}"
-                TooltipPosition="Top"
-                TooltipTextSize="12"
-                Visibility="{Binding HasHistory, Converter={StaticResource BooleanToVisibilityConverter}}"
-                XAxes="{Binding XAxes}"
-                YAxes="{Binding YAxes}" />
+        <!--  ── Chart / empty state — wrapped in FormCard for visual consistency ──  -->
+        <Border Grid.Row="1" Style="{StaticResource FormCard}">
+            <Grid Style="{StaticResource PageContentGrid}">
+                <lvc:CartesianChart
+                    Background="Transparent"
+                    Series="{Binding ValueSeries}"
+                    TooltipPosition="Top"
+                    TooltipTextSize="12"
+                    Visibility="{Binding HasHistory, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    XAxes="{Binding XAxes}"
+                    YAxes="{Binding YAxes}" />
 
-            <StackPanel
-                Style="{StaticResource EmptyStatePanel}"
-                Visibility="{Binding HasHistory, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                <ds:AppIcon Style="{StaticResource EmptyStateIcon}" Symbol="DataTrending24" />
-                <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Trends.Empty}" />
-            </StackPanel>
-        </Grid>
+                <StackPanel
+                    Style="{StaticResource EmptyStatePanel}"
+                    Visibility="{Binding HasHistory, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <ds:AppIcon Style="{StaticResource EmptyStateIcon}" Symbol="DataTrending24" />
+                    <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Trends.Empty}" />
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <!--  ── Footer hint ──  -->
         <TextBlock

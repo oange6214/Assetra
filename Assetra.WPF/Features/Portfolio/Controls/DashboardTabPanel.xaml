@@ -38,10 +38,7 @@
                 <Border
                     Grid.Column="0"
                     Padding="20"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorderLight}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Card.Radius}">
+                    Style="{StaticResource FormCard}">
                     <StackPanel>
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Sm}"
@@ -91,10 +88,7 @@
                 <Border
                     Grid.Column="2"
                     Padding="16"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorderLight}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Card.Radius}">
+                    Style="{StaticResource FormCard}">
                     <StackPanel>
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Sm}"
@@ -128,10 +122,7 @@
                 <Border
                     Grid.Column="4"
                     Padding="16"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorderLight}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Card.Radius}">
+                    Style="{StaticResource FormCard}">
                     <StackPanel>
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Sm}"
@@ -150,10 +141,7 @@
                 <Border
                     Grid.Column="6"
                     Padding="16"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorderLight}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Card.Radius}">
+                    Style="{StaticResource FormCard}">
                     <StackPanel>
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Sm}"
@@ -185,10 +173,7 @@
             <Border
                 Grid.Row="2"
                 Padding="20"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorderLight}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource Card.Radius}">
+                Style="{StaticResource FormCard}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -224,10 +209,7 @@
                 <Border
                     Grid.Column="0"
                     Padding="20"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorderLight}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Card.Radius}">
+                    Style="{StaticResource FormCard}">
                     <StackPanel>
                         <DockPanel Margin="0,0,0,8">
                             <TextBlock
@@ -316,10 +298,7 @@
                 <Border
                     Grid.Column="2"
                     Padding="20"
-                    Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorderLight}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Card.Radius}">
+                    Style="{StaticResource FormCard}">
                     <StackPanel>
                         <DockPanel Margin="0,0,0,8">
                             <TextBlock
