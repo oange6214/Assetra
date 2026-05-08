@@ -139,15 +139,15 @@
 
 
     <!--  Portfolio  -->
-    <sys:String x:Key="Portfolio.PnL">淨損益</sys:String>
-    <sys:String x:Key="Portfolio.PnL.NetTooltip">淨損益 = 淨值 − 成本 = (市值 − 預估賣出費) − 成本&#x0a;• 預估賣出費 = 手續費 + 證交稅（ETF 0.1% / 股票 0.3%）&#x0a;• 成本 = 實付現金（含買入手續費）&#x0a;反映「現在賣掉真正到手的損益」，跟同列「淨值」直接相扣。</sys:String>
+    <sys:String x:Key="Portfolio.PnL">淨損益試算</sys:String>
+    <sys:String x:Key="Portfolio.PnL.NetTooltip">淨損益試算 = 淨值 − 付出成本 = (市值 − 預估賣出費/稅) − 付出成本&#x0a;• 預估賣出費/稅 = 手續費 + 證交稅（ETF 0.1% / 股票 0.3%）&#x0a;• 付出成本 = 實付現金（含買入手續費）&#x0a;這是依目前價格與費稅規則推估的結果，實際成交可能不同。</sys:String>
     <sys:String x:Key="Portfolio.History.MarketValue">市值</sys:String>
     <sys:String x:Key="Portfolio.Symbol">代號</sys:String>
     <sys:String x:Key="Portfolio.Shares">數量</sys:String>
     <sys:String x:Key="Portfolio.CostPerShare">成本均價</sys:String>
     <sys:String x:Key="Portfolio.EditCostPerShareHint">每單位均攤成本（股票已含買入手續費）。多次買入請自行計算加權平均後輸入。</sys:String>
     <sys:String x:Key="Portfolio.Price">現價</sys:String>
-    <sys:String x:Key="Portfolio.PnLPct">淨損益%</sys:String>
+    <sys:String x:Key="Portfolio.PnLPct">淨損益試算%</sys:String>
     <sys:String x:Key="Portfolio.MarketVal">市值</sys:String>
     <sys:String x:Key="Portfolio.NetVal">淨值</sys:String>
     <sys:String x:Key="Portfolio.PercentOfPortfolio">佔比</sys:String>
@@ -317,9 +317,10 @@
     <sys:String x:Key="Portfolio.Detail.CostAvgPrice">成本均價</sys:String>
     <sys:String x:Key="Portfolio.Trade.NetCash">實付/實收</sys:String>
     <sys:String x:Key="Portfolio.Detail.Holdings">持有數量</sys:String>
-    <sys:String x:Key="Portfolio.Detail.MarketValueCost">淨值 / 市值 / 成本</sys:String>
+    <sys:String x:Key="Portfolio.Detail.MarketValueCost">淨值 / 市值 / 付出成本</sys:String>
     <sys:String x:Key="Portfolio.Detail.MarketValue">市值</sys:String>
-    <sys:String x:Key="Portfolio.Detail.Cost">成本</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Cost">付出成本</sys:String>
+    <sys:String x:Key="Portfolio.Detail.EstimatedSellFee">預估賣出費/稅</sys:String>
     <sys:String x:Key="Portfolio.Detail.RealizedPnL">已實現損益</sys:String>
     <sys:String x:Key="Portfolio.Detail.TotalRealized">總已實現 (股息+價差)</sys:String>
     <sys:String x:Key="Portfolio.Detail.CapitalGain">資本利得</sys:String>
@@ -527,7 +528,7 @@
     <sys:String x:Key="Portfolio.Position.HideEmpty">隱藏空倉</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.MarketValue">總市值</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.TotalCost">總付出成本</sys:String>
-    <sys:String x:Key="Portfolio.Position.Summary.Pnl">損益試算</sys:String>
+    <sys:String x:Key="Portfolio.Position.Summary.Pnl">淨損益試算</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.DayChange">今日漲跌</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.Loading">報價載入中...</sys:String>
     <sys:String x:Key="Portfolio.DivCalendar.Title">股利日曆</sys:String>
@@ -842,6 +843,7 @@
     <sys:String x:Key="Categories.Rule.Add">新增規則</sys:String>
     <sys:String x:Key="Categories.Rule.AddTitle">新增規則</sys:String>
     <sys:String x:Key="Categories.Budget.AddTitle">新增預算</sys:String>
+    <sys:String x:Key="Categories.Budget.OverBudget">超支</sys:String>
     <sys:String x:Key="Categories.Rule.KeywordHint">關鍵字</sys:String>
     <sys:String x:Key="Categories.Rule.CategoryHint">分類</sys:String>
     <sys:String x:Key="Categories.Rule.PriorityHint">優先序</sys:String>
@@ -905,10 +907,10 @@
     <sys:String x:Key="Dashboard.Budget.Budget">總預算</sys:String>
     <sys:String x:Key="Dashboard.Budget.Empty">本月尚無現金收支紀錄；投資買賣不列入此卡。</sys:String>
 
-  <sys:String x:Key="Common.Delete">刪除</sys:String>
-  <sys:String x:Key="Common.DeleteConfirmTitle">刪除項目</sys:String>
-  <sys:String x:Key="Common.DeleteConfirmPrefix">確定要刪除「</sys:String>
-  <sys:String x:Key="Common.DeleteConfirmSuffix">」嗎？此動作無法復原。</sys:String>
+    <sys:String x:Key="Common.Delete">刪除</sys:String>
+    <sys:String x:Key="Common.DeleteConfirmTitle">刪除項目</sys:String>
+    <sys:String x:Key="Common.DeleteConfirmPrefix">確定要刪除「</sys:String>
+    <sys:String x:Key="Common.DeleteConfirmSuffix">」嗎？此動作無法復原。</sys:String>
 
     <!--  Recurring transactions / subscriptions  -->
     <sys:String x:Key="Nav.Recurring">訂閱排程</sys:String>

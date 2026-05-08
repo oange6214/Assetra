@@ -138,15 +138,15 @@
     <!--  Analysis — AI tab  -->
 
     <!--  Portfolio  -->
-    <sys:String x:Key="Portfolio.PnL">Net P&amp;L</sys:String>
-    <sys:String x:Key="Portfolio.PnL.NetTooltip">Net P&amp;L = Net Value − Cost = (Market Value − est. sell fees) − Cost&#x0a;• Est. sell fees = commission + securities tax (ETF 0.1% / Stock 0.3%)&#x0a;• Cost includes the buy-side commission actually paid&#x0a;Matches the Net Value column on the same row.</sys:String>
+    <sys:String x:Key="Portfolio.PnL">Est. net P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.PnL.NetTooltip">Est. net P&amp;L = Net Value − Total Cost = (Market Value − est. sell fees/tax) − Total Cost&#x0a;• Est. sell fees/tax = commission + securities tax (ETF 0.1% / Stock 0.3%)&#x0a;• Total Cost includes the buy-side commission actually paid&#x0a;This is an estimate based on current price and fee/tax rules; actual execution may differ.</sys:String>
     <sys:String x:Key="Portfolio.History.MarketValue">Market value</sys:String>
     <sys:String x:Key="Portfolio.Symbol">Symbol</sys:String>
     <sys:String x:Key="Portfolio.Shares">Qty</sys:String>
     <sys:String x:Key="Portfolio.CostPerShare">Avg Cost</sys:String>
     <sys:String x:Key="Portfolio.EditCostPerShareHint">Cost per unit including buy commission. For averaged positions, enter the weighted average cost.</sys:String>
     <sys:String x:Key="Portfolio.Price">Price</sys:String>
-    <sys:String x:Key="Portfolio.PnLPct">Net P&amp;L %</sys:String>
+    <sys:String x:Key="Portfolio.PnLPct">Est. net P&amp;L %</sys:String>
     <sys:String x:Key="Portfolio.MarketVal">Mkt val</sys:String>
     <sys:String x:Key="Portfolio.NetVal">Net val</sys:String>
     <sys:String x:Key="Portfolio.PercentOfPortfolio">Weight</sys:String>
@@ -316,9 +316,10 @@
     <sys:String x:Key="Portfolio.Detail.CostAvgPrice">Cost avg</sys:String>
     <sys:String x:Key="Portfolio.Trade.NetCash">Net cash</sys:String>
     <sys:String x:Key="Portfolio.Detail.Holdings">Holdings</sys:String>
-    <sys:String x:Key="Portfolio.Detail.MarketValueCost">Net / Market / Cost</sys:String>
+    <sys:String x:Key="Portfolio.Detail.MarketValueCost">Net / Market / Total Cost</sys:String>
     <sys:String x:Key="Portfolio.Detail.MarketValue">Market val</sys:String>
-    <sys:String x:Key="Portfolio.Detail.Cost">Cost</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Cost">Total cost</sys:String>
+    <sys:String x:Key="Portfolio.Detail.EstimatedSellFee">Est. sell fees/tax</sys:String>
     <sys:String x:Key="Portfolio.Detail.RealizedPnL">Realized P&amp;L</sys:String>
     <sys:String x:Key="Portfolio.Detail.TotalRealized">Total realized (Dividends + Capital)</sys:String>
     <sys:String x:Key="Portfolio.Detail.CapitalGain">Capital gain</sys:String>
@@ -526,7 +527,7 @@
     <sys:String x:Key="Portfolio.Position.HideEmpty">Hide empty</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.MarketValue">Total Market Value</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.TotalCost">Total Cost</sys:String>
-    <sys:String x:Key="Portfolio.Position.Summary.Pnl">Unrealized P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.Position.Summary.Pnl">Est. net P&amp;L</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.DayChange">Today's Change</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.Loading">Loading quotes...</sys:String>
     <sys:String x:Key="Portfolio.DivCalendar.Title">Dividend Calendar</sys:String>
@@ -871,6 +872,7 @@
     <!-- Budget management -->
     <sys:String x:Key="Categories.Tab.Budgets">Budgets</sys:String>
     <sys:String x:Key="Categories.Budget.Hint">Set a monthly or yearly cap per category or for total expenses.</sys:String>
+    <sys:String x:Key="Categories.Budget.OverBudget">Over</sys:String>
     <sys:String x:Key="Categories.Budget.AddForm.Title">Add Budget</sys:String>
     <sys:String x:Key="Categories.Budget.AddForm.Hint">Create monthly or yearly budgets for a category or total spending. They will feed the dashboard summary automatically.</sys:String>
     <sys:String x:Key="Categories.Field.BudgetMode">Budget mode</sys:String>

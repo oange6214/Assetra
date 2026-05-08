@@ -1029,22 +1029,21 @@
                                                         Text="{Binding EditNote, UpdateSourceTrigger=PropertyChanged}" />
                                                 </Grid>
 
-                                                <!--  Amount column  -->
-                                                <StackPanel
+                                                <!--
+                                                    Amount column with budget-vs-actual visualization.
+                                                    Shows "已支出 X / Y NT$"，progress bar (foreground
+                                                    swaps to AppDanger when over-budget, AppWarning
+                                                    when ≥80%) and an over-budget badge.
+                                                -->
+                                                <Grid
                                                     Grid.Column="2"
+                                                    MinWidth="200"
                                                     Margin="12,0"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal">
-                                                    <TextBlock
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{StaticResource Font.Family.Base}"
-                                                        FontSize="{StaticResource Font.Size.Base}"
-                                                        FontWeight="SemiBold"
-                                                        Foreground="{DynamicResource AppTextPrimary}"
-                                                        Text="{Binding Amount, StringFormat=NT$\{0:N0\}}"
-                                                        Typography.NumeralAlignment="Tabular">
-                                                        <TextBlock.Style>
-                                                            <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                                                    VerticalAlignment="Center">
+                                                    <!--  View mode  -->
+                                                    <StackPanel>
+                                                        <StackPanel.Style>
+                                                            <Style TargetType="StackPanel">
                                                                 <Setter Property="Visibility" Value="Visible" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsEditing}" Value="True">
@@ -1052,8 +1051,60 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
+                                                        </StackPanel.Style>
+                                                        <DockPanel LastChildFill="False">
+                                                            <TextBlock
+                                                                VerticalAlignment="Center"
+                                                                DockPanel.Dock="Left"
+                                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                                FontSize="{StaticResource Font.Size.Sm}"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                                Text="{Binding SpentVsBudgetDisplay}"
+                                                                Typography.NumeralAlignment="Tabular" />
+                                                            <!--  Over-budget badge — only visible when IsOverBudget=true  -->
+                                                            <Border
+                                                                Margin="6,0,0,0"
+                                                                Padding="6,1"
+                                                                VerticalAlignment="Center"
+                                                                Background="{DynamicResource AppDanger}"
+                                                                CornerRadius="3"
+                                                                DockPanel.Dock="Left"
+                                                                Visibility="{Binding IsOverBudget, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                <TextBlock
+                                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                                    FontWeight="SemiBold"
+                                                                    Foreground="{DynamicResource AppTextOnAccent}"
+                                                                    Text="{DynamicResource Categories.Budget.OverBudget}" />
+                                                            </Border>
+                                                        </DockPanel>
+                                                        <!--
+                                                            Progress bar: 4 px track. Foreground colour:
+                                                              IsOverBudget → AppDanger
+                                                              IsNearBudget (≥80%) → AppWarning (fall back AppAccentHover)
+                                                              otherwise → AppAccent
+                                                        -->
+                                                        <ProgressBar
+                                                            Margin="0,4,0,0"
+                                                            Height="4"
+                                                            Maximum="100"
+                                                            Value="{Binding ProgressPercent, Mode=OneWay}">
+                                                            <ProgressBar.Style>
+                                                                <Style BasedOn="{StaticResource {x:Type ProgressBar}}" TargetType="ProgressBar">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsNearBudget}" Value="True">
+                                                                            <Setter Property="Foreground" Value="{DynamicResource AppAccentHover}" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsOverBudget}" Value="True">
+                                                                            <Setter Property="Foreground" Value="{DynamicResource AppDanger}" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </ProgressBar.Style>
+                                                        </ProgressBar>
+                                                    </StackPanel>
+                                                    <!--  Edit mode (TextBox for budget amount) — same as before.  -->
                                                     <TextBox
                                                         Width="120"
                                                         MinHeight="36"
@@ -1071,7 +1122,7 @@
                                                             </Style>
                                                         </TextBox.Style>
                                                     </TextBox>
-                                                </StackPanel>
+                                                </Grid>
 
                                                 <!--  Buttons  -->
                                                 <StackPanel

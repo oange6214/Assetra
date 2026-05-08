@@ -198,6 +198,15 @@ public partial class CategoriesViewModel : ObservableObject
         _categories.CollectionChanged += (_, _) => NotifyEmptyStatesChanged();
         _rules.CollectionChanged       += (_, _) => NotifyEmptyStatesChanged();
         _budgets.CollectionChanged     += (_, _) => NotifyEmptyStatesChanged();
+
+        // External trade mutations (new income / expense entered via the
+        // shell's "新增紀錄" dialog) bump BudgetChanged → recompute Spent so
+        // the progress bars reflect reality without forcing the user to
+        // navigate away and back.
+        _budgetRefreshNotifier.BudgetChanged += async (_, _) =>
+        {
+            await RefreshBudgetSpentAsync().ConfigureAwait(true);
+        };
     }
 
     private void NotifyEmptyStatesChanged()
@@ -255,7 +264,69 @@ public partial class CategoriesViewModel : ObservableObject
         _budgets.Clear();
         foreach (var b in budgets)
             _budgets.Add(BudgetRowViewModel.FromModel(b, LookupBudgetCategoryDisplay(b.CategoryId)));
+        await RefreshBudgetSpentAsync().ConfigureAwait(true);
     }
+
+    /// <summary>
+    /// Computes <see cref="BudgetRowViewModel.Spent"/> for every budget row by
+    /// querying trades within each budget's effective period and summing the
+    /// expense legs that match the budget's <see cref="BudgetRowViewModel.CategoryId"/>
+    /// (or all expenses when CategoryId is null = 總預算).
+    ///
+    /// Expense classification mirrors <c>MonthlyBudgetSummaryService</c>:
+    /// Withdrawal + CreditCardCharge + LoanRepay (interest portion only). The
+    /// duplication is intentional — that service builds a single-month summary
+    /// for the dashboard card; here we need per-budget figures across mixed
+    /// monthly + yearly periods, so a focused recompute is simpler than
+    /// adapting the dashboard service.
+    /// </summary>
+    private async Task RefreshBudgetSpentAsync()
+    {
+        if (_budgets.Count == 0)
+            return;
+
+        // One full-trade fetch per refresh — budgets typically span a single
+        // year; pre-filter by the widest range we care about. ITradeRepository
+        // exposes GetByPeriodAsync; here we just fetch all and bucket in-memory
+        // because the budget list is small (≤24 rows typical) and the trade
+        // count is bounded by the user's history.
+        var allTrades = await _tradeRepository.GetAllAsync().ConfigureAwait(true);
+
+        foreach (var row in _budgets)
+            row.Spent = ComputeSpentForBudget(row, allTrades);
+    }
+
+    private static decimal ComputeSpentForBudget(BudgetRowViewModel row, IEnumerable<Trade> allTrades)
+    {
+        // Period bounds in local-time, converted to UTC for trade comparison.
+        DateTime fromLocal, toExclusiveLocal;
+        if (row.Mode == BudgetMode.Yearly)
+        {
+            fromLocal = new DateTime(row.Year, 1, 1, 0, 0, 0, DateTimeKind.Local);
+            toExclusiveLocal = fromLocal.AddYears(1);
+        }
+        else
+        {
+            var month = row.Month ?? DateTime.Today.Month;
+            fromLocal = new DateTime(row.Year, month, 1, 0, 0, 0, DateTimeKind.Local);
+            toExclusiveLocal = fromLocal.AddMonths(1);
+        }
+        var fromUtc = fromLocal.ToUniversalTime();
+        var toUtc = toExclusiveLocal.ToUniversalTime();
+
+        return allTrades
+            .Where(t => t.TradeDate >= fromUtc && t.TradeDate < toUtc)
+            .Where(t => row.CategoryId is null || t.CategoryId == row.CategoryId)
+            .Sum(GetBudgetExpenseAmount);
+    }
+
+    private static decimal GetBudgetExpenseAmount(Trade t) => t.Type switch
+    {
+        TradeType.Withdrawal => t.CashAmount ?? 0m,
+        TradeType.CreditCardCharge => t.CashAmount ?? 0m,
+        TradeType.LoanRepay => t.InterestPaid ?? 0m,
+        _ => 0m,
+    };
 
     private string LookupBudgetCategoryDisplay(Guid? categoryId)
     {
@@ -603,6 +674,8 @@ public partial class CategoriesViewModel : ObservableObject
 
         await _budgetRepository.AddAsync(budget).ConfigureAwait(true);
         _budgets.Add(BudgetRowViewModel.FromModel(budget, LookupBudgetCategoryDisplay(categoryId)));
+        // Refresh Spent for the new row (and any others affected by overlap).
+        await RefreshBudgetSpentAsync().ConfigureAwait(true);
         _budgetRefreshNotifier.NotifyChanged();
 
         AddBudgetAmount = 0m;
@@ -631,6 +704,9 @@ public partial class CategoriesViewModel : ObservableObject
         row.Note = NullIfBlank(row.EditNote);
         row.IsEditing = false;
         await _budgetRepository.UpdateAsync(row.ToModel()).ConfigureAwait(true);
+        // Spent itself didn't change but Remaining/ProgressPercent/IsOverBudget
+        // depend on Amount which we just edited — the [NotifyPropertyChangedFor]
+        // on Amount handles those. No explicit RefreshBudgetSpentAsync needed.
         _budgetRefreshNotifier.NotifyChanged();
         _snackbar.Success(GetString("Categories.Budget.Toast.Updated", "已更新預算"));
     }

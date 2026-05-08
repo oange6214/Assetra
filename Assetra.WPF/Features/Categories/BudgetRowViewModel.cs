@@ -12,8 +12,47 @@ public partial class BudgetRowViewModel : ObservableObject
     [ObservableProperty] private BudgetMode _mode;
     [ObservableProperty] private int _year;
     [ObservableProperty] private int? _month;
-    [ObservableProperty] private decimal _amount;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Remaining))]
+    [NotifyPropertyChangedFor(nameof(ProgressPercent))]
+    [NotifyPropertyChangedFor(nameof(IsOverBudget))]
+    [NotifyPropertyChangedFor(nameof(IsNearBudget))]
+    [NotifyPropertyChangedFor(nameof(SpentVsBudgetDisplay))]
+    private decimal _amount;
+
     [ObservableProperty] private string? _note;
+
+    /// <summary>
+    /// Cumulative expense across this budget's effective period (month / year),
+    /// filtered by <see cref="CategoryId"/> when set, otherwise all expense
+    /// trade types. Computed by <see cref="CategoriesViewModel"/> after
+    /// loading; defaults to 0 until first compute completes.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Remaining))]
+    [NotifyPropertyChangedFor(nameof(ProgressPercent))]
+    [NotifyPropertyChangedFor(nameof(IsOverBudget))]
+    [NotifyPropertyChangedFor(nameof(IsNearBudget))]
+    [NotifyPropertyChangedFor(nameof(SpentVsBudgetDisplay))]
+    private decimal _spent;
+
+    /// <summary>Budget − Spent. Negative when over budget.</summary>
+    public decimal Remaining => Amount - Spent;
+
+    /// <summary>0–100 scaled percentage of budget consumed; clamped at 100 for the progress bar.</summary>
+    public double ProgressPercent => Amount <= 0
+        ? 0
+        : Math.Clamp((double)(Spent / Amount * 100m), 0, 100);
+
+    /// <summary>True once spending exceeds the configured budget.</summary>
+    public bool IsOverBudget => Amount > 0 && Spent > Amount;
+
+    /// <summary>True when 80% ≤ spent &lt; 100% — used to colour-warn before going over.</summary>
+    public bool IsNearBudget => Amount > 0 && Spent >= Amount * 0.8m && Spent < Amount;
+
+    /// <summary>"已支出 X / Y" style display string for the row template.</summary>
+    public string SpentVsBudgetDisplay => $"{Spent:N0} / {Amount:N0}";
 
     // Edit buffers
     [ObservableProperty] private bool _isEditing;
