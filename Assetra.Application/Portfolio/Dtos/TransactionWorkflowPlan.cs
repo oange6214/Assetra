@@ -2,10 +2,19 @@ using Assetra.Core.Models;
 
 namespace Assetra.Application.Portfolio.Dtos;
 
+/// <summary>
+/// Income transaction. <paramref name="AccountName"/> is what gets displayed in the
+/// trade list "資產" column (mirrors the Deposit/Withdrawal convention); pass an
+/// empty string when no cash account is linked, the column will then render as "—".
+/// <paramref name="Note"/> is the free-text user note (e.g. "6 月薪水"), separate
+/// from <paramref name="CategoryId"/> so editing the category never mutates the
+/// note nor the asset display.
+/// </summary>
 public sealed record IncomeTransactionRequest(
     decimal Amount,
     DateTime TradeDate,
     Guid? CashAccountId,
+    string AccountName,
     string Note,
     decimal Fee,
     Guid? CategoryId = null);

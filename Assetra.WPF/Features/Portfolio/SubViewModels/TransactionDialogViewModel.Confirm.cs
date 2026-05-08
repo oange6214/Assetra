@@ -276,11 +276,19 @@ public partial class TransactionDialogViewModel
         { TxError = feeError; return; }
 
         var cashAccId = await ResolveCashAccountIdAsync();
+        // AccountName drives the trade-list 資產 column. Prefer the resolved
+        // ResolveCashAccountIdAsync row (covers the typed-but-not-yet-persisted
+        // case where TxCashAccount is null but TxCashAccountName is set);
+        // fall back to TxCashAccount.Name; otherwise empty.
+        var accountName = cashAccId is { } id
+            ? CashAccounts.FirstOrDefault(c => c.Id == id)?.Name ?? string.Empty
+            : TxCashAccount?.Name ?? string.Empty;
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         await _transactionWorkflowService.RecordIncomeAsync(new IncomeTransactionRequest(
             amount,
             tradeDate,
             cashAccId,
+            accountName,
             TxNote,
             fee,
             TxCategoryId));

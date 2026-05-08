@@ -19,6 +19,7 @@ public sealed class TransactionWorkflowServiceTests
             Amount: 5000m,
             TradeDate: new DateTime(2026, 1, 1),
             CashAccountId: null,
+            AccountName: string.Empty,
             Note: "薪資",
             Fee: 0m);
 
@@ -38,6 +39,7 @@ public sealed class TransactionWorkflowServiceTests
             Amount: 5000m,
             TradeDate: new DateTime(2026, 1, 1),
             CashAccountId: null,
+            AccountName: string.Empty,
             Note: "薪資",
             Fee: 50m);
 

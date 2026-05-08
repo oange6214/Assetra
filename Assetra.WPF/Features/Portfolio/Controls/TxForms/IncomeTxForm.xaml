@@ -72,21 +72,15 @@
             Text="{Binding TxFeeError}"
             Visibility="{Binding TxFeeError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-        <!--  備註  -->
+        <!--
+            分類（P1 收支管理）— 主要分類選擇，先於備註出現以反映其重要性。
+            原本上方的「說明」ComboBox 已移除：它跟分類使用同一份 preset 清單
+            （薪資/獎金/分紅/...）造成 UX 混淆，且因 Trade.Name 同步寫入該值，
+            讓交易列表「資產」欄顯示「薪資」這種非帳戶資料。重構後分類獨佔
+            該語義，Trade.Name 改寫帳戶名（見 RecordIncomeAsync）。
+        -->
         <TextBlock
             Margin="0,0,0,4"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.Note}" />
-        <ComboBox
-            ItemsSource="{Binding IncomeNotes}"
-            SelectedItem="{Binding TxNote, Mode=TwoWay}"
-            Style="{StaticResource FormComboBox}" />
-
-        <!--  分類（P1 收支管理）  -->
-        <TextBlock
-            Margin="0,12,0,4"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -97,5 +91,19 @@
             SelectedValue="{Binding TxCategoryId, Mode=TwoWay}"
             SelectedValuePath="Id"
             Style="{StaticResource FormComboBox}" />
+
+        <!--
+            備註 — 自由文字輸入（曾為 ComboBox + IncomeNotes preset list）。
+            與其他 TxForm 一致：寫入 Trade.Note，不再參與分類運算（分類由
+            上面的 ComboBox 直接決定，AutoCategorizationEngine 仍會在使用者
+            未指定時嘗試從 Note 文字猜分類）。
+        -->
+        <TextBlock
+            Margin="0,12,0,4"
+            FontSize="{StaticResource Font.Size.Xs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Portfolio.Tx.Note}" />
+        <TextBox Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
     </StackPanel>
 </UserControl>

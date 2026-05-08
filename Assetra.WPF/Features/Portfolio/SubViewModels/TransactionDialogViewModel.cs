@@ -296,8 +296,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     [ObservableProperty] private string _txAmount = string.Empty;
     [ObservableProperty] private string _txNote = string.Empty;
 
-    public static IReadOnlyList<string> IncomeNotes { get; } =
-        ["薪資", "獎金", "分紅", "利息收入", "租金收入", "其他"];
+    // IncomeNotes preset list removed — IncomeTxForm now uses a free-text TextBox
+    // for TxNote. Income source semantics live entirely in TxCategoryId, with the
+    // shared IncomeCategories collection driving the dropdown.
 
     // 現金帳戶選擇（收入 + 現金股利共用，null = 不連動）
     [ObservableProperty] private CashAccountRowViewModel? _txCashAccount;

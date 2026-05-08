@@ -74,11 +74,18 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
     {
         ct.ThrowIfCancellationRequested();
 
+        // Name = AccountName so the trade-list "資產" column shows the cash
+        // account ("台新 Richart") for income — same convention as Deposit /
+        // Withdrawal. Previously this field was assigned request.Note, which
+        // overlapped with Trade.Note + Trade.CategoryId and made all three
+        // columns display the same string ("薪資"); editing the category
+        // appeared to mutate the asset column. Decoupling Name from Note
+        // eliminates that confusion.
         var mainTrade = new Trade(
             Id: Guid.NewGuid(),
             Symbol: string.Empty,
             Exchange: string.Empty,
-            Name: request.Note,
+            Name: request.AccountName,
             Type: TradeType.Income,
             TradeDate: request.TradeDate,
             Price: 0,
@@ -98,8 +105,8 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
                 request.Fee,
                 request.CashAccountId,
                 request.TradeDate,
-                $"{request.Note} 手續費",
-                null,
+                $"{request.AccountName} 手續費",
+                request.Note,
                 mainTrade.Id)).ConfigureAwait(false);
         }
     }
