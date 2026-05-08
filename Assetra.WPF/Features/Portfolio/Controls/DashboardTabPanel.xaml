@@ -37,7 +37,6 @@
                 <!--  Hero: Net Worth  -->
                 <Border
                     Grid.Column="0"
-                    Padding="20"
                     Style="{StaticResource FormCard}">
                     <StackPanel>
                         <TextBlock
@@ -87,7 +86,6 @@
                 <!--  Metric: 淨損益  -->
                 <Border
                     Grid.Column="2"
-                    Padding="16"
                     Style="{StaticResource FormCard}">
                     <StackPanel>
                         <TextBlock
@@ -121,7 +119,6 @@
                 <!--  Metric: 總資產  -->
                 <Border
                     Grid.Column="4"
-                    Padding="16"
                     Style="{StaticResource FormCard}">
                     <StackPanel>
                         <TextBlock
@@ -140,7 +137,6 @@
                 <!--  Metric: 負債  -->
                 <Border
                     Grid.Column="6"
-                    Padding="16"
                     Style="{StaticResource FormCard}">
                     <StackPanel>
                         <TextBlock
@@ -172,7 +168,6 @@
             <!--  ═══ Row 2: 10-day Trend Chart (full width) ═══  -->
             <Border
                 Grid.Row="2"
-                Padding="20"
                 Style="{StaticResource FormCard}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -208,7 +203,6 @@
                 <!--  Top Holdings  -->
                 <Border
                     Grid.Column="0"
-                    Padding="20"
                     Style="{StaticResource FormCard}">
                     <StackPanel>
                         <DockPanel Margin="0,0,0,8">
@@ -297,7 +291,6 @@
                 <!--  Recent Trades  -->
                 <Border
                     Grid.Column="2"
-                    Padding="20"
                     Style="{StaticResource FormCard}">
                     <StackPanel>
                         <DockPanel Margin="0,0,0,8">

@@ -37,6 +37,32 @@ Compatibility shims under `DesignSystem/Controls` may import a canonical `Design
 - Use `PageTabHost` around tab content so selected pages fill the available area.
 - Use `DashboardMetricGrid`, `MetricCard`, `MetricLabel`, and `MetricValue` for KPI rows.
 
+### Page Spacing Spec
+
+These four numbers govern every standard page. Hard-coding alternative
+values is a violation; cite the token instead.
+
+| Layer | Token | Value | Use |
+|-------|-------|-------|-----|
+| Page outer (page edge → first card) | `PageChromeMargin` / literal `24` | 24 px | Margin on the page root container |
+| Card-to-card gap | `Gap.Lg` / literal `16` | 16 px | Inter-card spacing in StackPanel / Grid |
+| Inside card padding | `Padding.Card` / FormCard default | 16 px | Padding on a `FormCard` Border |
+| Form group-to-group | `Gap.Xl` / literal `24` | 24 px | Vertical separator between Form sections |
+
+Practical rules:
+
+- A page should have exactly one outer margin layer of 24 px. If a page
+  uses `PageRootGrid`, do not also add `Margin="16"` or `Margin="24"` on
+  inner cards.
+- Cards inside a page should use `Margin="0,0,16,0"` / `"0,0,0,16"` etc.
+  for inter-card spacing — never literal 8/12/20.
+- DataGrid sitting inside a page that has cards must be wrapped in a
+  `FormCard` (`Padding="0"`, `ClipToBounds="True"`) so its sharp corners
+  do not clash with surrounding rounded cards.
+- Hero / display cards do not get extra padding — `FormCard`'s default
+  16 px is the answer. If a hero card needs more breathing room, scale
+  via larger inner typography, not via `Padding="20"` or `Padding="24"`.
+
 ## Forms
 
 - Use `FormSection` for grouped form content.

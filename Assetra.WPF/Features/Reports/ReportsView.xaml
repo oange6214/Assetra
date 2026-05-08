@@ -368,7 +368,7 @@
 
         <!--  ── Statements (Income / Balance / CashFlow) ──  -->
         <StackPanel Grid.Row="3" Margin="0,16,0,0">
-            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.IncomeStatement.Title}" IsExpanded="False" Margin="0,0,0,8">
+            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.IncomeStatement.Title}" IsExpanded="False" Margin="0,0,0,16">
                 <Grid Margin="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -489,7 +489,7 @@
                 </Grid>
             </Expander>
 
-            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.BalanceSheet.Title}" IsExpanded="False" Margin="0,0,0,8">
+            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.BalanceSheet.Title}" IsExpanded="False" Margin="0,0,0,16">
                 <Grid Margin="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -723,7 +723,7 @@
                 </Grid>
             </Expander>
 
-            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.Performance.Title}" IsExpanded="False" Margin="0,8,0,0">
+            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.Performance.Title}" IsExpanded="False" Margin="0,0,0,16">
                 <Grid>
                     <TextBlock
                         Margin="12"
@@ -810,7 +810,7 @@
                 </Grid>
             </Expander>
 
-            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.Risk.Title}" IsExpanded="False" Margin="0,8,0,0">
+            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.Risk.Title}" IsExpanded="False" Margin="0,0,0,16">
                 <Grid>
                     <TextBlock
                         Margin="12"

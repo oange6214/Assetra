@@ -18,7 +18,7 @@
 
     <Grid>
         <ScrollViewer
-            Margin="16,0,16,16"
+            Margin="24,0,24,24"
             HorizontalScrollBarVisibility="Disabled"
             VerticalScrollBarVisibility="Auto">
             <ScrollViewer.Style>
@@ -249,10 +249,29 @@
             </ItemsControl>
         </ScrollViewer>
 
+        <Border
+            Margin="24,0,24,24"
+            Padding="0"
+            ClipToBounds="True">
+            <Border.Style>
+                <Style TargetType="Border" BasedOn="{StaticResource FormCard}">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Value="True">
+                            <DataTrigger.Binding>
+                                <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1180">
+                                    <Binding ElementName="Root" Path="ActualWidth" />
+                                    <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                </MultiBinding>
+                            </DataTrigger.Binding>
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
         <DataGrid
-            Margin="16,0,16,16"
             AutoGenerateColumns="False"
-            Background="{DynamicResource AppBackground}"
+            Background="Transparent"
             BorderThickness="0"
             CanUserAddRows="False"
             CanUserDeleteRows="False"
@@ -283,23 +302,6 @@
                 -->
                 <infra:BindingProxy x:Key="VmProxy" Data="{Binding}" />
             </DataGrid.Resources>
-
-            <DataGrid.Style>
-                <Style TargetType="DataGrid">
-                    <Setter Property="Visibility" Value="Visible" />
-                    <Style.Triggers>
-                        <DataTrigger Value="True">
-                            <DataTrigger.Binding>
-                                <MultiBinding Converter="{StaticResource WidthScaleThresholdToBooleanConverter}" ConverterParameter="1180">
-                                    <Binding ElementName="Root" Path="ActualWidth" />
-                                    <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                                </MultiBinding>
-                            </DataTrigger.Binding>
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.Style>
 
             <DataGrid.ColumnHeaderStyle>
                 <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader" />
@@ -584,5 +586,6 @@
 
             </DataGrid.Columns>
         </DataGrid>
+        </Border>
     </Grid>
 </UserControl>
