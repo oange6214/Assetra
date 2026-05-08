@@ -385,7 +385,6 @@
 
     <sys:String x:Key="Portfolio.Record.Title">新增紀錄</sys:String>
     <sys:String x:Key="Portfolio.Record.CoreLocked">此筆已影響持倉或配對紀錄，僅能修改日期與備註。</sys:String>
-    <sys:String x:Key="Portfolio.Record.ReviseHint">若需更正金額或數量，請刪除此筆後重新建立。</sys:String>
     <sys:String x:Key="Portfolio.Record.ReviseTitle">刪除此筆並新增</sys:String>
     <sys:String x:Key="Portfolio.Record.CreateRevision">刪除此筆並新增</sys:String>
     <sys:String x:Key="Portfolio.Record.RevisionModeHint">已根據原紀錄帶入內容。儲存後將自動覆寫原紀錄。</sys:String>
@@ -504,7 +503,6 @@
     <sys:String x:Key="Portfolio.Tx.CreditCardPayment.NoBalance">這張信用卡目前沒有未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款」。</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCardPayment.ExceedsBalance">繳款金額不可超過目前未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款」。</sys:String>
     <sys:String x:Key="Portfolio.Tx.EditTitle">編輯紀錄</sys:String>
-    <sys:String x:Key="Portfolio.Tx.MetaOnlyHint">此筆已連動其他資料（FIFO 賣出、轉帳配對等），僅能修改日期與備註。若要更正金額或股數，請刪除後重新建立。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Buy">買入</sys:String>
     <sys:String x:Key="Portfolio.Tx.Sell">賣出</sys:String>
     <sys:String x:Key="Portfolio.Tx.SellPosition">選擇持倉</sys:String>

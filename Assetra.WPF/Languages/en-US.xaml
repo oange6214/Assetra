@@ -384,7 +384,6 @@
 
     <sys:String x:Key="Portfolio.Record.Title">Add Record</sys:String>
     <sys:String x:Key="Portfolio.Record.CoreLocked">This record is linked to other data (FIFO sells, transfer pairs); only the date and note can be edited.</sys:String>
-    <sys:String x:Key="Portfolio.Record.ReviseHint">To correct the amount or quantity, delete this record and create a new one.</sys:String>
     <sys:String x:Key="Portfolio.Record.ReviseTitle">Delete and Recreate</sys:String>
     <sys:String x:Key="Portfolio.Record.CreateRevision">Delete and Recreate</sys:String>
     <sys:String x:Key="Portfolio.Record.RevisionModeHint">Prefilled from the original record. Saving will replace the original.</sys:String>
@@ -503,7 +502,6 @@
     <sys:String x:Key="Portfolio.Tx.CreditCardPayment.NoBalance">This card has no outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdraw”.</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCardPayment.ExceedsBalance">Payment cannot exceed the current outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdraw”.</sys:String>
     <sys:String x:Key="Portfolio.Tx.EditTitle">Edit Record</sys:String>
-    <sys:String x:Key="Portfolio.Tx.MetaOnlyHint">This record is linked to other data (FIFO sells, transfer pairs); only the date and note can be edited. To correct the amount or quantity, delete this record and create a new one.</sys:String>
     <sys:String x:Key="Portfolio.Tx.Buy">Buy</sys:String>
     <sys:String x:Key="Portfolio.Tx.Sell">Sell</sys:String>
     <sys:String x:Key="Portfolio.Tx.SellPosition">Select position</sys:String>
