@@ -205,6 +205,7 @@
     <sys:String x:Key="Portfolio.Liability.Health.Tooltip">負債比率閾值：&#x0a;　• 健康 &lt; 30%&#x0a;　• 警告 30% ~ 50%&#x0a;　• 危險 ≥ 50%</sys:String>
     <sys:String x:Key="Portfolio.DayChange">今日漲跌</sys:String>
     <sys:String x:Key="Portfolio.AddRecord">新增紀錄</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Tooltip">新增紀錄 (Ctrl+N)</sys:String>
     <sys:String x:Key="Portfolio.AddCash">帳戶</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">新增負債</sys:String>
     <sys:String x:Key="Portfolio.AddCreditCard">新增負債</sys:String>

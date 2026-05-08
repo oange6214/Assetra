@@ -67,25 +67,12 @@
             </TabControl>
 
             <!--
-                Floating Add Record button overlaid on the tab header strip.
-                Height 32 + Margin top 4 fits inside the tab strip with
-                ~4 px breathing room top and bottom.
+                Floating "新增紀錄" button removed — promoted to MainWindow
+                title bar so the high-frequency action stays reachable from
+                every page (Portfolio / Cash / Liabilities / TransactionLog /
+                FinancialOverview / …) instead of only when the user is on
+                this page. Ctrl+N is the global keyboard twin.
             -->
-            <Button
-                Height="32"
-                MinHeight="32"
-                Margin="0,4,12,0"
-                Padding="14,0"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Panel.ZIndex="10"
-                Command="{Binding AddRecordCommand}"
-                Style="{StaticResource AppPrimaryButton}">
-                <StackPanel Style="{StaticResource AppButtonContent}">
-                    <ds:AppIcon Style="{StaticResource AppButtonLeadingIcon}" Symbol="Add24" />
-                    <TextBlock Style="{StaticResource AppButtonText}" Text="{DynamicResource Portfolio.AddRecord}" />
-                </StackPanel>
-            </Button>
         </Grid>
 
         <!--  ── Cash / Liability detail overlays (floating side panel with backdrop) ──  -->
@@ -1787,10 +1774,7 @@
         </Grid>
 
         <!--  ── Dialog overlays ──  -->
-        <pcontrols:AddRecordDialog
-            Grid.RowSpan="2"
-            Panel.ZIndex="210"
-            DataContext="{Binding Transaction}" />
+        <!--  AddRecordDialog moved to MainWindow shell so it renders on every page.  -->
         <pcontrols:AddAssetDialog Grid.RowSpan="2" Panel.ZIndex="200" />
         <pcontrols:EditAssetDialog
             Grid.RowSpan="2"

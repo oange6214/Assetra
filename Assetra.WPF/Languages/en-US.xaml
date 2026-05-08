@@ -204,6 +204,7 @@
     <sys:String x:Key="Portfolio.Liability.Health.Tooltip">Debt ratio thresholds:&#x0a;　• Healthy &lt; 30%&#x0a;　• Caution 30% ~ 50%&#x0a;　• Danger ≥ 50%</sys:String>
     <sys:String x:Key="Portfolio.DayChange">Day P&amp;L</sys:String>
     <sys:String x:Key="Portfolio.AddRecord">Add Record</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Tooltip">Add Record (Ctrl+N)</sys:String>
     <sys:String x:Key="Portfolio.AddCash">Account</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">Add Liability</sys:String>
     <sys:String x:Key="Portfolio.AddCreditCard">Add Liability</sys:String>
