@@ -17,85 +17,57 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!--  ── KPI Bar ─────────────────────────────────────────────────────  -->
-        <UniformGrid
+        <!--
+            KPI Bar — driven by AppSettings.OverviewKpis. The user picks
+            which 3-6 metrics to show in the Settings page; this view just
+            renders whatever the ViewModel emits.
+        -->
+        <ItemsControl
             Grid.Row="0"
             Margin="0,0,0,16"
-            Columns="4"
-            Rows="1">
-
-            <!--  總淨資產  -->
-            <Border Margin="0,0,8,0" Style="{StaticResource FormCard}">
-                <StackPanel>
-                    <TextBlock
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource FinancialOverview.Header.NetWorth}" />
-                    <TextBlock
-                        Margin="0,8,0,0"
-                        FontFamily="{StaticResource Font.Family.Base}"
-                        Typography.NumeralAlignment="Tabular"
-                        FontSize="{StaticResource Font.Size.Lg}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{Binding TotalNetWorthDisplay}" />
-                </StackPanel>
-            </Border>
-
-            <!--  資產  -->
-            <Border Margin="8,0" Style="{StaticResource FormCard}">
-                <StackPanel>
-                    <TextBlock
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource FinancialOverview.Header.Assets}" />
-                    <TextBlock
-                        Margin="0,8,0,0"
-                        FontFamily="{StaticResource Font.Family.Base}"
-                        Typography.NumeralAlignment="Tabular"
-                        FontSize="{StaticResource Font.Size.Lg}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppUp}"
-                        Text="{Binding TotalAssetsDisplay}" />
-                </StackPanel>
-            </Border>
-
-            <!--  投資  -->
-            <Border Margin="8,0" Style="{StaticResource FormCard}">
-                <StackPanel>
-                    <TextBlock
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource FinancialOverview.Header.Investments}" />
-                    <TextBlock
-                        Margin="0,8,0,0"
-                        FontFamily="{StaticResource Font.Family.Base}"
-                        Typography.NumeralAlignment="Tabular"
-                        FontSize="{StaticResource Font.Size.Lg}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppAccent}"
-                        Text="{Binding TotalInvestmentsDisplay}" />
-                </StackPanel>
-            </Border>
-
-            <!--  負債  -->
-            <Border Margin="8,0,0,0" Style="{StaticResource FormCard}">
-                <StackPanel>
-                    <TextBlock
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource FinancialOverview.Header.Liabilities}" />
-                    <TextBlock
-                        Margin="0,8,0,0"
-                        FontFamily="{StaticResource Font.Family.Base}"
-                        Typography.NumeralAlignment="Tabular"
-                        FontSize="{StaticResource Font.Size.Lg}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppDown}"
-                        Text="{Binding TotalLiabilitiesDisplay}" />
-                </StackPanel>
-            </Border>
-        </UniformGrid>
+            ItemsSource="{Binding KpiCards}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="1" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="4,0" Style="{StaticResource FormCard}">
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{Binding LabelKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Lg}"
+                                FontWeight="SemiBold"
+                                Text="{Binding ValueDisplay}"
+                                Typography.NumeralAlignment="Tabular">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Tone}" Value="Up">
+                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Tone}" Value="Down">
+                                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Tone}" Value="Accent">
+                                                <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
         <!--  ── Accordion  ───────────────────────────────────────────────────  -->
         <ScrollViewer

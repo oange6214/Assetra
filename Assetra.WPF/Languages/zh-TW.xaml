@@ -685,10 +685,24 @@
 
     <!--  Financial Overview  -->
     <sys:String x:Key="FinancialOverview.Nav.Label">財務總覽</sys:String>
-    <sys:String x:Key="FinancialOverview.Header.NetWorth">總淨資產</sys:String>
-    <sys:String x:Key="FinancialOverview.Header.Assets">資產</sys:String>
-    <sys:String x:Key="FinancialOverview.Header.Investments">投資</sys:String>
-    <sys:String x:Key="FinancialOverview.Header.Liabilities">負債</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.NetWorth">淨資產</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.TotalAssets">總資產</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.Assets">其他資產</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.Investments">投資組合</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.Liabilities">總負債</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.DebtRatio">負債比率</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnl">投資淨損益</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnlPercent">投資報酬率</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.NetWorth.Desc">總資產扣除負債後的淨值</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.TotalAssets.Desc">所有資產加總（含投資、現金、不動產等）</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.OtherAssets.Desc">非投資類資產（現金、不動產、實物資產等）</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.Investments.Desc">投資組合市值</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.Liabilities.Desc">所有負債加總（貸款、信用卡）</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.DebtRatio.Desc">總負債 / 總資產 — 越低越健康</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnl.Desc">投資組合市值 - 成本</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnlPercent.Desc">投資報酬率（市值 / 成本 - 1）</sys:String>
+    <sys:String x:Key="Settings.OverviewKpis.Title">財務總覽 KPI</sys:String>
+    <sys:String x:Key="Settings.OverviewKpis.Description">勾選 3-6 個指標顯示在財務總覽頁面頂部</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Assets">資產</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Investments">投資</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Liabilities">負債</sys:String>

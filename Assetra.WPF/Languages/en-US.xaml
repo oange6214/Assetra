@@ -684,9 +684,23 @@
     <!--  Financial Overview  -->
     <sys:String x:Key="FinancialOverview.Nav.Label">Financial Overview</sys:String>
     <sys:String x:Key="FinancialOverview.Header.NetWorth">Net Worth</sys:String>
-    <sys:String x:Key="FinancialOverview.Header.Assets">Assets</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.TotalAssets">Total Assets</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.Assets">Other Assets</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Investments">Investments</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Liabilities">Liabilities</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.DebtRatio">Debt Ratio</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnl">Investment P&amp;L</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnlPercent">Investment Return</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.NetWorth.Desc">Total assets minus total liabilities</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.TotalAssets.Desc">All assets combined (investments + cash + property...)</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.OtherAssets.Desc">Non-investment assets (cash, real estate, physical assets)</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.Investments.Desc">Investment portfolio market value</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.Liabilities.Desc">Total liabilities (loans + credit cards)</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.DebtRatio.Desc">Liabilities / Total Assets — lower is healthier</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnl.Desc">Investment market value minus cost basis</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnlPercent.Desc">Investment return rate (market value / cost - 1)</sys:String>
+    <sys:String x:Key="Settings.OverviewKpis.Title">Financial Overview KPIs</sys:String>
+    <sys:String x:Key="Settings.OverviewKpis.Description">Pick 3-6 metrics to display at the top of the Financial Overview page</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Assets">Assets</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Investments">Investments</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Liabilities">Liabilities</sys:String>

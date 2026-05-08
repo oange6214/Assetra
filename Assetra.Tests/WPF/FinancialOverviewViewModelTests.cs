@@ -48,6 +48,18 @@ public sealed class FinancialOverviewViewModelTests
             }
         }
 
+        private decimal _totalCost;
+        public decimal TotalCost
+        {
+            get => _totalCost;
+            set
+            {
+                if (_totalCost == value) return;
+                _totalCost = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TotalCost)));
+            }
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
     }
 

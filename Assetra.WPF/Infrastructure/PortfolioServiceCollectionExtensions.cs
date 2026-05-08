@@ -153,7 +153,8 @@ internal static class PortfolioServiceCollectionExtensions
             sp.GetService<BudgetSummaryCardViewModel>()));
         services.AddSingleton<FinancialOverviewViewModel>(sp => new FinancialOverviewViewModel(
             sp.GetRequiredService<IFinancialOverviewQueryService>(),
-            sp.GetRequiredService<PortfolioViewModel>()));
+            sp.GetRequiredService<PortfolioViewModel>(),
+            sp.GetService<IAppSettingsService>()));
 
         return services;
     }

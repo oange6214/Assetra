@@ -64,4 +64,11 @@ public sealed record AppSettings(
     /// </summary>
     string SyncPassphraseSalt = "",
     /// <summary>背景同步間隔（分鐘）。0 = 停用背景同步，僅靠手動觸發。</summary>
-    int SyncIntervalMinutes = 0);
+    int SyncIntervalMinutes = 0,
+    /// <summary>
+    /// 財務總覽 KPI 卡片選擇 — 以逗號分隔的 KpiMetric 列舉名稱字串
+    /// （例：<c>"NetWorth,Investments,InvestmentPnl,DebtRatio"</c>）。
+    /// 空字串 = 使用預設組合（Plan B 推薦：淨資產 / 投資組合 / 投資淨損益 / 負債比率）。
+    /// 未知名稱在載入時靜默丟棄。
+    /// </summary>
+    string OverviewKpis = "");

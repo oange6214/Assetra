@@ -36,4 +36,12 @@ public interface IPortfolioPositionFeed : INotifyPropertyChanged
     /// and filter on this property's name.
     /// </summary>
     decimal TotalMarketValue { get; }
+
+    /// <summary>
+    /// Sum of all position cost-bases in the portfolio's base currency.
+    /// Used together with <see cref="TotalMarketValue"/> to compute investment
+    /// P&amp;L (TotalMarketValue - TotalCost). Updates with the same cadence as
+    /// TotalMarketValue.
+    /// </summary>
+    decimal TotalCost { get; }
 }
