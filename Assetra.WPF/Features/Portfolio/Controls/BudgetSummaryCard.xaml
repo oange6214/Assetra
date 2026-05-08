@@ -8,12 +8,7 @@
     d:DataContext="{d:DesignInstance Type={x:Type vm:BudgetSummaryCardViewModel}}"
     mc:Ignorable="d">
 
-    <Border
-        Padding="16,12"
-        Background="{DynamicResource AppSurface}"
-        BorderBrush="{DynamicResource AppBorderLight}"
-        BorderThickness="1"
-        CornerRadius="{StaticResource Card.Radius}">
+    <Border Padding="16,12" Style="{StaticResource FormCard}">
         <StackPanel>
             <DockPanel Margin="0,0,0,10">
                 <TextBlock
