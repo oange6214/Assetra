@@ -619,7 +619,7 @@
                 </Grid>
             </Expander>
 
-            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.CashFlow.Title}" IsExpanded="False">
+            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.CashFlow.Title}" IsExpanded="False" Margin="0,0,0,16">
                 <Grid Margin="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
