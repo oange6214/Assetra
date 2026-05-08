@@ -90,6 +90,7 @@ internal static class TradeSchemaMigrator
             BackfillLiabilityAssetIds(cmd);
             BackfillLoanLabels(conn, tx, cmd);
             NormalizeLegacyInterestTrades(cmd);
+            BackfillIncomeTradeNameFromCashAccount(cmd);
 
             tx.Commit();
         }
@@ -178,6 +179,44 @@ internal static class TradeSchemaMigrator
                        ELSE ABS(cash_amount)
                    END
              WHERE trade_type = 'Interest';
+            """;
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// One-time backfill for Income trades created BEFORE the Income decouple
+    /// refactor (commit 7fe6647). Pre-refactor, RecordIncomeAsync stored
+    /// <c>Trade.Name = Note</c> (e.g. "薪資") so the trade-list "資產" column
+    /// showed the note rather than the cash account. New behaviour stores
+    /// <c>Name = AccountName</c> (e.g. "台新 Richart") to match Deposit /
+    /// Withdrawal convention.
+    ///
+    /// This migration finds Income rows where the linked cash account exists
+    /// AND <c>name</c> still equals <c>note</c> (the legacy fingerprint) AND
+    /// rewrites <c>name</c> to the account's name. Income rows without a
+    /// linked cash account, or where <c>name</c> already differs from
+    /// <c>note</c> (post-refactor), are left untouched.
+    ///
+    /// Safe to run on every startup — the WHERE clause makes it idempotent.
+    /// </summary>
+    private static void BackfillIncomeTradeNameFromCashAccount(SqliteCommand cmd)
+    {
+        cmd.CommandText = """
+            UPDATE trade
+               SET name = (
+                       SELECT a.name
+                         FROM asset a
+                        WHERE a.id = trade.cash_account_id
+                   )
+             WHERE trade_type      = 'Income'
+               AND cash_account_id IS NOT NULL
+               AND note            IS NOT NULL
+               AND name            =  note
+               AND EXISTS (
+                       SELECT 1
+                         FROM asset a
+                        WHERE a.id = trade.cash_account_id
+                   );
             """;
         cmd.ExecuteNonQuery();
     }

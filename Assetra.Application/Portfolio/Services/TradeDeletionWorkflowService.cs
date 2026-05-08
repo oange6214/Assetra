@@ -42,7 +42,7 @@ public sealed class TradeDeletionWorkflowService : ITradeDeletionWorkflowService
 
         // Capture pre-deletion snapshot for the audit log. Best-effort —
         // a missing trade or audit-write failure must not block the deletion.
-        await TryWriteAuditAsync(request.TradeId, ct).ConfigureAwait(false);
+        await TryWriteAuditAsync(request.TradeId, request.Reason, ct).ConfigureAwait(false);
 
         await ApplyTradeRemovalOnPositionAsync(request, ct).ConfigureAwait(false);
         await _tradeRepository.RemoveChildrenAsync(request.TradeId).ConfigureAwait(false);
@@ -51,7 +51,7 @@ public sealed class TradeDeletionWorkflowService : ITradeDeletionWorkflowService
         return new TradeDeletionResult(Success: true);
     }
 
-    private async Task TryWriteAuditAsync(Guid tradeId, CancellationToken ct)
+    private async Task TryWriteAuditAsync(Guid tradeId, TradeDeletionReason reason, CancellationToken ct)
     {
         if (_auditRepository is null)
             return;
@@ -66,7 +66,11 @@ public sealed class TradeDeletionWorkflowService : ITradeDeletionWorkflowService
             var entry = new TradeAuditEntry(
                 Id: Guid.NewGuid(),
                 TradeId: tradeId,
-                Action: "delete",
+                Action: reason switch
+                {
+                    TradeDeletionReason.EditReplace => "edit-replace",
+                    _ => "delete",
+                },
                 TradeJson: json,
                 RecordedAt: DateTime.UtcNow,
                 Note: null);

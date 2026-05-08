@@ -1,0 +1,23 @@
+namespace Assetra.WPF.Features.Portfolio.SubViewModels;
+
+/// <summary>
+/// Production adapter that exposes a snapshot of <see cref="TransactionDialogViewModel"/>
+/// state via the <see cref="IBuyExecutionContext"/> interface. Each property
+/// reads through to the live VM at call-time, so the buy flow always sees the
+/// latest values the user has typed (no caching).
+///
+/// Wired once in <c>PortfolioViewModel</c> by:
+/// <code>
+/// AddAssetDialog.BuyContext = new TransactionBuyContext(Transaction);
+/// </code>
+/// </summary>
+public sealed class TransactionBuyContext(TransactionDialogViewModel vm) : IBuyExecutionContext
+{
+    public decimal CommissionDiscount => vm.TxCommissionDiscountValue;
+    public string TxFee => vm.TxFee;
+    public bool BuyMetaOnly => vm.TxBuyMetaOnly;
+    public Guid? CashAccountId => vm.TxCashAccount?.Id;
+    public bool UseCashAccount => vm.TxUseCashAccount;
+    public bool BuyIsTotalMode => vm.TxBuyIsTotalMode;
+    public bool BuyTotalIncludesFee => vm.TxBuyTotalIncludesFee;
+}

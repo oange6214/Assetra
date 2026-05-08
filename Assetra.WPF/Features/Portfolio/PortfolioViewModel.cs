@@ -396,13 +396,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
 
         // Wire the AddAssetDialog and SellPanel delegates that reference Transaction properties
         // now that Transaction is constructed.
-        AddAssetDialog.GetTxCommissionDiscountValue = () => Transaction.TxCommissionDiscountValue;
-        AddAssetDialog.GetTxFee = () => Transaction.TxFee;
-        AddAssetDialog.GetTxBuyMetaOnly = () => Transaction.TxBuyMetaOnly;
-        AddAssetDialog.GetTxCashAccountId = () => Transaction.TxCashAccount?.Id;
-        AddAssetDialog.GetTxUseCashAccount = () => Transaction.TxUseCashAccount;
-        AddAssetDialog.GetTxBuyIsTotalMode = () => Transaction.TxBuyIsTotalMode;
-        AddAssetDialog.GetTxBuyTotalIncludesFee = () => Transaction.TxBuyTotalIncludesFee;
+        // Single typed adapter replacing the former 7 ad-hoc Func<...> callbacks.
+        // See IBuyExecutionContext for rationale.
+        AddAssetDialog.BuyContext = new TransactionBuyContext(Transaction);
         AddAssetDialog.GetCashAccounts = () => CashAccounts;
         SellPanel.GetTxCommissionDiscountValue = () => Transaction.TxCommissionDiscountValue;
         SellPanel.GetTxFee = () => Transaction.TxFee;

@@ -418,7 +418,8 @@ public class TransactionDialogViewModelTests
             Mock.Of<ITransactionWorkflowService>(),
             Mock.Of<ICreditCardMutationWorkflowService>())
         {
-            GetTxFee = () => "abc",
+            // Migrated from GetTxFee Func to typed IBuyExecutionContext snapshot.
+            BuyContext = new StaticBuyContext(txFee: "abc"),
         };
 
         vm.AddAssetType = "stock";

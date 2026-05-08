@@ -138,7 +138,11 @@ public partial class TransactionDialogViewModel
             var deleteFailed = false;
             try
             {
-                var result = await _tradeDeletionWorkflowService.DeleteAsync(ToTradeDeletionRequest(oldRow));
+                // Pass EditReplace so the audit trail distinguishes this implicit
+                // delete from an explicit user delete (manual delete = "delete",
+                // edit flow = "edit-replace").
+                var result = await _tradeDeletionWorkflowService.DeleteAsync(
+                    ToTradeDeletionRequest(oldRow, TradeDeletionReason.EditReplace));
                 if (!result.Success && result.BlockedBySell)
                 {
                     TxError = L("Portfolio.Trade.DeleteBlockedBySell",
@@ -651,8 +655,16 @@ public partial class TransactionDialogViewModel
         // TransactionCompleted raised by ConfirmTx
     }
 
-    private static TradeDeletionRequest ToTradeDeletionRequest(TradeRowViewModel row) =>
-        new(row.Id, row.Type, row.Symbol, row.Quantity, row.PortfolioEntryId);
+    /// <summary>
+    /// Builds a deletion request for the given row. The optional <paramref name="reason"/>
+    /// drives the audit-log Action: defaults to <c>UserDelete</c> ("delete") for
+    /// explicit user-initiated deletions; pass <c>EditReplace</c> from the
+    /// edit-recreate flow so audit history can distinguish the two.
+    /// </summary>
+    private static TradeDeletionRequest ToTradeDeletionRequest(
+        TradeRowViewModel row,
+        TradeDeletionReason reason = TradeDeletionReason.UserDelete) =>
+        new(row.Id, row.Type, row.Symbol, row.Quantity, row.PortfolioEntryId, reason);
 
     /// <summary>
     /// H2 consolidation: every successful Confirm method previously ended

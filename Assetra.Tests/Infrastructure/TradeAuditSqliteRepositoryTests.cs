@@ -51,6 +51,30 @@ public sealed class TradeAuditSqliteRepositoryTests : IDisposable
         Assert.Equal("user-initiated delete", row.note);
     }
 
+    /// <summary>
+    /// Edit-replace path writes Action="edit-replace" (driven by
+    /// TradeDeletionRequest.Reason). Manual deletes write "delete". Audit
+    /// readers join on this column to distinguish user delete from implicit
+    /// edit delete.
+    /// </summary>
+    [Fact]
+    public async Task AppendAsync_StoresEditReplaceAction()
+    {
+        var sut = new TradeAuditSqliteRepository(_dbPath);
+        var entry = new TradeAuditEntry(
+            Id: Guid.NewGuid(),
+            TradeId: Guid.NewGuid(),
+            Action: "edit-replace",
+            TradeJson: "{}",
+            RecordedAt: DateTime.UtcNow,
+            Note: null);
+
+        await sut.AppendAsync(entry);
+
+        var row = Assert.Single(ReadAll());
+        Assert.Equal("edit-replace", row.action);
+    }
+
     [Fact]
     public async Task AppendAsync_AcceptsNullNote()
     {

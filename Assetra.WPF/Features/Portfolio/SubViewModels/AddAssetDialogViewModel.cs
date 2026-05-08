@@ -33,39 +33,17 @@ public partial class AddAssetDialogViewModel : ObservableObject
     public event EventHandler? AssetAdded;
 
     // ── Services injected from the parent for fields the Tx dialog shares ────────────
-    // These are accessed as delegates / properties so the sub-VM does not hold
-    // a back-reference to PortfolioViewModel (avoids circular coupling).
-
-    /// <summary>Returns the current commission-discount value from the Tx dialog (0–1).</summary>
-    public Func<decimal> GetTxCommissionDiscountValue { get; set; } = () => 1m;
-
-    /// <summary>Returns the raw TxFee string from the Tx dialog.</summary>
-    public Func<string> GetTxFee { get; set; } = () => string.Empty;
-
-    /// <summary>Returns whether TxBuyMetaOnly is set in the Tx dialog.</summary>
-    public Func<bool> GetTxBuyMetaOnly { get; set; } = () => false;
-
-    /// <summary>Returns the cash account ID to link to the buy (null = none).</summary>
-    public Func<Guid?> GetTxCashAccountId { get; set; } = () => null;
-
-    /// <summary>Returns whether to use a cash account for the buy.</summary>
-    public Func<bool> GetTxUseCashAccount { get; set; } = () => false;
+    // Replaces the former 7-Func service-locator pattern with a single typed
+    // context interface (IBuyExecutionContext). The sub-VM still doesn't hold a
+    // back-reference to PortfolioViewModel — production wiring uses a thin
+    // adapter (TransactionBuyContext) defined alongside the parent VM.
 
     /// <summary>
-    /// True when the Tx dialog is in "total cost" buy-price mode (vs "unit price"
-    /// mode). Combined with <see cref="GetTxBuyTotalIncludesFee"/> to decide
-    /// whether the recorded Trade should carry a separately-computed commission.
+    /// Read-only access to the transaction-dialog state needed during a buy.
+    /// Defaults to <see cref="NullBuyContext.Instance"/> so callers / fixtures
+    /// that don't exercise the buy path don't have to wire anything.
     /// </summary>
-    public Func<bool> GetTxBuyIsTotalMode { get; set; } = () => false;
-
-    /// <summary>
-    /// True when the user marked the total-cost field as already including the
-    /// broker commission. Defaults to true because most broker confirmations
-    /// quote the all-in number. When true (and we're in total mode), buy
-    /// recording forces commission=0 so the trade's CashAmount matches the
-    /// figure the user typed.
-    /// </summary>
-    public Func<bool> GetTxBuyTotalIncludesFee { get; set; } = () => true;
+    public IBuyExecutionContext BuyContext { get; set; } = NullBuyContext.Instance;
 
     public AddAssetDialogViewModel(
         IAddAssetWorkflowService addAssetWorkflow,
@@ -311,13 +289,13 @@ public partial class AddAssetDialogViewModel : ObservableObject
         // total cash out equals exactly what the user typed. Pass manualFee=0
         // here so the preview also reflects this (no double-fee illusion).
         decimal? overrideManualFee = null;
-        if (GetTxBuyIsTotalMode() && GetTxBuyTotalIncludesFee())
+        if (BuyContext.BuyIsTotalMode && BuyContext.BuyTotalIncludesFee)
         {
             overrideManualFee = 0m;
         }
         else
         {
-            var txFee = GetTxFee();
+            var txFee = BuyContext.TxFee;
             if (!string.IsNullOrWhiteSpace(txFee) &&
                 ParseHelpers.TryParseDecimal(txFee, out var manualFee) && manualFee >= 0)
             {
@@ -329,7 +307,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
             AddSymbol.Trim(),
             price,
             qty,
-            GetTxCommissionDiscountValue(),
+            BuyContext.CommissionDiscount,
             overrideManualFee));
 
         AddGrossAmount = preview.GrossAmount;
@@ -505,7 +483,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
     {
         // INVARIANT (Task 18 Option B): when TxBuyMetaOnly is true we MUST NOT write a
         // Trade row. Callers rely on this to pre-register symbols without affecting P&L.
-        if (GetTxBuyMetaOnly())
+        if (BuyContext.BuyMetaOnly)
         {
             AddError = string.Empty;
             if (string.IsNullOrWhiteSpace(AddSymbol))
@@ -543,25 +521,25 @@ public partial class AddAssetDialogViewModel : ObservableObject
         // Otherwise resolve manualFee from the optional TxFee field (may be
         // null → service auto-computes via TaiwanTradeFeeCalculator).
         decimal? manualFee;
-        if (GetTxBuyIsTotalMode() && GetTxBuyTotalIncludesFee())
+        if (BuyContext.BuyIsTotalMode && BuyContext.BuyTotalIncludesFee)
         {
             manualFee = 0m;
         }
         else
         {
-            var txFee = GetTxFee();
+            var txFee = BuyContext.TxFee;
             if (!TryResolveManualFee(txFee, out manualFee))
             { AddError = "手續費無效"; return; }
         }
 
-        var cashAccId = GetTxUseCashAccount() ? GetTxCashAccountId() : null;
+        var cashAccId = BuyContext.UseCashAccount ? BuyContext.CashAccountId : null;
         await _addAssetWorkflow.ExecuteStockBuyAsync(new StockBuyRequest(
             symbol,
             price,
             qty,
             AddBuyDate,
             cashAccId,
-            GetTxCommissionDiscountValue(),
+            BuyContext.CommissionDiscount,
             manualFee));
 
         // Cash balance reflects the Buy trade written above via the projection service;
