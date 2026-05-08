@@ -61,6 +61,28 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     /// </summary>
     public ObservableCollection<KpiCardVm> KpiCards { get; } = [];
 
+    // ── KPI selector dialog state ─────────────────────────────────────────
+
+    /// <summary>True while the gear-icon-triggered KPI edit dialog is open.</summary>
+    [ObservableProperty]
+    private bool _isKpiEditorOpen;
+
+    /// <summary>
+    /// Live editor list — one item per available metric, IsSelected toggled
+    /// by checkboxes. Snapshotted from the persisted selection on open;
+    /// flushed back to AppSettings on save.
+    /// </summary>
+    public ObservableCollection<KpiSelectionItemVm> KpiEditorItems { get; } = [];
+
+    [ObservableProperty]
+    private int _kpiSelectedCount;
+
+    [ObservableProperty]
+    private bool _canSaveKpiSelection;
+
+    public int KpiMinSelected => KpiMetricCatalog.MinSelected;
+    public int KpiMaxSelected => KpiMetricCatalog.MaxSelected;
+
     // ── Accordion collections ─────────────────────────────────────────────
 
     public ObservableCollection<AssetGroupVm> AssetGroups { get; } = [];
@@ -250,4 +272,47 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         value > 0m ? KpiTone.Up
         : value < 0m ? KpiTone.Down
         : KpiTone.Neutral;
+
+    // ── KPI editor commands ──────────────────────────────────────────────
+
+    [RelayCommand]
+    private void OpenKpiEditor()
+    {
+        var current = string.IsNullOrWhiteSpace(_settings?.Current.OverviewKpis)
+            ? KpiMetricCatalog.Default
+            : KpiMetricCatalog.ParseSelection(_settings.Current.OverviewKpis.Split(','));
+        var selectedSet = current.ToHashSet();
+
+        KpiEditorItems.Clear();
+        foreach (var info in KpiMetricCatalog.All)
+            KpiEditorItems.Add(new KpiSelectionItemVm(info, selectedSet.Contains(info.Id), RecomputeKpiEditorState));
+
+        RecomputeKpiEditorState();
+        IsKpiEditorOpen = true;
+    }
+
+    [RelayCommand]
+    private void CloseKpiEditor() => IsKpiEditorOpen = false;
+
+    [RelayCommand(CanExecute = nameof(CanSaveKpiSelection))]
+    private async Task SaveKpiSelectionAsync()
+    {
+        if (_settings is null) return;
+
+        var selected = KpiEditorItems.Where(i => i.IsSelected).Select(i => i.Id).ToList();
+        var serialised = KpiMetricCatalog.Serialize(selected);
+        var next = _settings.Current with { OverviewKpis = serialised };
+        await _settings.SaveAsync(next).ConfigureAwait(true);
+
+        IsKpiEditorOpen = false;
+        // RebuildKpiCards is triggered automatically by IAppSettingsService.Changed.
+    }
+
+    private void RecomputeKpiEditorState()
+    {
+        KpiSelectedCount = KpiEditorItems.Count(i => i.IsSelected);
+        CanSaveKpiSelection = KpiSelectedCount >= KpiMetricCatalog.MinSelected
+            && KpiSelectedCount <= KpiMetricCatalog.MaxSelected;
+        SaveKpiSelectionCommand.NotifyCanExecuteChanged();
+    }
 }

@@ -5,6 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel}}"
     d:DesignHeight="800"
     d:DesignWidth="900"
@@ -14,8 +16,23 @@
     <Grid Style="{StaticResource PageRootGrid}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+
+        <!--  Gear icon to open the KPI selector dialog  -->
+        <Button
+            Grid.Row="0"
+            Width="32"
+            Height="32"
+            Margin="0,0,0,8"
+            Padding="0"
+            HorizontalAlignment="Right"
+            Command="{Binding OpenKpiEditorCommand}"
+            Style="{StaticResource AppIconButton}"
+            ToolTip="{DynamicResource Settings.OverviewKpis.Title}">
+            <ds:AppIcon Symbol="Settings24" FontSize="{StaticResource Font.Size.Md}" />
+        </Button>
 
         <!--
             KPI Bar — driven by AppSettings.OverviewKpis. The user picks
@@ -23,7 +40,7 @@
             renders whatever the ViewModel emits.
         -->
         <ItemsControl
-            Grid.Row="0"
+            Grid.Row="1"
             Margin="0,0,0,16"
             ItemsSource="{Binding KpiCards}">
             <ItemsControl.ItemsPanel>
@@ -71,7 +88,7 @@
 
         <!--  ── Accordion  ───────────────────────────────────────────────────  -->
         <ScrollViewer
-            Grid.Row="1"
+            Grid.Row="2"
             Margin="0"
             VerticalScrollBarVisibility="Auto">
             <StackPanel>
@@ -261,6 +278,112 @@
 
             </StackPanel>
         </ScrollViewer>
+
+        <!--  ── KPI selector dialog ──────────────────────────────────────  -->
+        <Grid
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            behaviors:EscapeKeyCommandBehavior.Command="{Binding CloseKpiEditorCommand}"
+            Visibility="{Binding IsKpiEditorOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <!--  Backdrop  -->
+            <Border
+                Background="{DynamicResource AppModalOverlay}"
+                MouseDown="KpiEditorBackdrop_MouseDown" />
+            <!--  Card  -->
+            <Border
+                MaxWidth="520"
+                MaxHeight="640"
+                Margin="24"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Style="{StaticResource AppDialogShell}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!--  Header  -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Lg}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Settings.OverviewKpis.Title}" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Settings.OverviewKpis.Description}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <!--  Checkbox list  -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding KpiEditorItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox
+                                        Margin="0,4"
+                                        IsChecked="{Binding IsSelected, Mode=TwoWay}">
+                                        <StackPanel>
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Sm}"
+                                                FontWeight="Medium"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding LabelKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                            <TextBlock
+                                                Margin="0,2,0,0"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{Binding DescriptionKey, Converter={StaticResource ResourceKeyToStringConverter}}"
+                                                TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </CheckBox>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!--  Footer  -->
+                    <DockPanel Grid.Row="2" Margin="0,16,0,0" LastChildFill="False">
+                        <TextBlock
+                            DockPanel.Dock="Left"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}">
+                            <Run Text="{Binding KpiSelectedCount, Mode=OneWay}" />
+                            <Run Text=" / " />
+                            <Run Text="{Binding KpiMaxSelected, Mode=OneWay}" />
+                            <Run Text=" (min " />
+                            <Run Text="{Binding KpiMinSelected, Mode=OneWay}" />
+                            <Run Text=")" />
+                        </TextBlock>
+                        <Button
+                            Height="32"
+                            MinHeight="32"
+                            Margin="0,0,0,0"
+                            Padding="14,0"
+                            DockPanel.Dock="Right"
+                            Command="{Binding SaveKpiSelectionCommand}"
+                            Style="{StaticResource AppPrimaryButton}">
+                            <TextBlock Style="{StaticResource AppButtonText}" Text="{DynamicResource Common.Save}" />
+                        </Button>
+                        <Button
+                            Height="32"
+                            MinHeight="32"
+                            Margin="0,0,8,0"
+                            Padding="14,0"
+                            DockPanel.Dock="Right"
+                            Command="{Binding CloseKpiEditorCommand}"
+                            Style="{StaticResource AppSecondaryButton}">
+                            <TextBlock Style="{StaticResource AppButtonText}" Text="{DynamicResource Common.Cancel}" />
+                        </Button>
+                    </DockPanel>
+                </Grid>
+            </Border>
+        </Grid>
 
     </Grid>
 </UserControl>
