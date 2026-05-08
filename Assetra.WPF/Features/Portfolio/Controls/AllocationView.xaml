@@ -198,12 +198,16 @@
                     </Grid>
                 </Border>
 
-                <!--  Right: asset list DataGrid  -->
-                <DataGrid
+                <!--  Right: asset list DataGrid wrapped in FormCard for visual consistency with the left treemap card  -->
+                <Border
                     Grid.Column="1"
                     Margin="8,16,16,16"
+                    Padding="0"
+                    Style="{StaticResource FormCard}"
+                    ClipToBounds="True">
+                <DataGrid
                     AutoGenerateColumns="False"
-                    Background="{DynamicResource AppBackground}"
+                    Background="Transparent"
                     BorderThickness="0"
                     CanUserAddRows="False"
                     CanUserDeleteRows="False"
@@ -396,6 +400,7 @@
 
                     </DataGrid.Columns>
                 </DataGrid>
+                </Border>
             </Grid>
 
             <!-- Keep one allocation overview layout active. The previous width-based
