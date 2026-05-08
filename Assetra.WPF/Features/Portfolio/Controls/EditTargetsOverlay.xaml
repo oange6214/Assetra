@@ -119,14 +119,14 @@
                             Padding="12,0"
                             Command="{Binding CancelEditTargetsCommand}"
                             Style="{StaticResource AppSecondaryButton}">
-                            <TextBlock Text="{DynamicResource Common.Cancel}" />
+                            <TextBlock Style="{StaticResource AppButtonText}" Text="{DynamicResource Common.Cancel}" />
                         </Button>
                         <Button
                             Height="28"
                             Padding="12,0"
                             Command="{Binding SaveTargetsCommand}"
                             Style="{StaticResource AppPrimaryButton}">
-                            <TextBlock Text="{DynamicResource Common.Save}" />
+                            <TextBlock Style="{StaticResource AppButtonText}" Text="{DynamicResource Common.Save}" />
                         </Button>
                     </StackPanel>
                 </Border>

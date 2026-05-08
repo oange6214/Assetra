@@ -69,24 +69,16 @@
             <!--  Floating Add Record button overlaid on the tab header strip  -->
             <Button
                 Height="36"
-                Margin="0,4,12,0"
+                Margin="0,8,12,8"
                 Padding="14,0"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
                 Panel.ZIndex="10"
                 Command="{Binding AddRecordCommand}"
                 Style="{StaticResource AppPrimaryButton}">
-                <StackPanel Orientation="Horizontal">
-                    <ds:AppIcon
-                        Margin="0,0,4,0"
-                        VerticalAlignment="Center"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                        Symbol="Add24" />
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                        Text="{DynamicResource Portfolio.AddRecord}" />
+                <StackPanel Style="{StaticResource AppButtonContent}">
+                    <ds:AppIcon Style="{StaticResource AppButtonLeadingIcon}" Symbol="Add24" />
+                    <TextBlock Style="{StaticResource AppButtonText}" Text="{DynamicResource Portfolio.AddRecord}" />
                 </StackPanel>
             </Button>
         </Grid>

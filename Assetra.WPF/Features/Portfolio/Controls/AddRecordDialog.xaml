@@ -616,9 +616,9 @@
                                             Padding="14,0"
                                             Command="{Binding ConfirmTxCommand}"
                                             Style="{StaticResource AppPrimaryButton}">
-                                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}">
+                                            <TextBlock>
                                                 <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
+                                                    <Style BasedOn="{StaticResource AppButtonText}" TargetType="TextBlock">
                                                         <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.Confirm}" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsEditMode}" Value="True">
@@ -703,9 +703,9 @@
                                     Padding="14,0"
                                     Command="{Binding ConfirmTxCommand}"
                                     Style="{StaticResource AppPrimaryButton}">
-                                    <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}">
+                                    <TextBlock>
                                         <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
+                                            <Style BasedOn="{StaticResource AppButtonText}" TargetType="TextBlock">
                                                 <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.Confirm}" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsEditMode}" Value="True">
