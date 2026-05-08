@@ -29,6 +29,9 @@
     <sys:String x:Key="Nav.Settings">設定</sys:String>
     <sys:String x:Key="Nav.Overview">總覽</sys:String>
     <sys:String x:Key="Nav.Assets">資產</sys:String>
+    <sys:String x:Key="Nav.TransactionLog">交易記錄</sys:String>
+    <sys:String x:Key="Nav.CashAccounts">現金帳戶</sys:String>
+    <sys:String x:Key="Nav.Liabilities">負債</sys:String>
     <sys:String x:Key="Nav.Cashflow">收支</sys:String>
     <sys:String x:Key="Nav.Insights">分析報表</sys:String>
     <sys:String x:Key="Nav.Planning">規劃</sys:String>

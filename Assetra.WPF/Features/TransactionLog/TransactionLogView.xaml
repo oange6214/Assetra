@@ -1,0 +1,25 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.TransactionLog.TransactionLogView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
+    Background="{DynamicResource AppBackground}"
+    mc:Ignorable="d">
+
+    <!--
+        Top-level transaction log view. Hosts the existing TradesTabPanel
+        UserControl from Features/Portfolio/Controls/. DataContext flows
+        in from the NavRail data template as PortfolioViewModel, so the
+        TabPanel's bindings (Trades collection, filter commands, etc.)
+        resolve identically to when it lived inside the Portfolio tab.
+
+        No detail overlay is needed — TradesTabPanel is read-only-ish
+        (filter + sort + scroll). Per-row actions stay in the Portfolio
+        page where the AddRecord / Edit dialogs already live.
+    -->
+    <pcontrols:TradesTabPanel />
+</UserControl>

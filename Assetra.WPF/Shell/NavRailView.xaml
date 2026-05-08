@@ -22,6 +22,7 @@
     xmlns:settings="clr-namespace:Assetra.WPF.Features.Settings"
     xmlns:shell="clr-namespace:Assetra.WPF.Shell"
     xmlns:trends="clr-namespace:Assetra.WPF.Features.Trends"
+    xmlns:txlog="clr-namespace:Assetra.WPF.Features.TransactionLog"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     d:DataContext="{d:DesignInstance Type={x:Type shell:MainViewModel},
                                      IsDesignTimeCreatable=False}"
@@ -223,6 +224,17 @@
 
         <DataTemplate x:Key="SettingsContentTemplate">
             <settings:SettingsView DataContext="{Binding Settings}" />
+        </DataTemplate>
+
+        <!--
+            Top-level entries promoted from inside the Portfolio tab strip
+            (Option B + Portfolio-tabs refactor). All three reuse the
+            existing Portfolio sub-panels with PortfolioViewModel as
+            DataContext so the legacy bindings (Trades, Account.*, Liability.*)
+            keep working without a sub-VM extraction.
+        -->
+        <DataTemplate x:Key="TransactionLogContentTemplate">
+            <txlog:TransactionLogView DataContext="{Binding Portfolio}" />
         </DataTemplate>
     </UserControl.Resources>
 
@@ -546,6 +558,23 @@
                         </ToggleButton>
 
                         <ToggleButton
+                            x:Name="NavTransactionLog"
+                            Click="NavItem_Click"
+                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=TransactionLog, Mode=OneWay}"
+                            Style="{StaticResource NavRailItemButton}"
+                            Tag="{x:Static shell:NavSection.TransactionLog}"
+                            ToolTip="{DynamicResource Nav.TransactionLog}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ds:AppIcon Symbol="DocumentBulletList24" />
+                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.TransactionLog}" />
+                            </Grid>
+                        </ToggleButton>
+
+                        <ToggleButton
                             x:Name="NavAlerts"
                             Click="NavItem_Click"
                             IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Alerts, Mode=OneWay}"
@@ -726,6 +755,9 @@
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Settings}">
                             <Setter Property="ContentTemplate" Value="{StaticResource SettingsContentTemplate}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.TransactionLog}">
+                            <Setter Property="ContentTemplate" Value="{StaticResource TransactionLogContentTemplate}" />
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
