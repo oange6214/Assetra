@@ -1,0 +1,26 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.CashAccounts.CashAccountsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
+    Background="{DynamicResource AppBackground}"
+    mc:Ignorable="d">
+
+    <!--
+        Top-level cash accounts view. Hosts the existing AccountsTabPanel
+        from Features/Portfolio/Controls/. DataContext flows in as
+        PortfolioViewModel from the NavRail data template.
+
+        NOTE (deferred): the cash detail overlay (HasSelectedCashRow)
+        currently lives inside PortfolioView and only shows when the user
+        is on the Portfolio page. Clicking a cash row from this top-level
+        view sets PortfolioViewModel.SelectedCashRow but the overlay does
+        not appear until the user navigates to Portfolio → Cash tab.
+        Promoting the overlay to shell level is a separate task.
+    -->
+    <pcontrols:AccountsTabPanel />
+</UserControl>

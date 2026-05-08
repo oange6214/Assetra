@@ -1,0 +1,26 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Liabilities.LiabilitiesView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
+    Background="{DynamicResource AppBackground}"
+    mc:Ignorable="d">
+
+    <!--
+        Top-level liabilities view (loans + credit cards). Hosts the
+        existing LiabilityTabPanel from Features/Portfolio/Controls/.
+        DataContext flows in as PortfolioViewModel.
+
+        NOTE (deferred): the liability detail overlay
+        (HasSelectedLiabilityRow) currently lives inside PortfolioView.
+        Same caveat as CashAccountsView — clicking a liability row
+        from this top-level view does not show the overlay until the
+        user navigates to Portfolio → Liability tab. Shell-level
+        overlay promotion is a separate task.
+    -->
+    <pcontrols:LiabilityTabPanel />
+</UserControl>

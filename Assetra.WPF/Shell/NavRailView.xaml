@@ -23,6 +23,8 @@
     xmlns:shell="clr-namespace:Assetra.WPF.Shell"
     xmlns:trends="clr-namespace:Assetra.WPF.Features.Trends"
     xmlns:txlog="clr-namespace:Assetra.WPF.Features.TransactionLog"
+    xmlns:cashaccts="clr-namespace:Assetra.WPF.Features.CashAccounts"
+    xmlns:liabs="clr-namespace:Assetra.WPF.Features.Liabilities"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     d:DataContext="{d:DesignInstance Type={x:Type shell:MainViewModel},
                                      IsDesignTimeCreatable=False}"
@@ -236,6 +238,14 @@
         <DataTemplate x:Key="TransactionLogContentTemplate">
             <txlog:TransactionLogView DataContext="{Binding Portfolio}" />
         </DataTemplate>
+
+        <DataTemplate x:Key="CashAccountsContentTemplate">
+            <cashaccts:CashAccountsView DataContext="{Binding Portfolio}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="LiabilitiesContentTemplate">
+            <liabs:LiabilitiesView DataContext="{Binding Portfolio}" />
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid Background="{DynamicResource AppBackground}">
@@ -439,6 +449,40 @@
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="Briefcase24" />
                                 <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Portfolio}" />
+                            </Grid>
+                        </ToggleButton>
+
+                        <ToggleButton
+                            x:Name="NavCashAccounts"
+                            Click="NavItem_Click"
+                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=CashAccounts, Mode=OneWay}"
+                            Style="{StaticResource NavRailItemButton}"
+                            Tag="{x:Static shell:NavSection.CashAccounts}"
+                            ToolTip="{DynamicResource Nav.CashAccounts}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ds:AppIcon Symbol="Money24" />
+                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.CashAccounts}" />
+                            </Grid>
+                        </ToggleButton>
+
+                        <ToggleButton
+                            x:Name="NavLiabilities"
+                            Click="NavItem_Click"
+                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Liabilities, Mode=OneWay}"
+                            Style="{StaticResource NavRailItemButton}"
+                            Tag="{x:Static shell:NavSection.Liabilities}"
+                            ToolTip="{DynamicResource Nav.Liabilities}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ds:AppIcon Symbol="Cut24" />
+                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Liabilities}" />
                             </Grid>
                         </ToggleButton>
 
@@ -758,6 +802,12 @@
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.TransactionLog}">
                             <Setter Property="ContentTemplate" Value="{StaticResource TransactionLogContentTemplate}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.CashAccounts}">
+                            <Setter Property="ContentTemplate" Value="{StaticResource CashAccountsContentTemplate}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Liabilities}">
+                            <Setter Property="ContentTemplate" Value="{StaticResource LiabilitiesContentTemplate}" />
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
