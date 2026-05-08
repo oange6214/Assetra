@@ -573,6 +573,11 @@
                                     Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Tx.Delete}" />
                                 </Button>
+                                <!--
+                                    「刪除此筆並新增」只在 meta-only 編輯（Sell / Transfer /
+                                    legacy Buy/StockDiv）時才有意義 — 其他類型直接按「儲存」
+                                    就會自動覆寫原紀錄，不需要二次選擇。
+                                -->
                                 <Button
                                     Height="30"
                                     Margin="8,0,0,0"
@@ -580,7 +585,7 @@
                                     Command="{Binding CreateRevisionCommand}"
                                     DockPanel.Dock="Left"
                                     Style="{StaticResource AppSecondaryButton}"
-                                    Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    Visibility="{Binding IsEditingMetaOnly, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.CreateRevision}" />
                                 </Button>
                                 <!--  取消 / 儲存（靠右）  -->
@@ -660,12 +665,14 @@
                                     Style="{StaticResource AppDangerButton}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Tx.Delete}" />
                                 </Button>
+                                <!--  Same meta-only gate as the desktop layout above.  -->
                                 <Button
                                     Height="30"
                                     Margin="0,0,0,8"
                                     Padding="14,0"
                                     Command="{Binding CreateRevisionCommand}"
-                                    Style="{StaticResource AppSecondaryButton}">
+                                    Style="{StaticResource AppSecondaryButton}"
+                                    Visibility="{Binding IsEditingMetaOnly, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Record.CreateRevision}" />
                                 </Button>
                             </StackPanel>
