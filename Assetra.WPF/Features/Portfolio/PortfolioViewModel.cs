@@ -1,8 +1,6 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Windows.Data;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Application.Portfolio.Services;
@@ -15,10 +13,7 @@ using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LiveChartsCore;
-using LiveChartsCore.SkiaSharpView;
 using Serilog;
-using SkiaSharp;
 
 namespace Assetra.WPF.Features.Portfolio;
 
@@ -402,9 +397,11 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         AddAssetDialog.BuyContext = new TransactionBuyContext(Transaction);
         AddAssetDialog.GetCashAccounts = () => CashAccounts;
         // Multi-currency default: new account creation defaults to the user's
-        // primary currency from Settings instead of hard-coded "TWD".
+        // preferred display currency from Settings instead of hard-coded "TWD".
+        // (AppSettings field is PreferredCurrency; SettingsViewModel exposes it
+        // as PrimaryCurrency, but here we read the model directly.)
         AddAssetDialog.GetDefaultCurrency = () =>
-            _settingsService?.Current.PrimaryCurrency ?? "TWD";
+            _settingsService?.Current.PreferredCurrency ?? "TWD";
         SellPanel.GetTxCommissionDiscountValue = () => Transaction.TxCommissionDiscountValue;
         SellPanel.GetTxFee = () => Transaction.TxFee;
 
@@ -1101,8 +1098,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
     private static bool IsOnUiThreadOrTestEnvironment()
     {
         var app = System.Windows.Application.Current;
-        if (app is null) return true;                  // no Application at all
-        if (app.GetType() == typeof(System.Windows.Application)) return true; // bare-base test fake
+        if (app is null)
+            return true;                  // no Application at all
+        if (app.GetType() == typeof(System.Windows.Application))
+            return true; // bare-base test fake
         return app.Dispatcher.CheckAccess();           // real app subclass — must be on dispatcher
     }
 }
