@@ -31,17 +31,17 @@
                             CornerRadius="2" />
                     </Grid>
                     <ControlTemplate.Triggers>
+                        <!--
+                            Indeterminate: WPF auto-animates PART_Indicator
+                            (clipped to Track) when IsIndeterminate=True. We
+                            keep the simple solid-accent indicator — gradient
+                            sweep dropped because Binding.Source cannot accept
+                            DynamicResource and a hard-coded gradient would
+                            break dark-theme support.
+                        -->
                         <Trigger Property="IsIndeterminate" Value="True">
-                            <Setter TargetName="PART_Indicator" Property="Background" Value="{x:Null}" />
-                            <Setter TargetName="Track" Property="Background">
-                                <Setter.Value>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                        <GradientStop Offset="0" Color="{Binding Source={DynamicResource AppBorderLight}, Path=Color}" />
-                                        <GradientStop Offset="0.5" Color="{Binding Source={DynamicResource AppAccent}, Path=Color}" />
-                                        <GradientStop Offset="1" Color="{Binding Source={DynamicResource AppBorderLight}, Path=Color}" />
-                                    </LinearGradientBrush>
-                                </Setter.Value>
-                            </Setter>
+                            <Setter TargetName="PART_Indicator" Property="Width" Value="80" />
+                            <Setter TargetName="PART_Indicator" Property="Opacity" Value="0.85" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
