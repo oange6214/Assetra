@@ -53,17 +53,13 @@
                     <pcontrols:PositionsTabPanel />
                 </TabItem>
 
-                <TabItem Header="{DynamicResource Portfolio.Tab.Cash}" Tag="{x:Static vm:PortfolioTab.Accounts}">
-                    <pcontrols:AccountsTabPanel />
-                </TabItem>
-
-                <TabItem Header="{DynamicResource Portfolio.Tab.Liability}" Tag="{x:Static vm:PortfolioTab.Liability}">
-                    <pcontrols:LiabilityTabPanel />
-                </TabItem>
-
-                <TabItem Header="{DynamicResource Portfolio.Tab.Trades}" Tag="{x:Static vm:PortfolioTab.Trades}">
-                    <pcontrols:TradesTabPanel />
-                </TabItem>
+                <!--
+                    Cash / Liability / Trades tabs removed — those panels now have
+                    their own top-level nav entries (CashAccounts, Liabilities,
+                    TransactionLog) and shell-level detail overlays. Keeping them
+                    here would duplicate navigation and confuse users about which
+                    surface owns the data.
+                -->
             </TabControl>
 
             <!--
@@ -834,53 +830,10 @@
             </Border>
         </Grid>
 
-        <!--  ── Dialog overlays ──  -->
-        <!--  AddRecordDialog moved to MainWindow shell so it renders on every page.  -->
-        <pcontrols:AddAssetDialog Grid.RowSpan="2" Panel.ZIndex="200" />
-        <pcontrols:EditAssetDialog
-            Grid.RowSpan="2"
-            Panel.ZIndex="205"
-            DataContext="{Binding Account}" />
-        <!--  ── Confirm dialog ──  -->
-        <Grid
-            Grid.RowSpan="2"
-            Panel.ZIndex="220"
-            Style="{StaticResource AppDialogOverlay}"
-            Visibility="{Binding IsConfirmDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <Border
-                Style="{StaticResource AppDestructiveDialogShell}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                beh:EscapeKeyCommandBehavior.Command="{Binding ConfirmDialogNoCommand}">
-                <StackPanel Margin="24,20">
-                    <TextBlock
-                        Margin="0,0,0,4"
-                        Style="{StaticResource AppDialogTitle}"
-                        Text="{DynamicResource Portfolio.Confirm.Title}" />
-                    <TextBlock
-                        Margin="0,0,0,20"
-                        Style="{StaticResource AppDialogSubtitle}"
-                        Text="{Binding ConfirmDialogMessage}"
-                        TextWrapping="Wrap" />
-                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                        <Button
-                            Height="36"
-                            Margin="0,0,8,0"
-                            Padding="14,0"
-                            Command="{Binding ConfirmDialogNoCommand}"
-                            Style="{StaticResource AppSecondaryButton}">
-                            <TextBlock Text="{DynamicResource Common.Cancel}" />
-                        </Button>
-                        <Button
-                            Height="36"
-                            Padding="14,0"
-                            Command="{Binding ConfirmDialogYesCommand}"
-                            Style="{StaticResource AppDangerButton}">
-                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Confirm.Delete}" />
-                        </Button>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Grid>
+        <!--
+            AddAssetDialog / EditAssetDialog / ConfirmDialog moved to
+            MainWindow shell so they render on every page. AddRecordDialog
+            was already moved earlier.
+        -->
     </Grid>
 </UserControl>

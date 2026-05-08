@@ -5,6 +5,7 @@
     xmlns:chrome="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:beh="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:shell="clr-namespace:Assetra.WPF.Shell"
@@ -1402,6 +1403,70 @@
             Grid.RowSpan="3"
             Panel.ZIndex="210"
             DataContext="{Binding Portfolio.Transaction}" />
+
+        <!--
+            AddAssetDialog (新增帳戶 / 新增負債) — promoted from PortfolioView so
+            users on CashAccounts / Liabilities top-level pages can also create.
+        -->
+        <pcontrols:AddAssetDialog
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="200"
+            DataContext="{Binding Portfolio}" />
+
+        <!--  EditAssetDialog (編輯現有資產) — same shell promotion as above.  -->
+        <pcontrols:EditAssetDialog
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="205"
+            DataContext="{Binding Portfolio.Account}" />
+
+        <!--
+            Shell-level confirm dialog (刪除確認). Promoted so destructive
+            actions triggered from any page show their confirmation properly.
+        -->
+        <Grid
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="220"
+            DataContext="{Binding Portfolio}"
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsConfirmDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                beh:EscapeKeyCommandBehavior.Command="{Binding ConfirmDialogNoCommand}"
+                Style="{StaticResource AppDestructiveDialogShell}">
+                <StackPanel Margin="24,20">
+                    <TextBlock
+                        Margin="0,0,0,4"
+                        Style="{StaticResource AppDialogTitle}"
+                        Text="{DynamicResource Portfolio.Confirm.Title}" />
+                    <TextBlock
+                        Margin="0,0,0,20"
+                        Style="{StaticResource AppDialogSubtitle}"
+                        Text="{Binding ConfirmDialogMessage}"
+                        TextWrapping="Wrap" />
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <Button
+                            Height="36"
+                            Margin="0,0,8,0"
+                            Padding="14,0"
+                            Command="{Binding ConfirmDialogNoCommand}"
+                            Style="{StaticResource AppSecondaryButton}">
+                            <TextBlock Text="{DynamicResource Common.Cancel}" />
+                        </Button>
+                        <Button
+                            Height="36"
+                            Padding="14,0"
+                            Command="{Binding ConfirmDialogYesCommand}"
+                            Style="{StaticResource AppDangerButton}">
+                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.Confirm.Delete}" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
 
     </Grid>
 </Window>
