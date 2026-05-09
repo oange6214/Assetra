@@ -11,6 +11,9 @@ namespace Assetra.Tests.Infrastructure;
 /// </summary>
 public class BalanceQueryServiceTests
 {
+    /// <summary>M1 — service defaults to TWD when no <see cref="IAssetRepository"/> is wired.</summary>
+    private static Money TWD(decimal amount) => new(amount, "TWD");
+
     private static Trade Buy(Guid cashId, decimal price, int qty, decimal commission = 0m)
         => new(Guid.NewGuid(), "2330", "TWSE", "TSMC", TradeType.Buy,
                DateTime.Today, price, qty, null, null,
@@ -82,7 +85,7 @@ public class BalanceQueryServiceTests
     {
         var svc = Create();
         var bal = await svc.GetCashBalanceAsync(Guid.NewGuid());
-        Assert.Equal(0m, bal);
+        Assert.Equal(TWD(0m), bal);
     }
 
     [Fact]
@@ -90,7 +93,7 @@ public class BalanceQueryServiceTests
     {
         var id = Guid.NewGuid();
         var svc = Create(Deposit(id, 100_000m), Withdrawal(id, 30_000m), Deposit(id, 5_000m));
-        Assert.Equal(75_000m, await svc.GetCashBalanceAsync(id));
+        Assert.Equal(TWD(75_000m), await svc.GetCashBalanceAsync(id));
     }
 
     [Fact]
@@ -98,7 +101,7 @@ public class BalanceQueryServiceTests
     {
         var id = Guid.NewGuid();
         var svc = Create(Income(id, 60_000m), Income(id, 12_000m));
-        Assert.Equal(72_000m, await svc.GetCashBalanceAsync(id));
+        Assert.Equal(TWD(72_000m), await svc.GetCashBalanceAsync(id));
     }
 
     [Fact]
@@ -106,7 +109,7 @@ public class BalanceQueryServiceTests
     {
         var id = Guid.NewGuid();
         var svc = Create(CashDividend(id, 2_500m));
-        Assert.Equal(2_500m, await svc.GetCashBalanceAsync(id));
+        Assert.Equal(TWD(2_500m), await svc.GetCashBalanceAsync(id));
     }
 
     [Fact]
@@ -115,7 +118,7 @@ public class BalanceQueryServiceTests
         var id = Guid.NewGuid();
         var svc = Create(Deposit(id, 1_000_000m), Buy(id, 500m, 1000, commission: 713m));
         // 1_000_000 − (500×1000 + 713) = 499_287
-        Assert.Equal(499_287m, await svc.GetCashBalanceAsync(id));
+        Assert.Equal(TWD(499_287m), await svc.GetCashBalanceAsync(id));
     }
 
     [Fact]
@@ -124,7 +127,7 @@ public class BalanceQueryServiceTests
         var id = Guid.NewGuid();
         var svc = Create(Sell(id, 600m, 1000, commission: 855m));
         // +(600×1000 − 855) = 599_145
-        Assert.Equal(599_145m, await svc.GetCashBalanceAsync(id));
+        Assert.Equal(TWD(599_145m), await svc.GetCashBalanceAsync(id));
     }
 
     // ─── Cash balance: transfers ─────────────────────────────────────────
@@ -137,8 +140,8 @@ public class BalanceQueryServiceTests
         var svc = Create(
             Deposit(src, 100_000m),
             Transfer(src, dst, 40_000m));
-        Assert.Equal(60_000m, await svc.GetCashBalanceAsync(src));
-        Assert.Equal(40_000m, await svc.GetCashBalanceAsync(dst));
+        Assert.Equal(TWD(60_000m), await svc.GetCashBalanceAsync(src));
+        Assert.Equal(TWD(40_000m), await svc.GetCashBalanceAsync(dst));
     }
 
     [Fact]
@@ -147,7 +150,7 @@ public class BalanceQueryServiceTests
         var a = Guid.NewGuid();
         var b = Guid.NewGuid();
         var svc = Create(Deposit(a, 100_000m), Withdrawal(a, 20_000m));
-        Assert.Equal(0m, await svc.GetCashBalanceAsync(b));
+        Assert.Equal(TWD(0m), await svc.GetCashBalanceAsync(b));
     }
 
     // ─── Liability projection ────────────────────────────────────────────
@@ -166,8 +169,8 @@ public class BalanceQueryServiceTests
         var cash = Guid.NewGuid();
         var svc = Create(LoanBorrow(cash, "台新信貸", 2_000_000m));
         var snap = await svc.GetLiabilitySnapshotAsync("台新信貸");
-        Assert.Equal(2_000_000m, snap.Balance);
-        Assert.Equal(2_000_000m, snap.OriginalAmount);
+        Assert.Equal(TWD(2_000_000m), snap.Balance);
+        Assert.Equal(TWD(2_000_000m), snap.OriginalAmount);
     }
 
     [Fact]
@@ -178,8 +181,8 @@ public class BalanceQueryServiceTests
             LoanBorrow(cash, "台新信貸", 2_000_000m),
             LoanRepay(cash, "台新信貸", principal: 50_000m, interest: 5_000m));
         var snap = await svc.GetLiabilitySnapshotAsync("台新信貸");
-        Assert.Equal(1_950_000m, snap.Balance);
-        Assert.Equal(2_000_000m, snap.OriginalAmount); // interest never affects original
+        Assert.Equal(TWD(1_950_000m), snap.Balance);
+        Assert.Equal(TWD(2_000_000m), snap.OriginalAmount); // interest never affects original
     }
 
     [Fact]
@@ -192,8 +195,8 @@ public class BalanceQueryServiceTests
             LoanRepay(cash, "台新信貸", principal: 100_000m, interest: 10_000m),
             LoanRepay(cash, "台新信貸", principal: 200_000m, interest: 8_000m));
         var snap = await svc.GetLiabilitySnapshotAsync("台新信貸");
-        Assert.Equal(1_200_000m, snap.Balance);         // 1.5M − 300k principal
-        Assert.Equal(1_500_000m, snap.OriginalAmount);  // 2× borrow
+        Assert.Equal(TWD(1_200_000m), snap.Balance);         // 1.5M − 300k principal
+        Assert.Equal(TWD(1_500_000m), snap.OriginalAmount);  // 2× borrow
     }
 
     [Fact]
@@ -207,7 +210,7 @@ public class BalanceQueryServiceTests
             Principal: null, InterestPaid: null);
         var svc = Create(LoanBorrow(cash, "台新信貸", 100_000m), legacyRepay);
         var snap = await svc.GetLiabilitySnapshotAsync("台新信貸");
-        Assert.Equal(70_000m, snap.Balance);
+        Assert.Equal(TWD(70_000m), snap.Balance);
     }
 
     // ─── Cash/Liability cross effects ────────────────────────────────────
@@ -220,7 +223,7 @@ public class BalanceQueryServiceTests
             LoanBorrow(cash, "台新信貸", 2_000_000m),
             LoanRepay(cash, "台新信貸", principal: 50_000m, interest: 5_000m));
         // +2_000_000 − (50_000+5_000) = 1_945_000
-        Assert.Equal(1_945_000m, await svc.GetCashBalanceAsync(cash));
+        Assert.Equal(TWD(1_945_000m), await svc.GetCashBalanceAsync(cash));
     }
 
     [Fact]
@@ -232,7 +235,7 @@ public class BalanceQueryServiceTests
             Deposit(cash, 80_000m),
             CreditCardPayment(card, "玉山 Pi 卡", cash, 12_345m));
 
-        Assert.Equal(67_655m, await svc.GetCashBalanceAsync(cash));
+        Assert.Equal(TWD(67_655m), await svc.GetCashBalanceAsync(cash));
     }
 
     // ─── Bulk queries ────────────────────────────────────────────────────
@@ -248,9 +251,9 @@ public class BalanceQueryServiceTests
             Income(b, 50_000m),
             Transfer(a, c, 20_000m));
         var all = await svc.GetAllCashBalancesAsync();
-        Assert.Equal(80_000m, all[a]);
-        Assert.Equal(50_000m, all[b]);
-        Assert.Equal(20_000m, all[c]);
+        Assert.Equal(TWD(80_000m), all[a]);
+        Assert.Equal(TWD(50_000m), all[b]);
+        Assert.Equal(TWD(20_000m), all[c]);
     }
 
     [Fact]
@@ -262,8 +265,8 @@ public class BalanceQueryServiceTests
             LoanRepay(cash, "台新信貸", principal: 50_000m, interest: 3_000m),
             LoanBorrow(cash, "玉山信貸", 300_000m));
         var all = await svc.GetAllLiabilitySnapshotsAsync();
-        Assert.Equal(new LiabilitySnapshot(950_000m, 1_000_000m), all["台新信貸"]);
-        Assert.Equal(new LiabilitySnapshot(300_000m,   300_000m), all["玉山信貸"]);
+        Assert.Equal(new LiabilitySnapshot(TWD(950_000m), TWD(1_000_000m)), all["台新信貸"]);
+        Assert.Equal(new LiabilitySnapshot(TWD(300_000m), TWD(300_000m)), all["玉山信貸"]);
     }
 
     [Fact]
@@ -277,8 +280,8 @@ public class BalanceQueryServiceTests
             CreditCardPayment(card, "玉山 Pi 卡", cash, 3_500m));
 
         var snap = await svc.GetLiabilitySnapshotAsync("玉山 Pi 卡");
-        Assert.Equal(6_500m, snap.Balance);
-        Assert.Equal(10_000m, snap.OriginalAmount);
+        Assert.Equal(TWD(6_500m), snap.Balance);
+        Assert.Equal(TWD(10_000m), snap.OriginalAmount);
     }
 
     [Fact]
@@ -292,8 +295,8 @@ public class BalanceQueryServiceTests
             CreditCardPayment(card, "富邦 J 卡", cash, 4_000m));
 
         var all = await svc.GetAllLiabilitySnapshotsAsync();
-        Assert.Equal(new LiabilitySnapshot(500_000m, 500_000m), all["台新信貸"]);
-        Assert.Equal(new LiabilitySnapshot(16_000m, 20_000m), all["富邦 J 卡"]);
+        Assert.Equal(new LiabilitySnapshot(TWD(500_000m), TWD(500_000m)), all["台新信貸"]);
+        Assert.Equal(new LiabilitySnapshot(TWD(16_000m), TWD(20_000m)), all["富邦 J 卡"]);
     }
 
     // ─── Fake repo ───────────────────────────────────────────────────────

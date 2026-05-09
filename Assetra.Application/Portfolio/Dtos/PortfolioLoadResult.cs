@@ -8,6 +8,6 @@ public sealed record PortfolioLoadResult(
     IReadOnlyDictionary<Guid, PositionSnapshot> PositionSnapshots,
     IReadOnlyList<Trade> Trades,
     IReadOnlyList<AssetItem> CashAccounts,
-    IReadOnlyDictionary<Guid, decimal> CashBalances,
+    IReadOnlyDictionary<Guid, Money> CashBalances,
     IReadOnlyDictionary<string, LiabilitySnapshot> LiabilitySnapshots,
     IReadOnlyDictionary<string, AssetItem> LiabilityAssets);

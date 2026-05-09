@@ -988,7 +988,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
             .ToList();
         var newRows = visibleAccounts.ToDictionary(
             a => a.Id,
-            a => new CashAccountRowViewModel(a, balances.TryGetValue(a.Id, out var v) ? v : 0m));
+            a => new CashAccountRowViewModel(a, balances.TryGetValue(a.Id, out var v) ? v.Amount : 0m));
         var existingIndex = CashAccounts.ToDictionary(r => r.Id);
 
         for (var i = CashAccounts.Count - 1; i >= 0; i--)
@@ -999,7 +999,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
 
         foreach (var account in visibleAccounts)
         {
-            var bal = balances.TryGetValue(account.Id, out var v) ? v : 0m;
+            var bal = balances.TryGetValue(account.Id, out var v) ? v.Amount : 0m;
             if (existingIndex.TryGetValue(account.Id, out var existing))
             {
                 existing.Name = account.Name;

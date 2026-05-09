@@ -18,13 +18,13 @@ public partial class PortfolioViewModel
     // stored account rows without a trade history). All balances return 0 / empty.
     private sealed class NullBalanceQueryService : IBalanceQueryService
     {
-        public Task<decimal> GetCashBalanceAsync(Guid cashAccountId) =>
-            Task.FromResult(0m);
+        public Task<Money> GetCashBalanceAsync(Guid cashAccountId) =>
+            Task.FromResult(Money.Zero(IBalanceQueryService.DefaultCurrency));
         public Task<LiabilitySnapshot> GetLiabilitySnapshotAsync(string loanLabel) =>
             Task.FromResult(LiabilitySnapshot.Empty);
-        public Task<IReadOnlyDictionary<Guid, decimal>> GetAllCashBalancesAsync() =>
-            Task.FromResult<IReadOnlyDictionary<Guid, decimal>>(
-                new Dictionary<Guid, decimal>());
+        public Task<IReadOnlyDictionary<Guid, Money>> GetAllCashBalancesAsync() =>
+            Task.FromResult<IReadOnlyDictionary<Guid, Money>>(
+                new Dictionary<Guid, Money>());
         public Task<IReadOnlyDictionary<string, LiabilitySnapshot>> GetAllLiabilitySnapshotsAsync() =>
             Task.FromResult<IReadOnlyDictionary<string, LiabilitySnapshot>>(
                 new Dictionary<string, LiabilitySnapshot>());
@@ -196,7 +196,7 @@ public partial class PortfolioViewModel
                 new Dictionary<Guid, PositionSnapshot>(),
                 [],
                 [],
-                new Dictionary<Guid, decimal>(),
+                new Dictionary<Guid, Money>(),
                 new Dictionary<string, LiabilitySnapshot>(),
                 new Dictionary<string, AssetItem>()));
     }

@@ -10,44 +10,64 @@ namespace Assetra.Infrastructure;
 /// 單次呼叫的成本 = O(N) N = 交易筆數。對於 UI 載入清單，使用
 /// <see cref="GetAllCashBalancesAsync"/> / <see cref="GetAllLiabilitySnapshotsAsync"/>
 /// 能將整張表一次投影完成，避免 O(N × M) 的重複掃描。
+///
+/// <para>
+/// M1 — 注入 <see cref="IAssetRepository"/> 為了取得每個 cash account 的幣別 tag，
+/// 使回傳的 <see cref="Money"/> 自帶正確幣別。<see cref="IAssetRepository"/> 為 optional：
+/// 未注入時所有結果一律 tag 為 <see cref="IBalanceQueryService.DefaultCurrency"/>，
+/// 便於現有測試最小成本通過。
+/// </para>
 /// </remarks>
 public sealed class BalanceQueryService : IBalanceQueryService
 {
     private readonly ITradeRepository _trades;
+    private readonly IAssetRepository? _assets;
 
-    public BalanceQueryService(ITradeRepository trades)
+    public BalanceQueryService(ITradeRepository trades, IAssetRepository? assets = null)
     {
         _trades = trades ?? throw new ArgumentNullException(nameof(trades));
+        _assets = assets;
     }
 
-    public async Task<decimal> GetCashBalanceAsync(Guid cashAccountId)
+    public async Task<Money> GetCashBalanceAsync(Guid cashAccountId)
     {
         var trades = await _trades.GetAllAsync().ConfigureAwait(false);
-        return ComputeCashBalance(cashAccountId, trades);
+        var amount = ComputeCashBalance(cashAccountId, trades);
+        var currency = await ResolveCurrencyAsync(cashAccountId).ConfigureAwait(false);
+        return new Money(amount, currency);
     }
 
     public async Task<LiabilitySnapshot> GetLiabilitySnapshotAsync(string loanLabel)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(loanLabel);
         var trades = await _trades.GetAllAsync().ConfigureAwait(false);
-        return ComputeLiabilitySnapshot(loanLabel, trades);
+        var (balance, original) = ComputeLiabilitySnapshot(loanLabel, trades);
+        var currency = await ResolveLiabilityCurrencyAsync(loanLabel).ConfigureAwait(false);
+        return new LiabilitySnapshot(new Money(balance, currency), new Money(original, currency));
     }
 
-    public async Task<IReadOnlyDictionary<Guid, decimal>> GetAllCashBalancesAsync()
+    public async Task<IReadOnlyDictionary<Guid, Money>> GetAllCashBalancesAsync()
     {
         var trades = await _trades.GetAllAsync().ConfigureAwait(false);
-        var result = new Dictionary<Guid, decimal>();
+        var currencyMap = await BuildCurrencyMapAsync().ConfigureAwait(false);
+        var amounts = new Dictionary<Guid, decimal>();
         foreach (var t in trades)
         {
             if (t.CashAccountId is { } src)
             {
                 var delta = PrimaryCashDelta(t);
-                if (delta != 0) Accumulate(result, src, delta);
+                if (delta != 0) Accumulate(amounts, src, delta);
             }
             if (t.Type == TradeType.Transfer && t.ToCashAccountId is { } dst)
             {
-                Accumulate(result, dst, t.CashAmount ?? 0m);
+                Accumulate(amounts, dst, t.CashAmount ?? 0m);
             }
+        }
+        var result = new Dictionary<Guid, Money>(amounts.Count);
+        foreach (var (id, amt) in amounts)
+        {
+            var ccy = currencyMap.TryGetValue(id, out var c) ? c : IBalanceQueryService.DefaultCurrency;
+            result[id] = new Money(amt, ccy);
         }
         return result;
     }
@@ -55,33 +75,80 @@ public sealed class BalanceQueryService : IBalanceQueryService
     public async Task<IReadOnlyDictionary<string, LiabilitySnapshot>> GetAllLiabilitySnapshotsAsync()
     {
         var trades = await _trades.GetAllAsync().ConfigureAwait(false);
-        var result = new Dictionary<string, LiabilitySnapshot>(StringComparer.Ordinal);
+        var liabilityCurrencies = await BuildLiabilityCurrencyMapAsync().ConfigureAwait(false);
+        // First pass: accumulate raw decimals so arithmetic stays in one currency.
+        var amounts = new Dictionary<string, (decimal Balance, decimal Original)>(StringComparer.Ordinal);
         foreach (var t in trades)
         {
             var label = GetLiabilityLabel(t);
             if (string.IsNullOrWhiteSpace(label)) continue;
-            var current = result.TryGetValue(label, out var snap) ? snap : LiabilitySnapshot.Empty;
-            result[label] = t.Type switch
+            (decimal Balance, decimal Original) current = amounts.TryGetValue(label, out var snap) ? snap : (0m, 0m);
+            amounts[label] = t.Type switch
             {
-                TradeType.LoanBorrow => new LiabilitySnapshot(
+                TradeType.LoanBorrow => (
                     current.Balance + (t.CashAmount ?? 0m),
-                    current.OriginalAmount + (t.CashAmount ?? 0m)),
-                TradeType.LoanRepay => new LiabilitySnapshot(
+                    current.Original + (t.CashAmount ?? 0m)),
+                TradeType.LoanRepay => (
                     current.Balance - (t.Principal ?? t.CashAmount ?? 0m),
-                    current.OriginalAmount),
-                TradeType.CreditCardCharge => new LiabilitySnapshot(
+                    current.Original),
+                TradeType.CreditCardCharge => (
                     current.Balance + (t.CashAmount ?? 0m),
-                    current.OriginalAmount + (t.CashAmount ?? 0m)),
-                TradeType.CreditCardPayment => new LiabilitySnapshot(
+                    current.Original + (t.CashAmount ?? 0m)),
+                TradeType.CreditCardPayment => (
                     current.Balance - (t.CashAmount ?? 0m),
-                    current.OriginalAmount),
+                    current.Original),
                 _ => current,
             };
+        }
+        var result = new Dictionary<string, LiabilitySnapshot>(StringComparer.Ordinal);
+        foreach (var kv in amounts)
+        {
+            var ccy = liabilityCurrencies.TryGetValue(kv.Key, out var c) ? c : IBalanceQueryService.DefaultCurrency;
+            result[kv.Key] = new LiabilitySnapshot(new Money(kv.Value.Balance, ccy), new Money(kv.Value.Original, ccy));
         }
         return result;
     }
 
-    // ─── Pure projection helpers ─────────────────────────────────────────────
+    // ─── Currency lookup helpers ─────────────────────────────────────────────
+
+    private async Task<string> ResolveCurrencyAsync(Guid cashAccountId)
+    {
+        if (_assets is null) return IBalanceQueryService.DefaultCurrency;
+        var item = await _assets.GetByIdAsync(cashAccountId).ConfigureAwait(false);
+        return string.IsNullOrWhiteSpace(item?.Currency) ? IBalanceQueryService.DefaultCurrency : item!.Currency;
+    }
+
+    private async Task<string> ResolveLiabilityCurrencyAsync(string loanLabel)
+    {
+        if (_assets is null) return IBalanceQueryService.DefaultCurrency;
+        var liabilities = await _assets.GetItemsByTypeAsync(FinancialType.Liability).ConfigureAwait(false);
+        var match = liabilities.FirstOrDefault(a => string.Equals(a.Name, loanLabel, StringComparison.Ordinal));
+        return string.IsNullOrWhiteSpace(match?.Currency) ? IBalanceQueryService.DefaultCurrency : match!.Currency;
+    }
+
+    private async Task<IReadOnlyDictionary<Guid, string>> BuildCurrencyMapAsync()
+    {
+        if (_assets is null) return new Dictionary<Guid, string>();
+        var assets = await _assets.GetItemsByTypeAsync(FinancialType.Asset).ConfigureAwait(false);
+        return assets
+            .Where(a => !string.IsNullOrWhiteSpace(a.Currency))
+            .ToDictionary(a => a.Id, a => a.Currency);
+    }
+
+    private async Task<IReadOnlyDictionary<string, string>> BuildLiabilityCurrencyMapAsync()
+    {
+        if (_assets is null) return new Dictionary<string, string>(StringComparer.Ordinal);
+        var liabs = await _assets.GetItemsByTypeAsync(FinancialType.Liability).ConfigureAwait(false);
+        var dict = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var l in liabs)
+        {
+            if (string.IsNullOrWhiteSpace(l.Currency)) continue;
+            dict[l.Name] = l.Currency;
+        }
+        return dict;
+    }
+
+    // ─── Pure projection helpers (decimal arithmetic preserved) ──────────────
 
     /// <summary>
     /// 計算指定現金帳戶在整個交易歷史中的累計餘額。
@@ -101,9 +168,9 @@ public sealed class BalanceQueryService : IBalanceQueryService
     }
 
     /// <summary>
-    /// 計算指定貸款名稱的 (Balance, OriginalAmount)。
+    /// 計算指定貸款名稱的 (Balance, OriginalAmount)（純 decimal 內部使用）。
     /// </summary>
-    internal static LiabilitySnapshot ComputeLiabilitySnapshot(
+    internal static (decimal Balance, decimal Original) ComputeLiabilitySnapshot(
         string loanLabel, IReadOnlyList<Trade> trades)
     {
         decimal balance = 0m, original = 0m;
@@ -134,7 +201,7 @@ public sealed class BalanceQueryService : IBalanceQueryService
                     break;
             }
         }
-        return new LiabilitySnapshot(balance, original);
+        return (balance, original);
     }
 
     /// <summary>
