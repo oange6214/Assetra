@@ -18,6 +18,10 @@ internal static class AssistantServiceCollectionExtensions
             sp.GetRequiredService<IBalanceQueryService>(),
             sp.GetService<IAppSettingsService>(),
             sp.GetService<ICurrencyService>()));
+        services.AddSingleton<IAssistantInsightService>(sp => new RuleBasedAssistantInsightService(
+            sp.GetService<IBudgetRepository>(),
+            sp.GetService<IRecurringTransactionRepository>(),
+            sp.GetService<ITradeRepository>()));
         services.AddSingleton<AssistantViewModel>();
         return services;
     }
