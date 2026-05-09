@@ -17,6 +17,7 @@ namespace Assetra.WPF.Features.Assistant;
 public sealed partial class AssistantViewModel : ObservableObject
 {
     private readonly IFinancialAssistant _assistant;
+    private readonly IAssistantInsightService? _insights;
     private readonly ILocalizationService? _localization;
 
     [ObservableProperty]
@@ -30,21 +31,47 @@ public sealed partial class AssistantViewModel : ObservableObject
     private readonly ObservableCollection<AssistantMessage> _messages = [];
     public ReadOnlyObservableCollection<AssistantMessage> Messages { get; }
 
+    private readonly ObservableCollection<AssistantInsight> _insightCards = [];
+    public ReadOnlyObservableCollection<AssistantInsight> InsightCards { get; }
+
     public IReadOnlyList<string> SuggestedQueries => _assistant.SuggestedQueries;
 
     public bool HasMessages => _messages.Count > 0;
     public bool HasNoMessages => _messages.Count == 0;
+    public bool HasInsights => _insightCards.Count > 0;
 
-    public AssistantViewModel(IFinancialAssistant assistant, ILocalizationService? localization = null)
+    public AssistantViewModel(
+        IFinancialAssistant assistant,
+        IAssistantInsightService? insights = null,
+        ILocalizationService? localization = null)
     {
         _assistant = assistant ?? throw new ArgumentNullException(nameof(assistant));
+        _insights = insights;
         _localization = localization;
         Messages = new ReadOnlyObservableCollection<AssistantMessage>(_messages);
+        InsightCards = new ReadOnlyObservableCollection<AssistantInsight>(_insightCards);
         _messages.CollectionChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(HasMessages));
             OnPropertyChanged(nameof(HasNoMessages));
         };
+        _insightCards.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasInsights));
+    }
+
+    [RelayCommand]
+    public async Task LoadInsightsAsync()
+    {
+        if (_insights is null) return;
+        try
+        {
+            var snapshot = await _insights.GetCurrentInsightsAsync().ConfigureAwait(true);
+            _insightCards.Clear();
+            foreach (var i in snapshot) _insightCards.Add(i);
+        }
+        catch
+        {
+            // Insight loading is best-effort — never block the assistant UI.
+        }
     }
 
     private bool CanSend() => !IsAnswering && !string.IsNullOrWhiteSpace(InputText);
