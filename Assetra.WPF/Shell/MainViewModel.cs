@@ -54,6 +54,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public SettingsViewModel Settings { get; }
     public SnackbarViewModel Snackbar { get; }
     public Features.Assistant.AssistantViewModel Assistant { get; }
+    public Features.AuditLog.AuditLogViewModel AuditLog { get; }
 
     // Title bar search / command palette
     [ObservableProperty] private string _searchText = string.Empty;
@@ -158,6 +159,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         SettingsViewModel settings,
         SnackbarViewModel snackbar,
         Features.Assistant.AssistantViewModel assistant,
+        Features.AuditLog.AuditLogViewModel auditLog,
         IThemeService themeService,
         IStockSearchService searchService)
     {
@@ -183,6 +185,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         Settings = settings;
         Snackbar = snackbar;
         Assistant = assistant;
+        AuditLog = auditLog;
         _themeService = themeService;
         _searchService = searchService;
         CurrentTheme = themeService.CurrentTheme;

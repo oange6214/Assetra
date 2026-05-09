@@ -1111,6 +1111,16 @@
     <sys:String x:Key="Settings.Llm.Endpoint.Hint">Ollama only. Empty = http://localhost:11434.</sys:String>
     <sys:String x:Key="Settings.Ocr.Download">Download language packs</sys:String>
     <sys:String x:Key="Settings.Ocr.Download.Tooltip">Opens the Tesseract tessdata GitHub page so you can download .traineddata files (e.g. chi_tra.traineddata) into the folder selected above.</sys:String>
+    <sys:String x:Key="Nav.AuditLog">Audit Log</sys:String>
+    <sys:String x:Key="AuditLog.Title">Trade Audit Log</sys:String>
+    <sys:String x:Key="AuditLog.Subtitle">Every trade deletion or edit-replace stores a full JSON snapshot here so you can recover from accidental edits hours later.</sys:String>
+    <sys:String x:Key="AuditLog.Refresh">Reload</sys:String>
+    <sys:String x:Key="AuditLog.Empty">No audit entries yet.</sys:String>
+    <sys:String x:Key="AuditLog.Col.RecordedAt">Recorded</sys:String>
+    <sys:String x:Key="AuditLog.Col.Action">Action</sys:String>
+    <sys:String x:Key="AuditLog.Col.TradeId">Trade ID</sys:String>
+    <sys:String x:Key="AuditLog.Col.Note">Note</sys:String>
+    <sys:String x:Key="AuditLog.Col.TradeJson">Pre-deletion Trade snapshot (truncated)</sys:String>
     <sys:String x:Key="Settings.Fx.Title">Exchange rates (Frankfurter live source)</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">Last refreshed:</sys:String>
     <sys:String x:Key="Settings.Fx.NeverRefreshed">Never refreshed</sys:String>

@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:alerts="clr-namespace:Assetra.WPF.Features.Alerts"
     xmlns:assistant="clr-namespace:Assetra.WPF.Features.Assistant"
+    xmlns:auditlog="clr-namespace:Assetra.WPF.Features.AuditLog"
     xmlns:cashaccts="clr-namespace:Assetra.WPF.Features.CashAccounts"
     xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -180,6 +181,10 @@
 
         <DataTemplate x:Key="AssistantContentTemplate">
             <assistant:AssistantView DataContext="{Binding Assistant}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="AuditLogContentTemplate">
+            <auditlog:AuditLogView DataContext="{Binding AuditLog}" />
         </DataTemplate>
 
         <DataTemplate x:Key="ImportContentTemplate">
@@ -460,6 +465,26 @@
                                     Grid.Column="1"
                                     Style="{StaticResource NavRailItemText}"
                                     Text="{DynamicResource Nav.Assistant}" />
+                            </Grid>
+                        </ToggleButton>
+
+                        <ToggleButton
+                            x:Name="NavAuditLog"
+                            Click="NavItem_Click"
+                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=AuditLog, Mode=OneWay}"
+                            Style="{StaticResource NavRailItemButton}"
+                            Tag="{x:Static shell:NavSection.AuditLog}"
+                            ToolTip="{DynamicResource Nav.AuditLog}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ds:AppIcon Symbol="History24" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Nav.AuditLog}" />
                             </Grid>
                         </ToggleButton>
 
@@ -864,6 +889,9 @@
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Assistant}">
                             <Setter Property="ContentTemplate" Value="{StaticResource AssistantContentTemplate}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.AuditLog}">
+                            <Setter Property="ContentTemplate" Value="{StaticResource AuditLogContentTemplate}" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Alerts}">
                             <Setter Property="ContentTemplate" Value="{StaticResource AlertsContentTemplate}" />

@@ -26,4 +26,6 @@ public enum NavSection
     TransactionLog,
     /// <summary>AI 財務助手 — 自然語言查詢 (Phase 1 rule-based; Phase 2/3 spec'd).</summary>
     Assistant,
+    /// <summary>交易稽核日誌 — 顯示 trade_audit 表內容（被刪/被替換的歷史 Trade）。</summary>
+    AuditLog,
 }

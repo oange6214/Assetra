@@ -1115,6 +1115,16 @@
     <sys:String x:Key="Settings.Llm.Endpoint.Hint">僅 Ollama 用。空白 = http://localhost:11434。</sys:String>
     <sys:String x:Key="Settings.Ocr.Download">下載語言檔</sys:String>
     <sys:String x:Key="Settings.Ocr.Download.Tooltip">開啟 Tesseract tessdata GitHub 頁，下載對應語言的 .traineddata 檔（如 chi_tra.traineddata 繁體中文）放入上方資料夾。</sys:String>
+    <sys:String x:Key="Nav.AuditLog">稽核日誌</sys:String>
+    <sys:String x:Key="AuditLog.Title">交易稽核日誌</sys:String>
+    <sys:String x:Key="AuditLog.Subtitle">每次刪除或編輯（重建）交易時都會在此留下完整的 JSON 快照，做為使用者的回溯保障。</sys:String>
+    <sys:String x:Key="AuditLog.Refresh">重新載入</sys:String>
+    <sys:String x:Key="AuditLog.Empty">尚無任何稽核紀錄。</sys:String>
+    <sys:String x:Key="AuditLog.Col.RecordedAt">時間</sys:String>
+    <sys:String x:Key="AuditLog.Col.Action">動作</sys:String>
+    <sys:String x:Key="AuditLog.Col.TradeId">Trade ID</sys:String>
+    <sys:String x:Key="AuditLog.Col.Note">備註</sys:String>
+    <sys:String x:Key="AuditLog.Col.TradeJson">當時 Trade 內容（截短）</sys:String>
     <sys:String x:Key="Settings.Fx.Title">匯率（Frankfurter 即時來源）</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">上次更新：</sys:String>
     <sys:String x:Key="Settings.Fx.NeverRefreshed">尚未更新</sys:String>

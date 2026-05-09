@@ -16,4 +16,12 @@ public interface ITradeAuditRepository
 {
     /// <summary>Insert a new audit row. Throws on duplicate <c>Id</c>.</summary>
     Task AppendAsync(TradeAuditEntry entry, CancellationToken ct = default);
+
+    /// <summary>
+    /// Read the most recent <paramref name="limit"/> audit entries, descending
+    /// by <see cref="TradeAuditEntry.RecordedAt"/>. Powers the audit-log viewer.
+    /// Default fallback returns empty (audit repo is optional).
+    /// </summary>
+    Task<IReadOnlyList<TradeAuditEntry>> GetRecentAsync(int limit = 100, CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<TradeAuditEntry>>(Array.Empty<TradeAuditEntry>());
 }
