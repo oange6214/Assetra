@@ -119,10 +119,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         ArgumentNullException.ThrowIfNull(deps);
 
-        // H1 — react to Buy.X / Sell.X / Div.X changes (preview, validation, side effects).
+        // H1 — react to Buy/Sell/Div/Loan/Transfer.X changes (preview, validation, side effects).
         Buy.PropertyChanged += OnBuyPriceModeChanged;
         Sell.PropertyChanged += OnSellTxChanged;
         Div.PropertyChanged += OnDividendTxChanged;
+        Loan.PropertyChanged += OnLoanTxChanged;
+        Transfer.PropertyChanged += OnTransferTxChanged;
 
         _transactionWorkflowService = deps.TransactionWorkflow;
         _tradeDeletionWorkflowService = deps.TradeDeletion;
@@ -267,9 +269,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     [ObservableProperty] private string _txAmountError = string.Empty;
     [ObservableProperty] private string _txFeeError = string.Empty;
     // Div errors moved to Div (DividendTxViewModel).
-    [ObservableProperty] private string _txTransferTargetAmountError = string.Empty;
-    [ObservableProperty] private string _txPrincipalError = string.Empty;
-    [ObservableProperty] private string _txInterestPaidError = string.Empty;
+    // Transfer / Loan errors moved to Transfer / Loan sub-VMs (H1-P3 phase 3).
     [ObservableProperty] private string _txCommissionDiscountError = string.Empty;
 
     /// <summary>
@@ -477,19 +477,15 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     // Buy sub-type predicates moved next to the AssetType facade in the Buy block.
 
-    [ObservableProperty] private string _txLoanLabel = string.Empty;
-
-    partial void OnTxLoanLabelChanged(string value)
-    {
-        if (TxTypeIsLoanRepay)
-            _ = AutoFillLoanRepayAsync(value);
-        // Liability balance preview hinges on which loan label is selected.
-        NotifyImpactPreviewChanged();
-    }
+    /// <summary>
+    /// H1 — loan transaction state cluster extracted into <see cref="Tx.LoanTxViewModel"/>.
+    /// Covers Label, Principal/InterestPaid (LoanRepay), Rate/TermMonths/StartDate
+    /// (LoanBorrow amortization).
+    /// </summary>
+    public Tx.LoanTxViewModel Loan { get; } = new();
 
     /// <summary>
     /// Suggestions for the editable loan-label ComboBox — derived from already-recorded loans.
-    /// New labels can be typed freely; existing labels appear as dropdown options.
     /// </summary>
     public IReadOnlyList<string> LoanLabelSuggestions =>
         Liabilities.Select(l => l.Label).OrderBy(l => l).ToList();
@@ -499,42 +495,18 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public IReadOnlyList<LiabilityRowViewModel> CreditCardOptions =>
         Liabilities.Where(l => !l.IsLoan).OrderBy(l => l.Label).ToList();
 
-    // 轉帳 (Transfer)
-    // 轉帳會建一組 Withdrawal (源) + Deposit (目) 對：
-    //   - 源帳戶用既有的 TxCashAccount property + TxAmount (轉出金額)
-    //   - 目帳戶 + 轉入金額用以下兩個新 property（轉入金額可不同 → 跨幣別轉帳）
-
-    /// <summary>轉帳的目標現金帳戶（轉入方）。源是 TxCashAccount。</summary>
-    [ObservableProperty] private CashAccountRowViewModel? _txTransferTarget;
-
     /// <summary>
-    /// 轉入金額（目標帳戶收到的金額）。和 TxAmount（源扣款金額）相同 → 同幣別；
-    /// 不同 → 跨幣別，可由前端顯示 implied rate = TxAmount / TxTransferTargetAmount。
+    /// H1 — transfer transaction state cluster extracted into <see cref="Tx.TransferTxViewModel"/>.
+    /// Covers Target / TargetName / TargetAmount / TargetAmountError / ImpliedRate.
+    /// Source amount stays on dialog VM (TxAmount, shared across types).
     /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TxTransferImpliedRateDisplay))]
-    private string _txTransferTargetAmount = string.Empty;
-
-    /// <summary>
-    /// 隱含匯率顯示文字（給 dialog hint 用）。空白或無效時回 "—"。
-    /// </summary>
-    public string TxTransferImpliedRateDisplay
-    {
-        get
-        {
-            if (!ParseHelpers.TryParseDecimal(TxAmount, out var src) || src <= 0)
-                return "—";
-            if (!ParseHelpers.TryParseDecimal(TxTransferTargetAmount, out var dst) || dst <= 0)
-                return "—";
-            var rate = src / dst;
-            return rate.ToString("F4");
-        }
-    }
+    public Tx.TransferTxViewModel Transfer { get; } = new();
 
     partial void OnTxAmountChanged(string value)
     {
         TxAmountError = ValidatePositiveDecimalOrEmpty(value);
-        OnPropertyChanged(nameof(TxTransferImpliedRateDisplay));
+        // Push source-amount text into Transfer VM so its ImpliedRate refreshes.
+        Transfer.SourceAmountText = value;
         UpdateSellTxPreview();
         NotifyImpactPreviewChanged();
     }
@@ -577,12 +549,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public ObservableCollection<string> CashAccountSuggestions { get; } = new();
 
     // ── Transfer destination — same coexistence pattern as TxCashAccountName ──────────
-    // INVARIANT: TxTransferTarget (SelectedItem picker) wins when set.
-    // TxTransferTargetName (typed text) only wins when TxTransferTarget is null
+    // INVARIANT: Transfer.Target (SelectedItem picker) wins when set.
+    // Transfer.TargetName (typed text) only wins when Transfer.Target is null
     // AND the name is non-empty. IsNewTransferTarget drives the "will create new" hint.
     // Task 19.
     /// <summary>
-    /// Transfer destination — typed text coexisting with TxTransferTarget (the picker).
+    /// Transfer destination — typed text coexisting with Transfer.Target (the picker).
     /// When the text doesn't match any existing account, IsNewTransferTarget returns true
     /// and ConfirmTransferAsync routes through FindOrCreateAccountAsync on the destination side.
     /// Task 19.
@@ -592,9 +564,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     // INVARIANT: picker-first-then-text — same contract as IsNewCashAccount.
     public bool IsNewTransferTarget =>
-        !string.IsNullOrWhiteSpace(TxTransferTargetName)
+        !string.IsNullOrWhiteSpace(Transfer.TargetName)
         && !CashAccountSuggestions.Any(s =>
-            string.Equals(s, TxTransferTargetName, StringComparison.OrdinalIgnoreCase));
+            string.Equals(s, Transfer.TargetName, StringComparison.OrdinalIgnoreCase));
 
     // Same pattern for positions — task 19 will bind a free-text symbol input here
     // (currently `AddSymbol` is the only free-text symbol field and it lives on the
@@ -653,21 +625,21 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// <summary>
     /// Destination-side analogue of <see cref="ResolveCashAccountIdAsync"/> for
     /// Transfer's target account. Same two-tier resolution:
-    ///   1. TxTransferTarget (ComboBox SelectedItem) — authoritative when set.
-    ///   2. TxTransferTargetName (typed text) → FindOrCreateAccountAsync. TWD default currency.
+    ///   1. Transfer.Target (ComboBox SelectedItem) — authoritative when set.
+    ///   2. Transfer.TargetName (typed text) → FindOrCreateAccountAsync. TWD default currency.
     /// Task 19.
     /// </summary>
-    // INVARIANT: picker-first-then-text — TxTransferTarget.Id wins when the picker has a
-    // selection; only falls through to FindOrCreateAccountAsync when TxTransferTarget is null.
+    // INVARIANT: picker-first-then-text — Transfer.Target.Id wins when the picker has a
+    // selection; only falls through to FindOrCreateAccountAsync when Transfer.Target is null.
     private async Task<Guid?> ResolveTransferTargetIdAsync()
     {
-        if (TxTransferTarget is not null)
-            return TxTransferTarget.Id;
+        if (Transfer.Target is not null)
+            return Transfer.Target.Id;
 
-        if (!string.IsNullOrWhiteSpace(TxTransferTargetName) && _accountUpsert is not null)
+        if (!string.IsNullOrWhiteSpace(Transfer.TargetName) && _accountUpsert is not null)
         {
             return await _accountUpsert
-                .FindOrCreateAccountAsync(TxTransferTargetName.Trim(), "TWD")
+                .FindOrCreateAccountAsync(Transfer.TargetName.Trim(), "TWD")
                 .ConfigureAwait(true);
         }
         return null;
@@ -723,7 +695,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         UpdateSellTxPreview();
         NotifyImpactPreviewChanged();
         if (TxTypeIsLoanRepay)
-            _ = AutoFillLoanRepayAsync(TxLoanLabel);
+            _ = AutoFillLoanRepayAsync(Loan.Label);
     }
 
     /// <summary>
@@ -801,38 +773,46 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     // CashDividend / StockDividend 輸入模式 + 驗證 — 全部移到 Div (DividendTxViewModel).
     // 由 OnDividendTxChanged 處理 PropertyChanged 觸發的驗證與重算。
 
-    partial void OnTxTransferTargetAmountChanged(string value) =>
-        TxTransferTargetAmountError = ValidatePositiveDecimalOrEmpty(value);
-
-    // LoanRepay 拆分欄位
-    [ObservableProperty] private string _txPrincipal = string.Empty;
-    [ObservableProperty] private string _txInterestPaid = string.Empty;
-
-    partial void OnTxPrincipalChanged(string value)
+    /// <summary>
+    /// React to Transfer.X / Loan.X PropertyChanged: validation + auto-fill +
+    /// liability-balance preview. Replaces the old partial OnTxXxxChanged handlers.
+    /// </summary>
+    private void OnTransferTxChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        TxPrincipalError = ValidatePositiveDecimalOrEmpty(value);
-        NotifyImpactPreviewChanged();
+        switch (e.PropertyName)
+        {
+            case nameof(TransferTxViewModel.TargetAmount):
+                Transfer.TargetAmountError = ValidatePositiveDecimalOrEmpty(Transfer.TargetAmount);
+                break;
+        }
     }
 
-    partial void OnTxInterestPaidChanged(string value)
+    private void OnLoanTxChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        TxInterestPaidError = ValidateNonNegativeDecimalOrEmpty(value);
-        NotifyImpactPreviewChanged();
+        switch (e.PropertyName)
+        {
+            case nameof(LoanTxViewModel.Label):
+                if (TxTypeIsLoanRepay)
+                    _ = AutoFillLoanRepayAsync(Loan.Label);
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(LoanTxViewModel.Principal):
+                Loan.PrincipalError = ValidatePositiveDecimalOrEmpty(Loan.Principal);
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(LoanTxViewModel.InterestPaid):
+                Loan.InterestPaidError = ValidateNonNegativeDecimalOrEmpty(Loan.InterestPaid);
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(LoanTxViewModel.Rate):
+                Loan.RateError = ValidateNonNegativeDecimalOrEmpty(Loan.Rate);
+                break;
+            case nameof(LoanTxViewModel.TermMonths):
+                Loan.TermMonthsError = string.IsNullOrWhiteSpace(Loan.TermMonths) ? string.Empty
+                    : (ParseHelpers.TryParseInt(Loan.TermMonths, out var n) && n > 0 ? string.Empty : "請輸入正整數");
+                break;
+        }
     }
-
-    // LoanBorrow 攤還欄位（選填；填寫後自動建立攤還表）
-    [ObservableProperty] private string _txLoanRate = string.Empty;
-    [ObservableProperty] private string _txLoanTermMonths = string.Empty;
-    [ObservableProperty] private DateTime _txLoanStartDate = DateTime.Today;
-    [ObservableProperty] private string _txLoanRateError = string.Empty;
-    [ObservableProperty] private string _txLoanTermMonthsError = string.Empty;
-
-    partial void OnTxLoanRateChanged(string value) =>
-        TxLoanRateError = ValidateNonNegativeDecimalOrEmpty(value);
-
-    partial void OnTxLoanTermMonthsChanged(string value) =>
-        TxLoanTermMonthsError = string.IsNullOrWhiteSpace(value) ? string.Empty
-            : (ParseHelpers.TryParseInt(value, out var n) && n > 0 ? string.Empty : "請輸入正整數");
 
     // ── 新增紀錄 Dialog commands ──────────────────────────────────────────────────────
 
@@ -849,9 +829,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Div.PerShareError = string.Empty;
         Div.TotalInputError = string.Empty;
         Div.StockNewSharesError = string.Empty;
-        TxTransferTargetAmountError = string.Empty;
-        TxPrincipalError = string.Empty;
-        TxInterestPaidError = string.Empty;
+        Transfer.TargetAmountError = string.Empty;
+        Loan.PrincipalError = string.Empty;
+        Loan.InterestPaidError = string.Empty;
         Buy.TotalCostError = string.Empty;
         TxCommissionDiscountError = string.Empty;
         TxAmount = string.Empty;
@@ -866,13 +846,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Div.Total = 0;
         Div.StockPosition = null;
         Div.StockNewShares = string.Empty;
-        TxLoanLabel = string.Empty;
+        Loan.Label = string.Empty;
         TxFee = string.Empty;
         TxUseCashAccount = state.TxUseCashAccount;
         TxCashAccountName = string.Empty;
-        TxTransferTarget = null;
-        TxTransferTargetName = string.Empty;
-        TxTransferTargetAmount = string.Empty;
+        Transfer.Target = null;
+        Transfer.TargetName = string.Empty;
+        Transfer.TargetAmount = string.Empty;
         TxCreditCard = null;
         Buy.AssetType = state.TxBuyAssetType;
         Buy.PriceMode = state.TxBuyPriceMode;
@@ -889,13 +869,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         EditSummaryTarget = string.Empty;
         EditSummaryAmount = string.Empty;
         EditSummaryQuantity = string.Empty;
-        TxPrincipal = string.Empty;
-        TxInterestPaid = string.Empty;
-        TxLoanRate = string.Empty;
-        TxLoanTermMonths = string.Empty;
-        TxLoanStartDate = state.TxLoanStartDate;
-        TxLoanRateError = string.Empty;
-        TxLoanTermMonthsError = string.Empty;
+        Loan.Principal = string.Empty;
+        Loan.InterestPaid = string.Empty;
+        Loan.Rate = string.Empty;
+        Loan.TermMonths = string.Empty;
+        Loan.StartDate = state.TxLoanStartDate;
+        Loan.RateError = string.Empty;
+        Loan.TermMonthsError = string.Empty;
         // Buy-specific fields shared with AddAssetDialog sub-VM
         AddAssetDialog.AddSymbol = string.Empty;
         AddAssetDialog.AddPrice = string.Empty;
@@ -936,9 +916,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Div.PerShareError = string.Empty;
         Div.TotalInputError = string.Empty;
         Div.StockNewSharesError = string.Empty;
-        TxTransferTargetAmountError = string.Empty;
-        TxPrincipalError = string.Empty;
-        TxInterestPaidError = string.Empty;
+        Transfer.TargetAmountError = string.Empty;
+        Loan.PrincipalError = string.Empty;
+        Loan.InterestPaidError = string.Empty;
         Buy.TotalCostError = string.Empty;
         TxCommissionDiscountError = string.Empty;
         TxNote = editState.TxNote;
@@ -948,15 +928,15 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxAmount = string.Empty;
         TxCashAccount = null;
         TxCashAccountName = string.Empty;
-        TxLoanLabel = string.Empty;
+        Loan.Label = string.Empty;
         TxFee = string.Empty;
         TxUseCashAccount = true;
-        TxTransferTarget = null;
-        TxTransferTargetName = string.Empty;
-        TxTransferTargetAmount = string.Empty;
+        Transfer.Target = null;
+        Transfer.TargetName = string.Empty;
+        Transfer.TargetAmount = string.Empty;
         TxCreditCard = null;
-        TxPrincipal = string.Empty;
-        TxInterestPaid = string.Empty;
+        Loan.Principal = string.Empty;
+        Loan.InterestPaid = string.Empty;
         Div.Position = null;
         Div.PerShare = string.Empty;
         Div.StockPosition = null;
@@ -1058,7 +1038,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
             case TradeType.LoanBorrow:
                 TxAmount = editState.TxAmount;
-                TxLoanLabel = editState.TxLoanLabel;
+                Loan.Label = editState.TxLoanLabel;
                 TxCashAccount = editState.TxCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
                 TxFee = string.Empty;
@@ -1066,9 +1046,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
             case TradeType.LoanRepay:
                 // CashAmount = Principal + InterestPaid（向後相容：Principal null 代表全額為本金）
-                TxPrincipal = editState.TxPrincipal;
-                TxInterestPaid = editState.TxInterestPaid;
-                TxLoanLabel = editState.TxLoanLabel;
+                Loan.Principal = editState.TxPrincipal;
+                Loan.InterestPaid = editState.TxInterestPaid;
+                Loan.Label = editState.TxLoanLabel;
                 TxCashAccount = editState.TxCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
                 // Fee can't be inferred from trade record alone; leave blank.
@@ -1082,10 +1062,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 // post-success block deletes the original single Transfer trade. Cross-currency
                 // LEG edits remain meta-only (IsTransferLeg covers that).
                 TxAmount = row.CashAmount?.ToString("F0") ?? string.Empty;
-                TxTransferTargetAmount = row.CashAmount?.ToString("F0") ?? string.Empty;
+                Transfer.TargetAmount = row.CashAmount?.ToString("F0") ?? string.Empty;
                 TxCashAccount = row.CashAccountId is { } txSrcAcc
                     ? CashAccounts.FirstOrDefault(c => c.Id == txSrcAcc) : null;
-                TxTransferTarget = row.ToCashAccountId is { } txDstAcc
+                Transfer.Target = row.ToCashAccountId is { } txDstAcc
                     ? CashAccounts.FirstOrDefault(c => c.Id == txDstAcc) : null;
                 break;
         }

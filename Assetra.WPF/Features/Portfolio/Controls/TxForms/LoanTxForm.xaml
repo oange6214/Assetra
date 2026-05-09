@@ -25,7 +25,7 @@
             IsEditable="True"
             ItemsSource="{Binding LoanLabelSuggestions}"
             Style="{StaticResource FormComboBox}"
-            Text="{Binding TxLoanLabel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            Text="{Binding Loan.Label, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
             <ComboBox.Resources>
                 <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
             </ComboBox.Resources>
@@ -65,12 +65,12 @@
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
-                    <TextBox Text="{Binding TxLoanRate, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Text="{Binding Loan.Rate, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Margin="0,0,0,12"
                         Style="{StaticResource FormFieldError}"
-                        Text="{Binding TxLoanRateError}"
-                        Visibility="{Binding TxLoanRateError, Converter={StaticResource StringToVisibilityConverter}}" />
+                        Text="{Binding Loan.RateError}"
+                        Visibility="{Binding Loan.RateError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                     <TextBlock
                         Margin="0,0,0,4"
@@ -81,7 +81,7 @@
                     <DatePicker
                         MinWidth="132"
                         HorizontalContentAlignment="Left"
-                        SelectedDate="{Binding TxLoanStartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        SelectedDate="{Binding Loan.StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Style="{StaticResource AppDatePicker}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2">
@@ -91,12 +91,12 @@
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Loan.TermMonths}" />
-                    <TextBox Text="{Binding TxLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Text="{Binding Loan.TermMonths, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Margin="0,0,0,12"
                         Style="{StaticResource FormFieldError}"
-                        Text="{Binding TxLoanTermMonthsError}"
-                        Visibility="{Binding TxLoanTermMonthsError, Converter={StaticResource StringToVisibilityConverter}}" />
+                        Text="{Binding Loan.TermMonthsError}"
+                        Visibility="{Binding Loan.TermMonthsError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                     <Border
                         Padding="12,10"
@@ -125,12 +125,12 @@
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Loan.AnnualRate}" />
-                <TextBox Text="{Binding TxLoanRate, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding Loan.Rate, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Margin="0,0,0,12"
                     Style="{StaticResource FormFieldError}"
-                    Text="{Binding TxLoanRateError}"
-                    Visibility="{Binding TxLoanRateError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    Text="{Binding Loan.RateError}"
+                    Visibility="{Binding Loan.RateError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <TextBlock
                     Margin="0,0,0,4"
@@ -138,12 +138,12 @@
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Loan.TermMonths}" />
-                <TextBox Text="{Binding TxLoanTermMonths, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding Loan.TermMonths, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Margin="0,0,0,12"
                     Style="{StaticResource FormFieldError}"
-                    Text="{Binding TxLoanTermMonthsError}"
-                    Visibility="{Binding TxLoanTermMonthsError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    Text="{Binding Loan.TermMonthsError}"
+                    Visibility="{Binding Loan.TermMonthsError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <TextBlock
                     Margin="0,0,0,4"
@@ -154,7 +154,7 @@
                 <DatePicker
                     MinWidth="132"
                     HorizontalContentAlignment="Left"
-                    SelectedDate="{Binding TxLoanStartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedDate="{Binding Loan.StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Style="{StaticResource AppDatePicker}" />
                 <TextBlock
                     Margin="0,4,0,0"
@@ -186,12 +186,12 @@
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Tx.Principal}" />
-                    <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding Loan.Principal, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Margin="0,0,0,0"
                         Style="{StaticResource FormFieldError}"
-                        Text="{Binding TxPrincipalError}"
-                        Visibility="{Binding TxPrincipalError, Converter={StaticResource StringToVisibilityConverter}}" />
+                        Text="{Binding Loan.PrincipalError}"
+                        Visibility="{Binding Loan.PrincipalError, Converter={StaticResource StringToVisibilityConverter}}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2">
                     <TextBlock
@@ -200,11 +200,11 @@
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Tx.InterestPaid}" />
-                    <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding Loan.InterestPaid, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Style="{StaticResource FormFieldError}"
-                        Text="{Binding TxInterestPaidError}"
-                        Visibility="{Binding TxInterestPaidError, Converter={StaticResource StringToVisibilityConverter}}" />
+                        Text="{Binding Loan.InterestPaidError}"
+                        Visibility="{Binding Loan.InterestPaidError, Converter={StaticResource StringToVisibilityConverter}}" />
                 </StackPanel>
             </Grid>
             <StackPanel Margin="0,0,0,12">
@@ -220,12 +220,12 @@
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.Principal}" />
-                <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxPrincipal, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding Loan.Principal, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Margin="0,0,0,12"
                     Style="{StaticResource FormFieldError}"
-                    Text="{Binding TxPrincipalError}"
-                    Visibility="{Binding TxPrincipalError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    Text="{Binding Loan.PrincipalError}"
+                    Visibility="{Binding Loan.PrincipalError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <TextBlock
                     Margin="0,0,0,4"
@@ -233,11 +233,11 @@
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
                     Text="{DynamicResource Portfolio.Tx.InterestPaid}" />
-                <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxInterestPaid, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding Loan.InterestPaid, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Style="{StaticResource FormFieldError}"
-                    Text="{Binding TxInterestPaidError}"
-                    Visibility="{Binding TxInterestPaidError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    Text="{Binding Loan.InterestPaidError}"
+                    Visibility="{Binding Loan.InterestPaidError, Converter={StaticResource StringToVisibilityConverter}}" />
             </StackPanel>
             <TextBlock
                 Margin="0,2,0,12"

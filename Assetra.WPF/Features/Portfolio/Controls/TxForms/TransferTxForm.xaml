@@ -77,9 +77,9 @@
             IsEditable="True"
             IsTextSearchEnabled="True"
             ItemsSource="{Binding CashAccounts}"
-            SelectedItem="{Binding TxTransferTarget, Mode=TwoWay}"
+            SelectedItem="{Binding Transfer.Target, Mode=TwoWay}"
             Style="{StaticResource FormComboBox}"
-            Text="{Binding TxTransferTargetName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            Text="{Binding Transfer.TargetName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             <ComboBox.Resources>
                 <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
             </ComboBox.Resources>
@@ -97,18 +97,18 @@
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.TransferTargetAmount}" />
-        <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxTransferTargetAmount, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding Transfer.TargetAmount, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Style="{StaticResource FormFieldError}"
-            Text="{Binding TxTransferTargetAmountError}"
-            Visibility="{Binding TxTransferTargetAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
+            Text="{Binding Transfer.TargetAmountError}"
+            Visibility="{Binding Transfer.TargetAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
         <TextBlock
             Margin="0,2,0,12"
             FontSize="{StaticResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextMuted}">
             <Run Text="{DynamicResource Portfolio.Tx.TransferImpliedRate}" />
             <Run Text=": " />
-            <Run Text="{Binding TxTransferImpliedRateDisplay, Mode=OneWay}" />
+            <Run Text="{Binding Transfer.ImpliedRate, Mode=OneWay}" />
         </TextBlock>
 
         <TextBlock
