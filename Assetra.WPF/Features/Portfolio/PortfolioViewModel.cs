@@ -46,12 +46,37 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
     private readonly ILocalizationService? _localization;
     private readonly CompositeDisposable _disposables = new();
 
+    // M6-B mirror cluster — partially encapsulated. The collection TYPE stays
+    // ObservableCollection<T> for backward compat with cascading consumers
+    // (DashboardViewModel listens to .CollectionChanged directly; SellPanel,
+    // AccountDialog, TradeFilter, DividendCalendarViewModel constructors expect
+    // ObservableCollection<T> by-reference for live syncing). Replacing the
+    // type would require 5+ collateral refactors.
+    //
+    // What CAN be tightened today:
+    //   * Backing fields renamed to <c>_positions</c> etc.
+    //   * Documented Internal_* mutators are the preferred mutation API for
+    //     reload paths + test seeders. Direct <c>Positions.Add(...)</c> is now
+    //     considered legacy and discouraged in new code.
+    //
+    // Full ReadOnlyObservableCollection encapsulation tracked in
+    // M6-B-tx-mirror-followup (not in this branch).
     public ObservableCollection<PortfolioRowViewModel> Positions { get; } = [];
-    IReadOnlyList<PortfolioRowViewModel> Contracts.IPortfolioPositionFeed.Positions => Positions;
-
     public ObservableCollection<TradeRowViewModel> Trades { get; } = [];
     public ObservableCollection<CashAccountRowViewModel> CashAccounts { get; } = [];
     public ObservableCollection<LiabilityRowViewModel> Liabilities { get; } = [];
+
+    IReadOnlyList<PortfolioRowViewModel> Contracts.IPortfolioPositionFeed.Positions => Positions;
+
+    // ── Documented mutator API (preferred over direct collection mutation) ──
+    internal void Internal_AddPosition(PortfolioRowViewModel row) => Positions.Add(row);
+    internal bool Internal_RemovePosition(PortfolioRowViewModel row) => Positions.Remove(row);
+    internal void Internal_AddTrade(TradeRowViewModel row) => Trades.Add(row);
+    internal bool Internal_RemoveTrade(TradeRowViewModel row) => Trades.Remove(row);
+    internal void Internal_ClearTrades() => Trades.Clear();
+    internal void Internal_AddCashAccount(CashAccountRowViewModel row) => CashAccounts.Add(row);
+    internal void Internal_ClearLiabilities() => Liabilities.Clear();
+    internal void Internal_AddLiability(LiabilityRowViewModel row) => Liabilities.Add(row);
 
     // Tab-specific view models are built by the shell and attached once all
     // singleton VMs exist, avoiding circular construction inside PortfolioViewModel.
@@ -639,16 +664,13 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         // is the only caller that has the full entries list.
         if (Transaction is not null)
         {
-            Transaction.PositionSuggestions.Clear();
-            foreach (var e in entries.Where(x => x.IsActive)
-                                      .GroupBy(x => (x.Symbol, x.Exchange))
-                                      .Select(g => g.First())
-                                      .OrderBy(x => x.Symbol))
-            {
-                Transaction.PositionSuggestions.Add(
-                    new SubViewModels.TransactionDialogViewModel.PositionSuggestion(
-                        e.Id, e.Symbol, e.Exchange, e.DisplayName));
-            }
+            Transaction.ReplacePositionSuggestions(
+                entries.Where(x => x.IsActive)
+                       .GroupBy(x => (x.Symbol, x.Exchange))
+                       .Select(g => g.First())
+                       .OrderBy(x => x.Symbol)
+                       .Select(e => new SubViewModels.TransactionDialogViewModel.PositionSuggestion(
+                           e.Id, e.Symbol, e.Exchange, e.DisplayName)));
         }
     }
 
@@ -1026,9 +1048,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         // since ApplyCashAccounts is the only caller with the full account list.
         if (Transaction is not null)
         {
-            Transaction.CashAccountSuggestions.Clear();
-            foreach (var a in accounts.Where(a => a.IsActive).OrderBy(a => a.Name))
-                Transaction.CashAccountSuggestions.Add(a.Name);
+            Transaction.ReplaceCashAccountSuggestions(
+                accounts.Where(a => a.IsActive).OrderBy(a => a.Name).Select(a => a.Name));
         }
     }
 

@@ -32,7 +32,10 @@ internal sealed record TransactionDialogDependencies(
     PortfolioTradeDialogController TradeDialogController,
     IAccountUpsertWorkflowService? AccountUpsert,
     ISnackbarService? Snackbar,
-    // Shared parent collections (read-only references, kept in sync by parent)
+    // Shared parent collections (live references, owned + mutated by parent).
+    // Type stays ObservableCollection for cascading consumers (Account/SellPanel/
+    // TradeFilter etc. constructor signatures expect by-reference syncing).
+    // M6-B mirror full encapsulation tracked separately.
     ObservableCollection<TradeRowViewModel> Trades,
     ObservableCollection<PortfolioRowViewModel> Positions,
     ObservableCollection<CashAccountRowViewModel> CashAccounts,
@@ -125,6 +128,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Div.PropertyChanged += OnDividendTxChanged;
         Loan.PropertyChanged += OnLoanTxChanged;
         Transfer.PropertyChanged += OnTransferTxChanged;
+
+        // M6-B — read-only views of the internally-mutated suggestion collections.
+        CashAccountSuggestions = new ReadOnlyObservableCollection<string>(_cashAccountSuggestions);
+        PositionSuggestions = new ReadOnlyObservableCollection<PositionSuggestion>(_positionSuggestions);
 
         _transactionWorkflowService = deps.TransactionWorkflow;
         _tradeDeletionWorkflowService = deps.TradeDeletion;
@@ -546,7 +553,15 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         && !CashAccountSuggestions.Any(s =>
             string.Equals(s, TxCashAccountName, StringComparison.OrdinalIgnoreCase));
 
-    public ObservableCollection<string> CashAccountSuggestions { get; } = new();
+    private readonly ObservableCollection<string> _cashAccountSuggestions = new();
+    public ReadOnlyObservableCollection<string> CashAccountSuggestions { get; }
+
+    /// <summary>Used by PortfolioViewModel.ApplyCashAccounts to refresh the suggestion list.</summary>
+    internal void ReplaceCashAccountSuggestions(IEnumerable<string> names)
+    {
+        _cashAccountSuggestions.Clear();
+        foreach (var n in names) _cashAccountSuggestions.Add(n);
+    }
 
     // ── Transfer destination — same coexistence pattern as TxCashAccountName ──────────
     // INVARIANT: Transfer.Target (SelectedItem picker) wins when set.
@@ -585,7 +600,15 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             string.Equals(p.Symbol, TxSymbolInput, StringComparison.OrdinalIgnoreCase) &&
             string.Equals(p.Exchange, TxExchangeInput, StringComparison.OrdinalIgnoreCase));
 
-    public ObservableCollection<PositionSuggestion> PositionSuggestions { get; } = new();
+    private readonly ObservableCollection<PositionSuggestion> _positionSuggestions = new();
+    public ReadOnlyObservableCollection<PositionSuggestion> PositionSuggestions { get; }
+
+    /// <summary>Used by PortfolioViewModel to push a fresh suggestion snapshot.</summary>
+    internal void ReplacePositionSuggestions(IEnumerable<PositionSuggestion> suggestions)
+    {
+        _positionSuggestions.Clear();
+        foreach (var s in suggestions) _positionSuggestions.Add(s);
+    }
 
     /// <summary>
     /// Suggestion row for position autocomplete. Record with init-only fields so
