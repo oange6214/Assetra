@@ -14,6 +14,28 @@ namespace Assetra.WPF.Features.Portfolio.SubViewModels;
 /// </summary>
 public partial class TransactionDialogViewModel
 {
+    /// <summary>
+    /// Strategy-pattern dispatch for ConfirmTx. Maps TxType string → per-type
+    /// Confirm handler. Adding a new TxType is one entry; the dispatcher core
+    /// stays unchanged.
+    /// </summary>
+    private static readonly IReadOnlyDictionary<string, Func<TransactionDialogViewModel, Task>>
+        _confirmDispatch = new Dictionary<string, Func<TransactionDialogViewModel, Task>>(StringComparer.Ordinal)
+        {
+            ["income"]             = vm => vm.ConfirmIncomeAsync(),
+            ["cashDiv"]            = vm => vm.ConfirmCashDivAsync(),
+            ["stockDiv"]           = vm => vm.ConfirmStockDivAsync(),
+            ["deposit"]            = vm => vm.ConfirmCashFlowAsync(TradeType.Deposit),
+            ["withdrawal"]         = vm => vm.ConfirmCashFlowAsync(TradeType.Withdrawal),
+            ["loanBorrow"]         = vm => vm.ConfirmLoanAsync(TradeType.LoanBorrow),
+            ["loanRepay"]          = vm => vm.ConfirmLoanAsync(TradeType.LoanRepay),
+            ["creditCardCharge"]   = vm => vm.ConfirmCreditCardChargeAsync(),
+            ["creditCardPayment"]  = vm => vm.ConfirmCreditCardPaymentAsync(),
+            ["transfer"]           = vm => vm.ConfirmTransferAsync(),
+            ["buy"]                = vm => vm.ConfirmBuyAsync(),
+            ["sell"]               = vm => vm.ConfirmSellTxAsync(),
+        };
+
     [RelayCommand]
     private async Task ConfirmTx()
     {
@@ -61,45 +83,10 @@ public partial class TransactionDialogViewModel
 
         try
         {
-            switch (TxType)
-            {
-                case "income":
-                    await ConfirmIncomeAsync();
-                    break;
-                case "cashDiv":
-                    await ConfirmCashDivAsync();
-                    break;
-                case "stockDiv":
-                    await ConfirmStockDivAsync();
-                    break;
-                case "deposit":
-                    await ConfirmCashFlowAsync(TradeType.Deposit);
-                    break;
-                case "withdrawal":
-                    await ConfirmCashFlowAsync(TradeType.Withdrawal);
-                    break;
-                case "loanBorrow":
-                    await ConfirmLoanAsync(TradeType.LoanBorrow);
-                    break;
-                case "loanRepay":
-                    await ConfirmLoanAsync(TradeType.LoanRepay);
-                    break;
-                case "creditCardCharge":
-                    await ConfirmCreditCardChargeAsync();
-                    break;
-                case "creditCardPayment":
-                    await ConfirmCreditCardPaymentAsync();
-                    break;
-                case "transfer":
-                    await ConfirmTransferAsync();
-                    break;
-                case "buy":
-                    await ConfirmBuyAsync();
-                    break;
-                case "sell":
-                    await ConfirmSellTxAsync();
-                    break;
-            }
+            // Strategy-pattern dispatch — replaces the 12-arm switch. Extension point
+            // for future TxTypes is now adding one entry to _confirmDispatch.
+            if (_confirmDispatch.TryGetValue(TxType, out var handler))
+                await handler(this);
         }
         catch (Exception ex)
         {
