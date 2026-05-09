@@ -1498,7 +1498,7 @@ public class PortfolioViewModelTests
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);
         var cashAcc = vm.CashAccounts.First();
 
-        // Seed a position first so TxDivPosition can find it
+        // Seed a position first so Div.Position can find it
         var pos = new PortfolioRowViewModel
         { Id = Guid.NewGuid(), Symbol = "0050", Quantity = 1000, BuyPrice = 140 };
         vm.Positions.Add(pos);
@@ -1776,7 +1776,7 @@ public class PortfolioViewModelTests
         var original = vm.Trades.First(t => t.Type == TradeType.CashDividend);
         vm.Transaction.EditTradeCommand.Execute(original);
         vm.Transaction.CreateRevisionCommand.Execute(null);
-        vm.Transaction.TxDivPerShare = "3.0";
+        vm.Transaction.Div.PerShare = "3.0";
 
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
         vm.Transaction.KeepBothRecordsCommand.Execute(null);
@@ -1882,7 +1882,7 @@ public class PortfolioViewModelTests
         await vm.LoadTradesAsyncForTest();
 
         vm.Transaction.EditTradeCommand.Execute(staleRow);
-        vm.Transaction.TxDivPerShare = "2.0";
+        vm.Transaction.Div.PerShare = "2.0";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.DoesNotContain(tradeRepo.Store, t => t.Type == TradeType.CashDividend);
@@ -2242,9 +2242,9 @@ public class PortfolioViewModelTests
         // For this test simplicity, just verify the validation path: total mode with valid
         // total should not produce "每股股利無效" error.
         vm.Transaction.TxType = "cashDiv";
-        vm.Transaction.TxDivInputMode = "total";
-        vm.Transaction.TxDivTotalInput = "1000";
-        // No TxDivPosition set → expect "請選擇股票" not "每股股利無效"
+        vm.Transaction.Div.InputMode = "total";
+        vm.Transaction.Div.TotalInput = "1000";
+        // No Div.Position set → expect "請選擇股票" not "每股股利無效"
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
         Assert.Contains("股票", vm.Transaction.TxError);
         Assert.DoesNotContain("每股股利", vm.Transaction.TxError);
@@ -2255,8 +2255,8 @@ public class PortfolioViewModelTests
     {
         var (vm, _, _) = await CreateVmWithCashAsync(0m);
         vm.Transaction.TxType = "cashDiv";
-        vm.Transaction.TxDivInputMode = "total";
-        vm.Transaction.TxDivTotalInput = "abc";
+        vm.Transaction.Div.InputMode = "total";
+        vm.Transaction.Div.TotalInput = "abc";
 
         // Need position fake to bypass first guard
         var fakePos = new PortfolioRowViewModel
@@ -2267,7 +2267,7 @@ public class PortfolioViewModelTests
             BuyPrice = 100,
         };
         vm.Positions.Add(fakePos);
-        vm.Transaction.TxDivPosition = fakePos;
+        vm.Transaction.Div.Position = fakePos;
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Contains("總股息金額無效", vm.Transaction.TxError);
@@ -2306,11 +2306,11 @@ public class PortfolioViewModelTests
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
 
-        Assert.True(vm.Transaction.TxDivIsPerShareMode);
-        Assert.False(vm.Transaction.TxDivIsTotalMode);
-        vm.Transaction.TxDivInputMode = "total";
-        Assert.False(vm.Transaction.TxDivIsPerShareMode);
-        Assert.True(vm.Transaction.TxDivIsTotalMode);
+        Assert.True(vm.Transaction.Div.IsPerShareMode);
+        Assert.False(vm.Transaction.Div.IsTotalMode);
+        vm.Transaction.Div.InputMode = "total";
+        Assert.False(vm.Transaction.Div.IsPerShareMode);
+        Assert.True(vm.Transaction.Div.IsTotalMode);
     }
 
     // Cash-flow fee + Transfer

@@ -20,7 +20,7 @@
         <ComboBox
             Margin="0,0,0,12"
             ItemsSource="{Binding Positions}"
-            SelectedItem="{Binding TxDivPosition, Mode=TwoWay}"
+            SelectedItem="{Binding Div.Position, Mode=TwoWay}"
             Style="{StaticResource FormComboBox}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -48,47 +48,47 @@
         <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
             <RadioButton
                 Content="{DynamicResource Portfolio.Tx.DivModePerShare}"
-                GroupName="TxDivInputMode"
-                IsChecked="{Binding TxDivInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=perShare, Mode=TwoWay}"
+                GroupName="Div.InputMode"
+                IsChecked="{Binding Div.InputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=perShare, Mode=TwoWay}"
                 Style="{StaticResource SegmentBtn}" />
             <RadioButton
                 Margin="6,0,0,0"
                 Content="{DynamicResource Portfolio.Tx.DivModeTotal}"
-                GroupName="TxDivInputMode"
-                IsChecked="{Binding TxDivInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=total, Mode=TwoWay}"
+                GroupName="Div.InputMode"
+                IsChecked="{Binding Div.InputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=total, Mode=TwoWay}"
                 Style="{StaticResource SegmentBtn}" />
         </StackPanel>
 
         <!--  每股股利模式  -->
-        <StackPanel Visibility="{Binding TxDivIsPerShareMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <StackPanel Visibility="{Binding Div.IsPerShareMode, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.DivPerShare}" />
-            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxDivPerShare, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding Div.PerShare, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,12"
                 Style="{StaticResource FormFieldError}"
-                Text="{Binding TxDivPerShareError}"
-                Visibility="{Binding TxDivPerShareError, Converter={StaticResource StringToVisibilityConverter}}" />
+                Text="{Binding Div.PerShareError}"
+                Visibility="{Binding Div.PerShareError, Converter={StaticResource StringToVisibilityConverter}}" />
         </StackPanel>
 
         <!--  總額模式  -->
-        <StackPanel Visibility="{Binding TxDivIsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <StackPanel Visibility="{Binding Div.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.DivTotalAmount}" />
-            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxDivTotalInput, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding Div.TotalInput, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,12"
                 Style="{StaticResource FormFieldError}"
-                Text="{Binding TxDivTotalInputError}"
-                Visibility="{Binding TxDivTotalInputError, Converter={StaticResource StringToVisibilityConverter}}" />
+                Text="{Binding Div.TotalInputError}"
+                Visibility="{Binding Div.TotalInputError, Converter={StaticResource StringToVisibilityConverter}}" />
         </StackPanel>
 
         <!--  持有股數 + 合計（auto-calculated）  -->
@@ -99,7 +99,7 @@
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
             CornerRadius="{StaticResource Radius.Sm}"
-            Visibility="{Binding HasDivPreview, Converter={StaticResource BooleanToVisibilityConverter}}">
+            Visibility="{Binding Div.HasPreview, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -122,7 +122,7 @@
                     FontFamily="{StaticResource Font.Family.Base}"
                     FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{Binding TxDivPosition.Quantity, StringFormat={}{0:N0}}"
+                    Text="{Binding Div.Position.Quantity, StringFormat={}{0:N0}}"
                     Typography.NumeralAlignment="Tabular" />
                 <Rectangle
                     Grid.Row="1"
@@ -144,7 +144,7 @@
                     FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppUp}"
-                    Text="{Binding TxDivTotal, StringFormat={}{0:N0}}"
+                    Text="{Binding Div.Total, StringFormat={}{0:N0}}"
                     Typography.NumeralAlignment="Tabular" />
             </Grid>
         </Border>

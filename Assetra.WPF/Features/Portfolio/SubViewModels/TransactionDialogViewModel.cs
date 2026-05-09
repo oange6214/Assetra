@@ -119,9 +119,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         ArgumentNullException.ThrowIfNull(deps);
 
-        // H1 — react to Buy.X / Sell.X changes (preview, validation, side effects).
+        // H1 — react to Buy.X / Sell.X / Div.X changes (preview, validation, side effects).
         Buy.PropertyChanged += OnBuyPriceModeChanged;
         Sell.PropertyChanged += OnSellTxChanged;
+        Div.PropertyChanged += OnDividendTxChanged;
 
         _transactionWorkflowService = deps.TransactionWorkflow;
         _tradeDeletionWorkflowService = deps.TradeDeletion;
@@ -265,9 +266,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     // ── 欄位驗證訊息（空字串 = 無錯誤；綁定到 XAML FormFieldError TextBlock）──
     [ObservableProperty] private string _txAmountError = string.Empty;
     [ObservableProperty] private string _txFeeError = string.Empty;
-    [ObservableProperty] private string _txDivPerShareError = string.Empty;
-    [ObservableProperty] private string _txDivTotalInputError = string.Empty;
-    [ObservableProperty] private string _txStockDivNewSharesError = string.Empty;
+    // Div errors moved to Div (DividendTxViewModel).
     [ObservableProperty] private string _txTransferTargetAmountError = string.Empty;
     [ObservableProperty] private string _txPrincipalError = string.Empty;
     [ObservableProperty] private string _txInterestPaidError = string.Empty;
@@ -327,14 +326,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     // 現金帳戶選擇（收入 + 現金股利共用，null = 不連動）
     [ObservableProperty] private CashAccountRowViewModel? _txCashAccount;
 
-    // 現金股利欄位
-    [ObservableProperty] private PortfolioRowViewModel? _txDivPosition;  // from Positions
-    [ObservableProperty] private string _txDivPerShare = string.Empty;
-    [ObservableProperty] private decimal _txDivTotal;
-
-    // 股票股利欄位
-    [ObservableProperty] private PortfolioRowViewModel? _txStockDivPosition;
-    [ObservableProperty] private string _txStockDivNewShares = string.Empty;
+    // 股利欄位（現金 + 股票）— 全部移到 Div (DividendTxViewModel)。
+    public Tx.DividendTxViewModel Div { get; } = new();
 
     // 手續費折扣（每筆交易可調，預設 1.0 = 無折扣）
     [ObservableProperty] private string _txCommissionDiscount = "1.0";
@@ -733,27 +726,39 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             _ = AutoFillLoanRepayAsync(TxLoanLabel);
     }
 
-    partial void OnTxDivPositionChanged(PortfolioRowViewModel? _) => UpdateDivTotal();
-
-    partial void OnTxDivPerShareChanged(string value)
+    /// <summary>
+    /// React to Div.X changes — runs validation + total recomputation that the old
+    /// partial OnTxDiv*Changed handlers performed.
+    /// </summary>
+    private void OnDividendTxChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        TxDivPerShareError = ValidatePositiveDecimalOrEmpty(value);
-        UpdateDivTotal();
+        switch (e.PropertyName)
+        {
+            case nameof(DividendTxViewModel.Position):
+                UpdateDivTotal();
+                break;
+            case nameof(DividendTxViewModel.PerShare):
+                Div.PerShareError = ValidatePositiveDecimalOrEmpty(Div.PerShare);
+                UpdateDivTotal();
+                break;
+            case nameof(DividendTxViewModel.Total):
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(DividendTxViewModel.TotalInput):
+                Div.TotalInputError = ValidatePositiveDecimalOrEmpty(Div.TotalInput);
+                break;
+            case nameof(DividendTxViewModel.StockNewShares):
+                Div.StockNewSharesError = ValidatePositiveIntOrEmpty(Div.StockNewShares);
+                break;
+        }
     }
 
     private void UpdateDivTotal()
     {
-        if (TxDivPosition is null || !ParseHelpers.TryParseDecimal(TxDivPerShare, out var perShare) || perShare <= 0)
-            TxDivTotal = 0;
+        if (Div.Position is null || !ParseHelpers.TryParseDecimal(Div.PerShare, out var perShare) || perShare <= 0)
+            Div.Total = 0;
         else
-            TxDivTotal = perShare * TxDivPosition.Quantity;
-    }
-
-    public bool HasDivPreview => TxDivTotal > 0;
-    partial void OnTxDivTotalChanged(decimal _)
-    {
-        OnPropertyChanged(nameof(HasDivPreview));
-        NotifyImpactPreviewChanged();
+            Div.Total = perShare * Div.Position.Quantity;
     }
 
     /// <summary>
@@ -793,26 +798,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         }
     }
 
-    // CashDividend 輸入模式
-    /// <summary>
-    /// 股息輸入模式：<c>"perShare"</c> = 填每股股利；<c>"total"</c> = 直接填總股息金額。
-    /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TxDivIsPerShareMode))]
-    [NotifyPropertyChangedFor(nameof(TxDivIsTotalMode))]
-    private string _txDivInputMode = "perShare";
-
-    public bool TxDivIsPerShareMode => TxDivInputMode == "perShare";
-    public bool TxDivIsTotalMode => TxDivInputMode == "total";
-
-    /// <summary>總額模式下使用者直接輸入的總股息。</summary>
-    [ObservableProperty] private string _txDivTotalInput = string.Empty;
-
-    partial void OnTxDivTotalInputChanged(string value) =>
-        TxDivTotalInputError = ValidatePositiveDecimalOrEmpty(value);
-
-    partial void OnTxStockDivNewSharesChanged(string value) =>
-        TxStockDivNewSharesError = ValidatePositiveIntOrEmpty(value);
+    // CashDividend / StockDividend 輸入模式 + 驗證 — 全部移到 Div (DividendTxViewModel).
+    // 由 OnDividendTxChanged 處理 PropertyChanged 觸發的驗證與重算。
 
     partial void OnTxTransferTargetAmountChanged(string value) =>
         TxTransferTargetAmountError = ValidatePositiveDecimalOrEmpty(value);
@@ -859,9 +846,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxError = string.Empty;
         TxAmountError = string.Empty;
         TxFeeError = string.Empty;
-        TxDivPerShareError = string.Empty;
-        TxDivTotalInputError = string.Empty;
-        TxStockDivNewSharesError = string.Empty;
+        Div.PerShareError = string.Empty;
+        Div.TotalInputError = string.Empty;
+        Div.StockNewSharesError = string.Empty;
         TxTransferTargetAmountError = string.Empty;
         TxPrincipalError = string.Empty;
         TxInterestPaidError = string.Empty;
@@ -874,11 +861,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _txCategoryAutoMatched = false;
         // 新增（非編輯）時帶入使用者在現金頁設定的預設帳戶
         TxCashAccount = state.TxCashAccount;
-        TxDivPosition = null;
-        TxDivPerShare = string.Empty;
-        TxDivTotal = 0;
-        TxStockDivPosition = null;
-        TxStockDivNewShares = string.Empty;
+        Div.Position = null;
+        Div.PerShare = string.Empty;
+        Div.Total = 0;
+        Div.StockPosition = null;
+        Div.StockNewShares = string.Empty;
         TxLoanLabel = string.Empty;
         TxFee = string.Empty;
         TxUseCashAccount = state.TxUseCashAccount;
@@ -892,8 +879,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Buy.TotalCost = string.Empty;
         Buy.TotalIncludesFee = true;  // Reset to default — most broker totals include fee.
         Buy.MetaOnly = false;
-        TxDivInputMode = state.TxDivInputMode;
-        TxDivTotalInput = string.Empty;
+        Div.InputMode = state.TxDivInputMode;
+        Div.TotalInput = string.Empty;
         TxCommissionDiscount = state.TxCommissionDiscount;
         Sell.Position = null;
         Sell.Quantity = string.Empty;
@@ -946,9 +933,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxError = string.Empty;
         TxAmountError = string.Empty;
         TxFeeError = string.Empty;
-        TxDivPerShareError = string.Empty;
-        TxDivTotalInputError = string.Empty;
-        TxStockDivNewSharesError = string.Empty;
+        Div.PerShareError = string.Empty;
+        Div.TotalInputError = string.Empty;
+        Div.StockNewSharesError = string.Empty;
         TxTransferTargetAmountError = string.Empty;
         TxPrincipalError = string.Empty;
         TxInterestPaidError = string.Empty;
@@ -970,10 +957,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxCreditCard = null;
         TxPrincipal = string.Empty;
         TxInterestPaid = string.Empty;
-        TxDivPosition = null;
-        TxDivPerShare = string.Empty;
-        TxStockDivPosition = null;
-        TxStockDivNewShares = string.Empty;
+        Div.Position = null;
+        Div.PerShare = string.Empty;
+        Div.StockPosition = null;
+        Div.StockNewShares = string.Empty;
         Sell.Position = null;
         Sell.Quantity = string.Empty;
         Sell.QuantityError = string.Empty;
@@ -994,8 +981,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         AddAssetDialog.AddCreditCardLimit = string.Empty;
         TxCommissionDiscount = "1.0";
         Buy.Reset();
-        TxDivInputMode = "perShare";
-        TxDivTotalInput = string.Empty;
+        Div.InputMode = "perShare";
+        Div.TotalInput = string.Empty;
 
         TxType = editState.TxType;
         TxCreditCard = editState.TxCreditCard;
@@ -1051,15 +1038,15 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 break;
 
             case TradeType.CashDividend:
-                TxDivPosition = editState.TxDivPosition;
-                TxDivPerShare = editState.TxDivPerShare;
+                Div.Position = editState.TxDivPosition;
+                Div.PerShare = editState.TxDivPerShare;
                 TxCashAccount = editState.TxCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
                 break;
 
             case TradeType.StockDividend:
-                TxStockDivPosition = editState.TxStockDivPosition;
-                TxStockDivNewShares = editState.TxStockDivNewShares;
+                Div.StockPosition = editState.TxStockDivPosition;
+                Div.StockNewShares = editState.TxStockDivNewShares;
                 break;
 
             case TradeType.Income:

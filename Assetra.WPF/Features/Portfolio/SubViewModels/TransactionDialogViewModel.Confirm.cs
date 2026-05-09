@@ -338,39 +338,39 @@ public partial class TransactionDialogViewModel
     /// </summary>
     private async Task ConfirmCashDivAsync()
     {
-        if (TxDivPosition is null)
+        if (Div.Position is null)
         { TxError = "請選擇股票"; return; }
 
         decimal perShare;
         decimal total;
-        if (TxDivIsTotalMode)
+        if (Div.IsTotalMode)
         {
-            if (!ParseHelpers.TryParseDecimal(TxDivTotalInput, out total) || total <= 0)
+            if (!ParseHelpers.TryParseDecimal(Div.TotalInput, out total) || total <= 0)
             { TxError = "總股息金額無效"; return; }
-            perShare = TxDivPosition.Quantity > 0 ? total / TxDivPosition.Quantity : 0;
+            perShare = Div.Position.Quantity > 0 ? total / Div.Position.Quantity : 0;
         }
         else
         {
-            if (!ParseHelpers.TryParseDecimal(TxDivPerShare, out perShare) || perShare <= 0)
+            if (!ParseHelpers.TryParseDecimal(Div.PerShare, out perShare) || perShare <= 0)
             { TxError = "每股股利無效"; return; }
-            total = perShare * TxDivPosition.Quantity;
+            total = perShare * Div.Position.Quantity;
         }
 
         var fee = ParseOptionalFee(out var feeError);
         if (feeError is not null)
         { TxError = feeError; return; }
 
-        var divName = string.IsNullOrEmpty(TxDivPosition.Name)
-                      ? TxDivPosition.Symbol
-                      : TxDivPosition.Name;
+        var divName = string.IsNullOrEmpty(Div.Position.Name)
+                      ? Div.Position.Symbol
+                      : Div.Position.Name;
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
         await _transactionWorkflowService.RecordCashDividendAsync(new CashDividendTransactionRequest(
-            TxDivPosition.Symbol,
-            TxDivPosition.Exchange,
+            Div.Position.Symbol,
+            Div.Position.Exchange,
             divName,
             perShare,
-            (int)TxDivPosition.Quantity,
+            (int)Div.Position.Quantity,
             total,
             tradeDate,
             cashAccId,
@@ -382,21 +382,21 @@ public partial class TransactionDialogViewModel
 
     private async Task ConfirmStockDivAsync()
     {
-        if (TxStockDivPosition is null)
+        if (Div.StockPosition is null)
         { TxError = "請選擇股票"; return; }
-        if (!ParseHelpers.TryParseInt(TxStockDivNewShares, out var newShares) || newShares <= 0)
+        if (!ParseHelpers.TryParseInt(Div.StockNewShares, out var newShares) || newShares <= 0)
         { TxError = "配股數無效"; return; }
 
-        var divName = string.IsNullOrEmpty(TxStockDivPosition.Name)
-                      ? TxStockDivPosition.Symbol
-                      : TxStockDivPosition.Name;
+        var divName = string.IsNullOrEmpty(Div.StockPosition.Name)
+                      ? Div.StockPosition.Symbol
+                      : Div.StockPosition.Name;
         await _transactionWorkflowService.RecordStockDividendAsync(new StockDividendTransactionRequest(
-            TxStockDivPosition.Symbol,
-            TxStockDivPosition.Exchange,
+            Div.StockPosition.Symbol,
+            Div.StockPosition.Exchange,
             divName,
             newShares,
             DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
-            TxStockDivPosition.Id));
+            Div.StockPosition.Id));
 
         await AfterTxSuccessAsync(reloadBalances: false);
         // TransactionCompleted raised by ConfirmTx

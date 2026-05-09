@@ -112,9 +112,9 @@ public partial class TransactionDialogViewModel
                 return true;
 
             case "cashDiv":
-                if (TxDivTotal <= 0)
+                if (Div.Total <= 0)
                     return false;
-                delta = TxDivTotal;
+                delta = Div.Total;
                 return true;
 
             case "loanRepay":

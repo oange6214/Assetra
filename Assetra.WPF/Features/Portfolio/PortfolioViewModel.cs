@@ -932,7 +932,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
             return;
         Transaction.OpenTxDialog();
         Transaction.TxType = "cashDiv";
-        Transaction.TxDivPosition = SelectedPositionRow;
+        Transaction.Div.Position = SelectedPositionRow;
     }
 
     /// <summary>側面板「賣出」快速動作 — 呼叫既有 BeginSell，但以 SelectedPositionRow 為目標。</summary>
