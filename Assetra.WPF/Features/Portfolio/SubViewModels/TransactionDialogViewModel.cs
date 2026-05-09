@@ -119,8 +119,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         ArgumentNullException.ThrowIfNull(deps);
 
-        // H1 — bubble Buy.X PropertyChanged into TxBuy* facade notifications.
+        // H1 — react to Buy.X / Sell.X changes (preview, validation, side effects).
         Buy.PropertyChanged += OnBuyPriceModeChanged;
+        Sell.PropertyChanged += OnSellTxChanged;
 
         _transactionWorkflowService = deps.TransactionWorkflow;
         _tradeDeletionWorkflowService = deps.TradeDeletion;
@@ -352,40 +353,32 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     // 買入欄位 — 全部移到 Buy (BuyTxViewModel)。
 
     // 賣出欄位
-    [ObservableProperty] private PortfolioRowViewModel? _txSellPosition;
-    [ObservableProperty] private string _txSellQuantity = string.Empty;
-    [ObservableProperty] private string _txSellQuantityError = string.Empty;
+    /// <summary>
+    /// H1 — sell transaction state cluster extracted into <see cref="Tx.SellTxViewModel"/>.
+    /// All sell-related state (Position / Quantity / preview values / IsEtf flags)
+    /// now lives here. XAML binds directly to <c>Sell.X</c>.
+    /// </summary>
+    public Tx.SellTxViewModel Sell { get; } = new();
 
-    // Sell-tx preview — parallel to buy's AddGrossAmount / AddCommission / AddTotalCost,
-    // but also shows TransactionTax and NetAmount since sell has two deductions.
-    [ObservableProperty] private decimal _txSellGrossAmount;
-    [ObservableProperty] private decimal _txSellCommission;
-    [ObservableProperty] private decimal _txSellTransactionTax;
-    [ObservableProperty] private decimal _txSellNetAmount;
-    [ObservableProperty] private bool _txSellIsEtf;
-    [ObservableProperty] private bool _txSellIsBondEtf;
-    private bool _suppressSellPositionPriceAutoFill;
-
-    public bool HasTxSellPreview => TxSellGrossAmount > 0;
-    partial void OnTxSellGrossAmountChanged(decimal _) => OnPropertyChanged(nameof(HasTxSellPreview));
-
-    partial void OnTxSellQuantityChanged(string value)
+    private void OnSellTxChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        TxSellQuantityError = ValidatePositiveIntOrEmpty(value);
-        UpdateSellTxPreview();
-    }
-
-    partial void OnTxSellPositionChanged(PortfolioRowViewModel? value)
-    {
-        if (!_suppressSellPositionPriceAutoFill &&
-            value is not null &&
-            value.CurrentPrice > 0)
-            TxAmount = value.CurrentPrice.ToString("F2");
-        if (value is null)
-            TxSellQuantity = string.Empty;
-        TxSellIsEtf = value is not null && _search.IsEtf(value.Symbol);
-        TxSellIsBondEtf = value is not null && _search.IsBondEtf(value.Symbol);
-        UpdateSellTxPreview();
+        switch (e.PropertyName)
+        {
+            case nameof(SellTxViewModel.Position):
+                if (!Sell.SuppressPositionPriceAutoFill &&
+                    Sell.Position is { CurrentPrice: > 0 } pos)
+                    TxAmount = pos.CurrentPrice.ToString("F2");
+                if (Sell.Position is null)
+                    Sell.Quantity = string.Empty;
+                Sell.IsEtf = Sell.Position is not null && _search.IsEtf(Sell.Position.Symbol);
+                Sell.IsBondEtf = Sell.Position is not null && _search.IsBondEtf(Sell.Position.Symbol);
+                UpdateSellTxPreview();
+                break;
+            case nameof(SellTxViewModel.Quantity):
+                Sell.QuantityError = ValidatePositiveIntOrEmpty(Sell.Quantity);
+                UpdateSellTxPreview();
+                break;
+        }
     }
 
     /// <summary>
@@ -396,19 +389,16 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private void UpdateSellTxPreview()
     {
         if (!TxTypeIsSell ||
-            TxSellPosition is null ||
+            Sell.Position is null ||
             !ParseHelpers.TryParseDecimal(TxAmount, out var price) || price <= 0)
         {
-            TxSellGrossAmount = 0;
-            TxSellCommission = 0;
-            TxSellTransactionTax = 0;
-            TxSellNetAmount = 0;
+            Sell.ResetPreview();
             return;
         }
 
-        var qty = ParseHelpers.TryParseInt(TxSellQuantity, out var parsedQty) && parsedQty > 0
+        var qty = ParseHelpers.TryParseInt(Sell.Quantity, out var parsedQty) && parsedQty > 0
             ? parsedQty
-            : (int)TxSellPosition.Quantity;
+            : (int)Sell.Position.Quantity;
         var gross = price * qty;
 
         // Manual fee override: user has typed a value in the 手續費 field → treat that as
@@ -417,19 +407,19 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         if (!string.IsNullOrWhiteSpace(TxFee) &&
             ParseHelpers.TryParseDecimal(TxFee, out var manualFee) && manualFee >= 0)
         {
-            TxSellGrossAmount = gross;
-            TxSellCommission = manualFee;
-            TxSellTransactionTax = 0;
-            TxSellNetAmount = gross - manualFee;
+            Sell.GrossAmount = gross;
+            Sell.Commission = manualFee;
+            Sell.TransactionTax = 0;
+            Sell.NetAmount = gross - manualFee;
             return;
         }
 
         var discount = TxCommissionDiscountValue;
-        var fee = TaiwanTradeFeeCalculator.CalcSell(price, qty, discount, TxSellIsEtf, TxSellIsBondEtf);
-        TxSellGrossAmount = fee.GrossAmount;
-        TxSellCommission = fee.Commission;
-        TxSellTransactionTax = fee.TransactionTax;
-        TxSellNetAmount = fee.NetAmount;
+        var fee = TaiwanTradeFeeCalculator.CalcSell(price, qty, discount, Sell.IsEtf, Sell.IsBondEtf);
+        Sell.GrossAmount = fee.GrossAmount;
+        Sell.Commission = fee.Commission;
+        Sell.TransactionTax = fee.TransactionTax;
+        Sell.NetAmount = fee.NetAmount;
     }
 
     // Type booleans
@@ -905,9 +895,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxDivInputMode = state.TxDivInputMode;
         TxDivTotalInput = string.Empty;
         TxCommissionDiscount = state.TxCommissionDiscount;
-        TxSellPosition = null;
-        TxSellQuantity = string.Empty;
-        TxSellQuantityError = string.Empty;
+        Sell.Position = null;
+        Sell.Quantity = string.Empty;
+        Sell.QuantityError = string.Empty;
         EditSummaryType = string.Empty;
         EditSummaryTarget = string.Empty;
         EditSummaryAmount = string.Empty;
@@ -984,9 +974,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxDivPerShare = string.Empty;
         TxStockDivPosition = null;
         TxStockDivNewShares = string.Empty;
-        TxSellPosition = null;
-        TxSellQuantity = string.Empty;
-        TxSellQuantityError = string.Empty;
+        Sell.Position = null;
+        Sell.Quantity = string.Empty;
+        Sell.QuantityError = string.Empty;
         SellPanel.SellCashAccount = null;
         SellPanel.SellPriceInput = string.Empty;
         AddAssetDialog.AddSymbol = string.Empty;
@@ -1047,10 +1037,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 // editable fields. The position itself was closed at sell time.
                 // Populate BOTH TxCashAccount (dialog XAML binds to this) AND SellCashAccount
                 // (ConfirmSell uses this). Without the former, the dialog dropdown was empty.
-                _suppressSellPositionPriceAutoFill = true;
-                TxSellPosition = editState.TxSellPosition;
-                _suppressSellPositionPriceAutoFill = false;
-                TxSellQuantity = editState.TxSellQuantity;
+                Sell.SuppressPositionPriceAutoFill = true;
+                Sell.Position = editState.TxSellPosition;
+                Sell.SuppressPositionPriceAutoFill = false;
+                Sell.Quantity = editState.TxSellQuantity;
                 TxAmount = editState.TxAmount;
                 SellPanel.SellPriceInput = editState.SellPriceInput;
                 TxCashAccount = editState.TxCashAccount;

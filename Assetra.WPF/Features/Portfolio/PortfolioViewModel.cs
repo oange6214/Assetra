@@ -905,8 +905,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         // Open Tx dialog in Sell mode with this position pre-selected
         Transaction.OpenTxDialog();
         Transaction.TxType = "sell";
-        Transaction.TxSellPosition = row;
-        Transaction.TxSellQuantity = ((int)row.Quantity).ToString();
+        Transaction.Sell.Position = row;
+        Transaction.Sell.Quantity = ((int)row.Quantity).ToString();
     }
 
     /// <summary>側面板「買入」快速動作 — 打開 Tx 對話框，預填當前股票代號。</summary>

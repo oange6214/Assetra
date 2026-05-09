@@ -269,23 +269,23 @@ public partial class TransactionDialogViewModel
 
     private async Task ConfirmSellTxAsync()
     {
-        if (TxSellPosition is null)
+        if (Sell.Position is null)
         { TxError = "請選擇持倉"; return; }
 
-        if (!ParseHelpers.TryParseInt(TxSellQuantity, out var sellQty) || sellQty <= 0)
+        if (!ParseHelpers.TryParseInt(Sell.Quantity, out var sellQty) || sellQty <= 0)
         { TxError = "賣出數量無效"; return; }
-        if (sellQty > (int)TxSellPosition.Quantity)
-        { TxError = $"賣出數量 ({sellQty:N0}) 超過持倉 ({(int)TxSellPosition.Quantity:N0}) 股"; return; }
+        if (sellQty > (int)Sell.Position.Quantity)
+        { TxError = $"賣出數量 ({sellQty:N0}) 超過持倉 ({(int)Sell.Position.Quantity:N0}) 股"; return; }
 
         if (!ParseHelpers.TryParseDecimal(TxAmount, out var sellPrice) || sellPrice <= 0)
         { TxError = "賣出價格無效"; return; }
 
         var error = await SellPanel.ExecuteSellFromTxDialogAsync(
-            row: TxSellPosition,
+            row: Sell.Position,
             sellPrice: sellPrice.ToString(),
             tradeDate: DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
             cashAccount: TxUseCashAccount ? TxCashAccount : null,
-            isSellEtf: _search.IsEtf(TxSellPosition.Symbol),
+            isSellEtf: _search.IsEtf(Sell.Position.Symbol),
             qtyOverride: sellQty);
 
         if (error is not null)

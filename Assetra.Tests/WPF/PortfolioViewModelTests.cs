@@ -1485,7 +1485,7 @@ public class PortfolioViewModelTests
         Assert.Equal("sell", vm.Transaction.TxType);
         Assert.Equal("second sell", vm.Transaction.TxNote);
         Assert.Equal("188.5000", vm.Transaction.TxAmount);
-        Assert.Equal("2000", vm.Transaction.TxSellQuantity);
+        Assert.Equal("2000", vm.Transaction.Sell.Quantity);
         Assert.Equal("188.5000", vm.SellPanel.SellPriceInput);
         Assert.Equal(cashAcc.Id, vm.Transaction.TxCashAccount?.Id);
     }
@@ -1569,7 +1569,7 @@ public class PortfolioViewModelTests
     [Fact]
     public async Task EditTrade_SellRow_KeepsStoredPriceEvenWhenMatchingPositionHasCurrentPrice()
     {
-        // Regression: when a same-symbol holding still exists, selecting TxSellPosition
+        // Regression: when a same-symbol holding still exists, selecting Sell.Position
         // used to auto-fill TxAmount from CurrentPrice and could briefly or permanently
         // replace the stored sell price during edit prefill.
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);

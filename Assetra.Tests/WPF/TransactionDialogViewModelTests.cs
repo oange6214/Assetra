@@ -207,18 +207,18 @@ public class TransactionDialogViewModelTests
     public void TxSellQuantity_NonInteger_SetsError()
     {
         var vm = CreateVm();
-        vm.TxSellQuantity = "1.5";
-        Assert.NotEqual(string.Empty, vm.TxSellQuantityError);
+        vm.Sell.Quantity = "1.5";
+        Assert.NotEqual(string.Empty, vm.Sell.QuantityError);
     }
 
     [Fact]
     public void TxSellQuantity_PositiveInt_ClearsError()
     {
         var vm = CreateVm();
-        vm.TxSellQuantity = "abc";
-        Assert.NotEqual(string.Empty, vm.TxSellQuantityError);
-        vm.TxSellQuantity = "1000";
-        Assert.Equal(string.Empty, vm.TxSellQuantityError);
+        vm.Sell.Quantity = "abc";
+        Assert.NotEqual(string.Empty, vm.Sell.QuantityError);
+        vm.Sell.Quantity = "1000";
+        Assert.Equal(string.Empty, vm.Sell.QuantityError);
     }
 
     // ── Commission discount parsing ──────────────────────────────────────────
@@ -315,17 +315,17 @@ public class TransactionDialogViewModelTests
         Assert.Same(vm.IncomeCategories, vm.CashFlowCategories);
     }
 
-    // ── Sell preview (HasTxSellPreview gating) ───────────────────────────────
+    // ── Sell preview (Sell.HasPreview gating) ───────────────────────────────
 
     [Fact]
     public void HasTxSellPreview_FalseUntilGrossAmountSet()
     {
         var vm = CreateVm();
-        Assert.False(vm.HasTxSellPreview);
-        vm.TxSellGrossAmount = 100m;
-        Assert.True(vm.HasTxSellPreview);
-        vm.TxSellGrossAmount = 0m;
-        Assert.False(vm.HasTxSellPreview);
+        Assert.False(vm.Sell.HasPreview);
+        vm.Sell.GrossAmount = 100m;
+        Assert.True(vm.Sell.HasPreview);
+        vm.Sell.GrossAmount = 0m;
+        Assert.False(vm.Sell.HasPreview);
     }
 
     [Fact]
