@@ -709,7 +709,7 @@ public class PortfolioViewModelTests
         var (vm, _, _, card) = await CreateVmWithCreditCardAndCashAsync(initialCardBalance: 0m, initialCash: 30_000m);
 
         vm.Transaction.TxType = "creditCardCharge";
-        vm.Transaction.TxCreditCard = vm.Liabilities.Single(l => l.AssetId == card.Id);
+        vm.Transaction.CreditCard.Card = vm.Liabilities.Single(l => l.AssetId == card.Id);
         vm.Transaction.TxAmount = "3500";
         vm.Transaction.TxNote = "超商";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
@@ -727,7 +727,7 @@ public class PortfolioViewModelTests
         var cashId = assetRepo.Store.First(a => a.Type == FinancialType.Asset).Id;
 
         vm.Transaction.TxType = "creditCardPayment";
-        vm.Transaction.TxCreditCard = vm.Liabilities.Single(l => l.AssetId == card.Id);
+        vm.Transaction.CreditCard.Card = vm.Liabilities.Single(l => l.AssetId == card.Id);
         vm.Transaction.TxCashAccount = vm.CashAccounts.Single(a => a.Id == cashId);
         vm.Transaction.TxAmount = "4000";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);

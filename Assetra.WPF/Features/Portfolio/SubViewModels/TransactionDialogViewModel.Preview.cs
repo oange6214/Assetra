@@ -21,8 +21,8 @@ namespace Assetra.WPF.Features.Portfolio.SubViewModels;
 ///   ──────────────────────
 ///   * LoanBorrow                                   → +amount  (Loan.Label)
 ///   * LoanRepay                                    → −principal (Loan.Label)
-///   * CreditCardCharge                             → +amount  (TxCreditCard)
-///   * CreditCardPayment                            → −amount  (TxCreditCard)
+///   * CreditCardCharge                             → +amount  (CreditCard.Card)
+///   * CreditCardPayment                            → −amount  (CreditCard.Card)
 ///
 ///   Skipped (no preview):
 ///   * Sell                  — meta-only edit; form hidden
@@ -238,18 +238,18 @@ public partial class TransactionDialogViewModel
             case "creditCardCharge":
                 if (!ParseHelpers.TryParseDecimal(TxAmount, out var charged) || charged <= 0)
                     return false;
-                if (TxCreditCard is null)
+                if (CreditCard.Card is null)
                     return false;
-                liability = TxCreditCard;
+                liability = CreditCard.Card;
                 delta = charged;
                 return true;
 
             case "creditCardPayment":
                 if (!ParseHelpers.TryParseDecimal(TxAmount, out var paid) || paid <= 0)
                     return false;
-                if (TxCreditCard is null)
+                if (CreditCard.Card is null)
                     return false;
-                liability = TxCreditCard;
+                liability = CreditCard.Card;
                 delta = -paid;
                 return true;
 
@@ -312,6 +312,6 @@ public partial class TransactionDialogViewModel
     partial void OnTxCashAccountChanged(CashAccountRowViewModel? value) =>
         NotifyImpactPreviewChanged();
 
-    partial void OnTxCreditCardChanged(LiabilityRowViewModel? value) =>
-        NotifyImpactPreviewChanged();
+    // OnTxCreditCardChanged retired — CreditCard sub-VM PropertyChanged is wired
+    // via OnCreditCardTxChanged in the main partial.
 }

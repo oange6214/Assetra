@@ -556,7 +556,7 @@ public partial class TransactionDialogViewModel
 
     private async Task ConfirmCreditCardChargeAsync()
     {
-        if (TxCreditCard?.AssetId is not { } cardId)
+        if (CreditCard.Card?.AssetId is not { } cardId)
         { TxError = "請選擇信用卡"; return; }
         if (!ParseHelpers.TryParseDecimal(TxAmount, out var amount) || amount <= 0)
         { TxError = "金額無效"; return; }
@@ -564,7 +564,7 @@ public partial class TransactionDialogViewModel
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         await _creditCardTransactionWorkflowService.ChargeAsync(new CreditCardChargeRequest(
             cardId,
-            TxCreditCard.Label,
+            CreditCard.Card.Label,
             tradeDate,
             amount,
             string.IsNullOrWhiteSpace(TxNote) ? null : TxNote,
@@ -575,17 +575,17 @@ public partial class TransactionDialogViewModel
 
     private async Task ConfirmCreditCardPaymentAsync()
     {
-        if (TxCreditCard?.AssetId is not { } cardId)
+        if (CreditCard.Card?.AssetId is not { } cardId)
         { TxError = "請選擇信用卡"; return; }
         if (!ParseHelpers.TryParseDecimal(TxAmount, out var amount) || amount <= 0)
         { TxError = "金額無效"; return; }
-        if (TxCreditCard.Balance <= 0)
+        if (CreditCard.Card.Balance <= 0)
         {
             TxError = L("Portfolio.Tx.CreditCardPayment.NoBalance",
                 "這張信用卡目前沒有未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款」。");
             return;
         }
-        if (amount > TxCreditCard.Balance)
+        if (amount > CreditCard.Card.Balance)
         {
             TxError = L("Portfolio.Tx.CreditCardPayment.ExceedsBalance",
                 "繳款金額不可超過目前未繳金額。若是補登過去帳單，請先新增「信用卡消費」，或改用「提款」。");
@@ -604,7 +604,7 @@ public partial class TransactionDialogViewModel
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         await _creditCardTransactionWorkflowService.PayAsync(new CreditCardPaymentRequest(
             cardId,
-            TxCreditCard.Label,
+            CreditCard.Card.Label,
             cashAccId.Value,
             accountName,
             tradeDate,
