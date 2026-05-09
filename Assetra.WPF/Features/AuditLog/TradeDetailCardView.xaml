@@ -1,0 +1,152 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.AuditLog.TradeDetailCardView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.AuditLog"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:TradeDetailViewModel}}"
+    Background="{DynamicResource AppSurface}"
+    mc:Ignorable="d">
+
+    <ScrollViewer
+        Padding="16"
+        HorizontalScrollBarVisibility="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <!--  Empty state  -->
+            <TextBlock
+                Margin="0,32"
+                HorizontalAlignment="Center"
+                FontStyle="Italic"
+                Foreground="{DynamicResource AppTextMuted}"
+                Text="{DynamicResource AuditLog.Detail.SelectPrompt}"
+                Visibility="{Binding HasSnapshot, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+
+            <!--  Snapshot header  -->
+            <StackPanel Visibility="{Binding HasSnapshot, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Md}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{Binding HeaderLine}" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{Binding SubHeaderLine}" />
+                    </StackPanel>
+                    <Border
+                        Grid.Column="1"
+                        Padding="8,2"
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource AppAccentSoft}"
+                        CornerRadius="{StaticResource Radius.Sm}">
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppAccent}"
+                            Text="{Binding TypeLabel}" />
+                    </Border>
+                </Grid>
+
+                <!--  Diff banner — visible only when previous snapshot present  -->
+                <Border
+                    Margin="0,12,0,0"
+                    Padding="10,6"
+                    Background="{DynamicResource AppSurfaceAlt}"
+                    BorderBrush="{DynamicResource AppBorderLight}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}"
+                    Visibility="{Binding HasDiff, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource AuditLog.Detail.DiffMode}"
+                        TextWrapping="Wrap" />
+                </Border>
+
+                <!--  Field list  -->
+                <Border
+                    Margin="0,12,0,0"
+                    Padding="0"
+                    BorderBrush="{DynamicResource AppBorderLight}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}">
+                    <ItemsControl ItemsSource="{Binding Fields}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:TradeFieldRow}">
+                                <Border
+                                    Padding="10,8"
+                                    BorderBrush="{DynamicResource AppBorderLight}"
+                                    BorderThickness="0,0,0,1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{Binding Label}" />
+                                        <StackPanel Grid.Column="1">
+                                            <!--  Current value  -->
+                                            <TextBlock
+                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                FontSize="{StaticResource Font.Size.Sm}"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding Value}"
+                                                TextWrapping="Wrap" />
+                                            <!--  Previous value (only when changed)  -->
+                                            <TextBlock
+                                                Margin="0,2,0,0"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppDanger}"
+                                                Text="{Binding PreviousValue, StringFormat={}before: {0}}"
+                                                TextDecorations="Strikethrough"
+                                                Visibility="{Binding IsChanged, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+
+                <!--  Raw JSON (collapsible expander)  -->
+                <Expander
+                    Margin="0,12,0,0"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Header="{DynamicResource AuditLog.Detail.RawJson}"
+                    IsExpanded="False">
+                    <Border
+                        Margin="0,8,0,0"
+                        Padding="10"
+                        Background="{DynamicResource AppSurfaceAlt}"
+                        BorderBrush="{DynamicResource AppBorderLight}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Sm}">
+                        <TextBox
+                            Background="Transparent"
+                            BorderThickness="0"
+                            FontFamily="Consolas, Courier New, monospace"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            HorizontalScrollBarVisibility="Auto"
+                            IsReadOnly="True"
+                            MaxHeight="240"
+                            Text="{Binding RawJson, Mode=OneWay}"
+                            TextWrapping="NoWrap"
+                            VerticalScrollBarVisibility="Auto" />
+                    </Border>
+                </Expander>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

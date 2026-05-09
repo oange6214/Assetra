@@ -1127,6 +1127,16 @@
     <sys:String x:Key="AuditLog.Col.Restore">Restore</sys:String>
     <sys:String x:Key="AuditLog.Restore">Restore</sys:String>
     <sys:String x:Key="AuditLog.Restore.Tooltip">Insert this snapshot as a new Trade (assigned a new Id to avoid clashing with existing data). Review in Transaction Log afterward.</sys:String>
+    <sys:String x:Key="AuditLog.Restore.ConfirmPrompt">Create a new Trade from the snapshot on the right?</sys:String>
+    <sys:String x:Key="AuditLog.Restore.Confirm">Confirm restore</sys:String>
+    <sys:String x:Key="AuditLog.Col.Summary">Summary</sys:String>
+    <sys:String x:Key="AuditLog.Chip.All">All</sys:String>
+    <sys:String x:Key="AuditLog.Chip.Delete">Deletes</sys:String>
+    <sys:String x:Key="AuditLog.Chip.Edit">Edits</sys:String>
+    <sys:String x:Key="AuditLog.Chip.Day">Last 24h</sys:String>
+    <sys:String x:Key="AuditLog.Detail.SelectPrompt">Select an entry from the list to see details.</sys:String>
+    <sys:String x:Key="AuditLog.Detail.DiffMode">Previous version detected. Red strikethrough shows the prior value (expand raw JSON for full comparison).</sys:String>
+    <sys:String x:Key="AuditLog.Detail.RawJson">Raw JSON (debug)</sys:String>
     <sys:String x:Key="Settings.Fx.Title">Exchange rates (Frankfurter live source)</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">Last refreshed:</sys:String>
     <sys:String x:Key="Settings.Fx.NeverRefreshed">Never refreshed</sys:String>

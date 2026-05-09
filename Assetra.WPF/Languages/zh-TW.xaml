@@ -1131,6 +1131,16 @@
     <sys:String x:Key="AuditLog.Col.Restore">還原</sys:String>
     <sys:String x:Key="AuditLog.Restore">還原</sys:String>
     <sys:String x:Key="AuditLog.Restore.Tooltip">將此快照插入為一筆新 Trade（會配新 Id 避免與既存資料衝突）。請至交易紀錄頁複查。</sys:String>
+    <sys:String x:Key="AuditLog.Restore.ConfirmPrompt">確認以右側內容建立新 Trade？</sys:String>
+    <sys:String x:Key="AuditLog.Restore.Confirm">確認還原</sys:String>
+    <sys:String x:Key="AuditLog.Col.Summary">摘要</sys:String>
+    <sys:String x:Key="AuditLog.Chip.All">全部</sys:String>
+    <sys:String x:Key="AuditLog.Chip.Delete">僅刪除</sys:String>
+    <sys:String x:Key="AuditLog.Chip.Edit">僅編輯</sys:String>
+    <sys:String x:Key="AuditLog.Chip.Day">最近 24 小時</sys:String>
+    <sys:String x:Key="AuditLog.Detail.SelectPrompt">從左側列表選一筆查看詳細內容。</sys:String>
+    <sys:String x:Key="AuditLog.Detail.DiffMode">已偵測到較舊的版本，下方紅字為前一版內容（點選 raw JSON 摺疊區可比對全文）。</sys:String>
+    <sys:String x:Key="AuditLog.Detail.RawJson">原始 JSON（debug）</sys:String>
     <sys:String x:Key="Settings.Fx.Title">匯率（Frankfurter 即時來源）</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">上次更新：</sys:String>
     <sys:String x:Key="Settings.Fx.NeverRefreshed">尚未更新</sys:String>
