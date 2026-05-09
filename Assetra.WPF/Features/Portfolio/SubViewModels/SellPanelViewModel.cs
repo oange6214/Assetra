@@ -46,7 +46,8 @@ public partial class SellPanelViewModel : ObservableObject
     /// Cash account list for the sell-panel cash-account picker.
     /// Wired by the parent VM to its own <c>CashAccounts</c> collection.
     /// </summary>
-    public ObservableCollection<CashAccountRowViewModel> CashAccounts { get; init; } = [];
+    public ReadOnlyObservableCollection<CashAccountRowViewModel> CashAccounts { get; init; } =
+        new(new ObservableCollection<CashAccountRowViewModel>());
 
     // ── Sell Panel state ──────────────────────────────────────────────────────────────
 

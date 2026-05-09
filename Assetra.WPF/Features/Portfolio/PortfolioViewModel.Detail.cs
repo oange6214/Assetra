@@ -215,7 +215,7 @@ public partial class PortfolioViewModel
             await _positionDeletionWorkflowService.DeleteAsync(
                 new PositionDeletionRequest(row.AllEntryIds.ToList()));
 
-            Positions.Remove(row);
+            _positions.Remove(row);
             if (ReferenceEquals(SelectedPositionRow, row))
                 SelectedPositionRow = null;
             RebuildTotals();
@@ -240,7 +240,7 @@ public partial class PortfolioViewModel
             await _liabilityMutationWorkflowService.DeleteAsync(
                 new LiabilityDeletionRequest(row.AssetId, row.Label));
 
-            Liabilities.Remove(row);
+            _liabilities.Remove(row);
             if (ReferenceEquals(SelectedLiabilityRow, row))
                 SelectedLiabilityRow = null;
             RebuildTotals();

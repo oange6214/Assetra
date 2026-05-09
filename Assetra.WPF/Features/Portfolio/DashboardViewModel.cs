@@ -36,13 +36,13 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
         BudgetSummary = budgetSummary;
         if (BudgetSummary is not null)
         {
-            _portfolio.Trades.CollectionChanged += OnTradesChangedForBudget;
+            ((INotifyCollectionChanged)_portfolio.Trades).CollectionChanged += OnTradesChangedForBudget;
             AsyncHelpers.SafeFireAndForget(BudgetSummary.LoadAsync, "BudgetSummary.LoadFromDashboard");
         }
 
         _portfolio.PropertyChanged += OnPortfolioPropertyChanged;
-        _portfolio.Positions.CollectionChanged += OnPositionsChanged;
-        _portfolio.Trades.CollectionChanged    += OnTradesChanged;
+        ((INotifyCollectionChanged)_portfolio.Positions).CollectionChanged += OnPositionsChanged;
+        ((INotifyCollectionChanged)_portfolio.Trades).CollectionChanged    += OnTradesChanged;
         _portfolio.History.PropertyChanged     += OnHistoryPropertyChanged;
 
         if (themeService is not null)
@@ -102,10 +102,10 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
         // C2 leak fix: anonymous-lambda subscriptions can't be detached;
         // refactored to named handlers so Dispose actually unsubscribes.
         if (BudgetSummary is not null)
-            _portfolio.Trades.CollectionChanged -= OnTradesChangedForBudget;
+            ((INotifyCollectionChanged)_portfolio.Trades).CollectionChanged -= OnTradesChangedForBudget;
         _portfolio.PropertyChanged -= OnPortfolioPropertyChanged;
-        _portfolio.Positions.CollectionChanged -= OnPositionsChanged;
-        _portfolio.Trades.CollectionChanged    -= OnTradesChanged;
+        ((INotifyCollectionChanged)_portfolio.Positions).CollectionChanged -= OnPositionsChanged;
+        ((INotifyCollectionChanged)_portfolio.Trades).CollectionChanged    -= OnTradesChanged;
         _portfolio.History.PropertyChanged     -= OnHistoryPropertyChanged;
         if (_themeService is not null && _themeChangedHandler is not null)
             _themeService.ThemeChanged -= _themeChangedHandler;

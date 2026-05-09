@@ -1501,7 +1501,7 @@ public class PortfolioViewModelTests
         // Seed a position first so Div.Position can find it
         var pos = new PortfolioRowViewModel
         { Id = Guid.NewGuid(), Symbol = "0050", Quantity = 1000, BuyPrice = 140 };
-        vm.Positions.Add(pos);
+        vm.Internal_AddPosition(pos);
 
         await tradeRepo.AddAsync(new Trade(
             Id: Guid.NewGuid(), Symbol: "0050", Exchange: "TWSE", Name: "元大台灣50",
@@ -1573,7 +1573,7 @@ public class PortfolioViewModelTests
         // used to auto-fill TxAmount from CurrentPrice and could briefly or permanently
         // replace the stored sell price during edit prefill.
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);
-        vm.Positions.Add(new PortfolioRowViewModel
+        vm.Internal_AddPosition(new PortfolioRowViewModel
         {
             Id = Guid.NewGuid(),
             Symbol = "2330",
@@ -1754,7 +1754,7 @@ public class PortfolioViewModelTests
     {
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);
         var cashAcc = vm.CashAccounts.First();
-        vm.Positions.Add(new PortfolioRowViewModel
+        vm.Internal_AddPosition(new PortfolioRowViewModel
         {
             Id = Guid.NewGuid(),
             Symbol = "0050",
@@ -1828,7 +1828,7 @@ public class PortfolioViewModelTests
             Quantity = 1000,
             BuyPrice = 35m,
         };
-        vm.Positions.Add(position);
+        vm.Internal_AddPosition(position);
         vm.SelectedPositionRow = position;
 
         var changed = new List<string>();
@@ -1865,7 +1865,7 @@ public class PortfolioViewModelTests
             Quantity = 1000,
             BuyPrice = 35m,
         };
-        vm.Positions.Add(position);
+        vm.Internal_AddPosition(position);
 
         var originalId = Guid.NewGuid();
         await tradeRepo.AddAsync(new Trade(
@@ -2195,7 +2195,7 @@ public class PortfolioViewModelTests
         var fakeAcc = new CashAccountRowViewModel(
             new AssetItem(Guid.NewGuid(), "X", FinancialType.Asset, null, "TWD", DateOnly.FromDateTime(DateTime.Today)),
             projectedBalance: 0m);
-        vm.CashAccounts.Add(fakeAcc);
+        vm.Internal_AddCashAccount(fakeAcc);
         vm.Transaction.TxCashAccount = fakeAcc;
         Assert.NotNull(vm.Transaction.TxCashAccount);
 
@@ -2266,7 +2266,7 @@ public class PortfolioViewModelTests
             Quantity = 1000,
             BuyPrice = 100,
         };
-        vm.Positions.Add(fakePos);
+        vm.Internal_AddPosition(fakePos);
         vm.Transaction.Div.Position = fakePos;
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 

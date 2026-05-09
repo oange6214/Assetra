@@ -46,37 +46,39 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
     private readonly ILocalizationService? _localization;
     private readonly CompositeDisposable _disposables = new();
 
-    // M6-B mirror cluster — partially encapsulated. The collection TYPE stays
-    // ObservableCollection<T> for backward compat with cascading consumers
-    // (DashboardViewModel listens to .CollectionChanged directly; SellPanel,
-    // AccountDialog, TradeFilter, DividendCalendarViewModel constructors expect
-    // ObservableCollection<T> by-reference for live syncing). Replacing the
-    // type would require 5+ collateral refactors.
-    //
-    // What CAN be tightened today:
-    //   * Backing fields renamed to <c>_positions</c> etc.
-    //   * Documented Internal_* mutators are the preferred mutation API for
-    //     reload paths + test seeders. Direct <c>Positions.Add(...)</c> is now
-    //     considered legacy and discouraged in new code.
-    //
-    // Full ReadOnlyObservableCollection encapsulation tracked in
-    // M6-B-tx-mirror-followup (not in this branch).
-    public ObservableCollection<PortfolioRowViewModel> Positions { get; } = [];
-    public ObservableCollection<TradeRowViewModel> Trades { get; } = [];
-    public ObservableCollection<CashAccountRowViewModel> CashAccounts { get; } = [];
-    public ObservableCollection<LiabilityRowViewModel> Liabilities { get; } = [];
+    // M6-B mirror cluster — fully encapsulated. Public API exposes
+    // ReadOnlyObservableCollection<T>; mutations route through Internal_*
+    // helpers. Cascading consumers (DashboardVM / DividendCalendarVM /
+    // TradeFilter / SellPanel / AccountDialog) updated to accept the
+    // read-only type and cast to INotifyCollectionChanged where they need
+    // the .CollectionChanged event.
+    private readonly ObservableCollection<PortfolioRowViewModel> _positions = [];
+    private readonly ObservableCollection<TradeRowViewModel> _trades = [];
+    private readonly ObservableCollection<CashAccountRowViewModel> _cashAccounts = [];
+    private readonly ObservableCollection<LiabilityRowViewModel> _liabilities = [];
+
+    public ReadOnlyObservableCollection<PortfolioRowViewModel> Positions { get; }
+    public ReadOnlyObservableCollection<TradeRowViewModel> Trades { get; }
+    public ReadOnlyObservableCollection<CashAccountRowViewModel> CashAccounts { get; }
+    public ReadOnlyObservableCollection<LiabilityRowViewModel> Liabilities { get; }
 
     IReadOnlyList<PortfolioRowViewModel> Contracts.IPortfolioPositionFeed.Positions => Positions;
 
-    // ── Documented mutator API (preferred over direct collection mutation) ──
-    internal void Internal_AddPosition(PortfolioRowViewModel row) => Positions.Add(row);
-    internal bool Internal_RemovePosition(PortfolioRowViewModel row) => Positions.Remove(row);
-    internal void Internal_AddTrade(TradeRowViewModel row) => Trades.Add(row);
-    internal bool Internal_RemoveTrade(TradeRowViewModel row) => Trades.Remove(row);
-    internal void Internal_ClearTrades() => Trades.Clear();
-    internal void Internal_AddCashAccount(CashAccountRowViewModel row) => CashAccounts.Add(row);
-    internal void Internal_ClearLiabilities() => Liabilities.Clear();
-    internal void Internal_AddLiability(LiabilityRowViewModel row) => Liabilities.Add(row);
+    // ── Internal mutators (used by reload paths + test seeders) ──────────────
+    internal void Internal_AddPosition(PortfolioRowViewModel row) => _positions.Add(row);
+    internal bool Internal_RemovePosition(PortfolioRowViewModel row) => _positions.Remove(row);
+    internal void Internal_RemovePositionAt(int index) => _positions.RemoveAt(index);
+    internal void Internal_ClearPositions() => _positions.Clear();
+    internal int Internal_PositionsIndexOf(PortfolioRowViewModel row) => _positions.IndexOf(row);
+    internal void Internal_AddTrade(TradeRowViewModel row) => _trades.Add(row);
+    internal bool Internal_RemoveTrade(TradeRowViewModel row) => _trades.Remove(row);
+    internal void Internal_ClearTrades() => _trades.Clear();
+    internal void Internal_AddCashAccount(CashAccountRowViewModel row) => _cashAccounts.Add(row);
+    internal bool Internal_RemoveCashAccount(CashAccountRowViewModel row) => _cashAccounts.Remove(row);
+    internal void Internal_RemoveCashAccountAt(int index) => _cashAccounts.RemoveAt(index);
+    internal void Internal_ClearCashAccounts() => _cashAccounts.Clear();
+    internal void Internal_AddLiability(LiabilityRowViewModel row) => _liabilities.Add(row);
+    internal void Internal_ClearLiabilities() => _liabilities.Clear();
 
     // Tab-specific view models are built by the shell and attached once all
     // singleton VMs exist, avoiding circular construction inside PortfolioViewModel.
@@ -216,7 +218,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
                         "請先刪除此股票的賣出記錄，再刪除此買入記錄。"));
                     return;
                 }
-                Trades.Remove(row);
+                _trades.Remove(row);
                 HasNoTrades = Trades.Count == 0;
                 HasAnyDividendTrades = Trades.Any(t => t.IsCashDividend);
                 RebuildRealizedPnl();
@@ -279,6 +281,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(ui);
+
+        // M6-B — wrap collections before any sub-VM gets a reference.
+        Positions = new ReadOnlyObservableCollection<PortfolioRowViewModel>(_positions);
+        Trades = new ReadOnlyObservableCollection<TradeRowViewModel>(_trades);
+        CashAccounts = new ReadOnlyObservableCollection<CashAccountRowViewModel>(_cashAccounts);
+        Liabilities = new ReadOnlyObservableCollection<LiabilityRowViewModel>(_liabilities);
 
         _search = services.Search;
         _snackbar = ui.Snackbar;
@@ -632,7 +640,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         {
             var key = (Positions[i].Symbol, Positions[i].Exchange, Positions[i].AssetType);
             if (!newRows.ContainsKey(key))
-                Positions.RemoveAt(i);
+                _positions.RemoveAt(i);
         }
 
         // Add new rows; update existing rows in-place.
@@ -652,7 +660,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
             }
             else
             {
-                Positions.Add(newRow);
+                _positions.Add(newRow);
             }
         }
 
@@ -743,9 +751,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         TradeFilter.InitTradeTypeFilters();
         try
         {
-            Trades.Clear();
+            _trades.Clear();
             foreach (var t in trades)
-                Trades.Add(new TradeRowViewModel(t));
+                _trades.Add(new TradeRowViewModel(t));
             HasNoTrades = Trades.Count == 0;
             RaiseSetupNoticeChanged();
             HasAnyDividendTrades = Trades.Any(t => t.IsCashDividend);
@@ -1016,7 +1024,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         for (var i = CashAccounts.Count - 1; i >= 0; i--)
         {
             if (!newRows.ContainsKey(CashAccounts[i].Id))
-                CashAccounts.RemoveAt(i);
+                _cashAccounts.RemoveAt(i);
         }
 
         foreach (var account in visibleAccounts)
@@ -1031,7 +1039,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
             }
             else
             {
-                CashAccounts.Add(newRows[account.Id]);
+                _cashAccounts.Add(newRows[account.Id]);
             }
         }
         HasNoCashAccounts = CashAccounts.Count == 0;
@@ -1069,17 +1077,17 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         var snapshots = loaded.LiabilitySnapshots;
         var liabilityAssets = loaded.LiabilityAssets;
 
-        Liabilities.Clear();
+        _liabilities.Clear();
         foreach (var (label, snap) in snapshots.OrderBy(kv => kv.Key))
         {
             liabilityAssets.TryGetValue(label, out var asset);
-            Liabilities.Add(new LiabilityRowViewModel(label, snap, asset));
+            _liabilities.Add(new LiabilityRowViewModel(label, snap, asset));
         }
 
         foreach (var (name, asset) in liabilityAssets)
         {
             if (!snapshots.ContainsKey(name))
-                Liabilities.Add(new LiabilityRowViewModel(name, LiabilitySnapshot.Empty, asset));
+                _liabilities.Add(new LiabilityRowViewModel(name, LiabilitySnapshot.Empty, asset));
         }
 
         HasNoLiabilities = Liabilities.Count == 0;

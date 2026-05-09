@@ -32,14 +32,11 @@ internal sealed record TransactionDialogDependencies(
     PortfolioTradeDialogController TradeDialogController,
     IAccountUpsertWorkflowService? AccountUpsert,
     ISnackbarService? Snackbar,
-    // Shared parent collections (live references, owned + mutated by parent).
-    // Type stays ObservableCollection for cascading consumers (Account/SellPanel/
-    // TradeFilter etc. constructor signatures expect by-reference syncing).
-    // M6-B mirror full encapsulation tracked separately.
-    ObservableCollection<TradeRowViewModel> Trades,
-    ObservableCollection<PortfolioRowViewModel> Positions,
-    ObservableCollection<CashAccountRowViewModel> CashAccounts,
-    ObservableCollection<LiabilityRowViewModel> Liabilities,
+    // Shared parent collections — read-only views; parent owns mutation.
+    ReadOnlyObservableCollection<TradeRowViewModel> Trades,
+    ReadOnlyObservableCollection<PortfolioRowViewModel> Positions,
+    ReadOnlyObservableCollection<CashAccountRowViewModel> CashAccounts,
+    ReadOnlyObservableCollection<LiabilityRowViewModel> Liabilities,
     // Sub-VM references for cross-dialog coordination
     AddAssetDialogViewModel AddAssetDialog,
     SellPanelViewModel SellPanel,
@@ -85,10 +82,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     // Shared parent collections exposed as forwarding properties so TxForm XAML
     // (whose DataContext becomes this VM) can still bind to CashAccounts, Positions, etc.
-    public ObservableCollection<TradeRowViewModel> Trades { get; }
-    public ObservableCollection<PortfolioRowViewModel> Positions { get; }
-    public ObservableCollection<CashAccountRowViewModel> CashAccounts { get; }
-    public ObservableCollection<LiabilityRowViewModel> Liabilities { get; }
+    public ReadOnlyObservableCollection<TradeRowViewModel> Trades { get; }
+    public ReadOnlyObservableCollection<PortfolioRowViewModel> Positions { get; }
+    public ReadOnlyObservableCollection<CashAccountRowViewModel> CashAccounts { get; }
+    public ReadOnlyObservableCollection<LiabilityRowViewModel> Liabilities { get; }
 
     // Sub-VM references forwarded so BuyTxForm can bind to AddAssetDialog.*
     // and SellTxForm can bind to SellPanel.*
