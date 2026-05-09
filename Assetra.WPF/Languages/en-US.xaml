@@ -1109,6 +1109,8 @@
     <sys:String x:Key="Settings.Llm.Model.Hint">Empty = provider default: OpenAI = gpt-4o-mini, Ollama = llama3.1:8b.</sys:String>
     <sys:String x:Key="Settings.Llm.Endpoint">Endpoint</sys:String>
     <sys:String x:Key="Settings.Llm.Endpoint.Hint">Ollama only. Empty = http://localhost:11434.</sys:String>
+    <sys:String x:Key="Settings.Ocr.Download">Download language packs</sys:String>
+    <sys:String x:Key="Settings.Ocr.Download.Tooltip">Opens the Tesseract tessdata GitHub page so you can download .traineddata files (e.g. chi_tra.traineddata) into the folder selected above.</sys:String>
     <sys:String x:Key="Settings.Fx.Title">Exchange rates (Frankfurter live source)</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">Last refreshed:</sys:String>
     <sys:String x:Key="Settings.Fx.NeverRefreshed">Never refreshed</sys:String>
