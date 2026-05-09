@@ -1100,6 +1100,15 @@
     <sys:String x:Key="Settings.Amt.RegularTaxableIncome.Hint">"Net taxable income" line on the income tax return. 0 = not entered, AMT is skipped.</sys:String>
     <sys:String x:Key="Settings.Amt.RegularIncomeTax">Regular income tax payable (NTD)</sys:String>
     <sys:String x:Key="Settings.Amt.RegularIncomeTax.Hint">"Tax payable" line on the income tax return; compared against the AMT basic tax.</sys:String>
+    <sys:String x:Key="Settings.Section.Llm">AI Assistant (LLM)</sys:String>
+    <sys:String x:Key="Settings.Llm.Hint">When enabled, the AI assistant routes questions the rule-based dispatcher cannot answer to an LLM. Ollama needs a local daemon; OpenAI needs an API key. Privacy: only the user's text is sent to the LLM, not account balances.</sys:String>
+    <sys:String x:Key="Settings.Llm.Provider">Provider</sys:String>
+    <sys:String x:Key="Settings.Llm.ApiKey">API Key</sys:String>
+    <sys:String x:Key="Settings.Llm.ApiKey.Hint">Required for OpenAI; ignored for Ollama. Stored in plaintext in AppSettings.json today; future work moves this to the OS credential store.</sys:String>
+    <sys:String x:Key="Settings.Llm.Model">Model</sys:String>
+    <sys:String x:Key="Settings.Llm.Model.Hint">Empty = provider default: OpenAI = gpt-4o-mini, Ollama = llama3.1:8b.</sys:String>
+    <sys:String x:Key="Settings.Llm.Endpoint">Endpoint</sys:String>
+    <sys:String x:Key="Settings.Llm.Endpoint.Hint">Ollama only. Empty = http://localhost:11434.</sys:String>
     <sys:String x:Key="Settings.Fx.Title">Exchange rates (Frankfurter live source)</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">Last refreshed:</sys:String>
     <sys:String x:Key="Settings.Fx.NeverRefreshed">Never refreshed</sys:String>
