@@ -20,11 +20,16 @@ public sealed class HybridFinancialAssistant : IFinancialAssistant
 {
     private readonly RuleBasedFinancialAssistant _ruleBased;
     private readonly ILlmProvider _llm;
+    private readonly IAssistantToolRegistry? _tools;
 
-    public HybridFinancialAssistant(RuleBasedFinancialAssistant ruleBased, ILlmProvider llm)
+    public HybridFinancialAssistant(
+        RuleBasedFinancialAssistant ruleBased,
+        ILlmProvider llm,
+        IAssistantToolRegistry? tools = null)
     {
         _ruleBased = ruleBased ?? throw new ArgumentNullException(nameof(ruleBased));
         _llm = llm ?? throw new ArgumentNullException(nameof(llm));
+        _tools = tools;
     }
 
     public IReadOnlyList<string> SuggestedQueries => _ruleBased.SuggestedQueries;
@@ -37,11 +42,21 @@ public sealed class HybridFinancialAssistant : IFinancialAssistant
         if (ruleResponse.IsHandled || !_llm.IsConfigured)
             return ruleResponse;
 
-        // 2. LLM fallback for open-ended questions.
+        // 2. Phase 3.5 — pre-fetch grounded data from the tool registry and
+        //    splice into the system prompt before calling the LLM. This gives
+        //    the model real numbers to reason over and dramatically reduces
+        //    hallucinations on numeric questions.
+        var groundedContext = await BuildGroundedContextAsync(ct).ConfigureAwait(false);
+        var systemPrompt =
+            "你是個人理財助手。回答簡潔、實用。若問題涉及具體數字而你沒有數據，請坦白回覆。\n" +
+            (string.IsNullOrEmpty(groundedContext) ? string.Empty :
+                "\n以下是使用者目前的財務快照（grounding data）：\n" + groundedContext);
+
+        // 3. LLM fallback for open-ended questions.
         try
         {
             var answer = await _llm.CompleteAsync(
-                systemPrompt: "你是個人理財助手。回答簡潔、實用。若問題涉及具體數字而你沒有數據，請坦白回覆。",
+                systemPrompt: systemPrompt,
                 userPrompt: query.Text,
                 ct).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(answer))
@@ -57,5 +72,28 @@ public sealed class HybridFinancialAssistant : IFinancialAssistant
                 Source: ruleResponse.Source,
                 IsHandled: false);
         }
+    }
+
+    private async Task<string> BuildGroundedContextAsync(CancellationToken ct)
+    {
+        if (_tools is null || _tools.Tools.Count == 0) return string.Empty;
+        var snippets = new List<string>();
+        // Phase 3.5 MVP: invoke ALL tools (each returns a short snapshot string
+        // — total context << 1k chars). A future revision routes per-query:
+        // LLM picks which tool(s) to invoke via OpenAI-style function calling.
+        foreach (var tool in _tools.Tools)
+        {
+            try
+            {
+                var result = await tool.InvokeAsync(ct).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(result))
+                    snippets.Add($"- {tool.Name}: {result}");
+            }
+            catch
+            {
+                // Skip tools that throw — partial grounding is better than no answer.
+            }
+        }
+        return string.Join('\n', snippets);
     }
 }

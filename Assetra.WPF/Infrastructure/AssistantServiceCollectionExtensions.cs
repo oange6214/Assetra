@@ -41,9 +41,14 @@ internal static class AssistantServiceCollectionExtensions
             };
         });
 
+        services.AddSingleton<IAssistantToolRegistry>(sp => new GroundedAssistantToolRegistry(
+            sp.GetRequiredService<IBalanceQueryService>(),
+            sp.GetService<IBudgetRepository>()));
+
         services.AddSingleton<IFinancialAssistant>(sp => new HybridFinancialAssistant(
             sp.GetRequiredService<RuleBasedFinancialAssistant>(),
-            sp.GetRequiredService<ILlmProvider>()));
+            sp.GetRequiredService<ILlmProvider>(),
+            sp.GetService<IAssistantToolRegistry>()));
 
         services.AddSingleton<IAssistantInsightService>(sp => new RuleBasedAssistantInsightService(
             sp.GetService<IBudgetRepository>(),
