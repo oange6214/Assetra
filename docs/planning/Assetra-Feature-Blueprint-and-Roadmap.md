@@ -5,7 +5,7 @@
 
 ## 一、現況總覽
 
-> 截至 v0.21.1（2026-04-28）。
+> 截至 v0.28.0 release readiness sweep（2026-05-09）。
 
 ### 已實作模組
 
@@ -26,12 +26,16 @@
 | 投資績效 | XIRR / TWR / MWR / Benchmark 對比 / PnL 歸因 | v0.12.0 |
 | 風險分析 | 波動度 / 最大回撤 / Sharpe / 集中度警示（HHI + Top-N） | v0.13.0 |
 | 外幣 / FX | `Currency` VO、`FxRate`、`MultiCurrencyValuationService` | v0.14.0 |
-| 美股 / ETF | `StockExchangeRegistry`、跨市場選股、Trade 多市場 | v0.15.0 |
+| 跨市場基礎 / ETF | `StockExchangeRegistry`、交易所幣別 metadata、foreign exchange history routing | v0.15.x |
 | Goals 完整子系統 | `GoalMilestone` / `GoalFundingRule` / `GoalPlanningService` | v0.16.0 |
 | 趨勢圖增強 | `PortfolioEvent` 事件標註、堆疊圖 | v0.17.0 |
 | 稅務模組 | `TaxSummary`、股利 / 海外所得、報稅匯出 | v0.18.0 |
 | 進階匯入 | 銀行 / 信用卡 PDF parser、OCR adapter | v0.19.0 |
 | 雲端同步 | sync metadata / merge policy / AES-GCM 加密 / GA chaos test | v0.20.0–v0.21.0 |
+| 多元資產 | 不動產 / 保單 / 退休專戶 / 實物資產，接入報表與同步 | v0.22.0 |
+| 情境模擬 | FIRE / Monte Carlo / 退休提領模擬 | v0.22.0 |
+| AI 財務助理 | 規則式查詢、LLM fallback、grounded tools、洞察排程、對話歷史 | v0.27.0 |
+| Native DesignSystem | Fluent-first / Carbon-assisted tokens、shared controls、UI release gate | v0.28.0 |
 
 ## 二、產品目標
 
@@ -84,7 +88,7 @@ Assetra 的定位應逐步從「投資追蹤工具」擴展成：
 - 報稅資料匯出（CSV / 申報軟體格式）
 
 ### F. 多元資產擴展
-- 外幣 / FX：美股、ETF、外幣存款、匯率自動換算
+- 外幣 / FX：ETF、外幣存款、匯率自動換算；美股即時 market data 依 `Assetra-US-Market-Data-Plan.md` 規劃
 - 加密貨幣：BTC / ETH 持倉、交易所匯入
 - 不動產：市值估算、租金收入、房貸關聯
 - 保險：壽險、醫療、車險年費、保單現金價值
@@ -139,20 +143,20 @@ Assetra 的定位應逐步從「投資追蹤工具」擴展成：
 ## P2：成熟化與差異化（待做）
 
 ### 1. 自動化與智慧功能
-- AI 財務助理（v0.23.0+，從原 v0.22 延後：自然語言查詢 → 摘要與提醒 → 規劃建議）
+- AI 財務助理核心已於 v0.27.0 出貨；Action automation / mutate tools 延後至 v1.2（需 confirmation-flow 與安全審查）
 - 配息自動入帳
 - 異常交易偵測
 
 ### 2. 多元資產進階擴展
-- 不動產（v0.22.0）
-- 保險（v0.22.0）
-- 退休專戶（v0.22.0）
-- 實物資產（v0.22.0）
+- 不動產（✅ v0.22.0）
+- 保險（✅ v0.22.0）
+- 退休專戶（✅ v0.22.0）
+- 實物資產（✅ v0.22.0）
 
 ### 3. 多端體驗
-- PWA（v0.24.0+：read-only 瀏覽器端）
-- 行動端（v0.25.0+：iOS / Android）
-- 推播通知（v0.25.0+：帳單到期、目標進度、配息入帳）
+- PWA（deferred roadmap：read-only 瀏覽器端）
+- 行動端（deferred roadmap：iOS / Android）
+- 推播通知（deferred roadmap：帳單到期、目標進度、配息入帳）
 - 家庭多帳本（夫妻共用，未排版號）
 
 ### 4. 差異化模擬工具
@@ -187,11 +191,11 @@ Assetra 的定位應逐步從「投資追蹤工具」擴展成：
 - 進階匯入 PDF / OCR（v0.19）
 - 雲端同步 GA（v0.20.x → v0.21.0）
 
-### Phase 4（多元資產 / 情境模擬已 ship — v0.22.0；剩 PWA / 行動端 / AI）
-- AI 財務助理（待規劃，v0.23.0+）
+### Phase 4（多元資產 / 情境模擬 / AI core 已 ship；剩 PWA / 行動端 / action automation）
+- AI 財務助理核心 ✅ v0.27.0；action automation deferred
 - 多元資產：不動產 / 保險 / 退休 / 實物 ✅ v0.22.0
 - 情境模擬：FIRE / Monte Carlo ✅ v0.22.0
-- 多端體驗：PWA / 行動端（v0.24.0+ / v0.25.0+）
+- 多端體驗：PWA / 行動端（deferred roadmap）
 - 家庭多帳本（未排版號）
 - v1.0.0 GA：穩定性、文件、效能 baseline
 
@@ -237,12 +241,11 @@ Assetra 的定位應逐步從「投資追蹤工具」擴展成：
 
 ## 七、總結
 
-> 截至 v0.21.1，Phase 1–3 全部出貨，Assetra 已從「投資管理工具」升級為涵蓋預算、目標、報表、績效、風險、外幣、稅務、匯入治理、雲端同步的完整個人財務管理平台。
+> 截至 v0.28.0 release readiness sweep，Assetra 已從「投資管理工具」升級為涵蓋預算、目標、報表、績效、風險、外幣、稅務、匯入治理、雲端同步、多元資產、情境模擬、AI 助理與 Native DesignSystem 的完整個人財務管理平台。
 
-接下來 Phase 4 的重點：
+接下來的重點：
 
-1. **AI 財務助理**（延後到 v0.23.0+；原訂 v0.21 / v0.22 但被雲端同步 GA + 多元資產合併 sprint 順延）
-2. **多元資產**（不動產 / 保險 / 退休 / 實物，✅ v0.22.0）
-3. **情境模擬**（FIRE / Monte Carlo，✅ v0.22.0）
+1. **v1.0.0 GA hardening**（穩定性、文件、效能 baseline）
+2. **美股 market data**（symbol directory + routed quote provider + quota/cache/calendar/FX）
+3. **AI action automation**（延後至 v1.2）
 4. **多端體驗**（PWA / 行動端，待規劃）
-5. **v1.0.0 GA**（穩定性、文件、效能 baseline）

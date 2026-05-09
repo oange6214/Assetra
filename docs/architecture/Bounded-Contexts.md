@@ -251,7 +251,7 @@
 ### 責任
 - 多幣別帳戶換算
 - FX 匯率查詢（靜態 + 可選 online）
-- 美股 / ETF pipeline（`StockExchangeRegistry`，跨市場選股）
+- 跨市場 metadata / ETF foundation（`StockExchangeRegistry`，exchange currency 與 history routing；美股即時報價與 symbol directory 依 `docs/planning/Assetra-US-Market-Data-Plan.md` 規劃）
 
 ### 主要模型
 - `Currency`（VO，內建常數 TWD / USD / JPY / HKD / EUR / CNY）

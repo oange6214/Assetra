@@ -70,8 +70,7 @@
 - [Implementation Roadmap](planning/Implementation-Roadmap.md)
   - 以 phase 拆解的實作任務清單。
 - [Roadmap v0.14 to v1.0](planning/Roadmap-v0.14-to-v1.0.md)
-  - v0.14–v1.0 各 sprint 詳細 task breakdown。Phase 4
-    （多元資產 + 情境模擬）已於 **v0.22.0** 一次 ship。
+  - v0.14–v1.0 各 sprint 詳細 task breakdown。Phase 4 的多元資產 / 情境模擬已於 **v0.22.0** 一次 ship，AI core 已於 **v0.27.0** ship，Fluent + Carbon UI / DesignSystem 收斂對應 **v0.28.0**；PWA / Mobile / push / AI mutate tools 已轉入 deferred roadmap。
 
 ### Phase 4 已 ship（v0.22.0）
 

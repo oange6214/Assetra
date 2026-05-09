@@ -78,11 +78,12 @@
 - [x] 建立現金流量表 service（`CashFlowStatementService`，Operating / Investing / Financing）
 - [x] 建立 PDF / CSV export（`ReportExportService`，QuestPDF Community + 手寫 CSV）
 
-### 3. 外幣與美股  *(完成 — v0.14.0 / v0.15.0)*
+### 3. 外幣與跨市場基礎  *(完成 — v0.14.0 / v0.15.x；美股即時資料規劃中)*
 - [x] 建立外幣帳戶模型（v0.14.0：`Currency` VO、`FxRate`、`IFxRateProvider`）
 - [x] 建立 FX 換算策略（v0.14.0：`MultiCurrencyValuationService`）
-- [x] 擴充美股 / ETF quote & history pipeline（v0.15.0：`StockExchangeRegistry`）
-- [x] 擴充投資 UI 與交易流程（v0.15.0：跨市場選股、Trade 多市場）
+- [x] 建立跨市場 metadata 與幣別推導（v0.15.0：`StockExchangeRegistry`）
+- [x] 擴充 foreign exchange history routing（v0.15.1–v0.15.2：Yahoo history + exchange-aware timezone）
+- [ ] 美股 symbol directory + Twelve Data 即時報價 router（見 `docs/planning/Assetra-US-Market-Data-Plan.md`）
 
 ### 4. 風險分析  *(完成 — v0.13.0)*
 - [x] 建立波動度 / 最大回撤 / Sharpe Ratio 計算
@@ -103,10 +104,12 @@
 - [x] PDF parser
 - [x] OCR adapter
 
-### 3. AI 財務助理 *(待做 — v0.23.0+；從原 v0.22 延後)*
-- [ ] 先做自然語言查詢
-- [ ] 再做摘要與提醒建議
-- [ ] 最後才做規劃建議
+### 3. AI 財務助理 *(核心已完成 — v0.27.0；action automation deferred)*
+- [x] 規則式自然語言查詢（`RuleBasedFinancialAssistant`）
+- [x] 摘要與提醒建議（`AssistantInsightHostedService` + insight cards）
+- [x] LLM fallback + grounded tool context（OpenAI / Ollama / Null providers）
+- [x] 對話歷史持久化與 Markdown 匯出
+- [ ] Action automation / mutate tools（延後至 v1.2，需 confirmation-flow 與安全審查）
 
 ### 4. 雲端同步  *(GA 完成 — v0.20.0 → v0.21.0)*
 - [x] 設計 sync metadata（v0.20.0–v0.20.3）
@@ -116,21 +119,21 @@
 
 ## Phase 4：差異化與平台擴展
 
-### 1. 多元資產
-- 不動產
-- 保險
-- 退休專戶
-- 實物資產
+### 1. 多元資產 *(完成 — v0.22.0)*
+- [x] 不動產
+- [x] 保險
+- [x] 退休專戶
+- [x] 實物資產
 
-### 2. 情境模擬
-- FIRE 計算機
-- 退休提領模擬
-- 利率 / 通膨 / 薪資變動模擬
+### 2. 情境模擬 *(完成 — v0.22.0)*
+- [x] FIRE 計算機
+- [x] 退休提領模擬
+- [x] 利率 / 通膨 / 薪資變動模擬（Monte Carlo）
 
 ### 3. 多端體驗
-- PWA
-- 行動端
-- 推播通知
+- [ ] PWA
+- [ ] 行動端
+- [ ] 推播通知
 
 ## 橫向工程任務
 

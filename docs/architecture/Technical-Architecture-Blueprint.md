@@ -598,11 +598,11 @@ Assets/
 - OCR / PDF 匯入（v0.19）
 - 雲端同步 GA（v0.20–v0.21）
 
-### Phase 4（多元資產 / 情境模擬已 ship — v0.22.0）
+### Phase 4（多元資產 / 情境模擬 / AI core 已 ship）
 - ✅ 不動產 / 保險 / 退休專戶 / 實物資產（v0.22.0）
 - ✅ 高階情境模擬：FIRE / Monte Carlo（v0.22.0）
-- AI 財務助理（待規劃，v0.23.0+）
-- PWA / 行動端（v0.24.0+ / v0.25.0+）
+- ✅ AI 財務助理核心（v0.27.0）：規則式查詢、LLM fallback、grounded tools、洞察排程、對話歷史
+- PWA / 行動端（deferred；see `docs/planning/Deferred-Roadmap.md`）
 
 ---
 
@@ -747,20 +747,21 @@ static double NextGaussian(double mean, double stdDev)
 
 ## 十二、總結
 
-Assetra 截至 v0.21.3 已具備：
+Assetra 截至 v0.28.0 release readiness sweep 已具備：
 
 - 投資 / 帳戶 / 負債 / 交易記錄 / 提醒 / 配置分析
 - 收支 / 預算 / Recurring / Goals 完整子系統
 - 匯入治理全鏈路（CSV / Excel / PDF / OCR + 對帳 + rollback）
 - 三大財務報表 + PDF / CSV 匯出
 - 投資績效（XIRR / TWR / MWR / benchmark / PnL）+ 風險分析
-- 外幣 / 美股 / FX 換算
+- 外幣 / 跨市場 metadata / FX 換算（美股即時報價仍依 `Assetra-US-Market-Data-Plan.md` 規劃）
 - 稅務模組
 - 雲端同步（AES-GCM 端到端加密，8 entity GA）
+- 多元資產、情境模擬與 AI 財務助理核心
 
 Phase 4 架構重點：
 
 1. ✅ **多元資產模型**（v0.22.0）— 獨立 MultiAsset context，BalanceSheet / Reporting 接入，全 entity 加 EntityVersion
 2. ✅ **情境模擬計算引擎**（v0.22.0）— 純計算層，無 persistence，Box-Muller Monte Carlo，LiveChartsCore fan chart
-3. **LLM adapter 整合**（AI 財務助理，v0.23.0+）— query intent routing 不穿透 domain layer
-4. **Web API 抽出**（v0.24.0+，`Assetra.Api`）— PWA / 行動端前置，WPF 與 PWA 共用 `Assetra.Core` 介面
+3. ✅ **AI 財務助理核心**（v0.27.0）— query intent routing 不穿透 domain layer，LLM fallback 只吃 grounded tool context
+4. **Web API 抽出**（deferred，`Assetra.Api`）— PWA / 行動端前置，WPF 與 PWA 共用 `Assetra.Core` 介面

@@ -1,13 +1,13 @@
 # Settings Schema Migration — v0.x → v1.0
 
 **Status:** Spec / playbook
-**Last updated:** 2026-05-09 (v0.27.0 → v1.0 transition planning)
+**Last updated:** 2026-05-09 (v0.28.0 → v1.0 transition planning)
 
 ## Why this exists
 
-`AppSettings.cs` has accumulated 30+ fields across the v0.6 → v0.27 series. New fields land with safe defaults (positional record params), so deserializing an old `AppSettings.json` into a newer `AppSettings` record always works — but a v1.0 release should also remove deprecated fields and rename a few to the names we'd pick if writing it today. That's a breaking schema change and needs an explicit migration step.
+`AppSettings.cs` has accumulated 30+ fields across the v0.6 → v0.28 series. New fields land with safe defaults (positional record params), so deserializing an old `AppSettings.json` into a newer `AppSettings` record always works — but a v1.0 release should also remove deprecated fields and rename a few to the names we'd pick if writing it today. That's a breaking schema change and needs an explicit migration step.
 
-## Current state (v0.27)
+## Current state (v0.28)
 
 `AppSettingsService.LoadSettings()` reads `%APPDATA%/Assetra/settings.json`, deserialises directly into `AppSettings`, and falls back to `new AppSettings()` (all defaults) on parse error. There is no version field on disk; the schema is implicitly inferred from the JSON keys present.
 
@@ -59,7 +59,7 @@ When migration mutates anything, write a `settings.json.bak.<timestamp>` before 
 
 ## Acceptance criteria
 
-- A v0.27 user's `settings.json` survives v1.0 first-run with no data loss.
+- A v0.28 user's `settings.json` survives v1.0 first-run with no data loss.
 - A corrupt JSON triggers a friendly error dialog + offers to reset to defaults.
 - The new `SchemaVersion` field roundtrips correctly.
 - The migration is unit-tested with sample v0.x JSON fixtures.

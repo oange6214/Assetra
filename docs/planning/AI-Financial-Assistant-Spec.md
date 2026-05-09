@@ -1,6 +1,6 @@
 # AI 財務助手 — 設計與實作 Spec (v0.27+)
 
-**Status:** Phase 1 shipped (rule-based, no LLM).
+**Status:** Core shipped in v0.27.0 (rule-based + hybrid LLM fallback + insights + history/export). Action automation remains deferred.
 **Last updated:** 2026-05-09
 
 ---
@@ -29,28 +29,32 @@
 - 直接呼叫現有 query service，不重複實作邏輯
 - 失敗時回 `FinancialAssistantResponse.Unhandled` + 建議查詢清單
 
-### Phase 2 — 摘要與提醒（未實作）
+### Phase 2 — 摘要與提醒（已實作核心）
 
-- 月底自動摘要：`MonthEndSummaryService` 每月 1 號 schedule trigger
-- 預算超支預警：query `IBudgetRepository` + `IBalanceQueryService` 比對
-- 訂閱續扣提醒：query `IRecurringTransactionRepository.NextDue`
+- 服務：`IAssistantInsightService`
+- 實作：`RuleBasedAssistantInsightService`
+- Hosted service：`AssistantInsightHostedService`
+- UI：`AssistantViewModel.LoadInsightsAsync()` 將 insight cards 顯示於 Assistant 頁面
+- 目前涵蓋：預算超支、訂閱/排程到期、月度變動提示
 
-合適時機觸發（背景 hosted service），結果丟到 `INotificationService` 或 `ISnackbarService`。
+後續可再擴充到 email / push，但不列入 v0.28 release 範圍。
 
-### Phase 3 — LLM 規劃建議（未實作）
+### Phase 3 — LLM fallback / grounded answer（已實作核心）
 
 - 抽 `ILlmProvider` 介面（`AskAsync(prompt, ct)` → string）
 - 實作：`OpenAiLlmProvider`（HttpClient + API key from settings）
-  / `LocalOllamaProvider`（http://localhost:11434）
-- `LlmFinancialAssistant` 把 user query + 結構化 context（最近 30 天 trade summary、
-  current portfolio snapshot）丟給 LLM，讓它產生 actionable plan。
-- Tool calls：LLM 可呼叫具名 query function（`GetCashBalance`、`GetTaxSummary`），
-  避免 hallucinate 數字。
+  / `OllamaLlmProvider`（http://localhost:11434）/ `NullLlmProvider`
+- `HybridFinancialAssistant` 先走 deterministic rule-based answer；只有未命中且 provider 已設定時才使用 LLM。
+- `GroundedAssistantToolRegistry` 提供只讀 tool context。v0.27 baseline 會先取短快照後拼入 system prompt；不是正式 function-calling 協定。
+- 對話歷史可保留於 UI session，並可匯出 Markdown。
+
+Action automation / mutate tools 仍延後至 v1.2，需 confirmation-flow 與安全審查。
 
 **安全考量：**
-- API key 存於 AppSettings，UI 加 redact display
-- prompt 不包含個人 PII（帳戶名、金額正規化為 anonymous tokens）
-- response cache：相同 query 5 分鐘內回 cache，省 token
+- API key 目前存於 AppSettings；OS 憑證庫 migration 列在 v1.1 planning。
+- Prompt 只能包含短版 grounded snapshot，不可暴露 raw DB row；新增 tool 前需檢查是否包含可識別帳戶資訊。
+- 不支援 mutate / write action；所有資料操作都必須停留在 read-only query。
+- Response cache 尚未落地；若未來加入，必須依 provider / model / locale / query / context hash 做明確 key。
 
 ---
 
@@ -73,10 +77,11 @@ Phase 2/3 維持同一介面 — 替換實作即可，UI 不變。
 
 ## UI 規劃
 
-- **NavSection.Assistant**（新；待加入）— 主側欄第二排（Reports 之後）
+- **NavSection.Assistant** — 主側欄的 AI 財務助理入口
 - **AssistantView.xaml** — 對話列表 + 輸入框 + 建議查詢按鈕
-- 對話訊息分使用者 / 助手兩種樣式；助手訊息底部顯示 `Source` badge
+- 對話訊息分使用者 / 助手兩種樣式；助手訊息底部顯示 `Source` badge / grounded context
 - 空白狀態：顯示 `SuggestedQueries` 為可點擊 chip
+- Insight cards：由 `IAssistantInsightService` 回傳，目前為 best-effort，不阻塞聊天 UI
 
 ---
 
@@ -92,8 +97,9 @@ Phase 2/3 維持同一介面 — 替換實作即可，UI 不變。
 
 ## Roadmap 對位
 
-| Roadmap milestone | Phase | 預估 |
+| Roadmap milestone | Phase | 狀態 |
 |---|---|---|
-| v0.27 (current) | Phase 1 ✅ | 完成 |
-| v0.28 | Phase 2 (摘要/提醒) | 8–12h |
-| v0.29 | Phase 3 (LLM) | 16–24h（含 provider 抽象 + 測試） |
+| v0.27 | Phase 1–3 core | ✅ 已完成 |
+| v0.28 | UI / DesignSystem alignment | ✅ 已納入 release sweep |
+| v1.1 | OS credential store + insight persistence polish | Deferred |
+| v1.2 | Action automation / mutate tools | Deferred，需安全審查 |

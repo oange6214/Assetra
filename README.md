@@ -14,11 +14,15 @@
 - **正式報表與匯出（v0.11）**：損益表、資產負債表、現金流量表，支援 PDF / CSV 匯出
 - **投資績效分析（v0.12）**：XIRR、TWR / MWR、benchmark 對比、損益歸因
 - **風險分析（v0.13）**：年化波動率、最大回撤、Sharpe Ratio、集中度分析（HHI + Top-N）
-- **外幣 / 美股（v0.14–v0.15）**：Currency VO、FxRate、MultiCurrencyValuationService、StockExchangeRegistry
+- **外幣 / 跨市場基礎（v0.14–v0.15）**：Currency VO、FxRate、MultiCurrencyValuationService、StockExchangeRegistry、Yahoo history routing；美股即時報價與 symbol directory 仍在規劃中
 - **稅務模組（v0.18）**：TaxSummary、股利 / 海外所得追蹤、報稅匯出
 - **雲端同步（v0.20–v0.21）**：端到端 AES-GCM 加密、8 entity round-trip、LastWriteWins + manual conflict drain
+- **多元資產（v0.22）**：不動產、保險保單、退休專戶、實物資產，接入資產負債表與同步模型
+- **情境模擬（v0.22）**：FIRE 計算機、Monte Carlo、退休提領與長期資產路徑試算
+- **AI 財務助理（v0.27）**：規則式 + LLM fallback、grounded tools、洞察排程、對話歷史與 Markdown 匯出
+- **Native DesignSystem（v0.28）**：Fluent-first / Carbon-assisted UI 規範、tokens、shared controls、release gate 與文件化 migration path
 
-目前開發主線里程碑：`v0.21.1`（下一個 sprint：`v0.22.0` — AI 財務助理）
+目前 master 準備發佈 `v0.28.0`。版本由 git tag 透過 MinVer 推算；下一階段重點是 v1.0 GA hardening 與美股 market data 計畫落地。
 
 > 註：這裡描述的是目前 `master` 的開發目標與功能敘事，不等同於 GitHub Releases 上已正式發佈的版本號。
 

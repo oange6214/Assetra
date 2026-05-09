@@ -1,9 +1,11 @@
-# US Equities Support — Implementation Plan
+# US Equities Support — Detailed Appendix
 
-**Status:** Plan (not yet started)
+**Status:** Appendix / superseded by [`Assetra-US-Market-Data-Plan.md`](Assetra-US-Market-Data-Plan.md)
 **Target version:** v2.0 multi-asset extension
 **Estimated duration:** 4–5 weeks for one engineer
 **Last updated:** 2026-05-09
+
+> This document preserves the detailed implementation notes from the initial US equities planning pass. The current authoritative plan is [`Assetra-US-Market-Data-Plan.md`](Assetra-US-Market-Data-Plan.md). If the two documents conflict, the newer market data plan wins, especially for the transitional `IStockService` strategy, provider-independent cache identity, caller-driven TTL, symbol normalization, test-before-save API key flow, and trading-calendar edge cases.
 
 ## Goal
 

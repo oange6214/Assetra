@@ -2,6 +2,8 @@
 
 > **版號重編註記（2026-05-02，v0.22.0 修訂）**：原訂 v0.22 AI 助理 → v0.23/v0.24 多元資產 → v0.25/v0.26 情境模擬 的 4 個 sprint，最終以 **v0.22.0 一次合併出貨**（多元資產 + 情境模擬 + Wpf.Ui-first UX redesign）。AI 助理延後到後續獨立 sprint。
 >
+> **v0.28.0 release sweep（2026-05-09）**：AI 財務助理核心已於 **v0.27.0** 出貨；v0.28.0 收斂 Fluent + Carbon Native UI / DesignSystem。PWA / Mobile / action automation 移到 deferred roadmap。
+>
 > **更早的版號重編（2026-04-28）**：v0.14–v0.19 依 roadmap 出貨；雲端同步原訂 v0.20.0 一個 sprint，實際展開為 v0.20.0–v0.20.12 + v0.21.0（GA chaos test）+ v0.21.1–v0.21.4（docs / 修補）。詳細出貨對照請見 `docs/releases/CHANGELOG.md`。
 
 > 規劃日期：2026-04-28（v0.13.0 release 後）
@@ -15,7 +17,7 @@
 | 版本 | Sprint 主題 | Phase | 估算規模 | 主要產出 |
 |------|------------|-------|---------|----------|
 | **v0.14.0** ✅ | 外幣基礎（Currency + FX 換算） | P2.3-A | M | `Currency` VO、`FxRate`、`IFxRateProvider`、`MultiCurrencyValuationService`，既有 Performance/Risk/Reports 接入換算 |
-| **v0.15.0** ✅ | 美股 / ETF Pipeline 擴充 | P2.3-B | M | US/ETF quote & history、`StockExchangeRegistry`、投資 UI 跨市場選股、Trade 流程支援多市場 |
+| **v0.15.x** ✅ | 跨市場 / ETF foundation | P2.3-B | M | `StockExchangeRegistry`、ETF metadata、Yahoo foreign history routing、exchange-aware timezone；US live quote/search moved to dedicated market data plan |
 | **v0.16.0** ✅ | Goals 完整子系統 | P1.3 | S~M | `GoalMilestone`、`GoalFundingRule`、`GoalPlanningService`、`GoalProgressQueryService` |
 | **v0.17.0** ✅ | 趨勢圖增強（事件標註 + 堆疊圖） | P1.4 | S | `PortfolioEvent`、堆疊圖 schema 擴充、`TrendsView` enhancements |
 | **v0.18.0** ✅ | 稅務模組 MVP | P3.1 | M | `TaxSummary`、股利所得、海外所得追蹤、報稅匯出（CSV/PDF） |
@@ -24,9 +26,9 @@
 | **v0.21.0** ✅ | 雲端同步 GA（chaos test）| — | S | HTTP 5xx / cancellation 路徑覆蓋；i18n 複校 no-op；staging 煙霧延後到 v1.0 GA gate |
 | **v0.21.1** ✅ | 雲端同步使用者文件 + 規劃檔整理 | — | XS | `docs/guides/Cloud-Sync-Setup.md`；`docs/planning/` 6 份歷史 sprint 封存 |
 | **v0.22.0** ✅ | 多元資產 + 情境模擬 + Wpf.Ui UX redesign（合併 sprint） | P4.1+P4.2 | XL | `RealEstate` / `InsurancePolicy` / `RetirementAccount` / `PhysicalAsset` 模型 + UI；`FireCalculator` + `MonteCarloSimulator`；`ui:TextBox`/`ui:Button`/`ui:SymbolIcon` 全 app 遷移；NavRail 漢堡切換；GlobalStyles 清理 -28% |
-| **v0.23.0+** | AI 財務助理（自然語言查詢，從原 v0.22 延後） | P3.3 | M | LLM adapter、query intent → service routing、查詢 UI |
-| **v0.24.0+** | PWA（瀏覽器端只讀視圖） | P4.3-A | L | 後端 API 抽出、PWA shell |
-| **v0.25.0+** | 行動端 + 推播 | P4.3-B | L | Mobile 適配、推播通道 |
+| **v0.27.0** ✅ | AI 財務助理核心 | P3.3 | M | Rule-based assistant、LLM fallback、grounded tools、insights scheduler、history persistence/export |
+| **v0.28.0** ✅ | Fluent + Carbon Native UI / DesignSystem | — | M | Tokens、shared controls、release gate、page pattern sweep、UI docs alignment |
+| **Deferred** | PWA / 行動端 / 推播 | P4.3 | L | Moved to `docs/planning/Deferred-Roadmap.md` |
 | **v1.0.0** | GA 發布（穩定性、文件、效能） | — | M | 大量整合測試、文件全面整理、效能 baseline |
 
 > 備註：v0.22（AI）刻意排在雲端同步之後，是因為 AI 需要穩定資料來源；若不需雲端同步可提前。
@@ -78,9 +80,9 @@
 
 ---
 
-### v0.15.0 — 美股 / ETF Pipeline
+### v0.15.x — 跨市場 / ETF foundation
 
-**目標**：v0.14 已支援多幣別後，擴充標的市場。
+**目標**：v0.14 已支援多幣別後，先建立跨市場 metadata、ETF 基礎與歷史資料 routing。美股即時報價、offline symbol directory、quota/cache/calendar/FX 聚合已移到 [`Assetra-US-Market-Data-Plan.md`](Assetra-US-Market-Data-Plan.md) 作為後續 v2.0 market data 計畫，避免把免費 provider API key 整合誤認為 v0.15 已完成。
 
 #### Tasks
 
@@ -89,9 +91,10 @@
   - `StockExchangeRegistry`：交易時段、tick size、settlement cycle、預設 currency
   - `PortfolioEntry.Exchange` 升級為強型別 enum
 
-- **F1 美股 quote provider**
-  - `Assetra.Infrastructure/Http/UsStockQuoteProvider.cs`：wrap Yahoo Finance / Alpha Vantage 之一
+- **F1 跨市場 history routing**
+  - `StockExchangeRegistry` 提供 exchange metadata 與預設 currency
   - `IStockHistoryProvider` 多 provider routing：依 exchange 派送
+  - 美股 live quote provider 不在本 sprint 範圍，後續依 market data plan 導入 Twelve Data / symbol directory / quota
 
 - **F2 ETF 擴充**
   - 既有 `AssetType.Stock` 加 `Etf` 子分類（或於 PortfolioEntry 加 `IsEtf`）
@@ -233,26 +236,26 @@
 
 ---
 
-### v0.23.0+ — AI 財務助理（自然語言查詢）  *(從原 v0.22 延後)*
+### ✅ v0.27.0 — AI 財務助理核心  *(從原 v0.22 延後)*
 
 > 此 sprint 因 v0.22.0 合併出貨多元資產 + 情境模擬 + Wpf.Ui UX
-> redesign，AI 助理被排到下一個獨立 sprint。任務內容沿用原規劃。
+> redesign，AI 助理被排到後續獨立 sprint；核心能力已於 v0.27.0 出貨。
 
 #### Tasks
 
-- **D1 LLM adapter**
+- **D1 LLM adapter** ✅
   - `ILlmProvider`：`AskAsync(prompt, context) → string`
-  - 預設實作：Claude / OpenAI（API key 在 user-secrets）
+  - 實作：OpenAI / Ollama / Null providers（設定走 `AppSettings`；OS credential store migration 延後至 v1.1）
 
-- **F1 Query intent router**
+- **F1 Query intent router** ✅
   - 將使用者問題分類為：lookup（單一資料）/ aggregate（聚合）/ analysis（分析）
-  - 動態組裝 context（最近 trade、portfolio summary）→ tool calling
+  - Rule-based 先回答；未命中時才走 LLM fallback
 
-- **F2 Tool catalog**
+- **F2 Tool catalog** ✅
   - 暴露 `GetPortfolioValue`、`ListRecentTrades`、`GetIncomeStatement` 等只讀 tool
-  - LLM 透過 tool calling 取資料 → 回答自然語言
+  - v0.27 baseline 先 prefetch grounded context 並拼入 prompt；正式 function-calling 協定延後
 
-- **F3 UI**
+- **F3 UI** ✅
   - `Features/Assistant/AssistantView`：聊天介面、conversation history、引用資料連結
 
 #### 測試（~8 筆）
@@ -434,17 +437,17 @@
 
 ---
 
-### v0.24.0+ / v0.25.0+ — 多端體驗  *(原 v0.27 / v0.28，因 v0.22.0 合併出貨往前移 3 號)*
+### Deferred — 多端體驗
 
-> 重大架構決策：原 WPF Repository 直連 SQLite → 必須先抽出 Web API。
+> 重大架構決策：原 WPF Repository 直連 SQLite → 必須先抽出 Web API。這一段不再綁定 v0.24 / v0.25 版號，正式排序以 [`Deferred-Roadmap.md`](Deferred-Roadmap.md) 與後續 v1.x/v2.x planning 為準。
 
-#### v0.24.0+：PWA（read-only）
+#### PWA（deferred）
 
 - ASP.NET Core Web API 專案 `Assetra.Api`
 - WPF + PWA 共用 `Assetra.Core` 介面
 - PWA：dashboard、portfolio overview、reports（read-only）
 
-#### v0.25.0+：行動端 + 推播
+#### 行動端 + 推播（deferred）
 
 - 候選技術：MAUI / React Native / Flutter
 - 推播通道：定期任務、預算超支、異常交易
@@ -483,20 +486,21 @@
 
 ## 四、執行建議
 
-1. **逐個 sprint 順序執行**：v0.14 → v0.25.0+ → v1.0（中途 v0.22.0 一次合併出貨原 v0.23–v0.26）
+1. **逐個 sprint 順序執行**：v0.14 → v0.28.0 → v1.0（中途 v0.22.0 一次合併出貨原 v0.23–v0.26；AI core 於 v0.27.0 出貨）
 2. **每完成一個 sprint**：build / test / docs / commit / tag / push
-3. **遇到大規模 schema 改動**（v0.14 多幣別、v0.20 sync、v0.24.0+ API）：先做 spike POC，不行再退回
+3. **遇到大規模 schema 改動**（v0.14 多幣別、v0.20 sync、deferred Web API）：先做 spike POC，不行再退回
 4. **若使用者中途決定停在 MVP**：合理的 stop point 在 **v0.18.0**（核心理財 + 投資 + 稅務完整），v0.19+ 屬「進階自動化 / 多平台」
 
 ---
 
-## 五、本次執行範圍
+## 五、現況與執行範圍
 
-依使用者指示「**剩下的一次依序做完**」，本 plan 將從 **v0.14.0 開始依序執行至 v1.0.0**。每個 sprint 完成後自動：
+本文件保留 v0.14 → v1.0 的原始 sprint breakdown 與後續修訂紀錄。實際 master 已推進到 v0.28.0 release readiness；後續不應再照舊文字「自動 commit / tag / push」逐 sprint 執行，而是依目前 release gate 明確處理：
+
 1. 建置全綠（`dotnet build`）
 2. 全測試綠（`dotnet test`）
-3. 更新文件（CHANGELOG / Bounded-Contexts / Roadmap）
-4. Commit + tag + push（master）
-5. 進入下一個 sprint
+3. 更新文件（CHANGELOG / INDEX / Roadmap / relevant planning docs）
+4. 由 release owner 決定 commit / tag / push / GitHub release
+5. 下一階段進入 v1.0 GA hardening，PWA / Mobile / push / AI mutate tools 與 US market data 依各自 planning 文件排程
 
-**預估時程**：v0.14 ~ v1.0 共 16 個 sprint（v0.14–v0.21.1 已出貨 8 個；v0.22–v0.28 + v1.0.0 待做 8 個；v0.20.x 內部展開為 13 個 sub-version 不計入），每 sprint 約 2~5 小時實作（不含外部依賴整合測試）。
+**目前狀態（2026-05-09）**：v0.14–v0.28.0 已完成或進入 release readiness；剩餘主線是 v1.0 GA hardening。PWA / Mobile / push / AI mutate tools 轉入 deferred roadmap。

@@ -1,7 +1,7 @@
 # Deferred Roadmap — items NOT in v1.0 GA
 
 **Status:** Living document
-**Last updated:** 2026-05-09 (post v0.27.0 push)
+**Last updated:** 2026-05-09 (v0.28.0 release readiness sweep)
 
 Curated list of work items that are real and prioritised but consciously **out of scope for v1.0 GA**. Each entry has a target version and an effort estimate so future sprint planning can pull off the top.
 
