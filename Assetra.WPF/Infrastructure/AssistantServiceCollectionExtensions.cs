@@ -50,6 +50,10 @@ internal static class AssistantServiceCollectionExtensions
             sp.GetService<IRecurringTransactionRepository>(),
             sp.GetService<ITradeRepository>()));
         services.AddSingleton<AssistantViewModel>();
+
+        // Phase 2 scheduler — polls insights every 4h and pushes Critical/Warning
+        // to the snackbar. Registered as IHostedService so it starts/stops with the host.
+        services.AddHostedService<AssistantInsightHostedService>();
         return services;
     }
 }
