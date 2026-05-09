@@ -98,4 +98,20 @@ public sealed record AppSettings(
     /// 最近一次 Frankfurter 匯率刷新成功時間（UTC ISO-8601）。
     /// 空字串 = 從未刷新成功，UI 顯示「尚未更新」。
     /// </summary>
-    string LastFxRefreshUtc = "");
+    string LastFxRefreshUtc = "",
+
+    // AI Phase 3 — LLM provider settings.
+
+    /// <summary>"" / "null" = rule-based only; "openai"; "ollama".</summary>
+    string LlmProvider = "",
+
+    /// <summary>API key for cloud LLM providers (OpenAI). Stored plaintext (legacy);
+    /// future work moves to OS credential store. Empty = provider runs unconfigured.</summary>
+    string LlmApiKey = "",
+
+    /// <summary>Model identifier override. Empty = provider default
+    /// ("gpt-4o-mini" for OpenAI, "llama3.1:8b" for Ollama).</summary>
+    string LlmModel = "",
+
+    /// <summary>Endpoint override (Ollama only — defaults to http://localhost:11434).</summary>
+    string LlmEndpoint = "");
