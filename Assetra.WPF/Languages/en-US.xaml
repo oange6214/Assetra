@@ -1076,6 +1076,8 @@
     <sys:String x:Key="Reports.Tax.AmtTriggered">AMT declaration required</sys:String>
     <sys:String x:Key="Reports.Tax.DividendRecords">Dividend records</sys:String>
     <sys:String x:Key="Reports.Tax.CapitalGainRecords">Realised capital-gain records</sys:String>
+    <sys:String x:Key="Reports.Tax.MultiYear.Title">Multi-year tax comparison</sys:String>
+    <sys:String x:Key="Reports.Tax.RecordCount">Records</sys:String>
     <sys:String x:Key="Reports.Performance.Title">Performance</sys:String>
     <sys:String x:Key="Reports.Risk.Title">Risk Metrics</sys:String>
     <sys:String x:Key="Reports.Risk.ConcentrationWarning">⚠ High concentration risk (single position &gt; 30% or HHI &gt; 0.30)</sys:String>

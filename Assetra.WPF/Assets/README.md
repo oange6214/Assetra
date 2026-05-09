@@ -17,13 +17,15 @@ Do not keep duplicate icon copies in `Assets/` root. If the app needs a differen
 
 Light theme:
 - Background: `#FFFFFF`
-- Main: `#142F55`
-- Accent: `#C8A25A`
+- Main: `#14213D`
+- Surface: `#1E2430`
+- Accent: `#C8A96B`
 
 Dark theme:
-- Background: `#0F172A`
-- Main: `#3B82F6`
-- Accent: `#E6C27A`
+- Background: `#0A0F1C`
+- Main: `#14213D`
+- Surface: `#1E2430`
+- Accent: `#C8A96B`
 
 ## Usage guidance
 

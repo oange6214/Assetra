@@ -1080,6 +1080,8 @@
     <sys:String x:Key="Reports.Tax.AmtTriggered">需申報最低稅負</sys:String>
     <sys:String x:Key="Reports.Tax.DividendRecords">股利明細</sys:String>
     <sys:String x:Key="Reports.Tax.CapitalGainRecords">已實現資本利得明細</sys:String>
+    <sys:String x:Key="Reports.Tax.MultiYear.Title">多年度稅務比較</sys:String>
+    <sys:String x:Key="Reports.Tax.RecordCount">筆數</sys:String>
     <sys:String x:Key="Reports.Performance.Title">投資績效</sys:String>
     <sys:String x:Key="Reports.Risk.Title">風險指標</sys:String>
     <sys:String x:Key="Reports.Risk.ConcentrationWarning">⚠ 持股集中度過高（單一部位 &gt; 30% 或 HHI &gt; 0.30）</sys:String>

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using Assetra.Core.Interfaces.Reports;
+using Assetra.Core.Models;
 using Assetra.Core.Models.Reports;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;

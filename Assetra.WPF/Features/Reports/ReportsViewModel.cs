@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Net.Http;
 using Assetra.Application.Fx;
 using Assetra.Application.Reports.Services;
@@ -74,6 +75,18 @@ public sealed partial class ReportsViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasTaxSummary))]
     private TaxSummary? _taxSummary;
+
+    /// <summary>
+    /// Per-year tax aggregates for the multi-year comparison panel. Computed by
+    /// scanning the trade journal once and grouping by year. Years with NO
+    /// dividend or capital-gain records are still included (zero rows) so the
+    /// table doesn't have gaps.
+    /// </summary>
+    public ObservableCollection<TaxYearRowViewModel> MultiYearTaxRows { get; } = new();
+
+    /// <summary>True when MultiYearTaxRows has ≥ 2 rows — single-year users get
+    /// the regular TaxSummary card instead of an unnecessary one-row table.</summary>
+    public bool HasMultiYearTax => MultiYearTaxRows.Count >= 2;
 
     [ObservableProperty]
     private string? _exportStatus;
@@ -355,12 +368,33 @@ public sealed partial class ReportsViewModel : ObservableObject
                 // Tax is annual — pass the year from the dialog state. Re-runs
                 // every Month change too (cheap) so the user sees tax data
                 // even from the income/balance tabs without switching tabs.
-                var allTrades = await _trades.GetAllAsync().ConfigureAwait(true);
+                var allTrades = (await _trades.GetAllAsync().ConfigureAwait(true)).ToList();
                 TaxSummary = Assetra.Application.Tax.TaxCalculationService.CalculateForYear(Year, allTrades);
+
+                // Multi-year comparison: scan all trade-bearing years (CashDividend
+                // + Sell-with-PnL only) and build one row per year. Rebuild the
+                // collection in-place so existing XAML bindings stay attached.
+                var taxYears = allTrades
+                    .Where(t => t.Type == Assetra.Core.Models.TradeType.CashDividend
+                             || (t.Type == Assetra.Core.Models.TradeType.Sell && t.RealizedPnl is not null))
+                    .Select(t => t.TradeDate.Year)
+                    .Distinct()
+                    .OrderByDescending(y => y)
+                    .ToList();
+
+                MultiYearTaxRows.Clear();
+                foreach (var y in taxYears)
+                {
+                    var s = Assetra.Application.Tax.TaxCalculationService.CalculateForYear(y, allTrades);
+                    MultiYearTaxRows.Add(TaxYearRowViewModel.FromSummary(s));
+                }
+                OnPropertyChanged(nameof(HasMultiYearTax));
             }
             catch (Exception ex)
             {
                 TaxSummary = null;
+                MultiYearTaxRows.Clear();
+                OnPropertyChanged(nameof(HasMultiYearTax));
                 detailErrors.Add(ex.Message);
             }
         }
@@ -395,6 +429,8 @@ public sealed partial class ReportsViewModel : ObservableObject
         BalanceSheet = null;
         CashFlowStatement = null;
         TaxSummary = null;
+        MultiYearTaxRows.Clear();
+        OnPropertyChanged(nameof(HasMultiYearTax));
         Performance = null;
         Risk = null;
     }

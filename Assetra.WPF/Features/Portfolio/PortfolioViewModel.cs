@@ -34,7 +34,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
     private Action<ApplicationTheme>? _onThemeChanged;
     private readonly ICurrencyService? _currencyService;
     private readonly ICryptoService? _cryptoService;
-    private readonly IStockHistoryProvider? _historyProvider;
     private readonly IPortfolioLoadService _loadService;
     private readonly ITransactionWorkflowService _transactionWorkflowService;
     private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
@@ -261,7 +260,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         _settingsService = ui.Settings;
         _currencyService = services.Currency;
         _cryptoService = services.Crypto;
-        _historyProvider = services.History;
         _loadService = services.Load ?? new NullPortfolioLoadService();
         _transactionWorkflowService = services.TransactionWorkflow ?? new NullTransactionWorkflowService();
         _tradeDeletionWorkflowService = services.TradeDeletionWorkflow ?? new NullTradeDeletionWorkflowService();
