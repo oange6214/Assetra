@@ -77,6 +77,14 @@ public sealed partial class AssistantViewModel : ObservableObject
         }
     }
 
+    /// <summary>Dismiss a single insight card from the visible list.</summary>
+    [RelayCommand]
+    private void DismissInsight(AssistantInsight? insight)
+    {
+        if (insight is null) return;
+        _insightCards.Remove(insight);
+    }
+
     private bool CanSend() => !IsAnswering && !string.IsNullOrWhiteSpace(InputText);
 
     [RelayCommand(CanExecute = nameof(CanSend))]

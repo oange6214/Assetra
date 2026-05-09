@@ -453,10 +453,36 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         new("ollama", "Ollama (local)"),
     ];
 
-    partial void OnAmtExemptionChanged(decimal value)         { if (!_isLoading) _ = SaveAsync(); }
-    partial void OnAmtRateChanged(decimal value)              { if (!_isLoading) _ = SaveAsync(); }
-    partial void OnAmtRegularTaxableIncomeChanged(decimal v)  { if (!_isLoading) _ = SaveAsync(); }
-    partial void OnAmtRegularIncomeTaxChanged(decimal v)      { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtExemptionChanged(decimal value)
+    {
+        // Negative exemption invalid → clamp.
+        if (value < 0m) { AmtExemption = 0m; return; }
+        if (!_isLoading) _ = SaveAsync();
+    }
+
+    partial void OnAmtRateChanged(decimal value)
+    {
+        // Rate is a fraction in [0, 1] (0.20 = 20%). Users typing "20" instead
+        // of "0.2" used to silently produce wrong AMT. Reject + clamp.
+        if (value < 0m || value > 1m)
+        {
+            AmtRate = Math.Clamp(value, 0m, 1m);
+            return;
+        }
+        if (!_isLoading) _ = SaveAsync();
+    }
+
+    partial void OnAmtRegularTaxableIncomeChanged(decimal v)
+    {
+        if (v < 0m) { AmtRegularTaxableIncome = 0m; return; }
+        if (!_isLoading) _ = SaveAsync();
+    }
+
+    partial void OnAmtRegularIncomeTaxChanged(decimal v)
+    {
+        if (v < 0m) { AmtRegularIncomeTax = 0m; return; }
+        if (!_isLoading) _ = SaveAsync();
+    }
 
     partial void OnDefaultHomeSectionChanged(string value)
     {

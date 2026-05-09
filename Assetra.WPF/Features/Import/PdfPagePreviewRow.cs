@@ -23,6 +23,10 @@ public sealed record PdfPagePreviewRow(
     public string ConfidenceDisplay =>
         OcrConfidence is { } c ? $"{c * 100.0:N0}%" : string.Empty;
 
+    /// <summary>True 當 OCR 信心 &lt; 50%（XAML binding 用來顯示警告色）。</summary>
+    public bool IsLowConfidence =>
+        OcrConfidence is { } c && c < 0.5;
+
     /// <summary>截短文字預覽避免大量 PDF 撐爆 UI（最多 4000 字）。</summary>
     public string TextPreview =>
         Text.Length <= 4000 ? Text : Text[..4000] + "…";

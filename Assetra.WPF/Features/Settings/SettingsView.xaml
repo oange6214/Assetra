@@ -5,6 +5,7 @@
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:controls="clr-namespace:Assetra.WPF.Features.Settings.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:infra="clr-namespace:Assetra.WPF.Infrastructure"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Settings"
     d:DataContext="{d:DesignInstance Type={x:Type vm:SettingsViewModel}}"
@@ -536,11 +537,11 @@
 
                         <StackPanel Margin="0,0,0,12">
                             <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Llm.ApiKey}" />
-                            <TextBox
+                            <PasswordBox
                                 MinWidth="320"
                                 Margin="0,8,0,0"
                                 HorizontalAlignment="Left"
-                                Text="{Binding LlmApiKey, UpdateSourceTrigger=LostFocus}" />
+                                infra:PasswordBoxBindingHelper.BoundPassword="{Binding LlmApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <TextBlock
                                 Margin="0,4,0,0"
                                 FontSize="{StaticResource Font.Size.Xs}"

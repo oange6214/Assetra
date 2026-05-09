@@ -324,8 +324,19 @@
                                             Grid.Column="3"
                                             VerticalAlignment="Center"
                                             FontSize="{StaticResource Font.Size.Xs}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{Binding ConfidenceDisplay}" />
+                                            FontWeight="SemiBold"
+                                            Text="{Binding ConfidenceDisplay}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsLowConfidence}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDanger}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </Grid>
                                     <TextBox
                                         MaxHeight="180"

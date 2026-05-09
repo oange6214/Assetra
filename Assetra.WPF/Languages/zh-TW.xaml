@@ -27,6 +27,7 @@
     <sys:String x:Key="Assistant.EmptyState">試試以下查詢：</sys:String>
     <sys:String x:Key="Assistant.Send">送出</sys:String>
     <sys:String x:Key="Assistant.Clear">清除對話</sys:String>
+    <sys:String x:Key="Assistant.DismissInsight">關閉這條提示</sys:String>
     <sys:String x:Key="Nav.Trends">資產趨勢</sys:String>
     <sys:String x:Key="Nav.Goals">財務目標</sys:String>
     <sys:String x:Key="Nav.Alerts">警示</sys:String>
