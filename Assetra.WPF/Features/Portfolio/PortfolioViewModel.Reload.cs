@@ -238,6 +238,7 @@ public partial class PortfolioViewModel
         OnPropertyChanged(nameof(TotalLiabilities));
         OnPropertyChanged(nameof(TotalAssets));
         OnPropertyChanged(nameof(NetWorth));
+        TradeFilter.NotifyCurrencyChanged();
         SellPanel.NotifyCurrencyChanged();
         Financial.Apply(_summaryService.Calculate(BuildSummaryInput()));
     }

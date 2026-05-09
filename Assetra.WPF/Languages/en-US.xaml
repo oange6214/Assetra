@@ -183,6 +183,10 @@
     <sys:String x:Key="Portfolio.TradeHistory.Commission">Commission</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.GrossAmount">Amount</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Empty">No trades recorded yet</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Summary.Inflow">Inflow</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Summary.Outflow">Outflow</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Summary.Net">Net</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Summary.Commission">Total fees</sys:String>
     <sys:String x:Key="Portfolio.Confirm.Title">Confirm</sys:String>
     <sys:String x:Key="Portfolio.Confirm.Delete">Delete</sys:String>
     <sys:String x:Key="Portfolio.Confirm.DeleteTrade">Delete this trade? This cannot be undone.</sys:String>

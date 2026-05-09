@@ -64,7 +64,9 @@
             <RowDefinition Height="*" />
             <!--  2: DataGrid  -->
             <RowDefinition Height="Auto" />
-            <!--  3: Pagination  -->
+            <!--  3: Summary footer (inflow / outflow / net / fees)  -->
+            <RowDefinition Height="Auto" />
+            <!--  4: Pagination  -->
         </Grid.RowDefinitions>
 
         <!--  Dividend calendar (4×3 months, collapsible — hidden if no dividend trades)  -->
@@ -861,9 +863,106 @@
             </Border>
         </Grid>
 
-        <!--  Pagination bar  -->
+        <!--  Summary footer：流入 / 流出 / 淨額 / 總手續費 — 跟隨篩選即時更新  -->
         <Border
             Grid.Row="3"
+            Padding="12,6"
+            Background="{DynamicResource AppSurface}"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="0,1,0,0"
+            Visibility="{Binding TradeFilter.HasFilteredTrades, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                <StackPanel Orientation="Horizontal">
+                    <!--  流入  -->
+                    <StackPanel Margin="0,0,24,0" Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.TradeHistory.Summary.Inflow}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppUp}"
+                            Text="{Binding TradeFilter.TradeFilteredInflow, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}"
+                            Typography.NumeralAlignment="Tabular" />
+                    </StackPanel>
+
+                    <!--  流出  -->
+                    <StackPanel Margin="0,0,24,0" Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.TradeHistory.Summary.Outflow}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppDown}"
+                            Text="{Binding TradeFilter.TradeFilteredOutflow, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}"
+                            Typography.NumeralAlignment="Tabular" />
+                    </StackPanel>
+
+                    <!--  淨額（依正負自動上色）  -->
+                    <StackPanel Margin="0,0,24,0" Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.TradeHistory.Summary.Net}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            FontWeight="SemiBold"
+                            Text="{Binding TradeFilter.TradeFilteredNet, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}"
+                            Typography.NumeralAlignment="Tabular">
+                            <TextBlock.Style>
+                                <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TradeFilter.IsTradeFilteredNetPositive}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding TradeFilter.TradeFilteredNet}" Value="0">
+                                            <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!--  總手續費  -->
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.TradeHistory.Summary.Commission}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{Binding TradeFilter.TradeFilteredCommission, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount-dash}"
+                            Typography.NumeralAlignment="Tabular" />
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!--  Pagination bar  -->
+        <Border
+            Grid.Row="4"
             Padding="12,6"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"

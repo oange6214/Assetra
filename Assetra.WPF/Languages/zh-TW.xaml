@@ -184,6 +184,10 @@
     <sys:String x:Key="Portfolio.TradeHistory.Commission">手續費</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.GrossAmount">金額</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Empty">尚無交易紀錄</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Summary.Inflow">流入</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Summary.Outflow">流出</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Summary.Net">淨額</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Summary.Commission">總手續費</sys:String>
     <sys:String x:Key="Portfolio.Confirm.Title">確認操作</sys:String>
     <sys:String x:Key="Portfolio.Confirm.Delete">刪除</sys:String>
     <sys:String x:Key="Portfolio.Confirm.DeleteTrade">確定刪除此交易紀錄？此操作無法復原。</sys:String>

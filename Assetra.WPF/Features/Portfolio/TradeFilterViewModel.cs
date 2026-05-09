@@ -136,6 +136,44 @@ public partial class TradeFilterViewModel : ObservableObject, IDisposable
 
     partial void OnTradeCurrentPageChanged(int value) => TradeJumpPageInput = value.ToString();
 
+    // ── Filtered totals (summary footer) ─────────────────────────────────────
+    // 跨「整個篩選結果」（非當前分頁）彙總，數值為 TWD（顯示時由 CurrencyConverter
+    // 依使用者選擇的貨幣換算）。會在 RefreshTradesView() 內重新計算。
+
+    /// <summary>所有 TotalAmount > 0 的篩選結果加總（流入，正值）。</summary>
+    [ObservableProperty] private decimal _tradeFilteredInflow;
+
+    /// <summary>所有 TotalAmount &lt; 0 的篩選結果加總（流出，負值）。</summary>
+    [ObservableProperty] private decimal _tradeFilteredOutflow;
+
+    /// <summary>淨額 = Inflow + Outflow（含正負號，正即淨流入、負即淨流出）。</summary>
+    [ObservableProperty] private decimal _tradeFilteredNet;
+
+    /// <summary>篩選結果的 Commission 加總（僅 Buy/Sell 有值的列）。</summary>
+    [ObservableProperty] private decimal _tradeFilteredCommission;
+
+    /// <summary>篩選結果至少 1 筆時為 true，控制 footer 顯示。</summary>
+    public bool HasFilteredTrades => TradeTotalCount > 0;
+
+    /// <summary>淨額為正（含 0）時 true → footer 淨額欄位上綠色；False → 紅色。</summary>
+    public bool IsTradeFilteredNetPositive => TradeFilteredNet >= 0;
+
+    partial void OnTradeFilteredNetChanged(decimal value) =>
+        OnPropertyChanged(nameof(IsTradeFilteredNetPositive));
+
+    /// <summary>
+    /// 切換顯示貨幣時由 PortfolioViewModel.OnCurrencyChanged 呼叫，
+    /// 觸發 4 個彙總欄位的 PropertyChanged 讓 CurrencyConverter 重新格式化。
+    /// 數值本身無變化（皆為 TWD），僅需強制 UI 重新綁定。
+    /// </summary>
+    public void NotifyCurrencyChanged()
+    {
+        OnPropertyChanged(nameof(TradeFilteredInflow));
+        OnPropertyChanged(nameof(TradeFilteredOutflow));
+        OnPropertyChanged(nameof(TradeFilteredNet));
+        OnPropertyChanged(nameof(TradeFilteredCommission));
+    }
+
     [RelayCommand]
     private void TradePagePrev()
     {
@@ -328,6 +366,22 @@ public partial class TradeFilterViewModel : ObservableObject, IDisposable
 
         var unit = _localization.Get("Portfolio.TradeCount.Unit", "筆");
         TradePageDisplay = $"{TradeTotalCount} {unit}";
+
+        // 2b. 彙總全篩選結果（非僅當前分頁）— 提供 footer summary bar 的數據
+        decimal inflow = 0m, outflow = 0m, commission = 0m;
+        foreach (var t in filtered)
+        {
+            var amt = t.TotalAmount;
+            if (amt > 0) inflow += amt;
+            else if (amt < 0) outflow += amt;
+            if (t.Commission is { } com && com > 0)
+                commission += com;
+        }
+        TradeFilteredInflow = inflow;
+        TradeFilteredOutflow = outflow;
+        TradeFilteredNet = inflow + outflow;
+        TradeFilteredCommission = commission;
+        OnPropertyChanged(nameof(HasFilteredTrades));
 
         // 3. Compute current page slice
         _visibleTradeIds = filtered
