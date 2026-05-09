@@ -490,7 +490,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
     [RelayCommand]
     private async Task AddPosition()
     {
-        // INVARIANT (Task 18 Option B): when TxBuyMetaOnly is true we MUST NOT write a
+        // INVARIANT (Task 18 Option B): when Buy.MetaOnly is true we MUST NOT write a
         // Trade row. Callers rely on this to pre-register symbols without affecting P&L.
         if (BuyContext.BuyMetaOnly)
         {

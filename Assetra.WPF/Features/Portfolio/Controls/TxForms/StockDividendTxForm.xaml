@@ -22,7 +22,7 @@
             Margin="0,0,0,12"
             IsEnabled="{Binding AreEconomicFieldsEditable}"
             ItemsSource="{Binding Positions}"
-            SelectedItem="{Binding TxStockDivPosition, Mode=TwoWay}"
+            SelectedItem="{Binding Div.StockPosition, Mode=TwoWay}"
             Style="{StaticResource FormComboBox}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -49,10 +49,10 @@
         <TextBox
             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
             IsEnabled="{Binding AreEconomicFieldsEditable}"
-            Text="{Binding TxStockDivNewShares, UpdateSourceTrigger=PropertyChanged}" />
+            Text="{Binding Div.StockNewShares, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Style="{StaticResource FormFieldError}"
-            Text="{Binding TxStockDivNewSharesError}"
-            Visibility="{Binding TxStockDivNewSharesError, Converter={StaticResource StringToVisibilityConverter}}" />
+            Text="{Binding Div.StockNewSharesError}"
+            Visibility="{Binding Div.StockNewSharesError, Converter={StaticResource StringToVisibilityConverter}}" />
     </StackPanel>
 </UserControl>

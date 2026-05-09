@@ -905,8 +905,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         // Open Tx dialog in Sell mode with this position pre-selected
         Transaction.OpenTxDialog();
         Transaction.TxType = "sell";
-        Transaction.TxSellPosition = row;
-        Transaction.TxSellQuantity = ((int)row.Quantity).ToString();
+        Transaction.Sell.Position = row;
+        Transaction.Sell.Quantity = ((int)row.Quantity).ToString();
     }
 
     /// <summary>側面板「買入」快速動作 — 打開 Tx 對話框，預填當前股票代號。</summary>
@@ -918,7 +918,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         var row = SelectedPositionRow;
         Transaction.OpenTxDialog();
         Transaction.TxType = "buy";
-        Transaction.TxBuyAssetType = "stock";
+        Transaction.Buy.AssetType = "stock";
         AddAssetDialog.AddSymbol = row.Symbol;
         AddAssetDialog.AddPrice = string.Empty;
         AddAssetDialog.AddQuantity = string.Empty;
@@ -932,7 +932,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
             return;
         Transaction.OpenTxDialog();
         Transaction.TxType = "cashDiv";
-        Transaction.TxDivPosition = SelectedPositionRow;
+        Transaction.Div.Position = SelectedPositionRow;
     }
 
     /// <summary>側面板「賣出」快速動作 — 呼叫既有 BeginSell，但以 SelectedPositionRow 為目標。</summary>

@@ -47,17 +47,10 @@ public partial class TransactionDialogViewModel
         // buy for" logic) don't mistake this for an in-progress edit loop.
         EditingTradeId = null;
 
-        // Edit-mode dispatch:
-        //   * meta-only types (Sell / Transfer / legacy Buy/StockDiv without entry) →
-        //     in-place UPDATE preserving Trade.Id and economic fields. This is the only
-        //     safe path for trades whose downstream state (FIFO lots, paired transfer
-        //     legs) depends on the original values.
-        //   * direct-editable types (Income / CashDividend / Buy with PortfolioEntryId /
-        //     Deposit / Withdrawal / loan + credit card variants) → fall through to the
-        //     standard create-new flow below; the post-success block (line ~125) deletes
-        //     the old row and re-projects balances. Equivalent to the legacy "建立修正版"
-        //     amendment flow but invoked transparently by Save instead of a separate button.
-        if (oldRow is { IsMetaOnlyEditType: true })
+        // Safe edit mode updates only metadata in-place so balances, positions, FIFO lots,
+        // and paired ledger effects stay untouched. Full economic changes intentionally go
+        // through Create Revision, which clears EditingTradeId and reaches the create-new path.
+        if (oldRow is not null && !IsRevisionMode)
         {
             await UpdateTradeMetaOnlyAsync(oldRow);
             return;
@@ -216,18 +209,10 @@ public partial class TransactionDialogViewModel
     }
 
     /// <summary>
-    /// Thin wrapper delegating to <see cref="TradeRowViewModel.IsMetaOnlyEditType"/> so
-    /// the rule lives in one place (the row VM) and both ConfirmTx and the dialog XAML
-    /// (<see cref="IsEditingMetaOnly"/>) agree on what "meta-only" means.
-    /// </summary>
-    private static bool IsMetaOnlyEdit(TradeRowViewModel row) => row.IsMetaOnlyEditType;
-
-    /// <summary>
-    /// In-place UPDATE of an existing trade — used for Sell edits and legacy unlinked
-    /// Buy/StockDividend edits. Preserves the trade Id (and therefore <see cref="Trade.PortfolioEntryId"/>
-    /// and any downstream references). Only date and note are considered editable; all
-    /// economic fields (price, quantity, cash amount) are copied from the original row so
-    /// balances don't need to be re-reconciled.
+    /// In-place UPDATE of an existing trade. Preserves the trade Id (and therefore
+    /// <see cref="Trade.PortfolioEntryId"/> and any downstream references). Only date and
+    /// note are editable in safe edit mode; all economic fields stay unchanged so balances
+    /// don't need to be re-reconciled.
     /// </summary>
     private async Task UpdateTradeMetaOnlyAsync(TradeRowViewModel oldRow)
     {
@@ -262,9 +247,9 @@ public partial class TransactionDialogViewModel
     private async Task ConfirmBuyAsync()
     {
         // Delegate to the AddAssetDialog sub-VM's buy logic based on asset sub-type.
-        // AddAssetType must match TxBuyAssetType so ConfirmAdd routes to the correct add path.
+        // AddAssetType must match Buy.AssetType so ConfirmAdd routes to the correct add path.
         // The two dialogs are mutually exclusive in practice; this is an acceptable coupling.
-        AddAssetDialog.AddAssetType = TxBuyAssetType;
+        AddAssetDialog.AddAssetType = Buy.AssetType;
         AddAssetDialog.AddError = string.Empty;
 
         await AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
@@ -284,23 +269,23 @@ public partial class TransactionDialogViewModel
 
     private async Task ConfirmSellTxAsync()
     {
-        if (TxSellPosition is null)
+        if (Sell.Position is null)
         { TxError = "請選擇持倉"; return; }
 
-        if (!ParseHelpers.TryParseInt(TxSellQuantity, out var sellQty) || sellQty <= 0)
+        if (!ParseHelpers.TryParseInt(Sell.Quantity, out var sellQty) || sellQty <= 0)
         { TxError = "賣出數量無效"; return; }
-        if (sellQty > (int)TxSellPosition.Quantity)
-        { TxError = $"賣出數量 ({sellQty:N0}) 超過持倉 ({(int)TxSellPosition.Quantity:N0}) 股"; return; }
+        if (sellQty > (int)Sell.Position.Quantity)
+        { TxError = $"賣出數量 ({sellQty:N0}) 超過持倉 ({(int)Sell.Position.Quantity:N0}) 股"; return; }
 
         if (!ParseHelpers.TryParseDecimal(TxAmount, out var sellPrice) || sellPrice <= 0)
         { TxError = "賣出價格無效"; return; }
 
         var error = await SellPanel.ExecuteSellFromTxDialogAsync(
-            row: TxSellPosition,
+            row: Sell.Position,
             sellPrice: sellPrice.ToString(),
             tradeDate: DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
             cashAccount: TxUseCashAccount ? TxCashAccount : null,
-            isSellEtf: _search.IsEtf(TxSellPosition.Symbol),
+            isSellEtf: _search.IsEtf(Sell.Position.Symbol),
             qtyOverride: sellQty);
 
         if (error is not null)
@@ -353,39 +338,39 @@ public partial class TransactionDialogViewModel
     /// </summary>
     private async Task ConfirmCashDivAsync()
     {
-        if (TxDivPosition is null)
+        if (Div.Position is null)
         { TxError = "請選擇股票"; return; }
 
         decimal perShare;
         decimal total;
-        if (TxDivIsTotalMode)
+        if (Div.IsTotalMode)
         {
-            if (!ParseHelpers.TryParseDecimal(TxDivTotalInput, out total) || total <= 0)
+            if (!ParseHelpers.TryParseDecimal(Div.TotalInput, out total) || total <= 0)
             { TxError = "總股息金額無效"; return; }
-            perShare = TxDivPosition.Quantity > 0 ? total / TxDivPosition.Quantity : 0;
+            perShare = Div.Position.Quantity > 0 ? total / Div.Position.Quantity : 0;
         }
         else
         {
-            if (!ParseHelpers.TryParseDecimal(TxDivPerShare, out perShare) || perShare <= 0)
+            if (!ParseHelpers.TryParseDecimal(Div.PerShare, out perShare) || perShare <= 0)
             { TxError = "每股股利無效"; return; }
-            total = perShare * TxDivPosition.Quantity;
+            total = perShare * Div.Position.Quantity;
         }
 
         var fee = ParseOptionalFee(out var feeError);
         if (feeError is not null)
         { TxError = feeError; return; }
 
-        var divName = string.IsNullOrEmpty(TxDivPosition.Name)
-                      ? TxDivPosition.Symbol
-                      : TxDivPosition.Name;
+        var divName = string.IsNullOrEmpty(Div.Position.Name)
+                      ? Div.Position.Symbol
+                      : Div.Position.Name;
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
         await _transactionWorkflowService.RecordCashDividendAsync(new CashDividendTransactionRequest(
-            TxDivPosition.Symbol,
-            TxDivPosition.Exchange,
+            Div.Position.Symbol,
+            Div.Position.Exchange,
             divName,
             perShare,
-            (int)TxDivPosition.Quantity,
+            (int)Div.Position.Quantity,
             total,
             tradeDate,
             cashAccId,
@@ -397,21 +382,21 @@ public partial class TransactionDialogViewModel
 
     private async Task ConfirmStockDivAsync()
     {
-        if (TxStockDivPosition is null)
+        if (Div.StockPosition is null)
         { TxError = "請選擇股票"; return; }
-        if (!ParseHelpers.TryParseInt(TxStockDivNewShares, out var newShares) || newShares <= 0)
+        if (!ParseHelpers.TryParseInt(Div.StockNewShares, out var newShares) || newShares <= 0)
         { TxError = "配股數無效"; return; }
 
-        var divName = string.IsNullOrEmpty(TxStockDivPosition.Name)
-                      ? TxStockDivPosition.Symbol
-                      : TxStockDivPosition.Name;
+        var divName = string.IsNullOrEmpty(Div.StockPosition.Name)
+                      ? Div.StockPosition.Symbol
+                      : Div.StockPosition.Name;
         await _transactionWorkflowService.RecordStockDividendAsync(new StockDividendTransactionRequest(
-            TxStockDivPosition.Symbol,
-            TxStockDivPosition.Exchange,
+            Div.StockPosition.Symbol,
+            Div.StockPosition.Exchange,
             divName,
             newShares,
             DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
-            TxStockDivPosition.Id));
+            Div.StockPosition.Id));
 
         await AfterTxSuccessAsync(reloadBalances: false);
         // TransactionCompleted raised by ConfirmTx

@@ -119,8 +119,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         ArgumentNullException.ThrowIfNull(deps);
 
-        // H1 — bubble Buy.X PropertyChanged into TxBuy* facade notifications.
+        // H1 — react to Buy.X / Sell.X / Div.X changes (preview, validation, side effects).
         Buy.PropertyChanged += OnBuyPriceModeChanged;
+        Sell.PropertyChanged += OnSellTxChanged;
+        Div.PropertyChanged += OnDividendTxChanged;
 
         _transactionWorkflowService = deps.TransactionWorkflow;
         _tradeDeletionWorkflowService = deps.TradeDeletion;
@@ -213,13 +215,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// Locks down to false only for meta-only types (Sell / Transfer / legacy Buy without entry),
     /// where the trade has dependent state that direct editing would corrupt.
     /// </summary>
-    public bool AreEconomicFieldsEditable => !IsEditMode || !IsEditingMetaOnly;
+    public bool AreEconomicFieldsEditable => !IsEditMode;
 
     /// <summary>
     /// True when the dialog should show the locked-core summary card. Only meta-only edits
     /// need this — direct-edit flows show their normal form fields with live values pre-filled.
     /// </summary>
-    public bool ShowEditLockedSummary => IsEditMode && IsEditingMetaOnly;
+    public bool ShowEditLockedSummary => IsEditMode;
 
     partial void OnEditingTradeIdChanged(Guid? _)
     {
@@ -264,20 +266,25 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     // ── 欄位驗證訊息（空字串 = 無錯誤；綁定到 XAML FormFieldError TextBlock）──
     [ObservableProperty] private string _txAmountError = string.Empty;
     [ObservableProperty] private string _txFeeError = string.Empty;
-    [ObservableProperty] private string _txDivPerShareError = string.Empty;
-    [ObservableProperty] private string _txDivTotalInputError = string.Empty;
-    [ObservableProperty] private string _txStockDivNewSharesError = string.Empty;
+    // Div errors moved to Div (DividendTxViewModel).
     [ObservableProperty] private string _txTransferTargetAmountError = string.Empty;
     [ObservableProperty] private string _txPrincipalError = string.Empty;
     [ObservableProperty] private string _txInterestPaidError = string.Empty;
     [ObservableProperty] private string _txCommissionDiscountError = string.Empty;
 
     /// <summary>
-    /// H1 — buy "price-input mode" cluster extracted into <see cref="Tx.BuyPriceModeViewModel"/>.
-    /// The TxBuy* facade properties below delegate read/write to this sub-VM so XAML
-    /// bindings + tests keep working unchanged. New code should use <c>Buy.X</c> directly.
+    /// H1 — buy transaction cluster extracted into <see cref="Tx.BuyTxViewModel"/>.
+    /// All buy-related state (AssetType / MetaOnly / PriceMode / TotalCost /
+    /// TotalIncludesFee / TotalCostError + computed predicates) now lives here.
+    /// Bind XAML directly to <c>Buy.X</c>.
     /// </summary>
-    public Tx.BuyPriceModeViewModel Buy { get; } = new();
+    public Tx.BuyTxViewModel Buy { get; } = new();
+
+    public string TxBuyAssetType
+    {
+        get => Buy.AssetType;
+        set => Buy.AssetType = value;
+    }
 
     public string TxBuyTotalCostError
     {
@@ -319,14 +326,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     // 現金帳戶選擇（收入 + 現金股利共用，null = 不連動）
     [ObservableProperty] private CashAccountRowViewModel? _txCashAccount;
 
-    // 現金股利欄位
-    [ObservableProperty] private PortfolioRowViewModel? _txDivPosition;  // from Positions
-    [ObservableProperty] private string _txDivPerShare = string.Empty;
-    [ObservableProperty] private decimal _txDivTotal;
-
-    // 股票股利欄位
-    [ObservableProperty] private PortfolioRowViewModel? _txStockDivPosition;
-    [ObservableProperty] private string _txStockDivNewShares = string.Empty;
+    // 股利欄位（現金 + 股票）— 全部移到 Div (DividendTxViewModel)。
+    public Tx.DividendTxViewModel Div { get; } = new();
 
     // 手續費折扣（每筆交易可調，預設 1.0 = 無折扣）
     [ObservableProperty] private string _txCommissionDiscount = "1.0";
@@ -342,44 +343,35 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         UpdateSellTxPreview();
     }
 
-    // 買入欄位
-    [ObservableProperty] private string _txBuyAssetType = "stock";
+    // 買入欄位 — 全部移到 Buy (BuyTxViewModel)。
 
     // 賣出欄位
-    [ObservableProperty] private PortfolioRowViewModel? _txSellPosition;
-    [ObservableProperty] private string _txSellQuantity = string.Empty;
-    [ObservableProperty] private string _txSellQuantityError = string.Empty;
+    /// <summary>
+    /// H1 — sell transaction state cluster extracted into <see cref="Tx.SellTxViewModel"/>.
+    /// All sell-related state (Position / Quantity / preview values / IsEtf flags)
+    /// now lives here. XAML binds directly to <c>Sell.X</c>.
+    /// </summary>
+    public Tx.SellTxViewModel Sell { get; } = new();
 
-    // Sell-tx preview — parallel to buy's AddGrossAmount / AddCommission / AddTotalCost,
-    // but also shows TransactionTax and NetAmount since sell has two deductions.
-    [ObservableProperty] private decimal _txSellGrossAmount;
-    [ObservableProperty] private decimal _txSellCommission;
-    [ObservableProperty] private decimal _txSellTransactionTax;
-    [ObservableProperty] private decimal _txSellNetAmount;
-    [ObservableProperty] private bool _txSellIsEtf;
-    [ObservableProperty] private bool _txSellIsBondEtf;
-    private bool _suppressSellPositionPriceAutoFill;
-
-    public bool HasTxSellPreview => TxSellGrossAmount > 0;
-    partial void OnTxSellGrossAmountChanged(decimal _) => OnPropertyChanged(nameof(HasTxSellPreview));
-
-    partial void OnTxSellQuantityChanged(string value)
+    private void OnSellTxChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        TxSellQuantityError = ValidatePositiveIntOrEmpty(value);
-        UpdateSellTxPreview();
-    }
-
-    partial void OnTxSellPositionChanged(PortfolioRowViewModel? value)
-    {
-        if (!_suppressSellPositionPriceAutoFill &&
-            value is not null &&
-            value.CurrentPrice > 0)
-            TxAmount = value.CurrentPrice.ToString("F2");
-        if (value is null)
-            TxSellQuantity = string.Empty;
-        TxSellIsEtf = value is not null && _search.IsEtf(value.Symbol);
-        TxSellIsBondEtf = value is not null && _search.IsBondEtf(value.Symbol);
-        UpdateSellTxPreview();
+        switch (e.PropertyName)
+        {
+            case nameof(SellTxViewModel.Position):
+                if (!Sell.SuppressPositionPriceAutoFill &&
+                    Sell.Position is { CurrentPrice: > 0 } pos)
+                    TxAmount = pos.CurrentPrice.ToString("F2");
+                if (Sell.Position is null)
+                    Sell.Quantity = string.Empty;
+                Sell.IsEtf = Sell.Position is not null && _search.IsEtf(Sell.Position.Symbol);
+                Sell.IsBondEtf = Sell.Position is not null && _search.IsBondEtf(Sell.Position.Symbol);
+                UpdateSellTxPreview();
+                break;
+            case nameof(SellTxViewModel.Quantity):
+                Sell.QuantityError = ValidatePositiveIntOrEmpty(Sell.Quantity);
+                UpdateSellTxPreview();
+                break;
+        }
     }
 
     /// <summary>
@@ -390,19 +382,16 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private void UpdateSellTxPreview()
     {
         if (!TxTypeIsSell ||
-            TxSellPosition is null ||
+            Sell.Position is null ||
             !ParseHelpers.TryParseDecimal(TxAmount, out var price) || price <= 0)
         {
-            TxSellGrossAmount = 0;
-            TxSellCommission = 0;
-            TxSellTransactionTax = 0;
-            TxSellNetAmount = 0;
+            Sell.ResetPreview();
             return;
         }
 
-        var qty = ParseHelpers.TryParseInt(TxSellQuantity, out var parsedQty) && parsedQty > 0
+        var qty = ParseHelpers.TryParseInt(Sell.Quantity, out var parsedQty) && parsedQty > 0
             ? parsedQty
-            : (int)TxSellPosition.Quantity;
+            : (int)Sell.Position.Quantity;
         var gross = price * qty;
 
         // Manual fee override: user has typed a value in the 手續費 field → treat that as
@@ -411,19 +400,19 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         if (!string.IsNullOrWhiteSpace(TxFee) &&
             ParseHelpers.TryParseDecimal(TxFee, out var manualFee) && manualFee >= 0)
         {
-            TxSellGrossAmount = gross;
-            TxSellCommission = manualFee;
-            TxSellTransactionTax = 0;
-            TxSellNetAmount = gross - manualFee;
+            Sell.GrossAmount = gross;
+            Sell.Commission = manualFee;
+            Sell.TransactionTax = 0;
+            Sell.NetAmount = gross - manualFee;
             return;
         }
 
         var discount = TxCommissionDiscountValue;
-        var fee = TaiwanTradeFeeCalculator.CalcSell(price, qty, discount, TxSellIsEtf, TxSellIsBondEtf);
-        TxSellGrossAmount = fee.GrossAmount;
-        TxSellCommission = fee.Commission;
-        TxSellTransactionTax = fee.TransactionTax;
-        TxSellNetAmount = fee.NetAmount;
+        var fee = TaiwanTradeFeeCalculator.CalcSell(price, qty, discount, Sell.IsEtf, Sell.IsBondEtf);
+        Sell.GrossAmount = fee.GrossAmount;
+        Sell.Commission = fee.Commission;
+        Sell.TransactionTax = fee.TransactionTax;
+        Sell.NetAmount = fee.NetAmount;
     }
 
     // Type booleans
@@ -441,6 +430,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public bool TxTypeIsTransfer => TxType == "transfer";
     public bool TxTypeIsBuy => TxType == "buy";
     public bool TxTypeIsSell => TxType == "sell";
+
+    public bool TxBuyIsStock => TxTypeIsBuy && Buy.IsStock;
+    public bool TxBuyIsNonStock => TxTypeIsBuy && Buy.IsNonStock;
+    public bool TxBuyIsCrypto => TxTypeIsBuy && Buy.IsCrypto;
+    public bool TxBuyIsUnitMode => Buy.IsUnitMode;
+    public bool TxBuyIsTotalMode => Buy.IsTotalMode;
 
     public string TxCashAccountLabel => TxType switch
     {
@@ -480,10 +475,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _ => string.Empty
     };
 
-    // Buy sub-type predicates
-    public bool TxBuyIsStock => TxTypeIsBuy && TxBuyAssetType == "stock";
-    public bool TxBuyIsNonStock => TxTypeIsBuy && TxBuyAssetType is "fund" or "metal" or "bond";
-    public bool TxBuyIsCrypto => TxTypeIsBuy && TxBuyAssetType == "crypto";
+    // Buy sub-type predicates moved next to the AssetType facade in the Buy block.
 
     [ObservableProperty] private string _txLoanLabel = string.Empty;
 
@@ -717,9 +709,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(TxTypeIsTransfer));
         OnPropertyChanged(nameof(TxTypeIsBuy));
         OnPropertyChanged(nameof(TxTypeIsSell));
-        OnPropertyChanged(nameof(TxBuyIsStock));
-        OnPropertyChanged(nameof(TxBuyIsNonStock));
-        OnPropertyChanged(nameof(TxBuyIsCrypto));
+        // Buy.IsStock/IsNonStock/IsCrypto no longer gate on TxType — XAML form
+        // visibility is gated by TxTypeIsBuy on the parent StackPanel, which
+        // is already raised above. No notification needed for Buy.X here.
         OnPropertyChanged(nameof(TxCashAccountLabel));
         OnPropertyChanged(nameof(TxUseCashAccountLabel));
         OnPropertyChanged(nameof(TxCashFlowHint));
@@ -734,94 +726,62 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             _ = AutoFillLoanRepayAsync(TxLoanLabel);
     }
 
-    partial void OnTxBuyAssetTypeChanged(string _)
+    /// <summary>
+    /// React to Div.X changes — runs validation + total recomputation that the old
+    /// partial OnTxDiv*Changed handlers performed.
+    /// </summary>
+    private void OnDividendTxChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        OnPropertyChanged(nameof(TxBuyIsStock));
-        OnPropertyChanged(nameof(TxBuyIsNonStock));
-        OnPropertyChanged(nameof(TxBuyIsCrypto));
-    }
-
-    partial void OnTxDivPositionChanged(PortfolioRowViewModel? _) => UpdateDivTotal();
-
-    partial void OnTxDivPerShareChanged(string value)
-    {
-        TxDivPerShareError = ValidatePositiveDecimalOrEmpty(value);
-        UpdateDivTotal();
+        switch (e.PropertyName)
+        {
+            case nameof(DividendTxViewModel.Position):
+                UpdateDivTotal();
+                break;
+            case nameof(DividendTxViewModel.PerShare):
+                Div.PerShareError = ValidatePositiveDecimalOrEmpty(Div.PerShare);
+                UpdateDivTotal();
+                break;
+            case nameof(DividendTxViewModel.Total):
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(DividendTxViewModel.TotalInput):
+                Div.TotalInputError = ValidatePositiveDecimalOrEmpty(Div.TotalInput);
+                break;
+            case nameof(DividendTxViewModel.StockNewShares):
+                Div.StockNewSharesError = ValidatePositiveIntOrEmpty(Div.StockNewShares);
+                break;
+        }
     }
 
     private void UpdateDivTotal()
     {
-        if (TxDivPosition is null || !ParseHelpers.TryParseDecimal(TxDivPerShare, out var perShare) || perShare <= 0)
-            TxDivTotal = 0;
+        if (Div.Position is null || !ParseHelpers.TryParseDecimal(Div.PerShare, out var perShare) || perShare <= 0)
+            Div.Total = 0;
         else
-            TxDivTotal = perShare * TxDivPosition.Quantity;
-    }
-
-    public bool HasDivPreview => TxDivTotal > 0;
-    partial void OnTxDivTotalChanged(decimal _)
-    {
-        OnPropertyChanged(nameof(HasDivPreview));
-        NotifyImpactPreviewChanged();
-    }
-
-    // Buy 價格輸入模式 + 總額 — 狀態實際存於 Buy (BuyPriceModeViewModel)；以下為 facade.
-    public string TxBuyPriceMode
-    {
-        get => Buy.PriceMode;
-        set => Buy.PriceMode = value;
+            Div.Total = perShare * Div.Position.Quantity;
     }
 
     /// <summary>
-    /// When true (and TxBuyAssetType == "stock"), ConfirmBuy writes only the
-    /// PortfolioEntry (via FindOrCreatePortfolioEntryAsync) and skips the Buy
-    /// trade row — produces a watchlist-style Qty=0 position. The UI hides the
-    /// price/quantity/commission/cash-account inputs in this mode.
-    /// Plan Task 18 (Option B).
-    /// </summary>
-    [ObservableProperty] private bool _txBuyMetaOnly;
-
-    public bool TxBuyIsUnitMode => Buy.IsUnitMode;
-    public bool TxBuyIsTotalMode => Buy.IsTotalMode;
-
-    /// <summary>「總額」模式下使用者輸入的總成交金額。Facade → <see cref="BuyPriceModeViewModel.TotalCost"/>.</summary>
-    public string TxBuyTotalCost
-    {
-        get => Buy.TotalCost;
-        set => Buy.TotalCost = value;
-    }
-
-    /// <summary>
-    /// 「總額」模式下，使用者輸入的總成交金額是否已包含手續費。
-    /// 預設 <c>true</c>（多數券商給的成交回報是含手續費的最終扣款金額）。
-    /// Facade → <see cref="BuyPriceModeViewModel.TotalIncludesFee"/>.
-    /// </summary>
-    public bool TxBuyTotalIncludesFee
-    {
-        get => Buy.TotalIncludesFee;
-        set => Buy.TotalIncludesFee = value;
-    }
-
-    /// <summary>
-    /// 總計顯示文字：<c>「總計：NT$X」</c>。
-    /// 單價模式 → 顯示 數量 × 單價。
-    /// 總額模式 → 顯示使用者輸入的總額（保持一致）。
+    /// 總計顯示文字。注入 <see cref="AddAssetDialogViewModel"/> 的 AddPrice / AddQuantity
+    /// 後委派給 <see cref="Tx.BuyTxViewModel.ComputeTotalDisplay"/>。XAML 直接 bind 此屬性
+    /// （Buy.ComputedTotalDisplay 不知道 AddPrice/Qty 故無法 self-compute）。
     /// </summary>
     public string TxBuyComputedTotalDisplay =>
         Buy.ComputeTotalDisplay(AddAssetDialog.AddPrice, AddAssetDialog.AddQuantity);
 
+    /// <summary>
+    /// React to Buy.X changes — runs side effects that the old <c>partial OnTxBuy*Changed</c>
+    /// handlers performed (UpdateBuyPreview, write-back AddPrice in total mode, validation).
+    /// XAML now binds directly to Buy.X so no facade re-notification needed.
+    /// </summary>
     private void OnBuyPriceModeChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        // Bubble Buy.X changes up as TxBuyX so XAML / external listeners see them.
         switch (e.PropertyName)
         {
-            case nameof(BuyPriceModeViewModel.PriceMode):
-                OnPropertyChanged(nameof(TxBuyPriceMode));
-                OnPropertyChanged(nameof(TxBuyIsUnitMode));
-                OnPropertyChanged(nameof(TxBuyIsTotalMode));
+            case nameof(BuyTxViewModel.PriceMode):
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
                 break;
-            case nameof(BuyPriceModeViewModel.TotalCost):
-                // Side effect: write back single price when in total mode.
+            case nameof(BuyTxViewModel.TotalCost):
                 if (Buy.IsTotalMode &&
                     ParseHelpers.TryParseDecimal(Buy.TotalCost, out var total) && total > 0 &&
                     ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) && qty > 0)
@@ -829,40 +789,17 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                     AddAssetDialog.AddPrice = (total / qty).ToString("F4");
                 }
                 Buy.TotalCostError = ValidatePositiveDecimalOrEmpty(Buy.TotalCost);
-                OnPropertyChanged(nameof(TxBuyTotalCost));
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
                 break;
-            case nameof(BuyPriceModeViewModel.TotalIncludesFee):
+            case nameof(BuyTxViewModel.TotalIncludesFee):
                 AddAssetDialog.UpdateBuyPreview();
-                OnPropertyChanged(nameof(TxBuyTotalIncludesFee));
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
-                break;
-            case nameof(BuyPriceModeViewModel.TotalCostError):
-                OnPropertyChanged(nameof(TxBuyTotalCostError));
                 break;
         }
     }
 
-    // CashDividend 輸入模式
-    /// <summary>
-    /// 股息輸入模式：<c>"perShare"</c> = 填每股股利；<c>"total"</c> = 直接填總股息金額。
-    /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TxDivIsPerShareMode))]
-    [NotifyPropertyChangedFor(nameof(TxDivIsTotalMode))]
-    private string _txDivInputMode = "perShare";
-
-    public bool TxDivIsPerShareMode => TxDivInputMode == "perShare";
-    public bool TxDivIsTotalMode => TxDivInputMode == "total";
-
-    /// <summary>總額模式下使用者直接輸入的總股息。</summary>
-    [ObservableProperty] private string _txDivTotalInput = string.Empty;
-
-    partial void OnTxDivTotalInputChanged(string value) =>
-        TxDivTotalInputError = ValidatePositiveDecimalOrEmpty(value);
-
-    partial void OnTxStockDivNewSharesChanged(string value) =>
-        TxStockDivNewSharesError = ValidatePositiveIntOrEmpty(value);
+    // CashDividend / StockDividend 輸入模式 + 驗證 — 全部移到 Div (DividendTxViewModel).
+    // 由 OnDividendTxChanged 處理 PropertyChanged 觸發的驗證與重算。
 
     partial void OnTxTransferTargetAmountChanged(string value) =>
         TxTransferTargetAmountError = ValidatePositiveDecimalOrEmpty(value);
@@ -909,13 +846,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxError = string.Empty;
         TxAmountError = string.Empty;
         TxFeeError = string.Empty;
-        TxDivPerShareError = string.Empty;
-        TxDivTotalInputError = string.Empty;
-        TxStockDivNewSharesError = string.Empty;
+        Div.PerShareError = string.Empty;
+        Div.TotalInputError = string.Empty;
+        Div.StockNewSharesError = string.Empty;
         TxTransferTargetAmountError = string.Empty;
         TxPrincipalError = string.Empty;
         TxInterestPaidError = string.Empty;
-        TxBuyTotalCostError = string.Empty;
+        Buy.TotalCostError = string.Empty;
         TxCommissionDiscountError = string.Empty;
         TxAmount = string.Empty;
         TxNote = string.Empty;
@@ -924,11 +861,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _txCategoryAutoMatched = false;
         // 新增（非編輯）時帶入使用者在現金頁設定的預設帳戶
         TxCashAccount = state.TxCashAccount;
-        TxDivPosition = null;
-        TxDivPerShare = string.Empty;
-        TxDivTotal = 0;
-        TxStockDivPosition = null;
-        TxStockDivNewShares = string.Empty;
+        Div.Position = null;
+        Div.PerShare = string.Empty;
+        Div.Total = 0;
+        Div.StockPosition = null;
+        Div.StockNewShares = string.Empty;
         TxLoanLabel = string.Empty;
         TxFee = string.Empty;
         TxUseCashAccount = state.TxUseCashAccount;
@@ -937,17 +874,17 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxTransferTargetName = string.Empty;
         TxTransferTargetAmount = string.Empty;
         TxCreditCard = null;
-        TxBuyAssetType = state.TxBuyAssetType;
-        TxBuyPriceMode = state.TxBuyPriceMode;
-        TxBuyTotalCost = string.Empty;
-        TxBuyTotalIncludesFee = true;  // Reset to default — most broker totals include fee.
-        TxBuyMetaOnly = false;
-        TxDivInputMode = state.TxDivInputMode;
-        TxDivTotalInput = string.Empty;
+        Buy.AssetType = state.TxBuyAssetType;
+        Buy.PriceMode = state.TxBuyPriceMode;
+        Buy.TotalCost = string.Empty;
+        Buy.TotalIncludesFee = true;  // Reset to default — most broker totals include fee.
+        Buy.MetaOnly = false;
+        Div.InputMode = state.TxDivInputMode;
+        Div.TotalInput = string.Empty;
         TxCommissionDiscount = state.TxCommissionDiscount;
-        TxSellPosition = null;
-        TxSellQuantity = string.Empty;
-        TxSellQuantityError = string.Empty;
+        Sell.Position = null;
+        Sell.Quantity = string.Empty;
+        Sell.QuantityError = string.Empty;
         EditSummaryType = string.Empty;
         EditSummaryTarget = string.Empty;
         EditSummaryAmount = string.Empty;
@@ -996,13 +933,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxError = string.Empty;
         TxAmountError = string.Empty;
         TxFeeError = string.Empty;
-        TxDivPerShareError = string.Empty;
-        TxDivTotalInputError = string.Empty;
-        TxStockDivNewSharesError = string.Empty;
+        Div.PerShareError = string.Empty;
+        Div.TotalInputError = string.Empty;
+        Div.StockNewSharesError = string.Empty;
         TxTransferTargetAmountError = string.Empty;
         TxPrincipalError = string.Empty;
         TxInterestPaidError = string.Empty;
-        TxBuyTotalCostError = string.Empty;
+        Buy.TotalCostError = string.Empty;
         TxCommissionDiscountError = string.Empty;
         TxNote = editState.TxNote;
 
@@ -1020,13 +957,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxCreditCard = null;
         TxPrincipal = string.Empty;
         TxInterestPaid = string.Empty;
-        TxDivPosition = null;
-        TxDivPerShare = string.Empty;
-        TxStockDivPosition = null;
-        TxStockDivNewShares = string.Empty;
-        TxSellPosition = null;
-        TxSellQuantity = string.Empty;
-        TxSellQuantityError = string.Empty;
+        Div.Position = null;
+        Div.PerShare = string.Empty;
+        Div.StockPosition = null;
+        Div.StockNewShares = string.Empty;
+        Sell.Position = null;
+        Sell.Quantity = string.Empty;
+        Sell.QuantityError = string.Empty;
         SellPanel.SellCashAccount = null;
         SellPanel.SellPriceInput = string.Empty;
         AddAssetDialog.AddSymbol = string.Empty;
@@ -1043,13 +980,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         AddAssetDialog.AddCreditCardDueDay = string.Empty;
         AddAssetDialog.AddCreditCardLimit = string.Empty;
         TxCommissionDiscount = "1.0";
-        TxBuyAssetType = "stock";
-        TxBuyPriceMode = "unit";
-        TxBuyTotalCost = string.Empty;
-        TxBuyTotalIncludesFee = true;  // Reset to default — most broker totals include fee.
-        TxBuyMetaOnly = false;
-        TxDivInputMode = "perShare";
-        TxDivTotalInput = string.Empty;
+        Buy.Reset();
+        Div.InputMode = "perShare";
+        Div.TotalInput = string.Empty;
 
         TxType = editState.TxType;
         TxCreditCard = editState.TxCreditCard;
@@ -1078,7 +1011,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 // the old fee-calculator path has Commission > 0. Without this
                 // inference, EditTrade's blanket reset to true would silently
                 // strip commission from the recreated trade.
-                TxBuyTotalIncludesFee = (row.Commission ?? 0m) <= 0m;
+                Buy.TotalIncludesFee = (row.Commission ?? 0m) <= 0m;
                 // 還原使用者當初輸入的手續費來源：
                 //   CommissionDiscount 有值  → 走折扣路徑 → 帶回折扣，TxFee 留空
                 //   CommissionDiscount null 但 Commission 有值 → 走手動覆蓋 → 帶回 TxFee
@@ -1091,10 +1024,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 // editable fields. The position itself was closed at sell time.
                 // Populate BOTH TxCashAccount (dialog XAML binds to this) AND SellCashAccount
                 // (ConfirmSell uses this). Without the former, the dialog dropdown was empty.
-                _suppressSellPositionPriceAutoFill = true;
-                TxSellPosition = editState.TxSellPosition;
-                _suppressSellPositionPriceAutoFill = false;
-                TxSellQuantity = editState.TxSellQuantity;
+                Sell.SuppressPositionPriceAutoFill = true;
+                Sell.Position = editState.TxSellPosition;
+                Sell.SuppressPositionPriceAutoFill = false;
+                Sell.Quantity = editState.TxSellQuantity;
                 TxAmount = editState.TxAmount;
                 SellPanel.SellPriceInput = editState.SellPriceInput;
                 TxCashAccount = editState.TxCashAccount;
@@ -1105,15 +1038,15 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 break;
 
             case TradeType.CashDividend:
-                TxDivPosition = editState.TxDivPosition;
-                TxDivPerShare = editState.TxDivPerShare;
+                Div.Position = editState.TxDivPosition;
+                Div.PerShare = editState.TxDivPerShare;
                 TxCashAccount = editState.TxCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
                 break;
 
             case TradeType.StockDividend:
-                TxStockDivPosition = editState.TxStockDivPosition;
-                TxStockDivNewShares = editState.TxStockDivNewShares;
+                Div.StockPosition = editState.TxStockDivPosition;
+                Div.StockNewShares = editState.TxStockDivNewShares;
                 break;
 
             case TradeType.Income:

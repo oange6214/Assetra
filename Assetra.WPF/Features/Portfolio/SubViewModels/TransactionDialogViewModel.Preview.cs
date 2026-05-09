@@ -112,9 +112,9 @@ public partial class TransactionDialogViewModel
                 return true;
 
             case "cashDiv":
-                if (TxDivTotal <= 0)
+                if (Div.Total <= 0)
                     return false;
-                delta = TxDivTotal;
+                delta = Div.Total;
                 return true;
 
             case "loanRepay":
@@ -145,9 +145,9 @@ public partial class TransactionDialogViewModel
     private bool TryReadBuyGrossCost(out decimal gross)
     {
         gross = 0;
-        if (TxBuyPriceMode == "total")
+        if (Buy.PriceMode == "total")
         {
-            return ParseHelpers.TryParseDecimal(TxBuyTotalCost, out gross) && gross > 0;
+            return ParseHelpers.TryParseDecimal(Buy.TotalCost, out gross) && gross > 0;
         }
 
         if (!ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var price) || price <= 0 ||

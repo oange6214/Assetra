@@ -22,7 +22,7 @@
             Margin="0,0,0,12"
             IsEnabled="{Binding AreEconomicFieldsEditable}"
             ItemsSource="{Binding Positions}"
-            SelectedItem="{Binding TxSellPosition, Mode=TwoWay}"
+            SelectedItem="{Binding Sell.Position, Mode=TwoWay}"
             Style="{StaticResource FormComboBox}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -49,12 +49,12 @@
         <TextBox
             Margin="0,0,0,0"
             IsEnabled="{Binding AreEconomicFieldsEditable}"
-            Text="{Binding TxSellQuantity, UpdateSourceTrigger=PropertyChanged}" />
+            Text="{Binding Sell.Quantity, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Margin="0,0,0,12"
             Style="{StaticResource FormFieldError}"
-            Text="{Binding TxSellQuantityError}"
-            Visibility="{Binding TxSellQuantityError, Converter={StaticResource StringToVisibilityConverter}}" />
+            Text="{Binding Sell.QuantityError}"
+            Visibility="{Binding Sell.QuantityError, Converter={StaticResource StringToVisibilityConverter}}" />
 
         <TextBlock
             Margin="0,0,0,4"
@@ -135,7 +135,7 @@
             BorderBrush="{DynamicResource AppBorder}"
             BorderThickness="1"
             CornerRadius="{StaticResource Radius.Sm}"
-            Visibility="{Binding HasTxSellPreview, Converter={StaticResource BooleanToVisibilityConverter}}">
+            Visibility="{Binding Sell.HasPreview, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -160,7 +160,7 @@
                     FontFamily="{StaticResource Font.Family.Base}"
                     FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{Binding TxSellGrossAmount, StringFormat={}{0:N0}}"
+                    Text="{Binding Sell.GrossAmount, StringFormat={}{0:N0}}"
                     Typography.NumeralAlignment="Tabular" />
                 <TextBlock
                     Grid.Row="1"
@@ -174,7 +174,7 @@
                     FontFamily="{StaticResource Font.Family.Base}"
                     FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppDown}"
-                    Text="{Binding TxSellCommission, StringFormat=-{0:N0}}"
+                    Text="{Binding Sell.Commission, StringFormat=-{0:N0}}"
                     Typography.NumeralAlignment="Tabular" />
                 <TextBlock
                     Grid.Row="2"
@@ -188,10 +188,10 @@
                             <Style TargetType="Run">
                                 <Setter Property="Text" Value="(0.3%)" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding TxSellIsEtf}" Value="True">
+                                    <DataTrigger Binding="{Binding Sell.IsEtf}" Value="True">
                                         <Setter Property="Text" Value="(ETF 0.1%)" />
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding TxSellIsBondEtf}" Value="True">
+                                    <DataTrigger Binding="{Binding Sell.IsBondEtf}" Value="True">
                                         <Setter Property="Text" Value="(債券 ETF 免徵)" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -205,7 +205,7 @@
                     FontFamily="{StaticResource Font.Family.Base}"
                     FontSize="{StaticResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppDown}"
-                    Text="{Binding TxSellTransactionTax, StringFormat=-{0:N0}}"
+                    Text="{Binding Sell.TransactionTax, StringFormat=-{0:N0}}"
                     Typography.NumeralAlignment="Tabular" />
                 <Rectangle
                     Grid.Row="3"
@@ -227,7 +227,7 @@
                     FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
-                    Text="{Binding TxSellNetAmount, StringFormat={}{0:N0}}"
+                    Text="{Binding Sell.NetAmount, StringFormat={}{0:N0}}"
                     Typography.NumeralAlignment="Tabular" />
             </Grid>
         </Border>

@@ -15,9 +15,9 @@ public sealed class TransactionBuyContext(TransactionDialogViewModel vm) : IBuyE
 {
     public decimal CommissionDiscount => vm.TxCommissionDiscountValue;
     public string TxFee => vm.TxFee;
-    public bool BuyMetaOnly => vm.TxBuyMetaOnly;
+    public bool BuyMetaOnly => vm.Buy.MetaOnly;
     public Guid? CashAccountId => vm.TxCashAccount?.Id;
     public bool UseCashAccount => vm.TxUseCashAccount;
-    public bool BuyIsTotalMode => vm.TxBuyIsTotalMode;
-    public bool BuyTotalIncludesFee => vm.TxBuyTotalIncludesFee;
+    public bool BuyIsTotalMode => vm.Buy.IsTotalMode;
+    public bool BuyTotalIncludesFee => vm.Buy.TotalIncludesFee;
 }
