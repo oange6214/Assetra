@@ -15,5 +15,18 @@ public sealed partial class AssetGroupVm : ObservableObject
     public string SubtotalDisplay => MoneyFormatter.Format(Subtotal, Currency);
     partial void OnSubtotalChanged(decimal _) => OnPropertyChanged(nameof(SubtotalDisplay));
 
-    public ObservableCollection<AssetItemVm> Items { get; } = [];
+    private readonly ObservableCollection<AssetItemVm> _items = [];
+    public ReadOnlyObservableCollection<AssetItemVm> Items { get; }
+
+    public AssetGroupVm()
+    {
+        Items = new ReadOnlyObservableCollection<AssetItemVm>(_items);
+    }
+
+    /// <summary>
+    /// Builder used by <c>FinancialOverviewViewModel.ToGroupVm</c> — keeps mutation
+    /// inside the type (callers use <see cref="AddItem"/> instead of touching the
+    /// backing list directly).
+    /// </summary>
+    public void AddItem(AssetItemVm item) => _items.Add(item);
 }

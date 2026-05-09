@@ -39,7 +39,8 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     }
 
     // Observable collections
-    public ObservableCollection<AllocationRowViewModel> AllocationRows { get; } = new();
+    private readonly ObservableCollection<AllocationRowViewModel> _allocationRows = new();
+    public ReadOnlyObservableCollection<AllocationRowViewModel> AllocationRows { get; }
 
     // Tab state
     [ObservableProperty] private bool _isOverviewTab = true;
@@ -166,6 +167,7 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         _settings = settings;
         _localization = localization;
         _dispatcher = Dispatcher.CurrentDispatcher;
+        AllocationRows = new ReadOnlyObservableCollection<AllocationRowViewModel>(_allocationRows);
 
         _positionsObservable = portfolio.Positions as INotifyCollectionChanged;
         if (_positionsObservable is not null)
@@ -284,9 +286,9 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         // Final sort (cash may sit anywhere by value)
         allRows.Sort((a, b) => b.MarketValue.CompareTo(a.MarketValue));
 
-        AllocationRows.Clear();
+        _allocationRows.Clear();
         foreach (var row in allRows)
-            AllocationRows.Add(row);
+            _allocationRows.Add(row);
 
         RebuildBuySell();
     }
