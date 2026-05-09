@@ -88,6 +88,19 @@ public sealed partial class ReportsViewModel : ObservableObject
     /// the regular TaxSummary card instead of an unnecessary one-row table.</summary>
     public bool HasMultiYearTax => MultiYearTaxRows.Count >= 2;
 
+    /// <summary>
+    /// AMT computation result for the current <see cref="TaxSummary"/> using
+    /// the parameters from <see cref="AppSettings"/>. Null until trades load.
+    /// Even when not "applicable" (海外所得未達門檻 or 使用者未填一般所得),
+    /// the result still flows through so the UI can show the formula breakdown
+    /// for the user's awareness.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAmtResult))]
+    private AmtCalculationResult? _amtResult;
+
+    public bool HasAmtResult => AmtResult is not null && TaxSummary is not null;
+
     [ObservableProperty]
     private string? _exportStatus;
 
@@ -389,12 +402,31 @@ public sealed partial class ReportsViewModel : ObservableObject
                     MultiYearTaxRows.Add(TaxYearRowViewModel.FromSummary(s));
                 }
                 OnPropertyChanged(nameof(HasMultiYearTax));
+
+                // AMT calculation for the focal year — pulls parameters from AppSettings
+                // (Exemption / Rate / RegularTaxableIncome / RegularIncomeTax). Computed
+                // even when 海外所得 below threshold so the UI can show "未達門檻" state.
+                if (TaxSummary is not null && _appSettings is not null)
+                {
+                    var s = _appSettings.Current;
+                    var parameters = new AmtCalculationParameters(
+                        Exemption: s.AmtExemption,
+                        Rate: s.AmtRate,
+                        RegularTaxableIncome: s.AmtRegularTaxableIncome,
+                        RegularIncomeTax: s.AmtRegularIncomeTax);
+                    AmtResult = Assetra.Application.Tax.TaxCalculationService.ComputeAmtLiability(TaxSummary, parameters);
+                }
+                else
+                {
+                    AmtResult = null;
+                }
             }
             catch (Exception ex)
             {
                 TaxSummary = null;
                 MultiYearTaxRows.Clear();
                 OnPropertyChanged(nameof(HasMultiYearTax));
+                AmtResult = null;
                 detailErrors.Add(ex.Message);
             }
         }
@@ -431,6 +463,7 @@ public sealed partial class ReportsViewModel : ObservableObject
         TaxSummary = null;
         MultiYearTaxRows.Clear();
         OnPropertyChanged(nameof(HasMultiYearTax));
+        AmtResult = null;
         Performance = null;
         Risk = null;
     }

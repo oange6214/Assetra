@@ -1082,6 +1082,22 @@
     <sys:String x:Key="Reports.Tax.CapitalGainRecords">已實現資本利得明細</sys:String>
     <sys:String x:Key="Reports.Tax.MultiYear.Title">多年度稅務比較</sys:String>
     <sys:String x:Key="Reports.Tax.RecordCount">筆數</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.Title">最低稅負（AMT）試算</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.Hint">依「設定」中的免稅額、稅率與一般所得參數試算。僅供參考，實際稅額以國稅局核定為準。</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.NotApplicable">海外所得未達申報門檻或尚未填寫一般綜所稅資料，目前不適用 AMT 補繳。</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.OverseasIncluded">計入基本所得之海外所得</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.BaseTaxableIncome">基本所得淨額</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.AmtBaseTax">基本稅額（淨額 − 免稅額 × 稅率）</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.RegularIncomeTax">一般綜所稅應納稅額</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.Liability">AMT 應補繳稅額</sys:String>
+    <sys:String x:Key="Settings.Section.Amt">最低稅負制（AMT）</sys:String>
+    <sys:String x:Key="Settings.Amt.Hint">於報稅季填寫一般綜所稅淨額與應納稅額，「報表」頁即會自動算出 AMT 應補繳。免稅額與稅率採台灣 2024 年公告（670 萬 / 20%）。</sys:String>
+    <sys:String x:Key="Settings.Amt.Exemption">免稅額（NTD）</sys:String>
+    <sys:String x:Key="Settings.Amt.Rate">稅率</sys:String>
+    <sys:String x:Key="Settings.Amt.RegularTaxableIncome">一般綜合所得淨額（NTD）</sys:String>
+    <sys:String x:Key="Settings.Amt.RegularTaxableIncome.Hint">所得稅申報書「綜合所得淨額」欄位。0 = 未填，AMT 不計算。</sys:String>
+    <sys:String x:Key="Settings.Amt.RegularIncomeTax">一般綜所稅應納稅額（NTD）</sys:String>
+    <sys:String x:Key="Settings.Amt.RegularIncomeTax.Hint">所得稅申報書「應納稅額」欄位，用於與基本稅額比較。</sys:String>
     <sys:String x:Key="Reports.Performance.Title">投資績效</sys:String>
     <sys:String x:Key="Reports.Risk.Title">風險指標</sys:String>
     <sys:String x:Key="Reports.Risk.ConcentrationWarning">⚠ 持股集中度過高（單一部位 &gt; 30% 或 HHI &gt; 0.30）</sys:String>

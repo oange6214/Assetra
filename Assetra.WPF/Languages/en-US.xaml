@@ -1078,6 +1078,22 @@
     <sys:String x:Key="Reports.Tax.CapitalGainRecords">Realised capital-gain records</sys:String>
     <sys:String x:Key="Reports.Tax.MultiYear.Title">Multi-year tax comparison</sys:String>
     <sys:String x:Key="Reports.Tax.RecordCount">Records</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.Title">AMT (Alternative Minimum Tax) estimate</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.Hint">Computed from the exemption, rate and regular-income parameters in Settings. For reference only — final liability is determined by the tax authority.</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.NotApplicable">Overseas income is below the declaration threshold or regular income tax data is not yet entered — AMT liability does not apply.</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.OverseasIncluded">Overseas income included in basic income</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.BaseTaxableIncome">Basic taxable income</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.AmtBaseTax">Basic tax (taxable − exemption × rate)</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.RegularIncomeTax">Regular income tax payable</sys:String>
+    <sys:String x:Key="Reports.Tax.Amt.Liability">AMT additional tax due</sys:String>
+    <sys:String x:Key="Settings.Section.Amt">Alternative Minimum Tax (AMT)</sys:String>
+    <sys:String x:Key="Settings.Amt.Hint">Enter your regular taxable income and tax payable during tax season; the Reports page will then auto-compute the AMT additional tax due. Default exemption and rate follow Taiwan 2024 (NT$6.7M / 20%).</sys:String>
+    <sys:String x:Key="Settings.Amt.Exemption">Exemption (NTD)</sys:String>
+    <sys:String x:Key="Settings.Amt.Rate">Tax rate</sys:String>
+    <sys:String x:Key="Settings.Amt.RegularTaxableIncome">Regular taxable income (NTD)</sys:String>
+    <sys:String x:Key="Settings.Amt.RegularTaxableIncome.Hint">"Net taxable income" line on the income tax return. 0 = not entered, AMT is skipped.</sys:String>
+    <sys:String x:Key="Settings.Amt.RegularIncomeTax">Regular income tax payable (NTD)</sys:String>
+    <sys:String x:Key="Settings.Amt.RegularIncomeTax.Hint">"Tax payable" line on the income tax return; compared against the AMT basic tax.</sys:String>
     <sys:String x:Key="Reports.Performance.Title">Performance</sys:String>
     <sys:String x:Key="Reports.Risk.Title">Risk Metrics</sys:String>
     <sys:String x:Key="Reports.Risk.ConcentrationWarning">⚠ High concentration risk (single position &gt; 30% or HHI &gt; 0.30)</sys:String>

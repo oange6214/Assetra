@@ -354,6 +354,93 @@
                     </StackPanel>
                 </Border>
 
+                <!--  ── 最低稅負制（AMT）──  -->
+                <TextBlock
+                    Margin="0,0,0,8"
+                    FontSize="{StaticResource Font.Size.Md}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    Text="{DynamicResource Settings.Section.Amt}" />
+
+                <Border Style="{StaticResource FormCard}"
+                    Margin="0,0,0,24"
+                    Padding="16,12">
+                    <StackPanel>
+                        <TextBlock
+                            Margin="0,0,0,12"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Settings.Amt.Hint}"
+                            TextWrapping="Wrap" />
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.Exemption}" />
+                                <TextBox
+                                    MinWidth="180"
+                                    Margin="0,8,0,0"
+                                    HorizontalAlignment="Left"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    Text="{Binding AmtExemption, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}"
+                                    Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.Rate}" />
+                                <TextBox
+                                    MinWidth="180"
+                                    Margin="0,8,0,0"
+                                    HorizontalAlignment="Left"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    Text="{Binding AmtRate, StringFormat={}{0:P2}, UpdateSourceTrigger=LostFocus}"
+                                    Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.RegularTaxableIncome}" />
+                                <TextBox
+                                    MinWidth="180"
+                                    Margin="0,8,0,0"
+                                    HorizontalAlignment="Left"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    Text="{Binding AmtRegularTaxableIncome, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}"
+                                    Typography.NumeralAlignment="Tabular" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Settings.Amt.RegularTaxableIncome.Hint}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.RegularIncomeTax}" />
+                                <TextBox
+                                    MinWidth="180"
+                                    Margin="0,8,0,0"
+                                    HorizontalAlignment="Left"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    Text="{Binding AmtRegularIncomeTax, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}"
+                                    Typography.NumeralAlignment="Tabular" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Settings.Amt.RegularIncomeTax.Hint}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
                 <!--  ── 雲端同步 ──  -->
                 <TextBlock
                     Margin="0,0,0,8"

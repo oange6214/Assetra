@@ -79,6 +79,42 @@ public static class TaxCalculationService
             CapitalGains: capitalGains);
     }
 
+    /// <summary>
+    /// Computes the AMT liability for a given <see cref="TaxSummary"/> using
+    /// the supplied <see cref="AmtCalculationParameters"/>. Pure function — no
+    /// I/O, no time dependence.
+    ///
+    /// <para>
+    /// 規則（簡化版，僅含海外所得這條特定項目）：
+    /// <list type="number">
+    ///   <item>若海外所得合計 &lt; <see cref="AmtDeclarationThreshold"/>（100 萬）→ 海外所得不計入基本所得，IsApplicable=false。</item>
+    ///   <item>否則 BaseTaxableIncome = RegularTaxableIncome + OverseasIncomeTotal。</item>
+    ///   <item>AmtBaseTax = max(0, BaseTaxableIncome − Exemption) × Rate。</item>
+    ///   <item>AmtLiability = max(0, AmtBaseTax − RegularIncomeTax)。</item>
+    /// </list>
+    /// </para>
+    /// </summary>
+    public static AmtCalculationResult ComputeAmtLiability(TaxSummary summary, AmtCalculationParameters parameters)
+    {
+        ArgumentNullException.ThrowIfNull(summary);
+        ArgumentNullException.ThrowIfNull(parameters);
+
+        var triggers = summary.OverseasIncomeTotal >= AmtDeclarationThreshold;
+        var overseasIncluded = triggers ? summary.OverseasIncomeTotal : 0m;
+        var baseTaxableIncome = parameters.RegularTaxableIncome + overseasIncluded;
+        var amtBaseTax = Math.Max(0m, baseTaxableIncome - parameters.Exemption) * parameters.Rate;
+        var liability = Math.Max(0m, amtBaseTax - parameters.RegularIncomeTax);
+        var applicable = triggers && parameters.RegularTaxableIncome > 0m;
+
+        return new AmtCalculationResult(
+            OverseasIncomeIncluded: overseasIncluded,
+            BaseTaxableIncome: baseTaxableIncome,
+            AmtBaseTax: amtBaseTax,
+            RegularIncomeTax: parameters.RegularIncomeTax,
+            AmtLiability: liability,
+            IsApplicable: applicable);
+    }
+
     private static string ResolveCountry(string exchange) =>
         StockExchangeRegistry.TryGet(exchange)?.Country ?? DomesticCountry;
 

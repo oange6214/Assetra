@@ -76,4 +76,20 @@ public sealed record AppSettings(
     /// 預設啟動分頁 — NavSection 列舉名稱字串（例：<c>"FinancialOverview"</c>、
     /// <c>"Portfolio"</c>）。空字串 / 未知名稱 = fallback 至 FinancialOverview。
     /// </summary>
-    string DefaultHomeSection = "FinancialOverview");
+    string DefaultHomeSection = "FinancialOverview",
+
+    // 最低稅負制（AMT）參數 — 預設值依台灣 2024 年公告：免稅額 670 萬、稅率 20%。
+    // 使用者填一般所得淨額 + 一般綜所稅應納稅額後，TaxCalculationService.ComputeAmtLiability
+    // 才能算出 AMT 應補繳金額。預設 0 表示不啟用 AMT 計算（只顯示申報門檻判定）。
+
+    /// <summary>AMT 基本所得免稅額（NTD）。台灣 2024 年公告為 670 萬。</summary>
+    decimal AmtExemption = 6_700_000m,
+
+    /// <summary>AMT 稅率（小數）。台灣 2024 年公告為 0.20（20%）。</summary>
+    decimal AmtRate = 0.20m,
+
+    /// <summary>使用者填寫的一般綜合所得淨額（NTD）。0 = 未填，AMT 不計算。</summary>
+    decimal AmtRegularTaxableIncome = 0m,
+
+    /// <summary>使用者填寫的一般綜合所得稅應納稅額（NTD）。AMT 應補繳 = max(0, 基本稅額 − 此值)。</summary>
+    decimal AmtRegularIncomeTax = 0m);

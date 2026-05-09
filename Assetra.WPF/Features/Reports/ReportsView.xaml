@@ -933,6 +933,87 @@
                 </Grid>
             </Expander>
 
+            <!--
+                AMT 完整稅額計算 — 使用 Settings.Amt.* 參數實算當年度應補繳。
+                只在 HasAmtResult（有 TaxSummary 且已算出 AmtResult）時顯示。
+            -->
+            <Expander
+                Margin="0,0,0,16"
+                Header="{DynamicResource Reports.Tax.Amt.Title}"
+                IsExpanded="False"
+                Style="{StaticResource AppExpander}"
+                Visibility="{Binding HasAmtResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Margin="12">
+                    <TextBlock
+                        Margin="0,0,0,12"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Reports.Tax.Amt.Hint}"
+                        TextWrapping="Wrap" />
+
+                    <!-- Not-applicable banner (海外所得未達門檻 或 未填一般所得) -->
+                    <Border
+                        Margin="0,0,0,12"
+                        Padding="10,8"
+                        Background="{DynamicResource AppSurfaceAlt}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Sm}"
+                        Visibility="{Binding AmtResult.IsApplicable, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                        <TextBlock
+                            FontStyle="Italic"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Reports.Tax.Amt.NotApplicable}"
+                            TextWrapping="Wrap" />
+                    </Border>
+
+                    <!-- Formula breakdown (4 rows) -->
+                    <Border
+                        Padding="14,12"
+                        Background="{DynamicResource AppSurfaceAlt}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Md}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.Tax.Amt.OverseasIncluded}" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" FontFamily="{StaticResource Font.Family.Base}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding AmtResult.OverseasIncomeIncluded, StringFormat={}{0:N0}}" Typography.NumeralAlignment="Tabular" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6,0,0" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.Tax.Amt.BaseTaxableIncome}" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,6,0,0" FontFamily="{StaticResource Font.Family.Base}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding AmtResult.BaseTaxableIncome, StringFormat={}{0:N0}}" Typography.NumeralAlignment="Tabular" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,6,0,0" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.Tax.Amt.AmtBaseTax}" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,6,0,0" FontFamily="{StaticResource Font.Family.Base}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding AmtResult.AmtBaseTax, StringFormat={}{0:N0}}" Typography.NumeralAlignment="Tabular" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,6,0,0" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.Tax.Amt.RegularIncomeTax}" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,6,0,0" FontFamily="{StaticResource Font.Family.Base}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding AmtResult.RegularIncomeTax, StringFormat={}{0:N0}}" Typography.NumeralAlignment="Tabular" />
+
+                            <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,10,0,0" Padding="10,8" Background="{DynamicResource AppAccent}" CornerRadius="{StaticResource Radius.Sm}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" FontWeight="SemiBold" Foreground="{DynamicResource AppTextOnAccent}" Text="{DynamicResource Reports.Tax.Amt.Liability}" />
+                                    <TextBlock Grid.Column="1" FontFamily="{StaticResource Font.Family.Base}" FontSize="{StaticResource Font.Size.Lg}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextOnAccent}" Text="{Binding AmtResult.AmtLiability, StringFormat={}{0:N0}}" Typography.NumeralAlignment="Tabular" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Expander>
+
             <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.Performance.Title}" IsExpanded="False" Margin="0,0,0,16">
                 <Grid>
                     <TextBlock

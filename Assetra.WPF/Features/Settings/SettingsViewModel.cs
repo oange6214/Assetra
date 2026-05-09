@@ -107,6 +107,15 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _ocrLanguage = "eng";
     [ObservableProperty] private string _defaultHomeSection = "FinancialOverview";
 
+    // ── AMT 最低稅負制設定 ─────────────────────────────────────────
+    // 使用者於報稅季填一般所得淨額 + 一般稅額後，Reports 頁的 AMT 計算
+    // 才能算出應補繳。免稅額/稅率台灣 2024 年公告為 670 萬 / 20%。
+
+    [ObservableProperty] private decimal _amtExemption = 6_700_000m;
+    [ObservableProperty] private decimal _amtRate = 0.20m;
+    [ObservableProperty] private decimal _amtRegularTaxableIncome = 0m;
+    [ObservableProperty] private decimal _amtRegularIncomeTax = 0m;
+
     public ObservableCollection<string> SupportedCurrencies { get; } = [];
 
     public string AppVersion { get; } = ResolveAppVersion();
@@ -185,6 +194,10 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             DefaultHomeSection = string.IsNullOrWhiteSpace(s.DefaultHomeSection)
                 ? "FinancialOverview"
                 : s.DefaultHomeSection;
+            AmtExemption = s.AmtExemption > 0 ? s.AmtExemption : 6_700_000m;
+            AmtRate = s.AmtRate > 0 ? s.AmtRate : 0.20m;
+            AmtRegularTaxableIncome = s.AmtRegularTaxableIncome;
+            AmtRegularIncomeTax = s.AmtRegularIncomeTax;
             DataSourceSaveStatus = string.Empty;
         }
         finally
@@ -362,9 +375,18 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             DefaultHomeSection = string.IsNullOrWhiteSpace(DefaultHomeSection)
                 ? "FinancialOverview"
                 : DefaultHomeSection,
+            AmtExemption = AmtExemption > 0 ? AmtExemption : 6_700_000m,
+            AmtRate = AmtRate > 0 ? AmtRate : 0.20m,
+            AmtRegularTaxableIncome = AmtRegularTaxableIncome,
+            AmtRegularIncomeTax = AmtRegularIncomeTax,
         };
         await _settings.SaveAsync(updated).ConfigureAwait(true);
     }
+
+    partial void OnAmtExemptionChanged(decimal value)         { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtRateChanged(decimal value)              { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtRegularTaxableIncomeChanged(decimal v)  { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtRegularIncomeTaxChanged(decimal v)      { if (!_isLoading) _ = SaveAsync(); }
 
     partial void OnDefaultHomeSectionChanged(string value)
     {
