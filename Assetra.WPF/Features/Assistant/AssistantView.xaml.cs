@@ -10,7 +10,10 @@ public partial class AssistantView : UserControl
         Loaded += async (_, _) =>
         {
             if (DataContext is AssistantViewModel vm)
+            {
+                await vm.LoadHistoryAsync();
                 await vm.LoadInsightsAsync();
+            }
         };
     }
 }
