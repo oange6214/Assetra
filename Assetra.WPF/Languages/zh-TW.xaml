@@ -1104,6 +1104,15 @@
     <sys:String x:Key="Settings.Amt.RegularTaxableIncome.Hint">所得稅申報書「綜合所得淨額」欄位。0 = 未填，AMT 不計算。</sys:String>
     <sys:String x:Key="Settings.Amt.RegularIncomeTax">一般綜所稅應納稅額（NTD）</sys:String>
     <sys:String x:Key="Settings.Amt.RegularIncomeTax.Hint">所得稅申報書「應納稅額」欄位，用於與基本稅額比較。</sys:String>
+    <sys:String x:Key="Settings.Section.Llm">AI 助手 (LLM)</sys:String>
+    <sys:String x:Key="Settings.Llm.Hint">啟用後，AI 助手對於規則式無法回答的問題會轉派給 LLM。Ollama 需本機跑 daemon；OpenAI 需 API key。資料隱私：目前只把使用者輸入文字送 LLM，不送帳戶餘額。</sys:String>
+    <sys:String x:Key="Settings.Llm.Provider">提供者</sys:String>
+    <sys:String x:Key="Settings.Llm.ApiKey">API Key</sys:String>
+    <sys:String x:Key="Settings.Llm.ApiKey.Hint">OpenAI 必填；Ollama 不需要。本欄位以明碼存於 AppSettings.json，未來會遷移到作業系統 credential store。</sys:String>
+    <sys:String x:Key="Settings.Llm.Model">模型</sys:String>
+    <sys:String x:Key="Settings.Llm.Model.Hint">空白採預設：OpenAI = gpt-4o-mini, Ollama = llama3.1:8b。</sys:String>
+    <sys:String x:Key="Settings.Llm.Endpoint">Endpoint</sys:String>
+    <sys:String x:Key="Settings.Llm.Endpoint.Hint">僅 Ollama 用。空白 = http://localhost:11434。</sys:String>
     <sys:String x:Key="Settings.Fx.Title">匯率（Frankfurter 即時來源）</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">上次更新：</sys:String>
     <sys:String x:Key="Settings.Fx.NeverRefreshed">尚未更新</sys:String>

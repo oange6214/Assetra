@@ -124,6 +124,16 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private decimal _amtRegularTaxableIncome = 0m;
     [ObservableProperty] private decimal _amtRegularIncomeTax = 0m;
 
+    // ── AI 助手 LLM provider 設定 ─────────────────────────────────
+    // 空字串 / "null" → NullLlmProvider（rule-based only）
+    // "openai" → 需要 LlmApiKey
+    // "ollama" → 預設 endpoint http://localhost:11434
+
+    [ObservableProperty] private string _llmProvider = string.Empty;
+    [ObservableProperty] private string _llmApiKey = string.Empty;
+    [ObservableProperty] private string _llmModel = string.Empty;
+    [ObservableProperty] private string _llmEndpoint = string.Empty;
+
     // ── 多幣別匯率即時換算 ─────────────────────────────────────────
     // 來源：Frankfurter（CurrencyService.RefreshRatesAsync）。
     // 顯示「上次更新時間 + 各幣別兌台幣匯率」並提供手動刷新按鈕。
@@ -224,6 +234,10 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             AmtRate = s.AmtRate > 0 ? s.AmtRate : 0.20m;
             AmtRegularTaxableIncome = s.AmtRegularTaxableIncome;
             AmtRegularIncomeTax = s.AmtRegularIncomeTax;
+            LlmProvider = s.LlmProvider ?? string.Empty;
+            LlmApiKey = s.LlmApiKey ?? string.Empty;
+            LlmModel = s.LlmModel ?? string.Empty;
+            LlmEndpoint = s.LlmEndpoint ?? string.Empty;
             DataSourceSaveStatus = string.Empty;
             RefreshFxDisplay();
         }
@@ -406,9 +420,25 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             AmtRate = AmtRate > 0 ? AmtRate : 0.20m,
             AmtRegularTaxableIncome = AmtRegularTaxableIncome,
             AmtRegularIncomeTax = AmtRegularIncomeTax,
+            LlmProvider = LlmProvider?.Trim() ?? string.Empty,
+            LlmApiKey = LlmApiKey?.Trim() ?? string.Empty,
+            LlmModel = LlmModel?.Trim() ?? string.Empty,
+            LlmEndpoint = LlmEndpoint?.Trim() ?? string.Empty,
         };
         await _settings.SaveAsync(updated).ConfigureAwait(true);
     }
+
+    partial void OnLlmProviderChanged(string value)  { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnLlmApiKeyChanged(string value)    { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnLlmModelChanged(string value)     { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnLlmEndpointChanged(string value)  { if (!_isLoading) _ = SaveAsync(); }
+
+    public static IReadOnlyList<ProviderOption> SupportedLlmProviders { get; } =
+    [
+        new("", "停用 (Rule-based only)"),
+        new("openai", "OpenAI"),
+        new("ollama", "Ollama (local)"),
+    ];
 
     partial void OnAmtExemptionChanged(decimal value)         { if (!_isLoading) _ = SaveAsync(); }
     partial void OnAmtRateChanged(decimal value)              { if (!_isLoading) _ = SaveAsync(); }
