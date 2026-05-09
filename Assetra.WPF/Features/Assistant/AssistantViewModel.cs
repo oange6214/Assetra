@@ -85,6 +85,50 @@ public sealed partial class AssistantViewModel : ObservableObject
         _insightCards.Remove(insight);
     }
 
+    /// <summary>
+    /// Export the full conversation history to a markdown file. Privacy-friendly:
+    /// only chat text + timestamps + provider source are written.
+    /// </summary>
+    [RelayCommand]
+    private async Task ExportHistoryAsync()
+    {
+        if (_history is null) return;
+        var dlg = new Microsoft.Win32.SaveFileDialog
+        {
+            Title = "Export assistant history",
+            Filter = "Markdown (*.md)|*.md|Plain text (*.txt)|*.txt",
+            FileName = $"assistant-history-{DateTime.Now:yyyy-MM-dd-HHmm}.md",
+        };
+        if (dlg.ShowDialog() != true) return;
+
+        try
+        {
+            var entries = await _history.GetRecentAsync(limit: 1000).ConfigureAwait(true);
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"# Assetra AI 助手對話記錄 — exported {DateTime.Now:yyyy-MM-dd HH:mm}");
+            sb.AppendLine();
+            foreach (var e in entries.Reverse())
+            {
+                sb.AppendLine($"## {e.AskedAt.ToLocalTime():yyyy-MM-dd HH:mm}");
+                sb.AppendLine();
+                sb.AppendLine($"**You:** {e.UserText}");
+                sb.AppendLine();
+                sb.AppendLine($"**Assistant{(string.IsNullOrEmpty(e.Source) ? string.Empty : $" ({e.Source})")}:** {e.AssistantText}");
+                sb.AppendLine();
+                sb.AppendLine("---");
+                sb.AppendLine();
+            }
+            await System.IO.File.WriteAllTextAsync(dlg.FileName, sb.ToString()).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            _messages.Add(new AssistantMessage(
+                IsUser: false,
+                Text: $"匯出失敗：{ex.Message}",
+                Source: "Error"));
+        }
+    }
+
     private bool CanSend() => !IsAnswering && !string.IsNullOrWhiteSpace(InputText);
 
     [RelayCommand(CanExecute = nameof(CanSend))]
