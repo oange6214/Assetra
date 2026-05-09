@@ -34,6 +34,7 @@
 
     <UserControl.Resources>
 
+        <!--  ── Leaf-button visual style (shared by expanded list, popup, bottom items) ──  -->
         <Style x:Key="NavRailItemButton" TargetType="{x:Type ToggleButton}">
             <Setter Property="Height" Value="40" />
             <Setter Property="Margin" Value="3,1" />
@@ -94,29 +95,61 @@
             </Setter>
         </Style>
 
+        <!--  Group-header style (expanded mode): chevron + title.  -->
+        <Style x:Key="NavRailGroupHeader" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Margin" Value="3,8,3,2" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border
+                            x:Name="Chrome"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                            <ContentPresenter
+                                Margin="14,0,8,0"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AppHover}" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--  Group icon (collapsed mode): like a leaf button but uses the group icon and opens a flyout.  -->
+        <Style x:Key="NavRailGroupIconButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource NavRailItemButton}">
+            <!--  The base style already paints a hover/focus chrome; isChecked here means "flyout open".  -->
+        </Style>
+
         <Style x:Key="NavRailItemText" TargetType="{x:Type TextBlock}">
             <Setter Property="Margin" Value="10,0,0,0" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
             <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding ElementName=PaneToggle, Path=IsChecked}" Value="False">
-                    <Setter Property="Visibility" Value="Collapsed" />
-                </DataTrigger>
-            </Style.Triggers>
         </Style>
 
-        <Style x:Key="NavRailHeaderText" TargetType="{x:Type TextBlock}">
-            <Setter Property="Margin" Value="16,16,12,6" />
+        <Style x:Key="NavRailGroupTitle" TargetType="{x:Type TextBlock}">
+            <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding ElementName=PaneToggle, Path=IsChecked}" Value="False">
-                    <Setter Property="Visibility" Value="Collapsed" />
-                </DataTrigger>
-            </Style.Triggers>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
 
         <Style x:Key="NavRailBadge" TargetType="{x:Type Border}">
@@ -130,23 +163,219 @@
         </Style>
 
         <!--
-            Group divider — only visible when the rail is collapsed. Provides
-            the visual section break that text headers (NavRailHeaderText)
-            give in expanded mode but disappear in collapsed mode.
+            Leaf badge content control — switches template based on the leaf's
+            BadgeKind tag and binds to the appropriate VM at the UserControl
+            level. Using a ContentControl + DataTrigger keeps the per-leaf
+            template free of badge-specific bindings.
         -->
-        <Style x:Key="NavRailGroupDivider" TargetType="{x:Type Border}">
-            <Setter Property="Height" Value="1" />
-            <Setter Property="Margin" Value="12,12,12,8" />
-            <Setter Property="Background" Value="{DynamicResource AppBorderLight}" />
-            <Setter Property="Visibility" Value="Collapsed" />
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding ElementName=PaneToggle, Path=IsChecked}" Value="False">
-                    <Setter Property="Visibility" Value="Visible" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
+        <DataTemplate x:Key="NavLeafBadgeRecurringTemplate">
+            <Border
+                Style="{StaticResource NavRailBadge}"
+                Visibility="{Binding DataContext.Recurring.HasPending, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppTextOnAccent}"
+                    Text="{Binding DataContext.Recurring.PendingCount, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+            </Border>
+        </DataTemplate>
 
-        <!--  ── Section view templates (resolved by ContentControl DataTrigger) ──  -->
+        <DataTemplate x:Key="NavLeafBadgeAlertsTemplate">
+            <Border
+                Style="{StaticResource NavRailBadge}"
+                Visibility="{Binding DataContext.Alerts.HasTriggeredAlerts, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppTextOnAccent}"
+                    Text="{Binding DataContext.Alerts.TriggeredCount, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+            </Border>
+        </DataTemplate>
+
+        <!--  ── Leaf DataTemplate: full row with icon + label + optional badge.  ──  -->
+        <DataTemplate x:Key="NavLeafRowTemplate" DataType="{x:Type shell:NavLeafVm}">
+            <ToggleButton
+                Click="NavLeaf_Click"
+                IsChecked="{Binding IsActive, Mode=OneWay}"
+                Style="{StaticResource NavRailItemButton}"
+                Tag="{Binding}"
+                ToolTip="{Binding LocalizedToolTip}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="24" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ds:AppIcon Symbol="{Binding IconSymbol}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        Style="{StaticResource NavRailItemText}"
+                        Text="{Binding LocalizedLabel}" />
+                    <ContentControl Grid.Column="2">
+                        <ContentControl.Style>
+                            <Style TargetType="{x:Type ContentControl}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding BadgeKind}" Value="Recurring">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Setter Property="ContentTemplate" Value="{StaticResource NavLeafBadgeRecurringTemplate}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding BadgeKind}" Value="Alerts">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Setter Property="ContentTemplate" Value="{StaticResource NavLeafBadgeAlertsTemplate}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
+                </Grid>
+            </ToggleButton>
+        </DataTemplate>
+
+        <!--  ── Group DataTemplate (expanded mode): collapsible header + child list.  ──  -->
+        <DataTemplate x:Key="NavGroupExpandedTemplate" DataType="{x:Type shell:NavGroupVm}">
+            <StackPanel>
+                <ToggleButton
+                    HorizontalContentAlignment="Stretch"
+                    IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                    Style="{StaticResource NavRailGroupHeader}"
+                    ToolTip="{Binding LocalizedTitle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Style="{StaticResource NavRailGroupTitle}" Text="{Binding LocalizedTitle}" />
+                        <ds:AppIcon
+                            x:Name="Chevron"
+                            Grid.Column="1"
+                            Margin="0,0,4,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Symbol="ChevronDown24">
+                            <ds:AppIcon.RenderTransform>
+                                <RotateTransform x:Name="ChevronRotate" Angle="0" CenterX="6" CenterY="6" />
+                            </ds:AppIcon.RenderTransform>
+                        </ds:AppIcon>
+                    </Grid>
+                </ToggleButton>
+                <ItemsControl
+                    ItemTemplate="{StaticResource NavLeafRowTemplate}"
+                    ItemsSource="{Binding Items}"
+                    Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </StackPanel>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsExpanded}" Value="False">
+                    <DataTrigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation
+                                    Storyboard.TargetName="ChevronRotate"
+                                    Storyboard.TargetProperty="Angle"
+                                    To="-90"
+                                    Duration="0:0:0.12" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </DataTrigger.EnterActions>
+                    <DataTrigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation
+                                    Storyboard.TargetName="ChevronRotate"
+                                    Storyboard.TargetProperty="Angle"
+                                    To="0"
+                                    Duration="0:0:0.12" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </DataTrigger.ExitActions>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!--
+            Group DataTemplate (collapsed mode): icon button that opens a Popup
+            flyout with the group's children. Same VS Code activity-bar pattern.
+        -->
+        <DataTemplate x:Key="NavGroupCollapsedTemplate" DataType="{x:Type shell:NavGroupVm}">
+            <Grid>
+                <ToggleButton
+                    x:Name="GroupIconBtn"
+                    Click="NavGroupIcon_Click"
+                    IsChecked="{Binding HasActiveChild, Mode=OneWay}"
+                    Style="{StaticResource NavRailGroupIconButton}"
+                    Tag="{Binding}"
+                    ToolTip="{Binding LocalizedTitle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ds:AppIcon Symbol="{Binding GroupIconSymbol}" />
+                    </Grid>
+                </ToggleButton>
+                <Popup
+                    AllowsTransparency="True"
+                    HorizontalOffset="4"
+                    IsOpen="{Binding IsFlyoutOpen, Mode=TwoWay}"
+                    Placement="Right"
+                    PlacementTarget="{Binding ElementName=GroupIconBtn}"
+                    PopupAnimation="Fade"
+                    StaysOpen="False">
+                    <Border
+                        MinWidth="220"
+                        Margin="0,4"
+                        Padding="6,8"
+                        Background="{DynamicResource AppSurface}"
+                        BorderBrush="{DynamicResource AppBorderLight}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Md}"
+                        SnapsToDevicePixels="True">
+                        <Border.Effect>
+                            <DropShadowEffect
+                                BlurRadius="16"
+                                Direction="270"
+                                Opacity="0.18"
+                                ShadowDepth="2"
+                                Color="Black" />
+                        </Border.Effect>
+                        <StackPanel>
+                            <TextBlock
+                                Margin="14,4,0,8"
+                                Style="{StaticResource NavRailGroupTitle}"
+                                Text="{Binding LocalizedTitle}" />
+                            <ItemsControl ItemTemplate="{StaticResource NavLeafRowTemplate}" ItemsSource="{Binding Items}" />
+                        </StackPanel>
+                    </Border>
+                </Popup>
+            </Grid>
+        </DataTemplate>
+
+        <!--  ── Bottom items DataTemplate (Import / Settings) — no group, just a leaf row.  ──  -->
+        <DataTemplate x:Key="NavBottomLeafTemplate" DataType="{x:Type shell:NavLeafVm}">
+            <ToggleButton
+                Click="NavLeaf_Click"
+                IsChecked="{Binding IsActive, Mode=OneWay}"
+                Style="{StaticResource NavRailItemButton}"
+                Tag="{Binding}"
+                ToolTip="{Binding LocalizedToolTip}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="24" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ds:AppIcon Symbol="{Binding IconSymbol}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        Style="{StaticResource NavRailItemText}"
+                        Text="{Binding LocalizedLabel}"
+                        Visibility="{Binding ElementName=PaneToggle, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </Grid>
+            </ToggleButton>
+        </DataTemplate>
+
+        <!--  ─────────── Section view templates (resolved by ContentControl DataTrigger) ───────────  -->
         <DataTemplate x:Key="PortfolioContentTemplate">
             <portfolio:PortfolioView DataContext="{Binding Portfolio}" />
         </DataTemplate>
@@ -239,11 +468,8 @@
         </DataTemplate>
 
         <!--
-            Top-level entries promoted from inside the Portfolio tab strip
-            (Option B + Portfolio-tabs refactor). All three reuse the
-            existing Portfolio sub-panels with PortfolioViewModel as
-            DataContext so the legacy bindings (Trades, Account.*, Liability.*)
-            keep working without a sub-VM extraction.
+            Top-level entries promoted from inside the Portfolio tab strip.
+            All three reuse the existing Portfolio sub-panels with PortfolioViewModel as DataContext.
         -->
         <DataTemplate x:Key="TransactionLogContentTemplate">
             <txlog:TransactionLogView DataContext="{Binding Portfolio}" />
@@ -317,21 +543,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!--
-                    Hamburger toggle:
-                    * Stretches full rail width and uses Padding 17,0,0,0 so
-                    the 18px icon (FontSize Md) sits with its center at
-                    x=26, matching the nav-item icon column (4px indicator
-                    + 10px content margin + 12px half of 24-wide icon column)
-                    in both expanded (200px) and collapsed (56px) modes.
-                    * Symbol swaps between ChevronLeft (expanded → click to
-                    collapse) and ChevronRight (collapsed → click to expand)
-                    so the affordance reflects state.
-                    * AppIcon style uses BasedOn so the default Viewbox+Path
-                    template is preserved.
-                    * Custom Template removes the default ToggleButton chrome
-                    so IsChecked state does not paint a blue rectangle.
-                -->
+                <!--  Hamburger toggle (unchanged from prior design).  -->
                 <ToggleButton
                     x:Name="PaneToggle"
                     Grid.Row="0"
@@ -365,492 +577,41 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         FontSize="{StaticResource Font.Size.Md}"
-                        Foreground="{DynamicResource AppTextMuted}">
-                        <ds:AppIcon.Style>
-                            <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
-                                <!--  Hamburger toggles the pane regardless of state — single recognisable affordance.  -->
-                                <Setter Property="Symbol" Value="Navigation24" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=PaneToggle, Path=IsChecked}" Value="False">
-                                        <Setter Property="Symbol" Value="Navigation24" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ds:AppIcon.Style>
-                    </ds:AppIcon>
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Symbol="Navigation24" />
                 </ToggleButton>
 
+                <!--
+                    Middle scroll region — switches between expanded and
+                    collapsed renderings via PaneToggle.IsChecked. Both
+                    bind to the same NavRail.Groups source.
+                -->
                 <ScrollViewer
                     Grid.Row="1"
                     HorizontalScrollBarVisibility="Disabled"
                     VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <!--  ─── Overview group ───  -->
-                        <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.Overview}" />
+                    <Grid>
+                        <!--  Expanded mode  -->
+                        <ItemsControl
+                            ItemTemplate="{StaticResource NavGroupExpandedTemplate}"
+                            ItemsSource="{Binding NavRail.Groups}"
+                            Visibility="{Binding ElementName=PaneToggle, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                        <ToggleButton
-                            x:Name="NavFinancialOverview"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=FinancialOverview, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.FinancialOverview}"
-                            ToolTip="{DynamicResource FinancialOverview.Nav.Label}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="DataPie24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource FinancialOverview.Nav.Label}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavTrends"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Trends, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Trends}"
-                            ToolTip="{DynamicResource Nav.Trends}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="DataTrending24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Nav.Trends}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavReports"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Reports, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Reports}"
-                            ToolTip="{DynamicResource Nav.Reports}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="DocumentBulletList24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Nav.Reports}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavAssistant"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Assistant, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Assistant}"
-                            ToolTip="{DynamicResource Nav.Assistant}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Sparkle24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Nav.Assistant}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavAuditLog"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=AuditLog, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.AuditLog}"
-                            ToolTip="{DynamicResource Nav.AuditLog}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="History24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Nav.AuditLog}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <!--  ─── Assets group (was MultiAsset; now also hosts Portfolio) ───  -->
-                        <Border Style="{StaticResource NavRailGroupDivider}" />
-                        <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.Assets}" />
-
-                        <ToggleButton
-                            x:Name="NavPortfolio"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Portfolio, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Portfolio}"
-                            ToolTip="{DynamicResource Nav.Portfolio}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Briefcase24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Nav.Portfolio}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavCashAccounts"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=CashAccounts, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.CashAccounts}"
-                            ToolTip="{DynamicResource Nav.CashAccounts}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Money24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Nav.CashAccounts}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavLiabilities"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Liabilities, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Liabilities}"
-                            ToolTip="{DynamicResource Nav.Liabilities}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Cut24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Nav.Liabilities}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavRealEstate"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=RealEstate, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.RealEstate}"
-                            ToolTip="{DynamicResource RealEstate.Title}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Home24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource RealEstate.Title}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavInsurance"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Insurance, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Insurance}"
-                            ToolTip="{DynamicResource Insurance.Title}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Shield24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Insurance.Title}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavRetirement"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Retirement, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Retirement}"
-                            ToolTip="{DynamicResource Retirement.Title}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="PersonClock24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Retirement.Title}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavPhysicalAsset"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=PhysicalAsset, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.PhysicalAsset}"
-                            ToolTip="{DynamicResource PhysicalAsset.Title}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Box24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource PhysicalAsset.Title}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <Border Style="{StaticResource NavRailGroupDivider}" />
-                        <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.Cashflow}" />
-
-                        <ToggleButton
-                            x:Name="NavCategories"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Categories, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Categories}"
-                            ToolTip="{DynamicResource Nav.Categories}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Tag24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Nav.Categories}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavRecurring"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Recurring, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Recurring}"
-                            ToolTip="{DynamicResource Nav.Recurring}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <!--  CalendarLtr maps cleanly to "subscription / recurring schedule" — matches the 訂閱排程 label and avoids the swap-arrow misread of ArrowRepeatAll.  -->
-                                <ds:AppIcon Symbol="CalendarLtr24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Nav.Recurring}" />
-                                <Border
-                                    Grid.Column="2"
-                                    Style="{StaticResource NavRailBadge}"
-                                    Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextOnAccent}"
-                                        Text="{Binding Recurring.PendingCount}" />
-                                </Border>
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavTransactionLog"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=TransactionLog, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.TransactionLog}"
-                            ToolTip="{DynamicResource Nav.TransactionLog}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="DocumentBulletList24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Nav.TransactionLog}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavAlerts"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Alerts, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Alerts}"
-                            ToolTip="{DynamicResource Nav.Alerts.Tooltip}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Alert24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Nav.Alerts}" />
-                                <Border
-                                    Grid.Column="2"
-                                    Style="{StaticResource NavRailBadge}"
-                                    Visibility="{Binding Alerts.HasTriggeredAlerts, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextOnAccent}"
-                                        Text="{Binding Alerts.TriggeredCount}" />
-                                </Border>
-                            </Grid>
-                        </ToggleButton>
-
-                        <Border Style="{StaticResource NavRailGroupDivider}" />
-                        <TextBlock Style="{StaticResource NavRailHeaderText}" Text="{DynamicResource Nav.Planning}" />
-
-                        <ToggleButton
-                            x:Name="NavGoals"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Goals, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Goals}"
-                            ToolTip="{DynamicResource Nav.Goals}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Target24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Nav.Goals}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavFire"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Fire, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.Fire}"
-                            ToolTip="{DynamicResource Fire.Title}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ds:AppIcon Symbol="Flash24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource Fire.Title}" />
-                            </Grid>
-                        </ToggleButton>
-
-                        <ToggleButton
-                            x:Name="NavMonteCarlo"
-                            Click="NavItem_Click"
-                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=MonteCarlo, Mode=OneWay}"
-                            Style="{StaticResource NavRailItemButton}"
-                            Tag="{x:Static shell:NavSection.MonteCarlo}"
-                            ToolTip="{DynamicResource MonteCarlo.Title}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <!--  Calculator differentiates Monte Carlo from the pie/line chart icons of FinancialOverview / Trends; conveys "simulation / computation" semantics.  -->
-                                <ds:AppIcon Symbol="Calculator24" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NavRailItemText}"
-                                    Text="{DynamicResource MonteCarlo.Title}" />
-                            </Grid>
-                        </ToggleButton>
-                    </StackPanel>
+                        <!--  Collapsed mode (4 group icons, no scroll)  -->
+                        <ItemsControl
+                            ItemTemplate="{StaticResource NavGroupCollapsedTemplate}"
+                            ItemsSource="{Binding NavRail.Groups}"
+                            Visibility="{Binding ElementName=PaneToggle, Path=IsChecked, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                    </Grid>
                 </ScrollViewer>
 
+                <!--  Bottom items (Import / Settings).  -->
                 <StackPanel Grid.Row="2" Margin="0,8,0,8">
                     <Border
                         Height="1"
                         Margin="0,0,0,8"
                         Background="{DynamicResource AppBorderLight}" />
-
-                    <ToggleButton
-                        x:Name="NavImport"
-                        Click="NavItem_Click"
-                        IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Import, Mode=OneWay}"
-                        Style="{StaticResource NavRailItemButton}"
-                        Tag="{x:Static shell:NavSection.Import}"
-                        ToolTip="{DynamicResource Nav.Import}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="24" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <ds:AppIcon Symbol="DocumentArrowDown24" />
-                            <TextBlock
-                                Grid.Column="1"
-                                Style="{StaticResource NavRailItemText}"
-                                Text="{DynamicResource Nav.Import}" />
-                        </Grid>
-                    </ToggleButton>
-
-                    <ToggleButton
-                        x:Name="NavSettings"
-                        Click="NavItem_Click"
-                        IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Settings, Mode=OneWay}"
-                        Style="{StaticResource NavRailItemButton}"
-                        Tag="{x:Static shell:NavSection.Settings}"
-                        ToolTip="{DynamicResource Nav.Settings}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="24" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <ds:AppIcon Symbol="Settings24" />
-                            <TextBlock
-                                Grid.Column="1"
-                                Style="{StaticResource NavRailItemText}"
-                                Text="{DynamicResource Nav.Settings}" />
-                        </Grid>
-                    </ToggleButton>
+                    <ItemsControl ItemTemplate="{StaticResource NavBottomLeafTemplate}" ItemsSource="{Binding NavRail.BottomItems}" />
                 </StackPanel>
             </Grid>
         </Border>

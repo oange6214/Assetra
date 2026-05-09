@@ -21,14 +21,34 @@ public partial class NavRailView : UserControl
         Dispatcher.BeginInvoke(() => UpdateLayout());
     }
 
-    private void NavItem_Click(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Click handler for any leaf row (expanded list, popup, or bottom items).
+    /// The Tag carries the <see cref="NavLeafVm"/>; we navigate to its section
+    /// and force IsChecked back to its bound source so a quick double-click on
+    /// the active leaf doesn't accidentally desync the toggle visual.
+    /// </summary>
+    private void NavLeaf_Click(object sender, RoutedEventArgs e)
     {
         if (_navRail is null) return;
+        if (sender is not ToggleButton { Tag: NavLeafVm leaf } button) return;
 
-        if (sender is ToggleButton { Tag: NavSection section } button)
-        {
-            _navRail.NavigateTo(section);
-            button.SetCurrentValue(ToggleButton.IsCheckedProperty, true);
-        }
+        _navRail.NavigateTo(leaf.Section);
+        button.SetCurrentValue(ToggleButton.IsCheckedProperty, leaf.IsActive);
+    }
+
+    /// <summary>
+    /// Click handler for collapsed-mode group icon — opens the flyout Popup
+    /// containing the group's children. The IsChecked source is the
+    /// HasActiveChild flag so the visual stays bound to "this group owns the
+    /// current section"; we toggle the IsFlyoutOpen flag explicitly.
+    /// </summary>
+    private void NavGroupIcon_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not ToggleButton { Tag: NavGroupVm group } button) return;
+
+        group.IsFlyoutOpen = !group.IsFlyoutOpen;
+        // Reset the IsChecked visual back to whatever HasActiveChild is —
+        // the user clicking the icon shouldn't permanently "select" the group.
+        button.SetCurrentValue(ToggleButton.IsCheckedProperty, group.HasActiveChild);
     }
 }
