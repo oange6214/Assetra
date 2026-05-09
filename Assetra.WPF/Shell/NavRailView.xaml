@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:alerts="clr-namespace:Assetra.WPF.Features.Alerts"
+    xmlns:assistant="clr-namespace:Assetra.WPF.Features.Assistant"
     xmlns:cashaccts="clr-namespace:Assetra.WPF.Features.CashAccounts"
     xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -175,6 +176,10 @@
 
         <DataTemplate x:Key="AlertsContentTemplate">
             <alerts:AlertsView DataContext="{Binding Alerts}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="AssistantContentTemplate">
+            <assistant:AssistantView DataContext="{Binding Assistant}" />
         </DataTemplate>
 
         <DataTemplate x:Key="ImportContentTemplate">
@@ -435,6 +440,26 @@
                                     Grid.Column="1"
                                     Style="{StaticResource NavRailItemText}"
                                     Text="{DynamicResource Nav.Reports}" />
+                            </Grid>
+                        </ToggleButton>
+
+                        <ToggleButton
+                            x:Name="NavAssistant"
+                            Click="NavItem_Click"
+                            IsChecked="{Binding NavRail.ActiveSection, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Assistant, Mode=OneWay}"
+                            Style="{StaticResource NavRailItemButton}"
+                            Tag="{x:Static shell:NavSection.Assistant}"
+                            ToolTip="{DynamicResource Nav.Assistant}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ds:AppIcon Symbol="Sparkle24" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Nav.Assistant}" />
                             </Grid>
                         </ToggleButton>
 
@@ -836,6 +861,9 @@
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Reports}">
                             <Setter Property="ContentTemplate" Value="{StaticResource ReportsContentTemplate}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Assistant}">
+                            <Setter Property="ContentTemplate" Value="{StaticResource AssistantContentTemplate}" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Alerts}">
                             <Setter Property="ContentTemplate" Value="{StaticResource AlertsContentTemplate}" />
