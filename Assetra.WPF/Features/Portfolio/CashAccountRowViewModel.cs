@@ -12,13 +12,34 @@ public sealed partial class CashAccountRowViewModel : ObservableObject
     public Guid Id { get; }
     public DateOnly CreatedDate { get; }
 
-    [ObservableProperty] private string _name;
-    [ObservableProperty] private decimal _balance;
-    [ObservableProperty] private string _currency = "TWD";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BalanceAsMoney))]
+    private string _name;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BalanceAsMoney))]
+    private decimal _balance;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BalanceAsMoney))]
+    private string _currency = "TWD";
+
     [ObservableProperty] private bool _isDefault;
     [ObservableProperty] private bool _isActive;
 
-    public void NotifyCurrencyChanged() => OnPropertyChanged(nameof(Balance));
+    /// <summary>
+    /// M1 — currency-tagged accessor for this row's balance. Use this for any
+    /// cross-row aggregation that must respect currency boundaries (e.g.,
+    /// ConcentrationAnalyzer, multi-currency portfolio summaries). Decimal
+    /// <see cref="Balance"/> stays the primary XAML binding for backward compat.
+    /// </summary>
+    public Money BalanceAsMoney => new(Balance, string.IsNullOrWhiteSpace(Currency) ? "TWD" : Currency);
+
+    public void NotifyCurrencyChanged()
+    {
+        OnPropertyChanged(nameof(Balance));
+        OnPropertyChanged(nameof(BalanceAsMoney));
+    }
 
     public CashAccountRowViewModel(AssetItem a, decimal projectedBalance)
     {

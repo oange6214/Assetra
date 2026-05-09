@@ -20,12 +20,24 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PaidPercent))]
     [NotifyPropertyChangedFor(nameof(PaidPercentDisplay))]
+    [NotifyPropertyChangedFor(nameof(BalanceAsMoney))]
     private decimal _balance;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PaidPercent))]
     [NotifyPropertyChangedFor(nameof(PaidPercentDisplay))]
+    [NotifyPropertyChangedFor(nameof(OriginalAmountAsMoney))]
     private decimal _originalAmount;
+
+    /// <summary>
+    /// M1 — currency-tagged accessor (uses linked AssetItem.Currency, defaults
+    /// to "TWD" for legacy labels with no AssetItem). For aggregation that needs
+    /// to respect currency boundaries.
+    /// </summary>
+    public Money BalanceAsMoney => new(Balance, _currency);
+    public Money OriginalAmountAsMoney => new(OriginalAmount, _currency);
+
+    private readonly string _currency;
 
     public double PaidPercent => OriginalAmount > 0
         ? (double)System.Math.Clamp((OriginalAmount - Balance) / OriginalAmount * 100, 0, 100)
@@ -112,6 +124,10 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
         // since UI bindings format with the asset's Currency separately via MoneyFormatter.
         _balance = snapshot.Balance.Amount;
         _originalAmount = snapshot.OriginalAmount.Amount;
+        // Capture currency from the linked asset (or snapshot fallback for legacy labels).
+        _currency = !string.IsNullOrWhiteSpace(asset?.Currency)
+            ? asset!.Currency
+            : (string.IsNullOrWhiteSpace(snapshot.Balance.Currency) ? "TWD" : snapshot.Balance.Currency);
 
         if (asset is not null)
         {
