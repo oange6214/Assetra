@@ -1117,6 +1117,7 @@
     <sys:String x:Key="AuditLog.Subtitle">Every trade deletion or edit-replace stores a full JSON snapshot here so you can recover from accidental edits hours later.</sys:String>
     <sys:String x:Key="AuditLog.Refresh">Reload</sys:String>
     <sys:String x:Key="AuditLog.Empty">No audit entries yet.</sys:String>
+    <sys:String x:Key="AuditLog.Filter.Tooltip">Search Action / Trade ID / Note / content (case-insensitive).</sys:String>
     <sys:String x:Key="AuditLog.Col.RecordedAt">Recorded</sys:String>
     <sys:String x:Key="AuditLog.Col.Action">Action</sys:String>
     <sys:String x:Key="AuditLog.Col.TradeId">Trade ID</sys:String>

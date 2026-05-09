@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows.Data;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -28,10 +30,30 @@ public sealed partial class AuditLogViewModel : ObservableObject
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string _errorMessage = string.Empty;
 
+    [ObservableProperty] private string _filterText = string.Empty;
+
+    /// <summary>ICollectionView used by the DataGrid; honours <see cref="FilterText"/>.</summary>
+    public ICollectionView EntriesView { get; }
+
     public AuditLogViewModel(ITradeAuditRepository? audit = null)
     {
         _audit = audit;
         Entries = new ReadOnlyObservableCollection<AuditRowViewModel>(_entries);
+        EntriesView = CollectionViewSource.GetDefaultView(_entries);
+        EntriesView.Filter = FilterEntry;
+    }
+
+    partial void OnFilterTextChanged(string value) => EntriesView.Refresh();
+
+    private bool FilterEntry(object obj)
+    {
+        if (obj is not AuditRowViewModel row) return false;
+        var q = FilterText?.Trim();
+        if (string.IsNullOrEmpty(q)) return true;
+        return row.Action.Contains(q, StringComparison.OrdinalIgnoreCase)
+            || row.TradeIdShort.Contains(q, StringComparison.OrdinalIgnoreCase)
+            || row.Note.Contains(q, StringComparison.OrdinalIgnoreCase)
+            || row.TradeJsonPreview.Contains(q, StringComparison.OrdinalIgnoreCase);
     }
 
     [RelayCommand]

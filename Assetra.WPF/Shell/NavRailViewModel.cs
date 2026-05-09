@@ -75,6 +75,19 @@ public partial class NavRailViewModel : ObservableObject
     }
 
     /// <summary>
+    /// String overload for XAML KeyBinding.CommandParameter use. Parses the
+    /// argument as <see cref="NavSection"/> and delegates. Unknown strings
+    /// silently no-op so a typo'd shortcut doesn't crash.
+    /// </summary>
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void NavigateToByName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return;
+        if (Enum.TryParse<NavSection>(name, ignoreCase: true, out var section))
+            NavigateTo(section);
+    }
+
+    /// <summary>
     /// All navigation goes through here — called by the ActiveSection setter,
     /// GoBack, GoForward, and any external callers.
     /// </summary>
