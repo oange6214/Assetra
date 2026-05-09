@@ -64,6 +64,7 @@
 | Mobile（iOS / Android，MAUI 或 native） | 4–6 週 |
 | Push notifications（APNs + FCM） | 2 週 |
 | 多資產擴張（CoinGecko crypto / 私募基金 / 選擇權鏈） | 4–6 週 |
+| **美股 (US equities) 支援 — Twelve Data + Nasdaq Symbol Directory** | 4–5 週（已寫詳細 plan: `US-Equities-Support-Plan.md`） |
 | ~~NavRail 重設計：可摺疊群組 + flyout~~ | ~~2–4 天~~ | **✅ 已完成（提早動工）** — 4 群組（Overview / Assets / Cashflow / Planning）+ 2 底部固定，展開模式可折疊 group 標題，縮起模式 group icon 點擊彈 Popup flyout 顯示子項。資料驅動 (`NavGroupVm` / `NavLeafVm`)、與 `ILocalizationService` 整合自動換語言、徽章 (Recurring/Alerts) 沿用。|
 
 **總計：** 13–18 週（建議拆多個 release）
