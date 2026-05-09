@@ -25,7 +25,8 @@ public sealed record CurrencyOption(string Code, string Display)
     public override string ToString() => Display;
 }
 
-public partial class PortfolioViewModel : ObservableObject, IDisposable, Contracts.IPortfolioPositionFeed
+public partial class PortfolioViewModel : ObservableObject, IDisposable,
+    Contracts.IPortfolioPositionFeed, Contracts.IDashboardNavigation
 {
     private readonly IStockSearchService _search;
     private readonly IAppSettingsService? _settingsService;
@@ -63,6 +64,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
     public ReadOnlyObservableCollection<LiabilityRowViewModel> Liabilities { get; }
 
     IReadOnlyList<PortfolioRowViewModel> Contracts.IPortfolioPositionFeed.Positions => Positions;
+
+    void Contracts.IDashboardNavigation.NavigateTo(PortfolioTab tab) => SelectedTab = tab;
 
     // ── Internal mutators (used by reload paths + test seeders) ──────────────
     internal void Internal_AddPosition(PortfolioRowViewModel row) => _positions.Add(row);

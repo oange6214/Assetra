@@ -26,13 +26,23 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
 
     public BudgetSummaryCardViewModel? BudgetSummary { get; }
 
+    /// <summary>
+    /// L3 — writeback channel for tab navigation. Defaults to the concrete
+    /// <see cref="PortfolioViewModel"/> instance (which implements
+    /// <see cref="Contracts.IDashboardNavigation"/>) so existing wiring keeps
+    /// working; tests can inject a stub.
+    /// </summary>
+    private readonly Contracts.IDashboardNavigation _navigation;
+
     public DashboardViewModel(
         PortfolioViewModel portfolio,
         IThemeService? themeService = null,
-        BudgetSummaryCardViewModel? budgetSummary = null)
+        BudgetSummaryCardViewModel? budgetSummary = null,
+        Contracts.IDashboardNavigation? navigation = null)
     {
         _portfolio = portfolio;
         _themeService = themeService;
+        _navigation = navigation ?? portfolio;
         BudgetSummary = budgetSummary;
         if (BudgetSummary is not null)
         {
@@ -147,10 +157,10 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
 
     // Navigation
     [RelayCommand]
-    private void NavigateToPositions() => _portfolio.SelectedTab = PortfolioTab.Positions;
+    private void NavigateToPositions() => _navigation.NavigateTo(PortfolioTab.Positions);
 
     [RelayCommand]
-    private void NavigateToTrades() => _portfolio.SelectedTab = PortfolioTab.Trades;
+    private void NavigateToTrades() => _navigation.NavigateTo(PortfolioTab.Trades);
 
     // Chart
     private void RefreshTenDayChart()
