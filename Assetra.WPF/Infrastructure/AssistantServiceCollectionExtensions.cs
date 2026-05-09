@@ -2,6 +2,7 @@ using System.Net.Http;
 using Assetra.Application.Assistant;
 using Assetra.Application.Assistant.Llm;
 using Assetra.Core.Interfaces;
+using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Assistant;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,10 +12,9 @@ internal static class AssistantServiceCollectionExtensions
 {
     /// <summary>
     /// Wires the rule-based assistant (Phase 1) + insights service (Phase 2) +
-    /// optional LLM provider (Phase 3). The hybrid orchestrator picks rule-based
-    /// when it can answer, LLM otherwise.
+    /// optional LLM provider (Phase 3) + history persistence.
     /// </summary>
-    public static IServiceCollection AddAssistantContext(this IServiceCollection services)
+    public static IServiceCollection AddAssistantContext(this IServiceCollection services, string dbPath)
     {
         services.AddSingleton<RuleBasedFinancialAssistant>(sp => new RuleBasedFinancialAssistant(
             sp.GetRequiredService<IBalanceQueryService>(),
@@ -49,6 +49,9 @@ internal static class AssistantServiceCollectionExtensions
             sp.GetService<IBudgetRepository>(),
             sp.GetService<IRecurringTransactionRepository>(),
             sp.GetService<ITradeRepository>()));
+
+        services.AddSingleton<IAssistantHistoryRepository>(_ => new AssistantHistorySqliteRepository(dbPath));
+
         services.AddSingleton<AssistantViewModel>();
 
         // Phase 2 scheduler — polls insights every 4h and pushes Critical/Warning

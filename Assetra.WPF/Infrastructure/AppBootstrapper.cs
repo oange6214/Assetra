@@ -34,7 +34,7 @@ internal static class AppBootstrapper
             .AddMultiAssetContext(paths.DbPath)
             .AddFireContext()
             .AddMonteCarloContext()
-            .AddAssistantContext()
+            .AddAssistantContext(paths.DbPath)
             .AddAssetraSync(paths.DataDir)
             .AddAssetraShell()
             .AddAssetraHostedServices();

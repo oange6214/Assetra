@@ -18,6 +18,7 @@ public sealed partial class AssistantViewModel : ObservableObject
 {
     private readonly IFinancialAssistant _assistant;
     private readonly IAssistantInsightService? _insights;
+    private readonly IAssistantHistoryRepository? _history;
     private readonly ILocalizationService? _localization;
 
     [ObservableProperty]
@@ -43,10 +44,12 @@ public sealed partial class AssistantViewModel : ObservableObject
     public AssistantViewModel(
         IFinancialAssistant assistant,
         IAssistantInsightService? insights = null,
+        IAssistantHistoryRepository? history = null,
         ILocalizationService? localization = null)
     {
         _assistant = assistant ?? throw new ArgumentNullException(nameof(assistant));
         _insights = insights;
+        _history = history;
         _localization = localization;
         Messages = new ReadOnlyObservableCollection<AssistantMessage>(_messages);
         InsightCards = new ReadOnlyObservableCollection<AssistantInsight>(_insightCards);
@@ -94,6 +97,21 @@ public sealed partial class AssistantViewModel : ObservableObject
                 IsUser: false,
                 Text: response.Answer,
                 Source: response.Source));
+
+            // Persist (best-effort, never block the UI on failure).
+            if (_history is not null)
+            {
+                try
+                {
+                    await _history.AddAsync(new AssistantHistoryEntry(
+                        Id: Guid.NewGuid(),
+                        AskedAt: DateTime.UtcNow,
+                        UserText: text,
+                        AssistantText: response.Answer,
+                        Source: response.Source ?? string.Empty)).ConfigureAwait(true);
+                }
+                catch { /* swallow — history is auxiliary */ }
+            }
         }
         catch (Exception ex)
         {
@@ -116,7 +134,36 @@ public sealed partial class AssistantViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ClearConversation() => _messages.Clear();
+    private async Task ClearConversationAsync()
+    {
+        _messages.Clear();
+        if (_history is not null)
+        {
+            try { await _history.ClearAsync(); }
+            catch { /* swallow */ }
+        }
+    }
+
+    /// <summary>
+    /// Loads recent persisted conversation entries (most-recent first) and
+    /// re-creates the chat bubbles in chronological order. Called once on view load.
+    /// </summary>
+    [RelayCommand]
+    public async Task LoadHistoryAsync()
+    {
+        if (_history is null || _messages.Count > 0) return;
+        try
+        {
+            var entries = await _history.GetRecentAsync(limit: 30).ConfigureAwait(true);
+            // entries is desc; replay chronologically
+            foreach (var e in entries.Reverse())
+            {
+                _messages.Add(new AssistantMessage(IsUser: true, Text: e.UserText, Source: string.Empty));
+                _messages.Add(new AssistantMessage(IsUser: false, Text: e.AssistantText, Source: e.Source));
+            }
+        }
+        catch { /* swallow — history load is auxiliary */ }
+    }
 }
 
 /// <summary>對話列表的單一訊息（user 提問 vs assistant 回答）。</summary>
