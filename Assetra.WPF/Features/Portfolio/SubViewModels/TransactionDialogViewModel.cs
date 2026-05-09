@@ -7,6 +7,7 @@ using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Core.Trading;
 using Assetra.WPF.Features.Categories;
+using Assetra.WPF.Features.Portfolio.SubViewModels.Tx;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -117,6 +118,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     internal TransactionDialogViewModel(TransactionDialogDependencies deps)
     {
         ArgumentNullException.ThrowIfNull(deps);
+
+        // H1 — bubble Buy.X PropertyChanged into TxBuy* facade notifications.
+        Buy.PropertyChanged += OnBuyPriceModeChanged;
 
         _transactionWorkflowService = deps.TransactionWorkflow;
         _tradeDeletionWorkflowService = deps.TradeDeletion;
@@ -266,8 +270,20 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     [ObservableProperty] private string _txTransferTargetAmountError = string.Empty;
     [ObservableProperty] private string _txPrincipalError = string.Empty;
     [ObservableProperty] private string _txInterestPaidError = string.Empty;
-    [ObservableProperty] private string _txBuyTotalCostError = string.Empty;
     [ObservableProperty] private string _txCommissionDiscountError = string.Empty;
+
+    /// <summary>
+    /// H1 — buy "price-input mode" cluster extracted into <see cref="Tx.BuyPriceModeViewModel"/>.
+    /// The TxBuy* facade properties below delegate read/write to this sub-VM so XAML
+    /// bindings + tests keep working unchanged. New code should use <c>Buy.X</c> directly.
+    /// </summary>
+    public Tx.BuyPriceModeViewModel Buy { get; } = new();
+
+    public string TxBuyTotalCostError
+    {
+        get => Buy.TotalCostError;
+        set => Buy.TotalCostError = value;
+    }
 
     private static string ValidatePositiveDecimalOrEmpty(string? value) =>
         string.IsNullOrWhiteSpace(value) ? string.Empty :
@@ -748,14 +764,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         NotifyImpactPreviewChanged();
     }
 
-    // Buy 價格輸入模式 + 總額
-    /// <summary>
-    /// 買入價格輸入模式：<c>"unit"</c> = 填單價（系統算總額）；<c>"total"</c> = 填總額（系統算單價）。
-    /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TxBuyIsUnitMode))]
-    [NotifyPropertyChangedFor(nameof(TxBuyIsTotalMode))]
-    private string _txBuyPriceMode = "unit";
+    // Buy 價格輸入模式 + 總額 — 狀態實際存於 Buy (BuyPriceModeViewModel)；以下為 facade.
+    public string TxBuyPriceMode
+    {
+        get => Buy.PriceMode;
+        set => Buy.PriceMode = value;
+    }
 
     /// <summary>
     /// When true (and TxBuyAssetType == "stock"), ConfirmBuy writes only the
@@ -766,33 +780,25 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// </summary>
     [ObservableProperty] private bool _txBuyMetaOnly;
 
-    public bool TxBuyIsUnitMode => TxBuyPriceMode == "unit";
-    public bool TxBuyIsTotalMode => TxBuyPriceMode == "total";
+    public bool TxBuyIsUnitMode => Buy.IsUnitMode;
+    public bool TxBuyIsTotalMode => Buy.IsTotalMode;
 
-    /// <summary>「總額」模式下使用者輸入的總成交金額。是否含手續費由
-    /// <see cref="TxBuyTotalIncludesFee"/> 決定（預設含）。</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TxBuyComputedTotalDisplay))]
-    private string _txBuyTotalCost = string.Empty;
+    /// <summary>「總額」模式下使用者輸入的總成交金額。Facade → <see cref="BuyPriceModeViewModel.TotalCost"/>.</summary>
+    public string TxBuyTotalCost
+    {
+        get => Buy.TotalCost;
+        set => Buy.TotalCost = value;
+    }
 
     /// <summary>
     /// 「總額」模式下，使用者輸入的總成交金額是否已包含手續費。
     /// 預設 <c>true</c>（多數券商給的成交回報是含手續費的最終扣款金額）。
-    ///
-    /// 勾選時：record 進 Trade 的 Commission = 0、Price = total/qty，
-    /// 確保 CashAmount = -total 與使用者期望一致；持倉成本即為使用者
-    /// 看到的金額，不會再多加 0.1425% 手續費。
-    ///
-    /// 取消時：總額視為 gross only，Commission 由 TaiwanTradeFeeCalculator
-    /// 額外算（與單價模式相同行為）。
+    /// Facade → <see cref="BuyPriceModeViewModel.TotalIncludesFee"/>.
     /// </summary>
-    [ObservableProperty] private bool _txBuyTotalIncludesFee = true;
-
-    partial void OnTxBuyTotalIncludesFeeChanged(bool _)
+    public bool TxBuyTotalIncludesFee
     {
-        // 切換含/不含手續費會改變 preview 的總計算法。
-        AddAssetDialog.UpdateBuyPreview();
-        OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
+        get => Buy.TotalIncludesFee;
+        set => Buy.TotalIncludesFee = value;
     }
 
     /// <summary>
@@ -800,29 +806,40 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// 單價模式 → 顯示 數量 × 單價。
     /// 總額模式 → 顯示使用者輸入的總額（保持一致）。
     /// </summary>
-    public string TxBuyComputedTotalDisplay
-    {
-        get
-        {
-            if (TxBuyIsTotalMode &&
-                ParseHelpers.TryParseDecimal(TxBuyTotalCost, out var t) && t > 0)
-                return t.ToString("N0");
-            if (ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var p) && p > 0 &&
-                ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var q) && q > 0)
-                return (p * q).ToString("N0");
-            return "0";
-        }
-    }
+    public string TxBuyComputedTotalDisplay =>
+        Buy.ComputeTotalDisplay(AddAssetDialog.AddPrice, AddAssetDialog.AddQuantity);
 
-    partial void OnTxBuyTotalCostChanged(string value)
+    private void OnBuyPriceModeChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        TxBuyTotalCostError = ValidatePositiveDecimalOrEmpty(value);
-        // 總額模式時，回算單價以維持持倉成本計算邏輯。
-        if (TxBuyIsTotalMode &&
-            ParseHelpers.TryParseDecimal(value, out var total) && total > 0 &&
-            ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) && qty > 0)
+        // Bubble Buy.X changes up as TxBuyX so XAML / external listeners see them.
+        switch (e.PropertyName)
         {
-            AddAssetDialog.AddPrice = (total / qty).ToString("F4");
+            case nameof(BuyPriceModeViewModel.PriceMode):
+                OnPropertyChanged(nameof(TxBuyPriceMode));
+                OnPropertyChanged(nameof(TxBuyIsUnitMode));
+                OnPropertyChanged(nameof(TxBuyIsTotalMode));
+                OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
+                break;
+            case nameof(BuyPriceModeViewModel.TotalCost):
+                // Side effect: write back single price when in total mode.
+                if (Buy.IsTotalMode &&
+                    ParseHelpers.TryParseDecimal(Buy.TotalCost, out var total) && total > 0 &&
+                    ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) && qty > 0)
+                {
+                    AddAssetDialog.AddPrice = (total / qty).ToString("F4");
+                }
+                Buy.TotalCostError = ValidatePositiveDecimalOrEmpty(Buy.TotalCost);
+                OnPropertyChanged(nameof(TxBuyTotalCost));
+                OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
+                break;
+            case nameof(BuyPriceModeViewModel.TotalIncludesFee):
+                AddAssetDialog.UpdateBuyPreview();
+                OnPropertyChanged(nameof(TxBuyTotalIncludesFee));
+                OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
+                break;
+            case nameof(BuyPriceModeViewModel.TotalCostError):
+                OnPropertyChanged(nameof(TxBuyTotalCostError));
+                break;
         }
     }
 
