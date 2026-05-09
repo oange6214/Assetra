@@ -1120,6 +1120,7 @@
     <sys:String x:Key="AuditLog.Title">交易稽核日誌</sys:String>
     <sys:String x:Key="AuditLog.Subtitle">每次刪除或編輯（重建）交易時都會在此留下完整的 JSON 快照，做為使用者的回溯保障。</sys:String>
     <sys:String x:Key="AuditLog.Refresh">重新載入</sys:String>
+    <sys:String x:Key="AuditLog.Filter.Tooltip">在動作 / Trade ID / 備註 / 內容中搜尋（不分大小寫）。</sys:String>
     <sys:String x:Key="AuditLog.Empty">尚無任何稽核紀錄。</sys:String>
     <sys:String x:Key="AuditLog.Col.RecordedAt">時間</sys:String>
     <sys:String x:Key="AuditLog.Col.Action">動作</sys:String>

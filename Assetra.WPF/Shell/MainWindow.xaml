@@ -52,6 +52,37 @@
             Key="N"
             Command="{Binding Portfolio.AddRecordCommand}"
             Modifiers="Ctrl" />
+        <!--  Ctrl+1..6: 跳到主要分頁（高頻使用率排序）  -->
+        <KeyBinding
+            Key="D1"
+            Command="{Binding NavRail.NavigateToByNameCommand}"
+            CommandParameter="FinancialOverview"
+            Modifiers="Ctrl" />
+        <KeyBinding
+            Key="D2"
+            Command="{Binding NavRail.NavigateToByNameCommand}"
+            CommandParameter="Portfolio"
+            Modifiers="Ctrl" />
+        <KeyBinding
+            Key="D3"
+            Command="{Binding NavRail.NavigateToByNameCommand}"
+            CommandParameter="TransactionLog"
+            Modifiers="Ctrl" />
+        <KeyBinding
+            Key="D4"
+            Command="{Binding NavRail.NavigateToByNameCommand}"
+            CommandParameter="Reports"
+            Modifiers="Ctrl" />
+        <KeyBinding
+            Key="D5"
+            Command="{Binding NavRail.NavigateToByNameCommand}"
+            CommandParameter="Categories"
+            Modifiers="Ctrl" />
+        <KeyBinding
+            Key="D6"
+            Command="{Binding NavRail.NavigateToByNameCommand}"
+            CommandParameter="Assistant"
+            Modifiers="Ctrl" />
     </Window.InputBindings>
 
     <Grid Background="{DynamicResource AppBackground}">

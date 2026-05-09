@@ -35,6 +35,13 @@
                 Command="{Binding LoadCommand}"
                 Content="{DynamicResource AuditLog.Refresh}"
                 Style="{StaticResource AppSecondaryButton}" />
+            <TextBox
+                MinWidth="220"
+                Margin="12,0,0,0"
+                Padding="8,6"
+                VerticalAlignment="Center"
+                Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                ToolTip="{DynamicResource AuditLog.Filter.Tooltip}" />
             <TextBlock
                 Margin="12,0,0,0"
                 VerticalAlignment="Center"
@@ -82,7 +89,7 @@
                     GridLinesVisibility="Horizontal"
                     HeadersVisibility="Column"
                     IsReadOnly="True"
-                    ItemsSource="{Binding Entries}"
+                    ItemsSource="{Binding EntriesView}"
                     Style="{StaticResource AppDataGrid}"
                     Visibility="{Binding HasEntries, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <DataGrid.Columns>
