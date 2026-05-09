@@ -197,6 +197,9 @@ public interface IEquityQuoteProvider
 {
     bool CanHandle(EquityInstrumentKey key);
     Task<EquityQuote?> GetQuoteAsync(EquityInstrumentKey key, CancellationToken ct);
+    Task<IReadOnlyList<EquityQuote>> GetQuotesAsync(
+        IReadOnlyList<EquityInstrumentKey> keys,
+        CancellationToken ct);
 }
 
 public interface ISymbolDirectory
@@ -318,6 +321,18 @@ Use lazy backfill with persistent cache:
 5. Treat old trading days as immutable unless the user explicitly rebuilds history.
 6. Allow the most recent trading day to refresh because provider data can settle after close.
 
+## Implementation Corrections Before Phase 1
+
+These corrections are required because the current Assetra codebase is Taiwan-first and several legacy names hide narrower responsibilities.
+
+- `IStockService` is currently a streaming scheduler contract (`QuoteStream`, `Start`, `Stop`), not a general quote lookup service. Keep `StockScheduler` as the transitional `IStockService` implementation, but make the scheduler call `EquityRouter` internally. New market-data code should not add more responsibilities to `IStockService`.
+- `StockQuote` is a legacy UI/scheduler payload. It has Taiwan-specific assumptions such as volume measured in board lots and no `Currency`, `SourceProvider`, or `IsDelayed`. US providers should emit `EquityQuote`; only the compatibility stream should adapt routed quotes back to `StockQuote` where existing callers still require it.
+- US quote refresh must not enter the existing fast scheduler path until quota tracking, caller-driven cache TTL, and trading calendar checks are in place. The current Taiwan scheduler cadence is too aggressive for Twelve Data Basic quota.
+- Portfolio totals and dashboard summaries must aggregate base-currency values only. Native quote values such as USD market value must be carried separately and converted through FX before reaching summary inputs.
+- Fee and tax estimation must become exchange-aware. The existing Taiwan sell-fee/tax estimator can remain for TWSE/TPEX, but US holdings must either use a US-specific cost model or clearly display that net P/L is pre-transaction-cost until that model exists.
+- Symbol lookup must be exchange-aware. Symbol-only APIs such as `GetExchange(symbol)` can remain as transitional helpers, but new flows should resolve through `ISymbolDirectory.Resolve(symbol, exchange?)` and show an explicit exchange picker when a symbol is ambiguous.
+- Provider interfaces should support batch quote fetches. Router and scheduler code should group unique instrument keys and use `GetQuotesAsync` when available, instead of issuing one HTTP request per visible row.
+
 ## Phase Plan
 
 ### Phase 0 - Document and Decision Lock
@@ -333,17 +348,21 @@ Use lazy backfill with persistent cache:
 - [ ] Add `IEquityQuoteProvider`.
 - [ ] Add `ISymbolDirectory`.
 - [ ] Add provider error/result model.
+- [ ] Add batch quote contract for provider implementations.
+- [ ] Add exchange-aware fee/tax policy boundary.
+- [ ] Add compatibility mapper from `EquityQuote` to legacy `StockQuote` for existing quote-stream consumers.
 - [ ] Add unit tests for key normalization.
 - [ ] Add unit tests for US symbol normalization: `BRKB`, `BRK.B`, and `BRK$B`.
 
 ### Phase 2 - Router-Backed IStockService
 
 - [ ] Create `EquityRouter`.
-- [ ] Create `EquityRouterStockService : IStockService`.
+- [ ] Refactor `StockScheduler : IStockService` to use `EquityRouter` internally.
 - [ ] Wrap existing TWSE client as a provider.
 - [ ] Wrap existing TPEX client as a provider.
 - [ ] Wrap Fugle as a provider when configured.
 - [ ] Keep current Portfolio / Alerts quote subscription behavior working.
+- [ ] Keep `IStockService` as a streaming compatibility alias only.
 - [ ] Add regression tests that `0050/TWSE` and `00878/TWSE` still resolve correctly.
 
 ### Phase 3 - US Symbol Directory
@@ -375,6 +394,7 @@ Use lazy backfill with persistent cache:
 - [ ] Support caller-provided `maxAge`.
 - [ ] Revalidate provider state when API key changes without changing quote cache identity.
 - [ ] Use TTL policy per caller.
+- [ ] Prevent US scheduler fetches from bypassing quota/calendar/cache gates.
 - [ ] Add unit tests for `0s`, `30s`, `60s`, and `120s` paths.
 
 ### Phase 6 - Trading Calendar
@@ -393,8 +413,10 @@ Use lazy backfill with persistent cache:
 
 - [ ] Preserve quote native currency.
 - [ ] Convert market value to app base currency before portfolio aggregation.
+- [ ] Add summary/input DTOs that distinguish native value from base-currency value.
 - [ ] Show native/base values where useful.
 - [ ] Ensure Portfolio summary does not add USD as TWD.
+- [ ] Ensure US holdings do not use Taiwan fee/tax estimation.
 - [ ] Add tests for USD quote converted to TWD.
 
 ### Phase 8 - UI Integration
@@ -407,6 +429,7 @@ Use lazy backfill with persistent cache:
 - [ ] API key field requires successful Test before Save is enabled.
 - [ ] Test calls a known Twelve Data quote endpoint such as `/quote?symbol=AAPL` and surfaces classified errors on fail.
 - [ ] Connect Add Record / Buy form to composite symbol directory.
+- [ ] Show exchange choice when symbol search resolves to multiple venues.
 - [ ] Connect Alerts to routed quote provider.
 - [ ] Connect Portfolio list and side panel to base-currency valuation.
 
@@ -437,6 +460,7 @@ Use lazy backfill with persistent cache:
 - Searching a NYSE symbol from `otherlisted.txt` returns a result.
 - Searching `0050` still returns TWSE Taiwan data.
 - Portfolio totals do not add USD values as TWD.
+- US holdings do not display Taiwan transaction tax as part of net value or P/L.
 - Alerts for US symbols do not consume quota repeatedly within the chosen TTL.
 - A missing Twelve Data key never results in silent empty search/quote state.
 - A quota exceeded response appears in Settings and relevant quote UI.
