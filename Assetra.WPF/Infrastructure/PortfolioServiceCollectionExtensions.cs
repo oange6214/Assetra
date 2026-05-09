@@ -133,7 +133,8 @@ internal static class PortfolioServiceCollectionExtensions
         services.AddSingleton<ILiabilityMutationWorkflowService>(sp =>
             new LiabilityMutationWorkflowService(
                 sp.GetRequiredService<IAssetRepository>(),
-                sp.GetRequiredService<ITradeRepository>()));
+                sp.GetRequiredService<ITradeRepository>(),
+                sp.GetService<Assetra.Application.Loans.Contracts.ILoanScheduleRecomputeService>()));
         services.AddSingleton<IAccountUpsertWorkflowService>(sp =>
             new AccountUpsertWorkflowService(
                 sp.GetRequiredService<IAssetRepository>()));

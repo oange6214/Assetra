@@ -72,6 +72,9 @@ public partial class PortfolioViewModel
     {
         public Task<LiabilityDeletionResult> DeleteAsync(LiabilityDeletionRequest request, CancellationToken ct = default) =>
             Task.FromResult(new LiabilityDeletionResult(false));
+
+        public Task<LiabilityUpdateResult> UpdateAsync(LiabilityUpdateRequest request, CancellationToken ct = default) =>
+            Task.FromResult(new LiabilityUpdateResult(Success: false, ScheduleRecomputed: false));
     }
 
     private sealed class NullAccountUpsertWorkflowService : IAccountUpsertWorkflowService

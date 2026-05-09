@@ -895,6 +895,33 @@
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Symbol="Dismiss24" />
                                 </Button>
+                                <!--
+                                    Edit (B 方案: 開啟 EditLiability dialog 編輯貸款 / 信用卡
+                                    metadata；可選擇是否重算攤還表，已付期保留)
+                                -->
+                                <Button
+                                    Height="32"
+                                    Margin="0,0,8,0"
+                                    Padding="12,0"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding OpenEditLiabilityCommand}"
+                                    CommandParameter="{Binding SelectedLiabilityRow}"
+                                    DockPanel.Dock="Right"
+                                    Style="{StaticResource AppSecondaryButton}"
+                                    ToolTip="{DynamicResource Portfolio.Detail.EditLiability.Tooltip}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <ds:AppIcon
+                                            Margin="0,0,6,0"
+                                            VerticalAlignment="Center"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Symbol="Edit24" />
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Text="{DynamicResource Portfolio.Detail.EditLiability}" />
+                                    </StackPanel>
+                                </Button>
                                 <TextBlock
                                     VerticalAlignment="Center"
                                     FontSize="{StaticResource Font.Size.Lg}"
@@ -1456,6 +1483,235 @@
             Grid.RowSpan="3"
             Panel.ZIndex="205"
             DataContext="{Binding Portfolio.Account}" />
+
+        <!--
+            EditLiabilityDialog (編輯既有負債 — Loan / CreditCard metadata)
+            B 方案：含可選的 Loan 攤還表重算。已付期保留原樣，未付期重新生成。
+            DataContext = PortfolioViewModel.EditLiabilityDialog (sub-VM)。
+        -->
+        <Grid
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="208"
+            DataContext="{Binding Portfolio.EditLiabilityDialog}"
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border
+                Width="480"
+                MaxHeight="640"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                beh:EscapeKeyCommandBehavior.Command="{Binding CancelCommand}"
+                Style="{StaticResource AppDialogShell}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!--  Header  -->
+                    <Border
+                        Grid.Row="0"
+                        Padding="20,16"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="0,0,0,1">
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Lg}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Portfolio.EditLiability.Title}" />
+                    </Border>
+
+                    <!--  Body  -->
+                    <ScrollViewer
+                        Grid.Row="1"
+                        Padding="20,16"
+                        HorizontalScrollBarVisibility="Disabled"
+                        VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+
+                            <!--  Common: Name  -->
+                            <TextBlock
+                                Margin="0,0,0,4"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Portfolio.EditLiability.Name}" />
+                            <TextBox
+                                Margin="0,0,0,12"
+                                Padding="8,6"
+                                Style="{StaticResource AppTextBox}"
+                                Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <!--  Issuer (both)  -->
+                            <TextBlock
+                                Margin="0,0,0,4"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Portfolio.EditLiability.Issuer}" />
+                            <TextBox
+                                Margin="0,0,0,12"
+                                Padding="8,6"
+                                Style="{StaticResource AppTextBox}"
+                                Text="{Binding IssuerName, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <!--  Loan-only fields  -->
+                            <StackPanel Visibility="{Binding IsLoanEdit, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Border
+                                    Margin="0,4,0,12"
+                                    Background="{DynamicResource AppBorderLight}"
+                                    Height="1" />
+                                <TextBlock
+                                    Margin="0,0,0,8"
+                                    FontWeight="SemiBold"
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.EditLiability.LoanSection}" />
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock
+                                            Margin="0,0,0,4"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{DynamicResource Portfolio.EditLiability.AnnualRate}" />
+                                        <TextBox
+                                            Padding="8,6"
+                                            Style="{StaticResource AppTextBox}"
+                                            Text="{Binding AnnualRatePercent, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock
+                                            Margin="0,0,0,4"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{DynamicResource Portfolio.EditLiability.TermMonths}" />
+                                        <TextBox
+                                            Padding="8,6"
+                                            Style="{StaticResource AppTextBox}"
+                                            Text="{Binding TermMonths, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock
+                                    Margin="0,0,0,4"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{DynamicResource Portfolio.EditLiability.HandlingFee}" />
+                                <TextBox
+                                    Margin="0,0,0,12"
+                                    Padding="8,6"
+                                    Style="{StaticResource AppTextBox}"
+                                    Text="{Binding HandlingFee, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <CheckBox
+                                    Margin="0,4,0,4"
+                                    IsChecked="{Binding RecomputeSchedule, Mode=TwoWay}"
+                                    Content="{DynamicResource Portfolio.EditLiability.Recompute}" />
+                                <TextBlock
+                                    Margin="22,0,0,8"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Portfolio.EditLiability.Recompute.Hint}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <!--  Credit card-only fields  -->
+                            <StackPanel Visibility="{Binding IsCreditCardEdit, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Border
+                                    Margin="0,4,0,12"
+                                    Background="{DynamicResource AppBorderLight}"
+                                    Height="1" />
+                                <TextBlock
+                                    Margin="0,0,0,8"
+                                    FontWeight="SemiBold"
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.EditLiability.CreditCardSection}" />
+
+                                <TextBlock
+                                    Margin="0,0,0,4"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{DynamicResource Portfolio.EditLiability.CreditLimit}" />
+                                <TextBox
+                                    Margin="0,0,0,12"
+                                    Padding="8,6"
+                                    Style="{StaticResource AppTextBox}"
+                                    Text="{Binding CreditLimit, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock
+                                            Margin="0,0,0,4"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{DynamicResource Portfolio.EditLiability.BillingDay}" />
+                                        <TextBox
+                                            Padding="8,6"
+                                            Style="{StaticResource AppTextBox}"
+                                            Text="{Binding BillingDay, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock
+                                            Margin="0,0,0,4"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{DynamicResource Portfolio.EditLiability.DueDay}" />
+                                        <TextBox
+                                            Padding="8,6"
+                                            Style="{StaticResource AppTextBox}"
+                                            Text="{Binding DueDay, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+
+                            <!--  Inline error  -->
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppDanger}"
+                                Text="{Binding ErrorMessage}"
+                                TextWrapping="Wrap"
+                                Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}" />
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!--  Footer  -->
+                    <Border
+                        Grid.Row="2"
+                        Padding="20,12"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="0,1,0,0">
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                            <Button
+                                Height="36"
+                                Margin="0,0,8,0"
+                                Padding="14,0"
+                                Command="{Binding CancelCommand}"
+                                Content="{DynamicResource Common.Cancel}"
+                                Style="{StaticResource AppSecondaryButton}" />
+                            <Button
+                                Height="36"
+                                Padding="14,0"
+                                Command="{Binding SaveCommand}"
+                                Content="{DynamicResource Common.Save}"
+                                Style="{StaticResource AppPrimaryButton}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
 
         <!--
             Shell-level confirm dialog (刪除確認). Promoted so destructive

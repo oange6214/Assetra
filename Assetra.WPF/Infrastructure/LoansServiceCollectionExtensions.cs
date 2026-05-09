@@ -16,6 +16,10 @@ internal static class LoansServiceCollectionExtensions
     {
         services.AddSingleton<ILoanScheduleRepository>(_ => new LoanScheduleSqliteRepository(dbPath));
         services.AddSingleton<ILoanScheduleService, LoanScheduleService>();
+        services.AddSingleton<ILoanScheduleRecomputeService>(sp =>
+            new LoanScheduleRecomputeService(
+                sp.GetRequiredService<ILoanScheduleRepository>(),
+                sp.GetRequiredService<IAssetRepository>()));
         services.AddSingleton<ILoanPaymentWorkflowService>(sp =>
             new LoanPaymentWorkflowService(
                 sp.GetRequiredService<ITradeRepository>(),

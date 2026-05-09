@@ -252,4 +252,45 @@ public partial class PortfolioViewModel
 
     [RelayCommand]
     private void SwitchDetailTab(string tab) => DetailTab = tab;
+
+    /// <summary>
+    /// Opens the EditLiability dialog pre-populated from <paramref name="row"/>.
+    /// Used by the Liability detail panel's Edit button.
+    /// </summary>
+    [RelayCommand]
+    private void OpenEditLiability(LiabilityRowViewModel? row)
+    {
+        var target = row ?? SelectedLiabilityRow;
+        if (target is null) return;
+        EditLiabilityDialog.Open(target);
+    }
+
+    /// <summary>
+    /// Wired from <c>EditLiabilityDialog.LiabilityUpdated</c>: reload trades +
+    /// balances + (if loan) the schedule for the still-selected row, then
+    /// rebuild totals so the detail panel reflects the new metadata.
+    /// </summary>
+    private async void OnLiabilityUpdated(object? sender, EventArgs e)
+    {
+        // The asset's metadata changed but the row VM holds a snapshot — easiest
+        // fix is a full liability list reload (mirrors the post-delete path).
+        try
+        {
+            var refreshed = SelectedLiabilityRow;
+            await LoadTradesAsync();
+            await ReloadAccountBalancesAsync();
+            RebuildTotals();
+            // If a loan was edited, force a schedule reload via the existing dialog VM
+            // so the right-pane schedule tab shows the regenerated unpaid tail.
+            if (refreshed is { IsLoan: true })
+            {
+                refreshed.IsScheduleLoaded = false;
+                await Loan.LoadLoanScheduleAsync(refreshed);
+            }
+        }
+        catch (Exception ex)
+        {
+            _snackbar?.Error("更新後的重新載入失敗：" + ex.Message);
+        }
+    }
 }

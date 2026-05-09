@@ -275,6 +275,13 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     /// </summary>
     public SubViewModels.LoanDialogViewModel Loan { get; }
 
+    /// <summary>
+    /// Edit-existing-liability dialog (Loan / CreditCard fields). Bound by
+    /// MainWindow's overlay; opened from the Liability detail panel's
+    /// Edit button via <see cref="OpenEditLiabilityCommand"/>.
+    /// </summary>
+    public SubViewModels.EditLiabilityDialogViewModel EditLiabilityDialog { get; }
+
     // Dividend calendar
     public DividendCalendarViewModel DivCalendar { get; }
 
@@ -423,6 +430,11 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 ReloadAccountBalancesAsync: ReloadAccountBalancesAsync,
                 RebuildTotals: RebuildTotals));
         Loan.LoanChanged += OnLoanChanged;
+
+        // Edit-liability dialog: built lazily here so it can share the same
+        // workflow service + snackbar without an extra DI override.
+        EditLiabilityDialog = new SubViewModels.EditLiabilityDialogViewModel(_liabilityMutationWorkflowService, _snackbar);
+        EditLiabilityDialog.LiabilityUpdated += OnLiabilityUpdated;
 
         // Wire the AddAssetDialog and SellPanel delegates that reference Transaction properties
         // now that Transaction is constructed.
