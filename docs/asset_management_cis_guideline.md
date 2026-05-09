@@ -1,203 +1,203 @@
-# Asset Management CIS — Corporate Identity System
+# 資產管理 CIS — 企業識別系統
 
-## Brand Direction
+## 品牌方向
 
-### Brand Positioning
-A modern asset management brand focused on:
+### 品牌定位
+一個現代資產管理品牌，核心聚焦於：
 
-- Long-term value
-- Stability
-- Institutional trust
-- Precision
-- Structured intelligence
-- Quiet luxury
-- Modern financial technology
+- 長期價值
+- 穩定性
+- 機構級信任
+- 精準
+- 結構化智慧
+- 低調奢華
+- 現代金融科技
 
-The visual identity combines:
+視覺識別結合：
 
-- Apple-level minimalism
-- Institutional finance credibility
-- Bloomberg-like information clarity
-- Modern SaaS product consistency
-
----
-
-# 1. Brand Foundation
-
-## Brand Keywords
-
-### Core Identity
-- Precision
-- Stability
-- Clarity
-- Trust
-- Timeless
-- Structured
-- Calm
-- Intelligent
-- Disciplined
-- Long-term
+- Apple 等級的極簡主義
+- 機構金融的可信度
+- Bloomberg 式的資訊清晰度
+- 現代 SaaS 產品的一致性
 
 ---
 
-# 2. Logo System
+# 1. 品牌基礎
 
-## Recommended Logo Style
+## 品牌關鍵字
 
-### Primary Direction
-Geometric abstract symbol inspired by:
-
-- Portfolio balancing
-- Structured capital allocation
-- Layered assets
-- Long-term growth
-- Stability through symmetry
+### 核心識別
+- 精準
+- 穩定
+- 清晰
+- 信任
+- 歷久彌新
+- 結構化
+- 沉穩
+- 智慧
+- 紀律
+- 長期導向
 
 ---
 
-# 3. Color System
+# 2. 標誌系統
 
-## Primary Palette
+## 建議標誌風格
 
-| Role | Color | HEX | CMYK |
+### 主要方向
+幾何抽象符號，靈感來自：
+
+- 投資組合平衡
+- 結構化資本配置
+- 層疊資產
+- 長期成長
+- 透過對稱建立穩定感
+
+---
+
+# 3. 色彩系統
+
+## 主要色票
+
+| 角色 | 顏色 | HEX | CMYK |
 |---|---|---|---|
-| Primary Black | Deep Graphite | #0A0F1C | 76 57 32 78 |
-| Secondary Navy | Institutional Navy | #14213D | 66 46 0 76 |
-| Accent Gold | Soft Metallic Gold | #C8A96B | 0 15 47 22 |
-| Surface Gray | Graphite Surface | #1E2430 | 37 24 0 81 |
-| Light Background | Soft White | #F7F8FA | 1 1 0 2 |
+| 主黑色 | 深石墨色 | #0A0F1C | 76 57 32 78 |
+| 次要海軍藍 | 機構海軍藍 | #14213D | 66 46 0 76 |
+| 強調金色 | 柔和金屬金 | #C8A96B | 0 15 47 22 |
+| 表面灰色 | 石墨表面色 | #1E2430 | 37 24 0 81 |
+| 淺色背景 | 柔白色 | #F7F8FA | 1 1 0 2 |
 
 ---
 
-# 4. Typography System
+# 4. 字體系統
 
-## English Typography
+## 英文字體
 
-### Primary Font
+### 主要字體
 SF Pro Display
 
-Fallback:
+備援字體：
 - Inter
 - Helvetica Neue
 - Arial
 
 ---
 
-## Chinese Typography
+## 中文字體
 
-### Primary
+### 主要字體
 Noto Sans TC
 
-### Secondary
+### 次要字體
 Taipei Sans TC Beta
 
 ---
 
-# 5. Layout System
+# 5. 版面系統
 
-## Base Grid
-12-column grid.
+## 基礎網格
+12 欄網格。
 
-Spacing based on:
-8px spacing system.
-
----
-
-# 6. UI Design System
-
-## UI Direction
-
-Institutional-grade fintech interface.
-
-Combines:
-- Bloomberg clarity
-- Apple minimalism
-- Linear consistency
-- Modern dark-theme SaaS aesthetics
+間距基於：
+8px 間距系統。
 
 ---
 
-# 7. Dark Theme Standards
+# 6. UI 設計系統
 
-| Layer | HEX |
+## UI 方向
+
+機構級金融科技介面。
+
+結合：
+- Bloomberg 式清晰度
+- Apple 極簡主義
+- Linear 式一致性
+- 現代深色主題 SaaS 美學
+
+---
+
+# 7. 深色主題標準
+
+| 層級 | HEX |
 |---|---|
-| Background | #0A0F1C |
-| Layer 1 | #121826 |
-| Layer 2 | #161B26 |
-| Layer 3 | #1D2433 |
-| Primary Text | #F8FAFC |
-| Secondary Text | #98A2B3 |
+| 背景 | #0A0F1C |
+| 第 1 層 | #121826 |
+| 第 2 層 | #161B26 |
+| 第 3 層 | #1D2433 |
+| 主要文字 | #F8FAFC |
+| 次要文字 | #98A2B3 |
 
 ---
 
-# 8. Light Theme Standards
+# 8. 淺色主題標準
 
-| Layer | HEX |
+| 層級 | HEX |
 |---|---|
-| Background | #F7F8FA |
-| Surface | #FFFFFF |
-| Border | #E4E7EC |
-| Primary Text | #101828 |
-| Secondary Text | #667085 |
+| 背景 | #F7F8FA |
+| 表面 | #FFFFFF |
+| 邊框 | #E4E7EC |
+| 主要文字 | #101828 |
+| 次要文字 | #667085 |
 
 ---
 
-# 9. Business Card System
+# 9. 名片系統
 
-## Print Specification
+## 印刷規格
 
-| Spec | Value |
+| 規格 | 數值 |
 |---|---|
-| Color Mode | CMYK |
-| Resolution | 300 DPI |
-| Bleed | 3mm |
-| Safe Area | 5mm |
-| Export | PDF/X-1a |
+| 色彩模式 | CMYK |
+| 解析度 | 300 DPI |
+| 出血 | 3mm |
+| 安全範圍 | 5mm |
+| 匯出格式 | PDF/X-1a |
 
 ---
 
-# 10. Data Visualization Language
+# 10. 資料視覺化語言
 
-## Philosophy
+## 哲學
 
-Charts are not decoration.
+圖表不是裝飾。
 
-Charts communicate:
-- Trust
-- Structure
-- Performance
-- Risk
-- Decision clarity
-
----
-
-# 11. Enterprise Dashboard Principles
-
-## Dashboard Philosophy
-
-The dashboard should feel like:
-
-> A professional operating system for capital.
+圖表傳達：
+- 信任
+- 結構
+- 績效
+- 風險
+- 決策清晰度
 
 ---
 
-# 12. Accessibility System
+# 11. 企業儀表板原則
 
-## Standards
+## 儀表板哲學
 
-### Minimum Requirement
-WCAG AA compliance.
+儀表板應該讓人感覺像是：
 
-Preferred:
-WCAG AAA for core dashboards.
+> 一套專業的資本作業系統。
 
 ---
 
-# 13. Design Token Architecture
+# 12. 無障礙系統
 
-## Core Tokens
+## 標準
 
-### Color Tokens
+### 最低要求
+符合 WCAG AA。
+
+偏好：
+核心儀表板達到 WCAG AAA。
+
+---
+
+# 13. 設計 Token 架構
+
+## 核心 Token
+
+### 色彩 Token
 - color.background.primary
 - color.background.secondary
 - color.surface.primary
@@ -207,95 +207,95 @@ WCAG AAA for core dashboards.
 
 ---
 
-# 14. Figma Design System Structure
+# 14. Figma 設計系統結構
 
-## Foundation
-- Colors
-- Typography
-- Spacing
-- Elevation
-- Motion
+## 基礎
+- 色彩
+- 字體
+- 間距
+- 陰影層級
+- 動效
 
-## Components
-- Buttons
-- Inputs
-- Tables
-- Cards
-- Navigation
-- Charts
-- Modals
+## 元件
+- 按鈕
+- 輸入欄位
+- 表格
+- 卡片
+- 導覽
+- 圖表
+- Modal
 
 ---
 
-# 15. Corporate Print System
+# 15. 企業印刷系統
 
-## Recommended Paper
+## 建議紙材
 
-| Usage | Recommendation |
+| 用途 | 建議 |
 |---|---|
-| Business Card | 600gsm soft-touch black cardstock |
-| Letterhead | Premium matte paper |
-| Investor Reports | Smooth coated stock |
+| 名片 | 600gsm 黑色柔觸卡紙 |
+| 信紙 | 高級霧面紙 |
+| 投資人報告 | 平滑塗佈紙 |
 
 ---
 
-# 16. Brand Photography System
+# 16. 品牌攝影系統
 
-## Preferred Subjects
+## 偏好主題
 
-- Modern architecture
-- Structured environments
-- Abstract lighting
-- Material textures
-- Minimal workspaces
-- Financial infrastructure
-
----
-
-# 17. Website Experience Principles
-
-## Experience Goal
-
-The website should feel like:
-
-> A premium institutional platform rather than a marketing campaign.
+- 現代建築
+- 結構化環境
+- 抽象光影
+- 材質紋理
+- 極簡工作空間
+- 金融基礎設施
 
 ---
 
-# 18. Exhibition Booth Direction
+# 17. 網站體驗原則
 
-## Booth Characteristics
+## 體驗目標
 
-### MUST
-- Large whitespace
-- Architectural lighting
-- Minimal text
-- Matte materials
-- Structured geometry
+網站應該讓人感覺像是：
+
+> 一個高級機構平台，而不是一場行銷活動。
 
 ---
 
-# 19. Final Institutional Design Vision
+# 18. 展覽攤位方向
 
-## Final Vision Statement
+## 攤位特徵
 
-This CIS is designed to create:
-
-> A world-class institutional asset management identity system with the precision of Apple, the trust of BlackRock, and the clarity of Bloomberg.
+### 必須具備
+- 大量留白
+- 建築式照明
+- 極少文字
+- 霧面材質
+- 結構化幾何
 
 ---
 
-# Recommended Production Deliverables
+# 19. 最終機構級設計願景
 
-1. Master logo package
-2. SVG vector system
-3. App icon exports
-4. Figma design system
-5. Dark/light theme tokens
-6. Enterprise UI kit
-7. Presentation templates
-8. Print-ready business cards
-9. Exhibition graphics
-10. Website design system
-11. CMYK print exports
-12. PDF/X production files
+## 最終願景聲明
+
+此 CIS 旨在建立：
+
+> 一套世界級的機構資產管理識別系統，具備 Apple 的精準、BlackRock 的信任，以及 Bloomberg 的清晰度。
+
+---
+
+# 建議製作交付項目
+
+1. 主標誌套件
+2. SVG 向量系統
+3. App icon 匯出檔
+4. Figma 設計系統
+5. 深色 / 淺色主題 token
+6. 企業 UI kit
+7. 簡報範本
+8. 可印刷名片
+9. 展覽圖像
+10. 網站設計系統
+11. CMYK 印刷匯出檔
+12. PDF/X 生產檔案

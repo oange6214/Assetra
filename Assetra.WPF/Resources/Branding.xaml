@@ -5,17 +5,12 @@
             <DrawingGroup ClipGeometry="M 16,16 L 96,16 96,96 16,96 Z">
                 <GeometryDrawing Brush="#14213D">
                     <GeometryDrawing.Geometry>
-                        <PathGeometry Figures="M 24,78 L 44,34 56,34 36,78 Z" />
-                    </GeometryDrawing.Geometry>
-                </GeometryDrawing>
-                <GeometryDrawing Brush="#1E2430">
-                    <GeometryDrawing.Geometry>
-                        <PathGeometry Figures="M 48,78 L 66,34 78,34 60,78 Z" />
+                        <PathGeometry Figures="M 30,78 L 49,30 63,30 43,78 Z" />
                     </GeometryDrawing.Geometry>
                 </GeometryDrawing>
                 <GeometryDrawing Brush="#C8A96B">
                     <GeometryDrawing.Geometry>
-                        <PathGeometry Figures="M 42,78 L 56,50 70,78 Z" />
+                        <PathGeometry Figures="M 58,78 L 71,52 82,78 Z" />
                     </GeometryDrawing.Geometry>
                 </GeometryDrawing>
             </DrawingGroup>
