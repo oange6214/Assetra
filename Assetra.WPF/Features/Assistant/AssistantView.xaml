@@ -63,6 +63,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock
                                     FontWeight="SemiBold"
@@ -70,9 +71,23 @@
                                     Text="{Binding Title}" />
                                 <TextBlock
                                     Grid.Column="1"
+                                    Margin="0,0,8,0"
                                     FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{Binding Source}" />
+                                <Button
+                                    Grid.Column="2"
+                                    Width="20"
+                                    Height="20"
+                                    Padding="0"
+                                    BorderThickness="0"
+                                    Background="Transparent"
+                                    Command="{Binding DataContext.DismissInsightCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    Content="✕"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    ToolTip="{DynamicResource Assistant.DismissInsight}" />
                             </Grid>
                             <TextBlock
                                 Margin="0,4,0,0"
@@ -130,6 +145,7 @@
 
                 <!--  Messages  -->
                 <ScrollViewer
+                    x:Name="MessagesScrollViewer"
                     Padding="16"
                     HorizontalScrollBarVisibility="Disabled"
                     VerticalScrollBarVisibility="Auto"
