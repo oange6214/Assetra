@@ -58,7 +58,6 @@ public sealed partial class EditLiabilityDialogViewModel : ObservableObject
     // ── Common fields ─────────────────────────────────────────────────────
     [ObservableProperty] private string _name = string.Empty;
     [ObservableProperty] private string _issuerName = string.Empty;
-    [ObservableProperty] private string _subtype = string.Empty;
 
     // ── Loan-only ─────────────────────────────────────────────────────────
     /// <summary>Annual rate as a percentage string (e.g. "2.5" for 2.5%).</summary>
@@ -113,7 +112,6 @@ public sealed partial class EditLiabilityDialogViewModel : ObservableObject
         EditingCreditCard = row.IsCreditCard;
         Name = row.Name;
         IssuerName = row.IssuerName ?? string.Empty;
-        Subtype = string.Empty; // Subtype isn't surfaced on the row VM yet; user can fill if needed.
 
         if (row.IsLoan)
         {
@@ -245,7 +243,6 @@ public sealed partial class EditLiabilityDialogViewModel : ObservableObject
                 AssetId:          assetId,
                 NewName:          Name.Trim(),
                 NewIssuerName:    string.IsNullOrWhiteSpace(IssuerName) ? null : IssuerName.Trim(),
-                NewSubtype:       string.IsNullOrWhiteSpace(Subtype) ? null : Subtype.Trim(),
                 NewAnnualRate:    newAnnualRate,
                 NewTermMonths:    newTermMonths,
                 NewHandlingFee:   newHandlingFee,

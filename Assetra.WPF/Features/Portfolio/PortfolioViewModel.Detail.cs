@@ -266,26 +266,36 @@ public partial class PortfolioViewModel
     }
 
     /// <summary>
-    /// Wired from <c>EditLiabilityDialog.LiabilityUpdated</c>: reload trades +
-    /// balances + (if loan) the schedule for the still-selected row, then
-    /// rebuild totals so the detail panel reflects the new metadata.
+    /// Wired from <c>EditLiabilityDialog.LiabilityUpdated</c>: rebuild the
+    /// liability list so the row's snapshot picks up the new Name / rate /
+    /// term, then re-select the matching row by AssetId so the side panel
+    /// header stays in sync. Loan schedule is reloaded after re-selection.
     /// </summary>
     private async void OnLiabilityUpdated(object? sender, EventArgs e)
     {
-        // The asset's metadata changed but the row VM holds a snapshot — easiest
-        // fix is a full liability list reload (mirrors the post-delete path).
         try
         {
-            var refreshed = SelectedLiabilityRow;
+            var editedAssetId = SelectedLiabilityRow?.AssetId;
+
             await LoadTradesAsync();
+            await LoadLiabilitiesAsync();
             await ReloadAccountBalancesAsync();
             RebuildTotals();
-            // If a loan was edited, force a schedule reload via the existing dialog VM
-            // so the right-pane schedule tab shows the regenerated unpaid tail.
-            if (refreshed is { IsLoan: true })
+
+            // Re-pick the same liability so the side panel keeps it open with
+            // the refreshed VM (otherwise the header still shows the stale Name).
+            if (editedAssetId is { } id)
             {
-                refreshed.IsScheduleLoaded = false;
-                await Loan.LoadLoanScheduleAsync(refreshed);
+                var refreshed = Liabilities.FirstOrDefault(l => l.AssetId == id);
+                if (refreshed is not null)
+                {
+                    SelectedLiabilityRow = refreshed;
+                    if (refreshed.IsLoan)
+                    {
+                        refreshed.IsScheduleLoaded = false;
+                        await Loan.LoadLoanScheduleAsync(refreshed);
+                    }
+                }
             }
         }
         catch (Exception ex)

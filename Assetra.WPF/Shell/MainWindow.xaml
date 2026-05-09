@@ -896,31 +896,27 @@
                                         Symbol="Dismiss24" />
                                 </Button>
                                 <!--
-                                    Edit (B 方案: 開啟 EditLiability dialog 編輯貸款 / 信用卡
-                                    metadata；可選擇是否重算攤還表，已付期保留)
+                                    Edit pencil — same icon-only pattern as
+                                    Cash / Position panels for visual parity.
+                                    Hidden for legacy label-only liabilities
+                                    (AssetId == null) since they have no
+                                    AssetItem to edit.
                                 -->
                                 <Button
-                                    Height="32"
-                                    Margin="0,0,8,0"
-                                    Padding="12,0"
+                                    Width="30"
+                                    Height="36"
+                                    Padding="0"
                                     VerticalAlignment="Center"
                                     Command="{Binding OpenEditLiabilityCommand}"
                                     CommandParameter="{Binding SelectedLiabilityRow}"
                                     DockPanel.Dock="Right"
-                                    Style="{StaticResource AppSecondaryButton}"
-                                    ToolTip="{DynamicResource Portfolio.Detail.EditLiability.Tooltip}">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <ds:AppIcon
-                                            Margin="0,0,6,0"
-                                            VerticalAlignment="Center"
-                                            FontSize="11"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Symbol="Edit24" />
-                                        <TextBlock
-                                            VerticalAlignment="Center"
-                                            FontSize="{StaticResource Font.Size.Xs}"
-                                            Text="{DynamicResource Portfolio.Detail.EditLiability}" />
-                                    </StackPanel>
+                                    Style="{StaticResource AppIconButton}"
+                                    ToolTip="{DynamicResource Common.Edit}"
+                                    Visibility="{Binding SelectedLiabilityRow.AssetId, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
+                                    <ds:AppIcon
+                                        FontSize="12"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Symbol="Edit24" />
                                 </Button>
                                 <TextBlock
                                     VerticalAlignment="Center"
