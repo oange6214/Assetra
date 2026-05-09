@@ -13,6 +13,14 @@ public sealed record LanguageOption(string Code, string Display);
 public sealed record ProviderOption(string Code, string Display);
 
 /// <summary>
+/// 顯示用：1 單位外幣 = N 台幣。<see cref="RateDisplay"/> 已格式化為 4 位小數。
+/// </summary>
+public sealed record FxRateRow(string Currency, decimal Rate)
+{
+    public string RateDisplay => $"1 {Currency} = {Rate:N4} TWD";
+}
+
+/// <summary>
 /// Minimal settings surface for Assetra.
 ///
 /// Trimmed from Stockra's large SettingsViewModel (LLM providers, Jin10 flash,
@@ -116,6 +124,19 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private decimal _amtRegularTaxableIncome = 0m;
     [ObservableProperty] private decimal _amtRegularIncomeTax = 0m;
 
+    // ── 多幣別匯率即時換算 ─────────────────────────────────────────
+    // 來源：Frankfurter（CurrencyService.RefreshRatesAsync）。
+    // 顯示「上次更新時間 + 各幣別兌台幣匯率」並提供手動刷新按鈕。
+
+    [ObservableProperty] private string _lastFxRefreshDisplay = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanRefreshFxRates))]
+    private bool _isRefreshingFxRates;
+
+    public bool CanRefreshFxRates => !IsRefreshingFxRates;
+    public ObservableCollection<FxRateRow> FxRateRows { get; } = [];
+
     public ObservableCollection<string> SupportedCurrencies { get; } = [];
 
     public string AppVersion { get; } = ResolveAppVersion();
@@ -199,6 +220,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             AmtRegularTaxableIncome = s.AmtRegularTaxableIncome;
             AmtRegularIncomeTax = s.AmtRegularIncomeTax;
             DataSourceSaveStatus = string.Empty;
+            RefreshFxDisplay();
         }
         finally
         {
@@ -415,6 +437,45 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     private async Task SaveDataSourceSettingsAsync()
     {
         await SaveAsync(showDataSourceSuccess: true);
+    }
+
+    [RelayCommand]
+    private async Task RefreshFxRatesAsync()
+    {
+        if (IsRefreshingFxRates) return;
+        IsRefreshingFxRates = true;
+        try
+        {
+            await _currencyService.RefreshRatesAsync().ConfigureAwait(true);
+            RefreshFxDisplay();
+        }
+        catch (Exception ex)
+        {
+            ShowSaveFailure(ex);
+        }
+        finally
+        {
+            IsRefreshingFxRates = false;
+        }
+    }
+
+    private void RefreshFxDisplay()
+    {
+        FxRateRows.Clear();
+        foreach (var kv in _currencyService.ExchangeRates.OrderBy(k => k.Key))
+        {
+            if (string.Equals(kv.Key, "TWD", StringComparison.OrdinalIgnoreCase)) continue;
+            FxRateRows.Add(new FxRateRow(kv.Key, kv.Value));
+        }
+
+        var iso = _settings.Current.LastFxRefreshUtc;
+        if (string.IsNullOrWhiteSpace(iso) ||
+            !DateTime.TryParse(iso, null, System.Globalization.DateTimeStyles.RoundtripKind, out var utc))
+        {
+            LastFxRefreshDisplay = _localization.Get("Settings.Fx.NeverRefreshed", "Never refreshed");
+            return;
+        }
+        LastFxRefreshDisplay = utc.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
     }
 
     [RelayCommand]

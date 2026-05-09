@@ -1098,6 +1098,11 @@
     <sys:String x:Key="Settings.Amt.RegularTaxableIncome.Hint">所得稅申報書「綜合所得淨額」欄位。0 = 未填，AMT 不計算。</sys:String>
     <sys:String x:Key="Settings.Amt.RegularIncomeTax">一般綜所稅應納稅額（NTD）</sys:String>
     <sys:String x:Key="Settings.Amt.RegularIncomeTax.Hint">所得稅申報書「應納稅額」欄位，用於與基本稅額比較。</sys:String>
+    <sys:String x:Key="Settings.Fx.Title">匯率（Frankfurter 即時來源）</sys:String>
+    <sys:String x:Key="Settings.Fx.LastRefreshed">上次更新：</sys:String>
+    <sys:String x:Key="Settings.Fx.NeverRefreshed">尚未更新</sys:String>
+    <sys:String x:Key="Settings.Fx.Refresh">立即刷新</sys:String>
+    <sys:String x:Key="Settings.Fx.Source">資料來源 https://api.frankfurter.app；應用程式啟動時亦會自動嘗試刷新一次。</sys:String>
     <sys:String x:Key="Reports.Performance.Title">投資績效</sys:String>
     <sys:String x:Key="Reports.Risk.Title">風險指標</sys:String>
     <sys:String x:Key="Reports.Risk.ConcentrationWarning">⚠ 持股集中度過高（單一部位 &gt; 30% 或 HHI &gt; 0.30）</sys:String>

@@ -194,6 +194,61 @@
                                 SelectedItem="{Binding BaseCurrency}"
                                 ToolTip="{DynamicResource Settings.BaseCurrency.Tooltip}" />
                         </StackPanel>
+
+                        <!--  ── 即時匯率（Frankfurter）──  -->
+                        <StackPanel Margin="0,16,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Fx.Title}" />
+                                    <TextBlock
+                                        Margin="0,2,0,0"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextMuted}">
+                                        <Run Text="{DynamicResource Settings.Fx.LastRefreshed}" />
+                                        <Run Text=" " />
+                                        <Run FontFamily="{StaticResource Font.Family.Base}" Text="{Binding LastFxRefreshDisplay, Mode=OneWay}" />
+                                    </TextBlock>
+                                </StackPanel>
+                                <Button
+                                    Grid.Column="1"
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Top"
+                                    Command="{Binding RefreshFxRatesCommand}"
+                                    Content="{DynamicResource Settings.Fx.Refresh}"
+                                    IsEnabled="{Binding CanRefreshFxRates}"
+                                    Style="{StaticResource AppSecondaryButton}" />
+                            </Grid>
+                            <Border
+                                Margin="0,8,0,0"
+                                Padding="10,8"
+                                Background="{DynamicResource AppSurfaceAlt}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Sm}">
+                                <ItemsControl ItemsSource="{Binding FxRateRows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock
+                                                Margin="0,2,0,2"
+                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{Binding RateDisplay}"
+                                                Typography.NumeralAlignment="Tabular" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Settings.Fx.Source}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 

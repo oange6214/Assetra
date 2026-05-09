@@ -1094,6 +1094,11 @@
     <sys:String x:Key="Settings.Amt.RegularTaxableIncome.Hint">"Net taxable income" line on the income tax return. 0 = not entered, AMT is skipped.</sys:String>
     <sys:String x:Key="Settings.Amt.RegularIncomeTax">Regular income tax payable (NTD)</sys:String>
     <sys:String x:Key="Settings.Amt.RegularIncomeTax.Hint">"Tax payable" line on the income tax return; compared against the AMT basic tax.</sys:String>
+    <sys:String x:Key="Settings.Fx.Title">Exchange rates (Frankfurter live source)</sys:String>
+    <sys:String x:Key="Settings.Fx.LastRefreshed">Last refreshed:</sys:String>
+    <sys:String x:Key="Settings.Fx.NeverRefreshed">Never refreshed</sys:String>
+    <sys:String x:Key="Settings.Fx.Refresh">Refresh now</sys:String>
+    <sys:String x:Key="Settings.Fx.Source">Source: https://api.frankfurter.app; the app also tries to refresh once at startup.</sys:String>
     <sys:String x:Key="Reports.Performance.Title">Performance</sys:String>
     <sys:String x:Key="Reports.Risk.Title">Risk Metrics</sys:String>
     <sys:String x:Key="Reports.Risk.ConcentrationWarning">⚠ High concentration risk (single position &gt; 30% or HHI &gt; 0.30)</sys:String>

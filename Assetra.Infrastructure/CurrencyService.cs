@@ -105,6 +105,7 @@ public sealed class CurrencyService : ICurrencyService
             {
                 UsdTwdRate = newRates["USD"],
                 ExchangeRates = newRates,
+                LastFxRefreshUtc = DateTime.UtcNow.ToString("O"),
             };
             await _settings.SaveAsync(updated).ConfigureAwait(false);
             CurrencyChanged?.Invoke();

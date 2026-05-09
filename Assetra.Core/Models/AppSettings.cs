@@ -92,4 +92,10 @@ public sealed record AppSettings(
     decimal AmtRegularTaxableIncome = 0m,
 
     /// <summary>使用者填寫的一般綜合所得稅應納稅額（NTD）。AMT 應補繳 = max(0, 基本稅額 − 此值)。</summary>
-    decimal AmtRegularIncomeTax = 0m);
+    decimal AmtRegularIncomeTax = 0m,
+
+    /// <summary>
+    /// 最近一次 Frankfurter 匯率刷新成功時間（UTC ISO-8601）。
+    /// 空字串 = 從未刷新成功，UI 顯示「尚未更新」。
+    /// </summary>
+    string LastFxRefreshUtc = "");
