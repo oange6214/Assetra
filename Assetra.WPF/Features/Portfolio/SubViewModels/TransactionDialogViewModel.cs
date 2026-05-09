@@ -213,13 +213,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// Locks down to false only for meta-only types (Sell / Transfer / legacy Buy without entry),
     /// where the trade has dependent state that direct editing would corrupt.
     /// </summary>
-    public bool AreEconomicFieldsEditable => !IsEditMode || !IsEditingMetaOnly;
+    public bool AreEconomicFieldsEditable => !IsEditMode;
 
     /// <summary>
     /// True when the dialog should show the locked-core summary card. Only meta-only edits
     /// need this — direct-edit flows show their normal form fields with live values pre-filled.
     /// </summary>
-    public bool ShowEditLockedSummary => IsEditMode && IsEditingMetaOnly;
+    public bool ShowEditLockedSummary => IsEditMode;
 
     partial void OnEditingTradeIdChanged(Guid? _)
     {

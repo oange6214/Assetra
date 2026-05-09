@@ -47,17 +47,10 @@ public partial class TransactionDialogViewModel
         // buy for" logic) don't mistake this for an in-progress edit loop.
         EditingTradeId = null;
 
-        // Edit-mode dispatch:
-        //   * meta-only types (Sell / Transfer / legacy Buy/StockDiv without entry) →
-        //     in-place UPDATE preserving Trade.Id and economic fields. This is the only
-        //     safe path for trades whose downstream state (FIFO lots, paired transfer
-        //     legs) depends on the original values.
-        //   * direct-editable types (Income / CashDividend / Buy with PortfolioEntryId /
-        //     Deposit / Withdrawal / loan + credit card variants) → fall through to the
-        //     standard create-new flow below; the post-success block (line ~125) deletes
-        //     the old row and re-projects balances. Equivalent to the legacy "建立修正版"
-        //     amendment flow but invoked transparently by Save instead of a separate button.
-        if (oldRow is { IsMetaOnlyEditType: true })
+        // Safe edit mode updates only metadata in-place so balances, positions, FIFO lots,
+        // and paired ledger effects stay untouched. Full economic changes intentionally go
+        // through Create Revision, which clears EditingTradeId and reaches the create-new path.
+        if (oldRow is not null && !IsRevisionMode)
         {
             await UpdateTradeMetaOnlyAsync(oldRow);
             return;
@@ -216,18 +209,10 @@ public partial class TransactionDialogViewModel
     }
 
     /// <summary>
-    /// Thin wrapper delegating to <see cref="TradeRowViewModel.IsMetaOnlyEditType"/> so
-    /// the rule lives in one place (the row VM) and both ConfirmTx and the dialog XAML
-    /// (<see cref="IsEditingMetaOnly"/>) agree on what "meta-only" means.
-    /// </summary>
-    private static bool IsMetaOnlyEdit(TradeRowViewModel row) => row.IsMetaOnlyEditType;
-
-    /// <summary>
-    /// In-place UPDATE of an existing trade — used for Sell edits and legacy unlinked
-    /// Buy/StockDividend edits. Preserves the trade Id (and therefore <see cref="Trade.PortfolioEntryId"/>
-    /// and any downstream references). Only date and note are considered editable; all
-    /// economic fields (price, quantity, cash amount) are copied from the original row so
-    /// balances don't need to be re-reconciled.
+    /// In-place UPDATE of an existing trade. Preserves the trade Id (and therefore
+    /// <see cref="Trade.PortfolioEntryId"/> and any downstream references). Only date and
+    /// note are editable in safe edit mode; all economic fields stay unchanged so balances
+    /// don't need to be re-reconciled.
     /// </summary>
     private async Task UpdateTradeMetaOnlyAsync(TradeRowViewModel oldRow)
     {
