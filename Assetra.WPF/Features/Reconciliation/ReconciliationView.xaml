@@ -232,6 +232,7 @@
                     HeadersVisibility="Column"
                     IsReadOnly="True"
                     ItemsSource="{Binding GroupedDiffs}"
+                    MinColumnWidth="60"
                     SelectionMode="Single">
                     <DataGrid.GroupStyle>
                         <GroupStyle>
@@ -247,51 +248,68 @@
                         </GroupStyle>
                     </DataGrid.GroupStyle>
                     <DataGrid.Columns>
+                        <!--
+                            All columns get MinWidth + NoWrap header so CJK 字元
+                            不會被擠到一字一行（窄欄/小視窗下的預設換行行為）。
+                        -->
                         <DataGridTextColumn
+                            MinWidth="100"
                             Width="120"
                             Binding="{Binding KindDisplay}">
                             <DataGridTextColumn.Header>
-                                <TextBlock Text="{DynamicResource Reconciliation.Col.Kind}" />
+                                <TextBlock Text="{DynamicResource Reconciliation.Col.Kind}" TextWrapping="NoWrap" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
                         <DataGridTextColumn
+                            MinWidth="92"
                             Width="100"
                             Binding="{Binding DateDisplay}">
                             <DataGridTextColumn.Header>
-                                <TextBlock Text="{DynamicResource Reconciliation.Col.Date}" />
+                                <TextBlock Text="{DynamicResource Reconciliation.Col.Date}" TextWrapping="NoWrap" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
                         <DataGridTextColumn
+                            MinWidth="80"
                             Width="90"
                             Binding="{Binding TradeIdDisplay}">
                             <DataGridTextColumn.Header>
-                                <TextBlock Text="{DynamicResource Reconciliation.Col.Trade}" />
+                                <TextBlock Text="{DynamicResource Reconciliation.Col.Trade}" TextWrapping="NoWrap" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
                         <DataGridTextColumn
+                            MinWidth="100"
                             Width="120"
                             Binding="{Binding AmountDisplay}">
                             <DataGridTextColumn.Header>
-                                <TextBlock Text="{DynamicResource Reconciliation.Col.Amount}" />
+                                <TextBlock Text="{DynamicResource Reconciliation.Col.Amount}" TextWrapping="NoWrap" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
                         <DataGridTextColumn
+                            MinWidth="160"
                             Width="*"
                             Binding="{Binding CounterpartyDisplay}">
                             <DataGridTextColumn.Header>
-                                <TextBlock Text="{DynamicResource Reconciliation.Col.Counterparty}" />
+                                <TextBlock Text="{DynamicResource Reconciliation.Col.Counterparty}" TextWrapping="NoWrap" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
                         <DataGridTextColumn
-                            Width="120"
+                            MinWidth="80"
+                            Width="100"
                             Binding="{Binding ResolutionDisplay}">
                             <DataGridTextColumn.Header>
-                                <TextBlock Text="{DynamicResource Reconciliation.Col.Resolution}" />
+                                <TextBlock Text="{DynamicResource Reconciliation.Col.Resolution}" TextWrapping="NoWrap" />
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTemplateColumn Width="360">
+                        <!--
+                            Actions: 改用 contextual rendering — 同一 row 同時間
+                            只會出現 1~2 個 button（IsMissing / IsAmountMismatch /
+                            IsExtra 互斥），加上 MarkResolved/Ignore 共 2 顆通用。
+                            不再寫死 360px；改 Auto + MinWidth 讓它自然撐大，
+                            而且按鈕 padding 縮小、icon-only tooltip 減少橫寬。
+                        -->
+                        <DataGridTemplateColumn MinWidth="220" Width="Auto">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="{DynamicResource Reconciliation.Col.Actions}" />
+                                <TextBlock Text="{DynamicResource Reconciliation.Col.Actions}" TextWrapping="NoWrap" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate DataType="{x:Type vm:ReconciliationDiffRowViewModel}">
@@ -300,33 +318,33 @@
                                         IsEnabled="{Binding IsPending}">
                                         <Button
                                             Margin="0,0,4,0"
-                                            Padding="8,2,8,2"
+                                            Padding="8,2"
                                             Command="{Binding DataContext.CreateTradeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
                                             Content="{DynamicResource Reconciliation.Action.CreateTrade}"
                                             Visibility="{Binding IsMissing, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                         <Button
                                             Margin="0,0,4,0"
-                                            Padding="8,2,8,2"
+                                            Padding="8,2"
                                             Command="{Binding DataContext.OverwriteFromStatementCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
                                             Content="{DynamicResource Reconciliation.Action.Overwrite}"
                                             Visibility="{Binding IsAmountMismatch, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                         <Button
                                             Margin="0,0,4,0"
-                                            Padding="8,2,8,2"
+                                            Padding="8,2"
                                             Command="{Binding DataContext.RequestDeleteTradeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
                                             Content="{DynamicResource Reconciliation.Action.DeleteTrade}"
                                             Visibility="{Binding IsExtra, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                         <Button
                                             Margin="0,0,4,0"
-                                            Padding="8,2,8,2"
+                                            Padding="8,2"
                                             Command="{Binding DataContext.MarkResolvedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
                                             Content="{DynamicResource Reconciliation.Action.MarkResolved}" />
                                         <Button
-                                            Padding="8,2,8,2"
+                                            Padding="8,2"
                                             Command="{Binding DataContext.IgnoreCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
                                             Content="{DynamicResource Reconciliation.Action.Ignore}" />
