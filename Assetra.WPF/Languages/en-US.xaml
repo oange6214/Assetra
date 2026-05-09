@@ -1099,6 +1099,8 @@
     <sys:String x:Key="Settings.Fx.NeverRefreshed">Never refreshed</sys:String>
     <sys:String x:Key="Settings.Fx.Refresh">Refresh now</sys:String>
     <sys:String x:Key="Settings.Fx.Source">Source: https://api.frankfurter.app; the app also tries to refresh once at startup.</sys:String>
+    <sys:String x:Key="Import.PdfPreview.Title">PDF page text preview (verify OCR output)</sys:String>
+    <sys:String x:Key="Import.PdfPreview.EmptyPage">No text extracted from this page (likely an image-only page with OCR disabled or no recognised content).</sys:String>
     <sys:String x:Key="Reports.Performance.Title">Performance</sys:String>
     <sys:String x:Key="Reports.Risk.Title">Risk Metrics</sys:String>
     <sys:String x:Key="Reports.Risk.ConcentrationWarning">⚠ High concentration risk (single position &gt; 30% or HHI &gt; 0.30)</sys:String>

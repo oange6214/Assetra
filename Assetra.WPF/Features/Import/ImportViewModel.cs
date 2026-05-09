@@ -37,6 +37,8 @@ public sealed partial class ImportViewModel : ObservableObject
     private readonly IAssetRepository _assets;
     private readonly ISnackbarService _snackbar;
     private readonly ILocalizationService? _localization;
+    private readonly IPdfStatementParser? _pdfPreviewParser;
+    private readonly Func<IOcrAdapter?>? _ocrFactory;
 
     private ImportBatch? _currentBatch;
     private int _conflictRefreshVersion;
@@ -44,10 +46,13 @@ public sealed partial class ImportViewModel : ObservableObject
     private readonly ObservableCollection<ImportRowViewModel> _rows = [];
     private readonly ObservableCollection<CashAccountOption> _cashAccountOptions = [];
     private readonly ObservableCollection<ImportHistoryRowViewModel> _history = [];
+    private readonly ObservableCollection<PdfPagePreviewRow> _pdfPagePreview = [];
 
     public ReadOnlyObservableCollection<ImportRowViewModel> Rows { get; }
     public ReadOnlyObservableCollection<CashAccountOption> CashAccountOptions { get; }
     public ReadOnlyObservableCollection<ImportHistoryRowViewModel> History { get; }
+    public ReadOnlyObservableCollection<PdfPagePreviewRow> PdfPagePreview { get; }
+    public bool HasPdfPagePreview => PdfPagePreview.Count > 0;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasFile))]
@@ -122,7 +127,9 @@ public sealed partial class ImportViewModel : ObservableObject
         IImportRollbackService rollbackService,
         IAssetRepository assets,
         ISnackbarService snackbar,
-        ILocalizationService? localization = null)
+        ILocalizationService? localization = null,
+        IPdfStatementParser? pdfPreviewParser = null,
+        Func<IOcrAdapter?>? ocrFactory = null)
     {
         ArgumentNullException.ThrowIfNull(detector);
         ArgumentNullException.ThrowIfNull(parserFactory);
@@ -142,11 +149,15 @@ public sealed partial class ImportViewModel : ObservableObject
         _assets = assets;
         _snackbar = snackbar;
         _localization = localization;
+        _pdfPreviewParser = pdfPreviewParser;
+        _ocrFactory = ocrFactory;
 
         Rows = new ReadOnlyObservableCollection<ImportRowViewModel>(_rows);
         CashAccountOptions = new ReadOnlyObservableCollection<CashAccountOption>(_cashAccountOptions);
         History = new ReadOnlyObservableCollection<ImportHistoryRowViewModel>(_history);
+        PdfPagePreview = new ReadOnlyObservableCollection<PdfPagePreviewRow>(_pdfPagePreview);
         _history.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasHistory));
+        _pdfPagePreview.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasPdfPagePreview));
     }
 
     [RelayCommand]
@@ -270,6 +281,11 @@ public sealed partial class ImportViewModel : ObservableObject
                 rows = await parser.ParseAsync(parseStream).ConfigureAwait(true);
             }
 
+            // T4: PDF 頁面文字預覽 — 對 PDF 額外抽一次頁面結構供使用者驗證 OCR 結果。
+            _pdfPagePreview.Clear();
+            if (fileType == ImportFileType.Pdf && _pdfPreviewParser is not null)
+                await PopulatePdfPreviewAsync(path).ConfigureAwait(true);
+
             var batch = new ImportBatch(
                 Guid.NewGuid(),
                 Path.GetFileName(path),
@@ -355,9 +371,60 @@ public sealed partial class ImportViewModel : ObservableObject
         Interlocked.Increment(ref _conflictRefreshVersion);
         _currentBatch = null;
         _rows.Clear();
+        _pdfPagePreview.Clear();
         RowCount = 0;
         OnPropertyChanged(nameof(ConflictCount));
         OnPropertyChanged(nameof(NewRowCount));
+    }
+
+    /// <summary>
+    /// 重新跑一次 <see cref="IPdfStatementParser"/>（純文字模式）並對圖片頁套 OCR，
+    /// 然後把每頁文字 + 來源 + 信心分數塞進 <see cref="PdfPagePreview"/>。
+    /// 失敗時靜默 — 預覽是輔助功能，不應阻擋主流程。
+    /// </summary>
+    private async Task PopulatePdfPreviewAsync(string path)
+    {
+        if (_pdfPreviewParser is null) return;
+        try
+        {
+            IReadOnlyList<PdfPage> pages;
+            await using (var s = File.OpenRead(path))
+            {
+                pages = await _pdfPreviewParser.ExtractPagesAsync(s).ConfigureAwait(true);
+            }
+
+            var ocr = _ocrFactory?.Invoke();
+            foreach (var page in pages)
+            {
+                var text = page.Text;
+                var conf = page.OcrConfidence;
+                if (page.Source == PdfPageSource.Ocr
+                    && string.IsNullOrWhiteSpace(text)
+                    && page.ImageBytes is { Length: > 0 } img
+                    && ocr is not null)
+                {
+                    try
+                    {
+                        var result = await ocr.RecognizeAsync(img).ConfigureAwait(true);
+                        text = result.Text;
+                        conf = result.Confidence;
+                    }
+                    catch
+                    {
+                        // OCR failure → leave text empty; preview row still shows the page index.
+                    }
+                }
+                _pdfPagePreview.Add(new PdfPagePreviewRow(
+                    PageIndex: page.PageIndex + 1,
+                    Source: page.Source,
+                    OcrConfidence: conf,
+                    Text: text ?? string.Empty));
+            }
+        }
+        catch
+        {
+            // PDF parse failure already surfaced through the main parser path; preview is best-effort.
+        }
     }
 
     [RelayCommand]

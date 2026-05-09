@@ -271,6 +271,91 @@
             </Grid>
         </Border>
 
+        <!--  ── PDF OCR preview (T4) — 折疊面板，僅 PDF 解析後顯示 ──  -->
+        <Expander
+            Grid.Row="3"
+            Margin="0,12,0,0"
+            VerticalAlignment="Bottom"
+            Header="{DynamicResource Import.PdfPreview.Title}"
+            IsExpanded="False"
+            Style="{StaticResource AppExpander}"
+            Visibility="{Binding HasPdfPagePreview, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border
+                Padding="12"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource Radius.Md}">
+                <ItemsControl ItemsSource="{Binding PdfPagePreview}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border
+                                Margin="0,0,0,8"
+                                Padding="10,8"
+                                Background="{DynamicResource AppSurfaceAlt}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Sm}">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}">
+                                            <Run Text="P." />
+                                            <Run Text="{Binding PageIndex}" />
+                                        </TextBlock>
+                                        <Border
+                                            Grid.Column="1"
+                                            Margin="8,0,0,0"
+                                            Padding="6,1"
+                                            VerticalAlignment="Center"
+                                            Background="{DynamicResource AppAccentSoft}"
+                                            CornerRadius="{StaticResource Radius.Sm}">
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding SourceLabel}" />
+                                        </Border>
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            VerticalAlignment="Center"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{Binding ConfidenceDisplay}" />
+                                    </Grid>
+                                    <TextBox
+                                        MaxHeight="180"
+                                        Margin="0,6,0,0"
+                                        Padding="6,4"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        FontFamily="Consolas, Courier New, monospace"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        IsReadOnly="True"
+                                        Text="{Binding TextPreview, Mode=OneWay}"
+                                        TextWrapping="Wrap"
+                                        VerticalScrollBarVisibility="Auto"
+                                        Visibility="{Binding HasText, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <TextBlock
+                                        Margin="0,6,0,0"
+                                        FontStyle="Italic"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{DynamicResource Import.PdfPreview.EmptyPage}"
+                                        Visibility="{Binding HasText, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+        </Expander>
+
         <!--  ── Footer ──  -->
         <Grid Grid.Row="4" Margin="0,16,0,0">
             <Grid.ColumnDefinitions>

@@ -1103,6 +1103,8 @@
     <sys:String x:Key="Settings.Fx.NeverRefreshed">尚未更新</sys:String>
     <sys:String x:Key="Settings.Fx.Refresh">立即刷新</sys:String>
     <sys:String x:Key="Settings.Fx.Source">資料來源 https://api.frankfurter.app；應用程式啟動時亦會自動嘗試刷新一次。</sys:String>
+    <sys:String x:Key="Import.PdfPreview.Title">PDF 頁面文字預覽（檢查 OCR 結果）</sys:String>
+    <sys:String x:Key="Import.PdfPreview.EmptyPage">本頁未抽出文字（可能為純圖片頁，且 OCR 未啟用 / 未識別出內容）。</sys:String>
     <sys:String x:Key="Reports.Performance.Title">投資績效</sys:String>
     <sys:String x:Key="Reports.Risk.Title">風險指標</sys:String>
     <sys:String x:Key="Reports.Risk.ConcentrationWarning">⚠ 持股集中度過高（單一部位 &gt; 30% 或 HHI &gt; 0.30）</sys:String>

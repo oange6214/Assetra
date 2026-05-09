@@ -52,7 +52,18 @@ internal static class ImportServiceCollectionExtensions
             sp.GetService<IAutoCategorizationRuleRepository>(),
             sp.GetService<ICategoryRepository>()));
         services.AddSingleton<IImportRollbackService, ImportRollbackService>();
-        services.AddSingleton<ImportViewModel>();
+        services.AddSingleton<ImportViewModel>(sp => new ImportViewModel(
+            sp.GetRequiredService<IImportFormatDetector>(),
+            sp.GetRequiredService<ImportParserFactory>(),
+            sp.GetRequiredService<IImportConflictDetector>(),
+            sp.GetRequiredService<IImportApplyService>(),
+            sp.GetRequiredService<IImportBatchHistoryRepository>(),
+            sp.GetRequiredService<IImportRollbackService>(),
+            sp.GetRequiredService<IAssetRepository>(),
+            sp.GetRequiredService<ISnackbarService>(),
+            sp.GetService<ILocalizationService>(),
+            sp.GetService<IPdfStatementParser>(),
+            sp.GetService<Func<IOcrAdapter?>>()));
         return services;
     }
 }
