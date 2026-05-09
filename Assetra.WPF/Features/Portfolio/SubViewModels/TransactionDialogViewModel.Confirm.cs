@@ -460,8 +460,8 @@ public partial class TransactionDialogViewModel
         if (next is null)
             return;
 
-        TxPrincipal = next.PrincipalAmount.ToString("F0");
-        TxInterestPaid = next.InterestAmount > 0 ? next.InterestAmount.ToString("F0") : string.Empty;
+        Loan.Principal = next.PrincipalAmount.ToString("F0");
+        Loan.InterestPaid = next.InterestAmount > 0 ? next.InterestAmount.ToString("F0") : string.Empty;
     }
 
     private decimal ParseOptionalFee(out string? err)
@@ -495,9 +495,9 @@ public partial class TransactionDialogViewModel
         }
         else // LoanRepay
         {
-            if (!ParseHelpers.TryParseDecimal(TxPrincipal, out var p) || p < 0)
+            if (!ParseHelpers.TryParseDecimal(Loan.Principal, out var p) || p < 0)
             { TxError = "本金無效"; return; }
-            var rawInterest = string.IsNullOrWhiteSpace(TxInterestPaid) ? "0" : TxInterestPaid;
+            var rawInterest = string.IsNullOrWhiteSpace(Loan.InterestPaid) ? "0" : Loan.InterestPaid;
             if (!ParseHelpers.TryParseDecimal(rawInterest, out var ip) || ip < 0)
             { TxError = "利息金額無效"; return; }
             if (p + ip <= 0)
@@ -507,19 +507,19 @@ public partial class TransactionDialogViewModel
             cashAmount = p + ip;
         }
 
-        if (string.IsNullOrWhiteSpace(TxLoanLabel))
+        if (string.IsNullOrWhiteSpace(Loan.Label))
         { TxError = "請輸入或選擇貸款名稱"; return; }
 
         // ── 攤還表欄位（選填；借款時才適用）────────────────────────────────
         decimal? amortAnnualRate = null;
         int? amortTermMonths = null;
         if (type == TradeType.LoanBorrow &&
-            !string.IsNullOrWhiteSpace(TxLoanRate) &&
-            !string.IsNullOrWhiteSpace(TxLoanTermMonths))
+            !string.IsNullOrWhiteSpace(Loan.Rate) &&
+            !string.IsNullOrWhiteSpace(Loan.TermMonths))
         {
-            if (!ParseHelpers.TryParseDecimal(TxLoanRate, out var ratePct) || ratePct < 0)
+            if (!ParseHelpers.TryParseDecimal(Loan.Rate, out var ratePct) || ratePct < 0)
             { TxError = "年利率無效"; return; }
-            if (!ParseHelpers.TryParseInt(TxLoanTermMonths, out var termMo) || termMo <= 0)
+            if (!ParseHelpers.TryParseInt(Loan.TermMonths, out var termMo) || termMo <= 0)
             { TxError = "還款期數無效"; return; }
             amortAnnualRate = ratePct / 100m;
             amortTermMonths = termMo;
@@ -530,7 +530,7 @@ public partial class TransactionDialogViewModel
         { TxError = feeError; return; }
 
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
-        var liabName = TxLoanLabel.Trim();
+        var liabName = Loan.Label.Trim();
         var cleanNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
         var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
 
@@ -546,7 +546,7 @@ public partial class TransactionDialogViewModel
             interestPaid,
             amortAnnualRate,
             amortTermMonths,
-            amortAnnualRate.HasValue && amortTermMonths.HasValue ? DateOnly.FromDateTime(TxLoanStartDate) : null));
+            amortAnnualRate.HasValue && amortTermMonths.HasValue ? DateOnly.FromDateTime(Loan.StartDate) : null));
 
         await AfterTxSuccessAsync(
             reloadLiabilities: amortAnnualRate.HasValue,
@@ -621,7 +621,7 @@ public partial class TransactionDialogViewModel
     {
         if (!ParseHelpers.TryParseDecimal(TxAmount, out var srcAmount) || srcAmount <= 0)
         { TxError = "轉出金額無效"; return; }
-        if (!ParseHelpers.TryParseDecimal(TxTransferTargetAmount, out var dstAmount) || dstAmount <= 0)
+        if (!ParseHelpers.TryParseDecimal(Transfer.TargetAmount, out var dstAmount) || dstAmount <= 0)
         { TxError = "轉入金額無效"; return; }
         if (CashAccounts.Count < 2)
         { TxError = "至少需要兩個帳戶才能轉帳"; return; }
@@ -638,7 +638,7 @@ public partial class TransactionDialogViewModel
 
         var tradeDate = DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime();
         var srcName = TxCashAccount.Name;
-        var dstName = TxTransferTarget?.Name ?? TxTransferTargetName.Trim();
+        var dstName = Transfer.Target?.Name ?? Transfer.TargetName.Trim();
         var userNote = string.IsNullOrWhiteSpace(TxNote) ? null : TxNote;
 
         await _transactionWorkflowService.RecordTransferAsync(new TransferTransactionRequest(

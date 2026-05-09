@@ -19,8 +19,8 @@ namespace Assetra.WPF.Features.Portfolio.SubViewModels;
 ///
 ///   Liability balance line
 ///   ──────────────────────
-///   * LoanBorrow                                   → +amount  (TxLoanLabel)
-///   * LoanRepay                                    → −principal (TxLoanLabel)
+///   * LoanBorrow                                   → +amount  (Loan.Label)
+///   * LoanRepay                                    → −principal (Loan.Label)
 ///   * CreditCardCharge                             → +amount  (TxCreditCard)
 ///   * CreditCardPayment                            → −amount  (TxCreditCard)
 ///
@@ -118,8 +118,8 @@ public partial class TransactionDialogViewModel
                 return true;
 
             case "loanRepay":
-                ParseHelpers.TryParseDecimal(TxPrincipal, out var principal);
-                ParseHelpers.TryParseDecimal(TxInterestPaid, out var interest);
+                ParseHelpers.TryParseDecimal(Loan.Principal, out var principal);
+                ParseHelpers.TryParseDecimal(Loan.InterestPaid, out var interest);
                 var totalCashOut = principal + interest;
                 if (totalCashOut <= 0)
                     return false;
@@ -218,7 +218,7 @@ public partial class TransactionDialogViewModel
             case "loanBorrow":
                 if (!ParseHelpers.TryParseDecimal(TxAmount, out var borrowed) || borrowed <= 0)
                     return false;
-                if (FindLiabilityByLabel(TxLoanLabel) is not { } borrowLiab)
+                if (FindLiabilityByLabel(Loan.Label) is not { } borrowLiab)
                     return false;
                 liability = borrowLiab;
                 delta = borrowed;
@@ -227,9 +227,9 @@ public partial class TransactionDialogViewModel
             case "loanRepay":
                 // Only the principal portion reduces remaining debt; interest
                 // is a pure expense on the cash side.
-                if (!ParseHelpers.TryParseDecimal(TxPrincipal, out var principalPaid) || principalPaid <= 0)
+                if (!ParseHelpers.TryParseDecimal(Loan.Principal, out var principalPaid) || principalPaid <= 0)
                     return false;
-                if (FindLiabilityByLabel(TxLoanLabel) is not { } repayLiab)
+                if (FindLiabilityByLabel(Loan.Label) is not { } repayLiab)
                     return false;
                 liability = repayLiab;
                 delta = -principalPaid;

@@ -643,7 +643,7 @@ public class PortfolioViewModelTests
 
         vm.Transaction.TxType = "loanBorrow";
         vm.Transaction.TxAmount = "50000";
-        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.Loan.Label = vm.Liabilities.First().Label;
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(2_050_000m, vm.Liabilities[0].Balance);
@@ -656,8 +656,8 @@ public class PortfolioViewModelTests
             initialBalance: 2_000_000m, original: 2_000_000m);
 
         vm.Transaction.TxType = "loanRepay";
-        vm.Transaction.TxPrincipal = "25979";   // Phase 3: LoanRepay uses Principal/InterestPaid split
-        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.Loan.Principal = "25979";   // Phase 3: LoanRepay uses Principal/InterestPaid split
+        vm.Transaction.Loan.Label = vm.Liabilities.First().Label;
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(1_974_021m, vm.Liabilities[0].Balance);
@@ -748,8 +748,8 @@ public class PortfolioViewModelTests
             initialBalance: 2_000_000m, original: 2_000_000m);
 
         vm.Transaction.TxType = "loanRepay";
-        vm.Transaction.TxPrincipal = "25979";
-        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.Loan.Principal = "25979";
+        vm.Transaction.Loan.Label = vm.Liabilities.First().Label;
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(2_000_000m, vm.Liabilities[0].OriginalAmount);
@@ -764,8 +764,8 @@ public class PortfolioViewModelTests
             initialBalance: 2_000_000m, original: 2_000_000m);
 
         vm.Transaction.TxType = "loanRepay";
-        vm.Transaction.TxPrincipal = "25979";
-        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.Loan.Principal = "25979";
+        vm.Transaction.Loan.Label = vm.Liabilities.First().Label;
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
         Assert.Equal(1_974_021m, vm.Liabilities[0].Balance);
 
@@ -788,7 +788,7 @@ public class PortfolioViewModelTests
 
         vm.Transaction.TxType = "loanBorrow";
         vm.Transaction.TxAmount = "1994000";
-        vm.Transaction.TxLoanLabel = "台新 7y";
+        vm.Transaction.Loan.Label = "台新 7y";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         var row = vm.Liabilities[0];
@@ -805,8 +805,8 @@ public class PortfolioViewModelTests
             initialBalance: 2_000_000m, original: 2_000_000m);
 
         vm.Transaction.TxType = "loanRepay";
-        vm.Transaction.TxPrincipal = "500000";
-        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.Loan.Principal = "500000";
+        vm.Transaction.Loan.Label = vm.Liabilities.First().Label;
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(1_500_000m, vm.Liabilities[0].Balance);
@@ -823,15 +823,15 @@ public class PortfolioViewModelTests
             initialBalance: 2_000_000m, original: 2_000_000m);
 
         vm.Transaction.TxType = "loanRepay";
-        vm.Transaction.TxPrincipal = "25979";
-        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.Loan.Principal = "25979";
+        vm.Transaction.Loan.Label = vm.Liabilities.First().Label;
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
         Assert.Equal(1_974_021m, vm.Liabilities[0].Balance);
 
         // Open edit mode and attempt to change the principal — must have no effect on balance.
         var trade = vm.Trades.First(t => t.IsLoanRepay);
         vm.Transaction.EditTradeCommand.Execute(trade);
-        vm.Transaction.TxPrincipal = "50000";
+        vm.Transaction.Loan.Principal = "50000";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(1_974_021m, vm.Liabilities[0].Balance);
@@ -868,7 +868,7 @@ public class PortfolioViewModelTests
         // Record a LoanBorrow — this implicitly creates the liability row
         vm.Transaction.TxType = "loanBorrow";
         vm.Transaction.TxAmount = "1000000";
-        vm.Transaction.TxLoanLabel = "台新 7y";
+        vm.Transaction.Loan.Label = "台新 7y";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Single(vm.Liabilities);
@@ -883,7 +883,7 @@ public class PortfolioViewModelTests
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(0m, 0m);
         vm.Transaction.TxType = "loanBorrow";
         vm.Transaction.TxAmount = "1000000";
-        vm.Transaction.TxLoanLabel = "   ";
+        vm.Transaction.Loan.Label = "   ";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.NotEmpty(vm.Transaction.TxError);
@@ -1035,7 +1035,7 @@ public class PortfolioViewModelTests
 
         vm.Transaction.TxType = "loanBorrow";
         vm.Transaction.TxAmount = "1000000";
-        // TxLoanLabel is empty — should show an error
+        // Loan.Label is empty — should show an error
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Contains("貸款名稱", vm.Transaction.TxError);
@@ -1736,7 +1736,7 @@ public class PortfolioViewModelTests
         var original = vm.Trades.First(t => t.Type == TradeType.Transfer);
         vm.Transaction.EditTradeCommand.Execute(original);
         vm.Transaction.CreateRevisionCommand.Execute(null);
-        vm.Transaction.TxTransferTargetAmount = "30000";
+        vm.Transaction.Transfer.TargetAmount = "30000";
 
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
         vm.Transaction.KeepBothRecordsCommand.Execute(null);
@@ -1990,8 +1990,8 @@ public class PortfolioViewModelTests
             initialBalance: 2_000_000m, initialCash: 100_000m);
 
         vm.Transaction.TxType = "loanRepay";
-        vm.Transaction.TxPrincipal = "25978";   // Phase 3: full amount as principal (no interest)
-        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.Loan.Principal = "25978";   // Phase 3: full amount as principal (no interest)
+        vm.Transaction.Loan.Label = vm.Liabilities.First().Label;
         vm.Transaction.TxCashAccount = vm.CashAccounts.First();
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
@@ -2017,9 +2017,9 @@ public class PortfolioViewModelTests
             initialBalance: 2_000_000m, initialCash: 100_000m);
 
         vm.Transaction.TxType = "loanRepay";
-        vm.Transaction.TxPrincipal = "25000";
-        vm.Transaction.TxInterestPaid = "978";
-        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.Loan.Principal = "25000";
+        vm.Transaction.Loan.InterestPaid = "978";
+        vm.Transaction.Loan.Label = vm.Liabilities.First().Label;
         vm.Transaction.TxCashAccount = vm.CashAccounts.First();
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
@@ -2043,8 +2043,8 @@ public class PortfolioViewModelTests
             initialBalance: 2_000_000m, original: 2_000_000m);
 
         vm.Transaction.TxType = "loanRepay";
-        vm.Transaction.TxPrincipal = "25978";
-        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.Loan.Principal = "25978";
+        vm.Transaction.Loan.Label = vm.Liabilities.First().Label;
         vm.Transaction.TxCashAccount = null;
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
@@ -2061,7 +2061,7 @@ public class PortfolioViewModelTests
 
         vm.Transaction.TxType = "loanBorrow";
         vm.Transaction.TxAmount = "1000000";
-        vm.Transaction.TxLoanLabel = "台新A 7y";
+        vm.Transaction.Loan.Label = "台新A 7y";
         vm.Transaction.TxCashAccount = vm.CashAccounts.First();
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
@@ -2083,7 +2083,7 @@ public class PortfolioViewModelTests
         vm.Transaction.TxType = "loanBorrow";
         vm.Transaction.TxAmount = "2000000";
         vm.Transaction.TxFee = "6000";
-        vm.Transaction.TxLoanLabel = "台新A 7y";
+        vm.Transaction.Loan.Label = "台新A 7y";
         vm.Transaction.TxUseCashAccount = true;
         vm.Transaction.TxCashAccount = vm.CashAccounts.First();
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
@@ -2113,9 +2113,9 @@ public class PortfolioViewModelTests
             initialBalance: 2_000_000m, initialCash: 100_000m);
 
         vm.Transaction.TxType = "loanRepay";
-        vm.Transaction.TxPrincipal = "25978";   // Phase 3: full principal, no interest split
+        vm.Transaction.Loan.Principal = "25978";   // Phase 3: full principal, no interest split
         vm.Transaction.TxFee = "100";
-        vm.Transaction.TxLoanLabel = vm.Liabilities.First().Label;
+        vm.Transaction.Loan.Label = vm.Liabilities.First().Label;
         vm.Transaction.TxUseCashAccount = true;
         vm.Transaction.TxCashAccount = vm.CashAccounts.First();
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
@@ -2133,7 +2133,7 @@ public class PortfolioViewModelTests
         vm.Transaction.TxType = "loanBorrow";
         vm.Transaction.TxAmount = "500000";
         vm.Transaction.TxFee = "";
-        vm.Transaction.TxLoanLabel = "台新A 7y";
+        vm.Transaction.Loan.Label = "台新A 7y";
         vm.Transaction.TxUseCashAccount = true;
         vm.Transaction.TxCashAccount = vm.CashAccounts.First();
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
@@ -2151,7 +2151,7 @@ public class PortfolioViewModelTests
         vm.Transaction.TxType = "loanBorrow";
         vm.Transaction.TxAmount = "1000000";
         vm.Transaction.TxFee = "3000";
-        vm.Transaction.TxLoanLabel = "台新A 7y";
+        vm.Transaction.Loan.Label = "台新A 7y";
         vm.Transaction.TxUseCashAccount = false;   // 關掉
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
@@ -2170,7 +2170,7 @@ public class PortfolioViewModelTests
         vm.Transaction.TxType = "loanBorrow";
         vm.Transaction.TxAmount = "1000000";
         vm.Transaction.TxFee = "-500";
-        vm.Transaction.TxLoanLabel = "台新A 7y";
+        vm.Transaction.Loan.Label = "台新A 7y";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Contains("手續費", vm.Transaction.TxError);
@@ -2372,9 +2372,9 @@ public class PortfolioViewModelTests
 
         vm.Transaction.TxType = "transfer";
         vm.Transaction.TxAmount = "30000";
-        vm.Transaction.TxTransferTargetAmount = "30000";
+        vm.Transaction.Transfer.TargetAmount = "30000";
         vm.Transaction.TxCashAccount = src;
-        vm.Transaction.TxTransferTarget = dst;
+        vm.Transaction.Transfer.Target = dst;
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Empty(vm.Transaction.TxError);
@@ -2402,11 +2402,11 @@ public class PortfolioViewModelTests
 
         vm.Transaction.TxType = "transfer";
         vm.Transaction.TxAmount = "30000";
-        vm.Transaction.TxTransferTargetAmount = "1000";
+        vm.Transaction.Transfer.TargetAmount = "1000";
         vm.Transaction.TxCashAccount = src;
-        vm.Transaction.TxTransferTarget = dst;
+        vm.Transaction.Transfer.Target = dst;
         // Implied rate auto-computed: 30000 / 1000 = 30
-        Assert.Equal("30.0000", vm.Transaction.TxTransferImpliedRateDisplay);
+        Assert.Equal("30.0000", vm.Transaction.Transfer.ImpliedRate);
 
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
@@ -2428,10 +2428,10 @@ public class PortfolioViewModelTests
 
         vm.Transaction.TxType = "transfer";
         vm.Transaction.TxAmount = "30000";
-        vm.Transaction.TxTransferTargetAmount = "30000";
+        vm.Transaction.Transfer.TargetAmount = "30000";
         vm.Transaction.TxFee = "50";
         vm.Transaction.TxCashAccount = src;
-        vm.Transaction.TxTransferTarget = dst;
+        vm.Transaction.Transfer.Target = dst;
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Equal(50_000m - 30_050m, src.Balance);
@@ -2457,9 +2457,9 @@ public class PortfolioViewModelTests
 
         vm.Transaction.TxType = "transfer";
         vm.Transaction.TxAmount = "1000";
-        vm.Transaction.TxTransferTargetAmount = "1000";
+        vm.Transaction.Transfer.TargetAmount = "1000";
         vm.Transaction.TxCashAccount = sameAcc;
-        vm.Transaction.TxTransferTarget = sameAcc;
+        vm.Transaction.Transfer.Target = sameAcc;
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
         Assert.Contains("同一個", vm.Transaction.TxError);
@@ -2477,7 +2477,7 @@ public class PortfolioViewModelTests
 
         vm.Transaction.TxType = "transfer";
         vm.Transaction.TxAmount = "1000";
-        vm.Transaction.TxTransferTargetAmount = "1000";
+        vm.Transaction.Transfer.TargetAmount = "1000";
         vm.Transaction.TxCashAccount = vm.CashAccounts.First();
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
@@ -2497,13 +2497,13 @@ public class PortfolioViewModelTests
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
 
-        Assert.Equal("—", vm.Transaction.TxTransferImpliedRateDisplay);
+        Assert.Equal("—", vm.Transaction.Transfer.ImpliedRate);
         vm.Transaction.TxAmount = "100";
-        Assert.Equal("—", vm.Transaction.TxTransferImpliedRateDisplay);  // target still empty
-        vm.Transaction.TxTransferTargetAmount = "abc";
-        Assert.Equal("—", vm.Transaction.TxTransferImpliedRateDisplay);
-        vm.Transaction.TxTransferTargetAmount = "25";
-        Assert.Equal("4.0000", vm.Transaction.TxTransferImpliedRateDisplay);  // 100 / 25
+        Assert.Equal("—", vm.Transaction.Transfer.ImpliedRate);  // target still empty
+        vm.Transaction.Transfer.TargetAmount = "abc";
+        Assert.Equal("—", vm.Transaction.Transfer.ImpliedRate);
+        vm.Transaction.Transfer.TargetAmount = "25";
+        Assert.Equal("4.0000", vm.Transaction.Transfer.ImpliedRate);  // 100 / 25
     }
 
     // Helper: VM seeded with both a cash account and a liability.
