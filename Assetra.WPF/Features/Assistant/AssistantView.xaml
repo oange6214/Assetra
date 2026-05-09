@@ -209,6 +209,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBox
                 Grid.Column="0"
@@ -227,6 +228,13 @@
                 Style="{StaticResource AppPrimaryButton}" />
             <Button
                 Grid.Column="2"
+                Margin="8,0,0,0"
+                Command="{Binding ExportHistoryCommand}"
+                Content="{DynamicResource Assistant.Export}"
+                Style="{StaticResource AppSecondaryButton}"
+                Visibility="{Binding HasMessages, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <Button
+                Grid.Column="3"
                 Margin="8,0,0,0"
                 Command="{Binding ClearConversationCommand}"
                 Content="{DynamicResource Assistant.Clear}"

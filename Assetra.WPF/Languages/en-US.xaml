@@ -28,6 +28,7 @@
     <sys:String x:Key="Assistant.Send">Send</sys:String>
     <sys:String x:Key="Assistant.Clear">Clear</sys:String>
     <sys:String x:Key="Assistant.DismissInsight">Dismiss this insight</sys:String>
+    <sys:String x:Key="Assistant.Export">Export Markdown</sys:String>
     <sys:String x:Key="Nav.Trends">Trends</sys:String>
     <sys:String x:Key="Nav.Goals">Goals</sys:String>
     <sys:String x:Key="Nav.Alerts">Alerts</sys:String>
