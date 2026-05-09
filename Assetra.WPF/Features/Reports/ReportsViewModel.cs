@@ -82,11 +82,12 @@ public sealed partial class ReportsViewModel : ObservableObject
     /// dividend or capital-gain records are still included (zero rows) so the
     /// table doesn't have gaps.
     /// </summary>
-    public ObservableCollection<TaxYearRowViewModel> MultiYearTaxRows { get; } = new();
+    private readonly ObservableCollection<TaxYearRowViewModel> _multiYearTaxRows = new();
+    public ReadOnlyObservableCollection<TaxYearRowViewModel> MultiYearTaxRows { get; }
 
     /// <summary>True when MultiYearTaxRows has ≥ 2 rows — single-year users get
     /// the regular TaxSummary card instead of an unnecessary one-row table.</summary>
-    public bool HasMultiYearTax => MultiYearTaxRows.Count >= 2;
+    public bool HasMultiYearTax => _multiYearTaxRows.Count >= 2;
 
     /// <summary>
     /// AMT computation result for the current <see cref="TaxSummary"/> using
@@ -180,6 +181,7 @@ public sealed partial class ReportsViewModel : ObservableObject
         _concentration = concentration;
         _snapshots = snapshots;
         _appSettings = appSettings;
+        MultiYearTaxRows = new ReadOnlyObservableCollection<TaxYearRowViewModel>(_multiYearTaxRows);
 
         var today = DateTime.Today;
         _year = today.Year;
@@ -395,11 +397,11 @@ public sealed partial class ReportsViewModel : ObservableObject
                     .OrderByDescending(y => y)
                     .ToList();
 
-                MultiYearTaxRows.Clear();
+                _multiYearTaxRows.Clear();
                 foreach (var y in taxYears)
                 {
                     var s = Assetra.Application.Tax.TaxCalculationService.CalculateForYear(y, allTrades);
-                    MultiYearTaxRows.Add(TaxYearRowViewModel.FromSummary(s));
+                    _multiYearTaxRows.Add(TaxYearRowViewModel.FromSummary(s));
                 }
                 OnPropertyChanged(nameof(HasMultiYearTax));
 
@@ -424,7 +426,7 @@ public sealed partial class ReportsViewModel : ObservableObject
             catch (Exception ex)
             {
                 TaxSummary = null;
-                MultiYearTaxRows.Clear();
+                _multiYearTaxRows.Clear();
                 OnPropertyChanged(nameof(HasMultiYearTax));
                 AmtResult = null;
                 detailErrors.Add(ex.Message);
@@ -461,7 +463,7 @@ public sealed partial class ReportsViewModel : ObservableObject
         BalanceSheet = null;
         CashFlowStatement = null;
         TaxSummary = null;
-        MultiYearTaxRows.Clear();
+        _multiYearTaxRows.Clear();
         OnPropertyChanged(nameof(HasMultiYearTax));
         AmtResult = null;
         Performance = null;

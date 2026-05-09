@@ -11,24 +11,30 @@ public sealed partial class SnackbarViewModel : ObservableObject
     private static readonly TimeSpan DefaultDuration = TimeSpan.FromSeconds(4);
     private readonly HashSet<SnackbarItemViewModel> _autoDismissStarted = [];
 
-    public ObservableCollection<SnackbarItemViewModel> Items { get; } = [];
+    private readonly ObservableCollection<SnackbarItemViewModel> _items = [];
+    public ReadOnlyObservableCollection<SnackbarItemViewModel> Items { get; }
+
+    public SnackbarViewModel()
+    {
+        Items = new ReadOnlyObservableCollection<SnackbarItemViewModel>(_items);
+    }
 
     public void Show(string message, SnackbarKind kind)
     {
         // Remove oldest if at capacity
-        if (Items.Count >= MaxItems)
-            Items.RemoveAt(0);
+        if (_items.Count >= MaxItems)
+            _items.RemoveAt(0);
 
         var item = new SnackbarItemViewModel(message, kind)
         {
             OnDismiss = Remove
         };
-        Items.Add(item);
+        _items.Add(item);
     }
 
     public void StartAutoDismiss(SnackbarItemViewModel item)
     {
-        if (!Items.Contains(item) || !_autoDismissStarted.Add(item))
+        if (!_items.Contains(item) || !_autoDismissStarted.Add(item))
             return;
 
         var timer = new DispatcherTimer { Interval = DefaultDuration };
@@ -42,8 +48,8 @@ public sealed partial class SnackbarViewModel : ObservableObject
 
     private void Remove(SnackbarItemViewModel item)
     {
-        if (Items.Contains(item))
-            Items.Remove(item);
+        if (_items.Contains(item))
+            _items.Remove(item);
         _autoDismissStarted.Remove(item);
     }
 }

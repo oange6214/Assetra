@@ -95,9 +95,7 @@ public partial class LoanDialogViewModel : ObservableObject
         if (!row.IsLoan || row.AssetId is null || _loanScheduleService is null)
             return;
         var entries = await _loanScheduleService.GetScheduleByAssetAsync(row.AssetId.Value).ConfigureAwait(true);
-        row.ScheduleEntries.Clear();
-        foreach (var e in entries)
-            row.ScheduleEntries.Add(new LoanScheduleRowViewModel(e));
+        row.ReplaceSchedule(entries.Select(e => new LoanScheduleRowViewModel(e)));
         row.IsScheduleLoaded = true;
         row.RefreshScheduleSummary();
     }

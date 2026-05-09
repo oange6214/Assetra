@@ -16,16 +16,18 @@ public partial class RecurringViewModel : ObservableObject
     private readonly ISnackbarService _snackbar;
     private readonly ILocalizationService _localization;
 
-    public ObservableCollection<RecurringRowViewModel> Subscriptions { get; } = [];
-    public ObservableCollection<PendingRecurringRowViewModel> Pending { get; } = [];
+    private readonly ObservableCollection<RecurringRowViewModel> _subscriptions = [];
+    private readonly ObservableCollection<PendingRecurringRowViewModel> _pending = [];
+    public ReadOnlyObservableCollection<RecurringRowViewModel> Subscriptions { get; }
+    public ReadOnlyObservableCollection<PendingRecurringRowViewModel> Pending { get; }
 
-    public int SubscriptionCount => Subscriptions.Count;
-    public int EnabledSubscriptionCount => Subscriptions.Count(row => row.IsEnabled);
-    public int DisabledSubscriptionCount => Subscriptions.Count(row => !row.IsEnabled);
-    public int PendingCount => Pending.Count;
-    public bool HasPending  => Pending.Count > 0;
-    public bool HasNoPending => Pending.Count == 0;
-    public string PendingBadge => Pending.Count > 99 ? "99+" : Pending.Count.ToString();
+    public int SubscriptionCount => _subscriptions.Count;
+    public int EnabledSubscriptionCount => _subscriptions.Count(row => row.IsEnabled);
+    public int DisabledSubscriptionCount => _subscriptions.Count(row => !row.IsEnabled);
+    public int PendingCount => _pending.Count;
+    public bool HasPending  => _pending.Count > 0;
+    public bool HasNoPending => _pending.Count == 0;
+    public string PendingBadge => _pending.Count > 99 ? "99+" : _pending.Count.ToString();
 
     [ObservableProperty] private bool _isLoaded;
 
@@ -38,8 +40,8 @@ public partial class RecurringViewModel : ObservableObject
     [ObservableProperty] private bool _isDeleteConfirmOpen;
     [ObservableProperty] private string _deleteTargetName = string.Empty;
     private RecurringRowViewModel? _pendingDelete;
-    public bool HasNoSubscriptions => Subscriptions.Count == 0;
-    public bool HasSubscriptions   => Subscriptions.Count > 0;
+    public bool HasNoSubscriptions => _subscriptions.Count == 0;
+    public bool HasSubscriptions   => _subscriptions.Count > 0;
 
     // Add subscription form
     [ObservableProperty] private string _addName = string.Empty;
@@ -75,7 +77,10 @@ public partial class RecurringViewModel : ObservableObject
         _snackbar = snackbar;
         _localization = localization;
 
-        Pending.CollectionChanged += (_, _) =>
+        Subscriptions = new ReadOnlyObservableCollection<RecurringRowViewModel>(_subscriptions);
+        Pending = new ReadOnlyObservableCollection<PendingRecurringRowViewModel>(_pending);
+
+        _pending.CollectionChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(PendingCount));
             OnPropertyChanged(nameof(HasPending));
@@ -83,7 +88,7 @@ public partial class RecurringViewModel : ObservableObject
             OnPropertyChanged(nameof(PendingBadge));
         };
 
-        Subscriptions.CollectionChanged += (_, _) =>
+        _subscriptions.CollectionChanged += (_, _) =>
         {
             RefreshSubscriptionSummary();
         };
@@ -107,19 +112,19 @@ public partial class RecurringViewModel : ObservableObject
     private async Task LoadSubscriptionsAsync()
     {
         var data = await _recurringRepo.GetAllAsync().ConfigureAwait(true);
-        Subscriptions.Clear();
+        _subscriptions.Clear();
         foreach (var r in data)
-            Subscriptions.Add(RecurringRowViewModel.FromModel(r));
+            _subscriptions.Add(RecurringRowViewModel.FromModel(r));
     }
 
     private async Task LoadPendingAsync()
     {
         var data = await _pendingRepo.GetByStatusAsync(PendingStatus.Pending).ConfigureAwait(true);
-        Pending.Clear();
+        _pending.Clear();
         foreach (var e in data)
         {
-            var sourceName = Subscriptions.FirstOrDefault(s => s.Id == e.RecurringSourceId)?.Name ?? "—";
-            Pending.Add(PendingRecurringRowViewModel.FromModel(e, sourceName));
+            var sourceName = _subscriptions.FirstOrDefault(s => s.Id == e.RecurringSourceId)?.Name ?? "—";
+            _pending.Add(PendingRecurringRowViewModel.FromModel(e, sourceName));
         }
     }
 
@@ -186,7 +191,7 @@ public partial class RecurringViewModel : ObservableObject
             IsEnabled: true);
 
         await _recurringRepo.AddAsync(recurring).ConfigureAwait(true);
-        Subscriptions.Add(RecurringRowViewModel.FromModel(recurring));
+        _subscriptions.Add(RecurringRowViewModel.FromModel(recurring));
 
         AddName = string.Empty;
         AddAmount = 0m;
@@ -212,9 +217,9 @@ public partial class RecurringViewModel : ObservableObject
         if (row is null) return;
         await _pendingRepo.RemoveByRecurringSourceAsync(row.Id).ConfigureAwait(true);
         await _recurringRepo.RemoveAsync(row.Id).ConfigureAwait(true);
-        foreach (var pending in Pending.Where(x => x.RecurringSourceId == row.Id).ToList())
-            Pending.Remove(pending);
-        Subscriptions.Remove(row);
+        foreach (var pending in _pending.Where(x => x.RecurringSourceId == row.Id).ToList())
+            _pending.Remove(pending);
+        _subscriptions.Remove(row);
         _snackbar.Success(string.Format(
             GetString("Recurring.Toast.Deleted", "已刪除「{0}」"), row.Name));
     }
@@ -272,7 +277,7 @@ public partial class RecurringViewModel : ObservableObject
     {
         if (row is null) return;
         await _scheduler.ConfirmAsync(row.Id).ConfigureAwait(true);
-        Pending.Remove(row);
+        _pending.Remove(row);
         _snackbar.Success(GetString("Recurring.Pending.Toast.Confirmed", "已確認"));
     }
 
@@ -281,7 +286,7 @@ public partial class RecurringViewModel : ObservableObject
     {
         if (row is null) return;
         await _scheduler.SkipAsync(row.Id).ConfigureAwait(true);
-        Pending.Remove(row);
+        _pending.Remove(row);
         _snackbar.Success(GetString("Recurring.Pending.Toast.Skipped", "已略過"));
     }
 

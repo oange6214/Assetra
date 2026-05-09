@@ -58,7 +58,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private bool _isSearchOpen;
 
-    public ObservableCollection<StockSearchResult> SearchResults { get; } = new();
+    private readonly ObservableCollection<StockSearchResult> _searchResults = new();
+    public ReadOnlyObservableCollection<StockSearchResult> SearchResults { get; }
 
     [RelayCommand]
     private void ToggleSearch() => IsSearchOpen = !IsSearchOpen;
@@ -69,25 +70,25 @@ public partial class MainViewModel : ObservableObject, IDisposable
     {
         if (query.Length < 1)
         {
-            SearchResults.Clear();
+            _searchResults.Clear();
             return;
         }
 
         var fresh = _searchService.Search(query);
 
         // Remove items no longer in results
-        for (var i = SearchResults.Count - 1; i >= 0; i--)
+        for (var i = _searchResults.Count - 1; i >= 0; i--)
         {
-            if (!fresh.Any(r => r.Symbol == SearchResults[i].Symbol))
-                SearchResults.RemoveAt(i);
+            if (!fresh.Any(r => r.Symbol == _searchResults[i].Symbol))
+                _searchResults.RemoveAt(i);
         }
 
         // Add new items not already present
-        var existingSymbols = new HashSet<string>(SearchResults.Select(r => r.Symbol));
+        var existingSymbols = new HashSet<string>(_searchResults.Select(r => r.Symbol));
         foreach (var result in fresh)
         {
             if (!existingSymbols.Contains(result.Symbol))
-                SearchResults.Add(result);
+                _searchResults.Add(result);
         }
     }
 
@@ -98,7 +99,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         if (!value)
         {
             SearchText = string.Empty;
-            SearchResults.Clear();
+            _searchResults.Clear();
         }
     }
 
@@ -182,6 +183,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _themeService = themeService;
         _searchService = searchService;
         CurrentTheme = themeService.CurrentTheme;
+        SearchResults = new ReadOnlyObservableCollection<StockSearchResult>(_searchResults);
 
         Portfolio.AttachTabViewModels(Dashboard, Allocation);
     }

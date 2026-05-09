@@ -29,9 +29,10 @@ public partial class ConflictResolutionViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = string.Empty;
 
-    public ObservableCollection<ConflictRowViewModel> Items { get; } = new();
+    private readonly ObservableCollection<ConflictRowViewModel> _items = new();
+    public ReadOnlyObservableCollection<ConflictRowViewModel> Items { get; }
 
-    public bool HasItems => Items.Count > 0;
+    public bool HasItems => _items.Count > 0;
 
     public ConflictResolutionViewModel(
         IManualConflictDrain drain,
@@ -43,18 +44,19 @@ public partial class ConflictResolutionViewModel : ObservableObject
         _drain = drain;
         _queue = queue;
         _loc = localization ?? NullLocalizationService.Instance;
+        Items = new ReadOnlyObservableCollection<ConflictRowViewModel>(_items);
     }
 
     [RelayCommand]
     private void Reload()
     {
-        Items.Clear();
+        _items.Clear();
         foreach (var c in _drain.DrainManualConflicts())
-            Items.Add(new ConflictRowViewModel(c));
+            _items.Add(new ConflictRowViewModel(c));
         OnPropertyChanged(nameof(HasItems));
-        StatusMessage = Items.Count == 0
+        StatusMessage = _items.Count == 0
             ? Text("Settings.Sync.Conflicts.Status.Empty", "No pending conflicts.")
-            : Text("Settings.Sync.Conflicts.Status.Pending", "{0} pending.", Items.Count);
+            : Text("Settings.Sync.Conflicts.Status.Pending", "{0} pending.", _items.Count);
     }
 
     [RelayCommand]
@@ -63,7 +65,7 @@ public partial class ConflictResolutionViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(row);
         // Keep local: do nothing to DB — local row is already pending push from before sync;
         // next SyncAsync will push it. Just drop from manual-conflict list.
-        Items.Remove(row);
+        _items.Remove(row);
         OnPropertyChanged(nameof(HasItems));
         StatusMessage = Text("Settings.Sync.Conflicts.Status.KeptLocal", "Kept local for {0}.", row.EntityId);
         return Task.CompletedTask;
@@ -74,7 +76,7 @@ public partial class ConflictResolutionViewModel : ObservableObject
     {
         ArgumentNullException.ThrowIfNull(row);
         await _queue.ApplyRemoteAsync(new[] { row.Conflict.Remote }).ConfigureAwait(true);
-        Items.Remove(row);
+        _items.Remove(row);
         OnPropertyChanged(nameof(HasItems));
         StatusMessage = Text("Settings.Sync.Conflicts.Status.UsedRemote", "Adopted remote for {0}.", row.EntityId);
     }

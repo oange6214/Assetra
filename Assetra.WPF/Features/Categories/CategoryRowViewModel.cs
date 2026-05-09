@@ -22,7 +22,13 @@ public partial class CategoryRowViewModel : ObservableObject
     [ObservableProperty] private string? _editColorHex;
     [ObservableProperty] private string _editError = string.Empty;
 
-    public ObservableCollection<CategoryVisualOption> EditIconOptions { get; } = [];
+    private readonly ObservableCollection<CategoryVisualOption> _editIconOptions = [];
+    public ReadOnlyObservableCollection<CategoryVisualOption> EditIconOptions { get; }
+
+    public CategoryRowViewModel()
+    {
+        EditIconOptions = new ReadOnlyObservableCollection<CategoryVisualOption>(_editIconOptions);
+    }
 
     public bool IsIncome => Kind == CategoryKind.Income;
     public bool IsExpense => Kind == CategoryKind.Expense;
@@ -80,15 +86,15 @@ public partial class CategoryRowViewModel : ObservableObject
 
     private void RefreshEditIconOptions(IReadOnlyList<CategoryVisualOption>? iconOptions, string currentIconLabel)
     {
-        EditIconOptions.Clear();
+        _editIconOptions.Clear();
         if (iconOptions is not null)
         {
             foreach (var option in iconOptions)
-                EditIconOptions.Add(option);
+                _editIconOptions.Add(option);
         }
 
-        if (!string.IsNullOrWhiteSpace(EditIcon) && EditIconOptions.All(x => x.Value != EditIcon))
-            EditIconOptions.Insert(0, new CategoryVisualOption(EditIcon!, currentIconLabel));
+        if (!string.IsNullOrWhiteSpace(EditIcon) && _editIconOptions.All(x => x.Value != EditIcon))
+            _editIconOptions.Insert(0, new CategoryVisualOption(EditIcon!, currentIconLabel));
     }
 
     public override string ToString() => Name;

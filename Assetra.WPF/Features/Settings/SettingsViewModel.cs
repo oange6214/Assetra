@@ -135,9 +135,12 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     private bool _isRefreshingFxRates;
 
     public bool CanRefreshFxRates => !IsRefreshingFxRates;
-    public ObservableCollection<FxRateRow> FxRateRows { get; } = [];
 
-    public ObservableCollection<string> SupportedCurrencies { get; } = [];
+    private readonly ObservableCollection<FxRateRow> _fxRateRows = [];
+    public ReadOnlyObservableCollection<FxRateRow> FxRateRows { get; }
+
+    private readonly ObservableCollection<string> _supportedCurrencies = [];
+    public ReadOnlyObservableCollection<string> SupportedCurrencies { get; }
 
     public string AppVersion { get; } = ResolveAppVersion();
     public bool IsFugleConfigured => !string.IsNullOrWhiteSpace(FugleApiKey);
@@ -185,8 +188,10 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         Sync = sync;
         Conflicts = conflicts;
 
+        FxRateRows = new ReadOnlyObservableCollection<FxRateRow>(_fxRateRows);
+        SupportedCurrencies = new ReadOnlyObservableCollection<string>(_supportedCurrencies);
         foreach (var code in _currencyService.SupportedCurrencies)
-            SupportedCurrencies.Add(code);
+            _supportedCurrencies.Add(code);
 
         LoadFromSettings();
 
@@ -461,11 +466,13 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
     private void RefreshFxDisplay()
     {
-        FxRateRows.Clear();
-        foreach (var kv in _currencyService.ExchangeRates.OrderBy(k => k.Key))
+        _fxRateRows.Clear();
+        var rates = _currencyService.ExchangeRates;
+        if (rates is null) return;
+        foreach (var kv in rates.OrderBy(k => k.Key))
         {
             if (string.Equals(kv.Key, "TWD", StringComparison.OrdinalIgnoreCase)) continue;
-            FxRateRows.Add(new FxRateRow(kv.Key, kv.Value));
+            _fxRateRows.Add(new FxRateRow(kv.Key, kv.Value));
         }
 
         var iso = _settings.Current.LastFxRefreshUtc;

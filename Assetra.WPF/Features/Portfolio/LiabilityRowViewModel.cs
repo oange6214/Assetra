@@ -54,7 +54,24 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
 
     // ── Amortization schedule (loaded lazily after selection) ─────────────
 
-    public ObservableCollection<LoanScheduleRowViewModel> ScheduleEntries { get; } = [];
+    private readonly ObservableCollection<LoanScheduleRowViewModel> _scheduleEntries = [];
+    public ReadOnlyObservableCollection<LoanScheduleRowViewModel> ScheduleEntries { get; }
+
+    /// <summary>
+    /// LoanDialog 重算攤還表後，由它呼叫此方法刷新 schedule。
+    /// 內部封裝避免外部直接 mutate <see cref="_scheduleEntries"/>。
+    /// </summary>
+    public void ReplaceSchedule(IEnumerable<LoanScheduleRowViewModel> entries)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+        _scheduleEntries.Clear();
+        foreach (var e in entries)
+            _scheduleEntries.Add(e);
+        OnPropertyChanged(nameof(PaidPrincipal));
+        OnPropertyChanged(nameof(PaidInterest));
+        OnPropertyChanged(nameof(RemainingFromSchedule));
+        OnPropertyChanged(nameof(HasSchedule));
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PaidPrincipal))]
@@ -89,6 +106,7 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
 
     public LiabilityRowViewModel(string label, LiabilitySnapshot snapshot, AssetItem? asset = null)
     {
+        ScheduleEntries = new ReadOnlyObservableCollection<LoanScheduleRowViewModel>(_scheduleEntries);
         Label = label;
         _balance = snapshot.Balance;
         _originalAmount = snapshot.OriginalAmount;
