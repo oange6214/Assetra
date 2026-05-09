@@ -21,7 +21,7 @@
             Text="{DynamicResource Portfolio.AssetType}" />
         <ComboBox
             Margin="0,0,0,12"
-            SelectedValue="{Binding TxBuyAssetType, Mode=TwoWay}"
+            SelectedValue="{Binding Buy.AssetType, Mode=TwoWay}"
             SelectedValuePath="Tag"
             Style="{StaticResource FormComboBox}">
             <ComboBox.Resources>
@@ -35,7 +35,7 @@
         </ComboBox>
 
         <!--  Stock/ETF: Symbol + autocomplete  -->
-        <StackPanel d:Visibility="Visible" Visibility="{Binding TxBuyIsStock, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <StackPanel d:Visibility="Visible" Visibility="{Binding Buy.IsStock, Converter={StaticResource BooleanToVisibilityConverter}}">
             <!--  Dual-mode toggle: full Buy trade vs. metadata-only (Task 18 Option B) — Stock only  -->
             <TextBlock
                 Margin="0,0,0,4"
@@ -64,7 +64,7 @@
                     HorizontalContentAlignment="Center"
                     Content="{DynamicResource Portfolio.Tx.BuyModeMetaOnly}"
                     GroupName="TxBuyMode"
-                    IsChecked="{Binding TxBuyMetaOnly, Mode=TwoWay}"
+                    IsChecked="{Binding Buy.MetaOnly, Mode=TwoWay}"
                     Style="{StaticResource SegmentBtn}" />
             </Grid>
 
@@ -110,7 +110,7 @@
                     <Style TargetType="StackPanel">
                         <Setter Property="Visibility" Value="Visible" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding TxBuyMetaOnly}" Value="True">
+                            <DataTrigger Binding="{Binding Buy.MetaOnly}" Value="True">
                                 <Setter Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
                         </Style.Triggers>
@@ -136,7 +136,7 @@
                         HorizontalContentAlignment="Center"
                         Content="{DynamicResource Portfolio.Tx.PriceModeUnit}"
                         GroupName="TxBuyPriceMode"
-                        IsChecked="{Binding TxBuyPriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=unit, Mode=TwoWay}"
+                        IsChecked="{Binding Buy.PriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=unit, Mode=TwoWay}"
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
                         Style="{StaticResource SegmentBtn}" />
                     <RadioButton
@@ -146,13 +146,13 @@
                         HorizontalContentAlignment="Center"
                         Content="{DynamicResource Portfolio.Tx.PriceModeTotal}"
                         GroupName="TxBuyPriceMode"
-                        IsChecked="{Binding TxBuyPriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=total, Mode=TwoWay}"
+                        IsChecked="{Binding Buy.PriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=total, Mode=TwoWay}"
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
                         Style="{StaticResource SegmentBtn}" />
                 </Grid>
 
                 <!--  單價輸入 (在 unit mode 顯示)  -->
-                <StackPanel d:Visibility="Visible" Visibility="{Binding TxBuyIsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel d:Visibility="Visible" Visibility="{Binding Buy.IsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock
                         Margin="0,0,0,4"
                         FontSize="{StaticResource Font.Size.Xs}"
@@ -176,7 +176,7 @@
                 </StackPanel>
 
                 <!--  總額輸入 (在 total mode 顯示)  -->
-                <StackPanel d:Visibility="Collapsed" Visibility="{Binding TxBuyIsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel d:Visibility="Collapsed" Visibility="{Binding Buy.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock
                         Margin="0,0,0,4"
                         FontSize="{StaticResource Font.Size.Xs}"
@@ -186,12 +186,12 @@
                     <TextBox
                         behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
-                        Text="{Binding TxBuyTotalCost, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding Buy.TotalCost, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Margin="0,0,0,4"
                         Style="{StaticResource FormFieldError}"
-                        Text="{Binding TxBuyTotalCostError}"
-                        Visibility="{Binding TxBuyTotalCostError, Converter={StaticResource StringToVisibilityConverter}}" />
+                        Text="{Binding Buy.TotalCostError}"
+                        Visibility="{Binding Buy.TotalCostError, Converter={StaticResource StringToVisibilityConverter}}" />
                     <!--
                         多數券商的成交回報是「含手續費的最終扣款金額」，
                         因此預設勾選。勾選時 record 進 Trade 的 Commission=0，
@@ -200,7 +200,7 @@
                     <CheckBox
                         Margin="0,0,0,8"
                         Content="{DynamicResource Portfolio.Tx.TotalIncludesFee}"
-                        IsChecked="{Binding TxBuyTotalIncludesFee, Mode=TwoWay}"
+                        IsChecked="{Binding Buy.TotalIncludesFee, Mode=TwoWay}"
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
                         ToolTip="{DynamicResource Portfolio.Tx.TotalIncludesFee.Tooltip}" />
                 </StackPanel>
@@ -364,7 +364,7 @@
         </StackPanel>
 
         <!--  Non-stock (Fund/Metal/Bond): Name + Cost  -->
-        <StackPanel Visibility="{Binding TxBuyIsNonStock, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <StackPanel Visibility="{Binding Buy.IsNonStock, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
                 FontSize="{StaticResource Font.Size.Xs}"
@@ -386,7 +386,7 @@
         </StackPanel>
 
         <!--  Crypto: Symbol + Qty + Price  -->
-        <StackPanel Visibility="{Binding TxBuyIsCrypto, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <StackPanel Visibility="{Binding Buy.IsCrypto, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="0,0,0,4"
                 FontSize="{StaticResource Font.Size.Xs}"
@@ -424,7 +424,7 @@
                 <Style TargetType="StackPanel">
                     <Setter Property="Visibility" Value="Visible" />
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding TxBuyMetaOnly}" Value="True">
+                        <DataTrigger Binding="{Binding Buy.MetaOnly}" Value="True">
                             <Setter Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
                     </Style.Triggers>

@@ -171,17 +171,17 @@ public sealed class FinancialOverviewQueryService : IFinancialOverviewQueryServi
             .Where(i => i.Type == FinancialType.Liability)
             .ToDictionary(i => i.Name, StringComparer.Ordinal);
 
-        var rows = new List<(AssetItem? Asset, string Label, decimal Balance)>();
+        var rows = new List<(AssetItem? Asset, string Label, Money Balance)>();
         foreach (var (label, snapshot) in liabilitySnapshots.OrderBy(kv => kv.Key))
         {
             liabilityAssets.TryGetValue(label, out var asset);
-            rows.Add((asset, label, snapshot.Balance.Amount));
+            rows.Add((asset, label, snapshot.Balance));
         }
 
         foreach (var (name, asset) in liabilityAssets.OrderBy(kv => kv.Key))
         {
             if (!liabilitySnapshots.ContainsKey(name))
-                rows.Add((asset, name, 0m));
+                rows.Add((asset, name, Money.Zero(asset.Currency)));
         }
 
         var groups = new List<FinancialOverviewGroup>();
@@ -190,8 +190,7 @@ public sealed class FinancialOverviewQueryService : IFinancialOverviewQueryServi
             var groupItems = new List<FinancialOverviewGroupItem>();
             foreach (var row in group.OrderBy(r => r.Label))
             {
-                var currency = row.Asset?.Currency ?? baseCurrency;
-                var converted = await ConvertToBaseAsync(row.Balance, currency, baseCurrency, asOf, ct)
+                var converted = await ConvertToBaseAsync(row.Balance.Amount, row.Balance.Currency, baseCurrency, asOf, ct)
                     .ConfigureAwait(false);
                 groupItems.Add(new FinancialOverviewGroupItem(
                     row.Asset?.Id ?? Guid.Empty,

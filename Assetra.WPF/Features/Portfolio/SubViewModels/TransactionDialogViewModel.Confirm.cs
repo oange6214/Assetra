@@ -262,9 +262,9 @@ public partial class TransactionDialogViewModel
     private async Task ConfirmBuyAsync()
     {
         // Delegate to the AddAssetDialog sub-VM's buy logic based on asset sub-type.
-        // AddAssetType must match TxBuyAssetType so ConfirmAdd routes to the correct add path.
+        // AddAssetType must match Buy.AssetType so ConfirmAdd routes to the correct add path.
         // The two dialogs are mutually exclusive in practice; this is an acceptable coupling.
-        AddAssetDialog.AddAssetType = TxBuyAssetType;
+        AddAssetDialog.AddAssetType = Buy.AssetType;
         AddAssetDialog.AddError = string.Empty;
 
         await AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);

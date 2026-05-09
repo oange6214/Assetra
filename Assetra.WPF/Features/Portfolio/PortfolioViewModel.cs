@@ -918,7 +918,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable, Contrac
         var row = SelectedPositionRow;
         Transaction.OpenTxDialog();
         Transaction.TxType = "buy";
-        Transaction.TxBuyAssetType = "stock";
+        Transaction.Buy.AssetType = "stock";
         AddAssetDialog.AddSymbol = row.Symbol;
         AddAssetDialog.AddPrice = string.Empty;
         AddAssetDialog.AddQuantity = string.Empty;

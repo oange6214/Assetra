@@ -6,11 +6,11 @@ namespace Assetra.Tests.WPF;
 public sealed class NavRailViewModelTests
 {
     [Fact]
-    public void ActiveSection_DefaultsToPortfolio()
+    public void ActiveSection_DefaultsToFinancialOverview()
     {
         var vm = new NavRailViewModel();
 
-        Assert.Equal(NavSection.Portfolio, vm.ActiveSection);
+        Assert.Equal(NavSection.FinancialOverview, vm.ActiveSection);
     }
 
     [Fact]
@@ -29,9 +29,9 @@ public sealed class NavRailViewModelTests
     public void NavigateTo_SameSection_IsNoOp()
     {
         var vm = new NavRailViewModel();
-        vm.NavigateTo(NavSection.Portfolio);
+        vm.NavigateTo(NavSection.FinancialOverview);
 
-        Assert.Equal(NavSection.Portfolio, vm.ActiveSection);
+        Assert.Equal(NavSection.FinancialOverview, vm.ActiveSection);
         Assert.False(vm.CanGoBack);
     }
 
@@ -52,7 +52,7 @@ public sealed class NavRailViewModelTests
         Assert.True(vm.CanGoForward);
 
         vm.GoBackCommand.Execute(null);
-        Assert.Equal(NavSection.Portfolio, vm.ActiveSection);
+        Assert.Equal(NavSection.FinancialOverview, vm.ActiveSection);
         Assert.False(vm.CanGoBack);
 
         vm.GoForwardCommand.Execute(null);

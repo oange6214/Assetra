@@ -2211,8 +2211,8 @@ public class PortfolioViewModelTests
         // 在 total mode 下輸入總額 90,200 + 數量 5,000 → AddPrice 自動回算 18.0400
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(0m, 0m);
         vm.AddAssetDialog.AddQuantity = "5000";
-        vm.Transaction.TxBuyPriceMode = "total";
-        vm.Transaction.TxBuyTotalCost = "90200";
+        vm.Transaction.Buy.PriceMode = "total";
+        vm.Transaction.Buy.TotalCost = "90200";
         Assert.Equal("18.0400", vm.AddAssetDialog.AddPrice);
     }
 
@@ -2220,7 +2220,7 @@ public class PortfolioViewModelTests
     public async Task TxBuyComputedTotalDisplay_UnitMode_ShowsPriceTimesQty()
     {
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(0m, 0m);
-        vm.Transaction.TxBuyPriceMode = "unit";
+        vm.Transaction.Buy.PriceMode = "unit";
         vm.AddAssetDialog.AddPrice = "18.04";
         vm.AddAssetDialog.AddQuantity = "5000";
         Assert.Equal("90,200", vm.Transaction.TxBuyComputedTotalDisplay);
@@ -2286,11 +2286,11 @@ public class PortfolioViewModelTests
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
             new PortfolioUiServices(ImmediateScheduler.Instance));
 
-        Assert.True(vm.Transaction.TxBuyIsUnitMode);
-        Assert.False(vm.Transaction.TxBuyIsTotalMode);
-        vm.Transaction.TxBuyPriceMode = "total";
-        Assert.False(vm.Transaction.TxBuyIsUnitMode);
-        Assert.True(vm.Transaction.TxBuyIsTotalMode);
+        Assert.True(vm.Transaction.Buy.IsUnitMode);
+        Assert.False(vm.Transaction.Buy.IsTotalMode);
+        vm.Transaction.Buy.PriceMode = "total";
+        Assert.False(vm.Transaction.Buy.IsUnitMode);
+        Assert.True(vm.Transaction.Buy.IsTotalMode);
     }
 
     [Fact]

@@ -90,7 +90,7 @@ internal static class TradeSchemaMigrator
             BackfillLiabilityAssetIds(cmd);
             BackfillLoanLabels(conn, tx, cmd);
             NormalizeLegacyInterestTrades(cmd);
-            BackfillIncomeTradeNameFromCashAccount(cmd);
+            BackfillIncomeTradeNameFromCashAccount(conn, tx, cmd);
 
             tx.Commit();
         }
@@ -199,8 +199,12 @@ internal static class TradeSchemaMigrator
     ///
     /// Safe to run on every startup — the WHERE clause makes it idempotent.
     /// </summary>
-    private static void BackfillIncomeTradeNameFromCashAccount(SqliteCommand cmd)
+    private static void BackfillIncomeTradeNameFromCashAccount(
+        SqliteConnection conn, SqliteTransaction tx, SqliteCommand cmd)
     {
+        if (!TableExists(conn, tx, "asset"))
+            return;
+
         cmd.CommandText = """
             UPDATE trade
                SET name = (

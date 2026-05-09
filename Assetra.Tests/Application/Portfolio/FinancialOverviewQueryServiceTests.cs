@@ -112,6 +112,37 @@ public sealed class FinancialOverviewQueryServiceTests
     }
 
     [Fact]
+    public async Task BuildAsync_ConvertsOrphanLiabilityUsingSnapshotCurrency()
+    {
+        var assets = AssetRepo([], []);
+        var balances = BalanceQuery(
+            cash: new Dictionary<Guid, decimal>(),
+            liabilities: new Dictionary<string, LiabilitySnapshot>
+            {
+                ["Legacy USD Loan"] = new(new Money(100m, "USD"), new Money(100m, "USD")),
+            });
+        var fx = new Mock<IMultiCurrencyValuationService>();
+        fx.Setup(x => x.ConvertAsync(100m, "USD", "TWD", It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(3200m);
+
+        var sut = new FinancialOverviewQueryService(
+            assets.Object,
+            balances.Object,
+            fx.Object,
+            Settings("TWD").Object);
+
+        var result = await sut.BuildAsync([]);
+
+        var group = Assert.Single(result.LiabilityGroups);
+        Assert.Equal("貸款", group.Name);
+        Assert.Equal(3200m, group.Subtotal);
+        var item = Assert.Single(group.Items);
+        Assert.Equal("Legacy USD Loan", item.Name);
+        Assert.Equal("TWD", item.Currency);
+        Assert.Equal(3200m, item.CurrentValue);
+    }
+
+    [Fact]
     public async Task BuildAsync_IncludesConfiguredLiabilityWithZeroBalance()
     {
         var loanId = Guid.NewGuid();

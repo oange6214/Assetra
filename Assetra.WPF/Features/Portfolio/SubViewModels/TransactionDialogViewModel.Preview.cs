@@ -145,9 +145,9 @@ public partial class TransactionDialogViewModel
     private bool TryReadBuyGrossCost(out decimal gross)
     {
         gross = 0;
-        if (TxBuyPriceMode == "total")
+        if (Buy.PriceMode == "total")
         {
-            return ParseHelpers.TryParseDecimal(TxBuyTotalCost, out gross) && gross > 0;
+            return ParseHelpers.TryParseDecimal(Buy.TotalCost, out gross) && gross > 0;
         }
 
         if (!ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var price) || price <= 0 ||
