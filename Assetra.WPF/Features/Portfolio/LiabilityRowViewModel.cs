@@ -108,8 +108,10 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
     {
         ScheduleEntries = new ReadOnlyObservableCollection<LoanScheduleRowViewModel>(_scheduleEntries);
         Label = label;
-        _balance = snapshot.Balance;
-        _originalAmount = snapshot.OriginalAmount;
+        // M1 — LiabilitySnapshot now carries Money; row VM keeps decimal display fields
+        // since UI bindings format with the asset's Currency separately via MoneyFormatter.
+        _balance = snapshot.Balance.Amount;
+        _originalAmount = snapshot.OriginalAmount.Amount;
 
         if (asset is not null)
         {

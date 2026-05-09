@@ -58,7 +58,7 @@ public sealed class FinancialOverviewQueryServiceTests
             cash: new Dictionary<Guid, decimal>(),
             liabilities: new Dictionary<string, LiabilitySnapshot>
             {
-                ["Visa"] = new(5000m, 5000m),
+                ["Visa"] = new(new Money(5000m, "TWD"), new Money(5000m, "TWD")),
             });
 
         var sut = new FinancialOverviewQueryService(assets.Object, balances.Object);
@@ -89,7 +89,7 @@ public sealed class FinancialOverviewQueryServiceTests
             cash: new Dictionary<Guid, decimal>(),
             liabilities: new Dictionary<string, LiabilitySnapshot>
             {
-                ["USD Mortgage"] = new(100m, 100m),
+                ["USD Mortgage"] = new(new Money(100m, "USD"), new Money(100m, "USD")),
             });
         var fx = new Mock<IMultiCurrencyValuationService>();
         fx.Setup(x => x.ConvertAsync(100m, "USD", "TWD", It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
@@ -163,7 +163,11 @@ public sealed class FinancialOverviewQueryServiceTests
         IReadOnlyDictionary<string, LiabilitySnapshot> liabilities)
     {
         var query = new Mock<IBalanceQueryService>();
-        query.Setup(x => x.GetAllCashBalancesAsync()).ReturnsAsync(cash);
+        // M1 — wrap legacy decimal fixture into Money tagged TWD; tests don't care
+        // about cross-currency cash since they pass empty/USD-tagged liabilities only.
+        var cashMoney = cash.ToDictionary(kv => kv.Key, kv => new Money(kv.Value, "TWD"));
+        query.Setup(x => x.GetAllCashBalancesAsync())
+            .ReturnsAsync((IReadOnlyDictionary<Guid, Money>)cashMoney);
         query.Setup(x => x.GetAllLiabilitySnapshotsAsync()).ReturnsAsync(liabilities);
         return query;
     }

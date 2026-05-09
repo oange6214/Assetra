@@ -125,11 +125,14 @@ public sealed class FinancialOverviewQueryService : IFinancialOverviewQueryServi
 
     private static decimal ResolveAssetValue(
         AssetItem item,
-        IReadOnlyDictionary<Guid, decimal> cashBalances,
+        IReadOnlyDictionary<Guid, Money> cashBalances,
         IReadOnlyDictionary<Guid, AssetEvent> valuations)
     {
+        // Cash balances now arrive as Money (currency-tagged); the caller still
+        // handles cross-currency conversion via ConvertToBaseAsync, so we pass
+        // through the raw Amount here and let the surrounding code use item.Currency.
         if (cashBalances.TryGetValue(item.Id, out var balance))
-            return balance;
+            return balance.Amount;
         return valuations.TryGetValue(item.Id, out var evt) ? evt.Amount ?? 0m : 0m;
     }
 
@@ -172,7 +175,7 @@ public sealed class FinancialOverviewQueryService : IFinancialOverviewQueryServi
         foreach (var (label, snapshot) in liabilitySnapshots.OrderBy(kv => kv.Key))
         {
             liabilityAssets.TryGetValue(label, out var asset);
-            rows.Add((asset, label, snapshot.Balance));
+            rows.Add((asset, label, snapshot.Balance.Amount));
         }
 
         foreach (var (name, asset) in liabilityAssets.OrderBy(kv => kv.Key))

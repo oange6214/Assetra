@@ -65,7 +65,9 @@ internal static class PortfolioServiceCollectionExtensions
         services.AddSingleton<ITransactionService>(sp => new TransactionService(
             sp.GetRequiredService<ITradeRepository>()));
         services.AddSingleton<IBalanceQueryService>(sp =>
-            new BalanceQueryService(sp.GetRequiredService<ITradeRepository>()));
+            new BalanceQueryService(
+                sp.GetRequiredService<ITradeRepository>(),
+                sp.GetService<IAssetRepository>()));
         services.AddSingleton<IPositionQueryService>(sp =>
             new Assetra.Infrastructure.PositionQueryService(
                 sp.GetRequiredService<ITradeRepository>()));
