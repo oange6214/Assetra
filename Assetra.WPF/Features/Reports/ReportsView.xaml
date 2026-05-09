@@ -723,6 +723,144 @@
                 </Grid>
             </Expander>
 
+            <!--
+                Annual tax summary — aggregates the Year's CashDividend +
+                Sell-with-RealizedPnl trades into 4 buckets (domestic /
+                overseas × dividend / capital-gain) plus an AMT trigger flag.
+                Driven by TaxCalculationService (pure function over trade
+                journal); export to PDF / CSV via IReportExportService.
+            -->
+            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.Tax.Title}" IsExpanded="False" Margin="0,0,0,16">
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!--  Header: export buttons (only when there is data)  -->
+                    <StackPanel
+                        Grid.Row="0"
+                        Margin="0,0,0,12"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Visibility="{Binding HasTaxSummary, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Button Margin="0,0,8,0" Command="{Binding ExportTaxPdfCommand}" Content="{DynamicResource Reports.Export.Pdf}" Style="{StaticResource AppSecondaryButton}" />
+                        <Button Command="{Binding ExportTaxCsvCommand}" Content="{DynamicResource Reports.Export.Csv}" Style="{StaticResource AppSecondaryButton}" />
+                    </StackPanel>
+
+                    <!--  Empty state  -->
+                    <TextBlock
+                        Grid.Row="1"
+                        FontStyle="Italic"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Reports.Tax.Empty}"
+                        Visibility="{Binding HasTaxSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+
+                    <!--  Data view  -->
+                    <StackPanel Grid.Row="1" Visibility="{Binding HasTaxSummary, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <!--  4 KPI cards: domestic / overseas × dividend / capital-gain  -->
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Reports.Tax.DomesticDividend}" />
+                                <TextBlock Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" FontSize="{StaticResource Font.Size.Lg}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding TaxSummary.DomesticDividendTotal, StringFormat={}{0:N0}}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Reports.Tax.OverseasDividend}" />
+                                <TextBlock Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" FontSize="{StaticResource Font.Size.Lg}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding TaxSummary.OverseasDividendTotal, StringFormat={}{0:N0}}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Reports.Tax.DomesticCapitalGain}" />
+                                <TextBlock Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" FontSize="{StaticResource Font.Size.Lg}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding TaxSummary.DomesticCapitalGainTotal, StringFormat={}{0:N0}}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="6">
+                                <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Reports.Tax.OverseasCapitalGain}" />
+                                <TextBlock Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" FontSize="{StaticResource Font.Size.Lg}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding TaxSummary.OverseasCapitalGainTotal, StringFormat={}{0:N0}}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!--  Overseas income + AMT trigger banner  -->
+                        <Border
+                            Margin="0,0,0,12"
+                            Padding="12,10"
+                            Background="{DynamicResource AppSurfaceAlt}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.Tax.OverseasIncome}" />
+                                    <TextBlock Margin="0,2,0,0" FontFamily="{StaticResource Font.Family.Base}" FontSize="{StaticResource Font.Size.Md}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding TaxSummary.OverseasIncomeTotal, StringFormat={}{0:N0}}" Typography.NumeralAlignment="Tabular" />
+                                </StackPanel>
+                                <Border
+                                    Grid.Column="1"
+                                    Padding="8,3"
+                                    VerticalAlignment="Center"
+                                    Background="{DynamicResource AppDanger}"
+                                    CornerRadius="{StaticResource Radius.Sm}"
+                                    Visibility="{Binding TaxSummary.TriggersAmtDeclaration, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock FontSize="{StaticResource Font.Size.Xs}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextOnAccent}" Text="{DynamicResource Reports.Tax.AmtTriggered}" />
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!--  Records: dividends  -->
+                        <TextBlock Margin="0,8,0,4" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Reports.Tax.DividendRecords}" />
+                        <ItemsControl ItemsSource="{Binding TaxSummary.Dividends}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,3,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="50" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding Date}" Typography.NumeralAlignment="Tabular" />
+                                        <TextBlock Grid.Column="1" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding Symbol}" />
+                                        <TextBlock Grid.Column="2" Foreground="{DynamicResource AppTextMuted}" Text="{Binding Country}" />
+                                        <TextBlock Grid.Column="3" FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular" Text="{Binding Amount, StringFormat={}{0:N2}}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!--  Records: capital gains  -->
+                        <TextBlock Margin="0,16,0,4" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Reports.Tax.CapitalGainRecords}" />
+                        <ItemsControl ItemsSource="{Binding TaxSummary.CapitalGains}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,3,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="50" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Foreground="{DynamicResource AppTextSecondary}" Text="{Binding Date}" Typography.NumeralAlignment="Tabular" />
+                                        <TextBlock Grid.Column="1" Foreground="{DynamicResource AppTextPrimary}" Text="{Binding Symbol}" />
+                                        <TextBlock Grid.Column="2" Foreground="{DynamicResource AppTextMuted}" Text="{Binding Country}" />
+                                        <TextBlock Grid.Column="3" FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular" Text="{Binding RealizedPnl, StringFormat={}{0:N2}}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Grid>
+            </Expander>
+
             <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.Performance.Title}" IsExpanded="False" Margin="0,0,0,16">
                 <Grid>
                     <TextBlock

@@ -1070,6 +1070,16 @@
     <sys:String x:Key="Reports.IncomeStatement.Title">損益表</sys:String>
     <sys:String x:Key="Reports.BalanceSheet.Title">資產負債表</sys:String>
     <sys:String x:Key="Reports.CashFlow.Title">現金流量表</sys:String>
+    <sys:String x:Key="Reports.Tax.Title">年度稅務彙整</sys:String>
+    <sys:String x:Key="Reports.Tax.Empty">本年度尚無股利或已實現資本利得紀錄。</sys:String>
+    <sys:String x:Key="Reports.Tax.DomesticDividend">本國股利</sys:String>
+    <sys:String x:Key="Reports.Tax.OverseasDividend">海外股利</sys:String>
+    <sys:String x:Key="Reports.Tax.DomesticCapitalGain">本國資本利得</sys:String>
+    <sys:String x:Key="Reports.Tax.OverseasCapitalGain">海外資本利得</sys:String>
+    <sys:String x:Key="Reports.Tax.OverseasIncome">海外所得合計</sys:String>
+    <sys:String x:Key="Reports.Tax.AmtTriggered">需申報最低稅負</sys:String>
+    <sys:String x:Key="Reports.Tax.DividendRecords">股利明細</sys:String>
+    <sys:String x:Key="Reports.Tax.CapitalGainRecords">已實現資本利得明細</sys:String>
     <sys:String x:Key="Reports.Performance.Title">投資績效</sys:String>
     <sys:String x:Key="Reports.Risk.Title">風險指標</sys:String>
     <sys:String x:Key="Reports.Risk.ConcentrationWarning">⚠ 持股集中度過高（單一部位 &gt; 30% 或 HHI &gt; 0.30）</sys:String>

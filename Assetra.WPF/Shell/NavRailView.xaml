@@ -3,13 +3,16 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:alerts="clr-namespace:Assetra.WPF.Features.Alerts"
+    xmlns:cashaccts="clr-namespace:Assetra.WPF.Features.CashAccounts"
     xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:financialoverview="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     xmlns:fire="clr-namespace:Assetra.WPF.Features.Fire"
     xmlns:goals="clr-namespace:Assetra.WPF.Features.Goals"
     xmlns:import="clr-namespace:Assetra.WPF.Features.Import"
     xmlns:insurance="clr-namespace:Assetra.WPF.Features.Insurance"
+    xmlns:liabs="clr-namespace:Assetra.WPF.Features.Liabilities"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:montecarlo="clr-namespace:Assetra.WPF.Features.MonteCarlo"
     xmlns:physicalasset="clr-namespace:Assetra.WPF.Features.PhysicalAsset"
@@ -23,9 +26,6 @@
     xmlns:shell="clr-namespace:Assetra.WPF.Shell"
     xmlns:trends="clr-namespace:Assetra.WPF.Features.Trends"
     xmlns:txlog="clr-namespace:Assetra.WPF.Features.TransactionLog"
-    xmlns:cashaccts="clr-namespace:Assetra.WPF.Features.CashAccounts"
-    xmlns:liabs="clr-namespace:Assetra.WPF.Features.Liabilities"
-    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     d:DataContext="{d:DesignInstance Type={x:Type shell:MainViewModel},
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
@@ -275,11 +275,11 @@
                                 <BeginStoryboard>
                                     <Storyboard>
                                         <DoubleAnimation
+                                            EasingFunction="{StaticResource Motion.Easing.Standard}"
+                                            FillBehavior="HoldEnd"
                                             Storyboard.TargetProperty="Width"
                                             To="56"
-                                            Duration="0:0:0.12"
-                                            EasingFunction="{StaticResource Motion.Easing.Standard}"
-                                            FillBehavior="HoldEnd" />
+                                            Duration="0:0:0.12" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </DataTrigger.EnterActions>
@@ -287,11 +287,11 @@
                                 <BeginStoryboard>
                                     <Storyboard>
                                         <DoubleAnimation
+                                            EasingFunction="{StaticResource Motion.Easing.Standard}"
+                                            FillBehavior="HoldEnd"
                                             Storyboard.TargetProperty="Width"
                                             To="{StaticResource Size.Sidebar.Width}"
-                                            Duration="0:0:0.12"
-                                            EasingFunction="{StaticResource Motion.Easing.Standard}"
-                                            FillBehavior="HoldEnd" />
+                                            Duration="0:0:0.12" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </DataTrigger.ExitActions>
@@ -310,26 +310,26 @@
                 <!--
                     Hamburger toggle:
                     * Stretches full rail width and uses Padding 17,0,0,0 so
-                      the 18px icon (FontSize Md) sits with its center at
-                      x=26, matching the nav-item icon column (4px indicator
-                      + 10px content margin + 12px half of 24-wide icon column)
-                      in both expanded (200px) and collapsed (56px) modes.
+                    the 18px icon (FontSize Md) sits with its center at
+                    x=26, matching the nav-item icon column (4px indicator
+                    + 10px content margin + 12px half of 24-wide icon column)
+                    in both expanded (200px) and collapsed (56px) modes.
                     * Symbol swaps between ChevronLeft (expanded → click to
-                      collapse) and ChevronRight (collapsed → click to expand)
-                      so the affordance reflects state.
+                    collapse) and ChevronRight (collapsed → click to expand)
+                    so the affordance reflects state.
                     * AppIcon style uses BasedOn so the default Viewbox+Path
-                      template is preserved.
+                    template is preserved.
                     * Custom Template removes the default ToggleButton chrome
-                      so IsChecked state does not paint a blue rectangle.
+                    so IsChecked state does not paint a blue rectangle.
                 -->
                 <ToggleButton
                     x:Name="PaneToggle"
                     Grid.Row="0"
                     Height="40"
                     Margin="0,8,0,8"
+                    Padding="17,0,0,0"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Left"
-                    Padding="17,0,0,0"
                     Background="Transparent"
                     BorderThickness="0"
                     Cursor="Hand"
@@ -342,9 +342,7 @@
                                 Padding="{TemplateBinding Padding}"
                                 Background="Transparent"
                                 SnapsToDevicePixels="True">
-                                <ContentPresenter
-                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                    VerticalAlignment="Center" />
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" />
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
@@ -393,7 +391,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="DataPie24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource FinancialOverview.Nav.Label}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource FinancialOverview.Nav.Label}" />
                             </Grid>
                         </ToggleButton>
 
@@ -410,7 +411,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="DataTrending24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Trends}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Nav.Trends}" />
                             </Grid>
                         </ToggleButton>
 
@@ -427,7 +431,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="DocumentBulletList24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Reports}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Nav.Reports}" />
                             </Grid>
                         </ToggleButton>
 
@@ -448,7 +455,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="Briefcase24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Portfolio}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Nav.Portfolio}" />
                             </Grid>
                         </ToggleButton>
 
@@ -465,7 +475,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="Money24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.CashAccounts}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Nav.CashAccounts}" />
                             </Grid>
                         </ToggleButton>
 
@@ -482,7 +495,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="Cut24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Liabilities}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Nav.Liabilities}" />
                             </Grid>
                         </ToggleButton>
 
@@ -499,7 +515,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="Home24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource RealEstate.Title}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource RealEstate.Title}" />
                             </Grid>
                         </ToggleButton>
 
@@ -516,7 +535,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="Shield24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Insurance.Title}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Insurance.Title}" />
                             </Grid>
                         </ToggleButton>
 
@@ -533,7 +555,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="PersonClock24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Retirement.Title}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Retirement.Title}" />
                             </Grid>
                         </ToggleButton>
 
@@ -550,7 +575,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="Box24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource PhysicalAsset.Title}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource PhysicalAsset.Title}" />
                             </Grid>
                         </ToggleButton>
 
@@ -570,7 +598,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="Tag24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Categories}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Nav.Categories}" />
                             </Grid>
                         </ToggleButton>
 
@@ -589,8 +620,14 @@
                                 </Grid.ColumnDefinitions>
                                 <!--  CalendarLtr maps cleanly to "subscription / recurring schedule" — matches the 訂閱排程 label and avoids the swap-arrow misread of ArrowRepeatAll.  -->
                                 <ds:AppIcon Symbol="CalendarLtr24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Recurring}" />
-                                <Border Grid.Column="2" Style="{StaticResource NavRailBadge}" Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Nav.Recurring}" />
+                                <Border
+                                    Grid.Column="2"
+                                    Style="{StaticResource NavRailBadge}"
+                                    Visibility="{Binding Recurring.HasPending, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
@@ -614,7 +651,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="DocumentBulletList24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.TransactionLog}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Nav.TransactionLog}" />
                             </Grid>
                         </ToggleButton>
 
@@ -632,8 +672,14 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="Alert24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Alerts}" />
-                                <Border Grid.Column="2" Style="{StaticResource NavRailBadge}" Visibility="{Binding Alerts.HasTriggeredAlerts, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Nav.Alerts}" />
+                                <Border
+                                    Grid.Column="2"
+                                    Style="{StaticResource NavRailBadge}"
+                                    Visibility="{Binding Alerts.HasTriggeredAlerts, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
@@ -660,7 +706,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="Target24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Goals}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Nav.Goals}" />
                             </Grid>
                         </ToggleButton>
 
@@ -677,7 +726,10 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ds:AppIcon Symbol="Flash24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Fire.Title}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource Fire.Title}" />
                             </Grid>
                         </ToggleButton>
 
@@ -695,14 +747,20 @@
                                 </Grid.ColumnDefinitions>
                                 <!--  Calculator differentiates Monte Carlo from the pie/line chart icons of FinancialOverview / Trends; conveys "simulation / computation" semantics.  -->
                                 <ds:AppIcon Symbol="Calculator24" />
-                                <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource MonteCarlo.Title}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NavRailItemText}"
+                                    Text="{DynamicResource MonteCarlo.Title}" />
                             </Grid>
                         </ToggleButton>
                     </StackPanel>
                 </ScrollViewer>
 
                 <StackPanel Grid.Row="2" Margin="0,8,0,8">
-                    <Border Height="1" Margin="0,0,0,8" Background="{DynamicResource AppBorderLight}" />
+                    <Border
+                        Height="1"
+                        Margin="0,0,0,8"
+                        Background="{DynamicResource AppBorderLight}" />
 
                     <ToggleButton
                         x:Name="NavImport"
@@ -717,7 +775,10 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <ds:AppIcon Symbol="DocumentArrowDown24" />
-                            <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Import}" />
+                            <TextBlock
+                                Grid.Column="1"
+                                Style="{StaticResource NavRailItemText}"
+                                Text="{DynamicResource Nav.Import}" />
                         </Grid>
                     </ToggleButton>
 
@@ -734,7 +795,10 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <ds:AppIcon Symbol="Settings24" />
-                            <TextBlock Grid.Column="1" Style="{StaticResource NavRailItemText}" Text="{DynamicResource Nav.Settings}" />
+                            <TextBlock
+                                Grid.Column="1"
+                                Style="{StaticResource NavRailItemText}"
+                                Text="{DynamicResource Nav.Settings}" />
                         </Grid>
                     </ToggleButton>
                 </StackPanel>

@@ -9,20 +9,20 @@
         Preserved for ColorSchemeService Taiwan/Intl swap.
     -->
 
-    <!--  Backgrounds — Slate scale  -->
-    <SolidColorBrush x:Key="AppBackground"     Color="{StaticResource Color.Slate.50}" />
-    <SolidColorBrush x:Key="AppSurface"        Color="{StaticResource Color.White}" />
-    <SolidColorBrush x:Key="AppSurfaceAlt"     Color="{StaticResource Color.Slate.100}" />
-    <SolidColorBrush x:Key="AppCardBackground" Color="{StaticResource Color.White}" />
-    <SolidColorBrush x:Key="AppHover"          Color="{StaticResource Color.Slate.100}" />
+    <!--  Backgrounds — Asset Management CIS light theme  -->
+    <SolidColorBrush x:Key="AppBackground"     Color="{StaticResource Color.Cis.Light.Background}" />
+    <SolidColorBrush x:Key="AppSurface"        Color="{StaticResource Color.Cis.Light.Surface}" />
+    <SolidColorBrush x:Key="AppSurfaceAlt"     Color="{StaticResource Color.Brand.SoftWhite}" />
+    <SolidColorBrush x:Key="AppCardBackground" Color="{StaticResource Color.Cis.Light.Surface}" />
+    <SolidColorBrush x:Key="AppHover"          Color="{StaticResource Color.Brand.NavySubtle}" />
 
     <!--  Borders  -->
-    <SolidColorBrush x:Key="AppBorder"      Color="{StaticResource Color.Slate.200}" />
-    <SolidColorBrush x:Key="AppBorderLight" Color="{StaticResource Color.Slate.100}" />
+    <SolidColorBrush x:Key="AppBorder"      Color="{StaticResource Color.Cis.Light.Border}" />
+    <SolidColorBrush x:Key="AppBorderLight" Color="{StaticResource Color.Brand.SoftWhite}" />
 
     <!--  Text — Slate ramp  -->
-    <SolidColorBrush x:Key="AppTextPrimary"   Color="{StaticResource Color.Slate.900}" />
-    <SolidColorBrush x:Key="AppTextSecondary" Color="{StaticResource Color.Slate.600}" />
+    <SolidColorBrush x:Key="AppTextPrimary"   Color="{StaticResource Color.Cis.Light.TextPrimary}" />
+    <SolidColorBrush x:Key="AppTextSecondary" Color="{StaticResource Color.Cis.Light.TextSecondary}" />
     <SolidColorBrush x:Key="AppTextMuted"     Color="{StaticResource Color.Slate.500}" />
     <SolidColorBrush x:Key="AppTextOnAccent"  Color="{StaticResource Color.White}" />
 
@@ -51,14 +51,14 @@
     <SolidColorBrush x:Key="AppAccentText"   Color="{StaticResource Color.Brand.Navy}" />
 
     <!--  Canonical semantic DesignSystem brushes  -->
-    <SolidColorBrush x:Key="Brush.Background"     Color="{StaticResource Color.Slate.50}" />
-    <SolidColorBrush x:Key="Brush.Surface"        Color="{StaticResource Color.White}" />
-    <SolidColorBrush x:Key="Brush.SurfaceRaised"  Color="{StaticResource Color.Slate.100}" />
-    <SolidColorBrush x:Key="Brush.Text.Primary"   Color="{StaticResource Color.Slate.900}" />
-    <SolidColorBrush x:Key="Brush.Text.Secondary" Color="{StaticResource Color.Slate.600}" />
+    <SolidColorBrush x:Key="Brush.Background"     Color="{StaticResource Color.Cis.Light.Background}" />
+    <SolidColorBrush x:Key="Brush.Surface"        Color="{StaticResource Color.Cis.Light.Surface}" />
+    <SolidColorBrush x:Key="Brush.SurfaceRaised"  Color="{StaticResource Color.Brand.SoftWhite}" />
+    <SolidColorBrush x:Key="Brush.Text.Primary"   Color="{StaticResource Color.Cis.Light.TextPrimary}" />
+    <SolidColorBrush x:Key="Brush.Text.Secondary" Color="{StaticResource Color.Cis.Light.TextSecondary}" />
     <SolidColorBrush x:Key="Brush.Text.Muted"     Color="{StaticResource Color.Slate.500}" />
     <SolidColorBrush x:Key="Brush.Text.OnAccent"  Color="{StaticResource Color.White}" />
-    <SolidColorBrush x:Key="Brush.Border"         Color="{StaticResource Color.Slate.200}" />
+    <SolidColorBrush x:Key="Brush.Border"         Color="{StaticResource Color.Cis.Light.Border}" />
     <SolidColorBrush x:Key="Brush.BorderStrong"   Color="{StaticResource Color.Slate.300}" />
     <SolidColorBrush x:Key="Brush.Accent"         Color="{StaticResource Color.Brand.Navy}" />
     <SolidColorBrush x:Key="Brush.AccentHover"    Color="{StaticResource Color.Brand.NavyHover}" />
@@ -82,7 +82,7 @@
 
     <!--  DataGrid  -->
     <SolidColorBrush x:Key="AppSelectedRow" Color="{StaticResource Color.Brand.NavySubtle}" />
-    <SolidColorBrush x:Key="AppGridLines"   Color="{StaticResource Color.Slate.100}" />
+    <SolidColorBrush x:Key="AppGridLines"   Color="{StaticResource Color.Cis.Light.Border}" />
 
     <!--  Error banner  -->
     <SolidColorBrush x:Key="AppErrorBg"     Color="{StaticResource Color.Red.50}" />

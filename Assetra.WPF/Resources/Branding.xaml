@@ -2,15 +2,20 @@
 
     <DrawingImage x:Key="AssetraLogo">
         <DrawingImage.Drawing>
-            <DrawingGroup>
-                <GeometryDrawing Brush="#142F55">
+            <DrawingGroup ClipGeometry="M 16,16 L 96,16 96,96 16,96 Z">
+                <GeometryDrawing Brush="#14213D">
                     <GeometryDrawing.Geometry>
-                        <PathGeometry Figures="M 34,72 L 52,28 64,28 46,72 Z" />
+                        <PathGeometry Figures="M 24,78 L 44,34 56,34 36,78 Z" />
                     </GeometryDrawing.Geometry>
                 </GeometryDrawing>
-                <GeometryDrawing Brush="#C8A25A">
+                <GeometryDrawing Brush="#1E2430">
                     <GeometryDrawing.Geometry>
-                        <PathGeometry Figures="M 60,72 L 72,52 82,72 Z" />
+                        <PathGeometry Figures="M 48,78 L 66,34 78,34 60,78 Z" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="#C8A96B">
+                    <GeometryDrawing.Geometry>
+                        <PathGeometry Figures="M 42,78 L 56,50 70,78 Z" />
                     </GeometryDrawing.Geometry>
                 </GeometryDrawing>
             </DrawingGroup>

@@ -2,28 +2,28 @@
 
     <!--
         ══════════════════════════════════════════════════════
-        Dark Theme — Windows 11 Mica / WinUI 3 palette
+        Dark Theme — Asset Management CIS
         ══════════════════════════════════════════════════════
         All Color= attributes reference primitives from
         DesignSystem/Tokens/Colors.xaml — no hex values here.
-        Per UX/UI guideline §2, Dark mode lifts primary to a brighter
-        blue (Color.Blue.500) so it stays visible on Slate-900 surfaces.
+        Institutional graphite surfaces, quiet navy structure, and gold
+        accents align the app with the asset management identity system.
     -->
 
-    <!--  Backgrounds — Slate scale (dark)  -->
-    <SolidColorBrush x:Key="AppBackground" Color="{StaticResource Color.Slate.900}" />
-    <SolidColorBrush x:Key="AppSurface" Color="{StaticResource Color.Slate.800}" />
-    <SolidColorBrush x:Key="AppSurfaceAlt" Color="{StaticResource Color.Slate.700}" />
-    <SolidColorBrush x:Key="AppCardBackground" Color="{StaticResource Color.Slate.800}" />
-    <SolidColorBrush x:Key="AppHover" Color="{StaticResource Color.Slate.700}" />
+    <!--  Backgrounds — Asset Management CIS dark theme  -->
+    <SolidColorBrush x:Key="AppBackground" Color="{StaticResource Color.Cis.Dark.Background}" />
+    <SolidColorBrush x:Key="AppSurface" Color="{StaticResource Color.Cis.Dark.Layer1}" />
+    <SolidColorBrush x:Key="AppSurfaceAlt" Color="{StaticResource Color.Cis.Dark.Layer2}" />
+    <SolidColorBrush x:Key="AppCardBackground" Color="{StaticResource Color.Cis.Dark.Layer1}" />
+    <SolidColorBrush x:Key="AppHover" Color="{StaticResource Color.Cis.Dark.Layer3}" />
 
     <!--  Borders  -->
-    <SolidColorBrush x:Key="AppBorder" Color="{StaticResource Color.Slate.700}" />
-    <SolidColorBrush x:Key="AppBorderLight" Color="{StaticResource Color.Slate.800}" />
+    <SolidColorBrush x:Key="AppBorder" Color="{StaticResource Color.Cis.Dark.Layer3}" />
+    <SolidColorBrush x:Key="AppBorderLight" Color="{StaticResource Color.Cis.Dark.Layer2}" />
 
     <!--  Text — Slate ramp (dark)  -->
-    <SolidColorBrush x:Key="AppTextPrimary" Color="{StaticResource Color.Slate.50}" />
-    <SolidColorBrush x:Key="AppTextSecondary" Color="{StaticResource Color.Slate.300}" />
+    <SolidColorBrush x:Key="AppTextPrimary" Color="{StaticResource Color.Cis.Dark.TextPrimary}" />
+    <SolidColorBrush x:Key="AppTextSecondary" Color="{StaticResource Color.Cis.Dark.TextSecondary}" />
     <SolidColorBrush x:Key="AppTextMuted" Color="{StaticResource Color.Slate.400}" />
     <SolidColorBrush x:Key="AppTextOnAccent" Color="{StaticResource Color.White}" />
 
@@ -41,24 +41,24 @@
     <SolidColorBrush x:Key="AppDanger" Color="{StaticResource Color.Red.500}" />
 
     <!--  Brand primary — Dark variant  -->
-    <SolidColorBrush x:Key="AppAccent" Color="{StaticResource Color.Blue.500}" />
-    <SolidColorBrush x:Key="AppAccentHover" Color="{StaticResource Color.Blue.400}" />
+    <SolidColorBrush x:Key="AppAccent" Color="{StaticResource Color.Brand.Gold}" />
+    <SolidColorBrush x:Key="AppAccentHover" Color="{StaticResource Color.Brand.GoldHover.Dark}" />
     <SolidColorBrush x:Key="AppAccentSubtle" Color="{StaticResource Color.Brand.NavySubtle.Dark}" />
     <SolidColorBrush x:Key="AppAccentSoft" Color="{StaticResource Color.Brand.NavySubtle.Dark}" />
-    <SolidColorBrush x:Key="AppAccentText" Color="{StaticResource Color.Blue.300}" />
+    <SolidColorBrush x:Key="AppAccentText" Color="{StaticResource Color.Brand.GoldDark}" />
 
     <!--  Canonical semantic DesignSystem brushes  -->
-    <SolidColorBrush x:Key="Brush.Background" Color="{StaticResource Color.Slate.900}" />
-    <SolidColorBrush x:Key="Brush.Surface" Color="{StaticResource Color.Slate.800}" />
-    <SolidColorBrush x:Key="Brush.SurfaceRaised" Color="{StaticResource Color.Slate.700}" />
-    <SolidColorBrush x:Key="Brush.Text.Primary" Color="{StaticResource Color.Slate.50}" />
-    <SolidColorBrush x:Key="Brush.Text.Secondary" Color="{StaticResource Color.Slate.300}" />
+    <SolidColorBrush x:Key="Brush.Background" Color="{StaticResource Color.Cis.Dark.Background}" />
+    <SolidColorBrush x:Key="Brush.Surface" Color="{StaticResource Color.Cis.Dark.Layer1}" />
+    <SolidColorBrush x:Key="Brush.SurfaceRaised" Color="{StaticResource Color.Cis.Dark.Layer2}" />
+    <SolidColorBrush x:Key="Brush.Text.Primary" Color="{StaticResource Color.Cis.Dark.TextPrimary}" />
+    <SolidColorBrush x:Key="Brush.Text.Secondary" Color="{StaticResource Color.Cis.Dark.TextSecondary}" />
     <SolidColorBrush x:Key="Brush.Text.Muted" Color="{StaticResource Color.Slate.400}" />
     <SolidColorBrush x:Key="Brush.Text.OnAccent" Color="{StaticResource Color.White}" />
-    <SolidColorBrush x:Key="Brush.Border" Color="{StaticResource Color.Slate.700}" />
+    <SolidColorBrush x:Key="Brush.Border" Color="{StaticResource Color.Cis.Dark.Layer3}" />
     <SolidColorBrush x:Key="Brush.BorderStrong" Color="{StaticResource Color.Slate.600}" />
-    <SolidColorBrush x:Key="Brush.Accent" Color="{StaticResource Color.Blue.500}" />
-    <SolidColorBrush x:Key="Brush.AccentHover" Color="{StaticResource Color.Blue.400}" />
+    <SolidColorBrush x:Key="Brush.Accent" Color="{StaticResource Color.Brand.Gold}" />
+    <SolidColorBrush x:Key="Brush.AccentHover" Color="{StaticResource Color.Brand.GoldHover.Dark}" />
     <SolidColorBrush x:Key="Brush.AccentSubtle" Color="{StaticResource Color.Brand.NavySubtle.Dark}" />
     <SolidColorBrush x:Key="Brush.Danger" Color="{StaticResource Color.Red.500}" />
     <SolidColorBrush x:Key="Brush.Warning" Color="{StaticResource Color.Amber.400}" />

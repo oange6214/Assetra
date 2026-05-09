@@ -83,6 +83,61 @@ public sealed class ReportExportService : IReportExportService
         };
     }
 
+    public Task ExportAsync(TaxSummary summary, ExportFormat format, string filePath, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(summary);
+        return format switch
+        {
+            ExportFormat.Pdf => Task.Run(() => new TaxSummaryDocument(summary).GeneratePdf(filePath), ct),
+            ExportFormat.Csv => WriteTaxCsvAsync(filePath, summary, ct),
+            _ => throw new ArgumentOutOfRangeException(nameof(format)),
+        };
+    }
+
+    private static async Task WriteTaxCsvAsync(string filePath, TaxSummary summary, CancellationToken ct)
+    {
+        var sb = new StringBuilder();
+
+        // Section 1: Dividend records
+        sb.AppendLine("Section,Date,Symbol,Exchange,Country,Amount,IsOverseas");
+        foreach (var d in summary.Dividends.OrderBy(x => x.Date))
+        {
+            sb.Append("Dividend,")
+              .Append(d.Date.ToString("yyyy-MM-dd")).Append(',')
+              .Append(Csv(d.Symbol)).Append(',')
+              .Append(Csv(d.Exchange)).Append(',')
+              .Append(Csv(d.Country)).Append(',')
+              .Append(d.Amount.ToString("F2", CultureInfo.InvariantCulture)).Append(',')
+              .Append(d.IsOverseas ? "Y" : "N")
+              .Append('\n');
+        }
+
+        // Section 2: Capital-gain records
+        foreach (var c in summary.CapitalGains.OrderBy(x => x.Date))
+        {
+            sb.Append("CapitalGain,")
+              .Append(c.Date.ToString("yyyy-MM-dd")).Append(',')
+              .Append(Csv(c.Symbol)).Append(',')
+              .Append(Csv(c.Exchange)).Append(',')
+              .Append(Csv(c.Country)).Append(',')
+              .Append(c.RealizedPnl.ToString("F2", CultureInfo.InvariantCulture)).Append(',')
+              .Append(c.IsOverseas ? "Y" : "N")
+              .Append('\n');
+        }
+
+        // Footer: bucket totals + AMT trigger
+        sb.AppendLine();
+        sb.AppendLine("Summary,Label,Amount");
+        sb.Append("Summary,Domestic Dividend,").Append(summary.DomesticDividendTotal.ToString("F2", CultureInfo.InvariantCulture)).Append('\n');
+        sb.Append("Summary,Overseas Dividend,").Append(summary.OverseasDividendTotal.ToString("F2", CultureInfo.InvariantCulture)).Append('\n');
+        sb.Append("Summary,Domestic Capital Gain,").Append(summary.DomesticCapitalGainTotal.ToString("F2", CultureInfo.InvariantCulture)).Append('\n');
+        sb.Append("Summary,Overseas Capital Gain,").Append(summary.OverseasCapitalGainTotal.ToString("F2", CultureInfo.InvariantCulture)).Append('\n');
+        sb.Append("Summary,Overseas Income Total,").Append(summary.OverseasIncomeTotal.ToString("F2", CultureInfo.InvariantCulture)).Append('\n');
+        sb.Append("Summary,AMT Declaration Required,").Append(summary.TriggersAmtDeclaration ? "Y" : "N").Append('\n');
+
+        await File.WriteAllTextAsync(filePath, sb.ToString(), Encoding.UTF8, ct).ConfigureAwait(false);
+    }
+
     private static async Task WriteCsvAsync(
         string filePath,
         IReadOnlyList<StatementSection> sections,
@@ -202,6 +257,165 @@ internal sealed class StatementDocument : IDocument
                     row.ConstantItem(140).AlignRight().Text(
                         _grandTotal.ToString("N2", CultureInfo.InvariantCulture)).SemiBold().FontSize(12);
                 });
+            });
+
+            page.Footer().AlignCenter().Text(t =>
+            {
+                t.Span("Page ");
+                t.CurrentPageNumber();
+                t.Span(" / ");
+                t.TotalPages();
+            });
+        });
+    }
+}
+
+/// <summary>
+/// PDF layout for the annual <see cref="TaxSummary"/>: 4 KPI bucket cards
+/// (domestic / overseas dividend + capital gain) + AMT-trigger banner +
+/// two record tables (Dividends, CapitalGains). Uses the same QuestPDF
+/// chrome conventions as <see cref="StatementDocument"/> for visual
+/// consistency.
+/// </summary>
+internal sealed class TaxSummaryDocument(TaxSummary summary) : IDocument
+{
+    public DocumentMetadata GetMetadata() => DocumentMetadata.Default;
+
+    public void Compose(IDocumentContainer container)
+    {
+        container.Page(page =>
+        {
+            page.Margin(36);
+            page.Size(PageSizes.A4);
+            page.DefaultTextStyle(t => t.FontSize(10));
+
+            page.Header().Column(col =>
+            {
+                col.Item().Text("Tax Summary").FontSize(18).SemiBold();
+                col.Item().Text($"Year {summary.Year}")
+                    .FontSize(10).FontColor(Colors.Grey.Darken1);
+            });
+
+            page.Content().PaddingTop(12).Column(col =>
+            {
+                // KPI grid — 2x2 totals
+                col.Item().Table(table =>
+                {
+                    table.ColumnsDefinition(cd =>
+                    {
+                        cd.RelativeColumn();
+                        cd.RelativeColumn();
+                    });
+                    table.Cell().Text(t =>
+                    {
+                        t.Span("Domestic Dividend\n").SemiBold();
+                        t.Span(summary.DomesticDividendTotal.ToString("N2", CultureInfo.InvariantCulture));
+                    });
+                    table.Cell().Text(t =>
+                    {
+                        t.Span("Overseas Dividend\n").SemiBold();
+                        t.Span(summary.OverseasDividendTotal.ToString("N2", CultureInfo.InvariantCulture));
+                    });
+                    table.Cell().Text(t =>
+                    {
+                        t.Span("Domestic Capital Gain\n").SemiBold();
+                        t.Span(summary.DomesticCapitalGainTotal.ToString("N2", CultureInfo.InvariantCulture));
+                    });
+                    table.Cell().Text(t =>
+                    {
+                        t.Span("Overseas Capital Gain\n").SemiBold();
+                        t.Span(summary.OverseasCapitalGainTotal.ToString("N2", CultureInfo.InvariantCulture));
+                    });
+                });
+
+                // Overseas income + AMT banner
+                col.Item().PaddingTop(12).BorderTop(1).BorderColor(Colors.Grey.Darken2)
+                   .PaddingTop(6).Row(row =>
+                {
+                    row.RelativeItem().Text(t =>
+                    {
+                        t.Span("Overseas Income Total: ").SemiBold();
+                        t.Span(summary.OverseasIncomeTotal.ToString("N2", CultureInfo.InvariantCulture));
+                    });
+                    row.ConstantItem(220).AlignRight().Text(t =>
+                    {
+                        if (summary.TriggersAmtDeclaration)
+                        {
+                            t.Span("⚠ AMT declaration required (≥ 1,000,000 NTD)")
+                                .SemiBold().FontColor(Colors.Red.Darken2);
+                        }
+                        else
+                        {
+                            t.Span("AMT not triggered").FontColor(Colors.Grey.Darken1);
+                        }
+                    });
+                });
+
+                // Dividend records table
+                if (summary.Dividends.Count > 0)
+                {
+                    col.Item().PaddingTop(14).Text("Dividend Records").SemiBold().FontSize(12);
+                    col.Item().Table(table =>
+                    {
+                        table.ColumnsDefinition(cd =>
+                        {
+                            cd.ConstantColumn(80);
+                            cd.RelativeColumn(2);
+                            cd.RelativeColumn(1);
+                            cd.ConstantColumn(50);
+                            cd.RelativeColumn(1);
+                        });
+                        table.Header(h =>
+                        {
+                            h.Cell().Text("Date").SemiBold();
+                            h.Cell().Text("Symbol").SemiBold();
+                            h.Cell().Text("Exchange").SemiBold();
+                            h.Cell().Text("Country").SemiBold();
+                            h.Cell().AlignRight().Text("Amount").SemiBold();
+                        });
+                        foreach (var d in summary.Dividends.OrderBy(x => x.Date))
+                        {
+                            table.Cell().Text(d.Date.ToString("yyyy-MM-dd"));
+                            table.Cell().Text(d.Symbol);
+                            table.Cell().Text(d.Exchange);
+                            table.Cell().Text(d.Country);
+                            table.Cell().AlignRight().Text(d.Amount.ToString("N2", CultureInfo.InvariantCulture));
+                        }
+                    });
+                }
+
+                // Capital-gain records table
+                if (summary.CapitalGains.Count > 0)
+                {
+                    col.Item().PaddingTop(14).Text("Realised Capital Gains").SemiBold().FontSize(12);
+                    col.Item().Table(table =>
+                    {
+                        table.ColumnsDefinition(cd =>
+                        {
+                            cd.ConstantColumn(80);
+                            cd.RelativeColumn(2);
+                            cd.RelativeColumn(1);
+                            cd.ConstantColumn(50);
+                            cd.RelativeColumn(1);
+                        });
+                        table.Header(h =>
+                        {
+                            h.Cell().Text("Date").SemiBold();
+                            h.Cell().Text("Symbol").SemiBold();
+                            h.Cell().Text("Exchange").SemiBold();
+                            h.Cell().Text("Country").SemiBold();
+                            h.Cell().AlignRight().Text("Realised P&L").SemiBold();
+                        });
+                        foreach (var c in summary.CapitalGains.OrderBy(x => x.Date))
+                        {
+                            table.Cell().Text(c.Date.ToString("yyyy-MM-dd"));
+                            table.Cell().Text(c.Symbol);
+                            table.Cell().Text(c.Exchange);
+                            table.Cell().Text(c.Country);
+                            table.Cell().AlignRight().Text(c.RealizedPnl.ToString("N2", CultureInfo.InvariantCulture));
+                        }
+                    });
+                }
             });
 
             page.Footer().AlignCenter().Text(t =>

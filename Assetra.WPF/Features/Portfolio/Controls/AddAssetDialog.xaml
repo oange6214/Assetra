@@ -5,8 +5,8 @@
     xmlns:assetSections="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.AssetSections"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
@@ -58,9 +58,9 @@
                             Margin="0,0,8,0"
                             Padding="0"
                             VerticalAlignment="Center"
-                            Style="{StaticResource AppIconButton}"
                             Command="{Binding AddAssetDialog.BackToTypePickerCommand}"
                             DockPanel.Dock="Left"
+                            Style="{StaticResource AppIconButton}"
                             ToolTip="{DynamicResource Common.Back}"
                             Visibility="{Binding AddAssetDialog.IsLiabilityFormStep, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <ds:AppIcon
@@ -73,9 +73,9 @@
                             Height="28"
                             Padding="0"
                             HorizontalAlignment="Right"
-                            Style="{StaticResource AppIconButton}"
                             Command="{Binding AddAssetDialog.CloseAddDialogCommand}"
                             DockPanel.Dock="Right"
+                            Style="{StaticResource AppIconButton}"
                             ToolTip="{DynamicResource Common.Close}">
                             <ds:AppIcon
                                 FontSize="12"
@@ -138,12 +138,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="creditCard:信用卡">
+                            CommandParameter="creditCard:信用卡"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -162,12 +162,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="creditCard:0% 分期">
+                            CommandParameter="creditCard:0% 分期"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -186,12 +186,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="creditCard:預借現金">
+                            CommandParameter="creditCard:預借現金"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -210,12 +210,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="loan:房貸">
+                            CommandParameter="loan:房貸"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -234,12 +234,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="loan:車貸">
+                            CommandParameter="loan:車貸"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -258,12 +258,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="loan:學貸">
+                            CommandParameter="loan:學貸"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -282,12 +282,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="loan:信貸">
+                            CommandParameter="loan:信貸"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -306,12 +306,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="loan:親友借款">
+                            CommandParameter="loan:親友借款"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -330,12 +330,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="loan">
+                            CommandParameter="loan"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -359,12 +359,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="cash:現金">
+                            CommandParameter="cash:現金"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -382,12 +382,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="cash:銀行活存">
+                            CommandParameter="cash:銀行活存"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -405,12 +405,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="cash:數位活存">
+                            CommandParameter="cash:數位活存"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -428,12 +428,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="cash:定存">
+                            CommandParameter="cash:定存"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -451,12 +451,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="cash:外幣活存">
+                            CommandParameter="cash:外幣活存"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -474,12 +474,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="cash:交割戶">
+                            CommandParameter="cash:交割戶"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -497,12 +497,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="cash:電子支付">
+                            CommandParameter="cash:電子支付"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -520,12 +520,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="cash:儲值卡">
+                            CommandParameter="cash:儲值卡"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -543,12 +543,12 @@
                             Padding="14,16"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="cash">
+                            CommandParameter="cash"
+                            Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock
                                     Margin="0,0,0,6"
@@ -613,15 +613,15 @@
                             Height="30"
                             Margin="0,0,8,0"
                             Padding="14,0"
-                            Style="{StaticResource AppSecondaryButton}"
-                            Command="{Binding AddAssetDialog.CloseAddDialogCommand}">
+                            Command="{Binding AddAssetDialog.CloseAddDialogCommand}"
+                            Style="{StaticResource AppSecondaryButton}">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Common.Cancel}" />
                         </Button>
                         <Button
                             Height="30"
                             Padding="14,0"
-                            Style="{StaticResource AppPrimaryButton}"
-                            Command="{Binding AddAssetDialog.ConfirmAddCommand}">
+                            Command="{Binding AddAssetDialog.ConfirmAddCommand}"
+                            Style="{StaticResource AppPrimaryButton}">
                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Common.Confirm}" />
                         </Button>
                     </StackPanel>

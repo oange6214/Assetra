@@ -4,9 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:subvm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
-    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     d:DataContext="{d:DesignInstance Type={x:Type subvm:AccountDialogViewModel}}"
     Visibility="{Binding IsEditAssetDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}"
@@ -44,9 +44,9 @@
                             Height="28"
                             Padding="0"
                             HorizontalAlignment="Right"
-                            Style="{StaticResource AppIconButton}"
                             Command="{Binding CloseEditAssetCommand}"
                             DockPanel.Dock="Right"
+                            Style="{StaticResource AppIconButton}"
                             ToolTip="{DynamicResource Common.Close}">
                             <ds:AppIcon
                                 FontSize="12"
@@ -162,15 +162,15 @@
                             Height="30"
                             Margin="0,0,8,0"
                             Padding="14,0"
-                            Style="{StaticResource AppSecondaryButton}"
-                            Command="{Binding CloseEditAssetCommand}">
+                            Command="{Binding CloseEditAssetCommand}"
+                            Style="{StaticResource AppSecondaryButton}">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Common.Cancel}" />
                         </Button>
                         <Button
                             Height="30"
                             Padding="14,0"
-                            Style="{StaticResource AppPrimaryButton}"
-                            Command="{Binding SaveEditAssetCommand}">
+                            Command="{Binding SaveEditAssetCommand}"
+                            Style="{StaticResource AppPrimaryButton}">
                             <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Portfolio.EditAsset.Update}" />
                         </Button>
                     </StackPanel>

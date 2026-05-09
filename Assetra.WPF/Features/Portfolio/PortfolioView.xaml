@@ -5,10 +5,10 @@
     xmlns:beh="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:conv="clr-namespace:Assetra.WPF.Infrastructure.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:Assetra.Core.Models;assembly=Assetra.Core"
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
-    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
@@ -798,7 +798,10 @@
                                 <ItemsControl Grid.Row="1" ItemsSource="{Binding SelectedPositionTrades}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Margin="0,0,0,10" Padding="12" Style="{StaticResource FormCard}">
+                                            <Border
+                                                Margin="0,0,0,10"
+                                                Padding="12"
+                                                Style="{StaticResource FormCard}">
                                                 <StackPanel>
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>

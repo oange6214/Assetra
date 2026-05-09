@@ -112,8 +112,8 @@
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Cash.InitialDeposit.Date}" />
                     <DatePicker
-                        Margin="0,0,0,10"
                         MinWidth="132"
+                        Margin="0,0,0,10"
                         HorizontalContentAlignment="Left"
                         SelectedDate="{Binding AddInitialDepositDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Style="{StaticResource AppDatePicker}" />

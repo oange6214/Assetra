@@ -8,12 +8,12 @@
         Typography tokens
         ══════════════════════════════════════════════════════════
         Font family + size scale used across the app.
-        FontBase is the only family used; the platform fallback
-        chain handles Win11 (Segoe UI Variable) -> Win10 / older
-        (Segoe UI) -> CJK (微軟正黑體 / 雅黑體) -> generic sans.
+        FontBase is the only family used; the fallback chain follows the
+        Asset Management CIS: SF Pro-style display typography first,
+        Inter/Helvetica for Latin fallbacks, then Noto Sans TC and Windows CJK.
     -->
 
-    <FontFamily x:Key="Font.Family.Base">Segoe UI Variable Display, Segoe UI, Microsoft JhengHei UI, Microsoft YaHei UI, sans-serif</FontFamily>
+    <FontFamily x:Key="Font.Family.Base">SF Pro Display, Inter, Helvetica Neue, Noto Sans TC, Taipei Sans TC Beta, Segoe UI Variable Display, Segoe UI, Microsoft JhengHei UI, Microsoft YaHei UI, sans-serif</FontFamily>
     <sys:Double x:Key="Font.Size.Xs">12</sys:Double>
     <sys:Double x:Key="Font.Size.Sm">14</sys:Double>
     <sys:Double x:Key="Font.Size.Base">16</sys:Double>

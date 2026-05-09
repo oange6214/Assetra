@@ -43,10 +43,11 @@
             <TextBlock
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                FontFamily="{StaticResource Font.Family.Base}" Typography.NumeralAlignment="Tabular"
+                FontFamily="{StaticResource Font.Family.Base}"
                 FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppTextMuted}"
-                Text="{Binding ClockText}" />
+                Text="{Binding ClockText}"
+                Typography.NumeralAlignment="Tabular" />
 
         </Grid>
     </Border>

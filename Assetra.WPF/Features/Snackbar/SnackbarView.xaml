@@ -2,8 +2,8 @@
     x:Class="Assetra.WPF.Features.Snackbar.SnackbarView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:local="clr-namespace:Assetra.WPF.Features.Snackbar"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type local:SnackbarViewModel},
@@ -63,7 +63,12 @@
                                 DockPanel.Dock="Right"
                                 Style="{StaticResource AppIconButton}"
                                 ToolTip="關閉">
-                                <ds:AppIcon Symbol="Dismiss24" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="{DynamicResource AppTextMuted}" />
+                                <ds:AppIcon
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontSize="10"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Symbol="Dismiss24" />
                             </Button>
 
                             <!--  Kind icon  -->

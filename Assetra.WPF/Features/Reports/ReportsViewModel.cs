@@ -64,6 +64,17 @@ public sealed partial class ReportsViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasCashFlowStatement))]
     private CashFlowStatement? _cashFlowStatement;
 
+    /// <summary>
+    /// Annual tax summary for the current <see cref="Year"/>. Computed in-process
+    /// by <see cref="TaxCalculationService.CalculateForYear"/> over the trade
+    /// repository — no separate service interface needed since it's a pure
+    /// function. Refreshed on Year change (Month change does NOT trigger
+    /// recompute since tax is a yearly aggregate).
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasTaxSummary))]
+    private TaxSummary? _taxSummary;
+
     [ObservableProperty]
     private string? _exportStatus;
 
@@ -186,6 +197,9 @@ public sealed partial class ReportsViewModel : ObservableObject
     public string MonthHeader => $"{Year}-{Month:D2}";
     public bool   HasReport   => Report is not null;
     public bool HasIncomeStatement => IncomeStatement is not null;
+
+    public bool HasTaxSummary => TaxSummary is not null
+        && (TaxSummary.Dividends.Count > 0 || TaxSummary.CapitalGains.Count > 0);
     public bool HasBalanceSheet => BalanceSheet is not null;
     public bool HasCashFlowStatement => CashFlowStatement is not null;
     public bool HasPerformance => Performance is not null;
@@ -334,6 +348,23 @@ public sealed partial class ReportsViewModel : ObservableObject
             }
         }
 
+        if (_trades is not null)
+        {
+            try
+            {
+                // Tax is annual — pass the year from the dialog state. Re-runs
+                // every Month change too (cheap) so the user sees tax data
+                // even from the income/balance tabs without switching tabs.
+                var allTrades = await _trades.GetAllAsync().ConfigureAwait(true);
+                TaxSummary = Assetra.Application.Tax.TaxCalculationService.CalculateForYear(Year, allTrades);
+            }
+            catch (Exception ex)
+            {
+                TaxSummary = null;
+                detailErrors.Add(ex.Message);
+            }
+        }
+
         try
         {
             await LoadPerformanceAsync().ConfigureAwait(true);
@@ -363,6 +394,7 @@ public sealed partial class ReportsViewModel : ObservableObject
         IncomeStatement = null;
         BalanceSheet = null;
         CashFlowStatement = null;
+        TaxSummary = null;
         Performance = null;
         Risk = null;
     }
@@ -439,6 +471,12 @@ public sealed partial class ReportsViewModel : ObservableObject
     [RelayCommand]
     private Task ExportCashFlowCsvAsync() => ExportAsync("CashFlow", "csv");
 
+    [RelayCommand]
+    private Task ExportTaxPdfAsync() => ExportAsync("TaxSummary", "pdf");
+
+    [RelayCommand]
+    private Task ExportTaxCsvAsync() => ExportAsync("TaxSummary", "csv");
+
     private async Task ExportAsync(string target, string formatStr)
     {
         if (_exportService is null)
@@ -448,9 +486,14 @@ public sealed partial class ReportsViewModel : ObservableObject
         }
         var format = formatStr == "pdf" ? ExportFormat.Pdf : ExportFormat.Csv;
         var ext = format == ExportFormat.Pdf ? "pdf" : "csv";
+        // Tax is an annual aggregate — drop the month suffix from its file name
+        // so successive year-end exports don't accidentally collide on Month.
+        var fileBase = target == "TaxSummary"
+            ? $"{target}_{Year:D4}"
+            : $"{target}_{Year:D4}-{Month:D2}";
         var dlg = new Microsoft.Win32.SaveFileDialog
         {
-            FileName = $"{target}_{Year:D4}-{Month:D2}.{ext}",
+            FileName = $"{fileBase}.{ext}",
             DefaultExt = ext,
             Filter = format == ExportFormat.Pdf ? "PDF (*.pdf)|*.pdf" : "CSV (*.csv)|*.csv",
         };
@@ -467,6 +510,9 @@ public sealed partial class ReportsViewModel : ObservableObject
                     break;
                 case "CashFlow" when CashFlowStatement is not null:
                     await _exportService.ExportAsync(CashFlowStatement, format, dlg.FileName).ConfigureAwait(true);
+                    break;
+                case "TaxSummary" when TaxSummary is not null:
+                    await _exportService.ExportAsync(TaxSummary, format, dlg.FileName).ConfigureAwait(true);
                     break;
                 default:
                     ExportStatus = GetString("Reports.Export.Status.Empty", "目前沒有可匯出的資料。");
