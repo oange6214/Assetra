@@ -24,4 +24,6 @@ public enum NavSection
     Liabilities,
     /// <summary>Cross-cutting trade / transaction log. Promoted from Portfolio inner-tab to top-level nav.</summary>
     TransactionLog,
+    /// <summary>AI 財務助手 — 自然語言查詢 (Phase 1 rule-based; Phase 2/3 spec'd).</summary>
+    Assistant,
 }

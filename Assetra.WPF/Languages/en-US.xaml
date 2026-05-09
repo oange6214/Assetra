@@ -21,6 +21,12 @@
     <sys:String x:Key="TitleBar.Search.Hint">Type a stock symbol or name to search</sys:String>
     <sys:String x:Key="TitleBar.Search.Placeholder">Search stocks...</sys:String>
 <sys:String x:Key="Nav.Reports">Reports</sys:String>
+    <sys:String x:Key="Nav.Assistant">Assistant</sys:String>
+    <sys:String x:Key="Assistant.Title">AI Financial Assistant</sys:String>
+    <sys:String x:Key="Assistant.Subtitle">Ask in natural language about net worth, cash, liabilities, overseas income, and more. Phase 1 is rule-based; Phase 2/3 (summaries, alerts, LLM) is planned.</sys:String>
+    <sys:String x:Key="Assistant.EmptyState">Try one of these queries:</sys:String>
+    <sys:String x:Key="Assistant.Send">Send</sys:String>
+    <sys:String x:Key="Assistant.Clear">Clear</sys:String>
     <sys:String x:Key="Nav.Trends">Trends</sys:String>
     <sys:String x:Key="Nav.Goals">Goals</sys:String>
     <sys:String x:Key="Nav.Alerts">Alerts</sys:String>

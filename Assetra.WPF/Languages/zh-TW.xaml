@@ -21,6 +21,12 @@
     <sys:String x:Key="TitleBar.Search.Hint">輸入股票代號或名稱搜尋</sys:String>
     <sys:String x:Key="TitleBar.Search.Placeholder">搜尋股票...</sys:String>
     <sys:String x:Key="Nav.Reports">月結報告</sys:String>
+    <sys:String x:Key="Nav.Assistant">財務助手</sys:String>
+    <sys:String x:Key="Assistant.Title">AI 財務助手</sys:String>
+    <sys:String x:Key="Assistant.Subtitle">用自然語言查詢淨資產、現金、負債、海外所得等資料。Phase 1 為規則式分發；Phase 2/3 (摘要、提醒、LLM) 規劃中。</sys:String>
+    <sys:String x:Key="Assistant.EmptyState">試試以下查詢：</sys:String>
+    <sys:String x:Key="Assistant.Send">送出</sys:String>
+    <sys:String x:Key="Assistant.Clear">清除對話</sys:String>
     <sys:String x:Key="Nav.Trends">資產趨勢</sys:String>
     <sys:String x:Key="Nav.Goals">財務目標</sys:String>
     <sys:String x:Key="Nav.Alerts">警示</sys:String>

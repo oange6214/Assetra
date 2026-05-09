@@ -53,6 +53,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public MonteCarloViewModel MonteCarlo { get; }
     public SettingsViewModel Settings { get; }
     public SnackbarViewModel Snackbar { get; }
+    public Features.Assistant.AssistantViewModel Assistant { get; }
 
     // Title bar search / command palette
     [ObservableProperty] private string _searchText = string.Empty;
@@ -156,6 +157,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         MonteCarloViewModel monteCarlo,
         SettingsViewModel settings,
         SnackbarViewModel snackbar,
+        Features.Assistant.AssistantViewModel assistant,
         IThemeService themeService,
         IStockSearchService searchService)
     {
@@ -180,6 +182,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         MonteCarlo = monteCarlo;
         Settings = settings;
         Snackbar = snackbar;
+        Assistant = assistant;
         _themeService = themeService;
         _searchService = searchService;
         CurrentTheme = themeService.CurrentTheme;
