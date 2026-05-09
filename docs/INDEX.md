@@ -61,6 +61,8 @@
   - 未來可拆分的業務 context 邊界。
 
 ## Planning
+- [Assetra US Market Data Plan](planning/Assetra-US-Market-Data-Plan.md)
+  - 台股與美股共存的 market data 架構計畫，包含 symbol directory、quote provider、quota、cache、trading calendar、FX valuation 與導入 phase。
 - [Assetra Fluent + Carbon UI Plan](planning/Assetra-Fluent-Carbon-UI-Plan.md)
   - Assetra WPF 以 Fluent Design 為主、Carbon 為輔的 UI 設計決策、頁面模式與分階段重構計畫。
 - [Assetra Feature Blueprint and Roadmap](planning/Assetra-Feature-Blueprint-and-Roadmap.md)
