@@ -95,8 +95,9 @@ internal static class PortfolioServiceCollectionExtensions
                 sp.GetRequiredService<PortfolioBackfillService>()));
         // Append-only audit log: optional dependency of TradeDeletionWorkflowService.
         // Deletes capture a JSON snapshot of the trade BEFORE removal so users can
-        // recover from accidental edits / deletes via raw SQL inspection. No UI yet.
+        // recover from accidental edits / deletes. UI: NavSection.AuditLog page.
         services.AddSingleton<ITradeAuditRepository>(_ => new TradeAuditSqliteRepository(dbPath));
+        services.AddSingleton<Features.AuditLog.AuditLogViewModel>();
         services.AddSingleton<ITradeDeletionWorkflowService>(sp =>
             new TradeDeletionWorkflowService(
                 sp.GetRequiredService<ITradeRepository>(),
