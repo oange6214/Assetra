@@ -342,6 +342,19 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             OcrTessdataPath = dialog.FolderName;
     }
 
+    /// <summary>
+    /// Opens the Tesseract tessdata GitHub releases page in the default browser
+    /// so the user can download .traineddata files (chi_tra.traineddata for
+    /// 繁體中文, eng.traineddata for English etc.) and drop them into the
+    /// folder selected via <see cref="BrowseOcrTessdata"/>.
+    /// </summary>
+    [RelayCommand]
+    private void OpenTessdataDownload()
+    {
+        Process.Start(new ProcessStartInfo("https://github.com/tesseract-ocr/tessdata/tree/main")
+        { UseShellExecute = true });
+    }
+
     private void OnThemeChanged(ApplicationTheme theme)
     {
         _isLoading = true;

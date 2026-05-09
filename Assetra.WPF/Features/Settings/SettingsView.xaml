@@ -382,6 +382,12 @@
                                 <Button
                                     Command="{Binding BrowseOcrTessdataCommand}"
                                     Content="{DynamicResource Common.Browse}" Style="{StaticResource AppSecondaryButton}" />
+                                <Button
+                                    Margin="8,0,0,0"
+                                    Command="{Binding OpenTessdataDownloadCommand}"
+                                    Content="{DynamicResource Settings.Ocr.Download}"
+                                    Style="{StaticResource AppSecondaryButton}"
+                                    ToolTip="{DynamicResource Settings.Ocr.Download.Tooltip}" />
                             </StackPanel>
                             <TextBlock
                                 Margin="0,4,0,0"
