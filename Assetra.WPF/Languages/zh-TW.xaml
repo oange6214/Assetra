@@ -1127,6 +1127,9 @@
     <sys:String x:Key="AuditLog.Col.TradeId">Trade ID</sys:String>
     <sys:String x:Key="AuditLog.Col.Note">備註</sys:String>
     <sys:String x:Key="AuditLog.Col.TradeJson">當時 Trade 內容（截短）</sys:String>
+    <sys:String x:Key="AuditLog.Col.Restore">還原</sys:String>
+    <sys:String x:Key="AuditLog.Restore">還原</sys:String>
+    <sys:String x:Key="AuditLog.Restore.Tooltip">將此快照插入為一筆新 Trade（會配新 Id 避免與既存資料衝突）。請至交易紀錄頁複查。</sys:String>
     <sys:String x:Key="Settings.Fx.Title">匯率（Frankfurter 即時來源）</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">上次更新：</sys:String>
     <sys:String x:Key="Settings.Fx.NeverRefreshed">尚未更新</sys:String>

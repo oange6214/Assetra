@@ -1123,6 +1123,9 @@
     <sys:String x:Key="AuditLog.Col.TradeId">Trade ID</sys:String>
     <sys:String x:Key="AuditLog.Col.Note">Note</sys:String>
     <sys:String x:Key="AuditLog.Col.TradeJson">Pre-deletion Trade snapshot (truncated)</sys:String>
+    <sys:String x:Key="AuditLog.Col.Restore">Restore</sys:String>
+    <sys:String x:Key="AuditLog.Restore">Restore</sys:String>
+    <sys:String x:Key="AuditLog.Restore.Tooltip">Insert this snapshot as a new Trade (assigned a new Id to avoid clashing with existing data). Review in Transaction Log afterward.</sys:String>
     <sys:String x:Key="Settings.Fx.Title">Exchange rates (Frankfurter live source)</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">Last refreshed:</sys:String>
     <sys:String x:Key="Settings.Fx.NeverRefreshed">Never refreshed</sys:String>

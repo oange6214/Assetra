@@ -128,6 +128,24 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Width="100">
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock Text="{DynamicResource AuditLog.Col.Restore}" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button
+                                        Padding="8,2"
+                                        Command="{Binding DataContext.RestoreCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Content="{DynamicResource AuditLog.Restore}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Style="{StaticResource AppSecondaryButton}"
+                                        ToolTip="{DynamicResource AuditLog.Restore.Tooltip}"
+                                        Visibility="{Binding DataContext.CanRestore, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
