@@ -65,17 +65,43 @@ public partial class PortfolioRowViewModel : ObservableObject
     [ObservableProperty] private bool _isActive = true;
 
     [ObservableProperty] private string _name = string.Empty;
-    [ObservableProperty] private string _currency = "TWD";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MarketValueAsMoney))]
+    [NotifyPropertyChangedFor(nameof(CostAsMoney))]
+    [NotifyPropertyChangedFor(nameof(PnlAsMoney))]
+    private string _currency = "TWD";
+
     [ObservableProperty] private decimal _currentPrice;
     [ObservableProperty] private decimal _prevClose;
     [ObservableProperty] private bool _isLoadingPrice;
 
     // Derived — updated by Refresh()
-    [ObservableProperty] private decimal _cost;
-    [ObservableProperty] private decimal _marketValue;
-    [ObservableProperty] private decimal _pnl;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CostAsMoney))]
+    private decimal _cost;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MarketValueAsMoney))]
+    private decimal _marketValue;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PnlAsMoney))]
+    private decimal _pnl;
+
     [ObservableProperty] private decimal _pnlPercent;
     [ObservableProperty] private bool _isPnlPositive;
+
+    /// <summary>
+    /// M1 — currency-tagged accessors. Use these for any cross-row aggregation
+    /// that must respect currency boundaries (concentration, multi-currency
+    /// portfolio summary). Existing decimal properties stay primary for XAML.
+    /// </summary>
+    public Money MarketValueAsMoney => new(MarketValue, NormalizedCurrency);
+    public Money CostAsMoney => new(Cost, NormalizedCurrency);
+    public Money PnlAsMoney => new(Pnl, NormalizedCurrency);
+
+    private string NormalizedCurrency => string.IsNullOrWhiteSpace(Currency) ? "TWD" : Currency;
 
     /// <summary>
     /// 賣出時估算費用 = 賣出手續費 + 證交稅 (僅股票/ETF；其他資產類型為 0)。
