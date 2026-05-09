@@ -15,6 +15,8 @@ namespace Assetra.WPF.Features.AuditLog;
 public sealed partial class AuditLogViewModel : ObservableObject
 {
     private readonly ITradeAuditRepository? _audit;
+    private readonly Application.Portfolio.Services.TradeAuditRestoreService? _restore;
+    private readonly Infrastructure.ISnackbarService? _snackbar;
     private readonly ObservableCollection<AuditRowViewModel> _entries = [];
     public ReadOnlyObservableCollection<AuditRowViewModel> Entries { get; }
 
@@ -35,12 +37,35 @@ public sealed partial class AuditLogViewModel : ObservableObject
     /// <summary>ICollectionView used by the DataGrid; honours <see cref="FilterText"/>.</summary>
     public ICollectionView EntriesView { get; }
 
-    public AuditLogViewModel(ITradeAuditRepository? audit = null)
+    public AuditLogViewModel(
+        ITradeAuditRepository? audit = null,
+        Application.Portfolio.Services.TradeAuditRestoreService? restore = null,
+        Infrastructure.ISnackbarService? snackbar = null)
     {
         _audit = audit;
+        _restore = restore;
+        _snackbar = snackbar;
         Entries = new ReadOnlyObservableCollection<AuditRowViewModel>(_entries);
         EntriesView = CollectionViewSource.GetDefaultView(_entries);
         EntriesView.Filter = FilterEntry;
+    }
+
+    /// <summary>Whether the restore button should be shown (DI may not have wired the service).</summary>
+    public bool CanRestore => _restore is not null;
+
+    [RelayCommand]
+    private async Task RestoreAsync(AuditRowViewModel? row)
+    {
+        if (row is null || _restore is null) return;
+        try
+        {
+            var newId = await _restore.RestoreAsync(row.RawTradeJson).ConfigureAwait(true);
+            _snackbar?.Success($"已還原為新 Trade（Id={newId.ToString()[..8]}…）。請至交易紀錄頁複查並刪除舊的若有需要。");
+        }
+        catch (Exception ex)
+        {
+            _snackbar?.Error("還原失敗：" + ex.Message);
+        }
     }
 
     partial void OnFilterTextChanged(string value) => EntriesView.Refresh();
@@ -97,4 +122,7 @@ public sealed class AuditRowViewModel
     /// <summary>JSON 預覽截短到 600 字 — 完整 payload 在 trade_audit table 中。</summary>
     public string TradeJsonPreview =>
         _entry.TradeJson.Length <= 600 ? _entry.TradeJson : _entry.TradeJson[..600] + "…";
+
+    /// <summary>Full snapshot for the restore-from-snapshot path.</summary>
+    public string RawTradeJson => _entry.TradeJson;
 }

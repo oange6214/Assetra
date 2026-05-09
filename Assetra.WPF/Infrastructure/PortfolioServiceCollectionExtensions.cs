@@ -97,7 +97,13 @@ internal static class PortfolioServiceCollectionExtensions
         // Deletes capture a JSON snapshot of the trade BEFORE removal so users can
         // recover from accidental edits / deletes. UI: NavSection.AuditLog page.
         services.AddSingleton<ITradeAuditRepository>(_ => new TradeAuditSqliteRepository(dbPath));
-        services.AddSingleton<Features.AuditLog.AuditLogViewModel>();
+        services.AddSingleton<TradeAuditRestoreService>(sp => new TradeAuditRestoreService(
+            sp.GetRequiredService<ITradeRepository>()));
+        services.AddSingleton<Features.AuditLog.AuditLogViewModel>(sp =>
+            new Features.AuditLog.AuditLogViewModel(
+                sp.GetService<ITradeAuditRepository>(),
+                sp.GetService<TradeAuditRestoreService>(),
+                sp.GetService<ISnackbarService>()));
         services.AddSingleton<ITradeDeletionWorkflowService>(sp =>
             new TradeDeletionWorkflowService(
                 sp.GetRequiredService<ITradeRepository>(),
