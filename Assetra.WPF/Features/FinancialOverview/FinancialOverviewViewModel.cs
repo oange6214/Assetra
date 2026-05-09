@@ -59,7 +59,8 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     /// the underlying totals or the user's <see cref="AppSettings.OverviewKpis"/>
     /// selection changes. Bound to an ItemsControl in the view.
     /// </summary>
-    public ObservableCollection<KpiCardVm> KpiCards { get; } = [];
+    private readonly ObservableCollection<KpiCardVm> _kpiCards = [];
+    public ReadOnlyObservableCollection<KpiCardVm> KpiCards { get; }
 
     // ── KPI selector dialog state ─────────────────────────────────────────
 
@@ -72,7 +73,8 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     /// by checkboxes. Snapshotted from the persisted selection on open;
     /// flushed back to AppSettings on save.
     /// </summary>
-    public ObservableCollection<KpiSelectionItemVm> KpiEditorItems { get; } = [];
+    private readonly ObservableCollection<KpiSelectionItemVm> _kpiEditorItems = [];
+    public ReadOnlyObservableCollection<KpiSelectionItemVm> KpiEditorItems { get; }
 
     [ObservableProperty]
     private int _kpiSelectedCount;
@@ -85,9 +87,12 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
     // ── Accordion collections ─────────────────────────────────────────────
 
-    public ObservableCollection<AssetGroupVm> AssetGroups { get; } = [];
-    public ObservableCollection<AssetGroupVm> InvestGroups { get; } = [];
-    public ObservableCollection<AssetGroupVm> LiabGroups { get; } = [];
+    private readonly ObservableCollection<AssetGroupVm> _assetGroups = [];
+    private readonly ObservableCollection<AssetGroupVm> _investGroups = [];
+    private readonly ObservableCollection<AssetGroupVm> _liabGroups = [];
+    public ReadOnlyObservableCollection<AssetGroupVm> AssetGroups { get; }
+    public ReadOnlyObservableCollection<AssetGroupVm> InvestGroups { get; }
+    public ReadOnlyObservableCollection<AssetGroupVm> LiabGroups { get; }
 
     [ObservableProperty] private bool _isLoading;
 
@@ -108,6 +113,12 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         // the first batch of live prices lands; without this hook the Investments
         // section freezes at TWD 0 because LoadAsync was called pre-price-fetch.
         _portfolio.PropertyChanged += OnPortfolioPropertyChanged;
+
+        KpiCards = new ReadOnlyObservableCollection<KpiCardVm>(_kpiCards);
+        KpiEditorItems = new ReadOnlyObservableCollection<KpiSelectionItemVm>(_kpiEditorItems);
+        AssetGroups = new ReadOnlyObservableCollection<AssetGroupVm>(_assetGroups);
+        InvestGroups = new ReadOnlyObservableCollection<AssetGroupVm>(_investGroups);
+        LiabGroups = new ReadOnlyObservableCollection<AssetGroupVm>(_liabGroups);
 
         if (_settings is not null)
             _settings.Changed += RebuildKpiCards;
@@ -159,17 +170,17 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
         void ApplyResult()
         {
-            AssetGroups.Clear();
+            _assetGroups.Clear();
             foreach (var g in result.AssetGroups)
-                AssetGroups.Add(ToGroupVm(g));
+                _assetGroups.Add(ToGroupVm(g));
 
-            InvestGroups.Clear();
+            _investGroups.Clear();
             foreach (var g in result.InvestmentGroups)
-                InvestGroups.Add(ToGroupVm(g));
+                _investGroups.Add(ToGroupVm(g));
 
-            LiabGroups.Clear();
+            _liabGroups.Clear();
             foreach (var g in result.LiabilityGroups)
-                LiabGroups.Add(ToGroupVm(g));
+                _liabGroups.Add(ToGroupVm(g));
 
             BaseCurrency = result.BaseCurrency;
             TotalAssets = result.TotalAssets;
@@ -204,7 +215,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     {
         var vm = new AssetGroupVm { Icon = group.Icon, Name = group.Name, Currency = group.Currency };
         foreach (var item in group.Items)
-            vm.Items.Add(new AssetItemVm { Id = item.Id, Name = item.Name, Currency = item.Currency, CurrentValue = item.CurrentValue });
+            vm.AddItem(new AssetItemVm { Id = item.Id, Name = item.Name, Currency = item.Currency, CurrentValue = item.CurrentValue });
         vm.Subtotal = group.Subtotal;
         return vm;
     }
@@ -233,9 +244,9 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
             ? KpiMetricCatalog.Default
             : KpiMetricCatalog.ParseSelection(persisted.Split(','));
 
-        KpiCards.Clear();
+        _kpiCards.Clear();
         foreach (var id in ids)
-            KpiCards.Add(BuildCard(id));
+            _kpiCards.Add(BuildCard(id));
     }
 
     private KpiCardVm BuildCard(KpiMetric id)
@@ -298,9 +309,9 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
             : KpiMetricCatalog.ParseSelection(_settings.Current.OverviewKpis.Split(','));
         var selectedSet = current.ToHashSet();
 
-        KpiEditorItems.Clear();
+        _kpiEditorItems.Clear();
         foreach (var info in KpiMetricCatalog.All)
-            KpiEditorItems.Add(new KpiSelectionItemVm(info, selectedSet.Contains(info.Id), RecomputeKpiEditorState));
+            _kpiEditorItems.Add(new KpiSelectionItemVm(info, selectedSet.Contains(info.Id), RecomputeKpiEditorState));
 
         RecomputeKpiEditorState();
         IsKpiEditorOpen = true;
