@@ -122,12 +122,17 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         ArgumentNullException.ThrowIfNull(deps);
 
-        // H1 — react to Buy/Sell/Div/Loan/Transfer.X changes (preview, validation, side effects).
+        // H1 — react to Buy/Sell/Div/Loan/Transfer/CreditCard.X changes.
         Buy.PropertyChanged += OnBuyPriceModeChanged;
         Sell.PropertyChanged += OnSellTxChanged;
         Div.PropertyChanged += OnDividendTxChanged;
         Loan.PropertyChanged += OnLoanTxChanged;
         Transfer.PropertyChanged += OnTransferTxChanged;
+        CreditCard.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(CreditCardTxViewModel.Card))
+                NotifyImpactPreviewChanged();
+        };
 
         // M6-B — read-only views of the internally-mutated suggestion collections.
         CashAccountSuggestions = new ReadOnlyObservableCollection<string>(_cashAccountSuggestions);
@@ -497,7 +502,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public IReadOnlyList<string> LoanLabelSuggestions =>
         Liabilities.Select(l => l.Label).OrderBy(l => l).ToList();
 
-    [ObservableProperty] private LiabilityRowViewModel? _txCreditCard;
+    /// <summary>
+    /// H1-P9 — credit-card transaction state extracted into <see cref="Tx.CreditCardTxViewModel"/>.
+    /// </summary>
+    public Tx.CreditCardTxViewModel CreditCard { get; } = new();
 
     public IReadOnlyList<LiabilityRowViewModel> CreditCardOptions =>
         Liabilities.Where(l => !l.IsLoan).OrderBy(l => l.Label).ToList();
@@ -876,7 +884,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Transfer.Target = null;
         Transfer.TargetName = string.Empty;
         Transfer.TargetAmount = string.Empty;
-        TxCreditCard = null;
+        CreditCard.Card = null;
         Buy.AssetType = state.TxBuyAssetType;
         Buy.PriceMode = state.TxBuyPriceMode;
         Buy.TotalCost = string.Empty;
@@ -957,7 +965,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Transfer.Target = null;
         Transfer.TargetName = string.Empty;
         Transfer.TargetAmount = string.Empty;
-        TxCreditCard = null;
+        CreditCard.Card = null;
         Loan.Principal = string.Empty;
         Loan.InterestPaid = string.Empty;
         Div.Position = null;
@@ -988,7 +996,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Div.TotalInput = string.Empty;
 
         TxType = editState.TxType;
-        TxCreditCard = editState.TxCreditCard;
+        CreditCard.Card = editState.TxCreditCard;
 
         switch (row.Type)
         {

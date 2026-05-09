@@ -33,7 +33,7 @@
             Margin="0,0,0,12"
             DisplayMemberPath="Label"
             ItemsSource="{Binding CreditCardOptions}"
-            SelectedItem="{Binding TxCreditCard, Mode=TwoWay}"
+            SelectedItem="{Binding CreditCard.Card, Mode=TwoWay}"
             Style="{StaticResource FormComboBox}" />
 
         <Grid Margin="0,0,0,12">
