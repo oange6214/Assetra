@@ -15,15 +15,15 @@ namespace Assetra.WPF.Features.Portfolio.SubViewModels;
 /// </summary>
 public sealed partial class DividendCalendarViewModel : ObservableObject
 {
-    private readonly ObservableCollection<TradeRowViewModel> _trades;
+    private readonly ReadOnlyObservableCollection<TradeRowViewModel> _trades;
     private readonly ObservableCollection<DividendCalendarCellViewModel> _cells = [];
 
-    public DividendCalendarViewModel(ObservableCollection<TradeRowViewModel> trades)
+    public DividendCalendarViewModel(ReadOnlyObservableCollection<TradeRowViewModel> trades)
     {
         ArgumentNullException.ThrowIfNull(trades);
         _trades = trades;
         Cells = new ReadOnlyObservableCollection<DividendCalendarCellViewModel>(_cells);
-        _trades.CollectionChanged += OnTradesChanged;
+        ((INotifyCollectionChanged)_trades).CollectionChanged += OnTradesChanged;
         Rebuild();
     }
 

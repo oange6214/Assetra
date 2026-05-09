@@ -19,7 +19,7 @@ internal sealed record AccountDialogDependencies(
     IAccountMutationWorkflowService AccountMutation,
     IPositionMetadataWorkflowService PositionMetadata,
     ISnackbarService? Snackbar,
-    ObservableCollection<CashAccountRowViewModel> CashAccounts,
+    ReadOnlyObservableCollection<CashAccountRowViewModel> CashAccounts,
     Func<Task> LoadCashAccountsAsync,
     Func<Guid?, Task> ApplyDefaultCashAccountAsync,
     Action<string, Func<Task>> AskConfirm,
@@ -38,7 +38,7 @@ public partial class AccountDialogViewModel : ObservableObject
     private readonly IAccountMutationWorkflowService _accountMutation;
     private readonly IPositionMetadataWorkflowService _positionMetadata;
     private readonly ISnackbarService? _snackbar;
-    private readonly ObservableCollection<CashAccountRowViewModel> _cashAccounts;
+    private readonly ReadOnlyObservableCollection<CashAccountRowViewModel> _cashAccounts;
     private readonly Func<Task> _loadCashAccountsAsync;
     private readonly Func<Guid?, Task> _applyDefaultCashAccountAsync;
     private readonly Action<string, Func<Task>> _askConfirm;
@@ -196,7 +196,8 @@ public partial class AccountDialogViewModel : ObservableObject
             async () =>
             {
                 await _accountMutation.DeleteAsync(row.Id);
-                _cashAccounts.Remove(row);
+                // M6-B — _cashAccounts is now read-only; parent VM removes the row
+                // via Internal_RemoveCashAccount in its AccountChanged handler.
                 AccountChanged?.Invoke(this, EventArgs.Empty);
 
                 if (DefaultCashAccountId == row.Id)

@@ -44,7 +44,7 @@ public sealed class DividendCalendarViewModelTests
     public void Constructor_PopulatesTwelveCells()
     {
         var trades = new ObservableCollection<TradeRowViewModel>();
-        var vm = new DividendCalendarViewModel(trades) { Year = 2026 };
+        var vm = new DividendCalendarViewModel(new ReadOnlyObservableCollection<TradeRowViewModel>(trades)) { Year = 2026 };
 
         Assert.Equal(12, vm.Cells.Count);
         Assert.All(vm.Cells, c => Assert.False(c.HasData));
@@ -60,7 +60,7 @@ public sealed class DividendCalendarViewModelTests
             CashDividend(2026, 8, 9999m),
             CashDividend(2025, 3,  100m),  // different year — ignored
         };
-        var vm = new DividendCalendarViewModel(trades) { Year = 2026 };
+        var vm = new DividendCalendarViewModel(new ReadOnlyObservableCollection<TradeRowViewModel>(trades)) { Year = 2026 };
 
         Assert.Equal(2000m, vm.Cells.Single(c => c.Month == 3).Total);
         Assert.Equal(9999m, vm.Cells.Single(c => c.Month == 8).Total);
@@ -75,7 +75,7 @@ public sealed class DividendCalendarViewModelTests
             CashDividend(2025, 5, 100m),
             CashDividend(2026, 5, 200m),
         };
-        var vm = new DividendCalendarViewModel(trades) { Year = 2025 };
+        var vm = new DividendCalendarViewModel(new ReadOnlyObservableCollection<TradeRowViewModel>(trades)) { Year = 2025 };
         Assert.Equal(100m, vm.Cells.Single(c => c.Month == 5).Total);
 
         vm.Year = 2026;
@@ -90,7 +90,7 @@ public sealed class DividendCalendarViewModelTests
             CashDividend(2026, 3, 1500m),
             CashDividend(2026, 8, 2500m),
         };
-        var vm = new DividendCalendarViewModel(trades) { Year = 2026 };
+        var vm = new DividendCalendarViewModel(new ReadOnlyObservableCollection<TradeRowViewModel>(trades)) { Year = 2026 };
 
         Assert.Equal(4000m, vm.YearTotal);
         Assert.Equal("合計 4,000", vm.YearTotalDisplay);
@@ -100,7 +100,7 @@ public sealed class DividendCalendarViewModelTests
     public void YearTotal_NoDividends_DisplayEmpty()
     {
         var trades = new ObservableCollection<TradeRowViewModel> { Buy(2026, 4) };
-        var vm = new DividendCalendarViewModel(trades) { Year = 2026 };
+        var vm = new DividendCalendarViewModel(new ReadOnlyObservableCollection<TradeRowViewModel>(trades)) { Year = 2026 };
 
         Assert.Equal(0m, vm.YearTotal);
         Assert.Equal(string.Empty, vm.YearTotalDisplay);
@@ -114,7 +114,7 @@ public sealed class DividendCalendarViewModelTests
             Buy(2026, 4),
             CashDividend(2020, 1, 50m),  // any past year still counts
         };
-        var vm = new DividendCalendarViewModel(trades) { Year = 2026 };
+        var vm = new DividendCalendarViewModel(new ReadOnlyObservableCollection<TradeRowViewModel>(trades)) { Year = 2026 };
 
         Assert.True(vm.HasAnyDividends);
     }
@@ -123,7 +123,7 @@ public sealed class DividendCalendarViewModelTests
     public void HasAnyDividends_FalseWhenOnlyNonDividendTrades()
     {
         var trades = new ObservableCollection<TradeRowViewModel> { Buy(2026, 4) };
-        var vm = new DividendCalendarViewModel(trades) { Year = 2026 };
+        var vm = new DividendCalendarViewModel(new ReadOnlyObservableCollection<TradeRowViewModel>(trades)) { Year = 2026 };
 
         Assert.False(vm.HasAnyDividends);
     }
@@ -132,7 +132,7 @@ public sealed class DividendCalendarViewModelTests
     public void TradesCollectionChanged_TriggersRebuild()
     {
         var trades = new ObservableCollection<TradeRowViewModel>();
-        var vm = new DividendCalendarViewModel(trades) { Year = 2026 };
+        var vm = new DividendCalendarViewModel(new ReadOnlyObservableCollection<TradeRowViewModel>(trades)) { Year = 2026 };
         Assert.Equal(0m, vm.Cells.Single(c => c.Month == 6).Total);
 
         trades.Add(CashDividend(2026, 6, 777m));
@@ -149,7 +149,7 @@ public sealed class DividendCalendarViewModelTests
             CashDividend(2025, 1, 100m),
             CashDividend(2027, 1, 300m),
         };
-        var vm = new DividendCalendarViewModel(trades) { Year = 2026 };
+        var vm = new DividendCalendarViewModel(new ReadOnlyObservableCollection<TradeRowViewModel>(trades)) { Year = 2026 };
         Assert.Equal(0m, vm.Cells[0].Total);
 
         vm.PrevYearCommand.Execute(null);

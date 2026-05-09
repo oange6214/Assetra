@@ -81,7 +81,7 @@ public sealed class TradeFilterViewModelTests
     {
         var col = new ObservableCollection<TradeRowViewModel>(rows);
         var vm = new TradeFilterViewModel(() => col, _nullLocalization);
-        vm.AttachTradesCollection(col);
+        vm.AttachTradesCollection(new ReadOnlyObservableCollection<TradeRowViewModel>(col));
         return (vm, col);
     }
 
@@ -417,7 +417,7 @@ public sealed class TradeFilterViewModelTests
             var rows = new List<TradeRowViewModel> { row };
             var col  = new ObservableCollection<TradeRowViewModel>(rows);
             var vm   = new TradeFilterViewModel(() => rows, _nullLocalization);
-            vm.AttachTradesCollection(col);
+            vm.AttachTradesCollection(new ReadOnlyObservableCollection<TradeRowViewModel>(col));
 
             // Wire type filters with real PropertyChanged subscriptions (as production does).
             vm.InitTradeTypeFilters();

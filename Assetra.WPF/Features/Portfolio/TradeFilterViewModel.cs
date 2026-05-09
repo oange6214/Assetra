@@ -214,7 +214,7 @@ public partial class TradeFilterViewModel : ObservableObject, IDisposable
     /// </summary>
     private HashSet<Guid> _visibleTradeIds = [];
 
-    private ObservableCollection<TradeRowViewModel>? _tradesCollection;
+    private ReadOnlyObservableCollection<TradeRowViewModel>? _tradesCollection;
 
     private ICollectionView? _tradesView;
 
@@ -228,7 +228,7 @@ public partial class TradeFilterViewModel : ObservableObject, IDisposable
     /// Attaches the view to the <paramref name="trades"/> collection owned by
     /// <see cref="PortfolioViewModel"/>. Call once after the collection exists.
     /// </summary>
-    public void AttachTradesCollection(ObservableCollection<TradeRowViewModel> trades)
+    public void AttachTradesCollection(ReadOnlyObservableCollection<TradeRowViewModel> trades)
     {
         ArgumentNullException.ThrowIfNull(trades);
         _tradesCollection = trades;
