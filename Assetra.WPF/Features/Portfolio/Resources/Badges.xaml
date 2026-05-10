@@ -50,27 +50,30 @@
     </Style>
 
     <!--
-        資金帳戶細分類 chip（銀行活存 / 數位活存 / 證券交割戶 / etc）—
-        中性灰底淺色，不與「預設」accent badge 衝突。Foreground 走 muted。
+        資金帳戶細分類 chip（銀行活存 / 數位活存 / 證券交割戶 / etc）。
+        v0.28+ 修正：原本用 AppSurfaceAlt 背景與頁面 SoftWhite 幾乎一樣
+        導致 chip 透明看不見。改用 accent-subtle 帶色背景 + accent 邊框，
+        在 light/dark theme 兩邊都明顯可辨識，仍保持「metadata 不是 status」
+        的視覺層級（與 PortfolioDefaultBadge 的滿色 accent 區別）。
     -->
     <Style
         x:Key="PortfolioSubtypeChip"
         BasedOn="{StaticResource PortfolioBadgeBase}"
         TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource AppSurfaceAlt}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+        <Setter Property="Background" Value="{DynamicResource AppAccentSubtle}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="MinWidth" Value="0" />
-        <Setter Property="Padding" Value="6,0" />
-        <Setter Property="Height" Value="18" />
+        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="Height" Value="20" />
     </Style>
 
     <Style x:Key="PortfolioSubtypeChipText" TargetType="TextBlock">
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size.Xs}" />
-        <Setter Property="FontWeight" Value="Normal" />
-        <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
     </Style>
 
     <Style
