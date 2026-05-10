@@ -24,25 +24,27 @@ public static class CategorySeeder
         var sort = 0;
 
         // ── 支出 ─────────────────────────────────────────────────────
-        yield return New("飲食", CategoryKind.Expense, ++sort, "🍱", "#F59E0B");
-        yield return New("交通", CategoryKind.Expense, ++sort, "🚇", "#3B82F6");
-        yield return New("居住", CategoryKind.Expense, ++sort, "🏠", "#8B5CF6");
-        yield return New("水電瓦斯", CategoryKind.Expense, ++sort, "💡", "#06B6D4");
-        yield return New("通訊", CategoryKind.Expense, ++sort, "📱", "#0EA5E9");
-        yield return New("購物", CategoryKind.Expense, ++sort, "🛍️", "#EC4899");
-        yield return New("娛樂", CategoryKind.Expense, ++sort, "🎬", "#A855F7");
-        yield return New("醫療", CategoryKind.Expense, ++sort, "🏥", "#EF4444");
-        yield return New("教育", CategoryKind.Expense, ++sort, "📚", "#10B981");
-        yield return New("保險", CategoryKind.Expense, ++sort, "🛡️", "#64748B");
-        yield return New("訂閱服務", CategoryKind.Expense, ++sort, "🔁", "#F97316");
-        yield return New("其他支出", CategoryKind.Expense, ++sort, "💸", "#9CA3AF");
+        // Icon 採 Fluent System Icons symbol name（與 navrail / dialog 風格一致），
+        // 由 ds:AppIcon 控件負責解析渲染。
+        yield return New("飲食", CategoryKind.Expense, ++sort, "FoodToast24", "#F59E0B");
+        yield return New("交通", CategoryKind.Expense, ++sort, "VehicleSubway24", "#3B82F6");
+        yield return New("居住", CategoryKind.Expense, ++sort, "Home24", "#8B5CF6");
+        yield return New("水電瓦斯", CategoryKind.Expense, ++sort, "Lightbulb24", "#06B6D4");
+        yield return New("通訊", CategoryKind.Expense, ++sort, "Phone24", "#0EA5E9");
+        yield return New("購物", CategoryKind.Expense, ++sort, "ShoppingBag24", "#EC4899");
+        yield return New("娛樂", CategoryKind.Expense, ++sort, "Filmstrip24", "#A855F7");
+        yield return New("醫療", CategoryKind.Expense, ++sort, "Stethoscope24", "#EF4444");
+        yield return New("教育", CategoryKind.Expense, ++sort, "BookOpen24", "#10B981");
+        yield return New("保險", CategoryKind.Expense, ++sort, "ShieldCheckmark24", "#64748B");
+        yield return New("訂閱服務", CategoryKind.Expense, ++sort, "ArrowSync24", "#F97316");
+        yield return New("其他支出", CategoryKind.Expense, ++sort, "MoneyDismiss24", "#9CA3AF");
 
         // ── 收入 ─────────────────────────────────────────────────────
-        yield return New("薪資", CategoryKind.Income, ++sort, "💼", "#22C55E");
-        yield return New("獎金", CategoryKind.Income, ++sort, "🎁", "#EAB308");
-        yield return New("利息", CategoryKind.Income, ++sort, "🏦", "#14B8A6");
-        yield return New("退稅", CategoryKind.Income, ++sort, "🧾", "#84CC16");
-        yield return New("其他收入", CategoryKind.Income, ++sort, "💰", "#6B7280");
+        yield return New("薪資", CategoryKind.Income, ++sort, "Briefcase24", "#22C55E");
+        yield return New("獎金", CategoryKind.Income, ++sort, "Gift24", "#EAB308");
+        yield return New("利息", CategoryKind.Income, ++sort, "BuildingBank24", "#14B8A6");
+        yield return New("退稅", CategoryKind.Income, ++sort, "Receipt24", "#84CC16");
+        yield return New("其他收入", CategoryKind.Income, ++sort, "Money24", "#6B7280");
     }
 
     private static ExpenseCategory New(string name, CategoryKind kind, int sort, string icon, string color) =>

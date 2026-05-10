@@ -119,11 +119,20 @@
                                 </Style.Triggers>
                             </Style>
                         </StackPanel.Style>
-                        <TextBlock
-                            Margin="0,0,8,0"
+                        <!--  Tinted circular badge with Fluent symbol (matches navrail style)  -->
+                        <Border
+                            Width="28" Height="28"
+                            Margin="0,0,10,0"
                             VerticalAlignment="Center"
-                            FontSize="{StaticResource Font.Size.Md}"
-                            Text="{Binding Icon}" />
+                            Background="{Binding ColorHex, Converter={StaticResource HexToTintBrushConverter}}"
+                            CornerRadius="14">
+                            <ds:AppIcon
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="16"
+                                Foreground="{Binding ColorHex, Converter={StaticResource HexToBrushConverter}}"
+                                Symbol="{Binding Icon}" />
+                        </Border>
                         <TextBlock
                             VerticalAlignment="Center"
                             FontSize="{StaticResource Font.Size.Base}"
@@ -1338,11 +1347,12 @@
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock
+                                            <ds:AppIcon
                                                 Margin="0,0,8,0"
                                                 VerticalAlignment="Center"
-                                                FontSize="{StaticResource Font.Size.Md}"
-                                                Text="{Binding Value}" />
+                                                FontSize="16"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Symbol="{Binding Value}" />
                                             <TextBlock
                                                 VerticalAlignment="Center"
                                                 FontSize="{StaticResource Font.Size.Sm}"

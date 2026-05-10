@@ -783,35 +783,37 @@ public partial class CategoriesViewModel : ObservableObject
             _iconOptions.Add(option);
     }
 
+    // Value 為 Fluent System Icons symbol name（例：FoodToast24），由 ds:AppIcon 解析渲染，
+    // 與 navrail / dialog 風格保持一致。Label 仍走語系 key。
     private IReadOnlyList<CategoryVisualOption> BuildIconOptions() =>
     [
-        new("🍱", GetString("Categories.Icon.Food", "飲食")),
-        new("🚇", GetString("Categories.Icon.Transport", "交通")),
-        new("🏠", GetString("Categories.Icon.Home", "居住")),
-        new("💡", GetString("Categories.Icon.Utilities", "水電")),
-        new("📱", GetString("Categories.Icon.Communication", "通訊")),
-        new("🛍️", GetString("Categories.Icon.Shopping", "購物")),
-        new("🎬", GetString("Categories.Icon.Entertainment", "娛樂")),
-        new("🏥", GetString("Categories.Icon.Medical", "醫療")),
-        new("📚", GetString("Categories.Icon.Education", "教育")),
-        new("🛡️", GetString("Categories.Icon.Insurance", "保險")),
-        new("🔁", GetString("Categories.Icon.Subscription", "訂閱")),
-        new("💸", GetString("Categories.Icon.Expense", "支出")),
-        new("💼", GetString("Categories.Icon.Salary", "薪資")),
-        new("🎁", GetString("Categories.Icon.Bonus", "獎金")),
-        new("🏦", GetString("Categories.Icon.Interest", "利息")),
-        new("🧾", GetString("Categories.Icon.TaxRefund", "退稅")),
-        new("💰", GetString("Categories.Icon.Income", "收入")),
-        new("📈", GetString("Categories.Icon.Investment", "投資")),
-        new("✈️", GetString("Categories.Icon.Travel", "旅遊")),
-        new("🏃", GetString("Categories.Icon.Sports", "運動")),
-        new("👨‍👩‍👧", GetString("Categories.Icon.Family", "家庭")),
-        new("🐾", GetString("Categories.Icon.Pet", "寵物"))
+        new("FoodToast24", GetString("Categories.Icon.Food", "飲食")),
+        new("VehicleSubway24", GetString("Categories.Icon.Transport", "交通")),
+        new("Home24", GetString("Categories.Icon.Home", "居住")),
+        new("Lightbulb24", GetString("Categories.Icon.Utilities", "水電")),
+        new("Phone24", GetString("Categories.Icon.Communication", "通訊")),
+        new("ShoppingBag24", GetString("Categories.Icon.Shopping", "購物")),
+        new("Filmstrip24", GetString("Categories.Icon.Entertainment", "娛樂")),
+        new("Stethoscope24", GetString("Categories.Icon.Medical", "醫療")),
+        new("BookOpen24", GetString("Categories.Icon.Education", "教育")),
+        new("ShieldCheckmark24", GetString("Categories.Icon.Insurance", "保險")),
+        new("ArrowSync24", GetString("Categories.Icon.Subscription", "訂閱")),
+        new("MoneyDismiss24", GetString("Categories.Icon.Expense", "支出")),
+        new("Briefcase24", GetString("Categories.Icon.Salary", "薪資")),
+        new("Gift24", GetString("Categories.Icon.Bonus", "獎金")),
+        new("BuildingBank24", GetString("Categories.Icon.Interest", "利息")),
+        new("Receipt24", GetString("Categories.Icon.TaxRefund", "退稅")),
+        new("Money24", GetString("Categories.Icon.Income", "收入")),
+        new("ArrowTrendingLines24", GetString("Categories.Icon.Investment", "投資")),
+        new("Airplane24", GetString("Categories.Icon.Travel", "旅遊")),
+        new("Run24", GetString("Categories.Icon.Sports", "運動")),
+        new("People24", GetString("Categories.Icon.Family", "家庭")),
+        new("AnimalPawPrint24", GetString("Categories.Icon.Pet", "寵物"))
     ];
 
     private void ApplyAddDefaults(CategoryKind kind)
     {
-        AddIcon = kind == CategoryKind.Income ? "💼" : "🍱";
+        AddIcon = kind == CategoryKind.Income ? "Briefcase24" : "FoodToast24";
         AddColorHex = kind == CategoryKind.Income ? "#22C55E" : "#F59E0B";
     }
 }

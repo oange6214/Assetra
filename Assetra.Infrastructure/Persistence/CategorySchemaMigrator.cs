@@ -54,12 +54,60 @@ internal static class CategorySchemaMigrator
                 idx.ExecuteNonQuery();
             }
 
+            // 將舊版 emoji icon 升級為 Fluent System Icons symbol name，
+            // 與 navrail / dialog 風格一致。idempotent — 只命中還是 emoji 的 row。
+            MigrateEmojiIconsToFluentSymbols(conn, tx);
+
             tx.Commit();
         }
         catch
         {
             tx.Rollback();
             throw;
+        }
+    }
+
+    /// <summary>
+    /// 一次性把舊版以 emoji 字串存的 icon 改寫成新的 Fluent symbol name。
+    /// 沒命中對照表的 row（含已升級者）保持不動。
+    /// </summary>
+    private static void MigrateEmojiIconsToFluentSymbols(SqliteConnection conn, SqliteTransaction tx)
+    {
+        // 對照表必須與 CategorySeeder / CategoriesViewModel.BuildIconOptions 同步。
+        var map = new (string Emoji, string Symbol)[]
+        {
+            ("🍱", "FoodToast24"),
+            ("🚇", "VehicleSubway24"),
+            ("🏠", "Home24"),
+            ("💡", "Lightbulb24"),
+            ("📱", "Phone24"),
+            ("🛍️", "ShoppingBag24"),
+            ("🎬", "Filmstrip24"),
+            ("🏥", "Stethoscope24"),
+            ("📚", "BookOpen24"),
+            ("🛡️", "ShieldCheckmark24"),
+            ("🔁", "ArrowSync24"),
+            ("💸", "MoneyDismiss24"),
+            ("💼", "Briefcase24"),
+            ("🎁", "Gift24"),
+            ("🏦", "BuildingBank24"),
+            ("🧾", "Receipt24"),
+            ("💰", "Money24"),
+            ("📈", "ArrowTrendingLines24"),
+            ("✈️", "Airplane24"),
+            ("🏃", "Run24"),
+            ("👨‍👩‍👧", "People24"),
+            ("🐾", "AnimalPawPrint24"),
+        };
+
+        foreach (var (emoji, symbol) in map)
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = "UPDATE expense_category SET icon = $symbol WHERE icon = $emoji;";
+            cmd.Parameters.AddWithValue("$symbol", symbol);
+            cmd.Parameters.AddWithValue("$emoji", emoji);
+            cmd.ExecuteNonQuery();
         }
     }
 

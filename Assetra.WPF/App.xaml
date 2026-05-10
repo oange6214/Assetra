@@ -13,6 +13,7 @@
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
             <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
             <converters:HexToBrushConverter x:Key="HexToBrushConverter" />
+            <converters:HexToTintBrushConverter x:Key="HexToTintBrushConverter" />
             <converters:StringEqualityConverter x:Key="EqualityConverter" />
             <converters:StatusTagToBrushConverter x:Key="StatusTagToBrushConverter" />
             <converters:PercentToWidthConverter x:Key="PercentToWidthConverter" />
