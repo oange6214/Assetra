@@ -64,6 +64,8 @@ public partial class PortfolioViewModel
     {
         public Task ArchiveAsync(Guid accountId, CancellationToken ct = default) => Task.CompletedTask;
 
+        public Task UnarchiveAsync(Guid accountId, CancellationToken ct = default) => Task.CompletedTask;
+
         public Task<AccountDeletionResult> DeleteAsync(Guid accountId, CancellationToken ct = default) =>
             Task.FromResult(new AccountDeletionResult(false));
     }
@@ -234,7 +236,11 @@ public partial class PortfolioViewModel
     private sealed class NullAddAssetWorkflowService : IAddAssetWorkflowService
     {
         public IReadOnlyList<StockSearchResult> SearchSymbols(string query, int maxResults = 8) => [];
-        public Task<ClosePriceLookupResult> LookupClosePriceAsync(string symbol, DateTime buyDate, CancellationToken ct = default) =>
+        public Task<ClosePriceLookupResult> LookupClosePriceAsync(
+            string symbol,
+            DateTime buyDate,
+            string? exchange = null,
+            CancellationToken ct = default) =>
             Task.FromResult(new ClosePriceLookupResult(false, null, string.Empty));
         public BuyPreviewResult BuildBuyPreview(BuyPreviewRequest request) =>
             new(request.Price * request.Quantity, 0m, request.Price * request.Quantity, request.Price);

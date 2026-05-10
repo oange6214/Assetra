@@ -23,6 +23,8 @@ public interface IAssetRepository
     Task                            DeleteItemAsync(Guid id);
     Task<Guid>                      FindOrCreateAccountAsync(string name, string currency, CancellationToken ct = default);
     Task                            ArchiveItemAsync(Guid id);
+    /// <summary>把封存的帳戶取消封存（is_active = 1）。</summary>
+    Task                            UnarchiveItemAsync(Guid id);
     /// <summary>Count of Trade rows referencing <paramref name="id"/>. 0 means safe to hard-delete.</summary>
     Task<int>                       HasTradeReferencesAsync(Guid id, CancellationToken ct = default);
 

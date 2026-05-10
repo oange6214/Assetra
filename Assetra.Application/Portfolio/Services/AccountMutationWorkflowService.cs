@@ -21,6 +21,12 @@ public sealed class AccountMutationWorkflowService : IAccountMutationWorkflowSer
         return _assetRepository.ArchiveItemAsync(accountId);
     }
 
+    public Task UnarchiveAsync(Guid accountId, CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        return _assetRepository.UnarchiveItemAsync(accountId);
+    }
+
     public async Task<AccountDeletionResult> DeleteAsync(Guid accountId, CancellationToken ct = default)
     {
         ct.ThrowIfCancellationRequested();

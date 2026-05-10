@@ -216,6 +216,36 @@ public partial class AccountDialogViewModel : ObservableObject
     }
 
     /// <summary>
+    /// 依目前 IsActive 狀態 toggle：active → 封存（需確認）；archived → 取消封存（直接執行不需確認）。
+    /// 取消封存不需確認因為它本來就是還原動作；封存確認是因為使用者可能誤點。
+    /// </summary>
+    [RelayCommand]
+    private void ToggleArchive(CashAccountRowViewModel? row)
+    {
+        if (row is null || _accountMutation is null)
+            return;
+
+        if (row.IsActive)
+        {
+            // active → 封存（需確認）
+            ArchiveAccount(row);
+        }
+        else
+        {
+            // archived → 取消封存（直接做）
+            _ = ExecuteUnarchiveAsync(row.Id);
+        }
+    }
+
+    private async Task ExecuteUnarchiveAsync(Guid id)
+    {
+        if (_accountMutation is null)
+            return;
+        await _accountMutation.UnarchiveAsync(id);
+        AccountChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
     /// Permanent hard-delete. Guarded: rejects if any trade row references this account.
     /// </summary>
     [RelayCommand]

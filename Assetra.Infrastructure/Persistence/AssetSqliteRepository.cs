@@ -283,6 +283,26 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
     }
 
+    public async Task UnarchiveItemAsync(Guid id)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync().ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            UPDATE asset SET
+                is_active = 1,
+                updated_at = $now,
+                version = version + 1,
+                last_modified_at = $now,
+                last_modified_by_device = $device,
+                is_pending_push = 1
+            WHERE id = $id;
+            """;
+        cmd.Parameters.AddWithValue("$id", id.ToString());
+        StampSyncParams(cmd);
+        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+    }
+
     public async Task<int> HasTradeReferencesAsync(Guid id, CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);

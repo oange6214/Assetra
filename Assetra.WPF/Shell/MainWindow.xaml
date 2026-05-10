@@ -567,6 +567,39 @@
                                         </ds:AppIcon.Style>
                                     </ds:AppIcon>
                                 </Button>
+                                <!--  封存 / 取消封存 toggle (依 IsActive 切標籤與圖示)  -->
+                                <Button
+                                    Width="30"
+                                    Height="36"
+                                    Margin="0,0,4,0"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding Account.ToggleArchiveCommand}"
+                                    CommandParameter="{Binding SelectedCashRow}"
+                                    DockPanel.Dock="Right">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource AppIconButton}" TargetType="{x:Type Button}">
+                                            <Setter Property="ToolTip" Value="{DynamicResource Portfolio.Account.Archive}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedCashRow.IsActive}" Value="False">
+                                                    <Setter Property="ToolTip" Value="{DynamicResource Portfolio.Account.Unarchive}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <ds:AppIcon FontSize="12" Foreground="{DynamicResource AppTextSecondary}" Symbol="Archive24">
+                                        <ds:AppIcon.Style>
+                                            <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
+                                                <Setter Property="Symbol" Value="Archive24" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SelectedCashRow.IsActive}" Value="False">
+                                                        <Setter Property="Symbol" Value="ArchiveArrowBack24" />
+                                                        <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ds:AppIcon.Style>
+                                    </ds:AppIcon>
+                                </Button>
                                 <TextBlock
                                     VerticalAlignment="Center"
                                     FontSize="{StaticResource Font.Size.Lg}"
