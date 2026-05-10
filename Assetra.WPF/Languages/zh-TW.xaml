@@ -553,6 +553,7 @@
     <sys:String x:Key="Portfolio.EditAsset.Update">更新</sys:String>
     <sys:String x:Key="Portfolio.Account.Title">新增帳戶</sys:String>
     <sys:String x:Key="Portfolio.Account.Archive">封存</sys:String>
+    <sys:String x:Key="Portfolio.Account.Unarchive">取消封存</sys:String>
     <sys:String x:Key="Portfolio.Account.PermanentDelete">永久刪除…</sys:String>
     <sys:String x:Key="Portfolio.Account.ShowArchived">顯示已封存</sys:String>
     <sys:String x:Key="Portfolio.Position.ShowArchived">顯示已封存</sys:String>

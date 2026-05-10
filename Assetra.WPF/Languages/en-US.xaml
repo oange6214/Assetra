@@ -552,6 +552,7 @@
     <sys:String x:Key="Portfolio.EditAsset.Update">Update</sys:String>
     <sys:String x:Key="Portfolio.Account.Title">New Account</sys:String>
     <sys:String x:Key="Portfolio.Account.Archive">Archive</sys:String>
+    <sys:String x:Key="Portfolio.Account.Unarchive">Unarchive</sys:String>
     <sys:String x:Key="Portfolio.Account.PermanentDelete">Permanent delete…</sys:String>
     <sys:String x:Key="Portfolio.Account.ShowArchived">Show archived</sys:String>
     <sys:String x:Key="Portfolio.Position.ShowArchived">Show archived</sys:String>
