@@ -440,6 +440,48 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public bool TxTypeIsBuy => TxType == "buy";
     public bool TxTypeIsSell => TxType == "sell";
 
+    /// <summary>
+    /// Dialog 動態標題的 i18n resource key。依使用者選的 TxType 切換成「新增買入交易」、
+    /// 「新增信用卡消費」等。XAML 用 ResourceKeyToStringConverter 解析此 key。
+    /// 編輯模式維持 Portfolio.Tx.EditTitle（在 XAML DataTrigger 處理）。
+    /// </summary>
+    public string TxDynamicTitleKey => TxType switch
+    {
+        "buy" => "Portfolio.Record.Title.Buy",
+        "sell" => "Portfolio.Record.Title.Sell",
+        "cashDiv" => "Portfolio.Record.Title.CashDiv",
+        "stockDiv" => "Portfolio.Record.Title.StockDiv",
+        "income" => "Portfolio.Record.Title.Income",
+        "deposit" => "Portfolio.Record.Title.Deposit",
+        "withdrawal" => "Portfolio.Record.Title.Withdrawal",
+        "transfer" => "Portfolio.Record.Title.Transfer",
+        "loanBorrow" => "Portfolio.Record.Title.LoanBorrow",
+        "loanRepay" => "Portfolio.Record.Title.LoanRepay",
+        "creditCardCharge" => "Portfolio.Record.Title.CreditCardCharge",
+        "creditCardPayment" => "Portfolio.Record.Title.CreditCardPayment",
+        _ => "Portfolio.Record.Title",
+    };
+
+    /// <summary>「此筆交易會儲存於 ___ 」的 i18n resource key。null = 沒選類型，提示隱藏。</summary>
+    public string? TxDestinationKey => TxType switch
+    {
+        "buy" => "Portfolio.Record.Destination.Buy",
+        "sell" => "Portfolio.Record.Destination.Sell",
+        "cashDiv" => "Portfolio.Record.Destination.CashDiv",
+        "stockDiv" => "Portfolio.Record.Destination.StockDiv",
+        "income" => "Portfolio.Record.Destination.Income",
+        "deposit" => "Portfolio.Record.Destination.Deposit",
+        "withdrawal" => "Portfolio.Record.Destination.Withdrawal",
+        "transfer" => "Portfolio.Record.Destination.Transfer",
+        "loanBorrow" => "Portfolio.Record.Destination.LoanBorrow",
+        "loanRepay" => "Portfolio.Record.Destination.LoanRepay",
+        "creditCardCharge" => "Portfolio.Record.Destination.CreditCardCharge",
+        "creditCardPayment" => "Portfolio.Record.Destination.CreditCardPayment",
+        _ => null,
+    };
+
+    public bool HasTxDestination => TxDestinationKey is not null;
+
     public bool TxBuyIsStock => TxTypeIsBuy && Buy.IsStock;
     public bool TxBuyIsNonStock => TxTypeIsBuy && Buy.IsNonStock;
     public bool TxBuyIsCrypto => TxTypeIsBuy && Buy.IsCrypto;
@@ -718,6 +760,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(TxTransferHint));
         OnPropertyChanged(nameof(TxCreditCardHint));
         OnPropertyChanged(nameof(CashFlowCategories));
+        // Dialog 動態標題與「顯示位置」提示 — 依當前 TxType 切換 i18n key。
+        OnPropertyChanged(nameof(TxDynamicTitleKey));
+        OnPropertyChanged(nameof(TxDestinationKey));
+        OnPropertyChanged(nameof(HasTxDestination));
         TxError = string.Empty;
         ApplyAutoCategoryFromNote();
         UpdateSellTxPreview();
