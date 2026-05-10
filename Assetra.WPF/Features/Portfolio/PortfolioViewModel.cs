@@ -1051,6 +1051,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 existing.Currency = account.Currency;
                 existing.Balance = bal;
                 existing.IsActive = account.IsActive;
+                // Subtype 必須在 reload 時同步：使用者改細分類後，AccountChanged event 觸發
+                // ReloadAfterAccountChangedAsync → 此處。若不同步，列表上的 chip 只會在
+                // app 重啟（走 ctor）時才顯示，當下 session 不會更新。
+                existing.Subtype = account.Subtype;
             }
             else
             {

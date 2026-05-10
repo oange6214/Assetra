@@ -83,11 +83,11 @@ public partial class PortfolioViewModel
     {
         public Task<AccountUpsertResult> CreateAsync(CreateAccountRequest request, CancellationToken ct = default) =>
             Task.FromResult(new AccountUpsertResult(
-                new AssetItem(Guid.NewGuid(), request.Name, FinancialType.Asset, null, request.Currency, request.CreatedDate)));
+                new AssetItem(Guid.NewGuid(), request.Name, FinancialType.Asset, null, request.Currency, request.CreatedDate, Subtype: request.Subtype)));
 
         public Task<AccountUpsertResult> UpdateAsync(UpdateAccountRequest request, CancellationToken ct = default) =>
             Task.FromResult(new AccountUpsertResult(
-                new AssetItem(request.AccountId, request.Name, FinancialType.Asset, null, request.Currency, request.CreatedDate)));
+                new AssetItem(request.AccountId, request.Name, FinancialType.Asset, null, request.Currency, request.CreatedDate, Subtype: request.Subtype)));
 
         public Task<Guid> FindOrCreateAccountAsync(string name, string currency, CancellationToken ct = default) =>
             Task.FromResult(Guid.NewGuid());
