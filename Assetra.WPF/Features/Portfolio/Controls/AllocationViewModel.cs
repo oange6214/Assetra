@@ -46,6 +46,16 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isOverviewTab = true;
     [ObservableProperty] private bool _isRebalanceTab = false;
 
+    /// <summary>
+    /// 配置分析「含現金」開關：預設 false（純投資商品配置，符合 Morningstar /
+    /// Yahoo Finance 等 portfolio tracker 的標準呈現）。勾選 true 時會把現金
+    /// 視為一個防禦性配置部位納入百分比計算。狀態為 in-memory（不持久化），
+    /// 跨 session 重啟會回到預設不含。
+    /// </summary>
+    [ObservableProperty] private bool _includeCashInAllocation;
+
+    partial void OnIncludeCashInAllocationChanged(bool _) => Rebuild();
+
     [RelayCommand]
     private void SwitchToOverview() { IsOverviewTab = true; IsRebalanceTab = false; }
     [RelayCommand]
@@ -250,8 +260,12 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
 
         var cashTotal = _portfolio.TotalCash;
         var investTotal = investItems.Sum(i => i.Value);
-        var total = investTotal + cashTotal;
-        TotalValue = total;
+
+        // 配置百分比的分母：預設只算「投資商品」(投資組合內部配置)；勾選含現金 → 投資+現金。
+        // TotalValue 仍存「總資產」(invest + cash) 給其他 binding 用，但 percentage 用的是
+        // denominator (依 toggle 切換)。
+        var denominator = IncludeCashInAllocation ? investTotal + cashTotal : investTotal;
+        TotalValue = investTotal + cashTotal;
         TotalInvestment = investTotal;
         TotalCash = cashTotal;
         TotalPnl = investItems.Sum(i => i.Pnl);
@@ -265,19 +279,21 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
             var row = new AllocationRowViewModel(
                 item.Symbol, item.Name, item.Cat,
                 item.Value, item.Price, item.Pnl, item.PnlPct, Palette[idx % Palette.Length]);
-            row.ActualPercent = total > 0 ? Math.Round(item.Value / total * 100m, 1) : 0m;
+            row.ActualPercent = denominator > 0 ? Math.Round(item.Value / denominator * 100m, 1) : 0m;
             row.TargetPercent = targets.TryGetValue(item.Symbol, out var t) ? t : 0m;
             row.EditTargetText = row.TargetPercent.ToString("G");
             allRows.Add(row);
         }
 
-        // Cash row (neutral grey, no target, no P&L)
-        if (cashTotal > 0)
+        // Cash row：only emitted when the user explicitly opts in via IncludeCashInAllocation.
+        // Default: cash excluded — pure investment allocation matches industry convention
+        // (Morningstar / Yahoo Finance) and prevents diluting the rebalance signal.
+        if (IncludeCashInAllocation && cashTotal > 0)
         {
             // Symbol "現金" stays as the dictionary key (matches saved target
             // percentages); Name is localized for display.
             var cashRow = new AllocationRowViewModel("現金", CashLabel, "cash", cashTotal, 0m, 0m, 0m, CashBrush);
-            cashRow.ActualPercent = total > 0 ? Math.Round(cashTotal / total * 100m, 1) : 0m;
+            cashRow.ActualPercent = denominator > 0 ? Math.Round(cashTotal / denominator * 100m, 1) : 0m;
             cashRow.TargetPercent = targets.TryGetValue("現金", out var cashTarget) ? cashTarget : 0m;
             cashRow.EditTargetText = cashRow.TargetPercent.ToString("G");
             allRows.Add(cashRow);

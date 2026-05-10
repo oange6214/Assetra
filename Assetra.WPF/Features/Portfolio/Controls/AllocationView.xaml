@@ -73,13 +73,23 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock
-                            Grid.Row="0"
-                            Margin="0,0,0,10"
-                            FontSize="{StaticResource Font.Size.Md}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{DynamicResource Allocation.Overview.Title}" />
+                        <DockPanel Grid.Row="0" Margin="0,0,0,10" LastChildFill="True">
+                            <CheckBox
+                                VerticalAlignment="Center"
+                                DockPanel.Dock="Right"
+                                IsChecked="{Binding IncludeCashInAllocation}"
+                                ToolTip="{DynamicResource Allocation.IncludeCash.Hint}">
+                                <TextBlock
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{DynamicResource Allocation.IncludeCash}" />
+                            </CheckBox>
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Md}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Allocation.Overview.Title}" />
+                        </DockPanel>
 
                         <ItemsControl
                             Grid.Row="1"

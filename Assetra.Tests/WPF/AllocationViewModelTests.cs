@@ -60,17 +60,32 @@ public sealed class AllocationViewModelTests
     }
 
     [Fact]
-    public void Constructor_EmptyFeed_BuildsCashOnlyRow()
+    public void Constructor_EmptyFeed_NoCashRowByDefault()
     {
         var feed = new StubFeed { TotalCash = 1000m };
         var vm = new AllocationViewModel(feed);
 
-        // Cash always gets a dedicated row when total > 0 — symbol "現金"
+        // v0.28+: cash row excluded by default (Morningstar convention) — only
+        // emitted when IncludeCashInAllocation = true. TotalValue still reports
+        // invest + cash for KPI bindings.
+        Assert.Empty(vm.AllocationRows);
+        Assert.Equal(1000m, vm.TotalValue);
+        Assert.Equal(0m, vm.TotalInvestment);
+        Assert.Equal(1000m, vm.TotalCash);
+    }
+
+    [Fact]
+    public void IncludeCashInAllocation_True_EmitsCashRow()
+    {
+        var feed = new StubFeed { TotalCash = 1000m };
+        var vm = new AllocationViewModel(feed)
+        {
+            IncludeCashInAllocation = true,
+        };
+
         var cashRow = vm.AllocationRows.FirstOrDefault(r => r.Symbol == "現金");
         Assert.NotNull(cashRow);
         Assert.Equal(1000m, cashRow!.MarketValue);
-        Assert.Equal(1000m, vm.TotalValue);
-        Assert.Equal(0m, vm.TotalInvestment);
     }
 
     [Fact]
