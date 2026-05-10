@@ -173,15 +173,30 @@ public partial class AccountDialogViewModel : ObservableObject
                 // Subtype 為空字串 = 使用者沒選（如自訂類） → 保留原值；有選 → 套新值。
                 // AccountUpsertWorkflowService 內 ResolveGroupIdForSubtype 會自動更新 GroupId。
                 var subtypeToSave = string.IsNullOrWhiteSpace(EditAssetSubtype) ? row.Subtype : EditAssetSubtype;
-                var result = await _accountUpsert.UpdateAsync(new UpdateAccountRequest(
-                    row.Id,
-                    name,
-                    currency,
-                    row.CreatedDate,
-                    Subtype: subtypeToSave));
-                row.Name = result.Account.Name;
-                row.Currency = result.Account.Currency;
-                row.Subtype = result.Account.Subtype;
+                Serilog.Log.Information(
+                    "[AccountDialog] SaveEditAsset cash: id={Id} name={Name} oldSubtype={Old} newSubtype={New} dropdownVal={Drop}",
+                    row.Id, name, row.Subtype, subtypeToSave, EditAssetSubtype);
+                try
+                {
+                    var result = await _accountUpsert.UpdateAsync(new UpdateAccountRequest(
+                        row.Id,
+                        name,
+                        currency,
+                        row.CreatedDate,
+                        Subtype: subtypeToSave));
+                    Serilog.Log.Information(
+                        "[AccountDialog] SaveEditAsset succeeded: persistedSubtype={Persisted}",
+                        result.Account.Subtype);
+                    row.Name = result.Account.Name;
+                    row.Currency = result.Account.Currency;
+                    row.Subtype = result.Account.Subtype;
+                }
+                catch (Exception ex)
+                {
+                    Serilog.Log.Error(ex, "[AccountDialog] SaveEditAsset cash UPDATE failed for {Id}", row.Id);
+                    EditAssetError = ex.Message;
+                    return;  // 不要關 dialog，讓使用者看到錯誤
+                }
             }
         }
         else if (_editAssetKind == "position" && _editPositionRow is { } posRow)
