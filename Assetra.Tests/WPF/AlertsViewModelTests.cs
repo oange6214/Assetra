@@ -100,16 +100,51 @@ public sealed class AlertsViewModelTests
         Assert.NotNull(snackbar.LastError);
     }
 
+    [Fact]
+    public async Task AddRule_UsesSymbolDirectoryForUsExchange()
+    {
+        var quoteStream = new Subject<IReadOnlyList<StockQuote>>();
+        var directory = new FakeSymbolDirectory([
+            new StockSearchResult("AAPL", "Apple Inc.", "NASDAQ", Currency: "USD"),
+        ]);
+        AlertRule? added = null;
+        var vm = CreateViewModel(
+            quoteStream,
+            out var alertService,
+            null,
+            symbolDirectory: directory);
+        alertService
+            .Setup(s => s.AddAsync(It.IsAny<AlertRule>(), It.IsAny<CancellationToken>()))
+            .Callback<AlertRule, CancellationToken>((rule, _) => added = rule)
+            .Returns(Task.CompletedTask);
+
+        vm.AddSymbol = "AAPL";
+        vm.AddTargetPrice = "200";
+
+        await vm.AddRuleCommand.ExecuteAsync(null);
+
+        Assert.NotNull(added);
+        Assert.Equal("AAPL", added!.Symbol);
+        Assert.Equal("NASDAQ", added.Exchange);
+        var row = Assert.Single(vm.Rules);
+        Assert.Equal("Apple Inc.", row.Name);
+        Assert.Equal("NASDAQ", row.Exchange);
+    }
+
     private static AlertsViewModel CreateViewModel(
         Subject<IReadOnlyList<StockQuote>> quoteStream,
         out Mock<IAlertService> alertService,
-        AlertRule rule,
-        ISnackbarService? snackbar = null)
+        AlertRule? rule,
+        ISnackbarService? snackbar = null,
+        ISymbolDirectory? symbolDirectory = null)
     {
         alertService = new Mock<IAlertService>();
         alertService
             .Setup(s => s.GetRulesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([rule]);
+            .ReturnsAsync(rule is null ? [] : [rule]);
+        alertService
+            .Setup(s => s.AddAsync(It.IsAny<AlertRule>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
         alertService
             .Setup(s => s.UpdateAsync(It.IsAny<AlertRule>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -124,7 +159,8 @@ public sealed class AlertsViewModelTests
             new FakeStockService(quoteStream),
             ImmediateScheduler.Instance,
             snackbar ?? new FakeSnackbarService(),
-            new FakeLocalizationService());
+            new FakeLocalizationService(),
+            symbolDirectory: symbolDirectory);
     }
 
     private static StockQuote Quote(string symbol, string exchange, decimal price) =>
@@ -156,6 +192,7 @@ public sealed class AlertsViewModelTests
         public string? LastError { get; private set; }
 
         public void Show(string message, SnackbarKind kind = SnackbarKind.Info) { }
+        public void Show(string message, string actionLabel, Action onAction, SnackbarKind kind = SnackbarKind.Success) { }
         public void Success(string message) { }
         public void Warning(string message) { }
         public void Error(string message) => LastError = message;
@@ -167,5 +204,20 @@ public sealed class AlertsViewModelTests
         public event EventHandler? LanguageChanged;
         public string Get(string key, string fallback = "") => fallback;
         public void SetLanguage(string languageCode) => LanguageChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private sealed class FakeSymbolDirectory(IReadOnlyList<StockSearchResult> results) : ISymbolDirectory
+    {
+        public IReadOnlyList<StockSearchResult> Search(string query) =>
+            results
+                .Where(r => r.Symbol.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                            r.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+        public StockSearchResult? Resolve(string symbol, string? exchange = null) =>
+            results.FirstOrDefault(r =>
+                EquitySymbolNormalizer.SymbolMatches(r.Symbol, symbol) &&
+                (string.IsNullOrWhiteSpace(exchange) ||
+                 string.Equals(r.Exchange, exchange, StringComparison.OrdinalIgnoreCase)));
     }
 }

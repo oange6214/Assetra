@@ -213,6 +213,7 @@ public sealed class RecurringViewModelTests
     private sealed class FakeSnackbarService : ISnackbarService
     {
         public void Show(string message, SnackbarKind kind = SnackbarKind.Info) { }
+        public void Show(string message, string actionLabel, Action onAction, SnackbarKind kind = SnackbarKind.Success) { }
         public void Success(string message) { }
         public void Warning(string message) { }
         public void Error(string message) { }

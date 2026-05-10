@@ -193,6 +193,40 @@ public partial class TransactionDialogViewModel
         }
 
         TransactionCompleted?.Invoke(this, EventArgs.Empty);
+
+        // 新交易建立成功 → 顯示「已新增 XXX，可在交易記錄查看」snackbar with action.
+        // 編輯 / 修正 / replace 路徑前面已經 return，這裡只走「全新建立」flow。
+        ShowCreatedSnackbar();
+    }
+
+    /// <summary>
+    /// 依 TxType 與 i18n 顯示成功訊息 + 「查看交易」action button (跳到 TransactionLog 頁)。
+    /// </summary>
+    private void ShowCreatedSnackbar()
+    {
+        if (_snackbar is null) return;
+        var typeLabel = TxType switch
+        {
+            "buy" => L("Portfolio.Tx.Buy", "買入"),
+            "sell" => L("Portfolio.Tx.Sell", "賣出"),
+            "cashDiv" => L("Portfolio.Tx.CashDiv", "現金股利"),
+            "stockDiv" => L("Portfolio.Tx.StockDiv", "股票股利"),
+            "income" => L("Portfolio.Tx.Income", "收入"),
+            "deposit" => L("Portfolio.TradeType.Deposit", "存入"),
+            "withdrawal" => L("Portfolio.Tx.WithdrawalAction", "提款"),
+            "transfer" => L("Portfolio.Tx.TransferAction", "轉帳"),
+            "loanBorrow" => L("Portfolio.TradeType.LoanBorrow", "借款"),
+            "loanRepay" => L("Portfolio.TradeType.LoanRepay", "還款"),
+            "creditCardCharge" => L("Portfolio.TradeType.CreditCardCharge", "信用卡消費"),
+            "creditCardPayment" => L("Portfolio.TradeType.CreditCardPayment", "信用卡繳款"),
+            _ => L("Portfolio.Tx.Generic", "交易"),
+        };
+        var template = L("Portfolio.Tx.CreatedSnackbar", "已新增 {0}，可在「交易記錄」查看");
+        var actionLabel = L("Portfolio.Tx.ViewTransactions", "查看交易");
+        _snackbar.Show(
+            string.Format(template, typeLabel),
+            actionLabel,
+            () => Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("TransactionLog"));
     }
 
     /// <summary>

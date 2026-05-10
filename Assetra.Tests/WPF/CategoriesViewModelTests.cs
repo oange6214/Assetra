@@ -355,6 +355,7 @@ public sealed class CategoriesViewModelTests
         public string? LastWarning { get; private set; }
 
         public void Show(string message, SnackbarKind kind = SnackbarKind.Info) { }
+        public void Show(string message, string actionLabel, Action onAction, SnackbarKind kind = SnackbarKind.Success) { }
         public void Success(string message) { }
         public void Warning(string message) => LastWarning = message;
         public void Error(string message) { }

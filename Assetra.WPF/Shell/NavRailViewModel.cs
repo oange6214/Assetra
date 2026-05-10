@@ -37,6 +37,10 @@ public partial class NavRailViewModel : ObservableObject
         RefreshLocalizedLabels();
         if (localization is not null)
             localization.LanguageChanged += (_, _) => RefreshLocalizedLabels();
+
+        // Subscribe to shell-level navigation requests (e.g. transaction-dialog
+        // 「查看交易」snackbar action). Lifetime = application; no unsubscribe needed.
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.NavigationRequested += NavigateToByName;
     }
 
     private static NavSection ResolveInitialSection(string raw)

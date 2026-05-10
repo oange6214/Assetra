@@ -97,6 +97,21 @@
                                 </TextBlock.Style>
                             </TextBlock>
 
+                            <!--  Action button (e.g. 「查看交易」) — visible only when ActionLabel set  -->
+                            <Button
+                                Margin="8,0,4,0"
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Command="{Binding InvokeActionCommand}"
+                                Content="{Binding ActionLabel}"
+                                Cursor="Hand"
+                                DockPanel.Dock="Right"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppAccent}"
+                                Style="{StaticResource AppGhostButton}"
+                                Visibility="{Binding HasAction, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
                             <!--  Message text  -->
                             <TextBlock
                                 VerticalAlignment="Center"

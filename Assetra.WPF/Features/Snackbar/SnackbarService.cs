@@ -26,6 +26,23 @@ public sealed class SnackbarService : ISnackbarService
         dispatcher.BeginInvoke(ShowCore);
     }
 
+    public void Show(string message, string actionLabel, Action onAction, SnackbarKind kind = SnackbarKind.Success)
+    {
+        var dispatcher = WpfApplication.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
+            return;
+
+        void ShowCore() => _vm.Show(message, actionLabel, onAction, kind);
+
+        if (dispatcher.CheckAccess())
+        {
+            ShowCore();
+            return;
+        }
+
+        dispatcher.BeginInvoke(ShowCore);
+    }
+
     public void Success(string message) => Show(message, SnackbarKind.Success);
     public void Warning(string message) => Show(message, SnackbarKind.Warning);
     public void Error(string message) => Show(message, SnackbarKind.Error);

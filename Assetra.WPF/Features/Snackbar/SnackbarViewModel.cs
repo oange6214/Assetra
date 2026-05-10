@@ -20,14 +20,20 @@ public sealed partial class SnackbarViewModel : ObservableObject
     }
 
     public void Show(string message, SnackbarKind kind)
+        => ShowCore(message, kind, null, null);
+
+    public void Show(string message, string actionLabel, Action onAction, SnackbarKind kind)
+        => ShowCore(message, kind, actionLabel, onAction);
+
+    private void ShowCore(string message, SnackbarKind kind, string? actionLabel, Action? onAction)
     {
         // Remove oldest if at capacity
         if (_items.Count >= MaxItems)
             _items.RemoveAt(0);
 
-        var item = new SnackbarItemViewModel(message, kind)
+        var item = new SnackbarItemViewModel(message, kind, actionLabel, onAction)
         {
-            OnDismiss = Remove
+            OnDismiss = Remove,
         };
         _items.Add(item);
     }
