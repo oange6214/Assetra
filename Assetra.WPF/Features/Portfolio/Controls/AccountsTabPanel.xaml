@@ -289,11 +289,21 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0">
-                                        <TextBlock
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding Name}"
-                                            TextTrimming="CharacterEllipsis" />
+                                        <!--  名稱 + Subtype chip（細分類；自訂或未設時 chip 不顯示）-->
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding Name}"
+                                                TextTrimming="CharacterEllipsis" />
+                                            <Border
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center"
+                                                Style="{StaticResource PortfolioSubtypeChip}"
+                                                Visibility="{Binding Subtype, Converter={StaticResource StringToVisibilityConverter}}">
+                                                <TextBlock Style="{StaticResource PortfolioSubtypeChipText}" Text="{Binding Subtype}" />
+                                            </Border>
+                                        </StackPanel>
                                         <TextBlock
                                             Margin="0,4,0,0"
                                             FontFamily="{StaticResource Font.Family.Base}"
