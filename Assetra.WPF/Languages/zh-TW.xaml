@@ -680,6 +680,8 @@
     <sys:String x:Key="Allocation.Cash">現金</sys:String>
     <sys:String x:Key="Allocation.Tab.Rebalance">再平衡</sys:String>
     <sys:String x:Key="Allocation.Overview.Title">配置概覽</sys:String>
+    <sys:String x:Key="Allocation.IncludeCash">含現金</sys:String>
+    <sys:String x:Key="Allocation.IncludeCash.Hint">預設不含現金，僅顯示投資商品的內部配置（同 Morningstar 慣例）。勾選後現金會作為防禦性部位納入百分比計算。</sys:String>
     <sys:String x:Key="Allocation.Summary.Investment">持股市值</sys:String>
     <sys:String x:Key="Allocation.Summary.Cash">現金</sys:String>
     <sys:String x:Key="Allocation.Summary.Total">總資產</sys:String>
@@ -710,6 +712,8 @@
     <!--  Dashboard  -->
     <sys:String x:Key="Dashboard.TenDayTrend">近 10 日走勢</sys:String>
     <sys:String x:Key="Dashboard.TopHoldings">主要持股</sys:String>
+    <sys:String x:Key="Dashboard.TopHoldings.CostLabel">成本</sys:String>
+    <sys:String x:Key="Dashboard.Pnl.Basis">（投資組合累積至今）</sys:String>
     <sys:String x:Key="Dashboard.RecentTrades">近期交易</sys:String>
     <sys:String x:Key="Dashboard.ViewDetail">詳細</sys:String>
 

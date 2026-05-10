@@ -678,6 +678,8 @@
     <sys:String x:Key="Allocation.Cash">Cash</sys:String>
     <sys:String x:Key="Allocation.Tab.Rebalance">Rebalance</sys:String>
     <sys:String x:Key="Allocation.Overview.Title">Allocation Overview</sys:String>
+    <sys:String x:Key="Allocation.IncludeCash">Include cash</sys:String>
+    <sys:String x:Key="Allocation.IncludeCash.Hint">Cash is excluded by default — percentages reflect within-portfolio allocation (Morningstar convention). Enable to treat cash as a defensive position in the totals.</sys:String>
     <sys:String x:Key="Allocation.Summary.Investment">Holdings</sys:String>
     <sys:String x:Key="Allocation.Summary.Cash">Cash</sys:String>
     <sys:String x:Key="Allocation.Summary.Total">Total Assets</sys:String>
@@ -708,6 +710,8 @@
     <!--  Dashboard  -->
     <sys:String x:Key="Dashboard.TenDayTrend">10-Day Trend</sys:String>
     <sys:String x:Key="Dashboard.TopHoldings">Top Holdings</sys:String>
+    <sys:String x:Key="Dashboard.TopHoldings.CostLabel">Cost</sys:String>
+    <sys:String x:Key="Dashboard.Pnl.Basis">(Portfolio cumulative to date)</sys:String>
     <sys:String x:Key="Dashboard.RecentTrades">Recent Trades</sys:String>
     <sys:String x:Key="Dashboard.ViewDetail">Details</sys:String>
 
