@@ -150,7 +150,7 @@
                                     HorizontalAlignment="Left"
                                     FontSize="24"
                                     Foreground="{DynamicResource AppTextPrimary}"
-                                    Symbol="PaymentRegular24" />
+                                    Symbol="CreditCardPerson24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -176,7 +176,7 @@
                                     HorizontalAlignment="Left"
                                     FontSize="24"
                                     Foreground="{DynamicResource AppTextPrimary}"
-                                    Symbol="CalendarLtr24" />
+                                    Symbol="CalendarMonth24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
