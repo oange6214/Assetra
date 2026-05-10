@@ -128,7 +128,11 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
     private void OnPortfolioPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(IPortfolioPositionFeed.TotalMarketValue))
+        // TotalMarketValue / TotalCash 改變時重新載入 — 涵蓋價格更新、現金流、
+        // 帳戶 metadata 編輯（PortfolioViewModel 在 ReloadAfterAccountChanged 末端
+        // 主動 raise TotalCash PropertyChanged，即使數值未變）。
+        if (e.PropertyName == nameof(IPortfolioPositionFeed.TotalMarketValue)
+            || e.PropertyName == nameof(IPortfolioPositionFeed.TotalCash))
             AsyncHelpers.SafeFireAndForget(LoadAsync, "FinancialOverview.Load");
 
         // Investment P&L KPI cards depend on both TotalMarketValue and TotalCost.

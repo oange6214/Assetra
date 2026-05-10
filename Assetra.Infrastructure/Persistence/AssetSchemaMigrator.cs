@@ -153,25 +153,28 @@ internal static class AssetSchemaMigrator
     /// </summary>
     private static void ReclassifyCashAccountsBySubtype(SqliteCommand cmd)
     {
+        // 注意：asset_type 欄位存 FinancialType enum 的 ToString()，即 'Asset' / 'Liability'，
+        // 不是 'cash' / 'loan'（v1 schema 的舊認知是錯的）。subtype 用來分辨細項。
+        // 對於 cash 帳戶，subtype 才是區分 銀行活存/數位活存/證券交割戶/etc 的依據。
         cmd.CommandText = """
             UPDATE asset
                SET group_id = $cashOnHand
-             WHERE asset_type = 'cash' AND subtype IN ('現金', '手邊現金')
+             WHERE asset_type = 'Asset' AND subtype IN ('現金', '手邊現金')
                AND (group_id IS NULL OR group_id = $bankAccount);
 
             UPDATE asset
                SET group_id = $brokerage
-             WHERE asset_type = 'cash' AND subtype = '證券交割戶'
+             WHERE asset_type = 'Asset' AND subtype = '證券交割戶'
                AND (group_id IS NULL OR group_id = $bankAccount);
 
             UPDATE asset
                SET group_id = $epayment
-             WHERE asset_type = 'cash' AND subtype IN ('電子支付', '儲值卡')
+             WHERE asset_type = 'Asset' AND subtype IN ('電子支付', '儲值卡')
                AND (group_id IS NULL OR group_id = $bankAccount);
 
             UPDATE asset
                SET group_id = $bankAccount
-             WHERE asset_type = 'cash' AND subtype IN ('銀行活存', '數位活存', '定期存款', '外幣活存')
+             WHERE asset_type = 'Asset' AND subtype IN ('銀行活存', '數位活存', '定期存款', '外幣活存')
                AND group_id IS NULL;
             """;
         cmd.Parameters.AddWithValue("$cashOnHand", GrpCashOnHand.ToString());

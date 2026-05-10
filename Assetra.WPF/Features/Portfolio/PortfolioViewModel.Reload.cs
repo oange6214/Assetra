@@ -74,6 +74,10 @@ public partial class PortfolioViewModel
     {
         await LoadCashAccountsAsync();
         RebuildTotals();
+        // 帳戶 metadata 變更（如 Subtype 改變影響 GroupId）需要 FinancialOverview 重撈分組，
+        // 但 LoadCashAccountsAsync / RebuildTotals 不會觸發 TotalMarketValue 通知。
+        // 主動 raise TotalCash PropertyChanged（即使數值未變）讓 FinancialOverview 重新載入。
+        OnPropertyChanged(nameof(TotalCash));
     }
 
     /// <summary>
