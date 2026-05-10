@@ -7,6 +7,13 @@ namespace Assetra.Application.Portfolio.Services;
 
 public sealed class AccountUpsertWorkflowService : IAccountUpsertWorkflowService
 {
+    // 系統 group GUID（與 AssetSchemaMigrator 的常數一致）。
+    // 不直接 reference Infrastructure.AssetSchemaMigrator 是為了不讓 Application 層相依 Infrastructure。
+    private static readonly Guid GrpBankAccount = new("11111111-1111-1111-1111-111111111101");
+    private static readonly Guid GrpCashOnHand = new("11111111-1111-1111-1111-111111111104");
+    private static readonly Guid GrpBrokerageSettlement = new("11111111-1111-1111-1111-111111111105");
+    private static readonly Guid GrpEPayment = new("11111111-1111-1111-1111-111111111106");
+
     private readonly IAssetRepository _assetRepository;
 
     public AccountUpsertWorkflowService(IAssetRepository assetRepository)
@@ -18,14 +25,15 @@ public sealed class AccountUpsertWorkflowService : IAccountUpsertWorkflowService
     {
         ct.ThrowIfCancellationRequested();
 
+        var subtype = string.IsNullOrWhiteSpace(request.Subtype) ? null : request.Subtype.Trim();
         var account = new AssetItem(
             Guid.NewGuid(),
             request.Name.Trim(),
             FinancialType.Asset,
-            null,
+            ResolveGroupIdForSubtype(subtype),
             request.Currency,
             request.CreatedDate,
-            Subtype: string.IsNullOrWhiteSpace(request.Subtype) ? null : request.Subtype.Trim());
+            Subtype: subtype);
 
         await _assetRepository.AddItemAsync(account).ConfigureAwait(false);
         return new AccountUpsertResult(account);
@@ -35,14 +43,15 @@ public sealed class AccountUpsertWorkflowService : IAccountUpsertWorkflowService
     {
         ct.ThrowIfCancellationRequested();
 
+        var subtype = string.IsNullOrWhiteSpace(request.Subtype) ? null : request.Subtype.Trim();
         var account = new AssetItem(
             request.AccountId,
             request.Name.Trim(),
             FinancialType.Asset,
-            null,
+            ResolveGroupIdForSubtype(subtype),
             request.Currency,
             request.CreatedDate,
-            Subtype: string.IsNullOrWhiteSpace(request.Subtype) ? null : request.Subtype.Trim());
+            Subtype: subtype);
 
         await _assetRepository.UpdateItemAsync(account).ConfigureAwait(false);
         return new AccountUpsertResult(account);
@@ -50,4 +59,17 @@ public sealed class AccountUpsertWorkflowService : IAccountUpsertWorkflowService
 
     public Task<Guid> FindOrCreateAccountAsync(string name, string currency, CancellationToken ct = default) =>
         _assetRepository.FindOrCreateAccountAsync(name, currency, ct);
+
+    /// <summary>
+    /// 把 dialog subtype 對應到財務總覽分組。新加的 subtype 要加在這裡。
+    /// 未對應的（自訂、未填）→ null，落入「其他」分組。
+    /// </summary>
+    private static Guid? ResolveGroupIdForSubtype(string? subtype) => subtype switch
+    {
+        "現金" or "手邊現金" => GrpCashOnHand,
+        "證券交割戶" => GrpBrokerageSettlement,
+        "電子支付" or "儲值卡" => GrpEPayment,
+        "銀行活存" or "數位活存" or "定期存款" or "外幣活存" => GrpBankAccount,
+        _ => null,
+    };
 }

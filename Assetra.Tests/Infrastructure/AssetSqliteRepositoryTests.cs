@@ -47,7 +47,10 @@ public class AssetSqliteRepositoryTests : IDisposable
     {
         var repo = new AssetSqliteRepository(_dbPath);
         var groups = await repo.GetGroupsAsync();
-        Assert.Contains(groups, g => g.Name == "銀行帳戶" && g.IsSystem);
+        Assert.Contains(groups, g => g.Name == "銀行類" && g.IsSystem);
+        Assert.Contains(groups, g => g.Name == "手邊現金" && g.IsSystem);
+        Assert.Contains(groups, g => g.Name == "證券交割款" && g.IsSystem);
+        Assert.Contains(groups, g => g.Name == "電子支付" && g.IsSystem);
         Assert.Contains(groups, g => g.Name == "銀行貸款" && g.IsSystem && g.Type == FinancialType.Liability);
     }
 
@@ -343,6 +346,6 @@ public class AssetSqliteRepositoryTests : IDisposable
         var repo = new AssetSqliteRepository(_dbPath);
         var groups = await repo.GetGroupsAsync();
         // System groups should appear exactly once each
-        Assert.Equal(1, groups.Count(g => g.Name == "銀行帳戶" && g.IsSystem));
+        Assert.Equal(1, groups.Count(g => g.Name == "銀行類" && g.IsSystem));
     }
 }

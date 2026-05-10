@@ -4,12 +4,17 @@ namespace Assetra.Infrastructure.Persistence;
 
 internal static class AssetSchemaMigrator
 {
-    // Fixed UUIDs for system groups — deterministic so INSERT OR IGNORE is idempotent
-    private static readonly Guid GrpBankAccount = new("11111111-1111-1111-1111-111111111101");
-    private static readonly Guid GrpRealEstate = new("11111111-1111-1111-1111-111111111102");
-    private static readonly Guid GrpVehicle = new("11111111-1111-1111-1111-111111111103");
-    private static readonly Guid GrpBankLoan = new("11111111-1111-1111-1111-111111111201");
-    private static readonly Guid GrpCreditCard = new("11111111-1111-1111-1111-111111111202");
+    // Fixed UUIDs for system groups — deterministic so INSERT OR IGNORE is idempotent.
+    // 資金帳戶細分（v0.28+）：原「銀行帳戶」拆成「銀行類」+ 3 個新 group。
+    // 舊 GrpBankAccount 保留 ID 但 name 改為「銀行類」(SeedSystemGroups 會 UPDATE)。
+    public static readonly Guid GrpBankAccount = new("11111111-1111-1111-1111-111111111101");
+    public static readonly Guid GrpCashOnHand = new("11111111-1111-1111-1111-111111111104");
+    public static readonly Guid GrpBrokerageSettlement = new("11111111-1111-1111-1111-111111111105");
+    public static readonly Guid GrpEPayment = new("11111111-1111-1111-1111-111111111106");
+    public static readonly Guid GrpRealEstate = new("11111111-1111-1111-1111-111111111102");
+    public static readonly Guid GrpVehicle = new("11111111-1111-1111-1111-111111111103");
+    public static readonly Guid GrpBankLoan = new("11111111-1111-1111-1111-111111111201");
+    public static readonly Guid GrpCreditCard = new("11111111-1111-1111-1111-111111111202");
 
     private static readonly HashSet<string> AssetAllowedColumns = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -85,6 +90,8 @@ internal static class AssetSchemaMigrator
             MigrateLegacyCashAccounts(cmd, conn, tx);
             MigrateLegacyLiabilityAccounts(cmd, conn, tx);
             BackfillLiabilitySubtype(cmd);
+            // 必須在 subtype 欄位存在之後才能跑（依 subtype 重新分配 group_id）。
+            ReclassifyCashAccountsBySubtype(cmd);
 
             tx.Commit();
         }
@@ -97,19 +104,80 @@ internal static class AssetSchemaMigrator
 
     private static void SeedSystemGroups(SqliteCommand cmd)
     {
+        // INSERT OR IGNORE：第一次跑全建；舊 DB 已有 GrpBankAccount，所以原本的「銀行帳戶」不會被覆蓋。
+        // 後續另行 UPDATE 把舊 GrpBankAccount 的 name 從「銀行帳戶」改為「銀行類」（保 ID 以保持外鍵）。
         cmd.CommandText = """
             INSERT OR IGNORE INTO asset_group (id, name, asset_type, icon, sort_order, is_system, created_date) VALUES
-                ($g1, '銀行帳戶', 'Asset',     '🏦', 0, 1, '2026-01-01'),
-                ($g2, '不動產',   'Asset',     '🏠', 1, 1, '2026-01-01'),
-                ($g3, '交通工具', 'Asset',     '🚗', 2, 1, '2026-01-01'),
-                ($g4, '銀行貸款', 'Liability', '🏦', 0, 1, '2026-01-01'),
-                ($g5, '信用卡',   'Liability', '💳', 1, 1, '2026-01-01');
+                ($g1, '銀行類',     'Asset',     '🏦', 0, 1, '2026-01-01'),
+                ($g6, '證券交割款', 'Asset',     '📊', 1, 1, '2026-01-01'),
+                ($g7, '電子支付',   'Asset',     '📱', 2, 1, '2026-01-01'),
+                ($g8, '手邊現金',   'Asset',     '💵', 3, 1, '2026-01-01'),
+                ($g2, '不動產',     'Asset',     '🏠', 4, 1, '2026-01-01'),
+                ($g3, '交通工具',   'Asset',     '🚗', 5, 1, '2026-01-01'),
+                ($g4, '銀行貸款',   'Liability', '🏦', 0, 1, '2026-01-01'),
+                ($g5, '信用卡',     'Liability', '💳', 1, 1, '2026-01-01');
             """;
         cmd.Parameters.AddWithValue("$g1", GrpBankAccount.ToString());
         cmd.Parameters.AddWithValue("$g2", GrpRealEstate.ToString());
         cmd.Parameters.AddWithValue("$g3", GrpVehicle.ToString());
         cmd.Parameters.AddWithValue("$g4", GrpBankLoan.ToString());
         cmd.Parameters.AddWithValue("$g5", GrpCreditCard.ToString());
+        cmd.Parameters.AddWithValue("$g6", GrpBrokerageSettlement.ToString());
+        cmd.Parameters.AddWithValue("$g7", GrpEPayment.ToString());
+        cmd.Parameters.AddWithValue("$g8", GrpCashOnHand.ToString());
+        cmd.ExecuteNonQuery();
+        cmd.Parameters.Clear();
+
+        // 舊 DB 的 GrpBankAccount 之 name 還是「銀行帳戶」，把它改名為「銀行類」（保留 ID 與所有 FK）。
+        // 同時更新 sort_order 對齊新 taxonomy。is_system=1 的不允許使用者改名，所以這個 UPDATE 是必要的。
+        cmd.CommandText = """
+            UPDATE asset_group
+               SET name = '銀行類', sort_order = 0
+             WHERE id = $bankId AND name = '銀行帳戶' AND is_system = 1;
+            UPDATE asset_group SET sort_order = 4 WHERE id = $realEstateId AND is_system = 1;
+            UPDATE asset_group SET sort_order = 5 WHERE id = $vehicleId AND is_system = 1;
+            """;
+        cmd.Parameters.AddWithValue("$bankId", GrpBankAccount.ToString());
+        cmd.Parameters.AddWithValue("$realEstateId", GrpRealEstate.ToString());
+        cmd.Parameters.AddWithValue("$vehicleId", GrpVehicle.ToString());
+        cmd.ExecuteNonQuery();
+        cmd.Parameters.Clear();
+
+    }
+
+    /// <summary>
+    /// 既有 cash 帳戶 reclassify：依 subtype 把 group_id 設定到正確的細分群組。
+    /// - 只動 group_id 為 NULL 或還在舊 GrpBankAccount 的（避免覆蓋使用者已自訂的）。
+    /// - subtype=null 或無對應的 → 維持不動（保留 NULL → 落入「其他」）。
+    /// 必須在 subtype 欄位被 AddAssetMetadataColumns 加入後才能跑。
+    /// </summary>
+    private static void ReclassifyCashAccountsBySubtype(SqliteCommand cmd)
+    {
+        cmd.CommandText = """
+            UPDATE asset
+               SET group_id = $cashOnHand
+             WHERE asset_type = 'cash' AND subtype IN ('現金', '手邊現金')
+               AND (group_id IS NULL OR group_id = $bankAccount);
+
+            UPDATE asset
+               SET group_id = $brokerage
+             WHERE asset_type = 'cash' AND subtype = '證券交割戶'
+               AND (group_id IS NULL OR group_id = $bankAccount);
+
+            UPDATE asset
+               SET group_id = $epayment
+             WHERE asset_type = 'cash' AND subtype IN ('電子支付', '儲值卡')
+               AND (group_id IS NULL OR group_id = $bankAccount);
+
+            UPDATE asset
+               SET group_id = $bankAccount
+             WHERE asset_type = 'cash' AND subtype IN ('銀行活存', '數位活存', '定期存款', '外幣活存')
+               AND group_id IS NULL;
+            """;
+        cmd.Parameters.AddWithValue("$cashOnHand", GrpCashOnHand.ToString());
+        cmd.Parameters.AddWithValue("$brokerage", GrpBrokerageSettlement.ToString());
+        cmd.Parameters.AddWithValue("$epayment", GrpEPayment.ToString());
+        cmd.Parameters.AddWithValue("$bankAccount", GrpBankAccount.ToString());
         cmd.ExecuteNonQuery();
         cmd.Parameters.Clear();
     }
