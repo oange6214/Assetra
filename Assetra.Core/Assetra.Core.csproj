@@ -9,4 +9,7 @@
   <ItemGroup>
     <PackageReference Include="System.Reactive" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\TaxYearProfiles.json" />
+  </ItemGroup>
 </Project>

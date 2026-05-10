@@ -114,8 +114,8 @@ public sealed class RuleBasedFinancialAssistant : IFinancialAssistant
                 "AMT 申報門檻為個人海外所得 100 萬 NTD；實際是否觸發請至「報表 → 年度稅務」頁查看本年度海外所得合計。",
                 Source: "TaxCalculationService");
         return new FinancialAssistantResponse(
-            $"AMT 個人海外所得申報門檻為 100 萬 NTD。當前設定：免稅額 {s.AmtExemption:N0}、稅率 {s.AmtRate:P0}、" +
-            "實際本年度海外所得合計請至「報表 → 年度稅務」頁查看。",
+            "AMT 個人海外所得申報門檻為 100 萬 NTD（歷年皆同）。免稅額/稅率依年度：2014–2023 為 670 萬 / 20%、" +
+            "2024 起調整為 750 萬 / 20%。實際本年度海外所得合計與應補繳金額請至「報表 → 年度稅務」頁查看。",
             Source: "TaxCalculationService");
     }
 

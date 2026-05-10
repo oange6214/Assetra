@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Net.Http;
 using Assetra.Application.Fx;
 using Assetra.Application.Reports.Services;
+using Assetra.Application.Tax;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Interfaces.Reports;
@@ -40,6 +41,8 @@ public sealed partial class ReportsViewModel : ObservableObject
     private readonly IConcentrationAnalyzer? _concentration;
     private readonly IPortfolioSnapshotRepository? _snapshots;
     private readonly IAppSettingsService? _appSettings;
+    private readonly ITaxProfileProvider? _taxProfiles;
+    private readonly AnnualTaxComputationService? _annualTaxComputer;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasPerformance))]
@@ -157,7 +160,8 @@ public sealed partial class ReportsViewModel : ObservableObject
         ISharpeRatioCalculator? sharpe = null,
         IConcentrationAnalyzer? concentration = null,
         IPortfolioSnapshotRepository? snapshots = null,
-        IAppSettingsService? appSettings = null)
+        IAppSettingsService? appSettings = null,
+        ITaxProfileProvider? taxProfiles = null)
     {
         ArgumentNullException.ThrowIfNull(service);
         _service = service;
@@ -181,6 +185,8 @@ public sealed partial class ReportsViewModel : ObservableObject
         _concentration = concentration;
         _snapshots = snapshots;
         _appSettings = appSettings;
+        _taxProfiles = taxProfiles ?? new EmbeddedTaxProfileProvider();
+        _annualTaxComputer = new AnnualTaxComputationService(_taxProfiles);
         MultiYearTaxRows = new ReadOnlyObservableCollection<TaxYearRowViewModel>(_multiYearTaxRows);
 
         var today = DateTime.Today;
@@ -384,11 +390,17 @@ public sealed partial class ReportsViewModel : ObservableObject
                 // every Month change too (cheap) so the user sees tax data
                 // even from the income/balance tabs without switching tabs.
                 var allTrades = (await _trades.GetAllAsync().ConfigureAwait(true)).ToList();
-                TaxSummary = Assetra.Application.Tax.TaxCalculationService.CalculateForYear(Year, allTrades);
 
-                // Multi-year comparison: scan all trade-bearing years (CashDividend
-                // + Sell-with-PnL only) and build one row per year. Rebuild the
-                // collection in-place so existing XAML bindings stay attached.
+                // 建構年度報稅 inputs（filing 與 amtInputs 由 AppSettings 投影）
+                var (filing, amtInputs) = BuildTaxInputs();
+
+                // 焦點年度完整試算
+                var focalProfile = _taxProfiles!.Get(Year);
+                var focalSummary = Assetra.Application.Tax.TaxCalculationService.CalculateForYear(
+                    Year, allTrades, focalProfile);
+                TaxSummary = focalSummary;
+
+                // Multi-year comparison: 每個有交易的年度跑完整 AnnualTaxComputation
                 var taxYears = allTrades
                     .Where(t => t.Type == Assetra.Core.Models.TradeType.CashDividend
                              || (t.Type == Assetra.Core.Models.TradeType.Sell && t.RealizedPnl is not null))
@@ -398,30 +410,18 @@ public sealed partial class ReportsViewModel : ObservableObject
                     .ToList();
 
                 _multiYearTaxRows.Clear();
+                AnnualTaxComputation? focalComputation = null;
                 foreach (var y in taxYears)
                 {
-                    var s = Assetra.Application.Tax.TaxCalculationService.CalculateForYear(y, allTrades);
-                    _multiYearTaxRows.Add(TaxYearRowViewModel.FromSummary(s));
+                    var c = _annualTaxComputer!.Compute(y, allTrades, filing, amtInputs);
+                    _multiYearTaxRows.Add(TaxYearRowViewModel.FromComputation(c));
+                    if (y == Year) focalComputation = c;
                 }
                 OnPropertyChanged(nameof(HasMultiYearTax));
 
-                // AMT calculation for the focal year — pulls parameters from AppSettings
-                // (Exemption / Rate / RegularTaxableIncome / RegularIncomeTax). Computed
-                // even when 海外所得 below threshold so the UI can show "未達門檻" state.
-                if (TaxSummary is not null && _appSettings is not null)
-                {
-                    var s = _appSettings.Current;
-                    var parameters = new AmtCalculationParameters(
-                        Exemption: s.AmtExemption,
-                        Rate: s.AmtRate,
-                        RegularTaxableIncome: s.AmtRegularTaxableIncome,
-                        RegularIncomeTax: s.AmtRegularIncomeTax);
-                    AmtResult = Assetra.Application.Tax.TaxCalculationService.ComputeAmtLiability(TaxSummary, parameters);
-                }
-                else
-                {
-                    AmtResult = null;
-                }
+                // AMT result 取焦點年度（若該年無交易，仍用 AnnualTaxComputer 跑一次）
+                focalComputation ??= _annualTaxComputer!.Compute(Year, allTrades, filing, amtInputs);
+                AmtResult = focalComputation.Amt;
             }
             catch (Exception ex)
             {
@@ -632,6 +632,42 @@ public sealed partial class ReportsViewModel : ObservableObject
         if (value is not { } v) return "—";
         return _currency?.FormatSigned(v)
                ?? (v >= 0 ? $"+NT${Math.Abs(v):N0}" : $"-NT${Math.Abs(v):N0}");
+    }
+
+    /// <summary>
+    /// 從 AppSettings 投影出 (TaxFilingProfile, AmtCalculationParameters) — 兩者都是
+    /// AnnualTaxComputationService 的入口參數。AppSettings 為 null（測試 / 早期啟動）
+    /// 時回傳全 0 預設值，計算服務仍會用 trade-derived 股利當作 fallback。
+    /// </summary>
+    private (TaxFilingProfile filing, AmtCalculationParameters amtInputs) BuildTaxInputs()
+    {
+        var s = _appSettings?.Current;
+        var filing = new TaxFilingProfile(
+            IsMarried: s?.TaxIsMarried ?? false,
+            DependentCount: s?.TaxDependentCount ?? 0,
+            PreschoolCount: s?.TaxPreschoolCount ?? 0,
+            CollegeStudentCount: s?.TaxCollegeStudentCount ?? 0,
+            LongCareCount: s?.TaxLongCareCount ?? 0,
+            DisabilityCount: s?.TaxDisabilityCount ?? 0,
+            SalaryIncome: s?.TaxSalaryIncome ?? 0m,
+            DividendIncome: 0m,   // 由 AnnualTaxComputationService 用 trade-derived 值填入
+            InterestIncome: s?.TaxInterestIncome ?? 0m,
+            RentalExpense: s?.TaxRentalExpense ?? 0m,
+            UseItemized: s?.TaxUseItemizedDeduction ?? false,
+            ItemizedAmount: s?.TaxItemizedDeductionAmount ?? 0m,
+            DividendSeparate: s?.TaxDividendSeparate ?? false);
+
+        var amtInputs = new AmtCalculationParameters(
+            RegularTaxableIncome: s?.AmtRegularTaxableIncome ?? 0m,
+            RegularIncomeTax: s?.AmtRegularIncomeTax ?? 0m,
+            InsuranceDeathProceeds: s?.AmtInsuranceDeathProceeds ?? 0m,
+            InsuranceNonDeathProceeds: s?.AmtInsuranceNonDeathProceeds ?? 0m,
+            UnlistedSecurityGains: s?.AmtUnlistedSecurityGains ?? 0m,
+            NonCashDonation: s?.AmtNonCashDonation ?? 0m,
+            PrivateFundGains: s?.AmtPrivateFundGains ?? 0m,
+            OverseasTaxCredit: s?.AmtOverseasTaxCredit ?? 0m);
+
+        return (filing, amtInputs);
     }
 
     private string FormatAmount(decimal value) =>

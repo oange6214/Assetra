@@ -53,8 +53,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
     public static IReadOnlyList<ProviderOption> SupportedQuoteProviders { get; } =
     [
-        new("official", "TWSE / TPEX"),
-        new("fugle", "Fugle"),
+        new("official", "TWSE / TPEX 官方"),
+        new("fugle", "Fugle 台股"),
     ];
 
     /// <summary>
@@ -83,6 +83,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     private readonly IThemeService _theme;
     private readonly ILocalizationService _localization;
     private readonly ICurrencyService _currencyService;
+    private readonly IRefreshableSymbolDirectory? _usSymbolDirectory;
+    private readonly ITwelveDataConnectionTester? _twelveDataTester;
     private readonly ISnackbarService? _snackbar;
     private readonly SemaphoreSlim _saveGate = new(1, 1);
 
@@ -109,20 +111,49 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _quoteProvider = "official";
     [ObservableProperty] private string _historyProvider = "twse";
     [ObservableProperty] private string _fugleApiKey = string.Empty;
+    [ObservableProperty] private string _twelveDataApiKey = string.Empty;
+    [ObservableProperty] private string _twelveDataTestStatus = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanTestTwelveDataConnection))]
+    private bool _isTestingTwelveDataConnection;
+
     [ObservableProperty] private string _dataSourceSaveStatus = string.Empty;
+    [ObservableProperty] private string _usSymbolDirectoryStatus = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanRefreshUsSymbolDirectory))]
+    private bool _isRefreshingUsSymbolDirectory;
+
     [ObservableProperty] private bool _isFugleHelpOpen;
     [ObservableProperty] private string _ocrTessdataPath = string.Empty;
     [ObservableProperty] private string _ocrLanguage = "eng";
     [ObservableProperty] private string _defaultHomeSection = "FinancialOverview";
 
-    // ── AMT 最低稅負制設定 ─────────────────────────────────────────
-    // 使用者於報稅季填一般所得淨額 + 一般稅額後，Reports 頁的 AMT 計算
-    // 才能算出應補繳。免稅額/稅率台灣 2024 年公告為 670 萬 / 20%。
-
-    [ObservableProperty] private decimal _amtExemption = 6_700_000m;
-    [ObservableProperty] private decimal _amtRate = 0.20m;
+    // ── AMT 最低稅負制設定（v2 — 免稅額/稅率改由 TaxYearProfile 動態提供）────
+    // 此處保留「使用者年度報稅彙整輸入」共 7 項。
     [ObservableProperty] private decimal _amtRegularTaxableIncome = 0m;
     [ObservableProperty] private decimal _amtRegularIncomeTax = 0m;
+    [ObservableProperty] private decimal _amtInsuranceDeathProceeds = 0m;
+    [ObservableProperty] private decimal _amtInsuranceNonDeathProceeds = 0m;
+    [ObservableProperty] private decimal _amtUnlistedSecurityGains = 0m;
+    [ObservableProperty] private decimal _amtNonCashDonation = 0m;
+    [ObservableProperty] private decimal _amtPrivateFundGains = 0m;
+    [ObservableProperty] private decimal _amtOverseasTaxCredit = 0m;
+
+    // ── 個人稅務檔案 ──────────────────────────────────────────────────
+    [ObservableProperty] private bool _taxIsMarried;
+    [ObservableProperty] private int _taxDependentCount;
+    [ObservableProperty] private int _taxPreschoolCount;
+    [ObservableProperty] private int _taxCollegeStudentCount;
+    [ObservableProperty] private int _taxLongCareCount;
+    [ObservableProperty] private int _taxDisabilityCount;
+    [ObservableProperty] private decimal _taxSalaryIncome;
+    [ObservableProperty] private decimal _taxInterestIncome;
+    [ObservableProperty] private decimal _taxRentalExpense;
+    [ObservableProperty] private bool _taxUseItemizedDeduction;
+    [ObservableProperty] private decimal _taxItemizedDeductionAmount;
+    [ObservableProperty] private bool _taxDividendSeparate;
 
     // ── AI 助手 LLM provider 設定 ─────────────────────────────────
     // 空字串 / "null" → NullLlmProvider（rule-based only）
@@ -145,6 +176,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     private bool _isRefreshingFxRates;
 
     public bool CanRefreshFxRates => !IsRefreshingFxRates;
+    public bool CanRefreshUsSymbolDirectory => !IsRefreshingUsSymbolDirectory && _usSymbolDirectory is not null;
 
     private readonly ObservableCollection<FxRateRow> _fxRateRows = [];
     public ReadOnlyObservableCollection<FxRateRow> FxRateRows { get; }
@@ -154,8 +186,19 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
     public string AppVersion { get; } = ResolveAppVersion();
     public bool IsFugleConfigured => !string.IsNullOrWhiteSpace(FugleApiKey);
+    public bool IsTwelveDataConfigured => !string.IsNullOrWhiteSpace(TwelveDataApiKey);
+    public bool CanTestTwelveDataConnection =>
+        !IsTestingTwelveDataConnection &&
+        _twelveDataTester is not null &&
+        !string.IsNullOrWhiteSpace(TwelveDataApiKey);
+    public bool CanSaveDataSourceSettings =>
+        string.IsNullOrWhiteSpace(TwelveDataApiKey) ||
+        string.Equals(TwelveDataApiKey.Trim(), _lastTestedTwelveDataApiKey, StringComparison.Ordinal);
+    public string TwelveDataQuotaDisplay =>
+        $"{Math.Max(0, _settings.Current.TwelveDataQuotaUsed):N0} / {Math.Max(1, _settings.Current.TwelveDataDailyQuota):N0}";
 
     private double _uiScalePreview = 1.0;
+    private string _lastTestedTwelveDataApiKey = string.Empty;
 
     public double UiScalePreview
     {
@@ -181,7 +224,9 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         ICurrencyService currencyService,
         SyncSettingsViewModel sync,
         ConflictResolutionViewModel conflicts,
-        ISnackbarService? snackbar = null)
+        ISnackbarService? snackbar = null,
+        IRefreshableSymbolDirectory? usSymbolDirectory = null,
+        ITwelveDataConnectionTester? twelveDataTester = null)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(theme);
@@ -194,6 +239,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         _theme = theme;
         _localization = localization;
         _currencyService = currencyService;
+        _usSymbolDirectory = usSymbolDirectory;
+        _twelveDataTester = twelveDataTester;
         _snackbar = snackbar;
         Sync = sync;
         Conflicts = conflicts;
@@ -222,23 +269,46 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
                 ? "TWD"
                 : s.PreferredCurrency;
             BaseCurrency = string.IsNullOrWhiteSpace(s.BaseCurrency) ? "TWD" : s.BaseCurrency;
-            QuoteProvider = string.IsNullOrWhiteSpace(s.QuoteProvider) ? "official" : s.QuoteProvider;
+            QuoteProvider = NormalizeTaiwanQuoteProvider(s.QuoteProvider);
             HistoryProvider = string.IsNullOrWhiteSpace(s.HistoryProvider) ? "twse" : s.HistoryProvider;
             FugleApiKey = s.FugleApiKey ?? string.Empty;
+            TwelveDataApiKey = s.TwelveDataApiKey ?? string.Empty;
+            _lastTestedTwelveDataApiKey = TwelveDataApiKey.Trim();
             OcrTessdataPath = s.OcrTessdataPath ?? string.Empty;
             OcrLanguage = string.IsNullOrWhiteSpace(s.OcrLanguage) ? "eng" : s.OcrLanguage;
             DefaultHomeSection = string.IsNullOrWhiteSpace(s.DefaultHomeSection)
                 ? "FinancialOverview"
                 : s.DefaultHomeSection;
-            AmtExemption = s.AmtExemption > 0 ? s.AmtExemption : 6_700_000m;
-            AmtRate = s.AmtRate > 0 ? s.AmtRate : 0.20m;
             AmtRegularTaxableIncome = s.AmtRegularTaxableIncome;
             AmtRegularIncomeTax = s.AmtRegularIncomeTax;
+            AmtInsuranceDeathProceeds = s.AmtInsuranceDeathProceeds;
+            AmtInsuranceNonDeathProceeds = s.AmtInsuranceNonDeathProceeds;
+            AmtUnlistedSecurityGains = s.AmtUnlistedSecurityGains;
+            AmtNonCashDonation = s.AmtNonCashDonation;
+            AmtPrivateFundGains = s.AmtPrivateFundGains;
+            AmtOverseasTaxCredit = s.AmtOverseasTaxCredit;
+            TaxIsMarried = s.TaxIsMarried;
+            TaxDependentCount = s.TaxDependentCount;
+            TaxPreschoolCount = s.TaxPreschoolCount;
+            TaxCollegeStudentCount = s.TaxCollegeStudentCount;
+            TaxLongCareCount = s.TaxLongCareCount;
+            TaxDisabilityCount = s.TaxDisabilityCount;
+            TaxSalaryIncome = s.TaxSalaryIncome;
+            TaxInterestIncome = s.TaxInterestIncome;
+            TaxRentalExpense = s.TaxRentalExpense;
+            TaxUseItemizedDeduction = s.TaxUseItemizedDeduction;
+            TaxItemizedDeductionAmount = s.TaxItemizedDeductionAmount;
+            TaxDividendSeparate = s.TaxDividendSeparate;
             LlmProvider = s.LlmProvider ?? string.Empty;
             LlmApiKey = s.LlmApiKey ?? string.Empty;
             LlmModel = s.LlmModel ?? string.Empty;
             LlmEndpoint = s.LlmEndpoint ?? string.Empty;
             DataSourceSaveStatus = string.Empty;
+            TwelveDataTestStatus = string.Empty;
+            OnPropertyChanged(nameof(IsTwelveDataConfigured));
+            OnPropertyChanged(nameof(CanSaveDataSourceSettings));
+            OnPropertyChanged(nameof(TwelveDataQuotaDisplay));
+            RefreshUsSymbolDirectoryStatus();
             RefreshFxDisplay();
         }
         finally
@@ -294,6 +364,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
     partial void OnQuoteProviderChanged(string value)
     {
+        OnPropertyChanged(nameof(CanSaveDataSourceSettings));
+        SaveDataSourceSettingsCommand.NotifyCanExecuteChanged();
         if (_isLoading)
             return;
         DataSourceSaveStatus = string.Empty;
@@ -314,6 +386,25 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         if (_isLoading)
             return;
         DataSourceSaveStatus = string.Empty;
+    }
+
+    partial void OnTwelveDataApiKeyChanged(string value)
+    {
+        OnPropertyChanged(nameof(IsTwelveDataConfigured));
+        OnPropertyChanged(nameof(CanTestTwelveDataConnection));
+        OnPropertyChanged(nameof(CanSaveDataSourceSettings));
+        TestTwelveDataConnectionCommand.NotifyCanExecuteChanged();
+        SaveDataSourceSettingsCommand.NotifyCanExecuteChanged();
+        if (_isLoading)
+            return;
+
+        DataSourceSaveStatus = string.Empty;
+        if (!string.Equals(value?.Trim(), _lastTestedTwelveDataApiKey, StringComparison.Ordinal))
+        {
+            TwelveDataTestStatus = _localization.Get(
+                "Settings.TwelveData.NotTested",
+                "Twelve Data API key has not been tested yet.");
+        }
     }
 
     partial void OnOcrTessdataPathChanged(string value)
@@ -421,18 +512,35 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             UiScale = UiScale,
             PreferredCurrency = PrimaryCurrency,
             BaseCurrency = BaseCurrency,
-            QuoteProvider = QuoteProvider,
+            QuoteProvider = NormalizeTaiwanQuoteProvider(QuoteProvider),
             HistoryProvider = HistoryProvider,
             FugleApiKey = FugleApiKey.Trim(),
+            TwelveDataApiKey = TwelveDataApiKey.Trim(),
             OcrTessdataPath = OcrTessdataPath?.Trim() ?? string.Empty,
             OcrLanguage = string.IsNullOrWhiteSpace(OcrLanguage) ? "eng" : OcrLanguage.Trim(),
             DefaultHomeSection = string.IsNullOrWhiteSpace(DefaultHomeSection)
                 ? "FinancialOverview"
                 : DefaultHomeSection,
-            AmtExemption = AmtExemption > 0 ? AmtExemption : 6_700_000m,
-            AmtRate = AmtRate > 0 ? AmtRate : 0.20m,
             AmtRegularTaxableIncome = AmtRegularTaxableIncome,
             AmtRegularIncomeTax = AmtRegularIncomeTax,
+            AmtInsuranceDeathProceeds = AmtInsuranceDeathProceeds,
+            AmtInsuranceNonDeathProceeds = AmtInsuranceNonDeathProceeds,
+            AmtUnlistedSecurityGains = AmtUnlistedSecurityGains,
+            AmtNonCashDonation = AmtNonCashDonation,
+            AmtPrivateFundGains = AmtPrivateFundGains,
+            AmtOverseasTaxCredit = AmtOverseasTaxCredit,
+            TaxIsMarried = TaxIsMarried,
+            TaxDependentCount = TaxDependentCount,
+            TaxPreschoolCount = TaxPreschoolCount,
+            TaxCollegeStudentCount = TaxCollegeStudentCount,
+            TaxLongCareCount = TaxLongCareCount,
+            TaxDisabilityCount = TaxDisabilityCount,
+            TaxSalaryIncome = TaxSalaryIncome,
+            TaxInterestIncome = TaxInterestIncome,
+            TaxRentalExpense = TaxRentalExpense,
+            TaxUseItemizedDeduction = TaxUseItemizedDeduction,
+            TaxItemizedDeductionAmount = TaxItemizedDeductionAmount,
+            TaxDividendSeparate = TaxDividendSeparate,
             LlmProvider = LlmProvider?.Trim() ?? string.Empty,
             LlmApiKey = LlmApiKey?.Trim() ?? string.Empty,
             LlmModel = LlmModel?.Trim() ?? string.Empty,
@@ -453,36 +561,30 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         new("ollama", "Ollama (local)"),
     ];
 
-    partial void OnAmtExemptionChanged(decimal value)
-    {
-        // Negative exemption invalid → clamp.
-        if (value < 0m) { AmtExemption = 0m; return; }
-        if (!_isLoading) _ = SaveAsync();
-    }
+    // ── AMT 彙整 / 個人稅務 — 全部走 SaveOnChange 模式 ───────────────────
+    // Negative-clamp + autosave；簡單一致。
 
-    partial void OnAmtRateChanged(decimal value)
-    {
-        // Rate is a fraction in [0, 1] (0.20 = 20%). Users typing "20" instead
-        // of "0.2" used to silently produce wrong AMT. Reject + clamp.
-        if (value < 0m || value > 1m)
-        {
-            AmtRate = Math.Clamp(value, 0m, 1m);
-            return;
-        }
-        if (!_isLoading) _ = SaveAsync();
-    }
+    partial void OnAmtRegularTaxableIncomeChanged(decimal v)  { if (v < 0m) { AmtRegularTaxableIncome = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtRegularIncomeTaxChanged(decimal v)      { if (v < 0m) { AmtRegularIncomeTax = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtInsuranceDeathProceedsChanged(decimal v)    { if (v < 0m) { AmtInsuranceDeathProceeds = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtInsuranceNonDeathProceedsChanged(decimal v) { if (v < 0m) { AmtInsuranceNonDeathProceeds = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtUnlistedSecurityGainsChanged(decimal v) { if (v < 0m) { AmtUnlistedSecurityGains = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtNonCashDonationChanged(decimal v)       { if (v < 0m) { AmtNonCashDonation = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtPrivateFundGainsChanged(decimal v)      { if (v < 0m) { AmtPrivateFundGains = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtOverseasTaxCreditChanged(decimal v)     { if (v < 0m) { AmtOverseasTaxCredit = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
 
-    partial void OnAmtRegularTaxableIncomeChanged(decimal v)
-    {
-        if (v < 0m) { AmtRegularTaxableIncome = 0m; return; }
-        if (!_isLoading) _ = SaveAsync();
-    }
-
-    partial void OnAmtRegularIncomeTaxChanged(decimal v)
-    {
-        if (v < 0m) { AmtRegularIncomeTax = 0m; return; }
-        if (!_isLoading) _ = SaveAsync();
-    }
+    partial void OnTaxIsMarriedChanged(bool v)                { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxDependentCountChanged(int v)            { if (v < 0) { TaxDependentCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxPreschoolCountChanged(int v)            { if (v < 0) { TaxPreschoolCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxCollegeStudentCountChanged(int v)       { if (v < 0) { TaxCollegeStudentCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxLongCareCountChanged(int v)             { if (v < 0) { TaxLongCareCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxDisabilityCountChanged(int v)           { if (v < 0) { TaxDisabilityCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxSalaryIncomeChanged(decimal v)          { if (v < 0m) { TaxSalaryIncome = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxInterestIncomeChanged(decimal v)        { if (v < 0m) { TaxInterestIncome = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxRentalExpenseChanged(decimal v)         { if (v < 0m) { TaxRentalExpense = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxUseItemizedDeductionChanged(bool v)     { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxItemizedDeductionAmountChanged(decimal v) { if (v < 0m) { TaxItemizedDeductionAmount = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxDividendSeparateChanged(bool v)         { if (!_isLoading) _ = SaveAsync(); }
 
     partial void OnDefaultHomeSectionChanged(string value)
     {
@@ -507,10 +609,62 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             await SaveAsync();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanSaveDataSourceSettings))]
     private async Task SaveDataSourceSettingsAsync()
     {
+        if (!CanSaveDataSourceSettings)
+        {
+            DataSourceSaveStatus = _localization.Get(
+                "Settings.TwelveData.TestBeforeSave",
+                "Test the Twelve Data API key before saving this provider.");
+            return;
+        }
+
         await SaveAsync(showDataSourceSuccess: true);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanTestTwelveDataConnection))]
+    private async Task TestTwelveDataConnectionAsync()
+    {
+        if (_twelveDataTester is null || IsTestingTwelveDataConnection)
+            return;
+
+        IsTestingTwelveDataConnection = true;
+        try
+        {
+            var key = TwelveDataApiKey.Trim();
+            var result = await _twelveDataTester.TestAsync(key).ConfigureAwait(true);
+            if (result.IsSuccess)
+            {
+                _lastTestedTwelveDataApiKey = key;
+                TwelveDataTestStatus = _localization.Get(
+                    "Settings.TwelveData.TestSucceeded",
+                    "Twelve Data connection test succeeded.");
+            }
+            else
+            {
+                _lastTestedTwelveDataApiKey = string.Empty;
+                TwelveDataTestStatus = result.Error?.Message
+                    ?? _localization.Get("Settings.TwelveData.TestFailed", "Twelve Data connection test failed.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _lastTestedTwelveDataApiKey = string.Empty;
+            TwelveDataTestStatus = $"{_localization.Get("Settings.TwelveData.TestFailed", "Twelve Data connection test failed.")} {ex.Message}";
+        }
+        finally
+        {
+            IsTestingTwelveDataConnection = false;
+            OnPropertyChanged(nameof(CanSaveDataSourceSettings));
+            OnPropertyChanged(nameof(TwelveDataQuotaDisplay));
+            SaveDataSourceSettingsCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    partial void OnIsTestingTwelveDataConnectionChanged(bool value)
+    {
+        TestTwelveDataConnectionCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
@@ -533,6 +687,37 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         }
     }
 
+    [RelayCommand]
+    private async Task RefreshUsSymbolDirectoryAsync()
+    {
+        if (_usSymbolDirectory is null || IsRefreshingUsSymbolDirectory)
+            return;
+
+        IsRefreshingUsSymbolDirectory = true;
+        try
+        {
+            var updated = await _usSymbolDirectory.RefreshAsync(force: true).ConfigureAwait(true);
+            RefreshUsSymbolDirectoryStatus(updated
+                ? _localization.Get("Settings.UsSymbolDirectory.Updated", "US symbol directory updated.")
+                : _localization.Get("Settings.UsSymbolDirectory.NoChange", "US symbol directory was already current."));
+        }
+        catch (Exception ex)
+        {
+            var message = $"{_localization.Get("Settings.UsSymbolDirectory.Failed", "US symbol directory refresh failed.")} {ex.Message}";
+            UsSymbolDirectoryStatus = message;
+            _snackbar?.Error(message);
+        }
+        finally
+        {
+            IsRefreshingUsSymbolDirectory = false;
+        }
+    }
+
+    partial void OnIsRefreshingUsSymbolDirectoryChanged(bool value)
+    {
+        RefreshUsSymbolDirectoryCommand.NotifyCanExecuteChanged();
+    }
+
     private void RefreshFxDisplay()
     {
         _fxRateRows.Clear();
@@ -552,6 +737,25 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             return;
         }
         LastFxRefreshDisplay = utc.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+    }
+
+    private void RefreshUsSymbolDirectoryStatus(string? prefix = null)
+    {
+        if (_usSymbolDirectory is null)
+        {
+            UsSymbolDirectoryStatus = _localization.Get(
+                "Settings.UsSymbolDirectory.Disabled",
+                "US symbol directory is not enabled.");
+            return;
+        }
+
+        var updatedAt = _usSymbolDirectory.LastUpdatedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+            ?? _localization.Get("Settings.UsSymbolDirectory.NeverUpdated", "Never updated");
+        var status = string.Format(
+            _localization.Get("Settings.UsSymbolDirectory.Status", "{0:N0} symbols, last updated {1}."),
+            _usSymbolDirectory.Count,
+            updatedAt);
+        UsSymbolDirectoryStatus = string.IsNullOrWhiteSpace(prefix) ? status : $"{prefix} {status}";
     }
 
     [RelayCommand]
@@ -594,6 +798,11 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         var version = assembly.GetName().Version?.ToString();
         return string.IsNullOrWhiteSpace(version) ? "v0.0.0" : $"v{version}";
     }
+
+    private static string NormalizeTaiwanQuoteProvider(string? provider) =>
+        string.Equals(provider, "fugle", StringComparison.OrdinalIgnoreCase)
+            ? "fugle"
+            : "official";
 
     public void Dispose()
     {

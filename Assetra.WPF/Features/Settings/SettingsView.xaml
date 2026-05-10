@@ -315,6 +315,22 @@
                                 SelectedValuePath="Code" />
                         </StackPanel>
 
+                        <StackPanel Margin="0,0,0,14">
+                            <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.UsSymbolDirectory.Title}" />
+                            <TextBlock
+                                Margin="0,8,0,6"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{Binding UsSymbolDirectoryStatus}"
+                                TextWrapping="Wrap" />
+                            <Button
+                                HorizontalAlignment="Left"
+                                Command="{Binding RefreshUsSymbolDirectoryCommand}"
+                                Content="{DynamicResource Settings.UsSymbolDirectory.Refresh}"
+                                IsEnabled="{Binding CanRefreshUsSymbolDirectory}"
+                                Style="{StaticResource AppSecondaryButton}" />
+                        </StackPanel>
+
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock
@@ -337,11 +353,6 @@
                                     Margin="0,0,0,8"
                                     HorizontalAlignment="Stretch"
                                     PasswordChanged="FugleApiKeyBox_OnPasswordChanged" />
-                                <Button
-                                    Margin="0,0,0,8"
-                                    HorizontalAlignment="Left"
-                                    Command="{Binding SaveDataSourceSettingsCommand}"
-                                    Content="{DynamicResource Common.Save}" Style="{StaticResource AppSecondaryButton}" />
                             </StackPanel>
                             <TextBlock
                                 Margin="0,0,0,0"
@@ -356,6 +367,54 @@
                                 Text="{Binding DataSourceSaveStatus}"
                                 TextWrapping="Wrap" />
                         </StackPanel>
+
+                        <StackPanel Margin="0,16,0,0">
+                            <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.TwelveDataApiKey}" />
+                            <StackPanel MaxWidth="420" Margin="0,8,0,0">
+                                <PasswordBox
+                                    x:Name="TwelveDataApiKeyBox"
+                                    MinWidth="220"
+                                    MaxWidth="420"
+                                    Margin="0,0,0,8"
+                                    HorizontalAlignment="Stretch"
+                                    PasswordChanged="TwelveDataApiKeyBox_OnPasswordChanged" />
+                                <WrapPanel>
+                                    <Button
+                                        Margin="0,0,8,8"
+                                        Command="{Binding TestTwelveDataConnectionCommand}"
+                                        Content="{DynamicResource Settings.TwelveData.Test}"
+                                        IsEnabled="{Binding CanTestTwelveDataConnection}"
+                                        Style="{StaticResource AppSecondaryButton}" />
+                                    <TextBlock
+                                        Margin="0,8,0,8"
+                                        VerticalAlignment="Center"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextMuted}">
+                                        <Run Text="{DynamicResource Settings.TwelveData.Quota}" />
+                                        <Run Text=" " />
+                                        <Run Text="{Binding TwelveDataQuotaDisplay, Mode=OneWay}" />
+                                    </TextBlock>
+                                </WrapPanel>
+                            </StackPanel>
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Settings.TwelveDataApiKeyHint}"
+                                TextWrapping="Wrap" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{Binding TwelveDataTestStatus}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <Button
+                            Margin="0,16,0,0"
+                            HorizontalAlignment="Left"
+                            Command="{Binding SaveDataSourceSettingsCommand}"
+                            Content="{DynamicResource Common.Save}"
+                            Style="{StaticResource AppSecondaryButton}" />
                     </StackPanel>
                 </Border>
 
@@ -435,71 +494,132 @@
                             Text="{DynamicResource Settings.Amt.Hint}"
                             TextWrapping="Wrap" />
 
+                        <!-- 一般所得（手動覆寫，0 = 由 IncomeTaxCalculator 自動估算） -->
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.Exemption}" />
-                                <TextBox
-                                    MinWidth="180"
-                                    Margin="0,8,0,0"
-                                    HorizontalAlignment="Left"
-                                    FontFamily="{StaticResource Font.Family.Base}"
-                                    Text="{Binding AmtExemption, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}"
-                                    Typography.NumeralAlignment="Tabular" />
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.RegularTaxableIncome}" />
+                                <TextBox MinWidth="180" Margin="0,8,0,0" HorizontalAlignment="Left" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding AmtRegularTaxableIncome, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                                <TextBlock Margin="0,4,0,0" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Settings.Amt.RegularTaxableIncome.Hint}" TextWrapping="Wrap" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.Rate}" />
-                                <TextBox
-                                    MinWidth="180"
-                                    Margin="0,8,0,0"
-                                    HorizontalAlignment="Left"
-                                    FontFamily="{StaticResource Font.Family.Base}"
-                                    Text="{Binding AmtRate, StringFormat={}{0:P2}, UpdateSourceTrigger=LostFocus}"
-                                    Typography.NumeralAlignment="Tabular" />
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.RegularIncomeTax}" />
+                                <TextBox MinWidth="180" Margin="0,8,0,0" HorizontalAlignment="Left" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding AmtRegularIncomeTax, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                                <TextBlock Margin="0,4,0,0" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Settings.Amt.RegularIncomeTax.Hint}" TextWrapping="Wrap" />
                             </StackPanel>
                         </Grid>
 
-                        <Grid>
+                        <!-- AMT 4 項加項 + 海外抵稅 -->
+                        <TextBlock Margin="0,8,0,8" FontSize="{StaticResource Font.Size.Sm}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Settings.Amt.AddBackItems}" />
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,8">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.InsuranceDeathProceeds}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding AmtInsuranceDeathProceeds, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                                <TextBlock Margin="0,2,0,0" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Settings.Amt.InsuranceDeathProceeds.Hint}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,8">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.InsuranceNonDeathProceeds}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding AmtInsuranceNonDeathProceeds, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                                <TextBlock Margin="0,2,0,0" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Settings.Amt.InsuranceNonDeathProceeds.Hint}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,8">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.UnlistedSecurityGains}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding AmtUnlistedSecurityGains, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,8">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.PrivateFundGains}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding AmtPrivateFundGains, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,8">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.NonCashDonation}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding AmtNonCashDonation, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,8">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.OverseasTaxCredit}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding AmtOverseasTaxCredit, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Margin="0,4,0,0" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Settings.Amt.AutoNote}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <!-- ── 個人稅務檔案（綜所稅試算用） ── -->
+                <TextBlock Margin="0,0,0,8" FontSize="{StaticResource Font.Size.Md}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Section.TaxFiling}" />
+                <Border Style="{StaticResource FormCard}" Margin="0,0,0,24" Padding="16">
+                    <StackPanel>
+                        <TextBlock Margin="0,0,0,12" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Settings.TaxFiling.Hint}" TextWrapping="Wrap" />
+
+                        <CheckBox Margin="0,0,0,8" Content="{DynamicResource Settings.TaxFiling.IsMarried}" IsChecked="{Binding TaxIsMarried}" />
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,8">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.TaxFiling.SalaryIncome}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding TaxSalaryIncome, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,8">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.TaxFiling.InterestIncome}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding TaxInterestIncome, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,8">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.TaxFiling.DependentCount}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding TaxDependentCount, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,8">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.TaxFiling.PreschoolCount}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding TaxPreschoolCount, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.TaxFiling.CollegeStudentCount}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding TaxCollegeStudentCount, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.TaxFiling.LongCareCount}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding TaxLongCareCount, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.RegularTaxableIncome}" />
-                                <TextBox
-                                    MinWidth="180"
-                                    Margin="0,8,0,0"
-                                    HorizontalAlignment="Left"
-                                    FontFamily="{StaticResource Font.Family.Base}"
-                                    Text="{Binding AmtRegularTaxableIncome, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}"
-                                    Typography.NumeralAlignment="Tabular" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="{StaticResource Font.Size.Xs}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="{DynamicResource Settings.Amt.RegularTaxableIncome.Hint}"
-                                    TextWrapping="Wrap" />
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.TaxFiling.DisabilityCount}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding TaxDisabilityCount, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Amt.RegularIncomeTax}" />
-                                <TextBox
-                                    MinWidth="180"
-                                    Margin="0,8,0,0"
-                                    HorizontalAlignment="Left"
-                                    FontFamily="{StaticResource Font.Family.Base}"
-                                    Text="{Binding AmtRegularIncomeTax, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}"
-                                    Typography.NumeralAlignment="Tabular" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="{StaticResource Font.Size.Xs}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Text="{DynamicResource Settings.Amt.RegularIncomeTax.Hint}"
-                                    TextWrapping="Wrap" />
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.TaxFiling.RentalExpense}" />
+                                <TextBox Margin="0,4,0,0" FontFamily="{StaticResource Font.Family.Base}" Text="{Binding TaxRentalExpense, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
                             </StackPanel>
                         </Grid>
+
+                        <CheckBox Margin="0,0,0,4" Content="{DynamicResource Settings.TaxFiling.UseItemized}" IsChecked="{Binding TaxUseItemizedDeduction}" />
+                        <TextBox Margin="20,0,0,12" HorizontalAlignment="Left" MinWidth="200" FontFamily="{StaticResource Font.Family.Base}" IsEnabled="{Binding TaxUseItemizedDeduction}" Text="{Binding TaxItemizedDeductionAmount, StringFormat={}{0:N0}, UpdateSourceTrigger=LostFocus}" Typography.NumeralAlignment="Tabular" />
+
+                        <CheckBox Content="{DynamicResource Settings.TaxFiling.DividendSeparate}" IsChecked="{Binding TaxDividendSeparate}" />
+                        <TextBlock Margin="20,4,0,0" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Settings.TaxFiling.DividendSeparate.Hint}" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
 

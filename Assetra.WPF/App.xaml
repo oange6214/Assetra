@@ -21,6 +21,7 @@
             <converters:TradeTypeConverter x:Key="TradeTypeConverter" />
             <converters:ResourceKeyToStringConverter x:Key="ResourceKeyToStringConverter" />
             <converters:ZeroToVisibleConverter x:Key="ZeroToVisibleConverter" />
+            <converters:NonZeroDecimalToVisibilityConverter x:Key="NonZeroDecimalToVisibilityConverter" />
             <converters:WidthScaleThresholdToBooleanConverter x:Key="WidthScaleThresholdToBooleanConverter" />
             <converters:WidthScaleThresholdToVisibilityConverter x:Key="WidthScaleThresholdToVisibilityConverter" />
             <converters:InverseWidthScaleThresholdToVisibilityConverter x:Key="InverseWidthScaleThresholdToVisibilityConverter" />

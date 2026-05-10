@@ -78,21 +78,77 @@ public sealed record AppSettings(
     /// </summary>
     string DefaultHomeSection = "FinancialOverview",
 
-    // 最低稅負制（AMT）參數 — 預設值依台灣 2024 年公告：免稅額 670 萬、稅率 20%。
-    // 使用者填一般所得淨額 + 一般綜所稅應納稅額後，TaxCalculationService.ComputeAmtLiability
-    // 才能算出 AMT 應補繳金額。預設 0 表示不啟用 AMT 計算（只顯示申報門檻判定）。
-
-    /// <summary>AMT 基本所得免稅額（NTD）。台灣 2024 年公告為 670 萬。</summary>
-    decimal AmtExemption = 6_700_000m,
-
-    /// <summary>AMT 稅率（小數）。台灣 2024 年公告為 0.20（20%）。</summary>
-    decimal AmtRate = 0.20m,
+    // ── 最低稅負制（AMT）參數 ─────────────────────────────────────────
+    // v2：免稅額 / 稅率 / 海外門檻 / 保險扣除額由 TaxYearProfile 依年度提供，
+    // 不再需要使用者手動填寫。以下欄位為「使用者年度報稅彙整輸入」。
 
     /// <summary>使用者填寫的一般綜合所得淨額（NTD）。0 = 未填，AMT 不計算。</summary>
     decimal AmtRegularTaxableIncome = 0m,
 
-    /// <summary>使用者填寫的一般綜合所得稅應納稅額（NTD）。AMT 應補繳 = max(0, 基本稅額 − 此值)。</summary>
+    /// <summary>使用者填寫的一般綜合所得稅應納稅額（NTD）。0 = 未填則由 IncomeTaxCalculator 自動估算。</summary>
     decimal AmtRegularIncomeTax = 0m,
+
+    /// <summary>
+    /// 受益人與要保人不同 + 人壽/年金保險「死亡給付」總額（NTD）。
+    /// 超過該年度 <c>AmtInsuranceDeduction</c>（2024 = 3,740 萬）部分計入 AMT。
+    /// 健康/傷害保險、要保人=受益人之給付都不計入此欄。
+    /// </summary>
+    decimal AmtInsuranceDeathProceeds = 0m,
+
+    /// <summary>
+    /// 受益人與要保人不同 + 人壽/年金保險「非死亡給付」（滿期 / 解約）總額（NTD）。
+    /// 全數計入 AMT，無扣除額。健康/傷害保險不計入此欄。
+    /// </summary>
+    decimal AmtInsuranceNonDeathProceeds = 0m,
+
+    /// <summary>未上市櫃股票交易所得（NTD）— 計入 AMT。</summary>
+    decimal AmtUnlistedSecurityGains = 0m,
+
+    /// <summary>非現金（藝術品、不動產等）捐贈扣除額（NTD）— 加計回基本所得。</summary>
+    decimal AmtNonCashDonation = 0m,
+
+    /// <summary>私募證券投資信託基金受益憑證交易所得（NTD）— 計入 AMT。</summary>
+    decimal AmtPrivateFundGains = 0m,
+
+    /// <summary>海外已納稅額可扣抵 AMT（NTD）。</summary>
+    decimal AmtOverseasTaxCredit = 0m,
+
+    // ── 個人稅務檔案（用於綜所稅自動試算）────────────────────────────
+    /// <summary>是否已婚合併申報（true = 夫妻合併、適用 2× 標準扣除額）。</summary>
+    bool TaxIsMarried = false,
+
+    /// <summary>扶養親屬人數（不含本人配偶）。每人加計一份免稅額。</summary>
+    int TaxDependentCount = 0,
+
+    /// <summary>6 歲以下幼兒人數，享幼兒學前特別扣除額。</summary>
+    int TaxPreschoolCount = 0,
+
+    /// <summary>大專以上就學子女人數，享教育學費特別扣除額。</summary>
+    int TaxCollegeStudentCount = 0,
+
+    /// <summary>長期照顧需求人數（直系親屬），享長照特別扣除額。</summary>
+    int TaxLongCareCount = 0,
+
+    /// <summary>身心障礙人數，享身心障礙特別扣除額。</summary>
+    int TaxDisabilityCount = 0,
+
+    /// <summary>本人薪資所得（NTD / 年）— 用於估算一般綜所稅。0 = 未填。</summary>
+    decimal TaxSalaryIncome = 0m,
+
+    /// <summary>銀行存款利息所得（NTD）— 享儲蓄投資特別扣除額。</summary>
+    decimal TaxInterestIncome = 0m,
+
+    /// <summary>房屋租金支出（NTD / 年）— 2024 起列特別扣除額。</summary>
+    decimal TaxRentalExpense = 0m,
+
+    /// <summary>true = 採列舉扣除；false = 採標準扣除。Default false。</summary>
+    bool TaxUseItemizedDeduction = false,
+
+    /// <summary>列舉扣除總額（NTD）— 僅 TaxUseItemizedDeduction = true 時使用。</summary>
+    decimal TaxItemizedDeductionAmount = 0m,
+
+    /// <summary>股利課稅選擇：true = 28% 分離課稅；false = 合併計稅（享 8.5% 抵減上限 8 萬）。</summary>
+    bool TaxDividendSeparate = false,
 
     /// <summary>
     /// 最近一次 Frankfurter 匯率刷新成功時間（UTC ISO-8601）。
@@ -114,4 +170,18 @@ public sealed record AppSettings(
     string LlmModel = "",
 
     /// <summary>Endpoint override (Ollama only — defaults to http://localhost:11434).</summary>
-    string LlmEndpoint = "");
+    string LlmEndpoint = "",
+
+    // US market data — Twelve Data Basic provider.
+
+    /// <summary>Twelve Data API key. Stored plaintext for now; future work moves to OS credential store.</summary>
+    string TwelveDataApiKey = "",
+
+    /// <summary>Date key for daily Twelve Data quota display, formatted as yyyy-MM-dd in UTC.</summary>
+    string TwelveDataQuotaDate = "",
+
+    /// <summary>Credits used for the date stored in <see cref="TwelveDataQuotaDate"/>.</summary>
+    int TwelveDataQuotaUsed = 0,
+
+    /// <summary>Soft daily quota guard for Twelve Data Basic. UI shows used / limit.</summary>
+    int TwelveDataDailyQuota = 800);
