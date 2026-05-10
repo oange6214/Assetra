@@ -6,6 +6,7 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:controls="clr-namespace:Assetra.WPF.Infrastructure.Controls"
     xmlns:conv="clr-namespace:Assetra.WPF.Infrastructure.Converters"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
@@ -74,16 +75,6 @@
                         </Grid.RowDefinitions>
 
                         <DockPanel Grid.Row="0" Margin="0,0,0,10" LastChildFill="True">
-                            <CheckBox
-                                VerticalAlignment="Center"
-                                DockPanel.Dock="Right"
-                                IsChecked="{Binding IncludeCashInAllocation}"
-                                ToolTip="{DynamicResource Allocation.IncludeCash.Hint}">
-                                <TextBlock
-                                    FontSize="{StaticResource Font.Size.Xs}"
-                                    Foreground="{DynamicResource AppTextSecondary}"
-                                    Text="{DynamicResource Allocation.IncludeCash}" />
-                            </CheckBox>
                             <TextBlock
                                 FontSize="{StaticResource Font.Size.Md}"
                                 FontWeight="SemiBold"
@@ -733,11 +724,12 @@
                 Visibility="{Binding IsCashRebalance, Converter={StaticResource BoolToVis}}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock
+                        <ds:AppIcon
                             Margin="0,0,6,0"
                             VerticalAlignment="Center"
-                            FontSize="{StaticResource Font.Size.Base}"
-                            Text="💰" />
+                            FontSize="16"
+                            Foreground="{DynamicResource AppAccent}"
+                            Symbol="Money24" />
                         <StackPanel>
                             <TextBlock
                                 FontSize="{StaticResource Font.Size.Sm}"

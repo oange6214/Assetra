@@ -116,16 +116,19 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     /// <summary>新增交易 — 開啟 transaction dialog（不切換頁面，dialog 是 modal）。</summary>
     [RelayCommand]
-    private void AddTransactionFromMenu() => Portfolio.AddRecordCommand.Execute(null);
+    private void AddTransactionFromMenu()
+    {
+        if (Portfolio.AddRecordCommand.CanExecute(null))
+            Portfolio.AddRecordCommand.Execute(null);
+    }
 
-    /// <summary>新增投資資產 — 切到投資組合頁 + 開買入 dialog。</summary>
+    /// <summary>新增買入交易 — 切到投資資產頁 + 開買入 dialog。</summary>
     [RelayCommand]
-    private void AddInvestmentFromMenu()
+    private void AddBuyTransactionFromMenu()
     {
         NavRail.ActiveSection = NavSection.Portfolio;
-        // 進 Portfolio 後預設已是「儀表板」tab；開啟交易 dialog 並預設為「買入」
+        // OpenTxDialog already resets TxType to buy; keep this as an explicit quick-add shortcut.
         Portfolio.Transaction.OpenTxDialog();
-        Portfolio.Transaction.TxType = "buy";
     }
 
     /// <summary>新增資金帳戶 — 切到資金帳戶頁 + 開新增帳戶 dialog。</summary>
@@ -133,7 +136,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private void AddAccountFromMenu()
     {
         NavRail.ActiveSection = NavSection.CashAccounts;
-        Portfolio.OpenAddAccountDialogCommand.Execute(null);
+        if (Portfolio.OpenAddAccountDialogCommand.CanExecute(null))
+            Portfolio.OpenAddAccountDialogCommand.Execute(null);
     }
 
     /// <summary>新增負債 — 切到負債頁 + 開新增負債 dialog。</summary>
@@ -141,7 +145,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private void AddLiabilityFromMenu()
     {
         NavRail.ActiveSection = NavSection.Liabilities;
-        Portfolio.OpenAddLiabilityDialogCommand.Execute(null);
+        if (Portfolio.OpenAddLiabilityDialogCommand.CanExecute(null))
+            Portfolio.OpenAddLiabilityDialogCommand.Execute(null);
     }
 
     /// <summary>新增收支分類 — 切到收支分類頁 + 開新增分類 dialog。</summary>
@@ -149,7 +154,35 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private void AddCategoryFromMenu()
     {
         NavRail.ActiveSection = NavSection.Categories;
-        Categories.OpenAddCategoryCommand.Execute(null);
+        if (Categories.OpenAddCategoryCommand.CanExecute(null))
+            Categories.OpenAddCategoryCommand.Execute(null);
+    }
+
+    /// <summary>新增訂閱排程 — 切到訂閱排程頁 + 開新增訂閱 dialog。</summary>
+    [RelayCommand]
+    private void AddRecurringFromMenu()
+    {
+        NavRail.ActiveSection = NavSection.Recurring;
+        if (Recurring.OpenAddFormCommand.CanExecute(null))
+            Recurring.OpenAddFormCommand.Execute(null);
+    }
+
+    /// <summary>新增警示 — 切到警示頁 + 開新增警示 dialog。</summary>
+    [RelayCommand]
+    private void AddAlertFromMenu()
+    {
+        NavRail.ActiveSection = NavSection.Alerts;
+        if (Alerts.OpenAddFormCommand.CanExecute(null))
+            Alerts.OpenAddFormCommand.Execute(null);
+    }
+
+    /// <summary>新增財務目標 — 切到財務目標頁 + 開新增目標 dialog。</summary>
+    [RelayCommand]
+    private void AddGoalFromMenu()
+    {
+        NavRail.ActiveSection = NavSection.Goals;
+        if (Goals.OpenAddFormCommand.CanExecute(null))
+            Goals.OpenAddFormCommand.Execute(null);
     }
 
     // Theme
@@ -160,12 +193,12 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty] private ApplicationTheme _currentTheme;
 
     public string ThemeToggleLabel => CurrentTheme == ApplicationTheme.Dark ? "淺色" : "深色";
-    public string ThemeToggleIcon => CurrentTheme == ApplicationTheme.Dark ? "☀️" : "🌙";
 
     partial void OnCurrentThemeChanged(ApplicationTheme value)
     {
+        // Title-bar 已用 DataTrigger 在 XAML 直接切換 ds:AppIcon Symbol，
+        // 不再需要回傳 emoji 字串給 binding。
         OnPropertyChanged(nameof(ThemeToggleLabel));
-        OnPropertyChanged(nameof(ThemeToggleIcon));
     }
 
     [RelayCommand]

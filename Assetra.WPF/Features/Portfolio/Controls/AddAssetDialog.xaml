@@ -145,10 +145,12 @@
                             CommandParameter="creditCard:信用卡"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F4B3;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="PaymentRegular24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -169,10 +171,12 @@
                             CommandParameter="creditCard:0% 分期"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F4C5;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="CalendarLtr24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -193,10 +197,12 @@
                             CommandParameter="creditCard:預借現金"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F9FE;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="MoneyHand24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -217,10 +223,12 @@
                             CommandParameter="loan:房貸"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F3E0;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="Home24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -241,10 +249,12 @@
                             CommandParameter="loan:車貸"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F697;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="VehicleCar24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -265,10 +275,12 @@
                             CommandParameter="loan:學貸"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F393;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="HatGraduation24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -289,10 +301,12 @@
                             CommandParameter="loan:信貸"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F4B0;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="Money24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -313,10 +327,12 @@
                             CommandParameter="loan:親友借款"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F465;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="People24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -337,10 +353,12 @@
                             CommandParameter="loan"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x2795;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="Add24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -366,10 +384,12 @@
                             CommandParameter="cash:手邊現金"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F4B5;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="Wallet24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -389,10 +409,12 @@
                             CommandParameter="cash:銀行活存"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F3E6;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="BuildingBank24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -412,10 +434,12 @@
                             CommandParameter="cash:數位活存"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F4F1;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="PhoneLaptop24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -435,10 +459,12 @@
                             CommandParameter="cash:定存"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F512;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="LockClosed24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -458,10 +484,12 @@
                             CommandParameter="cash:外幣活存"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F4B1;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="ArrowSwap24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -481,10 +509,12 @@
                             CommandParameter="cash:交割戶"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F4C8;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="ArrowTrendingLines24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -504,10 +534,12 @@
                             CommandParameter="cash:電子支付"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F4F2;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="WalletCreditCard24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -527,10 +559,12 @@
                             CommandParameter="cash:儲值卡"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x1F381;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="Gift24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"
@@ -550,10 +584,12 @@
                             CommandParameter="cash"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
-                                <TextBlock
+                                <ds:AppIcon
                                     Margin="0,0,0,6"
-                                    FontSize="{StaticResource Font.Size.2xl}"
-                                    Text="&#x2795;" />
+                                    HorizontalAlignment="Left"
+                                    FontSize="24"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Symbol="Add24" />
                                 <TextBlock
                                     FontSize="{StaticResource Font.Size.Base}"
                                     FontWeight="SemiBold"

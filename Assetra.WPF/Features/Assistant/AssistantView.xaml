@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Assistant"
     d:DataContext="{d:DesignInstance Type={x:Type vm:AssistantViewModel}}"
@@ -84,10 +85,12 @@
                                     Background="Transparent"
                                     Command="{Binding DataContext.DismissInsightCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     CommandParameter="{Binding}"
-                                    Content="✕"
-                                    FontSize="{StaticResource Font.Size.Xs}"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    ToolTip="{DynamicResource Assistant.DismissInsight}" />
+                                    ToolTip="{DynamicResource Assistant.DismissInsight}">
+                                    <ds:AppIcon
+                                        FontSize="14"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Symbol="Dismiss24" />
+                                </Button>
                             </Grid>
                             <TextBlock
                                 Margin="0,4,0,0"
