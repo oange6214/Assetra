@@ -89,6 +89,26 @@
                             Text="{Binding EditAssetTypeLabel}" />
                     </Border>
 
+                    <!--  Subtype (cash accounts only) — 改細分類會自動更新財務總覽分組  -->
+                    <StackPanel Visibility="{Binding EditAssetIsCash, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock
+                            Margin="0,14,0,6"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.EditAsset.SubtypeLabel}" />
+                        <ComboBox
+                            ItemsSource="{x:Static subvm:AccountDialogViewModel.CashSubtypeOptions}"
+                            SelectedItem="{Binding EditAssetSubtype}"
+                            Style="{StaticResource FormComboBox}" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.EditAsset.SubtypeHint}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
                     <!--  Symbol (read-only, stock positions only)  -->
                     <StackPanel Visibility="{Binding EditAssetIsStock, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <TextBlock

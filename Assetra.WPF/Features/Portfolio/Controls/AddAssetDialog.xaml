@@ -363,7 +363,7 @@
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
                             Command="{Binding AddAssetDialog.SelectLiabilityTypeCommand}"
-                            CommandParameter="cash:現金"
+                            CommandParameter="cash:手邊現金"
                             Style="{StaticResource AppSecondaryButton}">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock

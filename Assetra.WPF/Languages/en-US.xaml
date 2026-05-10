@@ -38,7 +38,7 @@
     <sys:String x:Key="Nav.Overview">Overview</sys:String>
     <sys:String x:Key="Nav.Assets">Assets</sys:String>
     <sys:String x:Key="Nav.TransactionLog">Transaction Log</sys:String>
-    <sys:String x:Key="Nav.CashAccounts">Cash Accounts</sys:String>
+    <sys:String x:Key="Nav.CashAccounts">Funds Accounts</sys:String>
     <sys:String x:Key="Nav.Liabilities">Liabilities</sys:String>
     <sys:String x:Key="Nav.Cashflow">Cash Flow</sys:String>
     <sys:String x:Key="Nav.Insights">Insights</sys:String>
@@ -383,7 +383,7 @@
     <sys:String x:Key="Portfolio.Liability.Subtype">Label</sys:String>
     <sys:String x:Key="Portfolio.Liability.SubtypeHint">Free-form label, e.g. "Mortgage", "0% Installment", "Cathay Pi Card"</sys:String>
     <sys:String x:Key="Portfolio.Account.PickType.Heading">Select an account type</sys:String>
-    <sys:String x:Key="Portfolio.Account.Preset.Cash">Cash</sys:String>
+    <sys:String x:Key="Portfolio.Account.Preset.Cash">Cash on hand</sys:String>
     <sys:String x:Key="Portfolio.Account.Preset.Bank">Checking</sys:String>
     <sys:String x:Key="Portfolio.Account.Preset.Digital">Digital Bank</sys:String>
     <sys:String x:Key="Portfolio.Account.Preset.TimeDeposit">Time Deposit</sys:String>
@@ -541,9 +541,11 @@
     <sys:String x:Key="Portfolio.Tx.SellPosition">Select position</sys:String>
     <sys:String x:Key="Portfolio.Tx.SellQuantity">Sell quantity</sys:String>
     <sys:String x:Key="Portfolio.Tx.SellPrice">Sell price</sys:String>
-    <sys:String x:Key="Portfolio.EditAsset.Title">Edit Asset</sys:String>
-    <sys:String x:Key="Portfolio.EditAsset.Subtitle">Update asset details.</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.Title">Edit Funds Account</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.Subtitle">Update account details.</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.TypeLabel">Type</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.SubtypeLabel">Sub-category</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.SubtypeHint">Changing the sub-category automatically updates which group this account appears under in the financial overview (e.g. Bank savings → Banking; Brokerage settlement → Settlement).</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Symbol">Symbol</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Currency">Currency</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.CurrencyHint">Ensure the currency matches what your broker uses for this account.</sys:String>

@@ -82,6 +82,26 @@ public partial class AccountDialogViewModel : ObservableObject
     [ObservableProperty] private string _editAssetCurrency = "TWD";
     [ObservableProperty] private bool _editAssetIsStock;
 
+    /// <summary>True 表示目前編輯的是現金類帳戶（cash），可改 Subtype。</summary>
+    [ObservableProperty] private bool _editAssetIsCash;
+
+    /// <summary>使用者可改的 Subtype（細分類）— 對應 AddAssetDialog 的 9 種選項；
+    /// 「自訂」對應到任意自訂字串，但目前 dialog 用下拉選單只給預設清單。</summary>
+    [ObservableProperty] private string _editAssetSubtype = string.Empty;
+
+    /// <summary>下拉選單來源 — 與 AddAssetDialog 對應的 cash subtype 預設清單。</summary>
+    public static IReadOnlyList<string> CashSubtypeOptions { get; } =
+    [
+        "手邊現金",
+        "銀行活存",
+        "數位活存",
+        "定期存款",
+        "外幣活存",
+        "證券交割戶",
+        "電子支付",
+        "儲值卡",
+    ];
+
     /// <summary>Supported currency options for the edit-asset currency picker.</summary>
     public static IReadOnlyList<CurrencyOption> SupportedCurrencies { get; } =
     [
@@ -100,7 +120,13 @@ public partial class AccountDialogViewModel : ObservableObject
         _editAssetId = row.Id;
         EditAssetName = row.Name;
         EditAssetCurrency = row.Currency;
-        EditAssetTypeLabel = L("Portfolio.Dialog.TypeCash", "現金");
+        EditAssetTypeLabel = L("Portfolio.Dialog.TypeCash", "資金帳戶");
+        EditAssetIsCash = true;
+        // 預設帶入既有 subtype；若該 subtype 不在預設清單（例如「自訂」），下拉框會顯示空白，
+        // 但儲存時會保留 null（不改原值），避免覆蓋使用者自訂 label。
+        EditAssetSubtype = CashSubtypeOptions.Contains(row.Subtype ?? string.Empty)
+            ? row.Subtype!
+            : string.Empty;
         EditAssetError = string.Empty;
         EditAssetIsStock = false;
         IsEditAssetDialogOpen = true;
@@ -115,6 +141,8 @@ public partial class AccountDialogViewModel : ObservableObject
         EditAssetSymbol = row.Symbol;
         EditAssetCurrency = row.Currency;
         EditAssetTypeLabel = L("Portfolio.Dialog.Type" + row.AssetType, row.AssetType.ToString());
+        EditAssetIsCash = false;
+        EditAssetSubtype = string.Empty;
         EditAssetIsStock = row.IsStock;
         EditAssetError = string.Empty;
         IsEditAssetDialogOpen = true;
@@ -142,13 +170,18 @@ public partial class AccountDialogViewModel : ObservableObject
             var row = _cashAccounts.FirstOrDefault(r => r.Id == _editAssetId);
             if (row is not null)
             {
+                // Subtype 為空字串 = 使用者沒選（如自訂類） → 保留原值；有選 → 套新值。
+                // AccountUpsertWorkflowService 內 ResolveGroupIdForSubtype 會自動更新 GroupId。
+                var subtypeToSave = string.IsNullOrWhiteSpace(EditAssetSubtype) ? row.Subtype : EditAssetSubtype;
                 var result = await _accountUpsert.UpdateAsync(new UpdateAccountRequest(
                     row.Id,
                     name,
                     currency,
-                    row.CreatedDate));
+                    row.CreatedDate,
+                    Subtype: subtypeToSave));
                 row.Name = result.Account.Name;
                 row.Currency = result.Account.Currency;
+                row.Subtype = result.Account.Subtype;
             }
         }
         else if (_editAssetKind == "position" && _editPositionRow is { } posRow)

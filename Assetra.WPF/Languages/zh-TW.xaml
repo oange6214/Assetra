@@ -38,7 +38,7 @@
     <sys:String x:Key="Nav.Overview">總覽</sys:String>
     <sys:String x:Key="Nav.Assets">資產</sys:String>
     <sys:String x:Key="Nav.TransactionLog">交易記錄</sys:String>
-    <sys:String x:Key="Nav.CashAccounts">現金帳戶</sys:String>
+    <sys:String x:Key="Nav.CashAccounts">資金帳戶</sys:String>
     <sys:String x:Key="Nav.Liabilities">負債</sys:String>
     <sys:String x:Key="Nav.Cashflow">收支</sys:String>
     <sys:String x:Key="Nav.Insights">分析報表</sys:String>
@@ -384,7 +384,7 @@
     <sys:String x:Key="Portfolio.Liability.Subtype">分類標籤</sys:String>
     <sys:String x:Key="Portfolio.Liability.SubtypeHint">可自由命名，例如「房貸」「0% 分期」「玉山 Pi 卡」</sys:String>
     <sys:String x:Key="Portfolio.Account.PickType.Heading">選擇帳戶類型</sys:String>
-    <sys:String x:Key="Portfolio.Account.Preset.Cash">現金</sys:String>
+    <sys:String x:Key="Portfolio.Account.Preset.Cash">手邊現金</sys:String>
     <sys:String x:Key="Portfolio.Account.Preset.Bank">銀行活存</sys:String>
     <sys:String x:Key="Portfolio.Account.Preset.Digital">數位活存</sys:String>
     <sys:String x:Key="Portfolio.Account.Preset.TimeDeposit">定期存款</sys:String>
@@ -542,9 +542,11 @@
     <sys:String x:Key="Portfolio.Tx.SellPosition">選擇持倉</sys:String>
     <sys:String x:Key="Portfolio.Tx.SellQuantity">賣出股數</sys:String>
     <sys:String x:Key="Portfolio.Tx.SellPrice">賣出價格</sys:String>
-    <sys:String x:Key="Portfolio.EditAsset.Title">編輯資產</sys:String>
-    <sys:String x:Key="Portfolio.EditAsset.Subtitle">更新資產詳細資訊。</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.Title">編輯資金帳戶</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.Subtitle">更新帳戶詳細資訊。</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.TypeLabel">類型</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.SubtypeLabel">細分類</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.SubtypeHint">調整細分類後，此帳戶在財務總覽的分組會自動更新（例：銀行活存 → 銀行類；證券交割戶 → 證券交割款）。</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Symbol">代號</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Currency">計價幣別</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.CurrencyHint">請確保選擇的幣別與您在交易所進行買賣交易所使用的幣別一致。</sys:String>
