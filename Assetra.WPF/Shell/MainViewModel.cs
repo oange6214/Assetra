@@ -110,6 +110,48 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void GoToSettings() => NavRail.ActiveSection = NavSection.Settings;
 
+    // ── Title-bar「新增」dropdown menu commands ────────────────────────────
+    // 5 quick-add entries that orchestrate "navigate to relevant page + open
+    // dialog". 解決使用者「新增的資料去哪了」的困惑 — 點哪個項目就直接看到對應頁面開好 dialog。
+
+    /// <summary>新增交易 — 開啟 transaction dialog（不切換頁面，dialog 是 modal）。</summary>
+    [RelayCommand]
+    private void AddTransactionFromMenu() => Portfolio.AddRecordCommand.Execute(null);
+
+    /// <summary>新增投資資產 — 切到投資組合頁 + 開買入 dialog。</summary>
+    [RelayCommand]
+    private void AddInvestmentFromMenu()
+    {
+        NavRail.ActiveSection = NavSection.Portfolio;
+        // 進 Portfolio 後預設已是「儀表板」tab；開啟交易 dialog 並預設為「買入」
+        Portfolio.Transaction.OpenTxDialog();
+        Portfolio.Transaction.TxType = "buy";
+    }
+
+    /// <summary>新增資金帳戶 — 切到資金帳戶頁 + 開新增帳戶 dialog。</summary>
+    [RelayCommand]
+    private void AddAccountFromMenu()
+    {
+        NavRail.ActiveSection = NavSection.CashAccounts;
+        Portfolio.OpenAddAccountDialogCommand.Execute(null);
+    }
+
+    /// <summary>新增負債 — 切到負債頁 + 開新增負債 dialog。</summary>
+    [RelayCommand]
+    private void AddLiabilityFromMenu()
+    {
+        NavRail.ActiveSection = NavSection.Liabilities;
+        Portfolio.OpenAddLiabilityDialogCommand.Execute(null);
+    }
+
+    /// <summary>新增收支分類 — 切到收支分類頁 + 開新增分類 dialog。</summary>
+    [RelayCommand]
+    private void AddCategoryFromMenu()
+    {
+        NavRail.ActiveSection = NavSection.Categories;
+        Categories.OpenAddCategoryCommand.Execute(null);
+    }
+
     // Theme
 
     private readonly IStockSearchService _searchService;

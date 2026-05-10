@@ -122,4 +122,18 @@ public partial class MainWindow : Window
         handled = true;
         return IntPtr.Zero;
     }
+
+    /// <summary>
+    /// 點 title-bar「+ 新增」按鈕時打開其 ContextMenu。Button.Click 觸發，
+    /// 把 ContextMenu 定位到 button 下方並開啟。
+    /// </summary>
+    private void AddMenuButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.Button btn && btn.ContextMenu is { } menu)
+        {
+            menu.PlacementTarget = btn;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            menu.IsOpen = true;
+        }
+    }
 }
