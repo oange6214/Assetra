@@ -117,6 +117,11 @@
                             FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextMuted}"
                             Text="{Binding TotalPnlPercent, StringFormat={}{0:+0.00;-0.00}%}" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Dashboard.Pnl.Basis}" />
                     </StackPanel>
                 </Border>
 
@@ -138,7 +143,7 @@
                     </StackPanel>
                 </Border>
 
-                <!--  Metric: 負債  -->
+                <!--  Metric: 負債（中性色 — 負債金額不是漲跌數字，避免綠/紅誤導）  -->
                 <Border
                     Grid.Column="6"
                     Style="{StaticResource FormCard}">
@@ -151,7 +156,7 @@
                             Margin="0,6,0,0"
                             FontSize="{StaticResource Font.Size.Xl}"
                             FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppDown}"
+                            Foreground="{DynamicResource AppTextPrimary}"
                             Text="{Binding TotalLiabilitiesDisplay}" />
                         <TextBlock
                             Margin="0,2,0,0"
@@ -213,6 +218,14 @@
                                                     Foreground="{DynamicResource AppTextSecondary}"
                                                     Text="{Binding Name}"
                                                     TextTrimming="CharacterEllipsis" />
+                                                <!--  成本均價（讓使用者快速看到買入成本，與右邊現價對照）  -->
+                                                <TextBlock
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextMuted}">
+                                                    <Run Text="{DynamicResource Dashboard.TopHoldings.CostLabel}" />
+                                                    <Run Text=" " />
+                                                    <Run Text="{Binding BuyPrice, StringFormat=NT\{0:N2\}, Mode=OneWay}" />
+                                                </TextBlock>
                                             </StackPanel>
 
                                             <StackPanel
@@ -243,11 +256,25 @@
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
                                                     Text="{Binding MarketValue, StringFormat=NT\{0:N0\}}" />
+                                                <!--  累積損益（取代原本的「現價」— 現價已可從 MarketValue / Quantity 推得）  -->
                                                 <TextBlock
                                                     HorizontalAlignment="Right"
                                                     FontSize="{StaticResource Font.Size.Sm}"
-                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                    Text="{Binding CurrentPrice, StringFormat=NT\{0:N2\}}" />
+                                                    FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsPnlPositive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                    <Run Text="{Binding Pnl, StringFormat={}{0:+NT$#,##0;-NT$#,##0;NT$0}, Mode=OneWay}" />
+                                                    <Run Text=" " />
+                                                    <Run Text="{Binding PnlPercent, StringFormat={}{0:+0.00;-0.00;0.00}%, Mode=OneWay}" />
+                                                </TextBlock>
                                             </StackPanel>
                                         </Grid>
                                     </Border>

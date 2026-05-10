@@ -25,7 +25,7 @@
                     Text="{Binding PeriodDisplay}" />
             </DockPanel>
 
-            <!--  KPI row  -->
+            <!--  KPI row — 預算欄位（col 6）僅在 HasBudget=true 時佔欄寬 -->
             <Grid Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -33,8 +33,30 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="8" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="8" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition>
+                        <ColumnDefinition.Style>
+                            <Style TargetType="ColumnDefinition">
+                                <Setter Property="Width" Value="8" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasBudget}" Value="False">
+                                        <Setter Property="Width" Value="0" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ColumnDefinition.Style>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Style>
+                            <Style TargetType="ColumnDefinition">
+                                <Setter Property="Width" Value="*" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasBudget}" Value="False">
+                                        <Setter Property="Width" Value="0" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ColumnDefinition.Style>
+                    </ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0">
@@ -83,7 +105,7 @@
                     </TextBlock>
                 </StackPanel>
 
-                <StackPanel Grid.Column="6">
+                <StackPanel Grid.Column="6" Visibility="{Binding HasBudget, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock
                         FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
@@ -96,8 +118,8 @@
                 </StackPanel>
             </Grid>
 
-            <!--  Budget bar  -->
-            <Grid Height="6" Margin="0,0,0,10">
+            <!--  Budget bar — 僅在已設預算時顯示，避免空進度條混淆  -->
+            <Grid Height="6" Margin="0,0,0,10" Visibility="{Binding HasBudget, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Border Background="{DynamicResource AppBorderLight}" CornerRadius="{StaticResource Radius.Xs}" />
                 <ProgressBar
                     Background="Transparent"
@@ -148,14 +170,18 @@
                                 FontFamily="{StaticResource Font.Family.Base}"
                                 FontSize="{StaticResource Font.Size.Sm}"
                                 Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{Binding Spent, StringFormat=NT\{0:N0\}}"
+                                Text="{Binding Spent, StringFormat=NT$\{0:N0\}}"
                                 Typography.NumeralAlignment="Tabular" />
+                            <!--  預算（僅在分類有設預算時顯示，避免空字串「/NT」）  -->
                             <TextBlock
                                 Grid.Column="2"
                                 Margin="8,0,0,0"
+                                FontFamily="{StaticResource Font.Family.Base}"
                                 FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
-                                Text="{Binding BudgetAmount, StringFormat=/NT\{0:N0\}}" />
+                                Text="{Binding BudgetAmount, StringFormat=/ NT$\{0:N0\}}"
+                                Typography.NumeralAlignment="Tabular"
+                                Visibility="{Binding HasBudget, Converter={StaticResource BooleanToVisibilityConverter}}" />
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

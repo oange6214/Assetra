@@ -7,6 +7,9 @@ public sealed record CategorySpendSummary(
     decimal Spent,
     decimal? BudgetAmount)
 {
+    /// <summary>true 表示此分類有設預算（&gt; 0）；UI 用來決定要不要顯示「/預算金額」。</summary>
+    public bool HasBudget => BudgetAmount is { } amt && amt > 0;
+
     public decimal? Remaining =>
         BudgetAmount.HasValue ? BudgetAmount.Value - Spent : null;
 

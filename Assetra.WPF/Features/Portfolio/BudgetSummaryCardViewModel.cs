@@ -32,6 +32,8 @@ public sealed partial class BudgetSummaryCardViewModel : ObservableObject
         (NetCashFlow >= 0 ? "+" : "-") + $"NT${Math.Abs(NetCashFlow):N0}";
     public string TotalBudgetDisplay =>
         TotalBudget is { } b ? $"NT${b:N0}" : "—";
+    /// <summary>true 表示已設預算（&gt; 0），可顯示「總預算」KPI 與進度條；false 時應隱藏，避免「—」佔欄位。</summary>
+    public bool HasBudget => TotalBudget is { } b && b > 0m;
     public bool IsNetPositive => NetCashFlow >= 0;
     public bool IsOverBudget => TotalBudget is { } b && TotalExpense > b;
 
@@ -51,6 +53,7 @@ public sealed partial class BudgetSummaryCardViewModel : ObservableObject
     partial void OnTotalBudgetChanged(decimal? value)
     {
         OnPropertyChanged(nameof(TotalBudgetDisplay));
+        OnPropertyChanged(nameof(HasBudget));
         OnPropertyChanged(nameof(IsOverBudget));
     }
 
