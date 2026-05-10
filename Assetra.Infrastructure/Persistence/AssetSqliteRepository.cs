@@ -185,7 +185,23 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
             """;
         BindItem(cmd, item);
         StampSyncParams(cmd);
-        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        var rowsAffected = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+
+        // Diagnostic：直接 re-read subtype + group_id 驗證寫入是否真生效
+        await using var verify = conn.CreateCommand();
+        verify.CommandText = "SELECT subtype, group_id FROM asset WHERE id=$id;";
+        verify.Parameters.AddWithValue("$id", item.Id.ToString());
+        await using var r = await verify.ExecuteReaderAsync().ConfigureAwait(false);
+        string verifiedSubtype = "(no row)";
+        string verifiedGroup = "(no row)";
+        if (await r.ReadAsync().ConfigureAwait(false))
+        {
+            verifiedSubtype = r.IsDBNull(0) ? "(null)" : r.GetString(0);
+            verifiedGroup = r.IsDBNull(1) ? "(null)" : r.GetString(1);
+        }
+        Serilog.Log.Information(
+            "[AssetRepo.Update] id={Id} attempted subtype={Wrote} group={WroteGrp} rowsAffected={Rows} verifiedSubtype={Verified} verifiedGroup={VerGrp}",
+            item.Id, item.Subtype ?? "(null)", item.GroupId?.ToString() ?? "(null)", rowsAffected, verifiedSubtype, verifiedGroup);
     }
 
     public async Task DeleteItemAsync(Guid id)

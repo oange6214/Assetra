@@ -1028,6 +1028,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
             $"{nameof(ApplyCashAccounts)} must be called on the UI thread");
         var accounts = loaded.CashAccounts;
         var balances = loaded.CashBalances;
+        // Diagnostic log: 確認 DB 載入時 Subtype 是否帶回。
+        foreach (var a in accounts)
+            Serilog.Log.Information("[Portfolio.LoadCash] id={Id} name={Name} subtype={Subtype} groupId={GroupId}",
+                a.Id, a.Name, a.Subtype ?? "(null)", a.GroupId?.ToString() ?? "(null)");
         var visibleAccounts = accounts
             .Where(a => Account.ShowArchivedAccounts || a.IsActive)
             .ToList();
