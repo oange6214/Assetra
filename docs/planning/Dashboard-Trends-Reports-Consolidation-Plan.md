@@ -1,7 +1,7 @@
 # Dashboard / Trends / Reports 三頁重構整合計畫
 
 **Status:** Planning
-**Estimated effort:** 5–8 days（分 4 stage，可獨立交付）
+**Estimated effort:** 6–9 days（分 5 stage，可獨立交付）
 **Priority:** Medium-High（影響日常使用流，但不阻擋功能開發）
 **Owner:** TBD
 
@@ -36,11 +36,19 @@
 
 #### A. 「財務儀表板」（合併 + 重構）
 
-入口仍是 navrail `FinancialOverview`，但內部改成 **4 個平面 tab**（不巢狀）：
+> 命名考量見最後「Naming」附錄；plan body 仍沿用「財務儀表板」以保留現有 i18n key / 類名。
+
+入口仍是 navrail `FinancialOverview`，但內部改成 **4 個平面 tab**（不巢狀），且「總覽」tab 內嵌 3 個 widget 把 navrail 其他 leaf 的高 glance 資訊 pull-up 到首頁：
 
 ```
 財務儀表板
-├─ 總覽          ← 現 FinancialOverview，頂部加 30 天淨值 sparkline
+├─ 總覽 ──────────────────────────────────────────
+│   ├─ KPI bar（淨值/總資產/投資/負債）+ 30 天淨值 sparkline
+│   ├─ 🆕 助手 insights widget（1–2 條 pill，可關閉 / 跳轉 Assistant 頁）
+│   ├─ 🆕 目標進度 widget（前 3 個 active goal）
+│   ├─ 🆕 FIRE 進度 widget（單卡：FI 進度 + 倒數年）
+│   └─ 資產分組 accordion（保留現有）
+│
 ├─ 資產趨勢      ← 現 Trends，加對標切換 + 區間 KPI 列
 ├─ 報酬日曆 🆕    ← 全新月曆熱度圖
 └─ 配置          ← 從 Portfolio 內 tab 搬過來
@@ -50,6 +58,8 @@
 - 4 個 tab 上限 — 超過會變認知負擔
 - 不做巢狀 tab — 吃過 Portfolio 雙層 tab 的虧
 - 共用 `<controls:PeriodChipBar>` 抽出來給所有 tab 復用
+- **widget ≠ 整頁搬家**：Goals / FIRE / Assistant 仍保留 navrail 獨立 leaf；widget 是首頁的 summary + 跳轉入口
+- 每個 widget 都可一鍵跳到對應的詳細頁（保留現有工作流）
 
 #### B. 「月結報告」（瘦身專注 formal report）
 
@@ -163,6 +173,45 @@
 
 ---
 
+### Stage 2.5 — 「總覽」tab 加 Goals / FIRE / Assistant widget
+
+**目標：** 把高 glance value 的 leaf 內容以 widget 形式 pull-up 到首頁，獨立頁仍保留。
+
+**Scope：**
+
+1. **Goals widget**（前 3 個 active goal）
+   - 每個 row：goal name + 進度條 + 達成 % + 預計達成日（或剩餘天數）
+   - 點 widget header 跳轉 `NavSection.Goals`
+   - 點 single row 跳轉並 highlight 該 goal
+   - 來源：`IGoalRepository` 或 `GoalsViewModel` 投影；不重複 service
+2. **FIRE widget**（單張卡）
+   - 大數字：FI 進度 %（current net worth / FI target）
+   - 副資訊：FI 倒數年（按目前儲蓄率 / 報酬假設推算）
+   - 點卡片跳轉 `NavSection.Fire`
+   - 來源：`FireViewModel` 既有計算結果投影
+3. **Assistant insights widget**（1–2 條 pill）
+   - 只顯示優先序最高的 1–2 條 insight（既有 `IAssistantInsightService` 應已有排序）
+   - 每條 pill 有「✕ 關閉本條」+ 「全部 →」連到 Assistant 頁
+   - 已關閉的 insight 用 `AppSettings.DismissedInsightIds`（如沒則新增）持久化
+4. **跨 widget 共用：** `<controls:DashboardWidgetCard>` — 標題列 + 內容區 + footer link 的統一外框
+
+**驗收：**
+
+- 空狀態：沒設 goal / 沒 FIRE 目標 / 沒 insight 時，widget 顯示 onboarding hint + 跳轉鈕，不是空白
+- 點 widget 任何位置都能正確跳到對應頁面
+- 三個 widget 加總高度不應超過 KPI bar + accordion 一倍（避免「總覽」變太長）
+- Goals / Fire / Assistant 三個獨立頁 **完全不動**（lifecycle / state 不重複）
+- Tests 1300+ 全綠（不破壞既有 Goals / Fire / Assistant tests）
+
+**注意：**
+
+- widget 應「**只讀投影**」，不允許從首頁直接編輯 goal / FIRE 目標；編輯必須跳到獨立頁完成（避免兩處編輯邏輯）
+- Assistant insight 的「關閉」要與 Assistant 頁同步（不能首頁關了詳細頁還顯示）
+
+**估時：** 1 天
+
+---
+
 ### Stage 3 — Reports 瘦身、績效／風險搬到資產趨勢
 
 **目標：** Reports 只留 formal report，績效與風險合併進 Stage 1 的「資產趨勢」tab。
@@ -250,6 +299,9 @@
 2. **Multi-currency users 怎麼處理對標？** 台灣使用者預設看 TWD-denominated 對標即可；多幣別使用者要不要支援 base currency 切換？建議：先用 `AppSettings.PrimaryCurrency`，不額外加 UI。
 3. **報酬日曆 cell click popover 還是 detail panel？** Popover 較輕量，但若使用者想看「該日所有交易」可能需要更大畫面。建議：popover 顯示摘要 + 連結「跳到該日交易記錄」。
 4. **Trends 頁的 URL deep link / scroll position 要不要保留？** 重構後 leaf 消失，使用者既有 bookmark 失效。建議：navrail click `Trends` 自動跳到儀表板的「資產趨勢」tab。
+5. **Stage 2.5 — Assistant insight 的關閉持久化** 該寫進 `AppSettings.DismissedInsightIds`（user-scope）還是 per-insight `IsDismissed` flag（DB-scope）？建議：DB-scope，因為 insight 跟資料連動（用 insight id + dismiss timestamp），且雲端同步較自然。
+6. **Stage 2.5 — Goals widget 是否分「短期 / 長期」？** 若使用者有多個 active goal，前 3 個怎麼挑？建議按「最近到期日」優先，並提供「→ 看全部」連結。
+7. **命名是否同時改？** 見 Appendix A。建議：跟主重構分開，當小 PR 處理，方便回滾。
 
 ---
 
@@ -260,11 +312,15 @@
 ### Created
 - `Assetra.WPF/Controls/PeriodChipBar.xaml` + `.xaml.cs` — 共用時間 chip
 - `Assetra.WPF/Controls/ReturnCalendar.xaml` + `.xaml.cs` — 月曆熱度圖
+- `Assetra.WPF/Controls/DashboardWidgetCard.xaml` + `.xaml.cs` — 統一的 widget 外框
 - `Assetra.WPF/Features/FinancialOverview/Tabs/TrendsTab.xaml`
 - `Assetra.WPF/Features/FinancialOverview/Tabs/CalendarTab.xaml`
 - `Assetra.WPF/Features/FinancialOverview/Tabs/AllocationTab.xaml`（thin wrapper）
 - `Assetra.WPF/Features/FinancialOverview/SubViewModels/ReturnCalendarViewModel.cs`
 - `Assetra.WPF/Features/FinancialOverview/SubViewModels/BenchmarkSelectionViewModel.cs`
+- `Assetra.WPF/Features/FinancialOverview/Widgets/GoalsWidget.xaml` + `.xaml.cs` + `GoalsWidgetViewModel.cs`（Stage 2.5）
+- `Assetra.WPF/Features/FinancialOverview/Widgets/FireWidget.xaml` + `.xaml.cs` + `FireWidgetViewModel.cs`（Stage 2.5）
+- `Assetra.WPF/Features/FinancialOverview/Widgets/AssistantWidget.xaml` + `.xaml.cs` + `AssistantWidgetViewModel.cs`（Stage 2.5）
 
 ### Modified
 - `Assetra.WPF/Features/FinancialOverview/FinancialOverviewView.xaml` — 改成 4-tab 容器
@@ -312,7 +368,96 @@
 
 1. ✅ **Stage 1**（1.5d）— 對標 + 區間 KPI，立刻可見的價值
 2. ✅ **Stage 2**（1.5d）— 4-tab 殼 + Allocation 搬家，建立新架構
-3. ✅ **Stage 3**（2d）— Reports 瘦身，績效／風險併入儀表板
-4. ⏸️ **Stage 4**（3d）— 報酬日曆，最大新功能但需要 daily snapshot 基建驗證
+3. ✅ **Stage 2.5**（1d）— Goals / FIRE / Assistant widget 進「總覽」
+4. ✅ **Stage 3**（2d）— Reports 瘦身，績效／風險併入儀表板
+5. ⏸️ **Stage 4**（3d）— 報酬日曆，最大新功能但需要 daily snapshot 基建驗證
 
-中途的合理 stopping point：完成 Stage 1–3 後即已大幅改善（3 頁 → 2.x 頁），Stage 4 可延後到下一個 sprint。
+中途的合理 stopping point：完成 Stage 1–3 後即已大幅改善（3 頁 → 2.x 頁 + 首頁更有資訊密度），Stage 4 可延後到下一個 sprint。
+
+---
+
+## Appendix A — Naming（命名建議）
+
+`財務儀表板` 三個字有兩個小問題：
+
+1. **「儀表板」是技術 / SaaS 用語**，台灣使用者對它的直覺較弱
+2. 重構後它**不只是儀表板** — 有 4 個 tab 含日曆 / 趨勢 / 配置，「儀表板」嚴格上指 KPI 卡盤
+
+### 候選名稱比較
+
+| 名稱 | 優點 | 缺點 |
+|---|---|---|
+| **財務儀表板**（保留） | 已熟悉、commit history / tests / Settings 都引用 | 略技術；不完全準確 |
+| **財務概覽** ⭐ | 涵蓋 4 tab、不偏 KPI、用詞自然、對齊 Apple/Intuit 的「Overview」語言 | 跟 navrail 群組「總覽」字面有點近 |
+| 財務首頁 | 暗示這是預設落地頁 | 偏實作語意 |
+| 我的財務 | 親近、口語 | 不夠正式 |
+| 財務全景 | 精確（panorama） | 略文青 |
+| 淨值與走勢 | 描述準確 | 太長、太硬 |
+| 財富中心 | 行銷感強 | 不符 Assetra 工具型定位 |
+
+### 推薦：二擇一
+
+| 選 | 何時選 | 改名成本 |
+|---|---|---|
+| 改成「**財務概覽**」 | 重構是順手改名好時機，擺脫「儀表板≈純 KPI」誤導 | 只改 `FinancialOverview.Nav.Label` 等 i18n value（保留 key 名），**約 4–6 個 resource string** |
+| 保留「**財務儀表板**」 | 不確定改名價值；既有 doc / commit 引用穩定 | 0 |
+
+### 命名重構不動的東西（無論選哪個）
+
+- `NavSection.FinancialOverview` enum
+- `Assetra.WPF/Features/FinancialOverview/` 資料夾
+- `FinancialOverviewViewModel` 類名
+- i18n key（`FinancialOverview.Nav.Label`、`FinancialOverview.Kpi.*` 等）
+
+避免「英文識別子大規模 rename」帶來的 PR 噪音與 merge conflict 風險。
+
+---
+
+## Appendix B — navrail 群組重組（可選，獨立 PR）
+
+群組目前叫「**總覽 (Nav.Overview)**」，但裡面其實混了兩種語意：
+
+| 現群組成員 | 語意 |
+|---|---|
+| 財務儀表板 / 資產趨勢 / 月結報告 | **分析 / 觀察** |
+| 財務助手 / 稽核日誌 | **工具 / 診斷** |
+
+### 重組建議
+
+```
+原：總覽（5 leaf 混語意）
+   ├─ 財務儀表板 / 資產趨勢 / 月結報告 / 財務助手 / 稽核日誌
+
+後：分析（語意收斂）
+   ├─ 財務儀表板（含 4 tab）
+   ├─ 月結報告
+   └─ 財務助手        ← 留分析群組，因為 AI insight 是分析輸出
+
+  工具（新群組或併入既有底部）
+   └─ 稽核日誌        ← 屬於診斷而非日常分析
+```
+
+### 為何「資產趨勢」leaf 消失
+
+Stage 2 已併入儀表板 tab；舊 leaf 點擊行為改為：跳到儀表板 + 預設 active tab = 「資產趨勢」（deep link 行為），舊 keyboard bookmark / muscle memory 不破壞。
+
+### 風險
+
+- AuditLog 搬到新群組會打破現有導航流；如果使用者習慣從「總覽」找它，要評估
+- 「分析」這個群組名跟「規劃 (Planning)」可能語意重疊；可改用「**觀察**」或「**動態**」
+- 建議當獨立 PR，不要跟主重構綁定，降低 review 負擔
+
+---
+
+## Appendix C — Widget 與獨立頁的職責切分（給 Stage 2.5 用）
+
+| 元件 | 角色 | 編輯權限 | 跳轉行為 |
+|---|---|---|---|
+| 儀表板 Goals widget | 投影前 3 個 goal | **只讀** | 點 row → Goals 頁 + highlight 該 goal |
+| Goals 獨立頁 | CRUD + 詳細管理 | 可編輯 | — |
+| 儀表板 FIRE widget | 投影 FI 進度數字 | **只讀** | 點卡 → Fire 頁 |
+| Fire 獨立頁 | 設目標、調報酬假設、看模擬 | 可編輯 | — |
+| 儀表板 Assistant widget | 1–2 條 priority insight | 可「✕ 關閉本條」 | 點 pill → Assistant 頁 |
+| Assistant 獨立頁 | 全列表 + 已關閉項管理 | 可編輯 | — |
+
+**金科玉律：widget 不重複實作獨立頁的編輯邏輯。** 所有「改變狀態」的動作（編輯 goal、調整 FIRE 假設、永久 dismiss insight）都跳到獨立頁完成。Widget 只投影 + 跳轉。
