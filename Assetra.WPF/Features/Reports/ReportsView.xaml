@@ -1084,7 +1084,14 @@
                 </StackPanel>
             </Expander>
 
-            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.Performance.Title}" IsExpanded="False" Margin="0,0,0,16">
+            <!--
+                Stage 3 (Dashboard consolidation)：Performance / Risk 兩個 Expander
+                已搬到「財務儀表板 → 資產趨勢」tab，作為「動態觀察」語意更合適的家。
+                這裡保留為 Collapsed 以兼容既有 ReportsViewModel 計算（避免破壞測試），
+                未來真要移除 service 注入可以等下一輪 cleanup。
+            -->
+            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.Performance.Title}" IsExpanded="False" Margin="0,0,0,16"
+                      Visibility="Collapsed">
                 <Grid>
                     <TextBlock
                         Margin="12"
@@ -1172,6 +1179,12 @@
             </Expander>
 
             <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.Risk.Title}" IsExpanded="False" Margin="0,0,0,16">
+                <!--
+                    Stage 3 (Dashboard consolidation)：Risk Expander 暫留 Reports，
+                    因為 HHI / Top Holdings 等內容尚未整合到 Trends 頁。下一輪
+                    把 Volatility / Sharpe / HHI 接到 PortfolioHistoryViewModel
+                    後再搬遷。
+                -->
                 <Grid>
                     <TextBlock
                         Margin="12"
