@@ -38,7 +38,7 @@
                         BorderThickness="1"
                         CornerRadius="{StaticResource Radius.Sm}"
                         Cursor="Hand"
-                        Visibility="{Binding PortfolioRef, Converter={StaticResource NullToVisibilityConverter}}">
+                        Visibility="{Binding IsCashFocusVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Border.InputBindings>
                         <MouseBinding Command="{Binding NavigateToCashAccountsCommand}" MouseAction="LeftClick" />
                     </Border.InputBindings>
@@ -74,7 +74,7 @@
                         BorderThickness="1"
                         CornerRadius="{StaticResource Radius.Sm}"
                         Cursor="Hand"
-                        Visibility="{Binding PortfolioRef, Converter={StaticResource NullToVisibilityConverter}}">
+                        Visibility="{Binding IsLiabilityFocusVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Border.InputBindings>
                         <MouseBinding Command="{Binding NavigateToLiabilitiesCommand}" MouseAction="LeftClick" />
                     </Border.InputBindings>
@@ -110,7 +110,7 @@
                         BorderThickness="1"
                         CornerRadius="{StaticResource Radius.Sm}"
                         Cursor="Hand"
-                        Visibility="{Binding RealEstateFocusWidget, Converter={StaticResource NullToVisibilityConverter}}">
+                        Visibility="{Binding IsRealEstateFocusVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Border.InputBindings>
                         <MouseBinding Command="{Binding NavigateToRealEstateCommand}" MouseAction="LeftClick" />
                     </Border.InputBindings>
@@ -146,7 +146,7 @@
                         BorderThickness="1"
                         CornerRadius="{StaticResource Radius.Sm}"
                         Cursor="Hand"
-                        Visibility="{Binding InsuranceFocusWidget, Converter={StaticResource NullToVisibilityConverter}}">
+                        Visibility="{Binding IsInsuranceFocusVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Border.InputBindings>
                         <MouseBinding Command="{Binding NavigateToInsuranceCommand}" MouseAction="LeftClick" />
                     </Border.InputBindings>
@@ -182,7 +182,7 @@
                         BorderThickness="1"
                         CornerRadius="{StaticResource Radius.Sm}"
                         Cursor="Hand"
-                        Visibility="{Binding RetirementFocusWidget, Converter={StaticResource NullToVisibilityConverter}}">
+                        Visibility="{Binding IsRetirementFocusVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Border.InputBindings>
                         <MouseBinding Command="{Binding NavigateToRetirementCommand}" MouseAction="LeftClick" />
                     </Border.InputBindings>
@@ -218,7 +218,7 @@
                         BorderThickness="1"
                         CornerRadius="{StaticResource Radius.Sm}"
                         Cursor="Hand"
-                        Visibility="{Binding PhysicalAssetFocusWidget, Converter={StaticResource NullToVisibilityConverter}}">
+                        Visibility="{Binding IsPhysicalFocusVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Border.InputBindings>
                         <MouseBinding Command="{Binding NavigateToPhysicalAssetCommand}" MouseAction="LeftClick" />
                     </Border.InputBindings>

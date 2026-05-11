@@ -165,6 +165,25 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         || RetirementFocusWidget is not null
         || PhysicalAssetFocusWidget is not null;
 
+    // ── v2：資產類焦點卡 6 cell 顯示偏好 ──────────────────────────────────────
+    // 使用者在 settings.json 加 AssetClassFocusVisibility 即生效；
+    // 例：{ "Cash": true, "Insurance": false } → 隱藏保險格。
+    // 缺鍵預設 true（顯示）。
+    // 每個 cell 顯示 = (對應 VM 有注入) AND (使用者沒在 settings 把它關掉)
+    public bool IsCashFocusVisible => PortfolioRef is not null && IsAssetClassVisible("Cash");
+    public bool IsLiabilityFocusVisible => PortfolioRef is not null && IsAssetClassVisible("Liability");
+    public bool IsRealEstateFocusVisible => RealEstateFocusWidget is not null && IsAssetClassVisible("RealEstate");
+    public bool IsInsuranceFocusVisible => InsuranceFocusWidget is not null && IsAssetClassVisible("Insurance");
+    public bool IsRetirementFocusVisible => RetirementFocusWidget is not null && IsAssetClassVisible("Retirement");
+    public bool IsPhysicalFocusVisible => PhysicalAssetFocusWidget is not null && IsAssetClassVisible("Physical");
+
+    private bool IsAssetClassVisible(string key)
+    {
+        var map = _settings?.Current.AssetClassFocusVisibility;
+        if (map is null) return true;
+        return map.TryGetValue(key, out var v) ? v : true;
+    }
+
     public FinancialOverviewViewModel(
         IFinancialOverviewQueryService queryService,
         IPortfolioPositionFeed portfolio,
