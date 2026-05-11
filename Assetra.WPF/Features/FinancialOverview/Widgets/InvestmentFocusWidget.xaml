@@ -1,0 +1,149 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.FinancialOverview.Widgets.InvestmentFocusWidget"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel},
+                                     IsDesignTimeCreatable=False}"
+    Visibility="{Binding InvestmentFocusWidget, Converter={StaticResource NullToVisibilityConverter}}"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="DashboardWidgets.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!--
+        Long-term refactor：投資焦點卡。
+        替代「投資資產 → 儀表板」內 tab；展示投資專屬 KPI（市值/成本/總損益/當日 PnL）。
+        點 footer 跳「投資資產」工作頁（持倉明細為預設）。
+        widget 不顯示 Top Holdings — 那個跟 Positions tab 重複，使用者點進去看就好。
+    -->
+    <Border Style="{StaticResource DashboardWidgetCard}">
+        <StackPanel>
+            <DockPanel LastChildFill="True">
+                <ds:AppIcon
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    DockPanel.Dock="Left"
+                    FontSize="16"
+                    Foreground="{DynamicResource AppAccent}"
+                    Symbol="Briefcase24" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Style="{StaticResource DashboardWidgetHeader}"
+                    Text="{DynamicResource Dashboard.Widget.Investment.Heading}" />
+            </DockPanel>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  Hero：投資市值  -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Portfolio.Position.Summary.MarketValue}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        FontSize="{StaticResource Font.Size.Xl}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding InvestmentFocusWidget.TotalMarketValueDisplay}"
+                        Typography.NumeralAlignment="Tabular" />
+                    <!--  當日 PnL：跌色／漲色 + 百分比  -->
+                    <StackPanel
+                        Margin="0,4,0,0"
+                        Orientation="Horizontal"
+                        Visibility="{Binding InvestmentFocusWidget.HasDayPnl, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.Header.DailyPnL}" />
+                        <TextBlock
+                            Margin="6,0,0,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            FontWeight="SemiBold"
+                            Typography.NumeralAlignment="Tabular">
+                            <TextBlock.Style>
+                                <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding InvestmentFocusWidget.IsDayPnlPositive}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <Run Text="{Binding InvestmentFocusWidget.SignedDayPnlDisplay, Mode=OneWay}" />
+                            <Run Text=" " />
+                            <Run Text="{Binding InvestmentFocusWidget.DayPnlPercentDisplay, Mode=OneWay}" />
+                        </TextBlock>
+                    </StackPanel>
+                </StackPanel>
+
+                <!--  投資成本  -->
+                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Portfolio.Position.Summary.TotalCost}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        FontSize="{StaticResource Font.Size.Md}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding InvestmentFocusWidget.TotalCostDisplay}"
+                        Typography.NumeralAlignment="Tabular" />
+                </StackPanel>
+
+                <!--  總損益（持有以來）  -->
+                <StackPanel Grid.Column="2" Margin="12,0,0,0">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Dashboard.Widget.Investment.TotalPnl}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        FontSize="{StaticResource Font.Size.Md}"
+                        FontWeight="SemiBold"
+                        Typography.NumeralAlignment="Tabular">
+                        <TextBlock.Style>
+                            <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding InvestmentFocusWidget.IsTotalPositive}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                        <Run Text="{Binding InvestmentFocusWidget.TotalPnlDisplay, Mode=OneWay}" />
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Style="{StaticResource DashboardWidgetFooter}"
+                       Text="{DynamicResource Dashboard.Widget.Investment.OpenLink}">
+                <TextBlock.InputBindings>
+                    <MouseBinding Command="{Binding NavigateToPortfolioCommand}" MouseAction="LeftClick" />
+                </TextBlock.InputBindings>
+            </TextBlock>
+        </StackPanel>
+    </Border>
+</UserControl>

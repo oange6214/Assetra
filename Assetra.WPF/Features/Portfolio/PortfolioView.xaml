@@ -41,16 +41,18 @@
                 BorderThickness="0"
                 SelectedValue="{Binding SelectedTab, Mode=TwoWay}"
                 SelectedValuePath="Tag">
-                <TabItem Header="{DynamicResource Portfolio.Tab.Overview}" Tag="{x:Static vm:PortfolioTab.Dashboard}">
-                    <pcontrols:DashboardTabPanel DataContext="{Binding Dashboard}" />
-                </TabItem>
-
                 <!--
-                    Stage 2 (Dashboard consolidation)：配置分析從 Portfolio 內 tab
-                    搬到財務儀表板的「配置」tab。PortfolioTab.AllocationAnalysis
-                    enum 值保留以避免破壞既存設定持久化（會回退到 Dashboard）。
-                    AllocationAnalysisViewModel 仍存活於 PortfolioViewModel
-                    供儀表板那邊綁定。
+                    Long-term refactor (Dashboard singleton)：投資儀表板 + 配置分析
+                    都搬到全域財務儀表板。Portfolio 頁瘦身回到純資產類工作面，
+                    預設 landing = 持倉明細。
+
+                    保留的 enum：
+                    - PortfolioTab.Dashboard / AllocationAnalysis enum 值未刪，
+                      以防舊持久化設定載入；TabControl SelectedValue 找不到對應
+                      Tag 時會 fall back 到第一個 TabItem（Positions）。
+                    - DashboardViewModel / AllocationViewModel 物件仍存活在
+                      PortfolioViewModel，分別供「投資焦點卡」與「配置」tab
+                      綁定使用。
                 -->
 
                 <TabItem Header="{DynamicResource Portfolio.Tab.Positions}" Tag="{x:Static vm:PortfolioTab.Positions}">

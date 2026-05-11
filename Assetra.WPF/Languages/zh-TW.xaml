@@ -1125,6 +1125,10 @@
     <sys:String x:Key="Dashboard.Widget.Assistant.Heading">財務助手洞察</sys:String>
     <sys:String x:Key="Dashboard.Widget.Assistant.Empty">目前沒有需要注意的洞察。</sys:String>
     <sys:String x:Key="Dashboard.Widget.Assistant.OpenLink">→ 開啟財務助手</sys:String>
+    <!--  Long-term refactor：投資焦點卡（取代 Portfolio.Dashboard tab）  -->
+    <sys:String x:Key="Dashboard.Widget.Investment.Heading">投資焦點</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Investment.TotalPnl">總損益</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Investment.OpenLink">→ 前往投資資產</sys:String>
     <!--  Stage 4：報酬日曆  -->
     <sys:String x:Key="Dashboard.Calendar.Today">今日</sys:String>
     <sys:String x:Key="Dashboard.Calendar.MonthlyPnl">當月損益</sys:String>

@@ -1121,6 +1121,10 @@
     <sys:String x:Key="Dashboard.Widget.Assistant.Heading">Assistant insights</sys:String>
     <sys:String x:Key="Dashboard.Widget.Assistant.Empty">No insights right now.</sys:String>
     <sys:String x:Key="Dashboard.Widget.Assistant.OpenLink">→ Open Assistant</sys:String>
+    <!-- Long-term refactor: investment focus widget (replaces Portfolio.Dashboard tab) -->
+    <sys:String x:Key="Dashboard.Widget.Investment.Heading">Investment focus</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Investment.TotalPnl">Total P&amp;L</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Investment.OpenLink">→ Open Portfolio</sys:String>
     <!-- Stage 4: Return calendar -->
     <sys:String x:Key="Dashboard.Calendar.Today">Today</sys:String>
     <sys:String x:Key="Dashboard.Calendar.MonthlyPnl">Month P&amp;L</sys:String>

@@ -101,6 +101,11 @@
                     每個 widget 在對應 VM 未注入時自動隱藏（NullToVisibilityConverter）。
                 -->
                 <widgets:AssistantWidget />
+                <!--
+                    Long-term refactor：投資焦點卡放在 Assistant 之後、Goals/FIRE 之前。
+                    優先序：「我有多少 / 賺多少」(投資) → 「想達成什麼」(目標 / FIRE)。
+                -->
+                <widgets:InvestmentFocusWidget />
                 <Grid Margin="0,0,0,4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />

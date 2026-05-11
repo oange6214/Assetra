@@ -114,13 +114,21 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     public Assetra.WPF.Features.Fire.FireViewModel? FireWidget { get; }
     public Assetra.WPF.Features.Assistant.AssistantViewModel? AssistantWidget { get; }
 
+    /// <summary>
+    /// Long-term refactor：「投資焦點卡」用的 VM。原本是 Portfolio.Dashboard 內 tab
+    /// 的資料來源，現在升到「全域財務儀表板」的總覽 tab，作為對應「投資資產」
+    /// 工作頁的 glance summary。Portfolio 頁本身的 Dashboard tab 已移除。
+    /// </summary>
+    public Assetra.WPF.Features.Portfolio.DashboardViewModel? InvestmentFocusWidget { get; }
+
     public FinancialOverviewViewModel(
         IFinancialOverviewQueryService queryService,
         IPortfolioPositionFeed portfolio,
         IAppSettingsService? settings = null,
         Assetra.WPF.Features.Goals.GoalsViewModel? goalsWidget = null,
         Assetra.WPF.Features.Fire.FireViewModel? fireWidget = null,
-        Assetra.WPF.Features.Assistant.AssistantViewModel? assistantWidget = null)
+        Assetra.WPF.Features.Assistant.AssistantViewModel? assistantWidget = null,
+        Assetra.WPF.Features.Portfolio.DashboardViewModel? investmentFocusWidget = null)
     {
         _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
         _portfolio = portfolio ?? throw new ArgumentNullException(nameof(portfolio));
@@ -128,6 +136,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         GoalsWidget = goalsWidget;
         FireWidget = fireWidget;
         AssistantWidget = assistantWidget;
+        InvestmentFocusWidget = investmentFocusWidget;
         _uiContext = SynchronizationContext.Current;
 
         // Stock prices arrive asynchronously after Portfolio.LoadAsync() completes.
@@ -164,6 +173,10 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     [CommunityToolkit.Mvvm.Input.RelayCommand]
     private void NavigateToAssistant() =>
         Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("Assistant");
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void NavigateToPortfolio() =>
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("Portfolio");
 
     private void OnDashboardTabRequested(string tabName)
     {

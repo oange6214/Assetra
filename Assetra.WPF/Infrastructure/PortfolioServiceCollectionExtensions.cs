@@ -173,7 +173,10 @@ internal static class PortfolioServiceCollectionExtensions
             // Stage 2.5：總覽 tab 上的 widget；DI 已經有這三個 VM 作為 singleton。
             sp.GetService<Assetra.WPF.Features.Goals.GoalsViewModel>(),
             sp.GetService<Assetra.WPF.Features.Fire.FireViewModel>(),
-            sp.GetService<Assetra.WPF.Features.Assistant.AssistantViewModel>()));
+            sp.GetService<Assetra.WPF.Features.Assistant.AssistantViewModel>(),
+            // Long-term refactor：投資焦點卡 — Portfolio.Dashboard tab 移除後，
+            // DashboardViewModel 的角色轉為儀表板上的投資 glance summary。
+            sp.GetService<DashboardViewModel>()));
 
         return services;
     }
