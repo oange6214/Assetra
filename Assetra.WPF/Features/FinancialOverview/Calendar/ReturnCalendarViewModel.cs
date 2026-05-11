@@ -16,6 +16,15 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
 {
     private IReadOnlyList<PortfolioDailySnapshot> _allSnapshots = [];
 
+    /// <summary>
+    /// 在 cstor 抓 UI thread 的 SynchronizationContext；UpdateSnapshots 可能
+    /// 從 background thread 被呼叫（PortfolioHistoryViewModel.LoadAsync 內的
+    /// continuation），ObservableCollection 的 Clear/Add 必須 marshal 回 UI
+    /// thread，否則 WPF 綁定會 throw（被 LoadAsync 的 try-catch 吞掉，UI 看
+    /// 起來像空白）。
+    /// </summary>
+    private readonly SynchronizationContext? _uiContext;
+
     /// <summary>目前月曆所對齊的「月份起始日」（day=1）。預設為當月。</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MonthDisplay))]
@@ -48,6 +57,7 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
 
     public ReturnCalendarViewModel()
     {
+        _uiContext = SynchronizationContext.Current;
         Cells = new ReadOnlyObservableCollection<DailyCellVm>(_cells);
         Rebuild();
     }
@@ -57,11 +67,27 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     {
         _allSnapshots = snapshots ?? [];
 
-        // 若預設月份沒有資料，跳到最新有資料的月份
+        if (_uiContext is not null && SynchronizationContext.Current != _uiContext)
+        {
+            _uiContext.Post(_ => ApplySnapshotsOnUi(), null);
+        }
+        else
+        {
+            ApplySnapshotsOnUi();
+        }
+    }
+
+    private void ApplySnapshotsOnUi()
+    {
+        // 若預設月份沒有資料，跳到最新有資料的月份。
+        // 即便 CurrentMonth 不變，下面也會強制 Rebuild → 覆蓋初始 cstor 的空 cells。
         if (_allSnapshots.Count > 0)
         {
             var latest = _allSnapshots.Max(s => s.SnapshotDate);
-            CurrentMonth = new DateOnly(latest.Year, latest.Month, 1);
+            var target = new DateOnly(latest.Year, latest.Month, 1);
+            // 用 SetProperty 確保即使值沒變也不會吃掉 Rebuild（雖然 OnCurrentMonthChanged
+            // 不會 fire when same，但下方無條件 Rebuild 已保證重建）。
+            CurrentMonth = target;
         }
         Rebuild();
         OnPropertyChanged(nameof(CanGoPrev));
