@@ -127,6 +127,33 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
     public bool HasNoGoals => GoalsWidget is null || GoalsWidget.Goals.Count == 0;
 
+    // ── Today's Movers widget（盤中 / 收盤後即時損益）─────────────────────────
+    /// <summary>
+    /// 今日漲幅前 3 名 — 從 PortfolioRef.Positions 過濾 DayChange > 0，按
+    /// |DayChange| 降冪。對應 broker app「即時損益」橫切面 view。
+    /// </summary>
+    public IEnumerable<Assetra.WPF.Features.Portfolio.PortfolioRowViewModel> TopGainersToday =>
+        PortfolioRef is null
+            ? []
+            : PortfolioRef.Positions
+                .Where(p => p.DayChange > 0m)
+                .OrderByDescending(p => p.DayChange)
+                .Take(3);
+
+    /// <summary>今日跌幅前 3 名 — DayChange < 0，按 |DayChange| 降冪。</summary>
+    public IEnumerable<Assetra.WPF.Features.Portfolio.PortfolioRowViewModel> TopLosersToday =>
+        PortfolioRef is null
+            ? []
+            : PortfolioRef.Positions
+                .Where(p => p.DayChange < 0m)
+                .OrderBy(p => p.DayChange)
+                .Take(3);
+
+    /// <summary>True 當有任一 mover；空白時 widget 隱藏（避免「未開盤」期間空 card）。</summary>
+    public bool HasTodaysMovers =>
+        PortfolioRef is not null
+        && PortfolioRef.Positions.Any(p => p.DayChange != 0m);
+
     /// <summary>
     /// Long-term refactor：「投資焦點卡」用的 VM。原本是 Portfolio.Dashboard 內 tab
     /// 的資料來源，現在升到「全域財務儀表板」的總覽 tab，作為對應「投資資產」
@@ -232,6 +259,24 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
             };
         }
 
+        // Today's Movers：監聽 Positions 集合與每 row 的 DayChange 變化。
+        // Positions 是 ReadOnlyObservableCollection，先聽 CollectionChanged；
+        // 每 row 的 DayChange / DayChangePercent 改動透過 PropertyChanged
+        // 重新觸發 TopGainers/TopLosers/HasTodaysMovers 通知。
+        if (PortfolioRef is not null
+            && PortfolioRef.Positions is System.Collections.Specialized.INotifyCollectionChanged posNcc)
+        {
+            posNcc.CollectionChanged += (_, _) => RefreshTodaysMovers();
+            foreach (var row in PortfolioRef.Positions) HookRowPnl(row);
+            // 補上未來新增的 row（CollectionChanged.NewItems 也 hook）
+            posNcc.CollectionChanged += (_, e) =>
+            {
+                if (e.NewItems is null) return;
+                foreach (Assetra.WPF.Features.Portfolio.PortfolioRowViewModel r in e.NewItems)
+                    HookRowPnl(r);
+            };
+        }
+
         KpiCards = new ReadOnlyObservableCollection<KpiCardVm>(_kpiCards);
         KpiEditorItems = new ReadOnlyObservableCollection<KpiSelectionItemVm>(_kpiEditorItems);
         AssetGroups = new ReadOnlyObservableCollection<AssetGroupVm>(_assetGroups);
@@ -304,6 +349,25 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         if (idx < 0 || idx >= _kpiEditorItems.Count - 1) return;
         _kpiEditorItems.Move(idx, idx + 1);
         RecomputeKpiEditorState();
+    }
+
+    private void HookRowPnl(Assetra.WPF.Features.Portfolio.PortfolioRowViewModel row)
+    {
+        row.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(row.DayChange)
+                || e.PropertyName == nameof(row.DayChangePercent))
+            {
+                RefreshTodaysMovers();
+            }
+        };
+    }
+
+    private void RefreshTodaysMovers()
+    {
+        OnPropertyChanged(nameof(TopGainersToday));
+        OnPropertyChanged(nameof(TopLosersToday));
+        OnPropertyChanged(nameof(HasTodaysMovers));
     }
 
     private void OnDashboardTabRequested(string tabName)

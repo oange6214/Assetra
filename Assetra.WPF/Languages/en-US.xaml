@@ -1134,6 +1134,11 @@
     <sys:String x:Key="Dashboard.Widget.Investment.Heading">Investment focus</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.TotalPnl">Total P&amp;L</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.OpenLink">→ Open Portfolio</sys:String>
+    <!-- Today's Movers — broker app intraday P&L cross-section -->
+    <sys:String x:Key="Dashboard.Widget.TodaysMovers.Heading">Today's intraday P&amp;L</sys:String>
+    <sys:String x:Key="Dashboard.Widget.TodaysMovers.Gainers">Top 3 gainers today</sys:String>
+    <sys:String x:Key="Dashboard.Widget.TodaysMovers.Losers">Top 3 losers today</sys:String>
+    <sys:String x:Key="Dashboard.Widget.TodaysMovers.OpenLink">→ See all positions</sys:String>
     <!-- Phase C: asset-class focus card (cash / liability / real estate, 3-in-1) -->
     <sys:String x:Key="Dashboard.Widget.AssetClass.Heading">Asset class focus</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.Cash">Cash</sys:String>

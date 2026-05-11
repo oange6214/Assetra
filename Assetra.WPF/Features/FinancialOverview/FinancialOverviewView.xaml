@@ -143,6 +143,12 @@
                 -->
                 <widgets:InvestmentFocusWidget />
                 <!--
+                    Today's Movers — broker app「即時損益」的橫切面，與
+                    InvestmentFocus (aggregate today P&L) 對比是「per-position
+                    today」視角。沒持倉 / 全部 DayChange=0 時自動隱藏。
+                -->
+                <widgets:TodaysMoversWidget />
+                <!--
                     Phase C：現金 / 負債 / 不動產三在一焦點卡。同模式可擴展到
                     crypto / 保險 / 退休 / 實物等其他資產類 — 加新項目時只要
                     擴 grid columns 即可，不會再回到「每資產類做 mini-dashboard」

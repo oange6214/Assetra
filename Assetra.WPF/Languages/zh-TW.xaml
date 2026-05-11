@@ -1138,6 +1138,11 @@
     <sys:String x:Key="Dashboard.Widget.Investment.Heading">投資焦點</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.TotalPnl">總損益</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.OpenLink">→ 前往投資資產</sys:String>
+    <!--  Today's Movers — broker app「即時損益」橫切面  -->
+    <sys:String x:Key="Dashboard.Widget.TodaysMovers.Heading">今日即時損益</sys:String>
+    <sys:String x:Key="Dashboard.Widget.TodaysMovers.Gainers">今日漲幅前 3</sys:String>
+    <sys:String x:Key="Dashboard.Widget.TodaysMovers.Losers">今日跌幅前 3</sys:String>
+    <sys:String x:Key="Dashboard.Widget.TodaysMovers.OpenLink">→ 看完整持倉</sys:String>
     <!--  Phase C：資產類焦點卡（現金 / 負債 / 不動產 三在一）  -->
     <sys:String x:Key="Dashboard.Widget.AssetClass.Heading">資產類焦點</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.Cash">現金</sys:String>
