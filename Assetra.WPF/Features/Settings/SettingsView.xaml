@@ -148,6 +148,93 @@
                     </StackPanel>
                 </Border>
 
+                <!--
+                    ── v2：財務概覽客製化 ──
+                    1. 自訂對標清單（最多 4 個）
+                    2. 資產類焦點卡 6 cell 可獨立關閉
+                -->
+                <TextBlock
+                    Margin="0,0,0,8"
+                    FontSize="{StaticResource Font.Size.Md}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    Text="{DynamicResource Settings.Section.DashboardCustomize}" />
+
+                <Border Style="{StaticResource FormCard}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <!--  自訂對標  -->
+                        <TextBlock Foreground="{DynamicResource AppTextPrimary}"
+                                   FontWeight="SemiBold"
+                                   Text="{DynamicResource Settings.CustomBenchmarks.Heading}" />
+                        <TextBlock Margin="0,4,0,8"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Text="{DynamicResource Settings.CustomBenchmarks.Hint}"
+                                   TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBox MinWidth="200"
+                                     Style="{StaticResource AppTextBox}"
+                                     Text="{Binding CustomBenchmarkInput, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Margin="8,0,0,0" Padding="12,4"
+                                    Command="{Binding AddCustomBenchmarkCommand}"
+                                    Content="{DynamicResource Settings.CustomBenchmarks.Add}"
+                                    IsEnabled="{Binding CanAddCustomBenchmark}"
+                                    Style="{StaticResource AppSecondaryButton}" />
+                        </StackPanel>
+                        <ItemsControl ItemsSource="{Binding CustomBenchmarkSymbols}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,2"
+                                            Padding="10,4"
+                                            Background="{DynamicResource AppHover}"
+                                            BorderBrush="{DynamicResource AppBorder}"
+                                            BorderThickness="1"
+                                            CornerRadius="{StaticResource Radius.Sm}">
+                                        <DockPanel LastChildFill="True">
+                                            <Button DockPanel.Dock="Right"
+                                                    Width="24" Height="24" Padding="0"
+                                                    Background="Transparent" BorderThickness="0"
+                                                    Command="{Binding DataContext.RemoveCustomBenchmarkCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}">
+                                                <ds:AppIcon Symbol="Dismiss24" FontSize="12"
+                                                            Foreground="{DynamicResource AppTextMuted}" />
+                                            </Button>
+                                            <TextBlock VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource AppTextPrimary}"
+                                                       Text="{Binding}" />
+                                        </DockPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!--  資產類焦點卡 visibility toggles  -->
+                        <TextBlock Margin="0,16,0,4"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   FontWeight="SemiBold"
+                                   Text="{DynamicResource Settings.AssetClassFocus.Heading}" />
+                        <TextBlock Margin="0,0,0,8"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Text="{DynamicResource Settings.AssetClassFocus.Hint}"
+                                   TextWrapping="Wrap" />
+                        <UniformGrid Columns="3" Rows="2">
+                            <CheckBox Margin="0,2" IsChecked="{Binding IsCashFocusEnabled, Mode=TwoWay}"
+                                      Content="{DynamicResource Dashboard.Widget.AssetClass.Cash}" />
+                            <CheckBox Margin="0,2" IsChecked="{Binding IsLiabilityFocusEnabled, Mode=TwoWay}"
+                                      Content="{DynamicResource Dashboard.Widget.AssetClass.Liability}" />
+                            <CheckBox Margin="0,2" IsChecked="{Binding IsRealEstateFocusEnabled, Mode=TwoWay}"
+                                      Content="{DynamicResource Dashboard.Widget.AssetClass.RealEstate}" />
+                            <CheckBox Margin="0,2" IsChecked="{Binding IsInsuranceFocusEnabled, Mode=TwoWay}"
+                                      Content="{DynamicResource Dashboard.Widget.AssetClass.Insurance}" />
+                            <CheckBox Margin="0,2" IsChecked="{Binding IsRetirementFocusEnabled, Mode=TwoWay}"
+                                      Content="{DynamicResource Dashboard.Widget.AssetClass.Retirement}" />
+                            <CheckBox Margin="0,2" IsChecked="{Binding IsPhysicalFocusEnabled, Mode=TwoWay}"
+                                      Content="{DynamicResource Dashboard.Widget.AssetClass.Physical}" />
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
+
                 <!--  ── 語言與區域  ──  -->
                 <TextBlock
                     Margin="0,0,0,8"

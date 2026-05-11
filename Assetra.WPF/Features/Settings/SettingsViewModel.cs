@@ -165,6 +165,37 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _llmModel = string.Empty;
     [ObservableProperty] private string _llmEndpoint = string.Empty;
 
+    // ── v2：自訂對標清單（最多 4 個）+ 資產類焦點卡顯示偏好 ────────────────
+    /// <summary>使用者編輯的自訂對標 symbol；XAML 用 ListBox 綁，配 +/− 按鈕。</summary>
+    public ObservableCollection<string> CustomBenchmarkSymbols { get; } = [];
+
+    /// <summary>新增自訂對標時的輸入框文字。</summary>
+    [ObservableProperty] private string _customBenchmarkInput = string.Empty;
+
+    public bool CanAddCustomBenchmark =>
+        !string.IsNullOrWhiteSpace(CustomBenchmarkInput)
+        && CustomBenchmarkSymbols.Count < 4
+        && !CustomBenchmarkSymbols.Any(s => string.Equals(s, CustomBenchmarkInput.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    partial void OnCustomBenchmarkInputChanged(string _) =>
+        OnPropertyChanged(nameof(CanAddCustomBenchmark));
+
+    [ObservableProperty] private bool _isCashFocusEnabled = true;
+    [ObservableProperty] private bool _isLiabilityFocusEnabled = true;
+    [ObservableProperty] private bool _isRealEstateFocusEnabled = true;
+    [ObservableProperty] private bool _isInsuranceFocusEnabled = true;
+    [ObservableProperty] private bool _isRetirementFocusEnabled = true;
+    [ObservableProperty] private bool _isPhysicalFocusEnabled = true;
+
+    // 注意：partial-changed handler 內部用 `_ = SaveAsync()` 做 discard，所以
+    // 參數不能命名 `_`（會跟內部 discard 名稱衝突）。用 `value` 即可。
+    partial void OnIsCashFocusEnabledChanged(bool value)       { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnIsLiabilityFocusEnabledChanged(bool value)  { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnIsRealEstateFocusEnabledChanged(bool value) { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnIsInsuranceFocusEnabledChanged(bool value)  { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnIsRetirementFocusEnabledChanged(bool value) { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnIsPhysicalFocusEnabledChanged(bool value)   { if (!_isLoading) _ = SaveAsync(); }
+
     // ── 多幣別匯率即時換算 ─────────────────────────────────────────
     // 來源：Frankfurter（CurrencyService.RefreshRatesAsync）。
     // 顯示「上次更新時間 + 各幣別兌台幣匯率」並提供手動刷新按鈕。
@@ -303,6 +334,19 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             LlmApiKey = s.LlmApiKey ?? string.Empty;
             LlmModel = s.LlmModel ?? string.Empty;
             LlmEndpoint = s.LlmEndpoint ?? string.Empty;
+
+            // v2 — 自訂對標 + 焦點卡顯示偏好
+            CustomBenchmarkSymbols.Clear();
+            if (s.CustomBenchmarkSymbols is not null)
+                foreach (var sym in s.CustomBenchmarkSymbols) CustomBenchmarkSymbols.Add(sym);
+            var vis = s.AssetClassFocusVisibility;
+            IsCashFocusEnabled       = vis?.GetValueOrDefault("Cash",       true) ?? true;
+            IsLiabilityFocusEnabled  = vis?.GetValueOrDefault("Liability",  true) ?? true;
+            IsRealEstateFocusEnabled = vis?.GetValueOrDefault("RealEstate", true) ?? true;
+            IsInsuranceFocusEnabled  = vis?.GetValueOrDefault("Insurance",  true) ?? true;
+            IsRetirementFocusEnabled = vis?.GetValueOrDefault("Retirement", true) ?? true;
+            IsPhysicalFocusEnabled   = vis?.GetValueOrDefault("Physical",   true) ?? true;
+
             DataSourceSaveStatus = string.Empty;
             TwelveDataTestStatus = string.Empty;
             OnPropertyChanged(nameof(IsTwelveDataConfigured));
@@ -545,8 +589,50 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             LlmApiKey = LlmApiKey?.Trim() ?? string.Empty,
             LlmModel = LlmModel?.Trim() ?? string.Empty,
             LlmEndpoint = LlmEndpoint?.Trim() ?? string.Empty,
+            // v2：自訂對標清單 + 資產類焦點卡顯示偏好
+            CustomBenchmarkSymbols = CustomBenchmarkSymbols.Count == 0
+                ? null
+                : CustomBenchmarkSymbols.Select(s => s.Trim()).Where(s => s.Length > 0).ToList(),
+            AssetClassFocusVisibility = BuildFocusVisibilityMap(),
         };
         await _settings.SaveAsync(updated).ConfigureAwait(true);
+    }
+
+    /// <summary>建出 6 個 cell 的 visibility map；全 true 時回 null（節省 JSON 體積）。</summary>
+    private Dictionary<string, bool>? BuildFocusVisibilityMap()
+    {
+        var map = new Dictionary<string, bool>
+        {
+            ["Cash"] = IsCashFocusEnabled,
+            ["Liability"] = IsLiabilityFocusEnabled,
+            ["RealEstate"] = IsRealEstateFocusEnabled,
+            ["Insurance"] = IsInsuranceFocusEnabled,
+            ["Retirement"] = IsRetirementFocusEnabled,
+            ["Physical"] = IsPhysicalFocusEnabled,
+        };
+        // 都是 true 就不存（settings.json 留乾淨）
+        return map.Values.All(v => v) ? null : map;
+    }
+
+    [RelayCommand]
+    private void AddCustomBenchmark()
+    {
+        if (!CanAddCustomBenchmark) return;
+        CustomBenchmarkSymbols.Add(CustomBenchmarkInput.Trim());
+        CustomBenchmarkInput = string.Empty;
+        OnPropertyChanged(nameof(CanAddCustomBenchmark));
+        if (!_isLoading) _ = SaveAsync();
+    }
+
+    [RelayCommand]
+    private void RemoveCustomBenchmark(string? symbol)
+    {
+        if (string.IsNullOrEmpty(symbol)) return;
+        if (CustomBenchmarkSymbols.Remove(symbol))
+        {
+            OnPropertyChanged(nameof(CanAddCustomBenchmark));
+            if (!_isLoading) _ = SaveAsync();
+        }
     }
 
     partial void OnLlmProviderChanged(string value)  { if (!_isLoading) _ = SaveAsync(); }

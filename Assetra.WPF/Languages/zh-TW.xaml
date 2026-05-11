@@ -1171,6 +1171,13 @@
     <sys:String x:Key="Dashboard.Calendar.UseAbsolute.Tooltip">色階分桶基準：未勾選 = 依 |Δ%|；勾選 = 依 |Δ 金額|</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.MoveUp">上移</sys:String>
     <sys:String x:Key="Dashboard.Calendar.YearView">年度檢視</sys:String>
+    <!--  v2 Settings：財務概覽客製化  -->
+    <sys:String x:Key="Settings.Section.DashboardCustomize">財務概覽客製化</sys:String>
+    <sys:String x:Key="Settings.CustomBenchmarks.Heading">自訂對標</sys:String>
+    <sys:String x:Key="Settings.CustomBenchmarks.Hint">在資產趨勢 tab 加你關注的對標標的（最多 4 個）。例：2330.TW、QQQ。</sys:String>
+    <sys:String x:Key="Settings.CustomBenchmarks.Add">新增</sys:String>
+    <sys:String x:Key="Settings.AssetClassFocus.Heading">資產類焦點卡顯示</sys:String>
+    <sys:String x:Key="Settings.AssetClassFocus.Hint">取消勾選來隱藏不關心的資產類焦點卡。</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.MoveDown">下移</sys:String>
 
     <!--  Goals / 財務目標  -->
