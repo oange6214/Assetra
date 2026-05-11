@@ -30,52 +30,25 @@
 
         <pcontrols:PortfolioSetupNoticePanel Grid.Row="0" />
 
-        <!--  ── Row 1: TabControl with floating Add Record button ──  -->
-        <Grid Grid.Row="1">
-            <TabControl
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                HorizontalContentAlignment="Stretch"
-                VerticalContentAlignment="Stretch"
-                Background="Transparent"
-                BorderThickness="0"
-                SelectedValue="{Binding SelectedTab, Mode=TwoWay}"
-                SelectedValuePath="Tag">
-                <!--
-                    Long-term refactor (Dashboard singleton)：投資儀表板 + 配置分析
-                    都搬到全域財務儀表板。Portfolio 頁瘦身回到純資產類工作面，
-                    預設 landing = 持倉明細。
+        <!--
+            ── Row 1: Positions panel（直接渲染，不再包 TabControl）──
 
-                    保留的 enum：
-                    - PortfolioTab.Dashboard / AllocationAnalysis enum 值未刪，
-                      以防舊持久化設定載入；TabControl SelectedValue 找不到對應
-                      Tag 時會 fall back 到第一個 TabItem（Positions）。
-                    - DashboardViewModel / AllocationViewModel 物件仍存活在
-                      PortfolioViewModel，分別供「投資焦點卡」與「配置」tab
-                      綁定使用。
-                -->
+            Long-term refactor 後 Portfolio 頁只剩單一工作面 = 持倉明細：
+            - Dashboard tab 搬到「投資焦點卡」（全域財務儀表板總覽）
+            - Allocation tab 搬到「配置」tab（全域財務儀表板）
+            - Cash / Liability / Trades 早期已搬到各自的 navrail leaf
+            單一 TabControl + 單一 TabItem 是 anti-pattern，直接展開 PositionsTabPanel
+            節省 ~32px tab bar 並消除「為什麼只有一個 tab」的疑惑。
 
-                <TabItem Header="{DynamicResource Portfolio.Tab.Positions}" Tag="{x:Static vm:PortfolioTab.Positions}">
-                    <pcontrols:PositionsTabPanel />
-                </TabItem>
-
-                <!--
-                    Cash / Liability / Trades tabs removed — those panels now have
-                    their own top-level nav entries (CashAccounts, Liabilities,
-                    TransactionLog) and shell-level detail overlays. Keeping them
-                    here would duplicate navigation and confuse users about which
-                    surface owns the data.
-                -->
-            </TabControl>
-
-            <!--
-                Floating "新增紀錄" button removed — promoted to MainWindow
-                title bar so the high-frequency action stays reachable from
-                every page (Portfolio / Cash / Liabilities / TransactionLog /
-                FinancialOverview / …) instead of only when the user is on
-                this page. Ctrl+N is the global keyboard twin.
-            -->
-        </Grid>
+            保留的事：
+            - PortfolioTab enum / SelectedTab observable property 仍存在，
+              避免破壞舊持久化與 OpenAddAccountFromTab 等內部呼叫。
+            - DashboardViewModel / AllocationViewModel 子 VM 仍存活於 PortfolioVM，
+              供全域儀表板「投資焦點卡」與「配置 tab」綁定使用。
+            - 未來如要加投資專屬的次要 view（例：配息日曆／績效歸因），
+              再回頭包 TabControl 即可。
+        -->
+        <pcontrols:PositionsTabPanel Grid.Row="1" />
 
 
         <!--
