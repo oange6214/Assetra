@@ -42,4 +42,17 @@ public static class ShellNavigationEvents
 
     public static void RequestDashboardTab(string tabName) =>
         DashboardTabRequested?.Invoke(tabName);
+
+    /// <summary>
+    /// 報酬日曆 cell popover 跳轉「查看當日交易」時觸發 — 攜帶單一日期。
+    /// PortfolioViewModel 的 TradeFilter 訂閱後設置 TradeDateFrom = TradeDateTo
+    /// = 該日，然後切到 TransactionLog 頁面。
+    /// </summary>
+    public static event Action<DateOnly>? TransactionDateFilterRequested;
+
+    public static void RequestTransactionsForDate(DateOnly date)
+    {
+        TransactionDateFilterRequested?.Invoke(date);
+        RequestNavigateTo("TransactionLog");
+    }
 }

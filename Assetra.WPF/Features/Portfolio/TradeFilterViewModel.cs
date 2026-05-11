@@ -41,6 +41,17 @@ public partial class TradeFilterViewModel : ObservableObject, IDisposable
         ArgumentNullException.ThrowIfNull(localization);
         _getTrades = getTrades;
         _localization = localization;
+
+        // 訂閱「報酬日曆 cell popover → 查看當日交易」事件 — 把單日 filter 套上。
+        // lifetime = application；無需 unsubscribe。
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.TransactionDateFilterRequested += OnTransactionDateRequested;
+    }
+
+    private void OnTransactionDateRequested(DateOnly date)
+    {
+        var d = date.ToDateTime(TimeOnly.MinValue);
+        TradeDateFrom = d;
+        TradeDateTo = d;
     }
 
     // ── Type filter ──────────────────────────────────────────────────────────

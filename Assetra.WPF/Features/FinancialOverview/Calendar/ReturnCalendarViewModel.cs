@@ -195,13 +195,18 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     [RelayCommand]
     private void CloseCellPopover() => SelectedCell = null;
 
-    /// <summary>從 popover 跳到當日明細：navigate 到 TransactionLog（後續可加日期 filter）。</summary>
+    /// <summary>
+    /// 從 popover 跳到 TransactionLog 並把 trade filter 的日期區間設為該日。
+    /// 使用 ShellNavigationEvents.RequestTransactionsForDate 把日期一併傳遞，
+    /// PortfolioViewModel 訂閱後設置 TradeFilter.TradeDateFrom/To。
+    /// </summary>
     [RelayCommand]
     private void OpenDayTransactions()
     {
         if (SelectedCell is null) return;
+        var date = SelectedCell.Date;
         SelectedCell = null;
-        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("TransactionLog");
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestTransactionsForDate(date);
     }
 
     /// <summary>重算 42 個 cell。每日 Δ = 該日 marketValue − 前一交易日 marketValue。</summary>
