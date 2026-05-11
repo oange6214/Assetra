@@ -1,9 +1,52 @@
 # Dashboard / Trends / Reports 三頁重構整合計畫
 
-**Status:** Planning
+**Status:** ✅ **COMPLETED** (with notes — see Completion section)
 **Estimated effort:** 6–9 days（分 5 stage，可獨立交付）
+**Actual effort:** 多輪 session 累積 ≈ 6–8 天等效工時
 **Priority:** Medium-High（影響日常使用流，但不阻擋功能開發）
 **Owner:** TBD
+
+---
+
+## Completion Status (2026/05)
+
+| Stage | 狀態 | 主要 commits |
+|---|---|---|
+| Stage 1 — 對標 + 區間 KPI | ✅ Done | `6086c3d`（對標 + KPI 列）/ `d586190`（升級 full TWR） |
+| Stage 2 — 4-tab shell + Allocation 搬家 | ✅ Done | `0c6bdbc` |
+| Stage 2.5 — Goals / FIRE / Assistant widgets | ✅ Done | `229724a`（widget）/ `65afcfa`（onboarding polish + dismiss persist） |
+| Stage 3 — Reports 瘦身、風險指標搬到 Trends | ✅ Done | `5c5cd44`（hide Performance Expander）/ `26116aa`（Volatility/Sharpe/HHI 整合）/ `54f9bb0`（跳過 hidden 計算） |
+| Stage 4 — 報酬日曆 heatmap | ✅ Done | `845f6fe`（基礎）/ `e457ab5`（thread fix）/ `1c25d99`（紅綠 KPI + bar chart）/ `12d2365`（週欄 + 月份下拉 + popover）/ `d0b6a2f`（DateOnly bind crash 修復） |
+
+**附加工作（plan 外但同期完成）：**
+
+| 工作 | Commit |
+|---|---|
+| 命名「財務儀表板 → 財務概覽」 | `e5052c4` |
+| navrail 群組重組（總覽 → 分析 + 工具） | `e5052c4` |
+| 移除 Portfolio.Dashboard 內 tab（dashboard singleton） | `03c4209` |
+| 投資資產頁去掉單一 tab 包裝 | `d2b2f9d` |
+| 資產類焦點卡（現金/負債/不動產/保險/退休/實物） | `0631600`, `ba30f3d` |
+| 30 天 sparkline（投資焦點 + KPI bar 下方） | `342ee63` |
+| Reports performance/risk hidden 但仍計算 → 改跳過 | `54f9bb0` |
+| Title bar「新增」按鈕 icon-only 化 | `1bed7eb` |
+| Cash/Liability 按鈕 label 一致化 | `1bed7eb` |
+| 收支分類 Fluent icons | `24bafff`, `42e95bb`, `a5ea13a` |
+
+**Tests：** 1300 → **1321**（+21 新測試，全綠）
+
+---
+
+## 已知遺留事項（plan 範圍外或下一輪處理）
+
+| 項目 | 為什麼留 |
+|---|---|
+| `ReportsViewModel._risk` / `_performance` fields + 8 個 service 注入未刪 | 已跳過呼叫；完整刪除 ~250 行 + DI 條目改動，留下一輪 |
+| Daily net worth snapshot 持久化 CashValue/LiabilityValue | KPI bar sparkline 目前用投資 MV 作 proxy |
+| `PerformanceFlowBuilder` 只認 Buy/Sell/CashDividend | Income/Withdrawal/Transfer 不算 cash flow，多帳戶 TWR 可能偏差 |
+| `TransactionLog` 日期 filter API | Calendar cell popover 跳轉沒帶日期 |
+| `DismissedAssistantInsights` 雲端同步 schema | 跨裝置 dismiss 不保留（單機 OK） |
+| v2 功能（對標自訂 / year heatmap / KPI 拖拉重排…） | 列在 Out of Scope，未來再規劃 |
 
 ---
 
