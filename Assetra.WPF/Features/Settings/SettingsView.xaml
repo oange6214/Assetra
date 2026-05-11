@@ -815,12 +815,32 @@
                                     FontSize="{StaticResource Font.Size.Xs}"
                                     Foreground="{DynamicResource AppTextMuted}"
                                     Text="{DynamicResource Settings.Sync.LastResult}" />
-                                <TextBlock Foreground="{DynamicResource AppTextPrimary}">
-                                    <Run Text="↓" />
+                                <!--
+                                    把 ↓↑⚠ Unicode glyphs 換成 ds:AppIcon（inline-block via
+                                    InlineUIContainer）— 跟 navrail / title bar 的圖示語彙一致，
+                                    不再依賴系統字型對這幾個 glyph 的渲染（避免有些主題裡 ⚠
+                                    被當成 emoji 變成彩色）。
+                                -->
+                                <TextBlock Foreground="{DynamicResource AppTextPrimary}" FontSize="{StaticResource Font.Size.Xs}">
+                                    <InlineUIContainer BaselineAlignment="Center">
+                                        <ds:AppIcon Symbol="ArrowDownload24" FontSize="11"
+                                                    Foreground="{DynamicResource AppTextSecondary}" />
+                                    </InlineUIContainer>
+                                    <Run Text=" " />
                                     <Run Text="{Binding LastPulled, Mode=OneWay}" />
-                                    <Run Text="  ↑" />
+                                    <Run Text="   " />
+                                    <InlineUIContainer BaselineAlignment="Center">
+                                        <ds:AppIcon Symbol="ArrowUpload24" FontSize="11"
+                                                    Foreground="{DynamicResource AppTextSecondary}" />
+                                    </InlineUIContainer>
+                                    <Run Text=" " />
                                     <Run Text="{Binding LastPushed, Mode=OneWay}" />
-                                    <Run Text="  ⚠" />
+                                    <Run Text="   " />
+                                    <InlineUIContainer BaselineAlignment="Center">
+                                        <ds:AppIcon Symbol="Warning24" FontSize="11"
+                                                    Foreground="{DynamicResource AppDown}" />
+                                    </InlineUIContainer>
+                                    <Run Text=" " />
                                     <Run Text="{Binding ManualConflicts, Mode=OneWay}" />
                                 </TextBlock>
                             </StackPanel>
