@@ -192,4 +192,11 @@ public sealed record AppSettings(
     /// 的提示，避免每次重啟又跳出來。7 天後自動 expire（在 service 端過濾時
     /// 檢查 timestamp）。
     /// </summary>
-    Dictionary<string, DateTime>? DismissedAssistantInsights = null);
+    Dictionary<string, DateTime>? DismissedAssistantInsights = null,
+
+    /// <summary>
+    /// v2：資產類焦點卡 6 個 cell 的顯示偏好。null 或缺鍵 = 顯示。
+    /// Key 取 AssetClassFocusKey enum 字串名（Cash / Liability / RealEstate /
+    /// Insurance / Retirement / Physical）。
+    /// </summary>
+    Dictionary<string, bool>? AssetClassFocusVisibility = null);

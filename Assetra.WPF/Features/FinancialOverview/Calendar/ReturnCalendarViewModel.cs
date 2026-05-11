@@ -67,6 +67,13 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     [ObservableProperty] private bool _hasData;
 
     /// <summary>
+    /// v2：cell 色階分桶基準 — false（預設）按 |Δ%| 分；true 按 |Δ 絕對值| 分。
+    /// 切換不重抓資料，只重算 cell tone。
+    /// </summary>
+    [ObservableProperty] private bool _useAbsoluteForTone;
+    partial void OnUseAbsoluteForToneChanged(bool _) => Rebuild();
+
+    /// <summary>
     /// 使用者點選的單一日 cell。null 時 popover 關閉。
     /// </summary>
     [ObservableProperty]
@@ -275,7 +282,9 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
                 HasData: hasSnapshot && delta.HasValue,
                 Delta: delta,
                 DeltaDisplay: FormatDelta(delta),
-                Tone: ResolveTone(delta, deltaPct)));
+                Tone: UseAbsoluteForTone
+                    ? ResolveToneByAbsolute(delta)
+                    : ResolveTone(delta, deltaPct)));
         }
 
         MonthlyAbsolutePnl = monthlyDelta;
@@ -427,6 +436,27 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
             return (v >= 0 ? "+" : "") + w.ToString("F1", CultureInfo.InvariantCulture) + "萬";
         }
         return (v >= 0 ? "+" : "") + v.ToString("N0", CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// v2：以「絕對值」分桶。閥值用台幣慣用單位（千 / 萬 / 十萬）。
+    /// </summary>
+    private static CellTone ResolveToneByAbsolute(decimal? delta)
+    {
+        if (delta is null) return CellTone.None;
+        var sign = Math.Sign(delta.Value);
+        if (sign == 0) return CellTone.None;
+        var abs = Math.Abs(delta.Value);
+        var bucket = abs switch
+        {
+            < 1_000m => 1,        // < 1K
+            < 10_000m => 2,       // 1K–1萬
+            < 100_000m => 3,      // 1–10萬
+            _ => 4,               // > 10萬
+        };
+        return sign > 0
+            ? bucket switch { 1 => CellTone.UpWeak, 2 => CellTone.UpMedium, 3 => CellTone.UpStrong, _ => CellTone.UpStrongest, }
+            : bucket switch { 1 => CellTone.DownWeak, 2 => CellTone.DownMedium, 3 => CellTone.DownStrong, _ => CellTone.DownStrongest, };
     }
 
     /// <summary>

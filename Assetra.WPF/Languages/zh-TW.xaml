@@ -1167,6 +1167,8 @@
     <sys:String x:Key="Dashboard.Calendar.Popover.DailyPnl">當日損益</sys:String>
     <sys:String x:Key="Dashboard.Calendar.Popover.OpenTransactions">查看當日交易記錄</sys:String>
     <sys:String x:Key="Dashboard.Overview.PortfolioTrend30d">近 30 天投資組合趨勢</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.UseAbsolute">絕對值色階</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.UseAbsolute.Tooltip">色階分桶基準：未勾選 = 依 |Δ%|；勾選 = 依 |Δ 金額|</sys:String>
 
     <!--  Goals / 財務目標  -->
     <sys:String x:Key="Goals.Title">財務目標</sys:String>

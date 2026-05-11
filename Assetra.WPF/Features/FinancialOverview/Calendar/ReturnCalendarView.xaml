@@ -123,6 +123,16 @@
                     Command="{Binding GoTodayCommand}"
                     Content="{DynamicResource Dashboard.Calendar.Today}"
                     Style="{StaticResource AppSecondaryButton}" />
+            <!--  v2：絕對值 / 百分比 色階切換  -->
+            <CheckBox DockPanel.Dock="Right"
+                      Margin="0,0,12,0"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding UseAbsoluteForTone, Mode=TwoWay}"
+                      ToolTip="{DynamicResource Dashboard.Calendar.UseAbsolute.Tooltip}">
+                <TextBlock FontSize="{StaticResource Font.Size.Xs}"
+                           Foreground="{DynamicResource AppTextSecondary}"
+                           Text="{DynamicResource Dashboard.Calendar.UseAbsolute}" />
+            </CheckBox>
         </DockPanel>
 
         <!--
