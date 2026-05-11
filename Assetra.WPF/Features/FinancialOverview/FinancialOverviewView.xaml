@@ -7,6 +7,7 @@
     xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     xmlns:widgets="clr-namespace:Assetra.WPF.Features.FinancialOverview.Widgets"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel}}"
     d:DesignHeight="800"
@@ -93,6 +94,41 @@
             Margin="0"
             VerticalScrollBarVisibility="Auto">
             <StackPanel>
+
+                <!--
+                    30 天投資組合 sparkline — 給 KPI bar 一個「方向感」。
+                    純線條無軸；資料源是 InvestmentFocusWidget.TenDaySeries（cutoff -29 天）。
+                    註：理想是淨值（資產 + 投資 − 負債）每日 sparkline，但目前
+                    PortfolioDailySnapshot 只記錄投資 MarketValue（CashValue /
+                    LiabilityValue 兩欄存在但未持久化）。這版以投資組合趨勢為
+                    proxy；完整淨值 sparkline 待 daily NW snapshot 基建完成。
+                -->
+                <Border Height="56" Margin="0,0,0,16"
+                        Padding="12,8"
+                        Background="{DynamicResource AppCardBackground}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Sm}"
+                        Visibility="{Binding InvestmentFocusWidget, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   VerticalAlignment="Center"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Text="{DynamicResource Dashboard.Overview.PortfolioTrend30d}" />
+                        <lvc:CartesianChart Grid.Column="1"
+                                            Margin="12,0,0,0"
+                                            Background="Transparent"
+                                            Series="{Binding InvestmentFocusWidget.TenDaySeries}"
+                                            XAxes="{Binding InvestmentFocusWidget.SparklineXAxes}"
+                                            YAxes="{Binding InvestmentFocusWidget.SparklineYAxes}"
+                                            TooltipPosition="Hidden" />
+                    </Grid>
+                </Border>
 
                 <!--
                     Stage 2.5 (Dashboard consolidation)：總覽 tab 上的 widget。

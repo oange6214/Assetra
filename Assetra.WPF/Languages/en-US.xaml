@@ -1152,6 +1152,7 @@
     <sys:String x:Key="Dashboard.Calendar.WeeklyPnl">Weekly</sys:String>
     <sys:String x:Key="Dashboard.Calendar.Popover.DailyPnl">Daily P&amp;L</sys:String>
     <sys:String x:Key="Dashboard.Calendar.Popover.OpenTransactions">Open transactions for this day</sys:String>
+    <sys:String x:Key="Dashboard.Overview.PortfolioTrend30d">Portfolio trend (30d)</sys:String>
 
     <!-- Goals / Financial Goals -->
     <sys:String x:Key="Goals.Title">Financial Goals</sys:String>

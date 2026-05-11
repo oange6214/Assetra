@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel},
@@ -137,6 +138,22 @@
                     </TextBlock>
                 </StackPanel>
             </Grid>
+
+            <!--
+                30 天投資市值 sparkline — 視覺給「方向感」（漲跌趨勢），
+                沒軸 / 沒標籤 / 純線條；資料源是 DashboardViewModel.TenDaySeries
+                （cutoff 已調整為 -29 天 = 近 30 天）。
+            -->
+            <Border Margin="0,12,0,0"
+                    Height="48"
+                    Background="Transparent">
+                <lvc:CartesianChart
+                    Background="Transparent"
+                    Series="{Binding InvestmentFocusWidget.TenDaySeries}"
+                    XAxes="{Binding InvestmentFocusWidget.SparklineXAxes}"
+                    YAxes="{Binding InvestmentFocusWidget.SparklineYAxes}"
+                    TooltipPosition="Hidden" />
+            </Border>
 
             <TextBlock Style="{StaticResource DashboardWidgetFooter}"
                        Text="{DynamicResource Dashboard.Widget.Investment.OpenLink}">

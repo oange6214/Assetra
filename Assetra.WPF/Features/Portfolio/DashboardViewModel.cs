@@ -24,7 +24,12 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
     [ObservableProperty] private ICartesianAxis[] _tenDayXAxes = [new Axis { IsVisible = false }];
     [ObservableProperty] private ICartesianAxis[] _tenDayYAxes = [new Axis { IsVisible = false }];
 
-    public BudgetSummaryCardViewModel? BudgetSummary { get; }
+    /// <summary>
+    /// 純無軸 sparkline axes — 給 InvestmentFocusWidget 使用。chart 不顯示
+    /// 標籤 / 刻度 / 分隔線，視覺只有那條曲線。
+    /// </summary>
+    public ICartesianAxis[] SparklineXAxes { get; } = [new Axis { IsVisible = false }];
+    public ICartesianAxis[] SparklineYAxes { get; } = [new Axis { IsVisible = false }];
 
     /// <summary>
     /// L3 — writeback channel for tab navigation. Defaults to the concrete
@@ -37,18 +42,11 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
     public DashboardViewModel(
         PortfolioViewModel portfolio,
         IThemeService? themeService = null,
-        BudgetSummaryCardViewModel? budgetSummary = null,
         Contracts.IDashboardNavigation? navigation = null)
     {
         _portfolio = portfolio;
         _themeService = themeService;
         _navigation = navigation ?? portfolio;
-        BudgetSummary = budgetSummary;
-        if (BudgetSummary is not null)
-        {
-            ((INotifyCollectionChanged)_portfolio.Trades).CollectionChanged += OnTradesChangedForBudget;
-            AsyncHelpers.SafeFireAndForget(BudgetSummary.LoadAsync, "BudgetSummary.LoadFromDashboard");
-        }
 
         _portfolio.PropertyChanged += OnPortfolioPropertyChanged;
         ((INotifyCollectionChanged)_portfolio.Positions).CollectionChanged += OnPositionsChanged;
@@ -64,12 +62,6 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
         RefreshTenDayChart();
     }
 
-    private void OnTradesChangedForBudget(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        if (BudgetSummary is not null)
-            AsyncHelpers.SafeFireAndForget(BudgetSummary.LoadAsync, "BudgetSummary.LoadFromDashboard");
-    }
-
     private void OnPortfolioPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         OnPropertyChanged(e.PropertyName);
@@ -78,6 +70,12 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
             case nameof(PortfolioViewModel.NetWorth):
                 OnPropertyChanged(nameof(NetWorthDisplay));
                 OnPropertyChanged(nameof(LeverageRatio));
+                break;
+            case nameof(PortfolioViewModel.TotalMarketValue):
+                OnPropertyChanged(nameof(TotalMarketValueDisplay));
+                break;
+            case nameof(PortfolioViewModel.TotalCost):
+                OnPropertyChanged(nameof(TotalCostDisplay));
                 break;
             case nameof(PortfolioViewModel.TotalPnl):
                 OnPropertyChanged(nameof(TotalPnlDisplay));
@@ -91,6 +89,7 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
                 break;
             case nameof(PortfolioViewModel.DayPnl):
                 OnPropertyChanged(nameof(DayPnlDisplay));
+                OnPropertyChanged(nameof(SignedDayPnlDisplay));
                 break;
         }
     }
@@ -111,8 +110,6 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
     {
         // C2 leak fix: anonymous-lambda subscriptions can't be detached;
         // refactored to named handlers so Dispose actually unsubscribes.
-        if (BudgetSummary is not null)
-            ((INotifyCollectionChanged)_portfolio.Trades).CollectionChanged -= OnTradesChangedForBudget;
         _portfolio.PropertyChanged -= OnPortfolioPropertyChanged;
         ((INotifyCollectionChanged)_portfolio.Positions).CollectionChanged -= OnPositionsChanged;
         ((INotifyCollectionChanged)_portfolio.Trades).CollectionChanged    -= OnTradesChanged;
@@ -126,15 +123,23 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
     public string  NetWorthDisplay      => $"NT${NetWorth:N0}";
     public decimal DayPnl               => _portfolio.DayPnl;
     public string  DayPnlDisplay        => $"NT${Math.Abs(DayPnl):N0}";
+    public string  SignedDayPnlDisplay  => DayPnl >= 0 ? $"+NT${DayPnl:N0}" : $"-NT${Math.Abs(DayPnl):N0}";
     public string  DayPnlPercentDisplay => _portfolio.DayPnlPercentDisplay;
     public bool    IsDayPnlPositive     => _portfolio.IsDayPnlPositive;
     public bool    HasDayPnl            => _portfolio.HasDayPnl;
 
-    // Metric cards
+    // Investment metric cards
+    public decimal TotalMarketValue      => _portfolio.TotalMarketValue;
+    public string  TotalMarketValueDisplay => $"NT${TotalMarketValue:N0}";
+    public decimal TotalCost             => _portfolio.TotalCost;
+    public string  TotalCostDisplay      => $"NT${TotalCost:N0}";
     public decimal TotalPnl              => _portfolio.TotalPnl;
     public string  TotalPnlDisplay       => $"NT${TotalPnl:N0}";
     public decimal TotalPnlPercent       => _portfolio.TotalPnlPercent;
     public bool    IsTotalPositive       => _portfolio.IsTotalPositive;
+
+    // Global financial metrics. Kept for compatibility, but the investment
+    // dashboard no longer binds to them; FinancialOverview owns that story.
     public decimal TotalAssets           => _portfolio.TotalAssets;
     public string  TotalAssetsDisplay    => $"NT${TotalAssets:N0}";
     public decimal TotalLiabilities      => _portfolio.TotalLiabilities;
@@ -163,9 +168,12 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
     private void NavigateToTrades() => _navigation.NavigateTo(PortfolioTab.Trades);
 
     // Chart
+    // Long-term refactor: Portfolio.Dashboard tab 移除後，這個 series 改為
+    // InvestmentFocusWidget 的 30 天 sparkline 用。屬性名稱保留 TenDay* 以
+    // 避免大規模 rename；cutoff 由 -9 改 -29（10 天 → 30 天）。
     private void RefreshTenDayChart()
     {
-        var cutoff = DateOnly.FromDateTime(DateTime.Today.AddDays(-9));
+        var cutoff = DateOnly.FromDateTime(DateTime.Today.AddDays(-29));
         var snapshots = _portfolio.History.Snapshots
             .Where(s => s.SnapshotDate >= cutoff)
             .OrderBy(s => s.SnapshotDate)
