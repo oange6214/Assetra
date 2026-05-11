@@ -15,7 +15,7 @@
     Title="{DynamicResource App.Title}"
     Width="1600"
     Height="1000"
-    MinWidth="1280"
+    MinWidth="900"
     MinHeight="800"
     Background="{DynamicResource AppBackground}"
     Icon="pack://application:,,,/Assetra.WPF;component/Assets/windows/assetra-app.ico"
@@ -47,7 +47,7 @@
             Key="Right"
             Command="{Binding NavRail.GoForwardCommand}"
             Modifiers="Alt" />
-        <!--  Ctrl+N: Add Record (高頻操作快捷鍵)  -->
+        <!--  Ctrl+N: quick add transaction. The title-bar button itself opens the broader add menu.  -->
         <KeyBinding
             Key="N"
             Command="{Binding Portfolio.AddRecordCommand}"
@@ -109,6 +109,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
@@ -175,14 +176,16 @@
                 <TextBlock
                     Grid.Column="2"
                     Margin="14,0"
+                    MinWidth="0"
                     VerticalAlignment="Center"
                     FontFamily="{StaticResource Font.Family.Base}"
                     FontSize="{StaticResource Font.Size.Base}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextPrimary}"
-                    Text="{DynamicResource App.Title}" />
+                    Text="{DynamicResource App.Title}"
+                    TextTrimming="CharacterEllipsis" />
 
-                <!--  Right: Add Record (high-frequency primary action) + Theme toggle + native window commands  -->
+                <!--  Right: global app actions. Native window commands live in the final column so they never get clipped first.  -->
                 <StackPanel
                     Grid.Column="3"
                     Margin="0,0,8,0"
@@ -190,31 +193,38 @@
                     Orientation="Horizontal"
                     chrome:WindowChrome.IsHitTestVisibleInChrome="True">
                     <!--
-                        Global "Add Record" button — promoted from the Portfolio
-                        page's floating button to the title bar so the high-frequency
-                        action is reachable from every section. Ctrl+N is the keyboard
-                        twin (see Window.InputBindings above). Tooltip shows the shortcut.
+                        Global "Add" menu — high-frequency creation actions are reachable
+                        from every section. Ctrl+N remains a direct shortcut for adding a
+                        transaction; the button opens the broader menu.
                     -->
                     <!--
-                        v0.28+ UX：title-bar「+ 新增」改為 dropdown，列出 5 個常見新增動作。
-                        每個 menu item 切到對應頁面並開啟正確的 dialog，解決使用者「新增的資料
-                        去哪了」的困惑（之前單一按鈕只能新增交易，使用者無法從這裡新增帳戶 / 負債 等）。
-                        實作：Button.Click 程式化開啟 ContextMenu（避免額外的 Popup 樣板）。
+                        v0.28+ UX：title-bar「+ 新增」dropdown，列出常見新增動作。
+                        每個 menu item 切到對應頁面並開啟正確的 dialog，解決使用者
+                        「新增的資料去哪了」的困惑。
+                        實作：Button.Click 程式化開啟 ContextMenu。
+
+                        UI refresh：原本是填色（AppPrimaryButton），跟旁邊的小巧
+                        icon button（主題切換 / 最小化 / 關閉）視覺重量不一致 —
+                        title bar 是 shell 區域，不該被一顆深色 CTA 主導。改用
+                        icon-only style（Add24 + 小 chevron 提示有 dropdown），與
+                        旁邊一致。tooltip 顯示完整意圖，發現性靠 hover 即可。
                     -->
                     <Button x:Name="AddMenuButton"
+                        Width="44"
                         Height="32"
-                        Margin="0,0,12,0"
-                        Padding="12,0"
+                        Margin="0,0,4,0"
+                        Padding="0"
                         Click="AddMenuButton_Click"
-                        Style="{StaticResource AppPrimaryButton}"
+                        Style="{StaticResource AppIconButton}"
                         ToolTip="{DynamicResource Portfolio.AddRecord.Tooltip}">
-                        <StackPanel Style="{StaticResource AppButtonContent}">
-                            <ds:AppIcon Style="{StaticResource AppButtonLeadingIcon}" Symbol="Add24" />
-                            <TextBlock Style="{StaticResource AppButtonText}" Text="{DynamicResource Portfolio.AddRecord}" />
-                            <ds:AppIcon Margin="6,0,0,0" FontSize="9" Symbol="ChevronDown24" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <ds:AppIcon FontSize="{StaticResource Font.Size.Md}" Foreground="{DynamicResource AppTextMuted}" Symbol="Add24" />
+                            <ds:AppIcon Margin="2,0,0,0" FontSize="9" Foreground="{DynamicResource AppTextMuted}" Symbol="ChevronDown24" />
                         </StackPanel>
                         <Button.ContextMenu>
-                            <ContextMenu Placement="Bottom">
+                            <ContextMenu
+                                DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                Placement="Bottom">
                                 <MenuItem Command="{Binding AddTransactionFromMenuCommand}">
                                     <MenuItem.Header>
                                         <StackPanel>
@@ -223,11 +233,64 @@
                                         </StackPanel>
                                     </MenuItem.Header>
                                 </MenuItem>
+                                <MenuItem Command="{Binding AddBuyTransactionFromMenuCommand}">
+                                    <MenuItem.Header>
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.BuyTransaction}" />
+                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.BuyTransaction.Hint}" />
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
                                 <Separator />
-                                <MenuItem Command="{Binding AddInvestmentFromMenuCommand}" Header="{DynamicResource Portfolio.AddRecord.Menu.Investment}" />
-                                <MenuItem Command="{Binding AddAccountFromMenuCommand}" Header="{DynamicResource Portfolio.AddRecord.Menu.Account}" />
-                                <MenuItem Command="{Binding AddLiabilityFromMenuCommand}" Header="{DynamicResource Portfolio.AddRecord.Menu.Liability}" />
-                                <MenuItem Command="{Binding AddCategoryFromMenuCommand}" Header="{DynamicResource Portfolio.AddRecord.Menu.Category}" />
+                                <MenuItem Command="{Binding AddAccountFromMenuCommand}">
+                                    <MenuItem.Header>
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Account}" />
+                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Account.Hint}" />
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <MenuItem Command="{Binding AddLiabilityFromMenuCommand}">
+                                    <MenuItem.Header>
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Liability}" />
+                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Liability.Hint}" />
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <MenuItem Command="{Binding AddCategoryFromMenuCommand}">
+                                    <MenuItem.Header>
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Category}" />
+                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Category.Hint}" />
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Command="{Binding AddRecurringFromMenuCommand}">
+                                    <MenuItem.Header>
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Recurring}" />
+                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Recurring.Hint}" />
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <MenuItem Command="{Binding AddAlertFromMenuCommand}">
+                                    <MenuItem.Header>
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Alert}" />
+                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Alert.Hint}" />
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <MenuItem Command="{Binding AddGoalFromMenuCommand}">
+                                    <MenuItem.Header>
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Goal}" />
+                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Goal.Hint}" />
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>
@@ -251,10 +314,19 @@
                             </ds:AppIcon.Style>
                         </ds:AppIcon>
                     </Button>
+                </StackPanel>
+
+                <!--  Native window commands: highest priority on narrow widths.  -->
+                <StackPanel
+                    Grid.Column="4"
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    chrome:WindowChrome.IsHitTestVisibleInChrome="True">
                     <Button
                         Width="40"
                         Height="32"
-                        Margin="8,0,0,0"
+                        Margin="0"
                         Padding="0"
                         Click="MinimizeButton_Click"
                         Style="{StaticResource AppIconButton}"
@@ -497,7 +569,7 @@
                 Visibility="{Binding HasSelectedCashRow, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <!--  Click-to-close backdrop  -->
                 <Border beh:BackdropClickToCloseBehavior.Command="{Binding CloseCashDetailCommand}" Style="{StaticResource AppDialogOverlayBorder}" />
-    
+
                 <!--  Floating panel anchored right  -->
                 <Border
                     HorizontalAlignment="Right"
@@ -517,7 +589,7 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-    
+
                         <!--  Header  -->
                         <Border
                             Grid.Row="0"
@@ -633,7 +705,7 @@
                                     TextTrimming="CharacterEllipsis" />
                             </DockPanel>
                         </Border>
-    
+
                         <!--  Tab bar  -->
                         <Border
                             Grid.Row="1"
@@ -656,7 +728,7 @@
                                     Style="{StaticResource NavTabBtn}" />
                             </StackPanel>
                         </Border>
-    
+
                         <!--  Tab content  -->
                         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                             <Grid>
@@ -742,7 +814,7 @@
                                         </Grid>
                                     </StackPanel>
                                 </StackPanel>
-    
+
                                 <Grid Margin="16,12" Visibility="{Binding IsDetailTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock
                                         Margin="0,24,0,0"
@@ -812,7 +884,7 @@
                                                                     Symbol="Edit24" />
                                                             </Button>
                                                         </Grid>
-    
+
                                                         <WrapPanel Margin="0,8,0,0">
                                                             <StackPanel MinWidth="160" Margin="0,0,20,4">
                                                                 <TextBlock
@@ -828,7 +900,7 @@
                                                                     Typography.NumeralAlignment="Tabular" />
                                                             </StackPanel>
                                                         </WrapPanel>
-    
+
                                                         <TextBlock
                                                             Margin="0,2,0,0"
                                                             FontSize="{StaticResource Font.Size.Xs}"
@@ -844,7 +916,7 @@
                                 </Grid>
                             </Grid>
                         </ScrollViewer>
-    
+
                         <!--  Danger zone  -->
                         <Border
                             Grid.Row="3"
@@ -929,7 +1001,7 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-    
+
                         <Border
                             Grid.Row="0"
                             Padding="16,14"
@@ -984,7 +1056,7 @@
                                     TextTrimming="CharacterEllipsis" />
                             </DockPanel>
                         </Border>
-    
+
                         <Border
                             Grid.Row="1"
                             BorderBrush="{DynamicResource AppBorder}"
@@ -1014,7 +1086,7 @@
                                     Visibility="{Binding SelectedLiabilityRow.IsLoan, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                             </StackPanel>
                         </Border>
-    
+
                         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                             <Grid>
                                 <StackPanel Margin="16,16,16,12" Visibility="{Binding IsDetailOverviewTab, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -1026,7 +1098,7 @@
                                                 <ColumnDefinition Width="10" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-    
+
                                             <!--  Left: 總借款 (sum of LoanBorrow trades — what was actually borrowed)  -->
                                             <Border
                                                 Grid.Column="0"
@@ -1050,7 +1122,7 @@
                                                         Typography.NumeralAlignment="Tabular" />
                                                 </StackPanel>
                                             </Border>
-    
+
                                             <!--  Right: 剩餘債務 (current outstanding balance + paid progress bar)  -->
                                             <Border
                                                 Grid.Column="2"
@@ -1102,7 +1174,7 @@
                                         </Grid>
                                     </StackPanel>
                                 </StackPanel>
-    
+
                                 <Grid Margin="16,12" Visibility="{Binding IsDetailTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock
                                         Margin="0,24,0,0"
@@ -1172,7 +1244,7 @@
                                                                     Symbol="Edit24" />
                                                             </Button>
                                                         </Grid>
-    
+
                                                         <WrapPanel Margin="0,8,0,0">
                                                             <StackPanel MinWidth="160" Margin="0,0,20,4">
                                                                 <TextBlock
@@ -1188,7 +1260,7 @@
                                                                     Typography.NumeralAlignment="Tabular" />
                                                             </StackPanel>
                                                         </WrapPanel>
-    
+
                                                         <TextBlock
                                                             Margin="0,2,0,0"
                                                             FontSize="{StaticResource Font.Size.Xs}"
@@ -1202,10 +1274,10 @@
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </Grid>
-    
+
                                 <!--  ── 攤還表 tab ──  -->
                                 <StackPanel Margin="16,12,16,16" Visibility="{Binding IsDetailScheduleTab, Converter={StaticResource BooleanToVisibilityConverter}}">
-    
+
                                     <!--  Loan metadata  -->
                                     <DockPanel Margin="0,0,0,8">
                                         <TextBlock
@@ -1227,7 +1299,7 @@
                                                 Typography.NumeralAlignment="Tabular" />
                                         </TextBlock>
                                     </DockPanel>
-    
+
                                     <!--  3 summary cards  -->
                                     <WrapPanel Margin="0,0,0,14" ItemWidth="152">
                                         <Border
@@ -1297,7 +1369,7 @@
                                             </StackPanel>
                                         </Border>
                                     </WrapPanel>
-    
+
                                     <!--  Empty state  -->
                                     <TextBlock
                                         Margin="0,16,0,0"
@@ -1316,7 +1388,7 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-    
+
                                     <ItemsControl ItemsSource="{Binding SelectedLiabilityRow.ScheduleEntries}" Visibility="{Binding SelectedLiabilityRow.HasSchedule, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
@@ -1372,7 +1444,7 @@
                                                                 </TextBlock.Style>
                                                             </TextBlock>
                                                         </DockPanel>
-    
+
                                                         <WrapPanel Margin="0,8,0,0">
                                                             <StackPanel Margin="0,0,20,4">
                                                                 <TextBlock
@@ -1417,7 +1489,7 @@
                                                                     Typography.NumeralAlignment="Tabular" />
                                                             </StackPanel>
                                                         </WrapPanel>
-    
+
                                                         <Button
                                                             Height="28"
                                                             Margin="0,2,0,0"
@@ -1446,10 +1518,10 @@
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </StackPanel>
-    
+
                             </Grid>
                         </ScrollViewer>
-    
+
                         <!--  Danger zone  -->
                         <Border
                             Grid.Row="3"
@@ -1500,7 +1572,7 @@
                                 </Button>
                             </Grid>
                         </Border>
-    
+
                     </Grid>
                 </Border>
             </Grid>

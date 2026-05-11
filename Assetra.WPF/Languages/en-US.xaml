@@ -235,7 +235,7 @@
     <sys:String x:Key="Portfolio.AddRecord.Menu.Alert.Hint">Creates a price condition you can manage from "Alerts"</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Goal">Add Financial Goal</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Goal.Hint">Creates a goal you can track from "Goals"</sys:String>
-    <sys:String x:Key="Portfolio.AddCash">Account</sys:String>
+    <sys:String x:Key="Portfolio.AddCash">Add Account</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">Add Liability</sys:String>
     <sys:String x:Key="Portfolio.AddCreditCard">Add Liability</sys:String>
     <sys:String x:Key="Portfolio.Cash.AddHint">When creating the account, you can also record an opening deposit. Future deposits and withdrawals will update the balance automatically.</sys:String>

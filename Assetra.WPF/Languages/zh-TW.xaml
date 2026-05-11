@@ -236,7 +236,7 @@
     <sys:String x:Key="Portfolio.AddRecord.Menu.Alert.Hint">設定價格條件，之後可在「警示」查看</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Goal">新增財務目標</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Goal.Hint">建立後可在「財務目標」追蹤進度</sys:String>
-    <sys:String x:Key="Portfolio.AddCash">帳戶</sys:String>
+    <sys:String x:Key="Portfolio.AddCash">新增帳戶</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">新增負債</sys:String>
     <sys:String x:Key="Portfolio.AddCreditCard">新增負債</sys:String>
     <sys:String x:Key="Portfolio.Cash.AddHint">建立帳戶時可選擇一併記錄初始存入；之後的存提款會自動累計餘額。</sys:String>
