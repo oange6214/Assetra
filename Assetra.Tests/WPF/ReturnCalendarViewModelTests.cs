@@ -190,6 +190,65 @@ public sealed class ReturnCalendarViewModelTests
         Assert.Null(vm.SelectedCell);
     }
 
+    // ── v2 tests ──
+
+    [Fact]
+    public void UseAbsoluteForTone_RecomputesCellTone()
+    {
+        // 5/2 Δ=+50 → 5% (UpStrongest by pct); 但絕對值 50 < 1000 → UpWeak by abs
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 1), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 2), 0m, 1_050m, 0m, 1),
+        };
+        var vm = new ReturnCalendarViewModel();
+        vm.UpdateSnapshots(snapshots);
+        var cell = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 2));
+        Assert.Equal(CellTone.UpStrongest, cell.Tone);
+
+        vm.UseAbsoluteForTone = true;
+        cell = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 2));
+        Assert.Equal(CellTone.UpWeak, cell.Tone);   // |50| < 1000 → weak bucket
+    }
+
+    [Fact]
+    public void IsYearView_ProducesYearCells_365Or366()
+    {
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 1), 0m, 1_000m, 0m, 1),
+        };
+        var vm = new ReturnCalendarViewModel();
+        vm.UpdateSnapshots(snapshots);
+
+        var yearCells = vm.YearViewCells;
+        // 2026 is non-leap year → 365 days
+        Assert.Equal(365, yearCells.Count);
+        Assert.Equal(new DateOnly(2026, 1, 1), yearCells[0].Date);
+        Assert.Equal(new DateOnly(2026, 12, 31), yearCells[^1].Date);
+    }
+
+    [Fact]
+    public void YearViewCells_ColorsDaysWithSnapshotDelta()
+    {
+        // 跨月場景：5/1 baseline, 5/2 +200 (5%) → 應有 tone
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 1), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 2), 0m, 1_200m, 0m, 1),
+        };
+        var vm = new ReturnCalendarViewModel();
+        vm.UpdateSnapshots(snapshots);
+
+        var dayWithData = vm.YearViewCells.First(c => c.Date == new DateOnly(2026, 5, 2));
+        Assert.True(dayWithData.HasData);
+        Assert.NotEqual(CellTone.None, dayWithData.Tone);
+
+        // 1/1（年初無前一日 baseline）應該 HasData=false → Tone=None
+        var jan1 = vm.YearViewCells.First(c => c.Date == new DateOnly(2026, 1, 1));
+        Assert.Equal(CellTone.None, jan1.Tone);
+    }
+
     [Fact]
     public void MonthlyKpis_SumAndComputePercent()
     {

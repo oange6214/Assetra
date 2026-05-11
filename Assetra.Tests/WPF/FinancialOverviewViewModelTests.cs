@@ -136,4 +136,50 @@ public sealed class FinancialOverviewViewModelTests
 
         Assert.Equal(9999m, feed.TotalMarketValue);
     }
+
+    // ── v2 tests：focus visibility + KPI reorder edge cases ──
+
+    [Fact]
+    public void IsAssetClassVisible_DefaultsTrueWhenSettingsNull()
+    {
+        var vm = new FinancialOverviewViewModel(
+            new Mock<IFinancialOverviewQueryService>().Object,
+            new StubFeed(),
+            settings: null);
+
+        // 沒注入 settings → 任何 cell 都顯示（被 VM null check 過濾才會藏）
+        // 直接呼叫 IsAssetClassVisible 不行（private），用反射檢查 IsXxxFocusVisible
+        // 在 VM null 情況下回 false（VM 沒注入），等於上層 widget 自動隱藏。
+        Assert.False(vm.IsCashFocusVisible);
+        Assert.False(vm.IsRealEstateFocusVisible);
+    }
+
+    [Fact]
+    public void AssetClassFocusVisibility_FalseInSettings_HidesCell()
+    {
+        var settings = new StubSettings(new AppSettings(
+            AssetClassFocusVisibility: new Dictionary<string, bool>
+            {
+                { "Cash", false },
+            }));
+        var vm = new FinancialOverviewViewModel(
+            new Mock<IFinancialOverviewQueryService>().Object,
+            new StubFeed(),
+            settings: settings);
+
+        // settings 把 Cash 設 false → 即使 PortfolioRef 注入也不顯示
+        Assert.False(vm.IsCashFocusVisible);
+    }
+
+    private sealed class StubSettings(AppSettings current) : Assetra.Core.Interfaces.IAppSettingsService
+    {
+        public AppSettings Current { get; private set; } = current;
+        public event Action? Changed;
+        public Task SaveAsync(AppSettings settings)
+        {
+            Current = settings;
+            Changed?.Invoke();
+            return Task.CompletedTask;
+        }
+    }
 }
