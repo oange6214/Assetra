@@ -199,6 +199,113 @@ public sealed class PortfolioHistoryViewModelTests
             Task.FromResult(result);
     }
 
+    // ── New tests for risk metrics integration (Volatility / Sharpe / HHI) ──
+
+    [Fact]
+    public async Task LoadAsync_NoVolatilityService_HasVolatilityFalse()
+    {
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 1), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 2), 0m, 1_050m, 0m, 1),
+        };
+        var vm = new PortfolioHistoryViewModel(new StubHistoryQuery(snapshots));
+
+        await vm.LoadAsync();
+
+        Assert.False(vm.HasVolatility);
+        Assert.False(vm.HasSharpe);
+        Assert.False(vm.HasHhi);
+    }
+
+    [Fact]
+    public async Task LoadAsync_WithVolatilityService_ComputesValue()
+    {
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 1), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 2), 0m, 1_050m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 3), 0m, 1_010m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 4), 0m, 1_060m, 0m, 1),
+        };
+        var vm = new PortfolioHistoryViewModel(
+            new StubHistoryQuery(snapshots),
+            volatility: new Assetra.Application.Analysis.VolatilityCalculator());
+        vm.SelectedDays = 0;
+
+        await vm.LoadAsync();
+
+        Assert.True(vm.HasVolatility);
+        Assert.True(vm.KpiVolatilityPct > 0m, $"expected positive volatility, got {vm.KpiVolatilityPct}");
+    }
+
+    [Fact]
+    public async Task LoadAsync_NoConcentrationService_HhiZero()
+    {
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 1), 0m, 100m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 2), 0m, 110m, 0m, 1),
+        };
+        var vm = new PortfolioHistoryViewModel(new StubHistoryQuery(snapshots));
+
+        await vm.LoadAsync();
+
+        Assert.False(vm.HasHhi);
+        Assert.Equal(0m, vm.KpiHhi);
+    }
+
+    [Fact]
+    public async Task LoadAsync_WithTwrAndTrades_UsesFullTwrInsteadOfNaive()
+    {
+        // 區間：start=1000, end=1100, naive return = +10%
+        // 中間有 -50 cash flow（如 withdrawal），TWR 應比 naive 更高
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 1), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 15), 0m, 1_050m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 30), 0m, 1_100m, 0m, 1),
+        };
+
+        // 注入 TWR calculator + 一個沒交易的 stub trades repository（flows 空 → 算出來 = naive）
+        var vm = new PortfolioHistoryViewModel(
+            new StubHistoryQuery(snapshots),
+            twr: new Assetra.Application.Analysis.TimeWeightedReturnCalculator(),
+            trades: new StubTrades(Array.Empty<Trade>()));
+        vm.SelectedDays = 0;
+
+        await vm.LoadAsync();
+
+        Assert.True(vm.HasKpis);
+        // 沒 cash flow 時 TWR ≈ naive 10%
+        Assert.InRange(vm.KpiReturnPct, 0.099m, 0.101m);
+    }
+
+    /// <summary>
+    /// Minimal stub for tests — only GetAllAsync is exercised by PortfolioHistoryVM；
+    /// 其餘成員 throw NotImplementedException 以快速發現意外呼叫。
+    /// 介面預設方法（GetByPeriodAsync / GetByPortfolioEntryIdsAsync / CountByCategoryAsync）
+    /// 會自動 fall back 到 GetAllAsync — 不需在這裡 override。
+    /// </summary>
+    private sealed class StubTrades(IReadOnlyList<Trade> trades) : ITradeRepository
+    {
+        public Task<IReadOnlyList<Trade>> GetAllAsync(CancellationToken ct = default) => Task.FromResult(trades);
+        public Task<IReadOnlyList<Trade>> GetByCashAccountAsync(Guid cashAccountId, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<Trade>>(Array.Empty<Trade>());
+        public Task<IReadOnlyList<Trade>> GetByLoanLabelAsync(string loanLabel, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<Trade>>(Array.Empty<Trade>());
+        public Task<Trade?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+            Task.FromResult<Trade?>(trades.FirstOrDefault(t => t.Id == id));
+        public Task AddAsync(Trade trade, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UpdateAsync(Trade trade, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveChildrenAsync(Guid parentId, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveByAccountIdAsync(Guid accountId, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveByLiabilityAsync(Guid? liabilityAssetId, string? loanLabel, CancellationToken ct = default) => Task.CompletedTask;
+        public Task ApplyAtomicAsync(IReadOnlyList<Assetra.Core.Models.TradeMutation> mutations, CancellationToken ct = default) =>
+            Task.CompletedTask;
+    }
+
     [Fact]
     public async Task CustomDateChange_RefreshesChartWithSelectedRange()
     {

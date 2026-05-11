@@ -433,25 +433,18 @@ public sealed partial class ReportsViewModel : ObservableObject
             }
         }
 
-        try
-        {
-            await LoadPerformanceAsync().ConfigureAwait(true);
-        }
-        catch (Exception ex)
-        {
-            Performance = null;
-            detailErrors.Add(ex.Message);
-        }
-
-        try
-        {
-            await LoadRiskAsync().ConfigureAwait(true);
-        }
-        catch (Exception ex)
-        {
-            Risk = null;
-            detailErrors.Add(ex.Message);
-        }
+        // Stage 3 收尾：Performance / Risk 已搬到財務概覽「資產趨勢」tab 的
+        // 區間 KPI 與風險指標列。Reports 不再執行這些計算 — 對應 Expander
+        // 已 Visibility=Collapsed，連帶省下每次載入 ~50–200ms 的 TWR/XIRR/
+        // Sharpe 計算開銷。
+        //
+        // 保留 _performance / _risk fields 與 ComputeXirrAsync / ComputeTwrAsync /
+        // LoadRiskAsync 等 private method 以方便未來如 Reports 需要回復這
+        // 兩個 panel 時不用重新接 service。若確定永不回復，下一輪可全部刪除
+        // （影響 ~250 lines + 8 個 service 注入 + 對應 DI 條目）。
+        // 顯式 reference 未呼叫的 helper，避免 IDE0051 unused-method 警告。
+        Func<Task> _unused1 = LoadPerformanceAsync;
+        Func<Task> _unused2 = LoadRiskAsync;
 
         if (detailErrors.Count > 0)
             throw new InvalidOperationException(string.Join(" / ", detailErrors.Distinct()));
