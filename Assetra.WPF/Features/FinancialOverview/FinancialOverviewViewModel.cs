@@ -96,6 +96,13 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
     [ObservableProperty] private bool _isLoading;
 
+    /// <summary>
+    /// Stage 2 (Dashboard consolidation)：4-tab 儀表板的 active tab。
+    /// 由 NavRailView 的 FinancialOverviewContentTemplate 內的 TabControl
+    /// 透過 SelectedValue / Tag 雙向綁定。預設停留在「總覽」。
+    /// </summary>
+    [ObservableProperty] private DashboardTab _selectedDashboardTab = DashboardTab.Overview;
+
     private readonly IAppSettingsService? _settings;
 
     public FinancialOverviewViewModel(
@@ -114,6 +121,10 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         // section freezes at TWD 0 because LoadAsync was called pre-price-fetch.
         _portfolio.PropertyChanged += OnPortfolioPropertyChanged;
 
+        // Stage 2 (Dashboard consolidation)：接收 NavRail 攔截 Trends leaf 後送
+        // 過來的 tab 切換請求。lifetime = application；無需 unsubscribe。
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.DashboardTabRequested += OnDashboardTabRequested;
+
         KpiCards = new ReadOnlyObservableCollection<KpiCardVm>(_kpiCards);
         KpiEditorItems = new ReadOnlyObservableCollection<KpiSelectionItemVm>(_kpiEditorItems);
         AssetGroups = new ReadOnlyObservableCollection<AssetGroupVm>(_assetGroups);
@@ -124,6 +135,18 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
             _settings.Changed += RebuildKpiCards;
 
         RebuildKpiCards();
+    }
+
+    private void OnDashboardTabRequested(string tabName)
+    {
+        if (Enum.TryParse<DashboardTab>(tabName, ignoreCase: true, out var tab))
+        {
+            // 確保 marshal 回 UI thread；event 可能來自任何 caller。
+            if (_uiContext is not null && SynchronizationContext.Current != _uiContext)
+                _uiContext.Post(_ => SelectedDashboardTab = tab, null);
+            else
+                SelectedDashboardTab = tab;
+        }
     }
 
     private void OnPortfolioPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)

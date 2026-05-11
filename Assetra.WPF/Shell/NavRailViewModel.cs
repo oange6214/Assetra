@@ -70,7 +70,8 @@ public partial class NavRailViewModel : ObservableObject
                 Items = new[]
                 {
                     new NavLeafVm { Section = NavSection.FinancialOverview, LabelResourceKey = "FinancialOverview.Nav.Label", IconSymbol = "DataPie24",            ToolTipResourceKey = "FinancialOverview.Nav.Label" },
-                    new NavLeafVm { Section = NavSection.Trends,            LabelResourceKey = "Nav.Trends",                  IconSymbol = "DataTrending24",       ToolTipResourceKey = "Nav.Trends" },
+                    // Stage 2 (Dashboard consolidation)：資產趨勢併入財務儀表板的「資產趨勢」tab；
+                    // NavSection.Trends enum 保留以兼容舊持久化設定，NavigateTo() 會攔截重導。
                     new NavLeafVm { Section = NavSection.Reports,           LabelResourceKey = "Nav.Reports",                 IconSymbol = "DocumentBulletList24", ToolTipResourceKey = "Nav.Reports" },
                     new NavLeafVm { Section = NavSection.Assistant,         LabelResourceKey = "Nav.Assistant",               IconSymbol = "Sparkle24",            ToolTipResourceKey = "Nav.Assistant" },
                     new NavLeafVm { Section = NavSection.AuditLog,          LabelResourceKey = "Nav.AuditLog",                IconSymbol = "History24",            ToolTipResourceKey = "Nav.AuditLog" },
@@ -245,6 +246,16 @@ public partial class NavRailViewModel : ObservableObject
     /// </summary>
     public void NavigateTo(NavSection section)
     {
+        // Stage 2 (Dashboard consolidation)：舊 NavSection.Trends 已併入財務儀表板
+        // 的「資產趨勢」tab。攔截重導 + 通知 FinancialOverview 切到該 tab；
+        // 兼容外部 deep link 與舊持久化設定（DefaultHomeSection = "Trends"）。
+        if (section == NavSection.Trends)
+        {
+            section = NavSection.FinancialOverview;
+            Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestDashboardTab(
+                nameof(Assetra.WPF.Features.FinancialOverview.DashboardTab.Trends));
+        }
+
         if (section == _activeSection) return;
 
         if (!_isHistoryNavigation)

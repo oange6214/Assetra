@@ -1104,6 +1104,12 @@
     <sys:String x:Key="Trends.Benchmark.Tw0050">Yuanta Taiwan 50</sys:String>
     <sys:String x:Key="Trends.Benchmark.Tw00981A">00981A</sys:String>
     <sys:String x:Key="Trends.Benchmark.Deposit15">1.5% deposit baseline</sys:String>
+    <!-- Stage 2 (Dashboard consolidation): 4-tab financial dashboard -->
+    <sys:String x:Key="Dashboard.Tab.Overview">Overview</sys:String>
+    <sys:String x:Key="Dashboard.Tab.Trends">Asset Trends</sys:String>
+    <sys:String x:Key="Dashboard.Tab.Calendar">Return Calendar</sys:String>
+    <sys:String x:Key="Dashboard.Tab.Allocation">Allocation</sys:String>
+    <sys:String x:Key="Dashboard.Tab.Calendar.ComingSoon">Return calendar coming soon</sys:String>
 
     <!-- Goals / Financial Goals -->
     <sys:String x:Key="Goals.Title">Financial Goals</sys:String>

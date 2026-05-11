@@ -31,4 +31,15 @@ public static class ShellNavigationEvents
     /// <summary>Raises <see cref="NavigationRequested"/> with the given section name.</summary>
     public static void RequestNavigateTo(string sectionName) =>
         NavigationRequested?.Invoke(sectionName);
+
+    /// <summary>
+    /// Stage 2 (Dashboard consolidation)：要求財務儀表板切換到指定 tab。
+    /// 由 NavRailViewModel 在攔截 NavSection.Trends / Reports 時觸發，
+    /// FinancialOverviewViewModel 訂閱後更新 SelectedDashboardTab。
+    /// 參數為 DashboardTab 的 string name（避免雙向 namespace 相依）。
+    /// </summary>
+    public static event Action<string>? DashboardTabRequested;
+
+    public static void RequestDashboardTab(string tabName) =>
+        DashboardTabRequested?.Invoke(tabName);
 }

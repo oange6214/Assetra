@@ -1108,6 +1108,12 @@
     <sys:String x:Key="Trends.Benchmark.Tw0050">元大台灣 50</sys:String>
     <sys:String x:Key="Trends.Benchmark.Tw00981A">00981A</sys:String>
     <sys:String x:Key="Trends.Benchmark.Deposit15">定存參考 1.5%</sys:String>
+    <!--  Stage 2 (Dashboard consolidation)：4-tab 財務儀表板  -->
+    <sys:String x:Key="Dashboard.Tab.Overview">總覽</sys:String>
+    <sys:String x:Key="Dashboard.Tab.Trends">資產趨勢</sys:String>
+    <sys:String x:Key="Dashboard.Tab.Calendar">報酬日曆</sys:String>
+    <sys:String x:Key="Dashboard.Tab.Allocation">配置</sys:String>
+    <sys:String x:Key="Dashboard.Tab.Calendar.ComingSoon">報酬日曆即將推出</sys:String>
 
     <!--  Goals / 財務目標  -->
     <sys:String x:Key="Goals.Title">財務目標</sys:String>

@@ -45,9 +45,13 @@
                     <pcontrols:DashboardTabPanel DataContext="{Binding Dashboard}" />
                 </TabItem>
 
-                <TabItem Header="{DynamicResource Portfolio.Tab.Allocation}" Tag="{x:Static vm:PortfolioTab.AllocationAnalysis}">
-                    <pcontrols:AllocationView DataContext="{Binding AllocationAnalysis}" />
-                </TabItem>
+                <!--
+                    Stage 2 (Dashboard consolidation)：配置分析從 Portfolio 內 tab
+                    搬到財務儀表板的「配置」tab。PortfolioTab.AllocationAnalysis
+                    enum 值保留以避免破壞既存設定持久化（會回退到 Dashboard）。
+                    AllocationAnalysisViewModel 仍存活於 PortfolioViewModel
+                    供儀表板那邊綁定。
+                -->
 
                 <TabItem Header="{DynamicResource Portfolio.Tab.Positions}" Tag="{x:Static vm:PortfolioTab.Positions}">
                     <pcontrols:PositionsTabPanel />
@@ -408,7 +412,7 @@
                                                     FontSize="{StaticResource Font.Size.Xl}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
-                                                    Text="{Binding SelectedPositionRow.BuyPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, Mode=OneWay, FallbackValue=''}"
+                                                    Text="{Binding SelectedPositionRow.BuyPriceAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, Mode=OneWay, FallbackValue=''}"
                                                     Typography.NumeralAlignment="Tabular" />
                                                 <TextBlock
                                                     FontFamily="{StaticResource Font.Family.Base}"
@@ -417,7 +421,7 @@
                                                     Typography.NumeralAlignment="Tabular">
                                                     <Run Text="{DynamicResource Portfolio.Detail.TradeAvgPrice}" />
                                                     <Run Text=":" />
-                                                    <Run Text="{Binding SelectedPositionTradeAvgPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, Mode=OneWay, FallbackValue=''}" />
+                                                    <Run Text="{Binding SelectedPositionTradeAvgPriceAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, Mode=OneWay, FallbackValue=''}" />
                                                 </TextBlock>
                                             </StackPanel>
                                         </Border>
@@ -442,8 +446,15 @@
                                                     FontSize="{StaticResource Font.Size.Xl}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
-                                                    Text="{Binding SelectedPositionRow.Cost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}"
+                                                    Text="{Binding SelectedPositionRow.CostAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}"
                                                     Typography.NumeralAlignment="Tabular" />
+                                                <TextBlock
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Text="{Binding SelectedPositionRow.CostBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount-approx, Mode=OneWay, FallbackValue=''}"
+                                                    Typography.NumeralAlignment="Tabular"
+                                                    Visibility="{Binding SelectedPositionRow.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                                                 <TextBlock
                                                     FontFamily="{StaticResource Font.Family.Base}"
                                                     FontSize="{StaticResource Font.Size.Xs}"
@@ -473,7 +484,7 @@
                                                         FontSize="{StaticResource Font.Size.Xl}"
                                                         FontWeight="SemiBold"
                                                         Foreground="{DynamicResource AppTextPrimary}"
-                                                        Text="{Binding SelectedPositionRow.CurrentPrice, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, FallbackValue=''}"
+                                                        Text="{Binding SelectedPositionRow.CurrentPriceAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, FallbackValue=''}"
                                                         Typography.NumeralAlignment="Tabular" />
                                                     <TextBlock
                                                         Margin="6,0,0,0"
@@ -494,6 +505,20 @@
                                                         </TextBlock.Style>
                                                     </TextBlock>
                                                 </StackPanel>
+                                                <TextBlock
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Text="{Binding SelectedPositionRow.CurrentPriceBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price-approx, Mode=OneWay, FallbackValue=''}"
+                                                    Typography.NumeralAlignment="Tabular"
+                                                    Visibility="{Binding SelectedPositionRow.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+                                                <Border
+                                                    Margin="0,6,0,0"
+                                                    Style="{StaticResource StatusBadge.Info}"
+                                                    ToolTip="{Binding SelectedPositionRow.QuoteProviderStateMessage}"
+                                                    Visibility="{Binding SelectedPositionRow.ShowQuoteProviderState, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                                                    <TextBlock Style="{StaticResource StatusBadge.Text}" Text="{DynamicResource Portfolio.QuoteState.Stale}" />
+                                                </Border>
                                             </StackPanel>
                                         </Border>
 
@@ -517,8 +542,15 @@
                                                     FontSize="{StaticResource Font.Size.Xl}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
-                                                    Text="{Binding SelectedPositionRow.MarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}"
+                                                    Text="{Binding SelectedPositionRow.MarketValueAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}"
                                                     Typography.NumeralAlignment="Tabular" />
+                                                <TextBlock
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Text="{Binding SelectedPositionRow.MarketValueBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount-approx, Mode=OneWay, FallbackValue=''}"
+                                                    Typography.NumeralAlignment="Tabular"
+                                                    Visibility="{Binding SelectedPositionRow.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                                             </StackPanel>
                                         </Border>
 
@@ -543,8 +575,15 @@
                                                     FontSize="{StaticResource Font.Size.Xl}"
                                                     FontWeight="SemiBold"
                                                     Foreground="{DynamicResource AppTextPrimary}"
-                                                    Text="{Binding SelectedPositionRow.NetValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue=''}"
+                                                    Text="{Binding SelectedPositionRow.NetValueAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue=''}"
                                                     Typography.NumeralAlignment="Tabular" />
+                                                <TextBlock
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Text="{Binding SelectedPositionRow.NetValueBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount-approx, Mode=OneWay, FallbackValue=''}"
+                                                    Typography.NumeralAlignment="Tabular"
+                                                    Visibility="{Binding SelectedPositionRow.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                                                 <TextBlock
                                                     FontFamily="{StaticResource Font.Family.Base}"
                                                     FontSize="{StaticResource Font.Size.Xs}"
@@ -552,7 +591,7 @@
                                                     Typography.NumeralAlignment="Tabular">
                                                     <Run Text="{DynamicResource Portfolio.Detail.EstimatedSellFee}" />
                                                     <Run Text=":" />
-                                                    <Run Text="{Binding SelectedPositionRow.EstimatedSellFee, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}" />
+                                                    <Run Text="{Binding SelectedPositionRow.EstimatedSellFeeAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}" />
                                                 </TextBlock>
                                             </StackPanel>
                                         </Border>
@@ -578,7 +617,7 @@
                                                     FontFamily="{StaticResource Font.Family.Base}"
                                                     FontSize="{StaticResource Font.Size.Xl}"
                                                     FontWeight="SemiBold"
-                                                    Text="{Binding SelectedPositionRow.Pnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed, FallbackValue=''}"
+                                                    Text="{Binding SelectedPositionRow.PnlAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed, FallbackValue=''}"
                                                     Typography.NumeralAlignment="Tabular">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
@@ -607,6 +646,13 @@
                                                         </Style>
                                                     </TextBlock.Style>
                                                 </TextBlock>
+                                                <TextBlock
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Text="{Binding SelectedPositionRow.PnlBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-approx, Mode=OneWay, FallbackValue=''}"
+                                                    Typography.NumeralAlignment="Tabular"
+                                                    Visibility="{Binding SelectedPositionRow.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                                             </StackPanel>
                                         </Border>
                                     </Grid>
@@ -724,8 +770,15 @@
                                                 FontSize="{StaticResource Font.Size.Lg}"
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppTextPrimary}"
-                                                Text="{Binding SelectedPositionRow.MarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue=''}"
+                                                Text="{Binding SelectedPositionRow.MarketValueAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue=''}"
                                                 Typography.NumeralAlignment="Tabular" />
+                                            <TextBlock
+                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{Binding SelectedPositionRow.MarketValueBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount-approx, Mode=OneWay, FallbackValue=''}"
+                                                Typography.NumeralAlignment="Tabular"
+                                                Visibility="{Binding SelectedPositionRow.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                                         </StackPanel>
                                     </Border>
 
@@ -747,7 +800,7 @@
                                                 FontFamily="{StaticResource Font.Family.Base}"
                                                 FontSize="{StaticResource Font.Size.Lg}"
                                                 FontWeight="SemiBold"
-                                                Text="{Binding SelectedPositionRow.Pnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed, FallbackValue=''}"
+                                                Text="{Binding SelectedPositionRow.PnlAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed, FallbackValue=''}"
                                                 Typography.NumeralAlignment="Tabular">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -770,8 +823,15 @@
                                                 Typography.NumeralAlignment="Tabular">
                                                 <Run Text="{DynamicResource Portfolio.Detail.EstimatedSellFee}" />
                                                 <Run Text=":" />
-                                                <Run Text="{Binding SelectedPositionRow.EstimatedSellFee, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}" />
+                                                <Run Text="{Binding SelectedPositionRow.EstimatedSellFeeAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}" />
                                             </TextBlock>
+                                            <TextBlock
+                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{Binding SelectedPositionRow.PnlBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-approx, Mode=OneWay, FallbackValue=''}"
+                                                Typography.NumeralAlignment="Tabular"
+                                                Visibility="{Binding SelectedPositionRow.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                                         </StackPanel>
                                     </Border>
                                 </UniformGrid>
