@@ -16,10 +16,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="DashboardWidgets.xaml" />
             </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
 
-        <!--  Row template — symbol + name + day change + day pct  -->
-        <DataTemplate x:Key="MoverRow">
+            <!--  Row template — symbol + name + day change + day pct  -->
+            <DataTemplate x:Key="MoverRow">
             <Grid Margin="0,3,0,3">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -83,7 +82,8 @@
                     </TextBlock.Style>
                 </TextBlock>
             </Grid>
-        </DataTemplate>
+            </DataTemplate>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <!--
