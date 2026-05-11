@@ -121,6 +121,19 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     /// </summary>
     public Assetra.WPF.Features.Portfolio.DashboardViewModel? InvestmentFocusWidget { get; }
 
+    /// <summary>
+    /// Phase C：「現金 / 負債焦點卡」共用的資料源 — PortfolioViewModel 已有
+    /// TotalCash / TotalLiabilities / CashAccounts / Liabilities 集合。
+    /// 不再走 IPortfolioPositionFeed 介面以方便綁定 collection.Count。
+    /// </summary>
+    public Assetra.WPF.Features.Portfolio.PortfolioViewModel? PortfolioRef { get; }
+
+    /// <summary>
+    /// Phase C：「不動產焦點卡」資料源。RealEstateViewModel 內已有
+    /// PropertyCount / TotalCurrentValue / TotalMortgageBalance / TotalEquity。
+    /// </summary>
+    public Assetra.WPF.Features.RealEstate.RealEstateViewModel? RealEstateFocusWidget { get; }
+
     public FinancialOverviewViewModel(
         IFinancialOverviewQueryService queryService,
         IPortfolioPositionFeed portfolio,
@@ -128,7 +141,9 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         Assetra.WPF.Features.Goals.GoalsViewModel? goalsWidget = null,
         Assetra.WPF.Features.Fire.FireViewModel? fireWidget = null,
         Assetra.WPF.Features.Assistant.AssistantViewModel? assistantWidget = null,
-        Assetra.WPF.Features.Portfolio.DashboardViewModel? investmentFocusWidget = null)
+        Assetra.WPF.Features.Portfolio.DashboardViewModel? investmentFocusWidget = null,
+        Assetra.WPF.Features.Portfolio.PortfolioViewModel? portfolioRef = null,
+        Assetra.WPF.Features.RealEstate.RealEstateViewModel? realEstateFocusWidget = null)
     {
         _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
         _portfolio = portfolio ?? throw new ArgumentNullException(nameof(portfolio));
@@ -137,6 +152,8 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         FireWidget = fireWidget;
         AssistantWidget = assistantWidget;
         InvestmentFocusWidget = investmentFocusWidget;
+        PortfolioRef = portfolioRef;
+        RealEstateFocusWidget = realEstateFocusWidget;
         _uiContext = SynchronizationContext.Current;
 
         // Stock prices arrive asynchronously after Portfolio.LoadAsync() completes.
@@ -177,6 +194,18 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     [CommunityToolkit.Mvvm.Input.RelayCommand]
     private void NavigateToPortfolio() =>
         Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("Portfolio");
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void NavigateToCashAccounts() =>
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("CashAccounts");
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void NavigateToLiabilities() =>
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("Liabilities");
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void NavigateToRealEstate() =>
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("RealEstate");
 
     private void OnDashboardTabRequested(string tabName)
     {

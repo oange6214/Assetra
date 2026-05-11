@@ -106,6 +106,13 @@
                     優先序：「我有多少 / 賺多少」(投資) → 「想達成什麼」(目標 / FIRE)。
                 -->
                 <widgets:InvestmentFocusWidget />
+                <!--
+                    Phase C：現金 / 負債 / 不動產三在一焦點卡。同模式可擴展到
+                    crypto / 保險 / 退休 / 實物等其他資產類 — 加新項目時只要
+                    擴 grid columns 即可，不會再回到「每資產類做 mini-dashboard」
+                    的反模式。
+                -->
+                <widgets:AssetClassFocusWidget />
                 <Grid Margin="0,0,0,4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />

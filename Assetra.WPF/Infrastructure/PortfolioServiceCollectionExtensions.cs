@@ -176,7 +176,11 @@ internal static class PortfolioServiceCollectionExtensions
             sp.GetService<Assetra.WPF.Features.Assistant.AssistantViewModel>(),
             // Long-term refactor：投資焦點卡 — Portfolio.Dashboard tab 移除後，
             // DashboardViewModel 的角色轉為儀表板上的投資 glance summary。
-            sp.GetService<DashboardViewModel>()));
+            sp.GetService<DashboardViewModel>(),
+            // Phase C：現金 / 負債焦點卡的資料源（PortfolioViewModel 已有所需集合）；
+            // 不動產焦點卡的資料源（RealEstateViewModel 已有 PropertyCount / Totals）。
+            sp.GetService<PortfolioViewModel>(),
+            sp.GetService<Assetra.WPF.Features.RealEstate.RealEstateViewModel>()));
 
         return services;
     }

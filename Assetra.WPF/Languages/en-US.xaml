@@ -1125,6 +1125,14 @@
     <sys:String x:Key="Dashboard.Widget.Investment.Heading">Investment focus</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.TotalPnl">Total P&amp;L</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.OpenLink">→ Open Portfolio</sys:String>
+    <!-- Phase C: asset-class focus card (cash / liability / real estate, 3-in-1) -->
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Heading">Asset class focus</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Cash">Cash</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.CashAccountsSuffix"> accounts</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Liability">Liabilities</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.LiabilityItemsSuffix"> items</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.RealEstate">Real estate</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.PropertiesSuffix"> properties</sys:String>
     <!-- Stage 4: Return calendar -->
     <sys:String x:Key="Dashboard.Calendar.Today">Today</sys:String>
     <sys:String x:Key="Dashboard.Calendar.MonthlyPnl">Month P&amp;L</sys:String>

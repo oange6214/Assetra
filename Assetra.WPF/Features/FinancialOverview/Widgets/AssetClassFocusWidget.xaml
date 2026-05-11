@@ -1,0 +1,160 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.FinancialOverview.Widgets.AssetClassFocusWidget"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel},
+                                     IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="DashboardWidgets.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!--
+        Phase C：「資產類焦點」widget — 把現金 / 負債 / 不動產三個資產類做成
+        並排小卡，每卡顯示總額 + 項目數 + 跳轉。
+        三卡並排避免讓總覽 tab 過長；如果某個資產類沒注入則該卡隱藏。
+    -->
+    <Border Style="{StaticResource DashboardWidgetCard}">
+        <StackPanel>
+            <TextBlock Style="{StaticResource DashboardWidgetHeader}"
+                       Text="{DynamicResource Dashboard.Widget.AssetClass.Heading}" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  ── 現金 ──  -->
+                <Border Grid.Column="0" Margin="0,0,6,0"
+                        Padding="12,10"
+                        Background="{DynamicResource AppHover}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Sm}"
+                        Cursor="Hand"
+                        Visibility="{Binding PortfolioRef, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Border.InputBindings>
+                        <MouseBinding Command="{Binding NavigateToCashAccountsCommand}" MouseAction="LeftClick" />
+                    </Border.InputBindings>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ds:AppIcon Margin="0,0,6,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="14"
+                                        Foreground="{DynamicResource AppAccent}"
+                                        Symbol="Wallet24" />
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="{StaticResource Font.Size.Xs}"
+                                       Foreground="{DynamicResource AppTextSecondary}"
+                                       Text="{DynamicResource Dashboard.Widget.AssetClass.Cash}" />
+                        </StackPanel>
+                        <TextBlock Margin="0,6,0,0"
+                                   FontFamily="{StaticResource Font.Family.Base}"
+                                   FontSize="{StaticResource Font.Size.Md}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding PortfolioRef.TotalCash, StringFormat='N0'}"
+                                   Typography.NumeralAlignment="Tabular" />
+                        <TextBlock Margin="0,2,0,0"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}">
+                            <Run Text="{Binding PortfolioRef.CashAccounts.Count, Mode=OneWay}" />
+                            <Run Text="{DynamicResource Dashboard.Widget.AssetClass.CashAccountsSuffix}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!--  ── 負債 ──  -->
+                <Border Grid.Column="1" Margin="3,0,3,0"
+                        Padding="12,10"
+                        Background="{DynamicResource AppHover}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Sm}"
+                        Cursor="Hand"
+                        Visibility="{Binding PortfolioRef, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Border.InputBindings>
+                        <MouseBinding Command="{Binding NavigateToLiabilitiesCommand}" MouseAction="LeftClick" />
+                    </Border.InputBindings>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ds:AppIcon Margin="0,0,6,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="14"
+                                        Foreground="{DynamicResource AppDown}"
+                                        Symbol="Cut24" />
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="{StaticResource Font.Size.Xs}"
+                                       Foreground="{DynamicResource AppTextSecondary}"
+                                       Text="{DynamicResource Dashboard.Widget.AssetClass.Liability}" />
+                        </StackPanel>
+                        <TextBlock Margin="0,6,0,0"
+                                   FontFamily="{StaticResource Font.Family.Base}"
+                                   FontSize="{StaticResource Font.Size.Md}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding PortfolioRef.TotalLiabilities, StringFormat='N0'}"
+                                   Typography.NumeralAlignment="Tabular" />
+                        <TextBlock Margin="0,2,0,0"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}">
+                            <Run Text="{Binding PortfolioRef.Liabilities.Count, Mode=OneWay}" />
+                            <Run Text="{DynamicResource Dashboard.Widget.AssetClass.LiabilityItemsSuffix}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!--  ── 不動產 ──  -->
+                <Border Grid.Column="2" Margin="6,0,0,0"
+                        Padding="12,10"
+                        Background="{DynamicResource AppHover}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Sm}"
+                        Cursor="Hand"
+                        Visibility="{Binding RealEstateFocusWidget, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Border.InputBindings>
+                        <MouseBinding Command="{Binding NavigateToRealEstateCommand}" MouseAction="LeftClick" />
+                    </Border.InputBindings>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ds:AppIcon Margin="0,0,6,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="14"
+                                        Foreground="{DynamicResource AppAccent}"
+                                        Symbol="Home24" />
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="{StaticResource Font.Size.Xs}"
+                                       Foreground="{DynamicResource AppTextSecondary}"
+                                       Text="{DynamicResource Dashboard.Widget.AssetClass.RealEstate}" />
+                        </StackPanel>
+                        <TextBlock Margin="0,6,0,0"
+                                   FontFamily="{StaticResource Font.Family.Base}"
+                                   FontSize="{StaticResource Font.Size.Md}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding RealEstateFocusWidget.TotalCurrentValue, StringFormat='N0'}"
+                                   Typography.NumeralAlignment="Tabular" />
+                        <TextBlock Margin="0,2,0,0"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}">
+                            <Run Text="{Binding RealEstateFocusWidget.PropertyCount, Mode=OneWay}" />
+                            <Run Text="{DynamicResource Dashboard.Widget.AssetClass.PropertiesSuffix}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </Border>
+</UserControl>

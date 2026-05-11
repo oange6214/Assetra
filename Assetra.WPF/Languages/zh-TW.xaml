@@ -1129,6 +1129,14 @@
     <sys:String x:Key="Dashboard.Widget.Investment.Heading">投資焦點</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.TotalPnl">總損益</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.OpenLink">→ 前往投資資產</sys:String>
+    <!--  Phase C：資產類焦點卡（現金 / 負債 / 不動產 三在一）  -->
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Heading">資產類焦點</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Cash">現金</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.CashAccountsSuffix"> 個帳戶</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Liability">負債</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.LiabilityItemsSuffix"> 項</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.RealEstate">不動產</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.PropertiesSuffix"> 戶</sys:String>
     <!--  Stage 4：報酬日曆  -->
     <sys:String x:Key="Dashboard.Calendar.Today">今日</sys:String>
     <sys:String x:Key="Dashboard.Calendar.MonthlyPnl">當月損益</sys:String>
