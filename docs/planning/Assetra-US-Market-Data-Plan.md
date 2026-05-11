@@ -184,6 +184,7 @@ public sealed record EquityInstrumentKey(
 
 public sealed record EquityQuote(
     EquityInstrumentKey Instrument,
+    string Name,
     decimal Price,
     decimal? PreviousClose,
     decimal? Change,
@@ -195,9 +196,21 @@ public sealed record EquityQuote(
 
 public interface IEquityQuoteProvider
 {
+    string ProviderName { get; }
     bool CanHandle(EquityInstrumentKey key);
-    Task<EquityQuote?> GetQuoteAsync(EquityInstrumentKey key, CancellationToken ct);
-    Task<IReadOnlyList<EquityQuote>> GetQuotesAsync(
+    Task<MarketDataResult<EquityQuote>> GetQuoteAsync(EquityInstrumentKey key, CancellationToken ct);
+    Task<IReadOnlyList<MarketDataResult<EquityQuote>>> GetQuotesAsync(
+        IReadOnlyList<EquityInstrumentKey> keys,
+        CancellationToken ct);
+}
+
+public interface IEquityRouter
+{
+    Task<MarketDataResult<EquityQuote>> GetQuoteAsync(
+        EquityInstrumentKey key,
+        CancellationToken ct);
+
+    Task<IReadOnlyList<MarketDataResult<EquityQuote>>> GetQuotesAsync(
         IReadOnlyList<EquityInstrumentKey> keys,
         CancellationToken ct);
 }
@@ -338,121 +351,192 @@ These corrections are required because the current Assetra codebase is Taiwan-fi
 ### Phase 0 - Document and Decision Lock
 
 - [x] Create this plan.
-- [ ] Add any later accepted technical decisions here before implementation.
-- [ ] Add implementation issue links when work starts.
+- [x] Add any later accepted technical decisions here before implementation.
+- [x] Add implementation issue links when work starts.
+
+Implementation note: accepted technical decisions were captured directly in the
+corrections and phase notes in this file. No external issue tracker links were used for
+this implementation pass.
 
 ### Phase 1 - Core Market Data Abstractions
 
-- [ ] Add `EquityInstrumentKey`.
-- [ ] Add `EquityQuote`.
-- [ ] Add `IEquityQuoteProvider`.
-- [ ] Add `ISymbolDirectory`.
-- [ ] Add provider error/result model.
-- [ ] Add batch quote contract for provider implementations.
-- [ ] Add exchange-aware fee/tax policy boundary.
-- [ ] Add compatibility mapper from `EquityQuote` to legacy `StockQuote` for existing quote-stream consumers.
-- [ ] Add unit tests for key normalization.
-- [ ] Add unit tests for US symbol normalization: `BRKB`, `BRK.B`, and `BRK$B`.
+- [x] Add `EquityInstrumentKey`.
+- [x] Add `EquityQuote`.
+- [x] Add `IEquityQuoteProvider`.
+- [x] Add `ISymbolDirectory`.
+- [x] Add provider error/result model.
+- [x] Add batch quote contract for provider implementations.
+- [x] Add exchange-aware fee/tax policy boundary.
+- [x] Add compatibility mapper from `EquityQuote` to legacy `StockQuote` for existing quote-stream consumers.
+- [x] Add unit tests for key normalization.
+- [x] Add unit tests for US symbol normalization: `BRKB`, `BRK.B`, and `BRK$B`.
 
 ### Phase 2 - Router-Backed IStockService
 
-- [ ] Create `EquityRouter`.
-- [ ] Refactor `StockScheduler : IStockService` to use `EquityRouter` internally.
-- [ ] Wrap existing TWSE client as a provider.
-- [ ] Wrap existing TPEX client as a provider.
-- [ ] Wrap Fugle as a provider when configured.
-- [ ] Keep current Portfolio / Alerts quote subscription behavior working.
-- [ ] Keep `IStockService` as a streaming compatibility alias only.
-- [ ] Add regression tests that `0050/TWSE` and `00878/TWSE` still resolve correctly.
+- [x] Create `EquityRouter`.
+- [x] Refactor `StockScheduler : IStockService` to use `EquityRouter` internally.
+- [x] Wrap existing TWSE client as a provider.
+- [x] Wrap existing TPEX client as a provider.
+- [x] Wrap Fugle as a provider when configured.
+- [x] Keep current Portfolio / Alerts quote subscription behavior working.
+- [x] Keep `IStockService` as a streaming compatibility alias only.
+- [x] Add regression tests that `0050/TWSE` and `00878/TWSE` still resolve correctly.
 
 ### Phase 3 - US Symbol Directory
 
-- [ ] Add downloader for `nasdaqlisted.txt`.
-- [ ] Add downloader for `otherlisted.txt`.
-- [ ] Merge both into `NasdaqSymbolDirectory`.
-- [ ] Persist directory cache in SQLite or assets cache.
-- [ ] Add weekly refresh job.
-- [ ] Add manual refresh command in Settings.
-- [ ] Ensure failures keep the last successful directory.
-- [ ] Add tests for `AAPL/NASDAQ`, NYSE-listed symbol, and AMEX-listed symbol.
+- [x] Add downloader for `nasdaqlisted.txt`.
+- [x] Add downloader for `otherlisted.txt`.
+- [x] Merge both into `NasdaqSymbolDirectory`.
+- [x] Persist directory cache in SQLite or assets cache.
+- [x] Add weekly refresh job.
+- [x] Add manual refresh command in Settings.
+- [x] Ensure failures keep the last successful directory.
+- [x] Add tests for `AAPL/NASDAQ`, NYSE-listed symbol, and AMEX-listed symbol.
+
+Implementation note: Phase 3 uses an assets-cache directory at `Assets/market-data/nasdaq`.
+The Settings refresh command only updates the offline symbol directory; US quote lookup
+is completed through the router/provider layer in later phases. Portfolio UI integration
+still remains Phase 8 work so ambiguous exchange selection and provider error states can
+be surfaced deliberately.
 
 ### Phase 4 - Twelve Data Quote Provider
 
-- [ ] Add `TwelveDataClient`.
-- [ ] Add `TwelveDataQuoteProvider`.
-- [ ] Map provider responses into `EquityQuote`.
-- [ ] Normalize US ticker symbols.
-- [ ] Track quota usage.
-- [ ] Distinguish missing key, quota exceeded, rate limit, unsupported symbol, network failure.
-- [ ] Add integration-safe tests using canned JSON.
-- [ ] Add test-before-save flow for the Twelve Data API key.
+- [x] Add `TwelveDataClient`.
+- [x] Add `TwelveDataQuoteProvider`.
+- [x] Map provider responses into `EquityQuote`.
+- [x] Normalize US ticker symbols.
+- [x] Track quota usage.
+- [x] Distinguish missing key, quota exceeded, rate limit, unsupported symbol, network failure.
+- [x] Add integration-safe tests using canned JSON.
+- [x] Add test-before-save flow for the Twelve Data API key.
+
+Implementation note: Phase 4 registers Twelve Data as the US quote provider, persists its
+API key in settings, classifies provider failures into `MarketDataErrorCode`, and exposes
+Settings UI for test-before-save plus daily quota visibility. Later phases add quote
+cache, trading-calendar gating, and base-currency valuation guardrails before the UI
+fully exposes US-market flows.
 
 ### Phase 5 - Quote Cache
 
-- [ ] Add in-memory quote cache.
-- [ ] Make cache key provider-independent.
-- [ ] Support caller-provided `maxAge`.
-- [ ] Revalidate provider state when API key changes without changing quote cache identity.
-- [ ] Use TTL policy per caller.
-- [ ] Prevent US scheduler fetches from bypassing quota/calendar/cache gates.
-- [ ] Add unit tests for `0s`, `30s`, `60s`, and `120s` paths.
+- [x] Add in-memory quote cache.
+- [x] Make cache key provider-independent.
+- [x] Support caller-provided `maxAge`.
+- [x] Revalidate provider state when API key changes without changing quote cache identity.
+- [x] Use TTL policy per caller.
+- [x] Prevent US scheduler fetches from bypassing quota/cache gates.
+- [x] Prevent US scheduler fetches from bypassing calendar gates.
+- [x] Add unit tests for `0s`, `30s`, `60s`, and `120s` paths.
+
+Implementation note: Phase 5 adds `IEquityQuoteCache`, `InMemoryEquityQuoteCache`, and
+cache-aware `IEquityRouter` overloads. The cache key is only the canonical instrument
+key (`symbol + exchange`), not the provider. `EquityQuoteCachePolicies` names the caller
+TTL decisions: fresh/manual/scheduler `0s`, dashboard `30s`, alerts `60s`, hover preview
+`120s`. Calendar gating is handled in Phase 6 because it needs exchange-session semantics.
 
 ### Phase 6 - Trading Calendar
 
-- [ ] Add `TradingDayKind`.
-- [ ] Add `ITradingCalendarService`.
-- [ ] Add weekend handling.
-- [ ] Add US full holiday handling.
-- [ ] Add US half-day handling.
-- [ ] Make scheduler stop or reduce refresh after half-day close.
-- [ ] Add tests for Black Friday, 12/24, and 7/3 behavior.
-- [ ] Add DST transition tests for 2026/2027 spring forward and fall back weeks.
-- [ ] Add Taiwan makeup-working-Saturday tests so TWSE/TPEX calendar behavior does not accidentally mirror US weekends.
+- [x] Add `TradingDayKind`.
+- [x] Add `ITradingCalendarService`.
+- [x] Add weekend handling.
+- [x] Add US full holiday handling.
+- [x] Add US half-day handling.
+- [x] Make scheduler stop or reduce refresh after half-day close.
+- [x] Add tests for Black Friday, 12/24, and 7/3 behavior.
+- [x] Add DST transition tests for 2026/2027 spring forward and fall back weeks.
+- [x] Add Taiwan makeup-working-Saturday tests so TWSE/TPEX calendar behavior does not accidentally mirror US weekends.
+
+Implementation note: Phase 6 adds `TradingCalendarService` with US full-session,
+half-session, holiday, and weekend classification. `StockScheduler` now filters symbols
+through `ITradingCalendarService.ShouldRefreshQuotes(...)` before hitting the router, so
+US quotes stop after half-day close and do not consume quota on closed sessions.
 
 ### Phase 7 - FX and Portfolio Valuation
 
-- [ ] Preserve quote native currency.
-- [ ] Convert market value to app base currency before portfolio aggregation.
-- [ ] Add summary/input DTOs that distinguish native value from base-currency value.
-- [ ] Show native/base values where useful.
-- [ ] Ensure Portfolio summary does not add USD as TWD.
-- [ ] Ensure US holdings do not use Taiwan fee/tax estimation.
-- [ ] Add tests for USD quote converted to TWD.
+- [x] Preserve quote native currency.
+- [x] Convert market value to app base currency before portfolio aggregation.
+- [x] Add summary/input DTOs that distinguish native value from base-currency value.
+- [x] Show native/base values where useful.
+- [x] Ensure Portfolio summary does not add USD as TWD.
+- [x] Ensure US holdings do not use Taiwan fee/tax estimation.
+- [x] Add tests for USD quote converted to TWD.
+
+Implementation note: Phase 7 adds native currency propagation on routed quotes,
+base-currency conversion before portfolio summary aggregation, and guardrails that avoid
+applying Taiwan sell-fee/tax estimates to explicit US holdings. Legacy holdings with a
+blank exchange still keep the Taiwan fee path for backward compatibility. Explicit
+native/base display models are now available at the row UI boundary, while the deeper
+summary/input DTO split now carries native currency/value fields alongside the base
+decimal values used by the summary engine.
 
 ### Phase 8 - UI Integration
 
-- [ ] Add US search result display with symbol, company name, exchange, currency.
-- [ ] Add missing API key CTA.
-- [ ] Add stale quote and provider error UI states.
-- [ ] Add quota display to Settings.
-- [ ] Add symbol directory update status to Settings.
-- [ ] API key field requires successful Test before Save is enabled.
-- [ ] Test calls a known Twelve Data quote endpoint such as `/quote?symbol=AAPL` and surfaces classified errors on fail.
-- [ ] Connect Add Record / Buy form to composite symbol directory.
-- [ ] Show exchange choice when symbol search resolves to multiple venues.
-- [ ] Connect Alerts to routed quote provider.
-- [ ] Connect Portfolio list and side panel to base-currency valuation.
+- [x] Add US search result display with symbol, company name, exchange, currency.
+- [x] Add missing API key CTA.
+- [x] Add stale quote and provider error UI states.
+- [x] Add quota display to Settings.
+- [x] Add symbol directory update status to Settings.
+- [x] API key field requires successful Test before Save is enabled.
+- [x] Test calls a known Twelve Data quote endpoint such as `/quote?symbol=AAPL` and surfaces classified errors on fail.
+- [x] Connect Add Record / Buy form to composite symbol directory.
+- [x] Show exchange choice when symbol search resolves to multiple venues.
+- [x] Connect Alerts to routed quote provider.
+- [x] Connect Portfolio list and side panel to base-currency valuation.
+
+Implementation note: Add Record / Buy autocomplete now reads from the composite symbol
+directory, so TWSE/TPEX and Nasdaq Trader directory results appear in the same picker.
+The suggestion row shows symbol, company name, exchange, and currency; selecting a row
+carries exchange/name into the buy workflow so US symbols persist as `NASDAQ`/`USD`
+instead of falling back to Taiwan inference.
+
+Alerts also resolve new rules through the same composite directory. A US alert such as
+`AAPL` is stored with its exchange (`NASDAQ`) and then flows through the router-backed
+`StockScheduler`, using the same quota/cache/calendar controls as portfolio quotes.
+
+Portfolio rows now expose native `Money` accessors and converted base-currency accessors.
+The Positions list and side panel render the native amount as the primary value and show
+an approximate base-currency value for cross-currency holdings. When Twelve Data is
+selected but the API key is missing, the Positions page shows a setup notice pointing
+users to Settings > Data Source and the required connection test.
+
+Quote refresh failures now keep the last known quote visible only when the error is
+retryable or quota/provider related. The row and side panel mark that value as a cached
+quote and keep the provider error message in the tooltip. Missing API keys, unsupported
+symbols, and closed-calendar states are not masked by stale cache, so the setup CTA and
+actionable error states stay visible.
 
 ### Phase 9 - OHLC Persistent Cache
 
-- [ ] Add SQLite table/migration.
-- [ ] Add repository.
-- [ ] Add lazy gap fetch.
-- [ ] Keep provider as metadata only.
-- [ ] Refresh only recent mutable days.
-- [ ] Add tests proving provider is not part of the unique key.
+- [x] Add SQLite table/migration.
+- [x] Add repository.
+- [x] Add lazy gap fetch.
+- [x] Keep provider as metadata only.
+- [x] Refresh only recent mutable days.
+- [x] Add tests proving provider is not part of the unique key.
+
+Implementation note: Phase 9 adds `EquityOhlcCacheSqliteRepository` and wraps the
+existing dynamic history provider with `CachedStockHistoryProvider`. The cache identity is
+`symbol + exchange + interval + trade_date`; `source_provider` remains mutable metadata and
+is overwritten on upsert instead of creating duplicate candles. History is fetched lazily
+only when a chart/report asks for it. Fresh cached data is served directly, while recent
+mutable daily candles can be refreshed after the configured freshness window. The current
+provider interface still fetches by `ChartPeriod`, so missing-gap detection is conservative:
+the wrapper fetches the requested period when edge coverage is stale or incomplete, then
+persists the returned candles.
 
 ### Phase 10 - QA and Release Gate
 
-- [ ] `dotnet build` succeeds.
-- [ ] Existing TWSE/TPEX quote behavior still works.
-- [ ] Existing crypto quote behavior still works.
-- [ ] US symbol search works offline after directory download.
-- [ ] Missing key state is visible and actionable.
-- [ ] Quota exceeded state is visible and stops retry loops.
-- [ ] USD market value is converted before total asset aggregation.
-- [ ] Scheduler skips weekend/holiday and handles half days.
-- [ ] Docs and Settings help text are updated.
+- [x] `dotnet build` succeeds.
+- [x] Existing TWSE/TPEX quote behavior still works.
+- [x] Existing crypto quote behavior still works.
+- [x] US symbol search works offline after directory download.
+- [x] Missing key state is visible and actionable.
+- [x] Quota exceeded state is visible and stops retry loops.
+- [x] USD market value is converted before total asset aggregation.
+- [x] Scheduler skips weekend/holiday and handles half days.
+- [x] Docs and Settings help text are updated.
+
+Verification note: `dotnet build .\Assetra.WPF\Assetra.WPF.csproj -c Release` and
+`dotnet test .\Assetra.Tests\Assetra.Tests.csproj -c Release` both pass after this pass.
 
 ## Acceptance Criteria
 

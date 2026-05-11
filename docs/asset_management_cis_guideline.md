@@ -74,22 +74,28 @@
 ## 英文字體
 
 ### 主要字體
-SF Pro Display
+Segoe UI Variable Display（WPF / Windows runtime）
 
 備援字體：
-- Inter
-- Helvetica Neue
-- Arial
+- Segoe UI Variable Text
+- Segoe UI
+- Microsoft JhengHei UI
+- Noto Sans TC
 
 ---
 
 ## 中文字體
 
 ### 主要字體
-Noto Sans TC
+Microsoft JhengHei UI（Windows Traditional Chinese）
 
 ### 次要字體
+Noto Sans TC
+
+### 備援字體
 Taipei Sans TC Beta
+
+> 原 CIS 的 SF Pro / Inter 方向保留為品牌參考；WPF 實作以 Windows-first 字體為準，避免繁中介面在 Windows 上出現字重、行高與 fallback 不穩定。
 
 ---
 

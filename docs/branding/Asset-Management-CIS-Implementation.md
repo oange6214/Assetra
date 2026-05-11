@@ -20,11 +20,16 @@ Dark and light semantic theme brushes now use the CIS layer values from `DesignS
 
 ## Typography
 
-`Font.Family.Base` follows the CIS fallback stack:
+Assetra uses Windows-first typography because the runtime is WPF and the primary audience works in dense Traditional Chinese financial screens.
 
-`SF Pro Display, Inter, Helvetica Neue, Noto Sans TC, Taipei Sans TC Beta, Segoe UI Variable Display, Segoe UI, Microsoft JhengHei UI, Microsoft YaHei UI, sans-serif`
+| Role | Resource key | Stack |
+| --- | --- | --- |
+| UI text and controls | `Font.Family.UI` | `Segoe UI Variable Text, Segoe UI, Microsoft JhengHei UI, Noto Sans TC, Taipei Sans TC Beta, Microsoft YaHei UI, sans-serif` |
+| Headings and dialog titles | `Font.Family.Display` | `Segoe UI Variable Display, Segoe UI, Microsoft JhengHei UI, Noto Sans TC, Taipei Sans TC Beta, Microsoft YaHei UI, sans-serif` |
+| Financial numbers | `Font.Family.Numeric` | `Segoe UI Variable Text, Segoe UI, Microsoft JhengHei UI, Noto Sans TC, Taipei Sans TC Beta, Microsoft YaHei UI, sans-serif` |
+| Legacy compatibility alias | `Font.Family.Base` | Same stack as `Font.Family.UI`; new styles should choose `UI`, `Display`, or `Numeric` explicitly. |
 
-This keeps macOS-style product typography available where installed while preserving good Windows and Traditional Chinese rendering.
+Numeric text styles also enable tabular figures through `Typography.NumeralAlignment="Tabular"` so amounts align cleanly in tables, metric cards, and portfolio panels.
 
 ## Logo System
 

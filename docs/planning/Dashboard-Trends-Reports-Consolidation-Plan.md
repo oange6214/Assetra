@@ -39,14 +39,26 @@
 
 ## 已知遺留事項（plan 範圍外或下一輪處理）
 
-| 項目 | 為什麼留 |
+| 項目 | 狀態 |
 |---|---|
-| `ReportsViewModel._risk` / `_performance` fields + 8 個 service 注入未刪 | 已跳過呼叫；完整刪除 ~250 行 + DI 條目改動，留下一輪 |
-| Daily net worth snapshot 持久化 CashValue/LiabilityValue | KPI bar sparkline 目前用投資 MV 作 proxy |
-| `PerformanceFlowBuilder` 只認 Buy/Sell/CashDividend | Income/Withdrawal/Transfer 不算 cash flow，多帳戶 TWR 可能偏差 |
-| `TransactionLog` 日期 filter API | Calendar cell popover 跳轉沒帶日期 |
-| `DismissedAssistantInsights` 雲端同步 schema | 跨裝置 dismiss 不保留（單機 OK） |
-| v2 功能（對標自訂 / year heatmap / KPI 拖拉重排…） | 列在 Out of Scope，未來再規劃 |
+| ~~`ReportsViewModel._risk` / `_performance` fields + 8 個 service 注入~~ | ✅ Done in `728b479`（-459 行） |
+| ~~Daily net worth snapshot 持久化 CashValue/LiabilityValue~~ | ✅ Done in `29ff3c5` |
+| ~~`PerformanceFlowBuilder` 只認 Buy/Sell/CashDividend~~ | ✅ Done in `a2aa71b`（加 PerformanceFlowScope enum） |
+| ~~`TransactionLog` 日期 filter API~~ | ✅ Done in `a2aa71b`（Calendar popover 帶日期跳轉） |
+| ~~`DismissedAssistantInsights` 雲端同步 schema~~ | ✅ Done in `4302d21`（JSON 序列化 + tests） |
+
+## v2 Features Completion (commits 2026/05)
+
+| 任務 | 狀態 | Commit |
+|---|---|---|
+| #6a Calendar 絕對值/百分比色階切換 | ✅ Done | `f0531f6` |
+| #6b KPI 列重排（▲▼ 按鈕） | ✅ Done | `b69440d` |
+| #6c 對標自訂（settings.json 驅動 + 顯示） | ✅ Done | `87eac86` |
+| #6d Year heatmap（GitHub-style 切換） | ✅ Done | `8b7f254` |
+| #6e 資產類焦點卡客製顯示 | ✅ Done | `5264020` |
+| #6f 對標多框分屏 | ⏭️ SKIP | 永久 — 螢幕容不下 + 現有方案夠用 |
+
+v2 tests：`45cc326`（+5 test cases）
 
 ---
 

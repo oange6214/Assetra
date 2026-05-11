@@ -196,6 +196,55 @@ DI 註冊集中在 `Infrastructure/PortfolioServiceCollectionExtensions.AddPortf
 
 ---
 
+## v2 Features（2026/05 後續加入）
+
+加入 5 個 v2 特性，全部由 `AppSettings` 驅動，沒有獨立 settings dialog（除非另說）。
+
+### Calendar 色階切換（`#6a` / `f0531f6`）
+
+`ReturnCalendarViewModel.UseAbsoluteForTone` ObservableProperty 控制 cell tone 分桶基準：
+- `false`（預設）：按 `|Δ%|` 分（< 0.5% / 0.5–1.5% / 1.5–3% / ≥ 3%）
+- `true`：按 `|Δ 金額|` 分（< 1K / 1K–1萬 / 1–10萬 / ≥ 10萬）
+
+切換時不重抓資料，僅 `Rebuild()` 重算 cell tone。
+
+### Calendar 年度熱度圖（`#6d` / `8b7f254`）
+
+`ReturnCalendarViewModel.IsYearView` ObservableProperty：
+- `false`（預設）：原本 6×8 月份 grid + weekday header + bar chart
+- `true`：取代為 365/366 個 10×10 px 色塊（WrapPanel 流式），每 cell 有 tooltip
+
+`YearViewCells` computed property 動態建構整年 cells，與 `Cells`（月份）獨立。
+
+### KPI 重排（`#6b` / `b69440d`）
+
+`FinancialOverviewViewModel.MoveKpiUpCommand` / `MoveKpiDownCommand`，每 KPI editor item 旁有 ▲▼ button。`ObservableCollection.Move()` 保留物件 ref；`RecomputeKpiEditorState()` 觸發 OverviewKpis 順序持久化。
+
+### 對標自訂（`#6c` / `87eac86`）
+
+`AppSettings.CustomBenchmarkSymbols: List<string>?` — 最多 4 個。`PortfolioHistoryViewModel.CustomBenchmarks` 集合在每次 `UpdateBenchmarksAsync` 計算 TWR。TrendsView 對標區下方 ItemsControl 展示。
+
+無編輯 UI；使用者編輯 `settings.json` 加 `"CustomBenchmarkSymbols": ["2330.TW", "QQQ"]` 即生效。
+
+### 資產類焦點卡客製顯示（`#6e` / `5264020`）
+
+`AppSettings.AssetClassFocusVisibility: Dictionary<string, bool>?` — key = `Cash / Liability / RealEstate / Insurance / Retirement / Physical`。
+
+`FinancialOverviewViewModel` 加 6 個 `IsXxxFocusVisible` computed properties：
+```
+public bool IsCashFocusVisible => PortfolioRef is not null && IsAssetClassVisible("Cash");
+```
+
+`AssetClassFocusWidget` 每 cell `Visibility` 綁這 6 個 property。
+
+無編輯 UI；使用者編輯 `settings.json` 加 `"AssetClassFocusVisibility": { "Insurance": false }` 即隱藏該格。
+
+### Skip 記錄
+
+`#6f` 對標多框分屏永久 SKIP：螢幕容不下多 chart + 現有單框 + 4 default + 自訂對標已涵蓋用例。
+
+---
+
 ## 改動歷史摘要
 
 完整重構執行於 2026/05；參考 `docs/planning/Dashboard-Trends-Reports-Consolidation-Plan.md` 的 Completion Status table 取得每個 stage 對應的 commit hash。
