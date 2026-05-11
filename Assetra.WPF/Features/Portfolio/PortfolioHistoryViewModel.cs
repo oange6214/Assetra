@@ -130,6 +130,11 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// <summary>True 當 IBenchmarkComparisonService 已注入。隱藏整個對標區用。</summary>
     [ObservableProperty] private bool _hasBenchmark;
 
+    // v2：使用者自訂對標。每個項目是 (symbol, display) — UI 用 ObservableCollection
+    // 綁定，序列化結果直接從 AppSettings.CustomBenchmarkSymbols 拉。最多 4 個。
+    private readonly System.Collections.ObjectModel.ObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow> _customBenchmarks = [];
+    public System.Collections.ObjectModel.ReadOnlyObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow> CustomBenchmarks { get; }
+
     public PortfolioHistoryViewModel(
         IPortfolioHistoryQueryService historyQueryService,
         ILocalizationService? localization = null,
@@ -159,6 +164,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         HasVolatility = _volatility is not null;
         HasSharpe = _sharpe is not null;
         HasHhi = _concentration is not null;
+        CustomBenchmarks = new System.Collections.ObjectModel.ReadOnlyObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow>(_customBenchmarks);
     }
 
     // Public API
@@ -339,6 +345,18 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         BenchmarkTaiexDisplay = FormatPct(taiexTask.Result);
         BenchmarkTw0050Display = FormatPct(tw0050Task.Result);
         BenchmarkTw00981ADisplay = FormatPct(tw00981aTask.Result);
+
+        // v2：自訂對標清單。最多 4 個避免畫面爆掉；每抓一個 TWR 都 try-catch。
+        var custom = _settings?.Current.CustomBenchmarkSymbols ?? new List<string>();
+        _customBenchmarks.Clear();
+        foreach (var symbol in custom.Take(4))
+        {
+            if (string.IsNullOrWhiteSpace(symbol)) continue;
+            var twr = await SafeBenchmarkAsync(symbol, period).ConfigureAwait(false);
+            _customBenchmarks.Add(new Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow(
+                Symbol: symbol,
+                Display: FormatPct(twr)));
+        }
     }
 
     private async Task<decimal?> SafeBenchmarkAsync(string symbol, PerformancePeriod period)

@@ -304,6 +304,30 @@
                                    Text="{Binding BenchmarkDeposit15Display}" />
                     </StackPanel>
                 </UniformGrid>
+                <!--
+                    v2 對標自訂：使用者在 settings.json 加 CustomBenchmarkSymbols
+                    後，顯示一列自訂對標（最多 4 個並排）。CollectionEmpty 時自然
+                    不渲染（ItemsControl 無 items）。
+                -->
+                <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding CustomBenchmarks}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="4" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,0,8,0">
+                                <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                                           Foreground="{DynamicResource AppTextMuted}"
+                                           Text="{Binding Symbol}" />
+                                <TextBlock FontSize="{DynamicResource Font.Size.Sm}" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppTextPrimary}"
+                                           Text="{Binding Display}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </StackPanel>
         </Border>
 
