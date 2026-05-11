@@ -150,7 +150,8 @@ internal static class PortfolioServiceCollectionExtensions
             sp.GetService<IStockHistoryProvider>(),
             sp.GetRequiredService<IPortfolioRepository>(),
             sp.GetRequiredService<IPortfolioPositionLogRepository>(),
-            sp.GetRequiredService<ITransactionService>()));
+            sp.GetRequiredService<ITransactionService>(),
+            sp.GetRequiredService<ISymbolDirectory>()));
         services.AddSingleton<ITransactionWorkflowService>(sp =>
             new TransactionWorkflowService(
                 sp.GetRequiredService<ITransactionService>()));
@@ -164,12 +165,15 @@ internal static class PortfolioServiceCollectionExtensions
             sp.GetRequiredService<IAppSettingsService>()));
         services.AddSingleton<DashboardViewModel>(sp => new DashboardViewModel(
             sp.GetRequiredService<PortfolioViewModel>(),
-            sp.GetService<IThemeService>(),
-            sp.GetService<BudgetSummaryCardViewModel>()));
+            sp.GetService<IThemeService>()));
         services.AddSingleton<FinancialOverviewViewModel>(sp => new FinancialOverviewViewModel(
             sp.GetRequiredService<IFinancialOverviewQueryService>(),
             sp.GetRequiredService<PortfolioViewModel>(),
-            sp.GetService<IAppSettingsService>()));
+            sp.GetService<IAppSettingsService>(),
+            // Stage 2.5：總覽 tab 上的 widget；DI 已經有這三個 VM 作為 singleton。
+            sp.GetService<Assetra.WPF.Features.Goals.GoalsViewModel>(),
+            sp.GetService<Assetra.WPF.Features.Fire.FireViewModel>(),
+            sp.GetService<Assetra.WPF.Features.Assistant.AssistantViewModel>()));
 
         return services;
     }

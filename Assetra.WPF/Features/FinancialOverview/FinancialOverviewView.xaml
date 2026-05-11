@@ -7,6 +7,7 @@
     xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:widgets="clr-namespace:Assetra.WPF.Features.FinancialOverview.Widgets"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel}}"
     d:DesignHeight="800"
     d:DesignWidth="900"
@@ -92,6 +93,22 @@
             Margin="0"
             VerticalScrollBarVisibility="Auto">
             <StackPanel>
+
+                <!--
+                    Stage 2.5 (Dashboard consolidation)：總覽 tab 上的 widget。
+                    DataContext = FinancialOverviewViewModel；widget 內部用
+                    GoalsWidget / FireWidget / AssistantWidget 屬性投影既有 VM。
+                    每個 widget 在對應 VM 未注入時自動隱藏（NullToVisibilityConverter）。
+                -->
+                <widgets:AssistantWidget />
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <widgets:GoalsWidget Grid.Column="0" Margin="0,0,6,0" />
+                    <widgets:FireWidget Grid.Column="1" Margin="6,0,0,0" />
+                </Grid>
 
                 <!--  資產 Expander  -->
                 <Expander

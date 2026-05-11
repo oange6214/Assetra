@@ -1,0 +1,92 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.FinancialOverview.Widgets.AssistantWidget"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel},
+                                     IsDesignTimeCreatable=False}"
+    Visibility="{Binding AssistantWidget, Converter={StaticResource NullToVisibilityConverter}}"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="DashboardWidgets.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!--
+        Stage 2.5：助手 insight widget。投影 InsightCards 前 2 條當 pill 顯示。
+        widget 不允許關閉單條（避免兩處 dismiss 邏輯）；點 footer 跳 Assistant 頁完整管理。
+    -->
+    <Border Style="{StaticResource DashboardWidgetCard}">
+        <StackPanel>
+            <DockPanel LastChildFill="True">
+                <ds:AppIcon
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    DockPanel.Dock="Left"
+                    FontSize="16"
+                    Foreground="{DynamicResource AppAccent}"
+                    Symbol="Sparkle24" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Style="{StaticResource DashboardWidgetHeader}"
+                    Text="{DynamicResource Dashboard.Widget.Assistant.Heading}" />
+            </DockPanel>
+
+            <ItemsControl ItemsSource="{Binding AssistantWidget.InsightCards}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            Margin="0,3,0,3"
+                            Padding="10,8"
+                            Background="{DynamicResource AppHover}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                            <StackPanel>
+                                <TextBlock
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding Title}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{Binding Description}"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextWrapping="NoWrap" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock
+                FontSize="{StaticResource Font.Size.Xs}"
+                Foreground="{DynamicResource AppTextMuted}"
+                Text="{DynamicResource Dashboard.Widget.Assistant.Empty}"
+                TextWrapping="Wrap"
+                Visibility="{Binding AssistantWidget.InsightCards.Count, Converter={StaticResource ZeroToVisibleConverter}}" />
+
+            <TextBlock Style="{StaticResource DashboardWidgetFooter}"
+                       Text="{DynamicResource Dashboard.Widget.Assistant.OpenLink}">
+                <TextBlock.InputBindings>
+                    <MouseBinding Command="{Binding NavigateToAssistantCommand}" MouseAction="LeftClick" />
+                </TextBlock.InputBindings>
+            </TextBlock>
+        </StackPanel>
+    </Border>
+</UserControl>

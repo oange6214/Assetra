@@ -1110,6 +1110,17 @@
     <sys:String x:Key="Dashboard.Tab.Calendar">Return Calendar</sys:String>
     <sys:String x:Key="Dashboard.Tab.Allocation">Allocation</sys:String>
     <sys:String x:Key="Dashboard.Tab.Calendar.ComingSoon">Return calendar coming soon</sys:String>
+    <!-- Stage 2.5: Overview-tab widgets -->
+    <sys:String x:Key="Dashboard.Widget.SeeMore">→ See all</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Goals.Heading">Goal progress</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Goals.Empty">No goals yet. Open Goals page to create one.</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.Heading">FIRE progress</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.Number">FIRE number</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.YearsToFire">Years to FI</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.OpenLink">→ Open FIRE calculator</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Assistant.Heading">Assistant insights</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Assistant.Empty">No insights right now.</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Assistant.OpenLink">→ Open Assistant</sys:String>
 
     <!-- Goals / Financial Goals -->
     <sys:String x:Key="Goals.Title">Financial Goals</sys:String>

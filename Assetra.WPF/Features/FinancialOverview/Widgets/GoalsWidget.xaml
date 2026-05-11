@@ -1,0 +1,99 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.FinancialOverview.Widgets.GoalsWidget"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel},
+                                     IsDesignTimeCreatable=False}"
+    Visibility="{Binding GoalsWidget, Converter={StaticResource NullToVisibilityConverter}}"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="DashboardWidgets.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!--
+        Stage 2.5：目標進度 widget。投影 GoalsWidget.Goals 前 3 個項目。
+        widget DataContext = FinancialOverviewViewModel（外層 view 的 context），
+        裡面用 binding path 走進 GoalsWidget.Goals。
+    -->
+    <Border Style="{StaticResource DashboardWidgetCard}">
+        <StackPanel>
+            <DockPanel LastChildFill="True">
+                <ds:AppIcon
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    DockPanel.Dock="Left"
+                    FontSize="16"
+                    Foreground="{DynamicResource AppAccent}"
+                    Symbol="Target24" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Style="{StaticResource DashboardWidgetHeader}"
+                    Text="{DynamicResource Dashboard.Widget.Goals.Heading}" />
+            </DockPanel>
+
+            <!--  前 3 個目標：用 CollectionViewSource 切較難，先用 ItemsControl + MaxHeight 限制視覺密度  -->
+            <ItemsControl ItemsSource="{Binding GoalsWidget.Goals}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,4,0,4">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Row="0" Grid.Column="0"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding Name}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Grid.Row="0" Grid.Column="1"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{Binding ProgressDisplay}" />
+                            <ProgressBar
+                                Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                Height="4"
+                                Margin="0,4,0,0"
+                                Maximum="100"
+                                Value="{Binding ProgressPercent, Mode=OneWay}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock
+                FontSize="{StaticResource Font.Size.Xs}"
+                Foreground="{DynamicResource AppTextMuted}"
+                Text="{DynamicResource Dashboard.Widget.Goals.Empty}"
+                TextWrapping="Wrap"
+                Visibility="{Binding GoalsWidget.Goals.Count, Converter={StaticResource ZeroToVisibleConverter}}" />
+
+            <TextBlock Style="{StaticResource DashboardWidgetFooter}"
+                       Text="{DynamicResource Dashboard.Widget.SeeMore}">
+                <TextBlock.InputBindings>
+                    <MouseBinding Command="{Binding NavigateToGoalsCommand}" MouseAction="LeftClick" />
+                </TextBlock.InputBindings>
+            </TextBlock>
+        </StackPanel>
+    </Border>
+</UserControl>

@@ -1,0 +1,81 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.FinancialOverview.Widgets.FireWidget"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel},
+                                     IsDesignTimeCreatable=False}"
+    Visibility="{Binding FireWidget, Converter={StaticResource NullToVisibilityConverter}}"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="DashboardWidgets.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!--
+        Stage 2.5：FIRE 進度 widget。顯示 FireNumber + YearsToFire。
+        FireViewModel 的計算需要使用者按「計算」才會跑；此 widget 不主動觸發
+        計算 — 點 footer 跳到 Fire 頁完整輸入後再回來看。
+    -->
+    <Border Style="{StaticResource DashboardWidgetCard}">
+        <StackPanel>
+            <DockPanel LastChildFill="True">
+                <ds:AppIcon
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    DockPanel.Dock="Left"
+                    FontSize="16"
+                    Foreground="{DynamicResource AppAccent}"
+                    Symbol="Flash24" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Style="{StaticResource DashboardWidgetHeader}"
+                    Text="{DynamicResource Dashboard.Widget.Fire.Heading}" />
+            </DockPanel>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Dashboard.Widget.Fire.Number}" />
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Lg}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding FireWidget.FireNumber, StringFormat='N0'}"
+                        Typography.NumeralAlignment="Tabular" />
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Dashboard.Widget.Fire.YearsToFire}" />
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Lg}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppAccent}"
+                        Text="{Binding FireWidget.YearsToFire}" />
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Style="{StaticResource DashboardWidgetFooter}"
+                       Text="{DynamicResource Dashboard.Widget.Fire.OpenLink}">
+                <TextBlock.InputBindings>
+                    <MouseBinding Command="{Binding NavigateToFireCommand}" MouseAction="LeftClick" />
+                </TextBlock.InputBindings>
+            </TextBlock>
+        </StackPanel>
+    </Border>
+</UserControl>

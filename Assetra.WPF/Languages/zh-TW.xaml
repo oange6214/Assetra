@@ -1114,6 +1114,17 @@
     <sys:String x:Key="Dashboard.Tab.Calendar">報酬日曆</sys:String>
     <sys:String x:Key="Dashboard.Tab.Allocation">配置</sys:String>
     <sys:String x:Key="Dashboard.Tab.Calendar.ComingSoon">報酬日曆即將推出</sys:String>
+    <!--  Stage 2.5：總覽 tab widget  -->
+    <sys:String x:Key="Dashboard.Widget.SeeMore">→ 看全部</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Goals.Heading">目標進度</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Goals.Empty">尚未設定任何目標。點擊上方連結前往「目標」頁建立。</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.Heading">FIRE 進度</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.Number">FIRE 目標數字</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.YearsToFire">距離財務自由</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.OpenLink">→ 前往 FIRE 計算</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Assistant.Heading">財務助手洞察</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Assistant.Empty">目前沒有需要注意的洞察。</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Assistant.OpenLink">→ 開啟財務助手</sys:String>
 
     <!--  Goals / 財務目標  -->
     <sys:String x:Key="Goals.Title">財務目標</sys:String>

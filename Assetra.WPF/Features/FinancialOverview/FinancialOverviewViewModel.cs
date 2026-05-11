@@ -105,14 +105,29 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
     private readonly IAppSettingsService? _settings;
 
+    /// <summary>
+    /// Stage 2.5 (Dashboard consolidation)：總覽 tab 上的 widget 直接綁這三個 VM。
+    /// optional 注入，測試 / design-time 可省略。widget 不允許從首頁編輯，
+    /// 只投影 + 點擊跳轉。
+    /// </summary>
+    public Assetra.WPF.Features.Goals.GoalsViewModel? GoalsWidget { get; }
+    public Assetra.WPF.Features.Fire.FireViewModel? FireWidget { get; }
+    public Assetra.WPF.Features.Assistant.AssistantViewModel? AssistantWidget { get; }
+
     public FinancialOverviewViewModel(
         IFinancialOverviewQueryService queryService,
         IPortfolioPositionFeed portfolio,
-        IAppSettingsService? settings = null)
+        IAppSettingsService? settings = null,
+        Assetra.WPF.Features.Goals.GoalsViewModel? goalsWidget = null,
+        Assetra.WPF.Features.Fire.FireViewModel? fireWidget = null,
+        Assetra.WPF.Features.Assistant.AssistantViewModel? assistantWidget = null)
     {
         _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
         _portfolio = portfolio ?? throw new ArgumentNullException(nameof(portfolio));
         _settings = settings;
+        GoalsWidget = goalsWidget;
+        FireWidget = fireWidget;
+        AssistantWidget = assistantWidget;
         _uiContext = SynchronizationContext.Current;
 
         // Stock prices arrive asynchronously after Portfolio.LoadAsync() completes.
@@ -136,6 +151,19 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
         RebuildKpiCards();
     }
+
+    // Stage 2.5：widget「→ 看全部」連結
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void NavigateToGoals() =>
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("Goals");
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void NavigateToFire() =>
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("Fire");
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void NavigateToAssistant() =>
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("Assistant");
 
     private void OnDashboardTabRequested(string tabName)
     {
