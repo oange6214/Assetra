@@ -1121,6 +1121,17 @@
     <sys:String x:Key="Dashboard.Widget.Assistant.Heading">Assistant insights</sys:String>
     <sys:String x:Key="Dashboard.Widget.Assistant.Empty">No insights right now.</sys:String>
     <sys:String x:Key="Dashboard.Widget.Assistant.OpenLink">→ Open Assistant</sys:String>
+    <!-- Stage 4: Return calendar -->
+    <sys:String x:Key="Dashboard.Calendar.Today">Today</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.MonthlyPnl">Month P&amp;L</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.MonthlyReturn">Month return</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.Mon">Mon</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.Tue">Tue</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.Wed">Wed</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.Thu">Thu</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.Fri">Fri</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.Sat">Sat</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.Sun">Sun</sys:String>
 
     <!-- Goals / Financial Goals -->
     <sys:String x:Key="Goals.Title">Financial Goals</sys:String>

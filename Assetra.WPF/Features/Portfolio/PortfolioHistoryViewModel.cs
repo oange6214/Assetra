@@ -41,6 +41,13 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// <summary>Full snapshot history exposed for Dashboard 10-day chart.</summary>
     public IReadOnlyList<PortfolioDailySnapshot> Snapshots => _allSnapshots;
 
+    /// <summary>
+    /// Stage 4 (Dashboard consolidation)：報酬日曆 sub-VM。在 LoadAsync 後
+    /// 自動 push 最新 snapshot list。儀表板「報酬日曆」tab 透過 Binding 顯示。
+    /// </summary>
+    public Assetra.WPF.Features.FinancialOverview.Calendar.ReturnCalendarViewModel
+        ReturnCalendar { get; } = new();
+
     // Chart series
     [ObservableProperty] private ISeries[] _valueSeries = [];
     [ObservableProperty] private ICartesianAxis[] _xAxes = [new Axis { IsVisible = false }];
@@ -132,6 +139,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     {
         _allSnapshots = await _historyQueryService.GetSnapshotsAsync();
         OnPropertyChanged(nameof(Snapshots));
+        // Stage 4：餵入報酬日曆 sub-VM；獨立 try-catch 以免破壞主流程。
+        try { ReturnCalendar.UpdateSnapshots(_allSnapshots); }
+        catch (Exception ex) when (ex is not OperationCanceledException) { /* swallow */ }
         await RefreshChartAsync();
     }
 

@@ -10,6 +10,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:financialoverview="clr-namespace:Assetra.WPF.Features.FinancialOverview"
+    xmlns:cal="clr-namespace:Assetra.WPF.Features.FinancialOverview.Calendar"
     xmlns:fire="clr-namespace:Assetra.WPF.Features.Fire"
     xmlns:goals="clr-namespace:Assetra.WPF.Features.Goals"
     xmlns:import="clr-namespace:Assetra.WPF.Features.Import"
@@ -413,14 +414,10 @@
                          Tag="{x:Static financialoverview:DashboardTab.Trends}">
                     <trends:TrendsView DataContext="{Binding Portfolio.History}" />
                 </TabItem>
-                <!--  報酬日曆：Stage 4 才填內容；Stage 2 顯示 placeholder  -->
+                <!--  報酬日曆：Stage 4 — bind 到 PortfolioHistory 子 VM  -->
                 <TabItem Header="{DynamicResource Dashboard.Tab.Calendar}"
                          Tag="{x:Static financialoverview:DashboardTab.Calendar}">
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <ds:AppIcon Style="{StaticResource EmptyStateIcon}" Symbol="CalendarLtr24" />
-                        <TextBlock Style="{StaticResource EmptyStateHint}"
-                                   Text="{DynamicResource Dashboard.Tab.Calendar.ComingSoon}" />
-                    </StackPanel>
+                    <cal:ReturnCalendarView DataContext="{Binding Portfolio.History.ReturnCalendar}" />
                 </TabItem>
                 <!--  配置：從 Portfolio 內 tab 搬入  -->
                 <TabItem Header="{DynamicResource Dashboard.Tab.Allocation}"
