@@ -31,9 +31,15 @@ public sealed class PortfolioSnapshotService
     /// The currency the totals are computed in. Defaults to "TWD" for compatibility with
     /// pre-v0.14.2 callers; new callers should pass <c>AppSettings.BaseCurrency</c>.
     /// </param>
+    /// <param name="cashValue">v0.30+ optional：當日現金總額（含所有資金帳戶）。</param>
+    /// <param name="equityValue">v0.30+ optional：當日投資組合市值（通常 = <paramref name="marketValue"/>）。</param>
+    /// <param name="liabilityValue">v0.30+ optional：當日負債總額（信用卡 + 貸款餘額）。</param>
     public async Task<bool> TryRecordAsync(
         decimal totalCost, decimal marketValue, decimal pnl, int positionCount,
-        string currency = "TWD")
+        string currency = "TWD",
+        decimal? cashValue = null,
+        decimal? equityValue = null,
+        decimal? liabilityValue = null)
     {
         if (marketValue <= 0)
             return false;
@@ -44,9 +50,15 @@ public sealed class PortfolioSnapshotService
         if (_lastSnapshotDate == today)
             return false;
 
+        // 三個淨值組件（cash / equity / liability）持久化後，未來日損益月曆與
+        // KPI bar 30 天淨值 sparkline 才能計算「真實淨值」變動而非投資 MV
+        // proxy。equityValue 預設 fallback 為 marketValue（兩者通常相同）。
         var snapshot = new PortfolioDailySnapshot(
             today, totalCost, marketValue, pnl, positionCount,
-            string.IsNullOrWhiteSpace(currency) ? "TWD" : currency);
+            string.IsNullOrWhiteSpace(currency) ? "TWD" : currency,
+            CashValue: cashValue,
+            EquityValue: equityValue ?? marketValue,
+            LiabilityValue: liabilityValue);
         await _repo.UpsertAsync(snapshot).ConfigureAwait(false);
         _lastSnapshotDate = today;
         return true;

@@ -53,6 +53,8 @@ public partial class PortfolioViewModel
             decimal pnl,
             int positionCount,
             string currency = "TWD",
+            decimal? cashValue = null,
+            decimal? liabilityValue = null,
             CancellationToken ct = default) =>
             Task.FromResult(false);
 

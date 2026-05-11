@@ -171,6 +171,10 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
     // Long-term refactor: Portfolio.Dashboard tab 移除後，這個 series 改為
     // InvestmentFocusWidget 的 30 天 sparkline 用。屬性名稱保留 TenDay* 以
     // 避免大規模 rename；cutoff 由 -9 改 -29（10 天 → 30 天）。
+    //
+    // v0.30+ daily NW snapshot：若 snapshot 有 CashValue + LiabilityValue
+    // 欄位，sparkline 顯示「真實淨值」(Cash + Equity − Liability)；fallback
+    // 為 MarketValue（投資組合市值）。每張快照逐個檢查（migrating 期間混用）。
     private void RefreshTenDayChart()
     {
         var cutoff = DateOnly.FromDateTime(DateTime.Today.AddDays(-29));
@@ -190,10 +194,11 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
         var labelColor     = GetSkColor("AppTextSecondary", "#9E9E9E");
         var separatorColor = GetSkColor("AppBorderLight",   "#2E2E2E");
 
+        // 若 snapshot 有 NW 三組件，使用 Cash + Equity − Liability；否則 fallback MV
         var points = snapshots
             .Select(s => new DateTimePoint(
                 s.SnapshotDate.ToDateTime(TimeOnly.MinValue),
-                (double)s.MarketValue))
+                (double)ResolveNetWorthValue(s)))
             .ToList();
 
         TenDaySeries =
@@ -234,6 +239,23 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
                 Labeler         = v => $"NT${v / 1_000_000:F1}M",
             }
         ];
+    }
+
+    /// <summary>
+    /// 從 snapshot 解出「淨值」— 若有 CashValue + EquityValue + LiabilityValue
+    /// 三個欄位（v0.30+ daily NW snapshot），用 Cash + Equity − Liability；
+    /// 否則 fallback 為 MarketValue（舊版只記投資 MV，作為 proxy）。
+    /// </summary>
+    private static decimal ResolveNetWorthValue(Assetra.Core.Models.PortfolioDailySnapshot s)
+    {
+        if (s.CashValue.HasValue && s.EquityValue.HasValue)
+        {
+            var equity = s.EquityValue.Value;
+            var cash = s.CashValue.Value;
+            var liab = s.LiabilityValue ?? 0m;
+            return cash + equity - liab;
+        }
+        return s.MarketValue;
     }
 
     private static SKColor GetSkColor(string key, string hexFallback)

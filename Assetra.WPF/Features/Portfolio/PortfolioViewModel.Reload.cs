@@ -120,8 +120,13 @@ public partial class PortfolioViewModel
             if (string.IsNullOrEmpty(row.Name) && !string.IsNullOrEmpty(quote.Name))
                 row.Name = quote.Name;
 
+            if (!string.IsNullOrWhiteSpace(quote.Currency))
+                row.Currency = quote.Currency;
+
             row.CurrentPrice = quote.Price;
             row.PrevClose = quote.PrevClose;
+            row.IsQuoteStale = quote.IsStale;
+            row.QuoteProviderStateMessage = quote.ProviderStateMessage;
             row.IsLoadingPrice = false;
             row.Refresh();
             changed = true;
@@ -153,7 +158,11 @@ public partial class PortfolioViewModel
             var baseCcy = _settingsService?.Current?.BaseCurrency;
             var written = await _historyMaintenanceService.TryRecordSnapshotAsync(
                 TotalCost, TotalMarketValue, TotalPnl, Positions.Count,
-                string.IsNullOrWhiteSpace(baseCcy) ? "TWD" : baseCcy);
+                string.IsNullOrWhiteSpace(baseCcy) ? "TWD" : baseCcy,
+                // v0.30+ daily NW snapshot：把現金與負債一起記錄，讓未來
+                // KPI bar 30 天淨值 sparkline 不再需要用 MarketValue 作 proxy。
+                cashValue: TotalCash,
+                liabilityValue: TotalLiabilities);
             if (written)
                 await History.LoadAsync();
         }
@@ -244,6 +253,6 @@ public partial class PortfolioViewModel
         OnPropertyChanged(nameof(NetWorth));
         TradeFilter.NotifyCurrencyChanged();
         SellPanel.NotifyCurrencyChanged();
-        Financial.Apply(_summaryService.Calculate(BuildSummaryInput()));
+        RebuildTotals();
     }
 }
