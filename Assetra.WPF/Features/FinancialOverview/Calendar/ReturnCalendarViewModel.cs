@@ -1,8 +1,14 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows.Media;
 using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LiveChartsCore;
+using LiveChartsCore.Kernel.Sketches;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using SkiaSharp;
 
 namespace Assetra.WPF.Features.FinancialOverview.Calendar;
 
@@ -36,13 +42,30 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     public string MonthDisplay => $"{CurrentMonth.Year} / {CurrentMonth.Month:D2}";
 
     /// <summary>月份彙總：當月絕對損益總和。</summary>
-    [ObservableProperty] private decimal _monthlyAbsolutePnl;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsMonthlyPnlPositive))]
+    [NotifyPropertyChangedFor(nameof(IsMonthlyPnlNegative))]
+    private decimal _monthlyAbsolutePnl;
 
     /// <summary>月份彙總：當月報酬率（end/start − 1，naive）。</summary>
     [ObservableProperty] private decimal _monthlyReturnPct;
 
+    /// <summary>True 當當月損益 &gt; 0；XAML 用 DataTrigger 切紅色。</summary>
+    public bool IsMonthlyPnlPositive => MonthlyAbsolutePnl > 0m;
+
+    /// <summary>True 當當月損益 &lt; 0；XAML 用 DataTrigger 切綠色。</summary>
+    public bool IsMonthlyPnlNegative => MonthlyAbsolutePnl < 0m;
+
     /// <summary>當月是否有任何資料；false 時顯示 empty state。</summary>
     [ObservableProperty] private bool _hasData;
+
+    /// <summary>
+    /// 月底迷你 bar chart 的 series — 當月每日 PnL 直方圖（紅漲綠跌）。
+    /// 沒資料的日子 column 為 0，HasData=true 的日子用該日 Delta 值。
+    /// </summary>
+    [ObservableProperty] private ISeries[] _monthlyBarSeries = [];
+    [ObservableProperty] private ICartesianAxis[] _barXAxes = [new Axis { IsVisible = false }];
+    [ObservableProperty] private ICartesianAxis[] _barYAxes = [new Axis { IsVisible = false }];
 
     /// <summary>42 個 cell（6 週 × 7 天）。非當月或無資料的 cell 用 placeholder。</summary>
     private readonly ObservableCollection<DailyCellVm> _cells = [];
@@ -195,6 +218,111 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
         else
             MonthlyReturnPct = 0m;
         HasData = _cells.Any(c => c.HasData);
+
+        RebuildBarChart(daysInMonth);
+    }
+
+    /// <summary>
+    /// 用當月 cells 的 Delta 值建立 column series。一柱 = 該日 PnL；
+    /// 紅綠依台灣慣例（漲紅跌綠）。沒資料的日子值為 0，柱子隱形。
+    /// </summary>
+    private void RebuildBarChart(int daysInMonth)
+    {
+        var upColor = GetSkColor("AppUp", "#EF4444");      // 紅（漲）
+        var downColor = GetSkColor("AppDown", "#22C55E");  // 綠（跌）
+        var labelColor = GetSkColor("AppTextSecondary", "#787B86");
+
+        // 一個 day 一格；正值放 ups[i]，負值放 downs[i]，其餘為 null。
+        // 用兩個 ColumnSeries 著色（紅漲綠跌），對齊台灣 broker app 慣例。
+        var ups = new List<double?>(daysInMonth);
+        var downs = new List<double?>(daysInMonth);
+        for (var day = 1; day <= daysInMonth; day++)
+        {
+            var cell = _cells.FirstOrDefault(c => c.IsCurrentMonth && c.Day == day);
+            var v = cell?.Delta is decimal d ? (double)d : 0d;
+            if (v > 0)        { ups.Add(v); downs.Add(null); }
+            else if (v < 0)   { ups.Add(null); downs.Add(v); }
+            else              { ups.Add(null); downs.Add(null); }
+        }
+
+        var tooltipFormatter = (LiveChartsCore.Kernel.ChartPoint chartPoint) =>
+        {
+            var v = chartPoint.Coordinate.PrimaryValue;
+            return (v >= 0 ? "+" : "") + v.ToString("N0", CultureInfo.InvariantCulture);
+        };
+
+        MonthlyBarSeries =
+        [
+            new ColumnSeries<double?>
+            {
+                Values = ups,
+                Padding = 1,
+                MaxBarWidth = 14,
+                AnimationsSpeed = TimeSpan.Zero,
+                Fill = new SolidColorPaint(upColor),
+                Stroke = null,
+                YToolTipLabelFormatter = tooltipFormatter,
+            },
+            new ColumnSeries<double?>
+            {
+                Values = downs,
+                Padding = 1,
+                MaxBarWidth = 14,
+                AnimationsSpeed = TimeSpan.Zero,
+                Fill = new SolidColorPaint(downColor),
+                Stroke = null,
+                YToolTipLabelFormatter = tooltipFormatter,
+            }
+        ];
+
+        BarXAxes =
+        [
+            new Axis
+            {
+                Labels = Enumerable.Range(1, daysInMonth).Select(d => d.ToString(CultureInfo.InvariantCulture)).ToArray(),
+                MinStep = 6,
+                TextSize = 9,
+                LabelsPaint = new SolidColorPaint(labelColor),
+                SeparatorsPaint = null,
+                TicksPaint = null,
+            }
+        ];
+
+        BarYAxes =
+        [
+            new Axis
+            {
+                TextSize = 9,
+                LabelsPaint = new SolidColorPaint(labelColor),
+                SeparatorsPaint = null,
+                TicksPaint = null,
+                Labeler = v => v == 0 ? "0" : FormatBarYLabel((decimal)v),
+                MinLimit = ups.Count + downs.Count == 0 ? -1 : null,
+                MaxLimit = ups.Count + downs.Count == 0 ? 1 : null,
+            }
+        ];
+
+    }
+
+    private static string FormatBarYLabel(decimal v)
+    {
+        var abs = Math.Abs(v);
+        if (abs >= 10_000m)
+        {
+            var w = v / 10_000m;
+            return (v >= 0 ? "+" : "") + w.ToString("F1", CultureInfo.InvariantCulture) + "萬";
+        }
+        return (v >= 0 ? "+" : "") + v.ToString("N0", CultureInfo.InvariantCulture);
+    }
+
+    private static SKColor GetSkColor(string key, string hexFallback)
+    {
+        if (System.Windows.Application.Current?.TryFindResource(key) is SolidColorBrush brush)
+        {
+            var c = brush.Color;
+            return new SKColor(c.R, c.G, c.B, c.A);
+        }
+        return SKColor.Parse(hexFallback);
     }
 
     private static string FormatDelta(decimal? delta)

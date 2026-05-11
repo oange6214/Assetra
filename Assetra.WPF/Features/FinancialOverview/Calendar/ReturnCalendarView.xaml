@@ -5,6 +5,7 @@
     xmlns:cal="clr-namespace:Assetra.WPF.Features.FinancialOverview.Calendar"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type cal:ReturnCalendarViewModel},
                                      IsDesignTimeCreatable=False}"
@@ -71,8 +72,10 @@
             <!--  KPI line  -->
             <RowDefinition Height="Auto" />
             <!--  weekday header  -->
-            <RowDefinition Height="*" />
+            <RowDefinition Height="*" MinHeight="280" />
             <!--  6x7 grid  -->
+            <RowDefinition Height="Auto" />
+            <!--  monthly bar chart  -->
         </Grid.RowDefinitions>
 
         <!--  ── Toolbar：月份切換  ──  -->
@@ -103,7 +106,11 @@
                     Style="{StaticResource AppSecondaryButton}" />
         </DockPanel>
 
-        <!--  ── 月份 KPI line：當月 PnL + 報酬率  ──  -->
+        <!--
+            ── 月份 KPI line：當月 PnL + 報酬率 ──
+            紅 / 綠依台灣慣例（漲紅跌綠），值為 0 時用 primary text。
+            兩個 number TextBlock 用 Style + DataTrigger 切換 Foreground。
+        -->
         <StackPanel Grid.Row="1" Margin="0,0,0,12" Orientation="Horizontal"
                     Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock VerticalAlignment="Center"
@@ -112,20 +119,48 @@
                        Text="{DynamicResource Dashboard.Calendar.MonthlyPnl}" />
             <TextBlock Margin="6,0,16,0"
                        VerticalAlignment="Center"
-                       FontSize="{StaticResource Font.Size.Md}"
+                       FontSize="{StaticResource Font.Size.Lg}"
                        FontWeight="SemiBold"
-                       Foreground="{DynamicResource AppTextPrimary}"
-                       Text="{Binding MonthlyAbsolutePnl, StringFormat='+#\,##0;-#\,##0;0'}" />
+                       Text="{Binding MonthlyAbsolutePnl, StringFormat='+#\,##0;-#\,##0;0'}"
+                       Typography.NumeralAlignment="Tabular">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsMonthlyPnlPositive}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsMonthlyPnlNegative}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
             <TextBlock VerticalAlignment="Center"
                        FontSize="{StaticResource Font.Size.Xs}"
                        Foreground="{DynamicResource AppTextMuted}"
                        Text="{DynamicResource Dashboard.Calendar.MonthlyReturn}" />
             <TextBlock Margin="6,0,0,0"
                        VerticalAlignment="Center"
-                       FontSize="{StaticResource Font.Size.Md}"
+                       FontSize="{StaticResource Font.Size.Lg}"
                        FontWeight="SemiBold"
-                       Foreground="{DynamicResource AppTextPrimary}"
-                       Text="{Binding MonthlyReturnPct, StringFormat='+0.00%;-0.00%;0.00%'}" />
+                       Text="{Binding MonthlyReturnPct, StringFormat='+0.00%;-0.00%;0.00%'}"
+                       Typography.NumeralAlignment="Tabular">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsMonthlyPnlPositive}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsMonthlyPnlNegative}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
         </StackPanel>
 
         <!--  ── Weekday header  ──  -->
@@ -139,7 +174,11 @@
             <TextBlock Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Sun}" />
         </UniformGrid>
 
-        <!--  ── 6x7 grid  ──  -->
+        <!--
+            ── 6x7 grid ──
+            主月曆熱度圖；MinHeight 在 RowDefinition 上保證即使尺寸小也不會被
+            擠掉底下的 bar chart。
+        -->
         <ItemsControl Grid.Row="3" ItemsSource="{Binding Cells}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -164,5 +203,25 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+
+        <!--
+            ── 月份迷你 bar chart ──
+            每日 PnL 直方圖：紅柱為當日獲利，綠柱為當日虧損。視覺上補充
+            熱度圖看不出的「分布感」— 月初密集還是月底密集？極端值在何處？
+        -->
+        <Border Grid.Row="4"
+                Margin="0,12,0,0"
+                Padding="0"
+                Background="Transparent"
+                Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <lvc:CartesianChart
+                Height="100"
+                Background="Transparent"
+                Series="{Binding MonthlyBarSeries}"
+                XAxes="{Binding BarXAxes}"
+                YAxes="{Binding BarYAxes}"
+                TooltipPosition="Top"
+                TooltipTextSize="10" />
+        </Border>
     </Grid>
 </UserControl>
