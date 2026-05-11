@@ -266,6 +266,27 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     private void NavigateToPhysicalAsset() =>
         Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("PhysicalAsset");
 
+    // ── v2：KPI 編輯 dialog 內 reorder（▲▼）─────────────────────────────────
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void MoveKpiUp(KpiSelectionItemVm? item)
+    {
+        if (item is null) return;
+        var idx = _kpiEditorItems.IndexOf(item);
+        if (idx <= 0) return;
+        _kpiEditorItems.Move(idx, idx - 1);
+        RecomputeKpiEditorState();
+    }
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void MoveKpiDown(KpiSelectionItemVm? item)
+    {
+        if (item is null) return;
+        var idx = _kpiEditorItems.IndexOf(item);
+        if (idx < 0 || idx >= _kpiEditorItems.Count - 1) return;
+        _kpiEditorItems.Move(idx, idx + 1);
+        RecomputeKpiEditorState();
+    }
+
     private void OnDashboardTabRequested(string tabName)
     {
         if (Enum.TryParse<DashboardTab>(tabName, ignoreCase: true, out var tab))

@@ -1165,6 +1165,8 @@
     <sys:String x:Key="Dashboard.Overview.PortfolioTrend30d">Portfolio trend (30d)</sys:String>
     <sys:String x:Key="Dashboard.Calendar.UseAbsolute">Color by amount</sys:String>
     <sys:String x:Key="Dashboard.Calendar.UseAbsolute.Tooltip">Bucket basis: unchecked = |Δ%|; checked = |Δ amount|</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.MoveUp">Move up</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.MoveDown">Move down</sys:String>
 
     <!-- Goals / Financial Goals -->
     <sys:String x:Key="Goals.Title">Financial Goals</sys:String>

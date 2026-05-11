@@ -389,23 +389,47 @@
                         <ItemsControl ItemsSource="{Binding KpiEditorItems}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <CheckBox
-                                        Margin="0,4"
-                                        IsChecked="{Binding IsSelected, Mode=TwoWay}">
-                                        <StackPanel>
-                                            <TextBlock
-                                                FontSize="{StaticResource Font.Size.Sm}"
-                                                FontWeight="Medium"
-                                                Foreground="{DynamicResource AppTextPrimary}"
-                                                Text="{Binding LabelKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
-                                            <TextBlock
-                                                Margin="0,2,0,0"
-                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                Foreground="{DynamicResource AppTextMuted}"
-                                                Text="{Binding DescriptionKey, Converter={StaticResource ResourceKeyToStringConverter}}"
-                                                TextWrapping="Wrap" />
-                                        </StackPanel>
-                                    </CheckBox>
+                                    <Grid Margin="0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0"
+                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}">
+                                            <StackPanel>
+                                                <TextBlock
+                                                    FontSize="{StaticResource Font.Size.Sm}"
+                                                    FontWeight="Medium"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding LabelKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                                <TextBlock
+                                                    Margin="0,2,0,0"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Text="{Binding DescriptionKey, Converter={StaticResource ResourceKeyToStringConverter}}"
+                                                    TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </CheckBox>
+                                        <!--  v2：reorder（▲▼）— 按勾選順序排會混亂，用上下鈕較直覺。  -->
+                                        <Button Grid.Column="1" Width="28" Height="28" Padding="0"
+                                                Margin="0,0,4,0"
+                                                Style="{StaticResource AppIconButton}"
+                                                Command="{Binding DataContext.MoveKpiUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="{DynamicResource FinancialOverview.Kpi.MoveUp}">
+                                            <ds:AppIcon Symbol="ChevronUp24" FontSize="14"
+                                                        Foreground="{DynamicResource AppTextSecondary}" />
+                                        </Button>
+                                        <Button Grid.Column="2" Width="28" Height="28" Padding="0"
+                                                Style="{StaticResource AppIconButton}"
+                                                Command="{Binding DataContext.MoveKpiDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="{DynamicResource FinancialOverview.Kpi.MoveDown}">
+                                            <ds:AppIcon Symbol="ChevronDown24" FontSize="14"
+                                                        Foreground="{DynamicResource AppTextSecondary}" />
+                                        </Button>
+                                    </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
