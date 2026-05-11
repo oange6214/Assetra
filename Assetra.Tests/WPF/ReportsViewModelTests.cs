@@ -70,8 +70,7 @@ public sealed class ReportsViewModelTests
         Assert.Null(vm.IncomeStatement);
         Assert.Null(vm.BalanceSheet);
         Assert.Null(vm.CashFlowStatement);
-        Assert.Null(vm.Performance);
-        Assert.Null(vm.Risk);
+        // Performance / Risk fields removed from ReportsViewModel — see commit log.
         Assert.NotNull(vm.ErrorMessage);
     }
 

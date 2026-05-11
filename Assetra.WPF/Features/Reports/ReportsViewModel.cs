@@ -30,31 +30,15 @@ public sealed partial class ReportsViewModel : ObservableObject
     private readonly ITradeRepository? _trades;
     private readonly IPortfolioRepository? _portfolio;
     private readonly IMultiCurrencyValuationService? _fx;
-    private readonly IXirrCalculator? _xirrCalculator;
-    private readonly ITimeWeightedReturnCalculator? _twrCalculator;
-    private readonly IMoneyWeightedReturnCalculator? _mwrCalculator;
-    private readonly IPnlAttributionService? _attribution;
-    private readonly IBenchmarkComparisonService? _benchmark;
-    private readonly IVolatilityCalculator? _volatility;
-    private readonly IDrawdownCalculator? _drawdown;
-    private readonly ISharpeRatioCalculator? _sharpe;
-    private readonly IConcentrationAnalyzer? _concentration;
-    private readonly IPortfolioSnapshotRepository? _snapshots;
+    // Performance / Risk 計算服務（XirrCalculator, TwrCalculator, MwrCalculator,
+    // PnlAttributionService, BenchmarkComparisonService, VolatilityCalculator,
+    // DrawdownCalculator, SharpeRatioCalculator, ConcentrationAnalyzer,
+    // PortfolioSnapshotRepository）已隨 Performance/Risk Expander 移除一併
+    // 從 Reports 拔除 — 這些指標已搬到「財務概覽 → 資產趨勢」tab。
+    // 服務本身在 DI 仍註冊，由 PortfolioHistoryViewModel 取用。
     private readonly IAppSettingsService? _appSettings;
     private readonly ITaxProfileProvider? _taxProfiles;
     private readonly AnnualTaxComputationService? _annualTaxComputer;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasPerformance))]
-    [NotifyPropertyChangedFor(nameof(PerformanceAttributionRows))]
-    [NotifyPropertyChangedFor(nameof(HasPerformanceAttribution))]
-    private PerformanceResult? _performance;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasRisk))]
-    [NotifyPropertyChangedFor(nameof(RiskTopHoldingRows))]
-    [NotifyPropertyChangedFor(nameof(HasRiskTopHoldings))]
-    private RiskMetrics? _risk;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasIncomeStatement))]
@@ -150,16 +134,6 @@ public sealed partial class ReportsViewModel : ObservableObject
         ITradeRepository? trades = null,
         IPortfolioRepository? portfolio = null,
         IMultiCurrencyValuationService? fx = null,
-        IXirrCalculator? xirrCalculator = null,
-        ITimeWeightedReturnCalculator? twrCalculator = null,
-        IMoneyWeightedReturnCalculator? mwrCalculator = null,
-        IPnlAttributionService? attribution = null,
-        IBenchmarkComparisonService? benchmark = null,
-        IVolatilityCalculator? volatility = null,
-        IDrawdownCalculator? drawdown = null,
-        ISharpeRatioCalculator? sharpe = null,
-        IConcentrationAnalyzer? concentration = null,
-        IPortfolioSnapshotRepository? snapshots = null,
         IAppSettingsService? appSettings = null,
         ITaxProfileProvider? taxProfiles = null)
     {
@@ -174,16 +148,6 @@ public sealed partial class ReportsViewModel : ObservableObject
         _trades = trades;
         _portfolio = portfolio;
         _fx = fx;
-        _xirrCalculator = xirrCalculator;
-        _twrCalculator = twrCalculator;
-        _mwrCalculator = mwrCalculator;
-        _attribution = attribution;
-        _benchmark = benchmark;
-        _volatility = volatility;
-        _drawdown = drawdown;
-        _sharpe = sharpe;
-        _concentration = concentration;
-        _snapshots = snapshots;
         _appSettings = appSettings;
         _taxProfiles = taxProfiles ?? new EmbeddedTaxProfileProvider();
         _annualTaxComputer = new AnnualTaxComputationService(_taxProfiles);
@@ -236,10 +200,6 @@ public sealed partial class ReportsViewModel : ObservableObject
         && (TaxSummary.Dividends.Count > 0 || TaxSummary.CapitalGains.Count > 0);
     public bool HasBalanceSheet => BalanceSheet is not null;
     public bool HasCashFlowStatement => CashFlowStatement is not null;
-    public bool HasPerformance => Performance is not null;
-    public bool HasRisk => Risk is not null;
-    public bool HasPerformanceAttribution => PerformanceAttributionRows.Count > 0;
-    public bool HasRiskTopHoldings => RiskTopHoldingRows.Count > 0;
 
     public string IncomeDisplay  => Report is null ? "—" : FormatAmount(Report.Current.TotalIncome);
     public string ExpenseDisplay => Report is null ? "—" : FormatAmount(Report.Current.TotalExpense);
@@ -281,24 +241,8 @@ public sealed partial class ReportsViewModel : ObservableObject
                 FormatAmount(row.Amount)))
             .ToArray();
 
-    public IReadOnlyList<PerformanceAttributionRowViewModel> PerformanceAttributionRows =>
-        Performance?.Attribution
-            .Select(row => new PerformanceAttributionRowViewModel(
-                LocalizeAttributionLabel(row.Label),
-                FormatSignedAmount(row.Amount),
-                row.Amount >= 0m))
-            .ToArray()
-        ?? [];
-
-    public IReadOnlyList<RiskTopHoldingRowViewModel> RiskTopHoldingRows =>
-        Risk?.TopHoldings
-            .Select(row => new RiskTopHoldingRowViewModel(
-                row.Label,
-                FormatAmount(row.MarketValue),
-                $"{row.Weight:P2}",
-                row.Weight))
-            .ToArray()
-        ?? [];
+    // PerformanceAttributionRows / RiskTopHoldingRows getters 移除 —
+    // 對應 Performance / Risk Expander 已從 ReportsView 拔除。
 
     [RelayCommand]
     private async Task LoadAsync()
@@ -433,18 +377,8 @@ public sealed partial class ReportsViewModel : ObservableObject
             }
         }
 
-        // Stage 3 收尾：Performance / Risk 已搬到財務概覽「資產趨勢」tab 的
-        // 區間 KPI 與風險指標列。Reports 不再執行這些計算 — 對應 Expander
-        // 已 Visibility=Collapsed，連帶省下每次載入 ~50–200ms 的 TWR/XIRR/
-        // Sharpe 計算開銷。
-        //
-        // 保留 _performance / _risk fields 與 ComputeXirrAsync / ComputeTwrAsync /
-        // LoadRiskAsync 等 private method 以方便未來如 Reports 需要回復這
-        // 兩個 panel 時不用重新接 service。若確定永不回復，下一輪可全部刪除
-        // （影響 ~250 lines + 8 個 service 注入 + 對應 DI 條目）。
-        // 顯式 reference 未呼叫的 helper，避免 IDE0051 unused-method 警告。
-        Func<Task> _unused1 = LoadPerformanceAsync;
-        Func<Task> _unused2 = LoadRiskAsync;
+        // Performance / Risk 計算已搬到「財務概覽 → 資產趨勢」tab。Reports
+        // 不再執行這些計算，連帶省 50–200ms 載入時間。
 
         if (detailErrors.Count > 0)
             throw new InvalidOperationException(string.Join(" / ", detailErrors.Distinct()));
@@ -459,63 +393,8 @@ public sealed partial class ReportsViewModel : ObservableObject
         _multiYearTaxRows.Clear();
         OnPropertyChanged(nameof(HasMultiYearTax));
         AmtResult = null;
-        Performance = null;
-        Risk = null;
     }
 
-    private async Task LoadRiskAsync()
-    {
-        var perfPeriod = PerformancePeriod.Month(Year, Month);
-
-        IReadOnlyList<(DateOnly Date, decimal Value)> series = Array.Empty<(DateOnly, decimal)>();
-        if (_snapshots is not null)
-        {
-            var raw = await _snapshots.GetSnapshotsAsync(perfPeriod.Start, perfPeriod.End).ConfigureAwait(true);
-            series = raw.Select(s => (s.SnapshotDate, s.MarketValue)).ToList();
-        }
-
-        var vol = _volatility?.ComputeAnnualized(series);
-        var mdd = _drawdown?.ComputeMaxDrawdown(series);
-        var twr = Performance?.Twr ?? Performance?.Mwr;
-        var sharpe = _sharpe?.Compute(twr, vol, riskFreeRate: 0.02m);
-
-        IReadOnlyList<ConcentrationBucket> top = Array.Empty<ConcentrationBucket>();
-        decimal? hhi = null;
-        if (_concentration is not null)
-        {
-            top = await _concentration.AnalyzeAsync().ConfigureAwait(true);
-            hhi = await _concentration.ComputeHhiAsync().ConfigureAwait(true);
-        }
-
-        Risk = new RiskMetrics(vol, mdd, sharpe, hhi, top);
-    }
-
-    private async Task LoadPerformanceAsync()
-    {
-        if (_mwrCalculator is null && _attribution is null && _twrCalculator is null && _xirrCalculator is null) return;
-        var perfPeriod = PerformancePeriod.Month(Year, Month);
-        var xirr = await ComputeXirrAsync(perfPeriod).ConfigureAwait(true);
-        var twr = await ComputeTwrAsync(perfPeriod).ConfigureAwait(true);
-        var mwr = _mwrCalculator is null ? null : await _mwrCalculator.ComputeAsync(perfPeriod).ConfigureAwait(true);
-        var buckets = _attribution is null
-            ? (IReadOnlyList<AttributionBucket>)Array.Empty<AttributionBucket>()
-            : await _attribution.ComputeAsync(perfPeriod).ConfigureAwait(true);
-        decimal? bench = null;
-        var benchmarkSymbol = _appSettings?.Current.BenchmarkSymbol ?? "0050.TW";
-        if (_benchmark is not null && !string.IsNullOrWhiteSpace(benchmarkSymbol))
-        {
-            try
-            {
-                bench = await _benchmark.ComputeBenchmarkTwrAsync(benchmarkSymbol, perfPeriod).ConfigureAwait(true);
-            }
-            catch (Exception ex) when (ex is HttpRequestException or InvalidOperationException or TaskCanceledException)
-            {
-                System.Diagnostics.Debug.WriteLine($"Benchmark TWR failed for {benchmarkSymbol}: {ex.Message}");
-                bench = null;
-            }
-        }
-        Performance = new PerformanceResult(perfPeriod, Xirr: xirr, Twr: twr, Mwr: mwr, BenchmarkTwr: bench, Attribution: buckets);
-    }
 
     [RelayCommand]
     private Task ExportIncomePdfAsync() => ExportAsync("IncomeStatement", "pdf");
@@ -690,114 +569,11 @@ public sealed partial class ReportsViewModel : ObservableObject
         OnPropertyChanged(nameof(NetDeltaDisplay));
         OnPropertyChanged(nameof(OverBudgetRows));
         OnPropertyChanged(nameof(UpcomingRows));
-        OnPropertyChanged(nameof(PerformanceAttributionRows));
-        OnPropertyChanged(nameof(RiskTopHoldingRows));
     }
 
     private string GetString(string key, string fallback) =>
         _localization?.Get(key, fallback) ?? fallback;
 
-    private string LocalizeAttributionLabel(string label) =>
-        label switch
-        {
-            "Realized" => GetString("Reports.Performance.Attribution.Realized", "已實現損益"),
-            "Dividend" => GetString("Reports.Performance.Attribution.Dividend", "股利"),
-            "Commission" => GetString("Reports.Performance.Attribution.Commission", "手續費"),
-            "Unrealized Δ" => GetString("Reports.Performance.Attribution.Unrealized", "未實現變動"),
-            _ => label,
-        };
-
-    private async Task<decimal?> ComputeXirrAsync(PerformancePeriod period)
-    {
-        if (_xirrCalculator is null || _trades is null || _snapshots is null)
-            return null;
-
-        var entryCurrencyMap = await BuildEntryCurrencyMapAsync().ConfigureAwait(true);
-        var flows = Assetra.Application.Analysis.PerformanceFlowBuilder.BuildPerformanceFlows(
-            await _trades.GetAllAsync().ConfigureAwait(true), period, entryCurrencyMap);
-        flows = await ConvertFlowsToBaseAsync(flows).ConfigureAwait(true);
-        if (flows is null) return null;
-
-        var startSnap = await _snapshots.GetSnapshotAsync(period.Start).ConfigureAwait(true);
-        var endSnap = await _snapshots.GetSnapshotAsync(period.End).ConfigureAwait(true);
-        var startMv = await ConvertSnapshotMarketValueAsync(startSnap).ConfigureAwait(true);
-        if (startSnap is not null && startMv is null) return null;
-        var endMv = await ConvertSnapshotMarketValueAsync(endSnap).ConfigureAwait(true);
-        if (endSnap is not null && endMv is null) return null;
-
-        var withSynthetic = new List<CashFlow>(flows);
-        if (startMv is > 0m)
-            withSynthetic.Insert(0, new CashFlow(period.Start, -startMv.Value, GetBaseCurrency()));
-        if (endMv is > 0m)
-            withSynthetic.Add(new CashFlow(period.End, endMv.Value, GetBaseCurrency()));
-
-        return _xirrCalculator.Compute(withSynthetic);
-    }
-
-    private async Task<decimal?> ComputeTwrAsync(PerformancePeriod period)
-    {
-        if (_twrCalculator is null || _trades is null || _snapshots is null)
-            return null;
-
-        var rawSnapshots = await _snapshots.GetSnapshotsAsync(period.Start, period.End).ConfigureAwait(true);
-        var valuations = new List<(DateOnly Date, decimal Value)>(rawSnapshots.Count);
-        foreach (var snap in rawSnapshots.OrderBy(s => s.SnapshotDate))
-        {
-            var converted = await ConvertSnapshotMarketValueAsync(snap).ConfigureAwait(true);
-            if (converted is null) return null;
-            valuations.Add((snap.SnapshotDate, converted.Value));
-        }
-
-        if (valuations.Count < 2) return null;
-
-        var entryCurrencyMap = await BuildEntryCurrencyMapAsync().ConfigureAwait(true);
-        var flows = Assetra.Application.Analysis.PerformanceFlowBuilder.BuildPerformanceFlows(
-            await _trades.GetAllAsync().ConfigureAwait(true), period, entryCurrencyMap);
-        flows = await ConvertFlowsToBaseAsync(flows).ConfigureAwait(true);
-        if (flows is null) return null;
-
-        return _twrCalculator.Compute(valuations, flows);
-    }
-
-    private async Task<IReadOnlyDictionary<Guid, string>> BuildEntryCurrencyMapAsync()
-    {
-        if (_portfolio is null) return new Dictionary<Guid, string>();
-        var entries = await _portfolio.GetEntriesAsync().ConfigureAwait(true);
-        return entries.ToDictionary(
-            e => e.Id,
-            e => string.IsNullOrWhiteSpace(e.Currency) ? string.Empty : e.Currency);
-    }
-
-    private async Task<List<CashFlow>?> ConvertFlowsToBaseAsync(List<CashFlow> flows)
-    {
-        var baseCurrency = GetBaseCurrency();
-        if (_fx is null || string.IsNullOrWhiteSpace(baseCurrency)) return flows;
-        var converted = await MultiCurrencyCashFlowConverter.ConvertAllAsync(flows, baseCurrency, _fx).ConfigureAwait(true);
-        return converted is null ? null : converted.ToList();
-    }
-
-    private async Task<decimal?> ConvertSnapshotMarketValueAsync(PortfolioDailySnapshot? snap)
-    {
-        if (snap is null) return null;
-
-        var baseCurrency = GetBaseCurrency();
-        if (_fx is null || string.IsNullOrWhiteSpace(baseCurrency)) return snap.MarketValue;
-
-        var snapshotCurrency = string.IsNullOrWhiteSpace(snap.Currency) ? "TWD" : snap.Currency;
-        if (string.Equals(snapshotCurrency, baseCurrency, StringComparison.OrdinalIgnoreCase))
-            return snap.MarketValue;
-
-        return await _fx.ConvertAsync(snap.MarketValue, snapshotCurrency, baseCurrency, snap.SnapshotDate).ConfigureAwait(true);
-    }
-
-    private string? GetBaseCurrency()
-    {
-        var baseCurrency = _appSettings?.Current.BaseCurrency;
-        return string.IsNullOrWhiteSpace(baseCurrency) ? null : baseCurrency;
-    }
-
-    // BuildPerformanceFlows 抽到 Application/Analysis/PerformanceFlowBuilder
-    // 由 ReportsViewModel + PortfolioHistoryViewModel 共用。
 
     public sealed record OverBudgetRowViewModel(
         CategorySpendSummary Summary,
@@ -813,17 +589,4 @@ public sealed partial class ReportsViewModel : ObservableObject
         DateTime DueDate,
         string AmountDisplay);
 
-    public sealed record PerformanceAttributionRowViewModel(
-        string Label,
-        string AmountDisplay,
-        bool IsPositive);
-
-    public sealed record RiskTopHoldingRowViewModel(
-        string Label,
-        string MarketValueDisplay,
-        string WeightDisplay,
-        decimal Weight)
-    {
-        public decimal WeightPercent => Weight * 100m;
-    }
 }
