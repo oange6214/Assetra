@@ -79,6 +79,7 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(YearViewCells))]
+    [NotifyPropertyChangedFor(nameof(YearViewWeekColumns))]
     private bool _isYearView;
 
     /// <summary>
@@ -87,6 +88,13 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     /// 渲染（7 row × 53 col 接近一年）。
     /// </summary>
     public IReadOnlyList<DailyCellVm> YearViewCells => BuildYearCells();
+
+    /// <summary>
+    /// 年度熱度圖的「週欄」集合 — GitHub-style 嚴格 7-row 排列。
+    /// 每 column = 一週（Mon..Sun），長度 ≈ 54。1/1 的 day-of-week 前面 cells
+    /// 用 null 填空，12/31 後同理。
+    /// </summary>
+    public IReadOnlyList<YearWeekColumnVm> YearViewWeekColumns => BuildYearWeekColumns();
 
     /// <summary>
     /// 使用者點選的單一日 cell。null 時 popover 關閉。
@@ -487,6 +495,60 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
         return cells;
     }
 
+    /// <summary>
+    /// 以「週欄」結構建構年度熱度圖。每 column 7 cells（Mon..Sun），column
+    /// 數量 ≈ 53–54 視該年第一天的 DOW + 是否閏年而定。MonthLabel 標在每月
+    /// 第一週的 column（給 XAML 上方標題列用）。
+    /// </summary>
+    private IReadOnlyList<YearWeekColumnVm> BuildYearWeekColumns()
+    {
+        var year = CurrentMonth.Year;
+        var allCells = BuildYearCells();
+        var byDate = allCells.ToDictionary(c => c.Date);
+
+        // 把 1/1 推回到該週的週一作為 grid 起點。Mon=0, Sun=6（台灣慣例）。
+        var jan1 = new DateOnly(year, 1, 1);
+        var dow = (int)jan1.DayOfWeek;       // Sun=0..Sat=6
+        var mondayOffset = dow == 0 ? 6 : dow - 1;
+        var start = jan1.AddDays(-mondayOffset);
+        var end = new DateOnly(year, 12, 31);
+        // 把結束日推到該週週日確保最後一欄也是完整 7 cell
+        var endDow = (int)end.DayOfWeek;
+        var endOffset = endDow == 0 ? 0 : 7 - endDow;
+        var lastDay = end.AddDays(endOffset);
+
+        var columns = new List<YearWeekColumnVm>();
+        var cursor = start;
+        int? lastMonth = null;
+        while (cursor <= lastDay)
+        {
+            var days = new DailyCellVm?[7];
+            string? monthLabel = null;
+            for (var k = 0; k < 7; k++)
+            {
+                var d = cursor.AddDays(k);
+                if (d.Year != year) continue;            // 跨年 cell 留 null
+                if (!byDate.TryGetValue(d, out var cell)) continue;
+                days[k] = cell;
+                // 把月份標籤標在「該週包含的第一個月份首日所在 row 0」
+                if (lastMonth != d.Month && k == 0)
+                {
+                    monthLabel = d.Month.ToString();
+                    lastMonth = d.Month;
+                }
+                else if (lastMonth != d.Month && d.Day <= 7)
+                {
+                    // 月份首週但 jan-1 不在 row 0 → 標在這欄
+                    monthLabel = d.Month.ToString();
+                    lastMonth = d.Month;
+                }
+            }
+            columns.Add(new YearWeekColumnVm(days, monthLabel));
+            cursor = cursor.AddDays(7);
+        }
+        return columns;
+    }
+
     private static string FormatDelta(decimal? delta)
     {
         if (delta is null) return string.Empty;
@@ -555,6 +617,14 @@ public sealed record WeekRowVm(
     IReadOnlyList<DailyCellVm> Days,
     decimal? TotalDelta,
     string TotalDisplay);
+
+/// <summary>
+/// 年度熱度圖的「週欄」— 7 個 day cell（Mon..Sun，nullable 表示跨年 placeholder）
+/// + 可選的月份標籤（每月第一週標示）。XAML 用 ItemsControl over Columns。
+/// </summary>
+public sealed record YearWeekColumnVm(
+    IReadOnlyList<DailyCellVm?> Days,
+    string? MonthLabel);
 
 /// <summary>單一日曆格的 immutable 投影。</summary>
 public sealed record DailyCellVm(

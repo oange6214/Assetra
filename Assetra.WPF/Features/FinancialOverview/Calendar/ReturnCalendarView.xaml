@@ -310,69 +310,104 @@
 
         <!--
             ── v2 #6d：年度熱度圖（IsYearView=true 時取代月份 grid）──
-            GitHub-style：每 cell 一天，左到右、上到下排 365/366 個 cell。
-            純色塊 + tooltip 顯示日期 / Δ — 視覺上一眼看完整年。
+            GitHub-style：嚴格 7-row × ~54-col grid（Mon..Sun 為 row）。
+            每 column = 一週；月份標籤在每月首週欄的 column 上方。
         -->
-        <ItemsControl Grid.Row="3"
-                      ItemsSource="{Binding YearViewCells}"
-                      Visibility="{Binding IsYearView, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border Width="10" Height="10" Margin="1"
-                            BorderBrush="{DynamicResource AppBorderLight}"
-                            BorderThickness="0.5"
-                            CornerRadius="2">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Tone}" Value="UpWeak">
-                                        <Setter Property="Background" Value="#1AEF4444" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Tone}" Value="UpMedium">
-                                        <Setter Property="Background" Value="#33EF4444" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Tone}" Value="UpStrong">
-                                        <Setter Property="Background" Value="#66EF4444" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Tone}" Value="UpStrongest">
-                                        <Setter Property="Background" Value="#99EF4444" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Tone}" Value="DownWeak">
-                                        <Setter Property="Background" Value="#1A22C55E" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Tone}" Value="DownMedium">
-                                        <Setter Property="Background" Value="#3322C55E" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Tone}" Value="DownStrong">
-                                        <Setter Property="Background" Value="#6622C55E" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Tone}" Value="DownStrongest">
-                                        <Setter Property="Background" Value="#9922C55E" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <Border.ToolTip>
-                            <TextBlock>
-                                <Run Text="{Binding Date.Year, Mode=OneWay, StringFormat='0000'}" />
-                                <Run Text="/" />
-                                <Run Text="{Binding Date.Month, Mode=OneWay, StringFormat='00'}" />
-                                <Run Text="/" />
-                                <Run Text="{Binding Date.Day, Mode=OneWay, StringFormat='00'}" />
-                                <Run Text=" " />
-                                <Run Text="{Binding DeltaDisplay, Mode=OneWay}" />
-                            </TextBlock>
-                        </Border.ToolTip>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <StackPanel Grid.Row="3"
+                    Visibility="{Binding IsYearView, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <!--  Month labels row：每欄一個 label（多數空白，每月首週欄有月份字）  -->
+            <ItemsControl ItemsSource="{Binding YearViewWeekColumns}" Margin="0,0,0,4">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Width="12" Margin="1,0"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Text="{Binding MonthLabel}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!--  7-row × N-col 熱度圖：每 column 是 7 個 day cell 的垂直 stack  -->
+            <ItemsControl ItemsSource="{Binding YearViewWeekColumns}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ItemsControl ItemsSource="{Binding Days}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Vertical" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="10" Height="10" Margin="1"
+                                            BorderBrush="{DynamicResource AppBorderLight}"
+                                            BorderThickness="0.5"
+                                            CornerRadius="2">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+                                                <Style.Triggers>
+                                                    <!--  null cell（跨年 placeholder）：透明  -->
+                                                    <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                                        <Setter Property="Background" Value="Transparent" />
+                                                        <Setter Property="BorderBrush" Value="Transparent" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Tone}" Value="UpWeak">
+                                                        <Setter Property="Background" Value="#1AEF4444" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Tone}" Value="UpMedium">
+                                                        <Setter Property="Background" Value="#33EF4444" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Tone}" Value="UpStrong">
+                                                        <Setter Property="Background" Value="#66EF4444" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Tone}" Value="UpStrongest">
+                                                        <Setter Property="Background" Value="#99EF4444" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Tone}" Value="DownWeak">
+                                                        <Setter Property="Background" Value="#1A22C55E" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Tone}" Value="DownMedium">
+                                                        <Setter Property="Background" Value="#3322C55E" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Tone}" Value="DownStrong">
+                                                        <Setter Property="Background" Value="#6622C55E" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Tone}" Value="DownStrongest">
+                                                        <Setter Property="Background" Value="#9922C55E" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Border.ToolTip>
+                                            <TextBlock>
+                                                <Run Text="{Binding Date.Year, Mode=OneWay, StringFormat='0000'}" />
+                                                <Run Text="/" />
+                                                <Run Text="{Binding Date.Month, Mode=OneWay, StringFormat='00'}" />
+                                                <Run Text="/" />
+                                                <Run Text="{Binding Date.Day, Mode=OneWay, StringFormat='00'}" />
+                                                <Run Text=" " />
+                                                <Run Text="{Binding DeltaDisplay, Mode=OneWay}" />
+                                            </TextBlock>
+                                        </Border.ToolTip>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
 
         <!--
             ── 月份迷你 bar chart ──
