@@ -41,10 +41,15 @@ internal sealed class PortfolioViewModelFactory
             History: sp.GetRequiredService<IStockHistoryProvider>(),
             Currency: sp.GetRequiredService<ICurrencyService>(),
             Fx: sp.GetService<IMultiCurrencyValuationService>(),
+            // Stage 1 (Dashboard consolidation)：把分析服務灌進 PortfolioHistory，
+            // 讓 Trends 頁顯示最大回撤與對標 TWR。
+            Drawdown: sp.GetService<IDrawdownCalculator>(),
+            Benchmark: sp.GetService<IBenchmarkComparisonService>(),
             Crypto: sp.GetRequiredService<ICryptoService>(),
             BalanceQuery: sp.GetRequiredService<IBalanceQueryService>(),
             PositionQuery: sp.GetRequiredService<IPositionQueryService>(),
             TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>(),
+            AccountUpsert: sp.GetRequiredService<IAccountUpsertWorkflowService>(),
             AccountMutation: sp.GetRequiredService<IAccountMutationWorkflowService>(),
             LiabilityMutation: sp.GetRequiredService<ILiabilityMutationWorkflowService>(),
             CreditCardMutation: sp.GetRequiredService<ICreditCardMutationWorkflowService>(),

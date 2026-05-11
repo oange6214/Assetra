@@ -71,6 +71,134 @@ public sealed class PortfolioHistoryViewModelTests
         Assert.Empty(vm.ValueSeries);
     }
 
+    // ── Stage 1 (Dashboard consolidation)：區間 KPI + 對標 ──────────────────
+
+    [Fact]
+    public async Task LoadAsync_ComputesPeriodKpisFromFilteredSnapshots()
+    {
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 1), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 7, 1), 0m, 1_500m, 0m, 1),
+        };
+        var vm = new PortfolioHistoryViewModel(new StubHistoryQuery(snapshots));
+        vm.SelectedDays = 0; // "All" so both snapshots are included
+
+        await vm.LoadAsync();
+
+        Assert.True(vm.HasKpis);
+        Assert.Equal(1_000m, vm.KpiStartValue);
+        Assert.Equal(1_500m, vm.KpiEndValue);
+        Assert.Equal(500m, vm.KpiAbsolutePnl);
+        Assert.Equal(0.5m, vm.KpiReturnPct);
+        // Annualized over ~6 months should be > 50% (compounding to full year)
+        Assert.True(vm.KpiAnnualizedPct > 0.5m, $"annualized was {vm.KpiAnnualizedPct}");
+    }
+
+    [Fact]
+    public async Task LoadAsync_NoDrawdownService_HidesDrawdownAndKeepsZero()
+    {
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 1), 0m, 100m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 2), 0m, 110m, 0m, 1),
+        };
+        var vm = new PortfolioHistoryViewModel(new StubHistoryQuery(snapshots));
+
+        await vm.LoadAsync();
+
+        Assert.False(vm.HasDrawdown);
+        Assert.Equal(0m, vm.KpiMaxDrawdownPct);
+    }
+
+    [Fact]
+    public async Task LoadAsync_WithDrawdownService_ComputesMaxDrawdown()
+    {
+        // 1000 → 1200 → 800 → peak 1200, trough 800, dd = (800-1200)/1200 = -33.3%
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 1), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 2), 0m, 1_200m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 3), 0m, 800m, 0m, 1),
+        };
+        var vm = new PortfolioHistoryViewModel(
+            new StubHistoryQuery(snapshots),
+            drawdown: new Assetra.Application.Analysis.DrawdownCalculator());
+
+        await vm.LoadAsync();
+
+        Assert.True(vm.HasDrawdown);
+        // DrawdownCalculator returns magnitude (positive). 1000 → 1200 (peak) → 800
+        // gives (1200-800)/1200 = 33.33%.
+        Assert.True(vm.KpiMaxDrawdownPct > 0.3m && vm.KpiMaxDrawdownPct < 0.4m,
+            $"expected ~ 33% drawdown magnitude, got {vm.KpiMaxDrawdownPct}");
+    }
+
+    [Fact]
+    public async Task LoadAsync_NoBenchmarkService_HidesBenchmarkRow()
+    {
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 1), 0m, 100m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 2), 0m, 110m, 0m, 1),
+        };
+        var vm = new PortfolioHistoryViewModel(new StubHistoryQuery(snapshots));
+
+        await vm.LoadAsync();
+
+        Assert.False(vm.HasBenchmark);
+        Assert.Equal("—", vm.BenchmarkTaiexDisplay);
+        Assert.Equal("—", vm.BenchmarkTw0050Display);
+        Assert.Equal("—", vm.BenchmarkTw00981ADisplay);
+        Assert.Equal("—", vm.BenchmarkDeposit15Display);
+    }
+
+    [Fact]
+    public async Task LoadAsync_WithBenchmarkService_ComputesDepositBaseline()
+    {
+        // 1.5% 年化合成基準不依賴外部 history provider；只要 service 存在
+        // 且 filtered.Count >= 2，Deposit15Display 應該被計算出非 "—"。
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2025, 1, 1), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 1), 0m, 1_100m, 0m, 1),
+        };
+        var vm = new PortfolioHistoryViewModel(
+            new StubHistoryQuery(snapshots),
+            benchmark: new StubBenchmark(null));
+        vm.SelectedDays = 0;
+
+        await vm.LoadAsync();
+
+        Assert.True(vm.HasBenchmark);
+        Assert.NotEqual("—", vm.BenchmarkDeposit15Display);
+        // ETF / index benchmark 在 stub 回 null 時應 fallback 為 "—"，不影響 deposit。
+        Assert.Equal("—", vm.BenchmarkTaiexDisplay);
+    }
+
+    [Fact]
+    public async Task LoadAsync_BelowTwoSnapshots_HasKpisFalse()
+    {
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 1), 0m, 1_000m, 0m, 1),
+        };
+        var vm = new PortfolioHistoryViewModel(new StubHistoryQuery(snapshots));
+
+        await vm.LoadAsync();
+
+        Assert.False(vm.HasKpis);
+    }
+
+    private sealed class StubBenchmark(decimal? result) : IBenchmarkComparisonService
+    {
+        public Task<decimal?> ComputeBenchmarkTwrAsync(
+            string symbol,
+            Assetra.Core.Models.Analysis.PerformancePeriod period,
+            CancellationToken ct = default) =>
+            Task.FromResult(result);
+    }
+
     [Fact]
     public async Task CustomDateChange_RefreshesChartWithSelectedRange()
     {

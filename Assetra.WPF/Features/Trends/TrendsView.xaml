@@ -18,8 +18,15 @@
     <Grid Style="{StaticResource PageRootGrid}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <!--  period chip bar  -->
             <RowDefinition Height="*" />
+            <!--  main chart  -->
             <RowDefinition Height="Auto" />
+            <!--  Stage 1: 區間 KPI 列  -->
+            <RowDefinition Height="Auto" />
+            <!--  Stage 1: 對標比較區  -->
+            <RowDefinition Height="Auto" />
+            <!--  footer hint  -->
         </Grid.RowDefinitions>
 
         <!--  ── Period selector + custom range picker ──  -->
@@ -99,9 +106,154 @@
             </Grid>
         </Border>
 
+        <!--  ── Stage 1: 區間 KPI 列（期初/期末/絕對 PnL/報酬率/年化/最大回撤）──  -->
+        <!--
+            注意：XAML StringFormat 中的逗號是 markup extension 分隔符，
+            需用單引號包住整段 format 字串避免被誤切。百分比 0.00% 同理。
+        -->
+        <UniformGrid
+            Grid.Row="2"
+            Margin="0,12,0,0"
+            Columns="6"
+            Visibility="{Binding HasKpis, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <!--  期初  -->
+            <Border Margin="0,0,4,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}">
+                <StackPanel>
+                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                               Foreground="{DynamicResource AppTextMuted}"
+                               Text="{DynamicResource Trends.Kpi.StartValue}" />
+                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{Binding KpiStartValue, StringFormat='N0'}" />
+                </StackPanel>
+            </Border>
+            <!--  期末  -->
+            <Border Margin="2,0,2,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}">
+                <StackPanel>
+                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                               Foreground="{DynamicResource AppTextMuted}"
+                               Text="{DynamicResource Trends.Kpi.EndValue}" />
+                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{Binding KpiEndValue, StringFormat='N0'}" />
+                </StackPanel>
+            </Border>
+            <!--  區間絕對損益  -->
+            <Border Margin="2,0,2,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}">
+                <StackPanel>
+                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                               Foreground="{DynamicResource AppTextMuted}"
+                               Text="{DynamicResource Trends.Kpi.AbsolutePnl}" />
+                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{Binding KpiAbsolutePnl, StringFormat='+#\,##0;-#\,##0;0'}" />
+                </StackPanel>
+            </Border>
+            <!--  區間報酬率  -->
+            <Border Margin="2,0,2,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}">
+                <StackPanel>
+                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                               Foreground="{DynamicResource AppTextMuted}"
+                               Text="{DynamicResource Trends.Kpi.ReturnPct}" />
+                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{Binding KpiReturnPct, StringFormat='+0.00%;-0.00%;0.00%'}" />
+                </StackPanel>
+            </Border>
+            <!--  年化  -->
+            <Border Margin="2,0,2,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}">
+                <StackPanel>
+                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                               Foreground="{DynamicResource AppTextMuted}"
+                               Text="{DynamicResource Trends.Kpi.Annualized}" />
+                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{Binding KpiAnnualizedPct, StringFormat='+0.00%;-0.00%;0.00%'}" />
+                </StackPanel>
+            </Border>
+            <!--  最大回撤（IDrawdownCalculator 注入後才顯示）  -->
+            <Border Margin="4,0,0,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}"
+                    Visibility="{Binding HasDrawdown, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                               Foreground="{DynamicResource AppTextMuted}"
+                               Text="{DynamicResource Trends.Kpi.MaxDrawdown}" />
+                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppDown}"
+                               Text="{Binding KpiMaxDrawdownPct, StringFormat='0.00%'}" />
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <!--  ── Stage 1: 對標比較區（4 個固定 benchmark TWR）──  -->
+        <Border
+            Grid.Row="3"
+            Margin="0,8,0,0"
+            Padding="14,10"
+            Background="{DynamicResource AppCardBackground}"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="1"
+            CornerRadius="{StaticResource Radius.Sm}"
+            Visibility="{Binding HasBenchmark, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel>
+                <TextBlock
+                    Margin="0,0,0,6"
+                    FontSize="{DynamicResource Font.Size.Xs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Trends.Benchmark.Heading}" />
+                <UniformGrid Columns="4">
+                    <StackPanel Margin="0,0,8,0">
+                        <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Text="{DynamicResource Trends.Benchmark.Taiex}" />
+                        <TextBlock FontSize="{DynamicResource Font.Size.Sm}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding BenchmarkTaiexDisplay}" />
+                    </StackPanel>
+                    <StackPanel Margin="4,0,4,0">
+                        <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Text="{DynamicResource Trends.Benchmark.Tw0050}" />
+                        <TextBlock FontSize="{DynamicResource Font.Size.Sm}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding BenchmarkTw0050Display}" />
+                    </StackPanel>
+                    <StackPanel Margin="4,0,4,0">
+                        <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Text="{DynamicResource Trends.Benchmark.Tw00981A}" />
+                        <TextBlock FontSize="{DynamicResource Font.Size.Sm}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding BenchmarkTw00981ADisplay}" />
+                    </StackPanel>
+                    <StackPanel Margin="8,0,0,0">
+                        <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Text="{DynamicResource Trends.Benchmark.Deposit15}" />
+                        <TextBlock FontSize="{DynamicResource Font.Size.Sm}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding BenchmarkDeposit15Display}" />
+                    </StackPanel>
+                </UniformGrid>
+            </StackPanel>
+        </Border>
+
         <!--  ── Footer hint ──  -->
         <TextBlock
-            Grid.Row="2"
+            Grid.Row="4"
             Margin="0,12,0,0"
             FontSize="{DynamicResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextSecondary}"

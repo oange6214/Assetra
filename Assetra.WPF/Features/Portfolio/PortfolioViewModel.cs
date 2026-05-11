@@ -33,6 +33,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     private readonly ISnackbarService? _snackbar;
     private readonly IThemeService? _themeService;
     private Action<ApplicationTheme>? _onThemeChanged;
+    private Action? _onSettingsChanged;
     private readonly ICurrencyService? _currencyService;
     private readonly ICryptoService? _cryptoService;
     private readonly IPortfolioLoadService _loadService;
@@ -111,6 +112,17 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     [ObservableProperty] private decimal _netWorth;
     [ObservableProperty] private bool _hasNoCashAccounts = true;
     [ObservableProperty] private bool _hasNoLiabilities = true;
+
+    public bool ShowQuoteProviderNotice =>
+        _settingsService is not null &&
+        string.IsNullOrWhiteSpace(_settingsService.Current.TwelveDataApiKey) &&
+        Positions.Any(IsUsListedPosition);
+
+    private static bool IsUsListedPosition(PortfolioRowViewModel row) =>
+        string.Equals(
+            StockExchangeRegistry.TryGet(row.Exchange)?.Country,
+            "US",
+            StringComparison.OrdinalIgnoreCase);
 
     // 本日盈虧（基於 PrevClose，報價載入後才有效）
     [ObservableProperty] private decimal _dayPnl;
@@ -328,7 +340,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
             services.HistoryQuery ?? new NullPortfolioHistoryQueryService(),
             ui.Localization,
             ui.Settings,
-            services.Fx);
+            services.Fx,
+            services.Drawdown,
+            services.Benchmark);
 
         // TradeFilter must be created before LoadAsync so LoadTradesAsync can call
         // TradeFilter.InitTradeTypeFilters() and TradeFilter.RefreshTradesView().
@@ -462,6 +476,16 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         // Refresh all displayed amounts when currency changes
         if (services.Currency is not null)
             services.Currency.CurrencyChanged += OnCurrencyChanged;
+
+        if (_settingsService is not null)
+        {
+            _onSettingsChanged = () =>
+            {
+                OnPropertyChanged(nameof(ShowQuoteProviderNotice));
+                RebuildTotals();
+            };
+            _settingsService.Changed += _onSettingsChanged;
+        }
 
         services.Stock.QuoteStream
             .ObserveOn(ui.Scheduler)
@@ -680,6 +704,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         }
 
         HasNoPositions = Positions.Count == 0;
+        OnPropertyChanged(nameof(ShowQuoteProviderNotice));
 
         // Refresh Lazy-Upsert suggestion list for TX form editable ComboBox (Task 19).
         // Only active entries — one row per (Symbol, Exchange).
@@ -809,6 +834,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
 
     private void RebuildTotals()
     {
+        ApplyPositionBaseValuations();
+
         var summary = _summaryService.Calculate(BuildSummaryInput());
 
         TotalCost = summary.TotalCost;
@@ -838,6 +865,14 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
 
         // Fire-and-forget: record today's snapshot once prices are live
         AsyncHelpers.SafeFireAndForget(RecordSnapshotAsync, "Portfolio.RecordSnapshot");
+    }
+
+    private void ApplyPositionBaseValuations()
+    {
+        var baseCurrency = ResolveBaseCurrency();
+        var rates = _currencyService?.ExchangeRates;
+        foreach (var p in Positions)
+            p.ApplyBaseValuation(baseCurrency, rates);
     }
 
     // Position log helpers — seeding helpers removed in Wave 9.3: the trade log is now
@@ -881,24 +916,57 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
 
     private PortfolioSummaryInput BuildSummaryInput()
     {
+        var baseCurrency = ResolveBaseCurrency();
+        var rates = _currencyService?.ExchangeRates;
+
         return new PortfolioSummaryInput(
             Positions.Select(p => new PositionSummaryInput(
                 p.Id,
                 p.AssetType,
                 p.Quantity,
-                p.Cost,
-                p.MarketValue,
-                p.NetValue,
-                p.CurrentPrice,
-                p.PrevClose,
-                p.IsLoadingPrice)).ToList(),
-            CashAccounts.Select(c => new CashBalanceInput(c.Id, c.Balance)).ToList(),
+                ConvertToBase(p.Cost, p.Currency, baseCurrency, rates),
+                ConvertToBase(p.MarketValue, p.Currency, baseCurrency, rates),
+                ConvertToBase(p.NetValue, p.Currency, baseCurrency, rates),
+                ConvertToBase(p.CurrentPrice, p.Currency, baseCurrency, rates),
+                ConvertToBase(p.PrevClose, p.Currency, baseCurrency, rates),
+                p.IsLoadingPrice,
+                NativeCurrency: p.Currency,
+                BaseCurrency: baseCurrency,
+                NativeCost: p.Cost,
+                NativeMarketValue: p.MarketValue,
+                NativeNetValue: p.NetValue,
+                NativeCurrentPrice: p.CurrentPrice,
+                NativePrevClose: p.PrevClose)).ToList(),
+            CashAccounts.Select(c => new CashBalanceInput(
+                c.Id,
+                ConvertToBase(c.Balance, c.Currency, baseCurrency, rates),
+                NativeCurrency: c.Currency,
+                BaseCurrency: baseCurrency,
+                NativeBalance: c.Balance)).ToList(),
             Liabilities.Select(l => new LiabilityBalanceInput(
                 l.AssetId ?? Guid.Empty,
-                l.Balance,
-                l.OriginalAmount)).ToList(),
-            Financial.MonthlyExpense);
+                ConvertToBase(l.BalanceAsMoney.Amount, l.BalanceAsMoney.Currency, baseCurrency, rates),
+                ConvertToBase(l.OriginalAmountAsMoney.Amount, l.OriginalAmountAsMoney.Currency, baseCurrency, rates),
+                NativeCurrency: l.BalanceAsMoney.Currency,
+                BaseCurrency: baseCurrency,
+                NativeBalance: l.BalanceAsMoney.Amount,
+                NativeOriginalAmount: l.OriginalAmountAsMoney.Amount)).ToList(),
+            Financial.MonthlyExpense,
+            baseCurrency);
     }
+
+    private string ResolveBaseCurrency()
+    {
+        var baseCurrency = _settingsService?.Current.BaseCurrency;
+        return string.IsNullOrWhiteSpace(baseCurrency) ? "TWD" : baseCurrency;
+    }
+
+    private static decimal ConvertToBase(
+        decimal amount,
+        string? fromCurrency,
+        string baseCurrency,
+        IReadOnlyDictionary<string, decimal>? rates) =>
+        CurrencyValuation.ConvertToBase(amount, fromCurrency, baseCurrency, rates);
 
     /// <summary>
     /// Writes <paramref name="id"/> to <see cref="SubViewModels.AccountDialogViewModel.DefaultCashAccountId"/>
@@ -1028,7 +1096,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
             $"{nameof(ApplyCashAccounts)} must be called on the UI thread");
         var accounts = loaded.CashAccounts;
         var balances = loaded.CashBalances;
-        // Diagnostic log: 確認 DB 載入時 Subtype 是否帶回。
+        // Diagnostic log: 確認 DB 載入時 Subtype 是否帶回。若全部 row 的 Subtype 都是 null，
+        // 表示 DB 沒寫入或 schema/SELECT 出問題（v0.28+ taxonomy refactor 才有 Subtype）。
         foreach (var a in accounts)
             Serilog.Log.Information("[Portfolio.LoadCash] id={Id} name={Name} subtype={Subtype} groupId={GroupId}",
                 a.Id, a.Name, a.Subtype ?? "(null)", a.GroupId?.ToString() ?? "(null)");
@@ -1123,6 +1192,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
             _currencyService.CurrencyChanged -= OnCurrencyChanged;
         if (_themeService is not null && _onThemeChanged is not null)
             _themeService.ThemeChanged -= _onThemeChanged;
+        if (_settingsService is not null && _onSettingsChanged is not null)
+            _settingsService.Changed -= _onSettingsChanged;
         AddAssetDialog.AssetAdded -= OnAssetAdded;
         AddAssetDialog.CancelPendingFetch();
         SellPanel.SellCompleted -= OnSellCompleted;

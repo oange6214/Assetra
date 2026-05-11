@@ -105,7 +105,17 @@ public sealed record PortfolioServices(
     /// 自動分類規則來源（P1 收支管理）。為 null 時不執行 Note → Category 自動匹配。
     /// </summary>
     IAutoCategorizationRuleRepository? AutoCategorizationRuleRepository = null,
-    IMultiCurrencyValuationService? Fx = null)
+    IMultiCurrencyValuationService? Fx = null,
+    /// <summary>
+    /// Stage 1 (Dashboard consolidation)：給 PortfolioHistoryViewModel 算最大回撤用。
+    /// 為 null 時 KPI 列隱藏最大回撤卡。
+    /// </summary>
+    IDrawdownCalculator? Drawdown = null,
+    /// <summary>
+    /// Stage 1：給 PortfolioHistoryViewModel 算對標 TWR（^TWII / 0050.TW / 00981A.TW）。
+    /// 為 null 時對標比較區整段隱藏。
+    /// </summary>
+    IBenchmarkComparisonService? Benchmark = null)
 {
     /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。

@@ -201,7 +201,7 @@
     <sys:String x:Key="Portfolio.Tx.CommissionDiscountHint">輸入 0.1~1.0（1.0 = 無折扣，0.6 = 六折）</sys:String>
     <sys:String x:Key="Portfolio.Tab.Overview">儀表板</sys:String>
     <sys:String x:Key="Portfolio.History.Title">歷史走勢</sys:String>
-    <sys:String x:Key="Portfolio.Tab.Positions">投資</sys:String>
+    <sys:String x:Key="Portfolio.Tab.Positions">持倉</sys:String>
     <sys:String x:Key="Portfolio.Tab.Cash">帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tab.Liability">負債</sys:String>
     <sys:String x:Key="Portfolio.Tab.Allocation">配置分析</sys:String>
@@ -218,13 +218,24 @@
     <sys:String x:Key="Portfolio.Liability.Health.Tooltip">負債比率閾值：&#x0a;　• 健康 &lt; 30%&#x0a;　• 警告 30% ~ 50%&#x0a;　• 危險 ≥ 50%</sys:String>
     <sys:String x:Key="Portfolio.DayChange">今日漲跌</sys:String>
     <sys:String x:Key="Portfolio.AddRecord">新增</sys:String>
-    <sys:String x:Key="Portfolio.AddRecord.Tooltip">新增 (Ctrl+N)</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Tooltip">新增；Ctrl+N 可快速新增交易</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Transaction">新增交易</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Transaction.Hint">儲存後出現在「交易記錄」，並更新投資、帳戶或負債</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.BuyTransaction">新增買入交易</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.BuyTransaction.Hint">直接建立股票、ETF 或其他投資買入紀錄</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Investment">新增投資資產</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Account">新增資金帳戶</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Account.Hint">建立後可在「資金帳戶」查看與管理</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Liability">新增負債</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Liability.Hint">建立貸款或信用卡，之後可在「負債」查看</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Category">新增收支分類</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Category.Hint">建立後可在「收支分類」管理與套用</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Recurring">新增訂閱排程</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Recurring.Hint">建立固定收入或支出的自動排程</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Alert">新增警示</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Alert.Hint">設定價格條件，之後可在「警示」查看</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Goal">新增財務目標</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Goal.Hint">建立後可在「財務目標」追蹤進度</sys:String>
     <sys:String x:Key="Portfolio.AddCash">帳戶</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">新增負債</sys:String>
     <sys:String x:Key="Portfolio.AddCreditCard">新增負債</sys:String>
@@ -269,18 +280,18 @@
     <sys:String x:Key="Portfolio.Filter.Category.Liability">負債</sys:String>
     <sys:String x:Key="Portfolio.Cash.Empty">尚無帳戶，點擊「＋ 新增」</sys:String>
     <sys:String x:Key="Portfolio.Setup.NoAccounts.Title">先建立一個帳戶</sys:String>
-    <sys:String x:Key="Portfolio.Setup.NoAccounts.Message">建立帳戶後，新增紀錄時就能直接選擇資金流向，也更容易追蹤現金變化。</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoAccounts.Message">建立帳戶後，新增交易時就能直接選擇資金流向，也更容易追蹤現金變化。</sys:String>
     <sys:String x:Key="Portfolio.Setup.NoAccounts.Action">新增帳戶</sys:String>
     <sys:String x:Key="Portfolio.Setup.NoTrades.Title">先新增第一筆紀錄</sys:String>
-    <sys:String x:Key="Portfolio.Setup.NoTrades.Message">從新增紀錄開始，建立你的投資、現金與負債歷程；之後圖表與分析才會有內容。</sys:String>
-    <sys:String x:Key="Portfolio.Setup.NoTrades.Action">新增紀錄</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoTrades.Message">從新增交易開始，建立你的投資、現金與負債歷程；之後圖表與分析才會有內容。</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoTrades.Action">新增交易</sys:String>
     <sys:String x:Key="Portfolio.Cash.Name">帳戶名稱</sys:String>
     <sys:String x:Key="Portfolio.Cash.Currency">幣別</sys:String>
     <sys:String x:Key="Portfolio.Cash.Amount">餘額</sys:String>
     <sys:String x:Key="Portfolio.Cash.Default">預設</sys:String>
     <sys:String x:Key="Portfolio.Cash.SetDefault">設為預設</sys:String>
     <sys:String x:Key="Portfolio.Cash.UnsetDefault">取消預設</sys:String>
-    <sys:String x:Key="Portfolio.Cash.DefaultHint">新增紀錄時自動帶入此帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Cash.DefaultHint">新增交易時自動帶入此帳戶</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Title">緊急預備金</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Months">個月</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.MonthlyExpense">每月預估開銷</sys:String>
@@ -555,6 +566,8 @@
     <sys:String x:Key="Portfolio.Tx.TotalAmount">總成交金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee">金額已含手續費</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee.Tooltip">勾選時將總額直接視為持倉成本，不再額外加 0.1425% 手續費；多數券商的成交回報已含手續費，預設勾選。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.ActualCashAmount">實際扣款金額（選填）</sys:String>
+    <sys:String x:Key="Portfolio.Tx.ActualCashAmountHint">複委託或外幣換匯後，請填券商實際扣款；留空時以成交價 × 股數 + 手續費估算。跨幣別扣款時必填。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Subtotal">總計</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivInputMode">輸入方式</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivModePerShare">每股股利</sys:String>
@@ -594,6 +607,9 @@
     <sys:String x:Key="Portfolio.Position.ShowArchived">顯示已封存</sys:String>
     <sys:String x:Key="Portfolio.Position.HideEmpty">隱藏空倉</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.MarketValue">總市值</sys:String>
+    <sys:String x:Key="Portfolio.QuoteSetup.Title">Twelve Data API key 尚未設定</sys:String>
+    <sys:String x:Key="Portfolio.QuoteSetup.Message">若要查詢美股即時報價，請到「設定 > 資料來源」輸入 API key，並通過連線測試。</sys:String>
+    <sys:String x:Key="Portfolio.QuoteState.Stale">快取報價</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.TotalCost">總付出成本</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.Pnl">淨損益試算</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.DayChange">今日漲跌</sys:String>
@@ -688,7 +704,15 @@
     <sys:String x:Key="Settings.UiScaleDesc">0.75× ～ 1.5×，拖曳調整介面縮放</sys:String>
     <sys:String x:Key="Settings.DataSource">歷史資料來源</sys:String>
     <sys:String x:Key="Settings.DataSourceDesc">切換後立即生效，無需重新啟動</sys:String>
-    <sys:String x:Key="Settings.QuoteSource">即時報價來源</sys:String>
+    <sys:String x:Key="Settings.QuoteSource">台股即時報價來源</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.Title">美股代號目錄</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.Refresh">更新美股代號目錄</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.Status">{0:N0} 個代號，上次更新 {1}。</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.Updated">美股代號目錄已更新。</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.NoChange">美股代號目錄已是最新。</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.Failed">美股代號目錄更新失敗。</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.Disabled">美股代號目錄尚未啟用。</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.NeverUpdated">尚未更新</sys:String>
     <sys:String x:Key="Settings.FugleApiKeyHint">貼上 Fugle API Key 後按下儲存，即可在設定中選用 Fugle 資料來源。</sys:String>
     <sys:String x:Key="Settings.DataSource.Saved">資料來源設定已儲存</sys:String>
     <sys:String x:Key="Settings.SaveFailed">設定儲存失敗。</sys:String>
@@ -712,11 +736,8 @@
 
     <!--  ── 資產配置 ──  -->
     <sys:String x:Key="Allocation.Tab.Overview">配置概覽</sys:String>
-    <sys:String x:Key="Allocation.Cash">現金</sys:String>
     <sys:String x:Key="Allocation.Tab.Rebalance">再平衡</sys:String>
     <sys:String x:Key="Allocation.Overview.Title">配置概覽</sys:String>
-    <sys:String x:Key="Allocation.IncludeCash">含現金</sys:String>
-    <sys:String x:Key="Allocation.IncludeCash.Hint">預設不含現金，僅顯示投資商品的內部配置（同 Morningstar 慣例）。勾選後現金會作為防禦性部位納入百分比計算。</sys:String>
     <sys:String x:Key="Allocation.Summary.Investment">持股市值</sys:String>
     <sys:String x:Key="Allocation.Summary.Cash">現金</sys:String>
     <sys:String x:Key="Allocation.Summary.Total">總資產</sys:String>
@@ -764,11 +785,11 @@
     <sys:String x:Key="AddAsset.ClosePrice.FetchFailed">收盤價查詢失敗，請手動輸入</sys:String>
 
     <!--  Financial Overview  -->
-    <sys:String x:Key="FinancialOverview.Nav.Label">財務總覽</sys:String>
+    <sys:String x:Key="FinancialOverview.Nav.Label">財務儀表板</sys:String>
     <sys:String x:Key="FinancialOverview.Header.NetWorth">淨資產</sys:String>
     <sys:String x:Key="FinancialOverview.Header.TotalAssets">總資產</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Assets">其他資產</sys:String>
-    <sys:String x:Key="FinancialOverview.Header.Investments">投資組合</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.Investments">投資資產</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Liabilities">總負債</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.DebtRatio">負債比率</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnl">投資淨損益</sys:String>
@@ -776,7 +797,7 @@
     <sys:String x:Key="FinancialOverview.Kpi.NetWorth.Desc">總資產扣除負債後的淨值</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.TotalAssets.Desc">所有資產加總（含投資、現金、不動產等）</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.OtherAssets.Desc">非投資類資產（現金、不動產、實物資產等）</sys:String>
-    <sys:String x:Key="FinancialOverview.Kpi.Investments.Desc">投資組合市值</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.Investments.Desc">投資資產市值</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.Liabilities.Desc">所有負債加總（貸款、信用卡）</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.DebtRatio.Desc">總負債 / 總資產 — 越低越健康</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnl.Desc">投資組合市值 - 成本</sys:String>
@@ -788,8 +809,8 @@
     <sys:String x:Key="FinancialOverview.Section.Assets">資產</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Investments">投資</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Liabilities">負債</sys:String>
-    <sys:String x:Key="Nav.Portfolio">投資組合</sys:String>
-    <sys:String x:Key="Nav.FinancialOverview">財務總覽</sys:String>
+    <sys:String x:Key="Nav.Portfolio">投資資產</sys:String>
+    <sys:String x:Key="Nav.FinancialOverview">財務儀表板</sys:String>
     <sys:String x:Key="Onboarding.Banner.Title">歡迎使用 Assetra</sys:String>
     <sys:String x:Key="Onboarding.Banner.Steps">① 新增持倉  →  ② 查看配置分析  →  ③ 設定價格警示</sys:String>
     <sys:String x:Key="Settings.Title">設定</sys:String>
@@ -804,6 +825,14 @@
     <sys:String x:Key="Settings.Section.Data">資料</sys:String>
     <sys:String x:Key="Settings.Version">版本</sys:String>
     <sys:String x:Key="Settings.FugleApiKey">Fugle API Key</sys:String>
+    <sys:String x:Key="Settings.TwelveDataApiKey">美股即時報價來源 - Twelve Data API Key</sys:String>
+    <sys:String x:Key="Settings.TwelveDataApiKeyHint">Twelve Data 僅用於美股報價；台股來源可獨立選擇 TWSE / TPEX 官方或 Fugle。輸入 API Key 後需先測試再儲存。</sys:String>
+    <sys:String x:Key="Settings.TwelveData.Test">測試連線</sys:String>
+    <sys:String x:Key="Settings.TwelveData.Quota">今日用量</sys:String>
+    <sys:String x:Key="Settings.TwelveData.TestSucceeded">Twelve Data 連線測試成功。</sys:String>
+    <sys:String x:Key="Settings.TwelveData.TestFailed">Twelve Data 連線測試失敗。</sys:String>
+    <sys:String x:Key="Settings.TwelveData.NotTested">Twelve Data API Key 尚未測試。</sys:String>
+    <sys:String x:Key="Settings.TwelveData.TestBeforeSave">請先測試 Twelve Data API Key，再儲存此報價來源。</sys:String>
     <sys:String x:Key="Settings.Section.Ocr">OCR（PDF 對帳單匯入）</sys:String>
     <sys:String x:Key="Settings.Ocr.TessdataPath">Tesseract tessdata 路徑</sys:String>
     <sys:String x:Key="Settings.Ocr.TessdataPath.Hint">指向包含 .traineddata 檔案的資料夾。空白 = 不啟用 OCR，圖片頁 PDF 會被略過。</sys:String>
@@ -1067,6 +1096,18 @@
     <sys:String x:Key="Trends.Empty">尚無歷史快照</sys:String>
     <sys:String x:Key="Trends.Hint">資料來自每日投資組合快照（市值）</sys:String>
     <sys:String x:Key="Trends.CustomRange">自訂範圍</sys:String>
+    <!--  Stage 1 (Dashboard consolidation)：區間 KPI + 對標  -->
+    <sys:String x:Key="Trends.Kpi.StartValue">期初</sys:String>
+    <sys:String x:Key="Trends.Kpi.EndValue">期末</sys:String>
+    <sys:String x:Key="Trends.Kpi.AbsolutePnl">區間損益</sys:String>
+    <sys:String x:Key="Trends.Kpi.ReturnPct">報酬率</sys:String>
+    <sys:String x:Key="Trends.Kpi.Annualized">年化</sys:String>
+    <sys:String x:Key="Trends.Kpi.MaxDrawdown">最大回撤</sys:String>
+    <sys:String x:Key="Trends.Benchmark.Heading">同期對標報酬率</sys:String>
+    <sys:String x:Key="Trends.Benchmark.Taiex">加權指數</sys:String>
+    <sys:String x:Key="Trends.Benchmark.Tw0050">元大台灣 50</sys:String>
+    <sys:String x:Key="Trends.Benchmark.Tw00981A">00981A</sys:String>
+    <sys:String x:Key="Trends.Benchmark.Deposit15">定存參考 1.5%</sys:String>
 
     <!--  Goals / 財務目標  -->
     <sys:String x:Key="Goals.Title">財務目標</sys:String>

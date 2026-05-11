@@ -4,6 +4,7 @@ using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Models;
+using Assetra.Core.Models.Analysis;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -28,6 +29,11 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     private readonly ILocalizationService _localization;
     private readonly IAppSettingsService? _settings;
     private readonly IMultiCurrencyValuationService? _fx;
+
+    // Stage 1 (Dashboard consolidation plan)：可選的分析服務。為 null 時 KPI
+    // 列降階為「只顯示絕對值」、對標列整段隱藏，不阻擋主圖渲染。
+    private readonly IDrawdownCalculator? _drawdown;
+    private readonly IBenchmarkComparisonService? _benchmark;
 
     /// <summary>Full snapshot history (all dates), cached on each DB load.</summary>
     private IReadOnlyList<PortfolioDailySnapshot> _allSnapshots = [];
@@ -81,16 +87,42 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     partial void OnHasHistoryChanged(bool value) => IsHistoryPanelVisible = HasHistory && IsChartVisible;
     partial void OnIsChartVisibleChanged(bool value) => IsHistoryPanelVisible = HasHistory && IsChartVisible;
 
+    // Stage 1：區間 KPI（5 張卡 + 對標比較區）
+    [ObservableProperty] private decimal _kpiStartValue;
+    [ObservableProperty] private decimal _kpiEndValue;
+    [ObservableProperty] private decimal _kpiAbsolutePnl;
+    [ObservableProperty] private decimal _kpiReturnPct;        // 整個區間累積報酬率 (small "naive" calc：value-based)
+    [ObservableProperty] private decimal _kpiAnnualizedPct;    // 年化
+    [ObservableProperty] private decimal _kpiMaxDrawdownPct;   // 最大回撤 (負數，例：-0.12 表示 -12%)
+    [ObservableProperty] private bool _hasKpis;
+    /// <summary>True 當有提供 IDrawdownCalculator 時；用於控制最大回撤卡的可見性。</summary>
+    [ObservableProperty] private bool _hasDrawdown;
+
+    // Stage 1：對標比較（4 個固定 benchmark）
+    // 每個都是「該對標期間 TWR」字串，未啟用 / 無歷史 = "—"
+    [ObservableProperty] private string _benchmarkTaiexDisplay = "—";
+    [ObservableProperty] private string _benchmarkTw0050Display = "—";
+    [ObservableProperty] private string _benchmarkTw00981ADisplay = "—";
+    [ObservableProperty] private string _benchmarkDeposit15Display = "—";   // 1.5% 年化參考（合成）
+    /// <summary>True 當 IBenchmarkComparisonService 已注入。隱藏整個對標區用。</summary>
+    [ObservableProperty] private bool _hasBenchmark;
+
     public PortfolioHistoryViewModel(
         IPortfolioHistoryQueryService historyQueryService,
         ILocalizationService? localization = null,
         IAppSettingsService? settings = null,
-        IMultiCurrencyValuationService? fx = null)
+        IMultiCurrencyValuationService? fx = null,
+        IDrawdownCalculator? drawdown = null,
+        IBenchmarkComparisonService? benchmark = null)
     {
         _historyQueryService = historyQueryService;
         _localization = localization ?? NullLocalizationService.Instance;
         _settings = settings;
         _fx = fx;
+        _drawdown = drawdown;
+        _benchmark = benchmark;
+        HasDrawdown = _drawdown is not null;
+        HasBenchmark = _benchmark is not null;
     }
 
     // Public API
@@ -143,7 +175,122 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             : FilterByDays(_allSnapshots, SelectedDays);
         var points = await BuildPointsAsync(filtered);
         BuildChart(points);
+
+        // Stage 1: KPI 列 + 對標。失敗不影響主圖。
+        try
+        {
+            UpdateKpis(filtered, points);
+            await UpdateBenchmarksAsync(filtered).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // 任何 KPI / benchmark 計算錯誤不應拖累主流程
+            HasKpis = false;
+        }
     }
+
+    // ── Stage 1: 區間 KPI 計算 ─────────────────────────────────────────
+    // 採「naive」value-based 報酬率（end/start − 1），不扣除中間出入金；
+    // 完整 TWR/MWR 留待 Stage 3 把 Reports 的服務搬過來時再切換。
+    private void UpdateKpis(
+        IReadOnlyList<PortfolioDailySnapshot> filtered,
+        IReadOnlyList<DateTimePoint> points)
+    {
+        if (points.Count < 2)
+        {
+            HasKpis = false;
+            return;
+        }
+
+        var startValue = (decimal)points[0].Value!.Value;
+        var endValue = (decimal)points[^1].Value!.Value;
+        KpiStartValue = startValue;
+        KpiEndValue = endValue;
+        KpiAbsolutePnl = endValue - startValue;
+        KpiReturnPct = startValue == 0m ? 0m : (endValue - startValue) / startValue;
+
+        // 年化：用實際日數 + 365 day year
+        var startDate = points[0].DateTime;
+        var endDate = points[^1].DateTime;
+        var days = Math.Max(1, (endDate - startDate).TotalDays);
+        if (days >= 1 && startValue > 0m && endValue > 0m)
+        {
+            // (1 + r) ^ (365/days) − 1
+            var growth = (double)(endValue / startValue);
+            var annualized = Math.Pow(growth, 365.0 / days) - 1.0;
+            KpiAnnualizedPct = (decimal)annualized;
+        }
+        else
+        {
+            KpiAnnualizedPct = 0m;
+        }
+
+        // 最大回撤（只在有 IDrawdownCalculator 時計算）
+        if (_drawdown is not null && filtered.Count >= 2)
+        {
+            var series = filtered
+                .OrderBy(s => s.SnapshotDate)
+                .Select(s => (s.SnapshotDate, s.MarketValue))
+                .ToList();
+            KpiMaxDrawdownPct = _drawdown.ComputeMaxDrawdown(series) ?? 0m;
+        }
+        else
+        {
+            KpiMaxDrawdownPct = 0m;
+        }
+
+        HasKpis = true;
+    }
+
+    // ── Stage 1: 對標 TWR 計算 ─────────────────────────────────────────
+    // 4 個固定 benchmark：加權指數 / 0050 / 00981A / 1.5% 定存（合成）。
+    // 任一無歷史時對應字串顯示 "—"，不影響其他項。
+    private async Task UpdateBenchmarksAsync(IReadOnlyList<PortfolioDailySnapshot> filtered)
+    {
+        if (_benchmark is null || filtered.Count < 2)
+        {
+            BenchmarkTaiexDisplay = BenchmarkTw0050Display =
+                BenchmarkTw00981ADisplay = BenchmarkDeposit15Display = "—";
+            return;
+        }
+
+        var startDate = filtered.OrderBy(s => s.SnapshotDate).First().SnapshotDate;
+        var endDate = filtered.OrderByDescending(s => s.SnapshotDate).First().SnapshotDate;
+        var period = new PerformancePeriod(startDate, endDate);
+
+        // 1.5% 年化定存的合成報酬：(1.015)^(days/365) − 1
+        var days = Math.Max(1, endDate.DayNumber - startDate.DayNumber);
+        var depositTwr = (decimal)(Math.Pow(1.015, days / 365.0) - 1.0);
+        BenchmarkDeposit15Display = FormatPct(depositTwr);
+
+        // 三個 ETF / index — 平行抓
+        var taiexTask = SafeBenchmarkAsync("^TWII", period);
+        var tw0050Task = SafeBenchmarkAsync("0050.TW", period);
+        var tw00981aTask = SafeBenchmarkAsync("00981A.TW", period);
+
+        await Task.WhenAll(taiexTask, tw0050Task, tw00981aTask).ConfigureAwait(false);
+
+        BenchmarkTaiexDisplay = FormatPct(taiexTask.Result);
+        BenchmarkTw0050Display = FormatPct(tw0050Task.Result);
+        BenchmarkTw00981ADisplay = FormatPct(tw00981aTask.Result);
+    }
+
+    private async Task<decimal?> SafeBenchmarkAsync(string symbol, PerformancePeriod period)
+    {
+        try
+        {
+            return await _benchmark!.ComputeBenchmarkTwrAsync(symbol, period).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return null;
+        }
+    }
+
+    private static string FormatPct(decimal? pct) =>
+        pct is null
+            ? "—"
+            : (pct.Value >= 0 ? "+" : "") + (pct.Value * 100m).ToString("F2", CultureInfo.InvariantCulture) + "%";
 
     private void RefreshChart()
     {

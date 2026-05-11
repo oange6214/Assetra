@@ -200,7 +200,7 @@
     <sys:String x:Key="Portfolio.Tx.CommissionDiscountHint">0.1–1.0 (1.0 = full, 0.6 = 40% off)</sys:String>
     <sys:String x:Key="Portfolio.Tab.Overview">Dashboard</sys:String>
     <sys:String x:Key="Portfolio.History.Title">History</sys:String>
-    <sys:String x:Key="Portfolio.Tab.Positions">Investments</sys:String>
+    <sys:String x:Key="Portfolio.Tab.Positions">Holdings</sys:String>
     <sys:String x:Key="Portfolio.Tab.Cash">Accounts</sys:String>
     <sys:String x:Key="Portfolio.Tab.Liability">Liabilities</sys:String>
     <sys:String x:Key="Portfolio.Tab.Allocation">Allocation Analysis</sys:String>
@@ -217,13 +217,24 @@
     <sys:String x:Key="Portfolio.Liability.Health.Tooltip">Debt ratio thresholds:&#x0a;　• Healthy &lt; 30%&#x0a;　• Caution 30% ~ 50%&#x0a;　• Danger ≥ 50%</sys:String>
     <sys:String x:Key="Portfolio.DayChange">Day P&amp;L</sys:String>
     <sys:String x:Key="Portfolio.AddRecord">Add</sys:String>
-    <sys:String x:Key="Portfolio.AddRecord.Tooltip">Add (Ctrl+N)</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Tooltip">Add; Ctrl+N quickly adds a transaction</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Transaction">Add Transaction</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Transaction.Hint">Saved to "Transaction Log" and updates Investments, Accounts, or Liabilities</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.BuyTransaction">Add Buy Transaction</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.BuyTransaction.Hint">Quickly record a stock, ETF, or other investment purchase</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Investment">Add Investment</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Account">Add Funds Account</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Account.Hint">Creates an account you can manage from "Funds Accounts"</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Liability">Add Liability</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Liability.Hint">Creates a loan or credit card you can manage from "Liabilities"</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Category">Add Category</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Category.Hint">Creates a category you can manage from "Categories"</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Recurring">Add Recurring Schedule</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Recurring.Hint">Creates a recurring income or expense schedule</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Alert">Add Alert</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Alert.Hint">Creates a price condition you can manage from "Alerts"</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Goal">Add Financial Goal</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Goal.Hint">Creates a goal you can track from "Goals"</sys:String>
     <sys:String x:Key="Portfolio.AddCash">Account</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">Add Liability</sys:String>
     <sys:String x:Key="Portfolio.AddCreditCard">Add Liability</sys:String>
@@ -268,11 +279,11 @@
     <sys:String x:Key="Portfolio.Filter.Category.Liability">Liability</sys:String>
     <sys:String x:Key="Portfolio.Cash.Empty">No accounts — click "+ New" to add one</sys:String>
     <sys:String x:Key="Portfolio.Setup.NoAccounts.Title">Set up an account first</sys:String>
-    <sys:String x:Key="Portfolio.Setup.NoAccounts.Message">Once you have an account, new records can point to a cash source or destination and your balances will make more sense.</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoAccounts.Message">Once you have an account, new transactions can point to a cash source or destination and your balances will make more sense.</sys:String>
     <sys:String x:Key="Portfolio.Setup.NoAccounts.Action">Add Account</sys:String>
-    <sys:String x:Key="Portfolio.Setup.NoTrades.Title">Add your first record</sys:String>
-    <sys:String x:Key="Portfolio.Setup.NoTrades.Message">Start with a record to build your investment, cash, and liability timeline. Charts and analysis will appear after that.</sys:String>
-    <sys:String x:Key="Portfolio.Setup.NoTrades.Action">Add Record</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoTrades.Title">Add your first transaction</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoTrades.Message">Start with a transaction to build your investment, cash, and liability timeline. Charts and analysis will appear after that.</sys:String>
+    <sys:String x:Key="Portfolio.Setup.NoTrades.Action">Add Transaction</sys:String>
     <sys:String x:Key="Portfolio.Cash.Name">Account name</sys:String>
     <sys:String x:Key="Portfolio.Cash.Currency">Currency</sys:String>
     <sys:String x:Key="Portfolio.Cash.Amount">Balance</sys:String>
@@ -554,6 +565,8 @@
     <sys:String x:Key="Portfolio.Tx.TotalAmount">Total amount</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee">Total already includes commission</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee.Tooltip">When checked, the total is recorded as the actual cost basis with no extra 0.1425% commission added on top. Most broker confirmations already include the fee, so this is enabled by default.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.ActualCashAmount">Actual cash debit (optional)</sys:String>
+    <sys:String x:Key="Portfolio.Tx.ActualCashAmountHint">For sub-brokerage or FX settlement, enter the broker's actual cash debit. Leave blank to estimate from price × shares + fee. Required for cross-currency debits.</sys:String>
     <sys:String x:Key="Portfolio.Tx.Subtotal">Subtotal</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivInputMode">Input mode</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivModePerShare">Per share</sys:String>
@@ -593,6 +606,9 @@
     <sys:String x:Key="Portfolio.Position.ShowArchived">Show archived</sys:String>
     <sys:String x:Key="Portfolio.Position.HideEmpty">Hide empty</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.MarketValue">Total Market Value</sys:String>
+    <sys:String x:Key="Portfolio.QuoteSetup.Title">Twelve Data API key is not configured</sys:String>
+    <sys:String x:Key="Portfolio.QuoteSetup.Message">To fetch US stock quotes, open Settings > Data Source, enter an API key, and pass the connection test.</sys:String>
+    <sys:String x:Key="Portfolio.QuoteState.Stale">Cached quote</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.TotalCost">Total Cost</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.Pnl">Est. net P&amp;L</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.DayChange">Today's Change</sys:String>
@@ -686,7 +702,15 @@
     <sys:String x:Key="Settings.UiScaleDesc">Drag to adjust scale (0.75× – 1.50×)</sys:String>
     <sys:String x:Key="Settings.DataSource">Historical data source</sys:String>
     <sys:String x:Key="Settings.DataSourceDesc">Takes effect immediately, no restart needed</sys:String>
-    <sys:String x:Key="Settings.QuoteSource">Live quote source</sys:String>
+    <sys:String x:Key="Settings.QuoteSource">Taiwan live quote source</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.Title">US symbol directory</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.Refresh">Refresh US symbol directory</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.Status">{0:N0} symbols, last updated {1}.</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.Updated">US symbol directory updated.</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.NoChange">US symbol directory was already current.</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.Failed">US symbol directory refresh failed.</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.Disabled">US symbol directory is not enabled.</sys:String>
+    <sys:String x:Key="Settings.UsSymbolDirectory.NeverUpdated">Never updated</sys:String>
     <sys:String x:Key="Settings.FugleApiKeyHint">Paste your Fugle API key here and click Save to enable Fugle as a data source in Settings.</sys:String>
     <sys:String x:Key="Settings.DataSource.Saved">Data source settings saved</sys:String>
     <sys:String x:Key="Settings.SaveFailed">Settings could not be saved.</sys:String>
@@ -710,11 +734,8 @@
 
     <!--  ── Asset Allocation ──  -->
     <sys:String x:Key="Allocation.Tab.Overview">Overview</sys:String>
-    <sys:String x:Key="Allocation.Cash">Cash</sys:String>
     <sys:String x:Key="Allocation.Tab.Rebalance">Rebalance</sys:String>
     <sys:String x:Key="Allocation.Overview.Title">Allocation Overview</sys:String>
-    <sys:String x:Key="Allocation.IncludeCash">Include cash</sys:String>
-    <sys:String x:Key="Allocation.IncludeCash.Hint">Cash is excluded by default — percentages reflect within-portfolio allocation (Morningstar convention). Enable to treat cash as a defensive position in the totals.</sys:String>
     <sys:String x:Key="Allocation.Summary.Investment">Holdings</sys:String>
     <sys:String x:Key="Allocation.Summary.Cash">Cash</sys:String>
     <sys:String x:Key="Allocation.Summary.Total">Total Assets</sys:String>
@@ -762,11 +783,11 @@
     <sys:String x:Key="AddAsset.ClosePrice.FetchFailed">Close price lookup failed. Please enter manually.</sys:String>
 
     <!--  Financial Overview  -->
-    <sys:String x:Key="FinancialOverview.Nav.Label">Financial Overview</sys:String>
+    <sys:String x:Key="FinancialOverview.Nav.Label">Financial Dashboard</sys:String>
     <sys:String x:Key="FinancialOverview.Header.NetWorth">Net Worth</sys:String>
     <sys:String x:Key="FinancialOverview.Header.TotalAssets">Total Assets</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Assets">Other Assets</sys:String>
-    <sys:String x:Key="FinancialOverview.Header.Investments">Investments</sys:String>
+    <sys:String x:Key="FinancialOverview.Header.Investments">Investment Assets</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Liabilities">Liabilities</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.DebtRatio">Debt Ratio</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnl">Investment P&amp;L</sys:String>
@@ -774,7 +795,7 @@
     <sys:String x:Key="FinancialOverview.Kpi.NetWorth.Desc">Total assets minus total liabilities</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.TotalAssets.Desc">All assets combined (investments + cash + property...)</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.OtherAssets.Desc">Non-investment assets (cash, real estate, physical assets)</sys:String>
-    <sys:String x:Key="FinancialOverview.Kpi.Investments.Desc">Investment portfolio market value</sys:String>
+    <sys:String x:Key="FinancialOverview.Kpi.Investments.Desc">Investment asset market value</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.Liabilities.Desc">Total liabilities (loans + credit cards)</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.DebtRatio.Desc">Liabilities / Total Assets — lower is healthier</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnl.Desc">Investment market value minus cost basis</sys:String>
@@ -786,8 +807,8 @@
     <sys:String x:Key="FinancialOverview.Section.Assets">Assets</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Investments">Investments</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Liabilities">Liabilities</sys:String>
-    <sys:String x:Key="Nav.Portfolio">Portfolio</sys:String>
-    <sys:String x:Key="Nav.FinancialOverview">Overview</sys:String>
+    <sys:String x:Key="Nav.Portfolio">Investment Assets</sys:String>
+    <sys:String x:Key="Nav.FinancialOverview">Financial Dashboard</sys:String>
     <sys:String x:Key="Onboarding.Banner.Title">Welcome to Assetra</sys:String>
     <sys:String x:Key="Onboarding.Banner.Steps">① Add a position  →  ② View allocation analysis  →  ③ Set price alerts</sys:String>
     <sys:String x:Key="Settings.Title">Settings</sys:String>
@@ -802,6 +823,14 @@
     <sys:String x:Key="Settings.Section.Data">Data</sys:String>
     <sys:String x:Key="Settings.Version">Version</sys:String>
     <sys:String x:Key="Settings.FugleApiKey">Fugle API Key</sys:String>
+    <sys:String x:Key="Settings.TwelveDataApiKey">US live quote source - Twelve Data API key</sys:String>
+    <sys:String x:Key="Settings.TwelveDataApiKeyHint">Twelve Data is used only for US quotes; Taiwan quotes can independently use TWSE / TPEX official data or Fugle. Test the API key before saving it.</sys:String>
+    <sys:String x:Key="Settings.TwelveData.Test">Test connection</sys:String>
+    <sys:String x:Key="Settings.TwelveData.Quota">Today</sys:String>
+    <sys:String x:Key="Settings.TwelveData.TestSucceeded">Twelve Data connection test succeeded.</sys:String>
+    <sys:String x:Key="Settings.TwelveData.TestFailed">Twelve Data connection test failed.</sys:String>
+    <sys:String x:Key="Settings.TwelveData.NotTested">Twelve Data API key has not been tested yet.</sys:String>
+    <sys:String x:Key="Settings.TwelveData.TestBeforeSave">Test the Twelve Data API key before saving this provider.</sys:String>
     <sys:String x:Key="Settings.Section.Ocr">OCR (PDF statement import)</sys:String>
     <sys:String x:Key="Settings.Ocr.TessdataPath">Tesseract tessdata path</sys:String>
     <sys:String x:Key="Settings.Ocr.TessdataPath.Hint">Folder containing .traineddata files. Leave blank to disable OCR — image-only PDF pages will be skipped.</sys:String>
@@ -1063,6 +1092,18 @@
     <sys:String x:Key="Trends.Empty">No history snapshots yet</sys:String>
     <sys:String x:Key="Trends.Hint">Data sourced from daily portfolio snapshots (market value)</sys:String>
     <sys:String x:Key="Trends.CustomRange">Custom range</sys:String>
+    <!-- Stage 1 (Dashboard consolidation): period KPI strip + benchmarks -->
+    <sys:String x:Key="Trends.Kpi.StartValue">Start</sys:String>
+    <sys:String x:Key="Trends.Kpi.EndValue">End</sys:String>
+    <sys:String x:Key="Trends.Kpi.AbsolutePnl">Period P&amp;L</sys:String>
+    <sys:String x:Key="Trends.Kpi.ReturnPct">Return</sys:String>
+    <sys:String x:Key="Trends.Kpi.Annualized">Annualized</sys:String>
+    <sys:String x:Key="Trends.Kpi.MaxDrawdown">Max drawdown</sys:String>
+    <sys:String x:Key="Trends.Benchmark.Heading">Same-period benchmark returns</sys:String>
+    <sys:String x:Key="Trends.Benchmark.Taiex">TAIEX</sys:String>
+    <sys:String x:Key="Trends.Benchmark.Tw0050">Yuanta Taiwan 50</sys:String>
+    <sys:String x:Key="Trends.Benchmark.Tw00981A">00981A</sys:String>
+    <sys:String x:Key="Trends.Benchmark.Deposit15">1.5% deposit baseline</sys:String>
 
     <!-- Goals / Financial Goals -->
     <sys:String x:Key="Goals.Title">Financial Goals</sys:String>
