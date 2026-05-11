@@ -180,7 +180,11 @@ internal static class PortfolioServiceCollectionExtensions
             // Phase C：現金 / 負債焦點卡的資料源（PortfolioViewModel 已有所需集合）；
             // 不動產焦點卡的資料源（RealEstateViewModel 已有 PropertyCount / Totals）。
             sp.GetService<PortfolioViewModel>(),
-            sp.GetService<Assetra.WPF.Features.RealEstate.RealEstateViewModel>()));
+            sp.GetService<Assetra.WPF.Features.RealEstate.RealEstateViewModel>(),
+            // Phase C 擴展：保險 / 退休 / 實物資產焦點卡
+            sp.GetService<Assetra.WPF.Features.Insurance.InsurancePolicyViewModel>(),
+            sp.GetService<Assetra.WPF.Features.Retirement.RetirementViewModel>(),
+            sp.GetService<Assetra.WPF.Features.PhysicalAsset.PhysicalAssetViewModel>()));
 
         return services;
     }

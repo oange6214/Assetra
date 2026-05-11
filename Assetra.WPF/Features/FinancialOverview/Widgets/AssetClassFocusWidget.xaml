@@ -19,24 +19,19 @@
     </UserControl.Resources>
 
     <!--
-        Phase C：「資產類焦點」widget — 把現金 / 負債 / 不動產三個資產類做成
-        並排小卡，每卡顯示總額 + 項目數 + 跳轉。
-        三卡並排避免讓總覽 tab 過長；如果某個資產類沒注入則該卡隱藏。
+        Phase C：「資產類焦點」widget — 6 個資產類做成 2×3 grid，每格顯示
+        總額 + 項目數 + 跳轉。對應 VM 未注入時該格自動隱藏；六格全 null
+        時整個 widget 隱藏（HasAnyAssetClassFocus 控制）。
     -->
-    <Border Style="{StaticResource DashboardWidgetCard}">
+    <Border Style="{StaticResource DashboardWidgetCard}"
+            Visibility="{Binding HasAnyAssetClassFocus, Converter={StaticResource BooleanToVisibilityConverter}}">
         <StackPanel>
             <TextBlock Style="{StaticResource DashboardWidgetHeader}"
                        Text="{DynamicResource Dashboard.Widget.AssetClass.Heading}" />
 
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
+            <UniformGrid Columns="3" Rows="2">
                 <!--  ── 現金 ──  -->
-                <Border Grid.Column="0" Margin="0,0,6,0"
+                <Border Margin="0,0,4,4"
                         Padding="12,10"
                         Background="{DynamicResource AppHover}"
                         BorderBrush="{DynamicResource AppBorder}"
@@ -49,11 +44,8 @@
                     </Border.InputBindings>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <ds:AppIcon Margin="0,0,6,0"
-                                        VerticalAlignment="Center"
-                                        FontSize="14"
-                                        Foreground="{DynamicResource AppAccent}"
-                                        Symbol="Wallet24" />
+                            <ds:AppIcon Margin="0,0,6,0" VerticalAlignment="Center" FontSize="14"
+                                        Foreground="{DynamicResource AppAccent}" Symbol="Wallet24" />
                             <TextBlock VerticalAlignment="Center"
                                        FontSize="{StaticResource Font.Size.Xs}"
                                        Foreground="{DynamicResource AppTextSecondary}"
@@ -61,8 +53,7 @@
                         </StackPanel>
                         <TextBlock Margin="0,6,0,0"
                                    FontFamily="{StaticResource Font.Family.Base}"
-                                   FontSize="{StaticResource Font.Size.Md}"
-                                   FontWeight="SemiBold"
+                                   FontSize="{StaticResource Font.Size.Md}" FontWeight="SemiBold"
                                    Foreground="{DynamicResource AppTextPrimary}"
                                    Text="{Binding PortfolioRef.TotalCash, StringFormat='N0'}"
                                    Typography.NumeralAlignment="Tabular" />
@@ -76,7 +67,7 @@
                 </Border>
 
                 <!--  ── 負債 ──  -->
-                <Border Grid.Column="1" Margin="3,0,3,0"
+                <Border Margin="2,0,2,4"
                         Padding="12,10"
                         Background="{DynamicResource AppHover}"
                         BorderBrush="{DynamicResource AppBorder}"
@@ -89,11 +80,8 @@
                     </Border.InputBindings>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <ds:AppIcon Margin="0,0,6,0"
-                                        VerticalAlignment="Center"
-                                        FontSize="14"
-                                        Foreground="{DynamicResource AppDown}"
-                                        Symbol="Cut24" />
+                            <ds:AppIcon Margin="0,0,6,0" VerticalAlignment="Center" FontSize="14"
+                                        Foreground="{DynamicResource AppDown}" Symbol="Cut24" />
                             <TextBlock VerticalAlignment="Center"
                                        FontSize="{StaticResource Font.Size.Xs}"
                                        Foreground="{DynamicResource AppTextSecondary}"
@@ -101,8 +89,7 @@
                         </StackPanel>
                         <TextBlock Margin="0,6,0,0"
                                    FontFamily="{StaticResource Font.Family.Base}"
-                                   FontSize="{StaticResource Font.Size.Md}"
-                                   FontWeight="SemiBold"
+                                   FontSize="{StaticResource Font.Size.Md}" FontWeight="SemiBold"
                                    Foreground="{DynamicResource AppTextPrimary}"
                                    Text="{Binding PortfolioRef.TotalLiabilities, StringFormat='N0'}"
                                    Typography.NumeralAlignment="Tabular" />
@@ -116,7 +103,7 @@
                 </Border>
 
                 <!--  ── 不動產 ──  -->
-                <Border Grid.Column="2" Margin="6,0,0,0"
+                <Border Margin="4,0,0,4"
                         Padding="12,10"
                         Background="{DynamicResource AppHover}"
                         BorderBrush="{DynamicResource AppBorder}"
@@ -129,11 +116,8 @@
                     </Border.InputBindings>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <ds:AppIcon Margin="0,0,6,0"
-                                        VerticalAlignment="Center"
-                                        FontSize="14"
-                                        Foreground="{DynamicResource AppAccent}"
-                                        Symbol="Home24" />
+                            <ds:AppIcon Margin="0,0,6,0" VerticalAlignment="Center" FontSize="14"
+                                        Foreground="{DynamicResource AppAccent}" Symbol="Home24" />
                             <TextBlock VerticalAlignment="Center"
                                        FontSize="{StaticResource Font.Size.Xs}"
                                        Foreground="{DynamicResource AppTextSecondary}"
@@ -141,8 +125,7 @@
                         </StackPanel>
                         <TextBlock Margin="0,6,0,0"
                                    FontFamily="{StaticResource Font.Family.Base}"
-                                   FontSize="{StaticResource Font.Size.Md}"
-                                   FontWeight="SemiBold"
+                                   FontSize="{StaticResource Font.Size.Md}" FontWeight="SemiBold"
                                    Foreground="{DynamicResource AppTextPrimary}"
                                    Text="{Binding RealEstateFocusWidget.TotalCurrentValue, StringFormat='N0'}"
                                    Typography.NumeralAlignment="Tabular" />
@@ -154,7 +137,115 @@
                         </TextBlock>
                     </StackPanel>
                 </Border>
-            </Grid>
+
+                <!--  ── 保險 ──  -->
+                <Border Margin="0,4,4,0"
+                        Padding="12,10"
+                        Background="{DynamicResource AppHover}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Sm}"
+                        Cursor="Hand"
+                        Visibility="{Binding InsuranceFocusWidget, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Border.InputBindings>
+                        <MouseBinding Command="{Binding NavigateToInsuranceCommand}" MouseAction="LeftClick" />
+                    </Border.InputBindings>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ds:AppIcon Margin="0,0,6,0" VerticalAlignment="Center" FontSize="14"
+                                        Foreground="{DynamicResource AppAccent}" Symbol="ShieldCheckmark24" />
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="{StaticResource Font.Size.Xs}"
+                                       Foreground="{DynamicResource AppTextSecondary}"
+                                       Text="{DynamicResource Dashboard.Widget.AssetClass.Insurance}" />
+                        </StackPanel>
+                        <TextBlock Margin="0,6,0,0"
+                                   FontFamily="{StaticResource Font.Family.Base}"
+                                   FontSize="{StaticResource Font.Size.Md}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding InsuranceFocusWidget.TotalAnnualPremium, StringFormat='N0'}"
+                                   Typography.NumeralAlignment="Tabular" />
+                        <TextBlock Margin="0,2,0,0"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}">
+                            <Run Text="{Binding InsuranceFocusWidget.PolicyCount, Mode=OneWay}" />
+                            <Run Text="{DynamicResource Dashboard.Widget.AssetClass.PoliciesSuffix}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!--  ── 退休 ──  -->
+                <Border Margin="2,4,2,0"
+                        Padding="12,10"
+                        Background="{DynamicResource AppHover}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Sm}"
+                        Cursor="Hand"
+                        Visibility="{Binding RetirementFocusWidget, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Border.InputBindings>
+                        <MouseBinding Command="{Binding NavigateToRetirementCommand}" MouseAction="LeftClick" />
+                    </Border.InputBindings>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ds:AppIcon Margin="0,0,6,0" VerticalAlignment="Center" FontSize="14"
+                                        Foreground="{DynamicResource AppAccent}" Symbol="PersonClock24" />
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="{StaticResource Font.Size.Xs}"
+                                       Foreground="{DynamicResource AppTextSecondary}"
+                                       Text="{DynamicResource Dashboard.Widget.AssetClass.Retirement}" />
+                        </StackPanel>
+                        <TextBlock Margin="0,6,0,0"
+                                   FontFamily="{StaticResource Font.Family.Base}"
+                                   FontSize="{StaticResource Font.Size.Md}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding RetirementFocusWidget.TotalBalance, StringFormat='N0'}"
+                                   Typography.NumeralAlignment="Tabular" />
+                        <TextBlock Margin="0,2,0,0"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}">
+                            <Run Text="{Binding RetirementFocusWidget.AccountCount, Mode=OneWay}" />
+                            <Run Text="{DynamicResource Dashboard.Widget.AssetClass.RetirementAccountsSuffix}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!--  ── 實物 ──  -->
+                <Border Margin="4,4,0,0"
+                        Padding="12,10"
+                        Background="{DynamicResource AppHover}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Sm}"
+                        Cursor="Hand"
+                        Visibility="{Binding PhysicalAssetFocusWidget, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Border.InputBindings>
+                        <MouseBinding Command="{Binding NavigateToPhysicalAssetCommand}" MouseAction="LeftClick" />
+                    </Border.InputBindings>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ds:AppIcon Margin="0,0,6,0" VerticalAlignment="Center" FontSize="14"
+                                        Foreground="{DynamicResource AppAccent}" Symbol="Box24" />
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="{StaticResource Font.Size.Xs}"
+                                       Foreground="{DynamicResource AppTextSecondary}"
+                                       Text="{DynamicResource Dashboard.Widget.AssetClass.Physical}" />
+                        </StackPanel>
+                        <TextBlock Margin="0,6,0,0"
+                                   FontFamily="{StaticResource Font.Family.Base}"
+                                   FontSize="{StaticResource Font.Size.Md}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding PhysicalAssetFocusWidget.TotalCurrentValue, StringFormat='N0'}"
+                                   Typography.NumeralAlignment="Tabular" />
+                        <TextBlock Margin="0,2,0,0"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}">
+                            <Run Text="{Binding PhysicalAssetFocusWidget.AssetCount, Mode=OneWay}" />
+                            <Run Text="{DynamicResource Dashboard.Widget.AssetClass.PhysicalItemsSuffix}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
         </StackPanel>
     </Border>
 </UserControl>

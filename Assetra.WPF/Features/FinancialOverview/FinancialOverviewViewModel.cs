@@ -147,6 +147,24 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     /// </summary>
     public Assetra.WPF.Features.RealEstate.RealEstateViewModel? RealEstateFocusWidget { get; }
 
+    /// <summary>Phase C 擴展：保險焦點卡（PolicyCount + TotalAnnualPremium）。</summary>
+    public Assetra.WPF.Features.Insurance.InsurancePolicyViewModel? InsuranceFocusWidget { get; }
+
+    /// <summary>Phase C 擴展：退休專戶焦點卡（AccountCount + TotalBalance）。</summary>
+    public Assetra.WPF.Features.Retirement.RetirementViewModel? RetirementFocusWidget { get; }
+
+    /// <summary>Phase C 擴展：實物資產焦點卡（AssetCount + TotalCurrentValue）。</summary>
+    public Assetra.WPF.Features.PhysicalAsset.PhysicalAssetViewModel? PhysicalAssetFocusWidget { get; }
+
+    /// <summary>True 當六個資產類焦點卡至少有一個 VM 注入；全 null 時整個
+    /// AssetClassFocusWidget 隱藏，避免空白 header card。</summary>
+    public bool HasAnyAssetClassFocus =>
+        PortfolioRef is not null
+        || RealEstateFocusWidget is not null
+        || InsuranceFocusWidget is not null
+        || RetirementFocusWidget is not null
+        || PhysicalAssetFocusWidget is not null;
+
     public FinancialOverviewViewModel(
         IFinancialOverviewQueryService queryService,
         IPortfolioPositionFeed portfolio,
@@ -156,7 +174,10 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         Assetra.WPF.Features.Assistant.AssistantViewModel? assistantWidget = null,
         Assetra.WPF.Features.Portfolio.DashboardViewModel? investmentFocusWidget = null,
         Assetra.WPF.Features.Portfolio.PortfolioViewModel? portfolioRef = null,
-        Assetra.WPF.Features.RealEstate.RealEstateViewModel? realEstateFocusWidget = null)
+        Assetra.WPF.Features.RealEstate.RealEstateViewModel? realEstateFocusWidget = null,
+        Assetra.WPF.Features.Insurance.InsurancePolicyViewModel? insuranceFocusWidget = null,
+        Assetra.WPF.Features.Retirement.RetirementViewModel? retirementFocusWidget = null,
+        Assetra.WPF.Features.PhysicalAsset.PhysicalAssetViewModel? physicalAssetFocusWidget = null)
     {
         _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
         _portfolio = portfolio ?? throw new ArgumentNullException(nameof(portfolio));
@@ -167,6 +188,9 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         InvestmentFocusWidget = investmentFocusWidget;
         PortfolioRef = portfolioRef;
         RealEstateFocusWidget = realEstateFocusWidget;
+        InsuranceFocusWidget = insuranceFocusWidget;
+        RetirementFocusWidget = retirementFocusWidget;
+        PhysicalAssetFocusWidget = physicalAssetFocusWidget;
         _uiContext = SynchronizationContext.Current;
 
         // Stock prices arrive asynchronously after Portfolio.LoadAsync() completes.
@@ -229,6 +253,18 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     [CommunityToolkit.Mvvm.Input.RelayCommand]
     private void NavigateToRealEstate() =>
         Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("RealEstate");
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void NavigateToInsurance() =>
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("Insurance");
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void NavigateToRetirement() =>
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("Retirement");
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void NavigateToPhysicalAsset() =>
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("PhysicalAsset");
 
     private void OnDashboardTabRequested(string tabName)
     {

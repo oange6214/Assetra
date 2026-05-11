@@ -1142,6 +1142,12 @@
     <sys:String x:Key="Dashboard.Widget.AssetClass.LiabilityItemsSuffix"> items</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.RealEstate">Real estate</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.PropertiesSuffix"> properties</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Insurance">Insurance</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.PoliciesSuffix"> policies</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Retirement">Retirement</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.RetirementAccountsSuffix"> accounts</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Physical">Physical</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.PhysicalItemsSuffix"> items</sys:String>
     <!-- Stage 4: Return calendar -->
     <sys:String x:Key="Dashboard.Calendar.Today">Today</sys:String>
     <sys:String x:Key="Dashboard.Calendar.MonthlyPnl">Month P&amp;L</sys:String>

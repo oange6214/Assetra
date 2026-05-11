@@ -1146,6 +1146,12 @@
     <sys:String x:Key="Dashboard.Widget.AssetClass.LiabilityItemsSuffix"> 項</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.RealEstate">不動產</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.PropertiesSuffix"> 戶</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Insurance">保險</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.PoliciesSuffix"> 張</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Retirement">退休</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.RetirementAccountsSuffix"> 個帳戶</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Physical">實物</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.PhysicalItemsSuffix"> 項</sys:String>
     <!--  Stage 4：報酬日曆  -->
     <sys:String x:Key="Dashboard.Calendar.Today">今日</sys:String>
     <sys:String x:Key="Dashboard.Calendar.MonthlyPnl">當月損益</sys:String>
