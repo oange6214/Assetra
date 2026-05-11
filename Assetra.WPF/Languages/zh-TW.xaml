@@ -1153,6 +1153,9 @@
     <sys:String x:Key="Dashboard.Calendar.Fri">五</sys:String>
     <sys:String x:Key="Dashboard.Calendar.Sat">六</sys:String>
     <sys:String x:Key="Dashboard.Calendar.Sun">日</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.WeeklyPnl">週損益</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.Popover.DailyPnl">當日損益</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.Popover.OpenTransactions">查看當日交易記錄</sys:String>
 
     <!--  Goals / 財務目標  -->
     <sys:String x:Key="Goals.Title">財務目標</sys:String>

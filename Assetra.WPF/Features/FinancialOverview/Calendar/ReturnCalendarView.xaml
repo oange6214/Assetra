@@ -78,7 +78,10 @@
             <!--  monthly bar chart  -->
         </Grid.RowDefinitions>
 
-        <!--  ── Toolbar：月份切換  ──  -->
+        <!--
+            ── Toolbar：月份切換 ──
+            ◄ ► 箭頭 + 月份下拉選單（保留兩種互動：快速翻頁與直接跳指定月份）。
+        -->
         <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="False">
             <Button DockPanel.Dock="Left"
                     Width="32" Height="32" Padding="0"
@@ -86,13 +89,22 @@
                     Style="{StaticResource AppIconButton}">
                 <ds:AppIcon Symbol="ChevronLeft24" FontSize="{StaticResource Font.Size.Md}" />
             </Button>
-            <TextBlock Margin="12,0"
-                       VerticalAlignment="Center"
-                       DockPanel.Dock="Left"
-                       FontSize="{StaticResource Font.Size.Lg}"
-                       FontWeight="SemiBold"
-                       Foreground="{DynamicResource AppTextPrimary}"
-                       Text="{Binding MonthDisplay}" />
+            <!--  月份下拉：點開後直接選任一月份  -->
+            <ComboBox DockPanel.Dock="Left"
+                      Margin="8,0"
+                      MinWidth="140"
+                      Height="32"
+                      ItemsSource="{Binding AvailableMonths}"
+                      SelectedItem="{Binding CurrentMonth, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Year, StringFormat='0000'}">
+                            <Run Text=" / " />
+                            <Run Text="{Binding Month, StringFormat='00', Mode=OneWay}" />
+                        </TextBlock>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
             <Button DockPanel.Dock="Left"
                     Width="32" Height="32" Padding="0"
                     Command="{Binding GoNextCommand}"
@@ -163,43 +175,102 @@
             </TextBlock>
         </StackPanel>
 
-        <!--  ── Weekday header  ──  -->
-        <UniformGrid Grid.Row="2" Columns="7">
-            <TextBlock Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Mon}" />
-            <TextBlock Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Tue}" />
-            <TextBlock Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Wed}" />
-            <TextBlock Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Thu}" />
-            <TextBlock Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Fri}" />
-            <TextBlock Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Sat}" />
-            <TextBlock Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Sun}" />
-        </UniformGrid>
+        <!--  ── Weekday header ── 7 天 + 1 個週合計欄  -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="80" />
+                <!--  Weekly P&L column  -->
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Mon}" />
+            <TextBlock Grid.Column="1" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Tue}" />
+            <TextBlock Grid.Column="2" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Wed}" />
+            <TextBlock Grid.Column="3" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Thu}" />
+            <TextBlock Grid.Column="4" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Fri}" />
+            <TextBlock Grid.Column="5" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Sat}" />
+            <TextBlock Grid.Column="6" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Sun}" />
+            <TextBlock Grid.Column="7" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.WeeklyPnl}" />
+        </Grid>
 
         <!--
-            ── 6x7 grid ──
-            主月曆熱度圖；MinHeight 在 RowDefinition 上保證即使尺寸小也不會被
-            擠掉底下的 bar chart。
+            ── 6 列 × (7 日 + 1 週合計) ──
+            ItemsControl 跑 Weeks 集合；每列模板繪製 7 個日 cell + 1 個週合計。
+            click cell → SelectCellCommand 開 popover；HasData=false 的 cell
+            command 內部 return 不開啟。
         -->
-        <ItemsControl Grid.Row="3" ItemsSource="{Binding Cells}">
+        <ItemsControl Grid.Row="3" ItemsSource="{Binding Weeks}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <UniformGrid Columns="7" Rows="6" />
+                    <StackPanel />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Border Style="{StaticResource DayCellBorder}">
-                        <StackPanel>
-                            <TextBlock FontSize="{StaticResource Font.Size.Sm}"
+                    <Grid Height="46">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="80" />
+                        </Grid.ColumnDefinitions>
+                        <!--  7 個日 cell  -->
+                        <ItemsControl Grid.Column="0" Grid.ColumnSpan="7" ItemsSource="{Binding Days}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="7" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource DayCellBorder}" Cursor="Hand">
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick"
+                                                          Command="{Binding DataContext.SelectCellCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                          CommandParameter="{Binding}" />
+                                        </Border.InputBindings>
+                                        <StackPanel>
+                                            <TextBlock FontSize="{StaticResource Font.Size.Sm}"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource AppTextPrimary}"
+                                                       Text="{Binding Day}" />
+                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}"
+                                                       Foreground="{DynamicResource AppTextSecondary}"
+                                                       Text="{Binding DeltaDisplay}"
+                                                       Typography.NumeralAlignment="Tabular"
+                                                       Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <!--  週合計 cell  -->
+                        <Border Grid.Column="7"
+                                Margin="2"
+                                Padding="6,4"
+                                Background="{DynamicResource AppHover}"
+                                BorderBrush="{DynamicResource AppBorderLight}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Xs}">
+                            <TextBlock VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       FontFamily="{StaticResource Font.Family.Base}"
+                                       FontSize="{StaticResource Font.Size.Xs}"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource AppTextPrimary}"
-                                       Text="{Binding Day}" />
-                            <TextBlock FontSize="{StaticResource Font.Size.Xs}"
-                                       Foreground="{DynamicResource AppTextSecondary}"
-                                       Text="{Binding DeltaDisplay}"
-                                       Typography.NumeralAlignment="Tabular"
-                                       Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        </StackPanel>
-                    </Border>
+                                       Text="{Binding TotalDisplay}"
+                                       Typography.NumeralAlignment="Tabular" />
+                        </Border>
+                    </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
@@ -223,5 +294,66 @@
                 TooltipPosition="Top"
                 TooltipTextSize="10" />
         </Border>
+
+        <!--
+            ── Cell popover ──
+            點 cell 後彈出當日明細摘要 + 「跳到當日交易」link。整層蓋滿 Grid
+            才能在四個 row 上方居中；click 背景關閉。
+        -->
+        <Grid Grid.RowSpan="5" Panel.ZIndex="180"
+              Visibility="{Binding IsCellPopoverOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <!--  半透明 backdrop  -->
+            <Border Background="#80000000">
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding CloseCellPopoverCommand}" />
+                </Border.InputBindings>
+            </Border>
+            <!--  popover content card  -->
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Width="320" Padding="20,16"
+                    Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Md}">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,8" LastChildFill="False">
+                        <TextBlock DockPanel.Dock="Left"
+                                   FontSize="{StaticResource Font.Size.Md}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}">
+                            <Run Text="{Binding SelectedCell.Date.Year, FallbackValue=''}" />
+                            <Run Text="/" />
+                            <Run Text="{Binding SelectedCell.Date.Month, StringFormat='00', FallbackValue='', Mode=OneWay}" />
+                            <Run Text="/" />
+                            <Run Text="{Binding SelectedCell.Date.Day, StringFormat='00', FallbackValue='', Mode=OneWay}" />
+                        </TextBlock>
+                        <Button DockPanel.Dock="Right" Width="28" Height="28" Padding="0"
+                                Command="{Binding CloseCellPopoverCommand}"
+                                Style="{StaticResource AppIconButton}">
+                            <ds:AppIcon Symbol="Dismiss24" FontSize="14"
+                                        Foreground="{DynamicResource AppTextMuted}" />
+                        </Button>
+                    </DockPanel>
+                    <TextBlock FontSize="{StaticResource Font.Size.Xs}"
+                               Foreground="{DynamicResource AppTextMuted}"
+                               Text="{DynamicResource Dashboard.Calendar.Popover.DailyPnl}" />
+                    <TextBlock Margin="0,4,0,12"
+                               FontSize="{StaticResource Font.Size.Xl}"
+                               FontWeight="SemiBold"
+                               Text="{Binding SelectedCell.DeltaDisplay, FallbackValue='—'}"
+                               Typography.NumeralAlignment="Tabular">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <Button Command="{Binding OpenDayTransactionsCommand}"
+                            Content="{DynamicResource Dashboard.Calendar.Popover.OpenTransactions}"
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource AppSecondaryButton}" />
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

@@ -41,6 +41,13 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     /// <summary>"2026 / 05" 格式的標題字串。</summary>
     public string MonthDisplay => $"{CurrentMonth.Year} / {CurrentMonth.Month:D2}";
 
+    /// <summary>
+    /// 下拉選單用的月份清單（從最早 snapshot 月份到目前月份，倒序）。
+    /// XAML ComboBox 綁這個，SelectedItem 雙向到 CurrentMonth。
+    /// </summary>
+    private readonly ObservableCollection<DateOnly> _availableMonths = [];
+    public ReadOnlyObservableCollection<DateOnly> AvailableMonths { get; }
+
     /// <summary>月份彙總：當月絕對損益總和。</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMonthlyPnlPositive))]
@@ -60,6 +67,15 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     [ObservableProperty] private bool _hasData;
 
     /// <summary>
+    /// 使用者點選的單一日 cell。null 時 popover 關閉。
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCellPopoverOpen))]
+    private DailyCellVm? _selectedCell;
+
+    public bool IsCellPopoverOpen => SelectedCell is not null;
+
+    /// <summary>
     /// 月底迷你 bar chart 的 series — 當月每日 PnL 直方圖（紅漲綠跌）。
     /// 沒資料的日子 column 為 0，HasData=true 的日子用該日 Delta 值。
     /// </summary>
@@ -70,6 +86,13 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     /// <summary>42 個 cell（6 週 × 7 天）。非當月或無資料的 cell 用 placeholder。</summary>
     private readonly ObservableCollection<DailyCellVm> _cells = [];
     public ReadOnlyObservableCollection<DailyCellVm> Cells { get; }
+
+    /// <summary>
+    /// 6 個週列（每列 = 7 天 + 週合計）。Cells 的 grid 投影；提供右側「週損益」欄
+    /// 用。Cells 仍保留為 flat 視角給單元測試與向後相容用。
+    /// </summary>
+    private readonly ObservableCollection<WeekRowVm> _weeks = [];
+    public ReadOnlyObservableCollection<WeekRowVm> Weeks { get; }
 
     /// <summary>是否可以往前一個月 — 在有更早 snapshot 時為 true。</summary>
     public bool CanGoPrev => _allSnapshots.Count > 0
@@ -82,6 +105,8 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     {
         _uiContext = SynchronizationContext.Current;
         Cells = new ReadOnlyObservableCollection<DailyCellVm>(_cells);
+        Weeks = new ReadOnlyObservableCollection<WeekRowVm>(_weeks);
+        AvailableMonths = new ReadOnlyObservableCollection<DateOnly>(_availableMonths);
         Rebuild();
     }
 
@@ -102,14 +127,30 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
 
     private void ApplySnapshotsOnUi()
     {
+        // 重建月份下拉選單：從最早 snapshot 月份到目前月份，倒序。
+        _availableMonths.Clear();
+        if (_allSnapshots.Count > 0)
+        {
+            var earliest = _allSnapshots.Min(s => s.SnapshotDate);
+            var latest = _allSnapshots.Max(s => s.SnapshotDate);
+            var today = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var stop = latest > today ? new DateOnly(latest.Year, latest.Month, 1) : today;
+            var cursor = new DateOnly(earliest.Year, earliest.Month, 1);
+            var list = new List<DateOnly>();
+            while (cursor <= stop)
+            {
+                list.Add(cursor);
+                cursor = cursor.AddMonths(1);
+            }
+            list.Reverse();
+            foreach (var m in list) _availableMonths.Add(m);
+        }
+
         // 若預設月份沒有資料，跳到最新有資料的月份。
-        // 即便 CurrentMonth 不變，下面也會強制 Rebuild → 覆蓋初始 cstor 的空 cells。
         if (_allSnapshots.Count > 0)
         {
             var latest = _allSnapshots.Max(s => s.SnapshotDate);
             var target = new DateOnly(latest.Year, latest.Month, 1);
-            // 用 SetProperty 確保即使值沒變也不會吃掉 Rebuild（雖然 OnCurrentMonthChanged
-            // 不會 fire when same，但下方無條件 Rebuild 已保證重建）。
             CurrentMonth = target;
         }
         Rebuild();
@@ -142,6 +183,26 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     [RelayCommand]
     private void GoToday() =>
         CurrentMonth = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+    /// <summary>使用者點 cell 開 popover；HasData=false 的 cell 不開（沒內容可看）。</summary>
+    [RelayCommand]
+    private void SelectCell(DailyCellVm? cell)
+    {
+        if (cell is null || !cell.HasData || !cell.IsCurrentMonth) return;
+        SelectedCell = cell;
+    }
+
+    [RelayCommand]
+    private void CloseCellPopover() => SelectedCell = null;
+
+    /// <summary>從 popover 跳到當日明細：navigate 到 TransactionLog（後續可加日期 filter）。</summary>
+    [RelayCommand]
+    private void OpenDayTransactions()
+    {
+        if (SelectedCell is null) return;
+        SelectedCell = null;
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("TransactionLog");
+    }
 
     /// <summary>重算 42 個 cell。每日 Δ = 該日 marketValue − 前一交易日 marketValue。</summary>
     private void Rebuild()
@@ -218,6 +279,30 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
         else
             MonthlyReturnPct = 0m;
         HasData = _cells.Any(c => c.HasData);
+
+        // 重建 Weeks（每 7 個 cell 一列 + 週合計）
+        _weeks.Clear();
+        for (var w = 0; w < 6; w++)
+        {
+            var dayCells = new List<DailyCellVm>(7);
+            decimal weekSum = 0m;
+            var anyData = false;
+            for (var k = 0; k < 7; k++)
+            {
+                var cell = _cells[w * 7 + k];
+                dayCells.Add(cell);
+                if (cell.IsCurrentMonth && cell.HasData && cell.Delta.HasValue)
+                {
+                    weekSum += cell.Delta.Value;
+                    anyData = true;
+                }
+            }
+            _weeks.Add(new WeekRowVm(
+                WeekIndex: w,
+                Days: dayCells,
+                TotalDelta: anyData ? weekSum : (decimal?)null,
+                TotalDisplay: anyData ? FormatDelta(weekSum) : "—"));
+        }
 
         RebuildBarChart(daysInMonth);
     }
@@ -362,6 +447,16 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
             : bucket switch { 1 => CellTone.DownWeak, 2 => CellTone.DownMedium, 3 => CellTone.DownStrong, _ => CellTone.DownStrongest, };
     }
 }
+
+/// <summary>
+/// 月曆中的一個「週列」— 7 個日 cell + 週合計。XAML 用 ItemsControl over Weeks
+/// 渲染 6 列；每列模板繪製 7 個 day cell + 1 個週合計 cell。
+/// </summary>
+public sealed record WeekRowVm(
+    int WeekIndex,
+    IReadOnlyList<DailyCellVm> Days,
+    decimal? TotalDelta,
+    string TotalDisplay);
 
 /// <summary>單一日曆格的 immutable 投影。</summary>
 public sealed record DailyCellVm(

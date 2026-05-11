@@ -1149,6 +1149,9 @@
     <sys:String x:Key="Dashboard.Calendar.Fri">Fri</sys:String>
     <sys:String x:Key="Dashboard.Calendar.Sat">Sat</sys:String>
     <sys:String x:Key="Dashboard.Calendar.Sun">Sun</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.WeeklyPnl">Weekly</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.Popover.DailyPnl">Daily P&amp;L</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.Popover.OpenTransactions">Open transactions for this day</sys:String>
 
     <!-- Goals / Financial Goals -->
     <sys:String x:Key="Goals.Title">Financial Goals</sys:String>
