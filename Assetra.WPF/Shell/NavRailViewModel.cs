@@ -63,18 +63,18 @@ public partial class NavRailViewModel : ObservableObject
     {
         return new[]
         {
+            // 「分析」群組：日常觀察與輸出（語意收斂；原 Nav.Overview 拆出）。
             new NavGroupVm
             {
-                TitleResourceKey = "Nav.Overview",
-                GroupIconSymbol = "Apps24",
+                TitleResourceKey = "Nav.Analysis",
+                GroupIconSymbol = "DataPie24",
                 Items = new[]
                 {
                     new NavLeafVm { Section = NavSection.FinancialOverview, LabelResourceKey = "FinancialOverview.Nav.Label", IconSymbol = "DataPie24",            ToolTipResourceKey = "FinancialOverview.Nav.Label" },
-                    // Stage 2 (Dashboard consolidation)：資產趨勢併入財務儀表板的「資產趨勢」tab；
-                    // NavSection.Trends enum 保留以兼容舊持久化設定，NavigateTo() 會攔截重導。
+                    // NavSection.Trends 已併入財務概覽的「資產趨勢」tab；
+                    // NavigateTo() 攔截舊持久化重導。
                     new NavLeafVm { Section = NavSection.Reports,           LabelResourceKey = "Nav.Reports",                 IconSymbol = "DocumentBulletList24", ToolTipResourceKey = "Nav.Reports" },
                     new NavLeafVm { Section = NavSection.Assistant,         LabelResourceKey = "Nav.Assistant",               IconSymbol = "Sparkle24",            ToolTipResourceKey = "Nav.Assistant" },
-                    new NavLeafVm { Section = NavSection.AuditLog,          LabelResourceKey = "Nav.AuditLog",                IconSymbol = "History24",            ToolTipResourceKey = "Nav.AuditLog" },
                 },
             },
             new NavGroupVm
@@ -113,6 +113,16 @@ public partial class NavRailViewModel : ObservableObject
                     new NavLeafVm { Section = NavSection.Goals,      LabelResourceKey = "Nav.Goals",       IconSymbol = "Target24",     ToolTipResourceKey = "Nav.Goals" },
                     new NavLeafVm { Section = NavSection.Fire,       LabelResourceKey = "Fire.Title",      IconSymbol = "Flash24",      ToolTipResourceKey = "Fire.Title" },
                     new NavLeafVm { Section = NavSection.MonteCarlo, LabelResourceKey = "MonteCarlo.Title", IconSymbol = "Calculator24", ToolTipResourceKey = "MonteCarlo.Title" },
+                },
+            },
+            // 「工具」群組：診斷類項目（拆自 Nav.Overview），與日常分析語意分開。
+            new NavGroupVm
+            {
+                TitleResourceKey = "Nav.Tools",
+                GroupIconSymbol = "Wrench24",
+                Items = new[]
+                {
+                    new NavLeafVm { Section = NavSection.AuditLog, LabelResourceKey = "Nav.AuditLog", IconSymbol = "History24", ToolTipResourceKey = "Nav.AuditLog" },
                 },
             },
         };

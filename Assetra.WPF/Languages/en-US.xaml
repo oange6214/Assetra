@@ -36,6 +36,8 @@
     <sys:String x:Key="Nav.Import">Import</sys:String>
     <sys:String x:Key="Nav.Settings">Settings</sys:String>
     <sys:String x:Key="Nav.Overview">Overview</sys:String>
+    <sys:String x:Key="Nav.Analysis">Analysis</sys:String>
+    <sys:String x:Key="Nav.Tools">Tools</sys:String>
     <sys:String x:Key="Nav.Assets">Assets</sys:String>
     <sys:String x:Key="Nav.TransactionLog">Transaction Log</sys:String>
     <sys:String x:Key="Nav.CashAccounts">Funds Accounts</sys:String>
@@ -783,7 +785,7 @@
     <sys:String x:Key="AddAsset.ClosePrice.FetchFailed">Close price lookup failed. Please enter manually.</sys:String>
 
     <!--  Financial Overview  -->
-    <sys:String x:Key="FinancialOverview.Nav.Label">Financial Dashboard</sys:String>
+    <sys:String x:Key="FinancialOverview.Nav.Label">Financial Overview</sys:String>
     <sys:String x:Key="FinancialOverview.Header.NetWorth">Net Worth</sys:String>
     <sys:String x:Key="FinancialOverview.Header.TotalAssets">Total Assets</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Assets">Other Assets</sys:String>
@@ -808,7 +810,7 @@
     <sys:String x:Key="FinancialOverview.Section.Investments">Investments</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Liabilities">Liabilities</sys:String>
     <sys:String x:Key="Nav.Portfolio">Investment Assets</sys:String>
-    <sys:String x:Key="Nav.FinancialOverview">Financial Dashboard</sys:String>
+    <sys:String x:Key="Nav.FinancialOverview">Financial Overview</sys:String>
     <sys:String x:Key="Onboarding.Banner.Title">Welcome to Assetra</sys:String>
     <sys:String x:Key="Onboarding.Banner.Steps">① Add a position  →  ② View allocation analysis  →  ③ Set price alerts</sys:String>
     <sys:String x:Key="Settings.Title">Settings</sys:String>

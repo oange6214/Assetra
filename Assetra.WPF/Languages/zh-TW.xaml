@@ -36,6 +36,8 @@
     <sys:String x:Key="Nav.Import">匯入</sys:String>
     <sys:String x:Key="Nav.Settings">設定</sys:String>
     <sys:String x:Key="Nav.Overview">總覽</sys:String>
+    <sys:String x:Key="Nav.Analysis">分析</sys:String>
+    <sys:String x:Key="Nav.Tools">工具</sys:String>
     <sys:String x:Key="Nav.Assets">資產</sys:String>
     <sys:String x:Key="Nav.TransactionLog">交易記錄</sys:String>
     <sys:String x:Key="Nav.CashAccounts">資金帳戶</sys:String>
@@ -785,7 +787,7 @@
     <sys:String x:Key="AddAsset.ClosePrice.FetchFailed">收盤價查詢失敗，請手動輸入</sys:String>
 
     <!--  Financial Overview  -->
-    <sys:String x:Key="FinancialOverview.Nav.Label">財務儀表板</sys:String>
+    <sys:String x:Key="FinancialOverview.Nav.Label">財務概覽</sys:String>
     <sys:String x:Key="FinancialOverview.Header.NetWorth">淨資產</sys:String>
     <sys:String x:Key="FinancialOverview.Header.TotalAssets">總資產</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Assets">其他資產</sys:String>
@@ -810,7 +812,7 @@
     <sys:String x:Key="FinancialOverview.Section.Investments">投資</sys:String>
     <sys:String x:Key="FinancialOverview.Section.Liabilities">負債</sys:String>
     <sys:String x:Key="Nav.Portfolio">投資資產</sys:String>
-    <sys:String x:Key="Nav.FinancialOverview">財務儀表板</sys:String>
+    <sys:String x:Key="Nav.FinancialOverview">財務概覽</sys:String>
     <sys:String x:Key="Onboarding.Banner.Title">歡迎使用 Assetra</sys:String>
     <sys:String x:Key="Onboarding.Banner.Steps">① 新增持倉  →  ② 查看配置分析  →  ③ 設定價格警示</sys:String>
     <sys:String x:Key="Settings.Title">設定</sys:String>
@@ -1108,7 +1110,7 @@
     <sys:String x:Key="Trends.Benchmark.Tw0050">元大台灣 50</sys:String>
     <sys:String x:Key="Trends.Benchmark.Tw00981A">00981A</sys:String>
     <sys:String x:Key="Trends.Benchmark.Deposit15">定存參考 1.5%</sys:String>
-    <!--  Stage 2 (Dashboard consolidation)：4-tab 財務儀表板  -->
+    <!--  Stage 2 (Dashboard consolidation)：4-tab 財務概覽  -->
     <sys:String x:Key="Dashboard.Tab.Overview">總覽</sys:String>
     <sys:String x:Key="Dashboard.Tab.Trends">資產趨勢</sys:String>
     <sys:String x:Key="Dashboard.Tab.Calendar">報酬日曆</sys:String>
