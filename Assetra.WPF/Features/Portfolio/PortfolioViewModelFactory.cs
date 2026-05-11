@@ -45,6 +45,9 @@ internal sealed class PortfolioViewModelFactory
             // 讓 Trends 頁顯示最大回撤與對標 TWR。
             Drawdown: sp.GetService<IDrawdownCalculator>(),
             Benchmark: sp.GetService<IBenchmarkComparisonService>(),
+            // Stage 1 finish：full TWR 用的計算器 + 交易資料源。
+            Twr: sp.GetService<ITimeWeightedReturnCalculator>(),
+            Trades: sp.GetService<ITradeRepository>(),
             Crypto: sp.GetRequiredService<ICryptoService>(),
             BalanceQuery: sp.GetRequiredService<IBalanceQueryService>(),
             PositionQuery: sp.GetRequiredService<IPositionQueryService>(),

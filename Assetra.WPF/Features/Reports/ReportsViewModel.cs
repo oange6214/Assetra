@@ -720,7 +720,8 @@ public sealed partial class ReportsViewModel : ObservableObject
             return null;
 
         var entryCurrencyMap = await BuildEntryCurrencyMapAsync().ConfigureAwait(true);
-        var flows = BuildPerformanceFlows(await _trades.GetAllAsync().ConfigureAwait(true), period, entryCurrencyMap);
+        var flows = Assetra.Application.Analysis.PerformanceFlowBuilder.BuildPerformanceFlows(
+            await _trades.GetAllAsync().ConfigureAwait(true), period, entryCurrencyMap);
         flows = await ConvertFlowsToBaseAsync(flows).ConfigureAwait(true);
         if (flows is null) return null;
 
@@ -757,7 +758,8 @@ public sealed partial class ReportsViewModel : ObservableObject
         if (valuations.Count < 2) return null;
 
         var entryCurrencyMap = await BuildEntryCurrencyMapAsync().ConfigureAwait(true);
-        var flows = BuildPerformanceFlows(await _trades.GetAllAsync().ConfigureAwait(true), period, entryCurrencyMap);
+        var flows = Assetra.Application.Analysis.PerformanceFlowBuilder.BuildPerformanceFlows(
+            await _trades.GetAllAsync().ConfigureAwait(true), period, entryCurrencyMap);
         flows = await ConvertFlowsToBaseAsync(flows).ConfigureAwait(true);
         if (flows is null) return null;
 
@@ -801,38 +803,8 @@ public sealed partial class ReportsViewModel : ObservableObject
         return string.IsNullOrWhiteSpace(baseCurrency) ? null : baseCurrency;
     }
 
-    private static List<CashFlow> BuildPerformanceFlows(
-        IReadOnlyList<Trade> trades,
-        PerformancePeriod period,
-        IReadOnlyDictionary<Guid, string> entryCurrency)
-    {
-        var flows = new List<CashFlow>();
-        foreach (var trade in trades)
-        {
-            var date = PerformancePeriod.ToPeriodDate(trade.TradeDate);
-            if (!period.Contains(date)) continue;
-
-            var amount = trade.Type switch
-            {
-                TradeType.Buy => -((decimal)trade.Quantity * trade.Price + (trade.Commission ?? 0m)),
-                TradeType.Sell => (decimal)trade.Quantity * trade.Price - (trade.Commission ?? 0m),
-                TradeType.CashDividend => trade.CashAmount ?? (decimal)trade.Quantity * trade.Price,
-                _ => 0m,
-            };
-            if (amount == 0m) continue;
-
-            string? currency = null;
-            if (trade.PortfolioEntryId is { } entryId
-                && entryCurrency.TryGetValue(entryId, out var entryCcy)
-                && !string.IsNullOrWhiteSpace(entryCcy))
-            {
-                currency = entryCcy;
-            }
-
-            flows.Add(new CashFlow(date, amount, currency));
-        }
-        return flows;
-    }
+    // BuildPerformanceFlows 抽到 Application/Analysis/PerformanceFlowBuilder
+    // 由 ReportsViewModel + PortfolioHistoryViewModel 共用。
 
     public sealed record OverBudgetRowViewModel(
         CategorySpendSummary Summary,

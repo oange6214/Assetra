@@ -115,7 +115,17 @@ public sealed record PortfolioServices(
     /// Stage 1：給 PortfolioHistoryViewModel 算對標 TWR（^TWII / 0050.TW / 00981A.TW）。
     /// 為 null 時對標比較區整段隱藏。
     /// </summary>
-    IBenchmarkComparisonService? Benchmark = null)
+    IBenchmarkComparisonService? Benchmark = null,
+    /// <summary>
+    /// Stage 1 finish：把 Trends 區間報酬率從 naive 升級為 full TWR；
+    /// 需配合 <see cref="Trades"/> 一起注入才會生效。
+    /// </summary>
+    ITimeWeightedReturnCalculator? Twr = null,
+    /// <summary>
+    /// 交易 repository — 給 PortfolioHistoryViewModel 跑 TWR 時拉 cash flow 用。
+    /// 為 null 時 TWR 計算 fallback 到 naive return（end/start − 1）。
+    /// </summary>
+    ITradeRepository? Trades = null)
 {
     /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。

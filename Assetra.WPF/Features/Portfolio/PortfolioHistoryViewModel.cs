@@ -34,6 +34,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     // 列降階為「只顯示絕對值」、對標列整段隱藏，不阻擋主圖渲染。
     private readonly IDrawdownCalculator? _drawdown;
     private readonly IBenchmarkComparisonService? _benchmark;
+    // 「TWR + 交易」用於把區間報酬從 naive value-based 換成 full TWR
+    // （考慮中間出入金）。兩個都注入時才會切換到 TWR 模式；任一缺則用 naive。
+    private readonly ITimeWeightedReturnCalculator? _twr;
+    private readonly ITradeRepository? _trades;
 
     /// <summary>Full snapshot history (all dates), cached on each DB load.</summary>
     private IReadOnlyList<PortfolioDailySnapshot> _allSnapshots = [];
@@ -120,7 +124,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         IAppSettingsService? settings = null,
         IMultiCurrencyValuationService? fx = null,
         IDrawdownCalculator? drawdown = null,
-        IBenchmarkComparisonService? benchmark = null)
+        IBenchmarkComparisonService? benchmark = null,
+        ITimeWeightedReturnCalculator? twr = null,
+        ITradeRepository? trades = null)
     {
         _historyQueryService = historyQueryService;
         _localization = localization ?? NullLocalizationService.Instance;
@@ -128,6 +134,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         _fx = fx;
         _drawdown = drawdown;
         _benchmark = benchmark;
+        _twr = twr;
+        _trades = trades;
         HasDrawdown = _drawdown is not null;
         HasBenchmark = _benchmark is not null;
     }
@@ -189,7 +197,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         // Stage 1: KPI 列 + 對標。失敗不影響主圖。
         try
         {
-            UpdateKpis(filtered, points);
+            await UpdateKpisAsync(filtered, points).ConfigureAwait(false);
             await UpdateBenchmarksAsync(filtered).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -200,9 +208,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     }
 
     // ── Stage 1: 區間 KPI 計算 ─────────────────────────────────────────
-    // 採「naive」value-based 報酬率（end/start − 1），不扣除中間出入金；
-    // 完整 TWR/MWR 留待 Stage 3 把 Reports 的服務搬過來時再切換。
-    private void UpdateKpis(
+    // 報酬率優先用 full TWR（ITimeWeightedReturnCalculator + 交易 cash flow），
+    // 處理中間出入金的影響；服務未注入時回退到 naive value-based 計算。
+    private async Task UpdateKpisAsync(
         IReadOnlyList<PortfolioDailySnapshot> filtered,
         IReadOnlyList<DateTimePoint> points)
     {
@@ -217,7 +225,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         KpiStartValue = startValue;
         KpiEndValue = endValue;
         KpiAbsolutePnl = endValue - startValue;
-        KpiReturnPct = startValue == 0m ? 0m : (endValue - startValue) / startValue;
+
+        // 預設用 naive；若 TWR 服務 + 交易 repo 都注入則切換為 TWR。
+        var naiveReturn = startValue == 0m ? 0m : (endValue - startValue) / startValue;
+        KpiReturnPct = await TryComputeTwrAsync(filtered, points).ConfigureAwait(false) ?? naiveReturn;
 
         // 年化：用實際日數 + 365 day year
         var startDate = points[0].DateTime;
@@ -292,6 +303,42 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             return await _benchmark!.ComputeBenchmarkTwrAsync(symbol, period).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// 嘗試用 full TWR 計算區間報酬率。需要兩個服務都注入；任一缺或交易資料
+    /// 不足時回傳 null（caller fallback 到 naive 計算）。
+    /// </summary>
+    private async Task<decimal?> TryComputeTwrAsync(
+        IReadOnlyList<PortfolioDailySnapshot> filtered,
+        IReadOnlyList<DateTimePoint> points)
+    {
+        if (_twr is null || _trades is null || filtered.Count < 2)
+            return null;
+
+        try
+        {
+            // Valuations 用 filtered snapshots（已經過 chart filter 的 base 幣別轉換）
+            // 為簡化，使用 snapshot 原始 MarketValue（單幣別 user 預設情境）。
+            var valuations = filtered
+                .OrderBy(s => s.SnapshotDate)
+                .Select(s => (s.SnapshotDate, s.MarketValue))
+                .ToList();
+
+            var startDate = filtered.Min(s => s.SnapshotDate);
+            var endDate = filtered.Max(s => s.SnapshotDate);
+            var period = new PerformancePeriod(startDate, endDate);
+
+            var allTrades = await _trades.GetAllAsync().ConfigureAwait(false);
+            var flows = Assetra.Application.Analysis.PerformanceFlowBuilder.BuildPerformanceFlows(
+                allTrades, period);
+
+            return _twr.Compute(valuations, flows);
+        }
+        catch
         {
             return null;
         }
