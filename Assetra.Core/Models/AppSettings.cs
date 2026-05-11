@@ -184,4 +184,12 @@ public sealed record AppSettings(
     int TwelveDataQuotaUsed = 0,
 
     /// <summary>Soft daily quota guard for Twelve Data Basic. UI shows used / limit.</summary>
-    int TwelveDataDailyQuota = 800);
+    int TwelveDataDailyQuota = 800,
+
+    /// <summary>
+    /// 已關閉的 Assistant insight 鍵 → dismiss 時間。key = $"{Source}|{Title}"。
+    /// 用於儀表板總覽 widget 與 Assistant 頁的「✕」一致地隱藏使用者已忽略
+    /// 的提示，避免每次重啟又跳出來。7 天後自動 expire（在 service 端過濾時
+    /// 檢查 timestamp）。
+    /// </summary>
+    Dictionary<string, DateTime>? DismissedAssistantInsights = null);

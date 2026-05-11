@@ -1122,14 +1122,18 @@
     <!--  Stage 2.5：總覽 tab widget  -->
     <sys:String x:Key="Dashboard.Widget.SeeMore">→ 看全部</sys:String>
     <sys:String x:Key="Dashboard.Widget.Goals.Heading">目標進度</sys:String>
-    <sys:String x:Key="Dashboard.Widget.Goals.Empty">尚未設定任何目標。點擊上方連結前往「目標」頁建立。</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Goals.Empty">尚未設定任何目標。建立你的第一個目標以追蹤進度。</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Goals.CreateFirst">建立第一個目標</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.Heading">FIRE 進度</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.Number">FIRE 目標數字</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.YearsToFire">距離財務自由</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.OpenLink">→ 前往 FIRE 計算</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.Empty">尚未計算 FIRE 目標。輸入儲蓄率與預期報酬，預估財務自由時間。</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.CalculateNow">立即計算</sys:String>
     <sys:String x:Key="Dashboard.Widget.Assistant.Heading">財務助手洞察</sys:String>
     <sys:String x:Key="Dashboard.Widget.Assistant.Empty">目前沒有需要注意的洞察。</sys:String>
     <sys:String x:Key="Dashboard.Widget.Assistant.OpenLink">→ 開啟財務助手</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Assistant.Dismiss">關閉此提示 (7 天內不再顯示)</sys:String>
     <!--  Long-term refactor：投資焦點卡（取代 Portfolio.Dashboard tab）  -->
     <sys:String x:Key="Dashboard.Widget.Investment.Heading">投資焦點</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.TotalPnl">總損益</sys:String>

@@ -1118,14 +1118,18 @@
     <!-- Stage 2.5: Overview-tab widgets -->
     <sys:String x:Key="Dashboard.Widget.SeeMore">→ See all</sys:String>
     <sys:String x:Key="Dashboard.Widget.Goals.Heading">Goal progress</sys:String>
-    <sys:String x:Key="Dashboard.Widget.Goals.Empty">No goals yet. Open Goals page to create one.</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Goals.Empty">No goals yet. Create your first one to start tracking progress.</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Goals.CreateFirst">Create first goal</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.Heading">FIRE progress</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.Number">FIRE number</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.YearsToFire">Years to FI</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.OpenLink">→ Open FIRE calculator</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.Empty">FIRE target not calculated yet. Enter your savings rate and expected return to project financial freedom.</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.CalculateNow">Calculate now</sys:String>
     <sys:String x:Key="Dashboard.Widget.Assistant.Heading">Assistant insights</sys:String>
     <sys:String x:Key="Dashboard.Widget.Assistant.Empty">No insights right now.</sys:String>
     <sys:String x:Key="Dashboard.Widget.Assistant.OpenLink">→ Open Assistant</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Assistant.Dismiss">Dismiss (hide for 7 days)</sys:String>
     <!-- Long-term refactor: investment focus widget (replaces Portfolio.Dashboard tab) -->
     <sys:String x:Key="Dashboard.Widget.Investment.Heading">Investment focus</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.TotalPnl">Total P&amp;L</sys:String>

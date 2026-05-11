@@ -40,7 +40,8 @@
                     Text="{DynamicResource Dashboard.Widget.Fire.Heading}" />
             </DockPanel>
 
-            <Grid>
+            <!--  已計算狀態：顯示 FIRE number + 距離年數  -->
+            <Grid Visibility="{Binding FireWidget.HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
@@ -70,8 +71,30 @@
                 </StackPanel>
             </Grid>
 
+            <!--  Onboarding：尚未計算過 FIRE 時，引導使用者去 Fire 頁  -->
+            <Border Padding="14,12"
+                    Background="{DynamicResource AppHover}"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}"
+                    Visibility="{Binding FireWidget.HasCalculatedResult, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock FontSize="{StaticResource Font.Size.Xs}"
+                               Foreground="{DynamicResource AppTextSecondary}"
+                               Text="{DynamicResource Dashboard.Widget.Fire.Empty}"
+                               TextWrapping="Wrap" />
+                    <Button Margin="0,8,0,0"
+                            Padding="10,4"
+                            HorizontalAlignment="Left"
+                            Command="{Binding NavigateToFireCommand}"
+                            Content="{DynamicResource Dashboard.Widget.Fire.CalculateNow}"
+                            Style="{StaticResource AppSecondaryButton}" />
+                </StackPanel>
+            </Border>
+
             <TextBlock Style="{StaticResource DashboardWidgetFooter}"
-                       Text="{DynamicResource Dashboard.Widget.Fire.OpenLink}">
+                       Text="{DynamicResource Dashboard.Widget.Fire.OpenLink}"
+                       Visibility="{Binding FireWidget.HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <TextBlock.InputBindings>
                     <MouseBinding Command="{Binding NavigateToFireCommand}" MouseAction="LeftClick" />
                 </TextBlock.InputBindings>

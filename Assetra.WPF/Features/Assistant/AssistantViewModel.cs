@@ -41,16 +41,20 @@ public sealed partial class AssistantViewModel : ObservableObject
     public bool HasNoMessages => _messages.Count == 0;
     public bool HasInsights => _insightCards.Count > 0;
 
+    private readonly IAppSettingsService? _settings;
+
     public AssistantViewModel(
         IFinancialAssistant assistant,
         IAssistantInsightService? insights = null,
         IAssistantHistoryRepository? history = null,
-        ILocalizationService? localization = null)
+        ILocalizationService? localization = null,
+        IAppSettingsService? settings = null)
     {
         _assistant = assistant ?? throw new ArgumentNullException(nameof(assistant));
         _insights = insights;
         _history = history;
         _localization = localization;
+        _settings = settings;
         Messages = new ReadOnlyObservableCollection<AssistantMessage>(_messages);
         InsightCards = new ReadOnlyObservableCollection<AssistantInsight>(_insightCards);
         _messages.CollectionChanged += (_, _) =>
@@ -69,7 +73,19 @@ public sealed partial class AssistantViewModel : ObservableObject
         {
             var snapshot = await _insights.GetCurrentInsightsAsync().ConfigureAwait(true);
             _insightCards.Clear();
-            foreach (var i in snapshot) _insightCards.Add(i);
+            // 過濾掉使用者最近 7 天內已關閉的 insight。
+            var dismissed = _settings?.Current.DismissedAssistantInsights;
+            var cutoff = DateTime.UtcNow.AddDays(-7);
+            foreach (var i in snapshot)
+            {
+                if (dismissed is not null
+                    && dismissed.TryGetValue(InsightKey(i), out var dismissedAt)
+                    && dismissedAt > cutoff)
+                {
+                    continue;
+                }
+                _insightCards.Add(i);
+            }
         }
         catch
         {
@@ -77,13 +93,37 @@ public sealed partial class AssistantViewModel : ObservableObject
         }
     }
 
-    /// <summary>Dismiss a single insight card from the visible list.</summary>
+    /// <summary>Dismiss insight + 持久化到 AppSettings（7 天 expire）。</summary>
     [RelayCommand]
-    private void DismissInsight(AssistantInsight? insight)
+    private async Task DismissInsight(AssistantInsight? insight)
     {
         if (insight is null) return;
         _insightCards.Remove(insight);
+
+        if (_settings is null) return;
+        try
+        {
+            var current = _settings.Current;
+            var map = current.DismissedAssistantInsights is null
+                ? new Dictionary<string, DateTime>()
+                : new Dictionary<string, DateTime>(current.DismissedAssistantInsights);
+            map[InsightKey(insight)] = DateTime.UtcNow;
+            // 順手清掉 7 天前的舊紀錄，避免無限增長。
+            var cutoff = DateTime.UtcNow.AddDays(-7);
+            foreach (var k in map.Keys.ToList())
+                if (map[k] < cutoff) map.Remove(k);
+
+            await _settings.SaveAsync(current with { DismissedAssistantInsights = map }).ConfigureAwait(false);
+        }
+        catch
+        {
+            // 持久化失敗不影響使用者操作 — UI 還是已經移除
+        }
     }
+
+    /// <summary>建立 insight 的唯一鍵：Source|Title（兩者組合在 RuleBasedInsightService 通常穩定）。</summary>
+    private static string InsightKey(AssistantInsight insight) =>
+        $"{insight.Source}|{insight.Title}";
 
     /// <summary>
     /// Export the full conversation history to a markdown file. Privacy-friendly:

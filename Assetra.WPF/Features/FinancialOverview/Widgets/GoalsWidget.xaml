@@ -41,7 +41,7 @@
             </DockPanel>
 
             <!--  前 3 個目標：用 CollectionViewSource 切較難，先用 ItemsControl + MaxHeight 限制視覺密度  -->
-            <ItemsControl ItemsSource="{Binding GoalsWidget.Goals}">
+            <ItemsControl ItemsSource="{Binding TopThreeGoals}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel />
@@ -81,12 +81,27 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <TextBlock
-                FontSize="{StaticResource Font.Size.Xs}"
-                Foreground="{DynamicResource AppTextMuted}"
-                Text="{DynamicResource Dashboard.Widget.Goals.Empty}"
-                TextWrapping="Wrap"
-                Visibility="{Binding GoalsWidget.Goals.Count, Converter={StaticResource ZeroToVisibleConverter}}" />
+            <!--  空狀態 onboarding：當沒有任何目標時，給明顯的 CTA  -->
+            <Border Margin="0,4,0,0"
+                    Padding="14,12"
+                    Background="{DynamicResource AppHover}"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}"
+                    Visibility="{Binding HasNoGoals, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock FontSize="{StaticResource Font.Size.Xs}"
+                               Foreground="{DynamicResource AppTextSecondary}"
+                               Text="{DynamicResource Dashboard.Widget.Goals.Empty}"
+                               TextWrapping="Wrap" />
+                    <Button Margin="0,8,0,0"
+                            Padding="10,4"
+                            HorizontalAlignment="Left"
+                            Command="{Binding NavigateToGoalsCommand}"
+                            Content="{DynamicResource Dashboard.Widget.Goals.CreateFirst}"
+                            Style="{StaticResource AppSecondaryButton}" />
+                </StackPanel>
+            </Border>
 
             <TextBlock Style="{StaticResource DashboardWidgetFooter}"
                        Text="{DynamicResource Dashboard.Widget.SeeMore}">

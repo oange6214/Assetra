@@ -115,6 +115,19 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     public Assetra.WPF.Features.Assistant.AssistantViewModel? AssistantWidget { get; }
 
     /// <summary>
+    /// Stage 2.5 polish：總覽 widget 顯示的前 3 個目標 — 按 deadline 升冪
+    /// （無 deadline 排最後）。GoalsWidget.Goals 集合變動時自動 refresh。
+    /// </summary>
+    public IEnumerable<Assetra.WPF.Features.Goals.GoalRowViewModel> TopThreeGoals =>
+        GoalsWidget is null
+            ? []
+            : GoalsWidget.Goals
+                .OrderBy(g => g.Goal.Deadline ?? DateOnly.MaxValue)
+                .Take(3);
+
+    public bool HasNoGoals => GoalsWidget is null || GoalsWidget.Goals.Count == 0;
+
+    /// <summary>
     /// Long-term refactor：「投資焦點卡」用的 VM。原本是 Portfolio.Dashboard 內 tab
     /// 的資料來源，現在升到「全域財務儀表板」的總覽 tab，作為對應「投資資產」
     /// 工作頁的 glance summary。Portfolio 頁本身的 Dashboard tab 已移除。
@@ -165,6 +178,16 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         // Stage 2 (Dashboard consolidation)：接收 NavRail 攔截 Trends leaf 後送
         // 過來的 tab 切換請求。lifetime = application；無需 unsubscribe。
         Assetra.WPF.Infrastructure.ShellNavigationEvents.DashboardTabRequested += OnDashboardTabRequested;
+
+        // Stage 2.5 polish：監聽 Goals 集合變化以 refresh TopThreeGoals + HasNoGoals。
+        if (GoalsWidget is not null && GoalsWidget.Goals is System.Collections.Specialized.INotifyCollectionChanged ncc)
+        {
+            ncc.CollectionChanged += (_, _) =>
+            {
+                OnPropertyChanged(nameof(TopThreeGoals));
+                OnPropertyChanged(nameof(HasNoGoals));
+            };
+        }
 
         KpiCards = new ReadOnlyObservableCollection<KpiCardVm>(_kpiCards);
         KpiEditorItems = new ReadOnlyObservableCollection<KpiSelectionItemVm>(_kpiEditorItems);
