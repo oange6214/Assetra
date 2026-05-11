@@ -74,6 +74,21 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     partial void OnUseAbsoluteForToneChanged(bool _) => Rebuild();
 
     /// <summary>
+    /// v2 #6d：年度檢視 — 把 12 個月併成一個熱度圖（GitHub contribution graph style）。
+    /// 切換時只重組 view-only collection，不影響月曆主 grid 的 Cells。
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(YearViewCells))]
+    private bool _isYearView;
+
+    /// <summary>
+    /// 年度熱度圖的 cell 集合 — 365 (或 366) 個 DailyCellVm，按整年順序。
+    /// 純 computed，IsYearView=true 時 binding 才會看；XAML 用 UniformGrid Rows="7"
+    /// 渲染（7 row × 53 col 接近一年）。
+    /// </summary>
+    public IReadOnlyList<DailyCellVm> YearViewCells => BuildYearCells();
+
+    /// <summary>
     /// 使用者點選的單一日 cell。null 時 popover 關閉。
     /// </summary>
     [ObservableProperty]
@@ -422,6 +437,54 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
             return new SKColor(c.R, c.G, c.B, c.A);
         }
         return SKColor.Parse(hexFallback);
+    }
+
+    /// <summary>
+    /// 建立年度熱度圖 cell 集合 — CurrentMonth.Year 整年的每一天。
+    /// 全部都用 IsCurrentMonth=true 以套用 tone（年度檢視沒有「非當月」概念）。
+    /// </summary>
+    private IReadOnlyList<DailyCellVm> BuildYearCells()
+    {
+        var year = CurrentMonth.Year;
+        var snapshotByDate = _allSnapshots
+            .Where(s => s.SnapshotDate.Year == year)
+            .ToDictionary(s => s.SnapshotDate);
+        var cells = new List<DailyCellVm>(366);
+        var date = new DateOnly(year, 1, 1);
+        var end = new DateOnly(year, 12, 31);
+
+        // 找年初前最後一個 snapshot 作為計算 day 1 delta 的 baseline
+        decimal? prev = _allSnapshots
+            .Where(s => s.SnapshotDate < date)
+            .OrderByDescending(s => s.SnapshotDate)
+            .FirstOrDefault()?.MarketValue;
+
+        while (date <= end)
+        {
+            var has = snapshotByDate.TryGetValue(date, out var snap);
+            decimal? delta = null;
+            decimal? deltaPct = null;
+            if (has && prev.HasValue && prev.Value != 0m)
+            {
+                delta = snap!.MarketValue - prev.Value;
+                deltaPct = delta / prev.Value;
+            }
+            if (has) prev = snap!.MarketValue;
+
+            cells.Add(new DailyCellVm(
+                Date: date,
+                Day: date.Day,
+                IsCurrentMonth: true,  // 年度檢視全顯
+                IsWeekend: date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday,
+                HasData: has && delta.HasValue,
+                Delta: delta,
+                DeltaDisplay: FormatDelta(delta),
+                Tone: UseAbsoluteForTone
+                    ? ResolveToneByAbsolute(delta)
+                    : ResolveTone(delta, deltaPct)));
+            date = date.AddDays(1);
+        }
+        return cells;
     }
 
     private static string FormatDelta(decimal? delta)

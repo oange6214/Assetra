@@ -1170,6 +1170,7 @@
     <sys:String x:Key="Dashboard.Calendar.UseAbsolute">絕對值色階</sys:String>
     <sys:String x:Key="Dashboard.Calendar.UseAbsolute.Tooltip">色階分桶基準：未勾選 = 依 |Δ%|；勾選 = 依 |Δ 金額|</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.MoveUp">上移</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.YearView">年度檢視</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.MoveDown">下移</sys:String>
 
     <!--  Goals / 財務目標  -->

@@ -1166,6 +1166,7 @@
     <sys:String x:Key="Dashboard.Calendar.UseAbsolute">Color by amount</sys:String>
     <sys:String x:Key="Dashboard.Calendar.UseAbsolute.Tooltip">Bucket basis: unchecked = |Δ%|; checked = |Δ amount|</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.MoveUp">Move up</sys:String>
+    <sys:String x:Key="Dashboard.Calendar.YearView">Year view</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.MoveDown">Move down</sys:String>
 
     <!-- Goals / Financial Goals -->

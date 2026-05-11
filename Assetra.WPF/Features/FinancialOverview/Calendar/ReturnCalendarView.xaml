@@ -133,6 +133,15 @@
                            Foreground="{DynamicResource AppTextSecondary}"
                            Text="{DynamicResource Dashboard.Calendar.UseAbsolute}" />
             </CheckBox>
+            <!--  v2 #6d：年度熱度圖切換（GitHub contribution graph 風格）  -->
+            <CheckBox DockPanel.Dock="Right"
+                      Margin="0,0,12,0"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding IsYearView, Mode=TwoWay}">
+                <TextBlock FontSize="{StaticResource Font.Size.Xs}"
+                           Foreground="{DynamicResource AppTextSecondary}"
+                           Text="{DynamicResource Dashboard.Calendar.YearView}" />
+            </CheckBox>
         </DockPanel>
 
         <!--
@@ -192,8 +201,9 @@
             </TextBlock>
         </StackPanel>
 
-        <!--  ── Weekday header ── 7 天 + 1 個週合計欄  -->
-        <Grid Grid.Row="2">
+        <!--  ── Weekday header ── 7 天 + 1 個週合計欄 (年度檢視時隱藏)  -->
+        <Grid Grid.Row="2"
+              Visibility="{Binding IsYearView, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -221,7 +231,8 @@
             click cell → SelectCellCommand 開 popover；HasData=false 的 cell
             command 內部 return 不開啟。
         -->
-        <ItemsControl Grid.Row="3" ItemsSource="{Binding Weeks}">
+        <ItemsControl Grid.Row="3" ItemsSource="{Binding Weeks}"
+                      Visibility="{Binding IsYearView, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <!--
@@ -293,6 +304,72 @@
                                        Typography.NumeralAlignment="Tabular" />
                         </Border>
                     </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!--
+            ── v2 #6d：年度熱度圖（IsYearView=true 時取代月份 grid）──
+            GitHub-style：每 cell 一天，左到右、上到下排 365/366 個 cell。
+            純色塊 + tooltip 顯示日期 / Δ — 視覺上一眼看完整年。
+        -->
+        <ItemsControl Grid.Row="3"
+                      ItemsSource="{Binding YearViewCells}"
+                      Visibility="{Binding IsYearView, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Width="10" Height="10" Margin="1"
+                            BorderBrush="{DynamicResource AppBorderLight}"
+                            BorderThickness="0.5"
+                            CornerRadius="2">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Tone}" Value="UpWeak">
+                                        <Setter Property="Background" Value="#1AEF4444" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Tone}" Value="UpMedium">
+                                        <Setter Property="Background" Value="#33EF4444" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Tone}" Value="UpStrong">
+                                        <Setter Property="Background" Value="#66EF4444" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Tone}" Value="UpStrongest">
+                                        <Setter Property="Background" Value="#99EF4444" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Tone}" Value="DownWeak">
+                                        <Setter Property="Background" Value="#1A22C55E" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Tone}" Value="DownMedium">
+                                        <Setter Property="Background" Value="#3322C55E" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Tone}" Value="DownStrong">
+                                        <Setter Property="Background" Value="#6622C55E" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Tone}" Value="DownStrongest">
+                                        <Setter Property="Background" Value="#9922C55E" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <Border.ToolTip>
+                            <TextBlock>
+                                <Run Text="{Binding Date.Year, Mode=OneWay, StringFormat='0000'}" />
+                                <Run Text="/" />
+                                <Run Text="{Binding Date.Month, Mode=OneWay, StringFormat='00'}" />
+                                <Run Text="/" />
+                                <Run Text="{Binding Date.Day, Mode=OneWay, StringFormat='00'}" />
+                                <Run Text=" " />
+                                <Run Text="{Binding DeltaDisplay, Mode=OneWay}" />
+                            </TextBlock>
+                        </Border.ToolTip>
+                    </Border>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
