@@ -1178,12 +1178,15 @@
                 </Grid>
             </Expander>
 
-            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.Risk.Title}" IsExpanded="False" Margin="0,0,0,16">
+            <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.Risk.Title}" IsExpanded="False" Margin="0,0,0,16"
+                      Visibility="Collapsed">
                 <!--
-                    Stage 3 (Dashboard consolidation)：Risk Expander 暫留 Reports，
-                    因為 HHI / Top Holdings 等內容尚未整合到 Trends 頁。下一輪
-                    把 Volatility / Sharpe / HHI 接到 PortfolioHistoryViewModel
-                    後再搬遷。
+                    Stage 3 收尾：核心風險指標（Volatility / Sharpe / Drawdown / HHI）
+                    已搬到財務概覽「資產趨勢」tab 的風險指標列。Top Holdings 列表
+                    與集中度警示在儀表板的配置 tab 已有完整呈現。Reports 不再
+                    重複展示「動態觀察」型指標；本 Expander 保留 XAML 以兼容
+                    ReportsViewModel 仍計算的 Risk 資料，未來可進一步移除 service
+                    注入與 fields，達成 plan「Reports XAML ≤ 600 行」目標。
                 -->
                 <Grid>
                     <TextBlock

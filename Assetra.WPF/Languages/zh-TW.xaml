@@ -1105,6 +1105,9 @@
     <sys:String x:Key="Trends.Kpi.ReturnPct">報酬率</sys:String>
     <sys:String x:Key="Trends.Kpi.Annualized">年化</sys:String>
     <sys:String x:Key="Trends.Kpi.MaxDrawdown">最大回撤</sys:String>
+    <sys:String x:Key="Trends.Kpi.Volatility">年化波動率</sys:String>
+    <sys:String x:Key="Trends.Kpi.Sharpe">Sharpe 比率</sys:String>
+    <sys:String x:Key="Trends.Kpi.Hhi">HHI 集中度</sys:String>
     <sys:String x:Key="Trends.Benchmark.Heading">同期對標報酬率</sys:String>
     <sys:String x:Key="Trends.Benchmark.Taiex">加權指數</sys:String>
     <sys:String x:Key="Trends.Benchmark.Tw0050">元大台灣 50</sys:String>

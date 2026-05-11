@@ -22,9 +22,11 @@
             <RowDefinition Height="*" />
             <!--  main chart  -->
             <RowDefinition Height="Auto" />
-            <!--  Stage 1: 區間 KPI 列  -->
+            <!--  Stage 1: 區間 KPI 列（期初 / 期末 / 區間損益 / 報酬率 / 年化）  -->
             <RowDefinition Height="Auto" />
-            <!--  Stage 1: 對標比較區  -->
+            <!--  風險指標列（最大回撤 / 波動率 / Sharpe / HHI）  -->
+            <RowDefinition Height="Auto" />
+            <!--  對標比較區  -->
             <RowDefinition Height="Auto" />
             <!--  footer hint  -->
         </Grid.RowDefinitions>
@@ -114,7 +116,7 @@
         <UniformGrid
             Grid.Row="2"
             Margin="0,12,0,0"
-            Columns="6"
+            Columns="5"
             Visibility="{Binding HasKpis, Converter={StaticResource BooleanToVisibilityConverter}}">
             <!--  期初  -->
             <Border Margin="0,0,4,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
@@ -169,7 +171,7 @@
                 </StackPanel>
             </Border>
             <!--  年化  -->
-            <Border Margin="2,0,2,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
+            <Border Margin="4,0,0,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
                     BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
                     CornerRadius="{StaticResource Radius.Sm}">
                 <StackPanel>
@@ -181,8 +183,20 @@
                                Text="{Binding KpiAnnualizedPct, StringFormat='+0.00%;-0.00%;0.00%'}" />
                 </StackPanel>
             </Border>
-            <!--  最大回撤（IDrawdownCalculator 注入後才顯示）  -->
-            <Border Margin="4,0,0,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
+        </UniformGrid>
+
+        <!--
+            ── 風險指標列 ──
+            從 Reports.Risk Expander 搬到 Trends（合併「動態觀察」語意）。
+            每張卡有獨立的 Has* 旗標控制顯示；都沒注入時整列空白。
+        -->
+        <UniformGrid
+            Grid.Row="3"
+            Margin="0,8,0,0"
+            Columns="4"
+            Visibility="{Binding HasKpis, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <!--  最大回撤  -->
+            <Border Margin="0,0,4,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
                     BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
                     CornerRadius="{StaticResource Radius.Sm}"
                     Visibility="{Binding HasDrawdown, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -195,11 +209,53 @@
                                Text="{Binding KpiMaxDrawdownPct, StringFormat='0.00%'}" />
                 </StackPanel>
             </Border>
+            <!--  年化波動率  -->
+            <Border Margin="2,0,2,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}"
+                    Visibility="{Binding HasVolatility, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                               Foreground="{DynamicResource AppTextMuted}"
+                               Text="{DynamicResource Trends.Kpi.Volatility}" />
+                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{Binding KpiVolatilityPct, StringFormat='0.00%'}" />
+                </StackPanel>
+            </Border>
+            <!--  Sharpe  -->
+            <Border Margin="2,0,2,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}"
+                    Visibility="{Binding HasSharpe, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                               Foreground="{DynamicResource AppTextMuted}"
+                               Text="{DynamicResource Trends.Kpi.Sharpe}" />
+                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{Binding KpiSharpeRatio, StringFormat='0.00'}" />
+                </StackPanel>
+            </Border>
+            <!--  HHI 集中度  -->
+            <Border Margin="4,0,0,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}"
+                    Visibility="{Binding HasHhi, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                               Foreground="{DynamicResource AppTextMuted}"
+                               Text="{DynamicResource Trends.Kpi.Hhi}" />
+                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{Binding KpiHhi, StringFormat='0.000'}" />
+                </StackPanel>
+            </Border>
         </UniformGrid>
 
         <!--  ── Stage 1: 對標比較區（4 個固定 benchmark TWR）──  -->
         <Border
-            Grid.Row="3"
+            Grid.Row="4"
             Margin="0,8,0,0"
             Padding="14,10"
             Background="{DynamicResource AppCardBackground}"
@@ -253,7 +309,7 @@
 
         <!--  ── Footer hint ──  -->
         <TextBlock
-            Grid.Row="4"
+            Grid.Row="5"
             Margin="0,12,0,0"
             FontSize="{DynamicResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextSecondary}"

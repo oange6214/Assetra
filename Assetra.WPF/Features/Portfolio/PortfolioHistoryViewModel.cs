@@ -38,6 +38,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     // （考慮中間出入金）。兩個都注入時才會切換到 TWR 模式；任一缺則用 naive。
     private readonly ITimeWeightedReturnCalculator? _twr;
     private readonly ITradeRepository? _trades;
+    // 風險指標：原本 Reports 的 Risk Expander 內容，搬到 Trends 後共用。
+    private readonly IVolatilityCalculator? _volatility;
+    private readonly ISharpeRatioCalculator? _sharpe;
+    private readonly IConcentrationAnalyzer? _concentration;
 
     /// <summary>Full snapshot history (all dates), cached on each DB load.</summary>
     private IReadOnlyList<PortfolioDailySnapshot> _allSnapshots = [];
@@ -104,10 +108,18 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     [ObservableProperty] private decimal _kpiAbsolutePnl;
     [ObservableProperty] private decimal _kpiReturnPct;        // 整個區間累積報酬率 (small "naive" calc：value-based)
     [ObservableProperty] private decimal _kpiAnnualizedPct;    // 年化
-    [ObservableProperty] private decimal _kpiMaxDrawdownPct;   // 最大回撤 (負數，例：-0.12 表示 -12%)
+    [ObservableProperty] private decimal _kpiMaxDrawdownPct;   // 最大回撤 (DrawdownCalculator 回正值表 magnitude)
     [ObservableProperty] private bool _hasKpis;
     /// <summary>True 當有提供 IDrawdownCalculator 時；用於控制最大回撤卡的可見性。</summary>
     [ObservableProperty] private bool _hasDrawdown;
+
+    // 風險指標（之前在 Reports.Risk Expander，搬到 Trends 共用）
+    [ObservableProperty] private decimal _kpiVolatilityPct;     // 年化波動率
+    [ObservableProperty] private decimal _kpiSharpeRatio;       // Sharpe 比率（無單位，F2 顯示）
+    [ObservableProperty] private decimal _kpiHhi;               // 集中度（0..1，F3 顯示）
+    [ObservableProperty] private bool _hasVolatility;
+    [ObservableProperty] private bool _hasSharpe;
+    [ObservableProperty] private bool _hasHhi;
 
     // Stage 1：對標比較（4 個固定 benchmark）
     // 每個都是「該對標期間 TWR」字串，未啟用 / 無歷史 = "—"
@@ -126,7 +138,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         IDrawdownCalculator? drawdown = null,
         IBenchmarkComparisonService? benchmark = null,
         ITimeWeightedReturnCalculator? twr = null,
-        ITradeRepository? trades = null)
+        ITradeRepository? trades = null,
+        IVolatilityCalculator? volatility = null,
+        ISharpeRatioCalculator? sharpe = null,
+        IConcentrationAnalyzer? concentration = null)
     {
         _historyQueryService = historyQueryService;
         _localization = localization ?? NullLocalizationService.Instance;
@@ -136,8 +151,14 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         _benchmark = benchmark;
         _twr = twr;
         _trades = trades;
+        _volatility = volatility;
+        _sharpe = sharpe;
+        _concentration = concentration;
         HasDrawdown = _drawdown is not null;
         HasBenchmark = _benchmark is not null;
+        HasVolatility = _volatility is not null;
+        HasSharpe = _sharpe is not null;
+        HasHhi = _concentration is not null;
     }
 
     // Public API
@@ -246,18 +267,42 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             KpiAnnualizedPct = 0m;
         }
 
+        var series = filtered
+            .OrderBy(s => s.SnapshotDate)
+            .Select(s => (s.SnapshotDate, s.MarketValue))
+            .ToList();
+
         // 最大回撤（只在有 IDrawdownCalculator 時計算）
-        if (_drawdown is not null && filtered.Count >= 2)
+        KpiMaxDrawdownPct = _drawdown is not null && series.Count >= 2
+            ? _drawdown.ComputeMaxDrawdown(series) ?? 0m
+            : 0m;
+
+        // 年化波動率
+        KpiVolatilityPct = _volatility is not null && series.Count >= 2
+            ? _volatility.ComputeAnnualized(series) ?? 0m
+            : 0m;
+
+        // Sharpe = (annualizedReturn − 2%) / volatility；參考 Reports 用 0.02 risk-free rate
+        if (_sharpe is not null && KpiVolatilityPct > 0m)
+            KpiSharpeRatio = _sharpe.Compute(KpiAnnualizedPct, KpiVolatilityPct, riskFreeRate: 0.02m) ?? 0m;
+        else
+            KpiSharpeRatio = 0m;
+
+        // HHI 集中度（async；失敗 fallback 為 0）
+        if (_concentration is not null)
         {
-            var series = filtered
-                .OrderBy(s => s.SnapshotDate)
-                .Select(s => (s.SnapshotDate, s.MarketValue))
-                .ToList();
-            KpiMaxDrawdownPct = _drawdown.ComputeMaxDrawdown(series) ?? 0m;
+            try
+            {
+                KpiHhi = await _concentration.ComputeHhiAsync().ConfigureAwait(false) ?? 0m;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                KpiHhi = 0m;
+            }
         }
         else
         {
-            KpiMaxDrawdownPct = 0m;
+            KpiHhi = 0m;
         }
 
         HasKpis = true;

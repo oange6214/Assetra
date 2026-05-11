@@ -1101,6 +1101,9 @@
     <sys:String x:Key="Trends.Kpi.ReturnPct">Return</sys:String>
     <sys:String x:Key="Trends.Kpi.Annualized">Annualized</sys:String>
     <sys:String x:Key="Trends.Kpi.MaxDrawdown">Max drawdown</sys:String>
+    <sys:String x:Key="Trends.Kpi.Volatility">Annualized volatility</sys:String>
+    <sys:String x:Key="Trends.Kpi.Sharpe">Sharpe ratio</sys:String>
+    <sys:String x:Key="Trends.Kpi.Hhi">HHI concentration</sys:String>
     <sys:String x:Key="Trends.Benchmark.Heading">Same-period benchmark returns</sys:String>
     <sys:String x:Key="Trends.Benchmark.Taiex">TAIEX</sys:String>
     <sys:String x:Key="Trends.Benchmark.Tw0050">Yuanta Taiwan 50</sys:String>

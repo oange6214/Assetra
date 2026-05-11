@@ -125,7 +125,13 @@ public sealed record PortfolioServices(
     /// 交易 repository — 給 PortfolioHistoryViewModel 跑 TWR 時拉 cash flow 用。
     /// 為 null 時 TWR 計算 fallback 到 naive return（end/start − 1）。
     /// </summary>
-    ITradeRepository? Trades = null)
+    ITradeRepository? Trades = null,
+    /// <summary>風險指標：年化波動率（從 Reports 搬到 Trends）。</summary>
+    IVolatilityCalculator? Volatility = null,
+    /// <summary>風險指標：Sharpe 比率（從 Reports 搬到 Trends）。</summary>
+    ISharpeRatioCalculator? Sharpe = null,
+    /// <summary>風險指標：HHI 集中度（從 Reports 搬到 Trends）。</summary>
+    IConcentrationAnalyzer? Concentration = null)
 {
     /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。

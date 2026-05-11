@@ -48,6 +48,10 @@ internal sealed class PortfolioViewModelFactory
             // Stage 1 finish：full TWR 用的計算器 + 交易資料源。
             Twr: sp.GetService<ITimeWeightedReturnCalculator>(),
             Trades: sp.GetService<ITradeRepository>(),
+            // 風險指標（從 Reports 搬到 Trends 共用）
+            Volatility: sp.GetService<IVolatilityCalculator>(),
+            Sharpe: sp.GetService<ISharpeRatioCalculator>(),
+            Concentration: sp.GetService<IConcentrationAnalyzer>(),
             Crypto: sp.GetRequiredService<ICryptoService>(),
             BalanceQuery: sp.GetRequiredService<IBalanceQueryService>(),
             PositionQuery: sp.GetRequiredService<IPositionQueryService>(),
