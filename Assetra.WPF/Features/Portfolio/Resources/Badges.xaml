@@ -56,24 +56,33 @@
         在 light/dark theme 兩邊都明顯可辨識，仍保持「metadata 不是 status」
         的視覺層級（與 PortfolioDefaultBadge 的滿色 accent 區別）。
     -->
+    <!--
+        Subtype chip 視覺降階：原本是 accent-subtle 背景 + accent 邊框 + SemiBold
+        強調色文字 — 視覺上幾乎跟 status badge（例：「預設」）等量，搶走帳戶
+        名稱的焦點。新樣式：弱化背景、移除邊框、regular weight + muted 文字，
+        把它定位為「次要 metadata」而非「狀態警示」。
+
+        AccentSubtle / AppAccent 仍是「強調色」語意；subtype 只是「這個帳戶是
+        什麼類別」的補充資訊，不該搶 KPI 數字或預設 badge 的視覺。
+    -->
     <Style
         x:Key="PortfolioSubtypeChip"
         BasedOn="{StaticResource PortfolioBadgeBase}"
         TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource AppAccentSubtle}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+        <Setter Property="Background" Value="{DynamicResource AppHover}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="MinWidth" Value="0" />
-        <Setter Property="Padding" Value="8,0" />
-        <Setter Property="Height" Value="20" />
+        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="Height" Value="18" />
     </Style>
 
     <Style x:Key="PortfolioSubtypeChipText" TargetType="TextBlock">
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size.Xs}" />
-        <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
     </Style>
 
     <Style

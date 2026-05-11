@@ -73,9 +73,9 @@
             <RowDefinition Height="Auto" />
             <!--  weekday header  -->
             <RowDefinition Height="*" MinHeight="280" />
-            <!--  6x7 grid  -->
+            <!--  6 列 × 8 col grid（含週合計欄）— 拉伸填滿主要空間，使每列等高  -->
             <RowDefinition Height="Auto" />
-            <!--  monthly bar chart  -->
+            <!--  monthly bar chart：固定 100px 高，緊貼月曆下方  -->
         </Grid.RowDefinitions>
 
         <!--
@@ -98,9 +98,16 @@
                       SelectedItem="{Binding CurrentMonth, Mode=TwoWay}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Year, StringFormat='0000'}">
+                        <!--
+                            DateOnly.Year / .Month 是 readonly get；TextBlock.Text 與 Run.Text
+                            預設 binding mode 是 TwoWay 會 throw InvalidOperationException
+                            （'cannot work on the read-only property'）。三處 binding 全部
+                            標明 Mode=OneWay。
+                        -->
+                        <TextBlock>
+                            <Run Text="{Binding Year, Mode=OneWay, StringFormat='0000'}" />
                             <Run Text=" / " />
-                            <Run Text="{Binding Month, StringFormat='00', Mode=OneWay}" />
+                            <Run Text="{Binding Month, Mode=OneWay, StringFormat='00'}" />
                         </TextBlock>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
@@ -207,12 +214,17 @@
         <ItemsControl Grid.Row="3" ItemsSource="{Binding Weeks}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <StackPanel />
+                    <!--
+                        UniformGrid Rows="6" 讓 6 列在可用垂直空間內等高分配；
+                        原本 StackPanel + 每列 Height=46 會把月曆固定在 276px 高，
+                        Row=\"*\" 剩餘空間變成大片空白（特別在大螢幕）。
+                    -->
+                    <UniformGrid Rows="6" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid Height="46">
+                    <Grid MinHeight="42">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
@@ -321,11 +333,17 @@
                                    FontSize="{StaticResource Font.Size.Md}"
                                    FontWeight="SemiBold"
                                    Foreground="{DynamicResource AppTextPrimary}">
-                            <Run Text="{Binding SelectedCell.Date.Year, FallbackValue=''}" />
+                            <!--
+                                bug fix：原本 Year 沒標 Mode=OneWay；DateOnly.Year/Month/Day
+                                全部 readonly get → WPF 預設 TwoWay binding 直接 throw
+                                InvalidOperationException 在 SelectCell 命令觸發時。
+                                三個 Run 全部標明 Mode=OneWay。
+                            -->
+                            <Run Text="{Binding SelectedCell.Date.Year, Mode=OneWay, FallbackValue=''}" />
                             <Run Text="/" />
-                            <Run Text="{Binding SelectedCell.Date.Month, StringFormat='00', FallbackValue='', Mode=OneWay}" />
+                            <Run Text="{Binding SelectedCell.Date.Month, Mode=OneWay, StringFormat='00', FallbackValue=''}" />
                             <Run Text="/" />
-                            <Run Text="{Binding SelectedCell.Date.Day, StringFormat='00', FallbackValue='', Mode=OneWay}" />
+                            <Run Text="{Binding SelectedCell.Date.Day, Mode=OneWay, StringFormat='00', FallbackValue=''}" />
                         </TextBlock>
                         <Button DockPanel.Dock="Right" Width="28" Height="28" Padding="0"
                                 Command="{Binding CloseCellPopoverCommand}"
