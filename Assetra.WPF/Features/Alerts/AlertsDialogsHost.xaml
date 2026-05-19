@@ -1,0 +1,196 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Alerts.AlertsDialogsHost"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Alerts"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:AlertsViewModel}, IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <!--
+        外提到 MainWindow 的 Alerts dialog host — 包含新增 / 編輯規則表單與
+        刪除確認 modal。Root Grid 沒有 Visibility 綁定：兩個子 modal 各自靠
+        IsFormOpen / IsDeleteConfirmOpen 控制顯示，未開啟時 host 透明且不
+        攔截 hit-test。
+    -->
+    <Grid Background="Transparent" IsHitTestVisible="True">
+
+        <!--  警示 — 新增 / 編輯表單  -->
+        <Grid
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border
+                Width="720"
+                MaxHeight="520"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                behaviors:EscapeKeyCommandBehavior.Command="{Binding CancelAddFormCommand}"
+                Style="{StaticResource AppDialogShell}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                        <StackPanel Margin="0,4,40,0">
+                            <TextBlock Style="{StaticResource FormSectionTitle}" Text="{DynamicResource Alerts.Form.Title}" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Alerts.Form.Hint}" />
+                        </StackPanel>
+                        <Button
+                            Width="32"
+                            Height="32"
+                            Margin="0,-4,-4,0"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Command="{Binding CancelAddFormCommand}"
+                            Style="{StaticResource AppIconButton}"
+                            ToolTip="{DynamicResource Common.Close}">
+                            <ds:AppIcon FontSize="13" Symbol="Dismiss24" />
+                        </Button>
+                    </Grid>
+
+                    <UniformGrid Grid.Row="1" Columns="2" Rows="2">
+                        <StackPanel Margin="0,0,12,12">
+                            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Alerts.Symbol}" />
+                            <Grid>
+                                <TextBox
+                                    x:Name="AddAlertSymbolBox"
+                                    Text="{Binding AddSymbol, UpdateSourceTrigger=PropertyChanged}" />
+                                <Popup
+                                    Width="{Binding ActualWidth, ElementName=AddAlertSymbolBox}"
+                                    AllowsTransparency="True"
+                                    IsOpen="{Binding IsSuggestionsOpen}"
+                                    Placement="Bottom"
+                                    PlacementTarget="{Binding ElementName=AddAlertSymbolBox}"
+                                    StaysOpen="True">
+                                    <Border
+                                        Background="{DynamicResource AppSurface}"
+                                        BorderBrush="{DynamicResource AppBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource Radius.Sm}">
+                                        <ListBox
+                                            MaxHeight="240"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            ItemContainerStyle="{StaticResource StockSuggestionListBoxItemStyle}"
+                                            ItemTemplate="{StaticResource StockSuggestionItemTemplate}"
+                                            ItemsSource="{Binding SymbolSuggestions}"
+                                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                            SelectedItem="{Binding SelectedSuggestion, Mode=TwoWay}" />
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Alerts.Condition}" />
+                            <ComboBox
+                                ItemsSource="{Binding Conditions}"
+                                SelectedItem="{Binding AddCondition}"
+                                Style="{StaticResource AppComboBox}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="{DynamicResource Alerts.ConditionBelow}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding}" Value="突破">
+                                                            <Setter Property="Text" Value="{DynamicResource Alerts.ConditionAbove}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,12,0">
+                            <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Alerts.TargetPrice}" />
+                            <TextBox
+                                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                                Text="{Binding AddTargetPrice, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                    </UniformGrid>
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Margin="0,8,0,0"
+                        Foreground="{DynamicResource AppDanger}"
+                        Text="{Binding AddError}"
+                        Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+                    <StackPanel
+                        Grid.Row="3"
+                        Margin="0,16,0,0"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                        <Button
+                            Margin="0,0,8,0"
+                            Command="{Binding CancelAddFormCommand}"
+                            Content="{DynamicResource Common.Cancel}"
+                            Style="{StaticResource AppSecondaryButton}" />
+                        <Button Command="{Binding AddRuleCommand}" Style="{StaticResource AppPrimaryButton}">
+                            <TextBlock
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                Text="{DynamicResource Alerts.AddAlert}" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!--  警示 — 刪除確認  -->
+        <Grid
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                behaviors:EscapeKeyCommandBehavior.Command="{Binding CancelDeleteCommand}"
+                Style="{StaticResource AppDestructiveDialogShell}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Style="{StaticResource AppDialogSubtitle}">
+                        <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
+                        <Run Text="{Binding DeleteTargetName}" />
+                        <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />
+                    </TextBlock>
+
+                    <StackPanel Grid.Row="2" Style="{StaticResource AppDialogFooter}">
+                        <Button
+                            Margin="0,0,8,0"
+                            Command="{Binding CancelDeleteCommand}"
+                            Content="{DynamicResource Common.Cancel}"
+                            Style="{StaticResource AppSecondaryButton}" />
+                        <Button
+                            Command="{Binding ConfirmDeleteCommand}"
+                            Content="{DynamicResource Common.Delete}"
+                            Style="{StaticResource AppDangerButton}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

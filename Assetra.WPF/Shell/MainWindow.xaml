@@ -7,7 +7,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:alerts="clr-namespace:Assetra.WPF.Features.Alerts"
+    xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
+    xmlns:recurring="clr-namespace:Assetra.WPF.Features.Recurring"
     xmlns:shell="clr-namespace:Assetra.WPF.Shell"
     xmlns:snackbar="clr-namespace:Assetra.WPF.Features.Snackbar"
     xmlns:statusbar="clr-namespace:Assetra.WPF.Features.StatusBar"
@@ -2746,6 +2749,31 @@
                 </Grid>
             </Border>
         </Grid>
+
+        <!--
+            警示 (Alerts) — 新增 / 刪除 dialogs。模組性較高的頁面把所有 modal
+            打包進獨立 UserControl，避免 MainWindow.xaml 過度膨脹（vs. 上面
+            4 個 asset view 直接 inline 的作法）。
+        -->
+        <alerts:AlertsDialogsHost
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="188"
+            DataContext="{Binding Alerts}" />
+
+        <!--  訂閱排程 (Recurring) — 新增 / 刪除 dialogs  -->
+        <recurring:RecurringDialogsHost
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="189"
+            DataContext="{Binding Recurring}" />
+
+        <!--  收支分類 (Categories) — 新增分類 / 規則 / 預算 + 刪除確認 dialogs  -->
+        <categories:CategoriesDialogsHost
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="190"
+            DataContext="{Binding Categories}" />
 
         <!--  不動產 — 刪除確認  -->
         <Grid
