@@ -980,6 +980,7 @@
     <sys:String x:Key="Sync.Domain.Trade">Trades</sys:String>
     <sys:String x:Key="Sync.Domain.Portfolio">Investments</sys:String>
     <sys:String x:Key="Sync.Domain.Asset">Cash Accounts</sys:String>
+    <sys:String x:Key="Sync.Domain.AssetGroup">Account Groups</sys:String>
     <sys:String x:Key="Sync.Domain.AssetEvent">Asset Events</sys:String>
     <sys:String x:Key="Sync.Domain.Category">Categories</sys:String>
     <sys:String x:Key="Sync.Domain.AutoCategorizationRule">Auto Rules</sys:String>

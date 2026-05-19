@@ -18,6 +18,7 @@ public sealed class SqlitePendingPushCounter : IPendingPushCounter
         ("Trade", "trade"),
         ("Portfolio", "portfolio"),
         ("Asset", "asset"),
+        ("AssetGroup", "asset_group"),
         ("AssetEvent", "asset_event"),
         ("Category", "category"),
         ("AutoCategorizationRule", "auto_categorization_rule"),

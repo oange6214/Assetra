@@ -120,7 +120,9 @@ public partial class StatusBarViewModel : ObservableObject, IDisposable
 
     private void UpdateStatus(DateTime now)
     {
-        ClockText = now.ToString("HH:mm:ss");
+        // yyyy-MM-dd HH:mm:ss — 多裝置情境下 user 常會想知道「現在這個 client
+        // 顯示的是哪一天」（NAS / VM 上若時區跑掉，沒日期不易察覺）。
+        ClockText = now.ToString("yyyy-MM-dd HH:mm:ss");
         IsMarketOpen = IsTwseOpen(now);
         MarketStatusText = IsMarketOpen
             ? _localization.Get("StatusBar.MarketOpen", "開盤中")

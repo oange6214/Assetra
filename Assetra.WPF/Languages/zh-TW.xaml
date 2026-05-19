@@ -108,7 +108,7 @@
     <sys:String x:Key="Common.Cancel">取消</sys:String>
     <sys:String x:Key="Common.Save">儲存</sys:String>
     <sys:String x:Key="Common.Edit">編輯</sys:String>
-    <!-- Portfolio Groups (Portfolio-Groups-Refactor P2) -->
+    <!--  Portfolio Groups (Portfolio-Groups-Refactor P2)  -->
     <sys:String x:Key="PortfolioGroups.Nav">群組</sys:String>
     <sys:String x:Key="PortfolioGroups.Heading">投資群組管理</sys:String>
     <sys:String x:Key="PortfolioGroups.Subheading">把交易與帳戶分到不同群組（如「退休帳戶」「買房儲蓄」），讓目標與 FIRE 計算對應到具體 bucket。</sys:String>
@@ -258,10 +258,10 @@
     <sys:String x:Key="Portfolio.AddRecord.Menu.Alert.Hint">設定價格條件，之後可在「警示」查看</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Goal">新增財務目標</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Goal.Hint">建立後可在「財務目標」追蹤進度</sys:String>
-    <!-- header button labels (paired with + icon → 文字只留主詞即可) -->
+    <!--  header button labels (paired with + icon → 文字只留主詞即可)  -->
     <sys:String x:Key="Portfolio.AddCash">帳戶</sys:String>
     <sys:String x:Key="Portfolio.AddLiability">負債</sys:String>
-    <!-- empty-state CTAs（沒有 icon，需要完整描述）-->
+    <!--  empty-state CTAs（沒有 icon，需要完整描述）  -->
     <sys:String x:Key="Portfolio.AddCash.Full">新增帳戶</sys:String>
     <sys:String x:Key="Portfolio.AddLiability.Full">新增負債</sys:String>
     <sys:String x:Key="Portfolio.AddCreditCard">新增負債</sys:String>
@@ -687,7 +687,8 @@
     <sys:String x:Key="Portfolio.Position.Summary.MarketValue">總市值</sys:String>
     <sys:String x:Key="Portfolio.QuoteSetup.Title">Twelve Data API key 尚未設定</sys:String>
     <sys:String x:Key="Portfolio.QuoteSetup.Message">
-        若要查詢美股即時報價，請到「設定 >資料來源」輸入 API key，並通過連線測試。</sys:String>
+        若要查詢美股即時報價，請到「設定 >資料來源」輸入 API key，並通過連線測試。
+    </sys:String>
     <sys:String x:Key="Portfolio.QuoteState.Stale">快取報價</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.TotalCost">總付出成本</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.Pnl">淨損益試算</sys:String>
@@ -873,7 +874,7 @@
     <sys:String x:Key="FinancialOverview.Header.Assets">其他資產</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Investments">投資資產</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Liabilities">總負債</sys:String>
-    <!-- Hero card + formula row + composition view（總覽 redesign 2026-05-13）-->
+    <!--  Hero card + formula row + composition view（總覽 redesign 2026-05-13）  -->
     <sys:String x:Key="FinancialOverview.Hero.Today">今日漲跌</sys:String>
     <sys:String x:Key="FinancialOverview.Hero.GoalProgress">目標達成</sys:String>
     <sys:String x:Key="FinancialOverview.Hero.GoalLabel">目標</sys:String>
@@ -973,22 +974,23 @@
     <sys:String x:Key="Settings.Sync.Conflicts.Status.UsedRemote">已採用雲端版本：{0}</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">盤中</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">休市</sys:String>
-    <!-- Sync indicator (Phase 1, see docs/planning/Sync-Status-Indicator.md) -->
+    <!--  Sync indicator (Phase 1, see docs/planning/Sync-Status-Indicator.md)  -->
     <sys:String x:Key="StatusBar.Sync.Disabled">未啟用同步</sys:String>
     <sys:String x:Key="StatusBar.Sync.Synced">已同步</sys:String>
     <sys:String x:Key="StatusBar.Sync.Syncing">同步中…</sys:String>
     <sys:String x:Key="StatusBar.Sync.Failed">同步失敗</sys:String>
     <sys:String x:Key="StatusBar.Sync.Offline">離線</sys:String>
     <sys:String x:Key="StatusBar.Sync.PendingFormat">{0} 筆待同步</sys:String>
-    <!-- Phase 2 popover -->
+    <!--  Phase 2 popover  -->
     <sys:String x:Key="Sync.Popover.Title">同步狀態</sys:String>
     <sys:String x:Key="Sync.Popover.TriggerNow">立即同步</sys:String>
     <sys:String x:Key="Sync.Popover.NeverSynced">尚未同步過</sys:String>
     <sys:String x:Key="Sync.Popover.LastSyncedFormat">上次同步：{0:yyyy-MM-dd HH:mm}</sys:String>
-    <!-- Per-domain labels (mapped from stable domain keys) -->
+    <!--  Per-domain labels (mapped from stable domain keys)  -->
     <sys:String x:Key="Sync.Domain.Trade">交易記錄</sys:String>
     <sys:String x:Key="Sync.Domain.Portfolio">投資資產</sys:String>
     <sys:String x:Key="Sync.Domain.Asset">資金帳戶</sys:String>
+    <sys:String x:Key="Sync.Domain.AssetGroup">帳戶分組</sys:String>
     <sys:String x:Key="Sync.Domain.AssetEvent">資產異動</sys:String>
     <sys:String x:Key="Sync.Domain.Category">收支分類</sys:String>
     <sys:String x:Key="Sync.Domain.AutoCategorizationRule">自動分類規則</sys:String>
@@ -1001,7 +1003,7 @@
     <sys:String x:Key="Sync.Domain.FinancialGoal">財務目標</sys:String>
     <sys:String x:Key="Sync.Domain.PortfolioGroup">投資群組</sys:String>
 
-    <!-- P4.1d — FX history refresh (historical FX backfill, distinct from live FX) -->
+    <!--  P4.1d — FX history refresh (historical FX backfill, distinct from live FX)  -->
     <sys:String x:Key="Settings.FxHistory.SectionTitle">匯率歷史</sys:String>
     <sys:String x:Key="Settings.FxHistory.SectionHint">每次啟動自動拉過去 7 天的歷史匯率到本機；當報表顯示「匯率資料缺失」時可手動觸發更新。</sys:String>
     <sys:String x:Key="Settings.FxHistory.RefreshNow">立即更新 (7 天)</sys:String>
@@ -1345,7 +1347,7 @@
     <sys:String x:Key="Goals.Add.Deadline">期限</sys:String>
     <sys:String x:Key="Goals.Add.Submit">新增</sys:String>
     <sys:String x:Key="Goals.Form.Hint">設定目標金額、目前金額與期限，用來追蹤達成進度。</sys:String>
-    <!-- 2026-05-17 短期妥協：auto-track linked asset class options -->
+    <!--  2026-05-17 短期妥協：auto-track linked asset class options  -->
     <sys:String x:Key="Goals.Add.LinkedAssetClass">自動追蹤資產類別</sys:String>
     <sys:String x:Key="Goals.Add.LinkedAssetClass.Hint">選擇要對應的資產類別後，進度會自動取自 dashboard 上的當前值；選「手動」則沿用上方「目前金額」欄位。</sys:String>
     <sys:String x:Key="Goals.Add.PortfolioGroup">連結到投資組合群組</sys:String>
