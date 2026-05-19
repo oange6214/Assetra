@@ -2,6 +2,7 @@ using System.Reactive.Concurrency;
 using Assetra.Application.Alerts.Contracts;
 using Assetra.Application.Alerts.Services;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Sync;
 using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Alerts;
 using Assetra.WPF.Features.Snackbar;
@@ -15,7 +16,15 @@ internal static class AlertsServiceCollectionExtensions
         this IServiceCollection services,
         string dbPath)
     {
-        services.AddSingleton<IAlertRepository>(_ => new AlertSqliteRepository(dbPath));
+        // Sync-Status-Indicator 補洞：AlertSqliteRepository 一個物件同時實作 repo + sync store
+        // (跟 RetirementAccount / RealEstate pattern 對齊)。需要 deviceId 才能 stamp version。
+        services.AddSingleton<AlertSqliteRepository>(sp =>
+        {
+            var settings = sp.GetRequiredService<IAppSettingsService>();
+            return new AlertSqliteRepository(dbPath, () => SyncDeviceIdProvider.Resolve(settings));
+        });
+        services.AddSingleton<IAlertRepository>(sp => sp.GetRequiredService<AlertSqliteRepository>());
+        services.AddSingleton<IAlertSyncStore>(sp => sp.GetRequiredService<AlertSqliteRepository>());
         services.AddSingleton<IAlertService, AlertService>();
 
         services.AddSingleton<AlertsViewModel>(sp => new AlertsViewModel(

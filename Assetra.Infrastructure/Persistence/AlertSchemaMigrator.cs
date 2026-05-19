@@ -4,14 +4,19 @@ namespace Assetra.Infrastructure.Persistence;
 
 internal static class AlertSchemaMigrator
 {
+    // 同步擴充欄位允許清單（Sync-Status-Indicator 補洞）— 跟 RetirementSchemaMigrator 對齊。
     private static readonly HashSet<string> AllowedColumns = new(StringComparer.OrdinalIgnoreCase)
     {
         "created_at", "updated_at",
+        "ev_version", "ev_modified_at", "ev_device_id",
+        "is_deleted", "is_pending_push",
     };
 
     private static readonly HashSet<string> AllowedTypeDefs = new(StringComparer.OrdinalIgnoreCase)
     {
         "TEXT NOT NULL DEFAULT ''",
+        "INTEGER NOT NULL DEFAULT 0",
+        "INTEGER NOT NULL DEFAULT 1",
     };
 
     public static void EnsureInitialized(string connectionString)
@@ -25,22 +30,41 @@ internal static class AlertSchemaMigrator
             cmd.Transaction = tx;
             cmd.CommandText = """
                 CREATE TABLE IF NOT EXISTS alert (
-                    id           TEXT PRIMARY KEY,
-                    symbol       TEXT NOT NULL,
-                    exchange     TEXT NOT NULL,
-                    condition    INTEGER NOT NULL,
-                    target_price REAL NOT NULL,
-                    is_triggered INTEGER NOT NULL DEFAULT 0,
-                    trigger_time TEXT
+                    id              TEXT PRIMARY KEY,
+                    symbol          TEXT NOT NULL,
+                    exchange        TEXT NOT NULL,
+                    condition       INTEGER NOT NULL,
+                    target_price    REAL NOT NULL,
+                    is_triggered    INTEGER NOT NULL DEFAULT 0,
+                    trigger_time    TEXT,
+                    created_at      TEXT NOT NULL DEFAULT '',
+                    updated_at      TEXT NOT NULL DEFAULT '',
+                    ev_version      INTEGER NOT NULL DEFAULT 0,
+                    ev_modified_at  TEXT NOT NULL DEFAULT '',
+                    ev_device_id    TEXT NOT NULL DEFAULT '',
+                    is_deleted      INTEGER NOT NULL DEFAULT 0,
+                    is_pending_push INTEGER NOT NULL DEFAULT 1
                 );
                 """;
             cmd.ExecuteNonQuery();
 
             MigrateLegacyTable(cmd);
+
+            // 既有 DB 升級：新欄位用 MigrateAddColumn idempotent 補
             SqliteSchemaHelper.MigrateAddColumn(conn, tx, "alert",
                 "created_at", "TEXT NOT NULL DEFAULT ''", AllowedColumns, AllowedTypeDefs);
             SqliteSchemaHelper.MigrateAddColumn(conn, tx, "alert",
                 "updated_at", "TEXT NOT NULL DEFAULT ''", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "alert",
+                "ev_version", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "alert",
+                "ev_modified_at", "TEXT NOT NULL DEFAULT ''", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "alert",
+                "ev_device_id", "TEXT NOT NULL DEFAULT ''", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "alert",
+                "is_deleted", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "alert",
+                "is_pending_push", "INTEGER NOT NULL DEFAULT 1", AllowedColumns, AllowedTypeDefs);
 
             tx.Commit();
         }

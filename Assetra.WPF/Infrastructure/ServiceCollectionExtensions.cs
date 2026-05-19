@@ -215,6 +215,9 @@ internal static class ServiceCollectionExtensions
             new FinancialGoalLocalChangeQueue(sp.GetRequiredService<IFinancialGoalSyncStore>()));
         services.AddSingleton<PortfolioGroupLocalChangeQueue>(sp =>
             new PortfolioGroupLocalChangeQueue(sp.GetRequiredService<IPortfolioGroupSyncStore>()));
+        // Sync-Status-Indicator 補洞 — Alert 加入同步。
+        services.AddSingleton<AlertLocalChangeQueue>(sp =>
+            new AlertLocalChangeQueue(sp.GetRequiredService<IAlertSyncStore>()));
 
         services.AddSingleton<CompositeLocalChangeQueue>(sp =>
         {
@@ -234,6 +237,7 @@ internal static class ServiceCollectionExtensions
                 [PhysicalAssetSyncMapper.EntityType] = sp.GetRequiredService<PhysicalAssetLocalChangeQueue>(),
                 [Assetra.Infrastructure.Sync.FinancialGoalSyncMapper.EntityType] = sp.GetRequiredService<FinancialGoalLocalChangeQueue>(),
                 [Assetra.Infrastructure.Sync.PortfolioGroupSyncMapper.EntityType] = sp.GetRequiredService<PortfolioGroupLocalChangeQueue>(),
+                [AlertSyncMapper.EntityType] = sp.GetRequiredService<AlertLocalChangeQueue>(),
             };
             return new CompositeLocalChangeQueue(map);
         });
