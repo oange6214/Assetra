@@ -42,16 +42,9 @@
                                 </StackPanel>
                             </Button>
 
-                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                <ds:AppIcon
-                                    Margin="0,0,8,0"
-                                    VerticalAlignment="Center"
-                                    Foreground="{DynamicResource AppTextMuted}"
-                                    Symbol="Target24" />
-                                <TextBlock
-                                    Style="{StaticResource PageTitleText}"
-                                    Text="{DynamicResource Goals.Title}" />
-                            </StackPanel>
+                            <TextBlock
+                                Style="{StaticResource PageTitleText}"
+                                Text="{DynamicResource Goals.Title}" />
             </DockPanel>
 
                 <UniformGrid

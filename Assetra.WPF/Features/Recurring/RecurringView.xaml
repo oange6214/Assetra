@@ -23,16 +23,9 @@
             </Grid.RowDefinitions>
 
             <DockPanel Grid.Row="0" Style="{StaticResource PageHeaderDock}">
-                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                        <ds:AppIcon
-                            Margin="0,0,8,0"
-                            VerticalAlignment="Center"
-                            Foreground="{DynamicResource AppTextMuted}"
-                            Symbol="ArrowRepeatAll24" />
-                        <TextBlock
-                            Style="{StaticResource PageTitleText}"
-                            Text="{DynamicResource Recurring.Title}" />
-                    </StackPanel>
+                <TextBlock
+                    Style="{StaticResource PageTitleText}"
+                    Text="{DynamicResource Recurring.Title}" />
             </DockPanel>
 
             <UniformGrid
