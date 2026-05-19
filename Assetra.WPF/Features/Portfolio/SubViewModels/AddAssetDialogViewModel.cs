@@ -241,6 +241,23 @@ public partial class AddAssetDialogViewModel : ObservableObject
         _ = FetchClosePriceAsync(AddSymbol.Trim().ToUpper(), AddBuyDate, _closePriceCts.Token);
     }
 
+    /// <summary>
+    /// P2.4 — XAML 「⚡ 取得市價」inline link 用。手動觸發 close price 抓取，
+    /// 跳過 AutoFill 抑制旗標（使用者明確點下去就是要刷新）。
+    /// </summary>
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void FetchMarketPrice()
+    {
+        if (string.IsNullOrWhiteSpace(AddSymbol)) return;
+        _closePriceCts?.Cancel();
+        _closePriceCts = new CancellationTokenSource();
+        var previousSuppress = SuppressClosePriceAutoFill;
+        SuppressClosePriceAutoFill = false;
+        _ = FetchClosePriceAsync(AddSymbol.Trim().ToUpper(), AddBuyDate, _closePriceCts.Token)
+            .ContinueWith(_ => SuppressClosePriceAutoFill = previousSuppress,
+                TaskScheduler.FromCurrentSynchronizationContext());
+    }
+
     private async Task FetchClosePriceAsync(string symbol, DateTime buyDate, CancellationToken ct)
     {
         try

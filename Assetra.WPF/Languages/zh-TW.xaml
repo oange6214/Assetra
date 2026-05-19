@@ -632,6 +632,12 @@
     <sys:String x:Key="Portfolio.Tx.BuyModeMetaOnly">僅登記標的</sys:String>
     <sys:String x:Key="Portfolio.Tx.PriceMode">價格輸入模式</sys:String>
     <sys:String x:Key="Portfolio.Tx.PriceModeUnit">單價</sys:String>
+    <sys:String x:Key="Portfolio.Tx.UnitPriceLabel">單位價格</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TotalAmountLabel">總價值</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TotalMirrorPrefix">總計: </sys:String>
+    <sys:String x:Key="Portfolio.Tx.UnitPriceMirrorPrefix">單位價格: </sys:String>
+    <sys:String x:Key="Portfolio.Tx.FetchMarketPrice">取得市價</sys:String>
+    <sys:String x:Key="Portfolio.Tx.FetchMarketPrice.Hint">用目前的代號 + 日期向報價來源抓最新收盤價填入。</sys:String>
     <sys:String x:Key="Portfolio.Tx.PriceModeTotal">總額</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalAmount">總成交金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee">金額已含手續費</sys:String>

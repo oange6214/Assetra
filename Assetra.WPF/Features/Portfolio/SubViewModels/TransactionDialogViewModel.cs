@@ -192,6 +192,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                               or nameof(AddAssetDialog.AddCost))
             {
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
+                OnPropertyChanged(nameof(TxBuyComputedUnitPriceDisplay));
                 NotifyImpactPreviewChanged();
             }
             // P3 — keep Buy.InstrumentCurrency in sync with the selected symbol's
@@ -1183,6 +1184,21 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Buy.ComputeTotalDisplay(AddAssetDialog.AddPrice, AddAssetDialog.AddQuantity);
 
     /// <summary>
+    /// P2.4 — 總額模式下方的「單位價格: X」inline mirror。Buy.TotalCost / AddQuantity。
+    /// 無法計算（空欄位 / 0）時回 "0"。
+    /// </summary>
+    public string TxBuyComputedUnitPriceDisplay
+    {
+        get
+        {
+            if (!Buy.IsTotalMode) return "0";
+            if (!ParseHelpers.TryParseDecimal(Buy.TotalCost, out var total) || total <= 0) return "0";
+            if (!ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) || qty <= 0) return "0";
+            return (total / qty).ToString("N4").TrimEnd('0').TrimEnd('.');
+        }
+    }
+
+    /// <summary>
     /// React to Buy.X changes — runs side effects that the old <c>partial OnTxBuy*Changed</c>
     /// handlers performed (UpdateBuyPreview, write-back AddPrice in total mode, validation).
     /// XAML now binds directly to Buy.X so no facade re-notification needed.
@@ -1193,6 +1209,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         {
             case nameof(BuyTxViewModel.PriceMode):
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
+                OnPropertyChanged(nameof(TxBuyComputedUnitPriceDisplay));
                 break;
             case nameof(BuyTxViewModel.TotalCost):
                 if (Buy.IsTotalMode &&
@@ -1203,10 +1220,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 }
                 Buy.TotalCostError = ValidatePositiveDecimalOrEmpty(Buy.TotalCost);
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
+                OnPropertyChanged(nameof(TxBuyComputedUnitPriceDisplay));
                 break;
             case nameof(BuyTxViewModel.TotalIncludesFee):
                 AddAssetDialog.UpdateBuyPreview();
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
+                OnPropertyChanged(nameof(TxBuyComputedUnitPriceDisplay));
                 break;
             case nameof(BuyTxViewModel.ActualCashAmount):
                 Buy.ActualCashAmountError = ValidatePositiveDecimalOrEmpty(Buy.ActualCashAmount);

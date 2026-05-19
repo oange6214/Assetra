@@ -628,6 +628,12 @@
     <sys:String x:Key="Portfolio.Tx.BuyModeMetaOnly">Register only</sys:String>
     <sys:String x:Key="Portfolio.Tx.PriceMode">Price input mode</sys:String>
     <sys:String x:Key="Portfolio.Tx.PriceModeUnit">Unit price</sys:String>
+    <sys:String x:Key="Portfolio.Tx.UnitPriceLabel">Unit price</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TotalAmountLabel">Total value</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TotalMirrorPrefix">Total: </sys:String>
+    <sys:String x:Key="Portfolio.Tx.UnitPriceMirrorPrefix">Unit price: </sys:String>
+    <sys:String x:Key="Portfolio.Tx.FetchMarketPrice">Fetch market price</sys:String>
+    <sys:String x:Key="Portfolio.Tx.FetchMarketPrice.Hint">Pulls the latest close price from the configured quote source for the current symbol + date.</sys:String>
     <sys:String x:Key="Portfolio.Tx.PriceModeTotal">Total</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalAmount">Total amount</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee">Total already includes commission</sys:String>
