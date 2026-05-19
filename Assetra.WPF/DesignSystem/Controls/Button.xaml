@@ -34,7 +34,7 @@
     <Style x:Key="AppButtonBase" TargetType="{x:Type Button}">
         <Setter Property="MinHeight" Value="{StaticResource Control.Height.Md}" />
         <Setter Property="Padding" Value="{StaticResource Padding.Button}" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Medium}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />

@@ -7,6 +7,7 @@ using System.Windows.Threading;
 using Assetra.Core.Interfaces;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.Contracts;
+using Assetra.WPF.Features.PortfolioGroups;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -18,10 +19,34 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     private readonly IPortfolioPositionFeed _portfolio;
     private readonly INotifyCollectionChanged? _positionsObservable;
     private readonly IAppSettingsService? _settings;
+    private readonly PortfolioGroupCatalog? _groupCatalog;
     private readonly Dispatcher _dispatcher;
 
-    // Color palette (assigned by order of appearance) + neutral cash brush
-    private static readonly SolidColorBrush CashBrush = Brush("#6B7280");
+    /// <summary>Portfolio-Groups-Refactor P4 — XAML 用：catalog 存在且有 group 才暴露 toggle。</summary>
+    public bool HasPortfolioGroups => _groupCatalog is { Groups.Count: > 0 };
+
+    /// <summary>
+    /// P4 — Allocation 分組維度 toggle。true = 依「群組」(bucket) aggregate；
+    /// false (預設) = 依「Symbol」aggregate（既有行為）。
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsBySymbolMode))]
+    private bool _isByGroupMode;
+
+    /// <summary>For XAML radio binding — `true` when grouping by Symbol (default).</summary>
+    public bool IsBySymbolMode => !IsByGroupMode;
+
+    partial void OnIsByGroupModeChanged(bool _) => Rebuild();
+
+    /// <summary>XAML RadioButton command — parses "True"/"False" string and updates mode.</summary>
+    [RelayCommand]
+    private void SetByGroupMode(string? raw)
+    {
+        if (bool.TryParse(raw, out var v))
+            IsByGroupMode = v;
+    }
+
+    // Color palette (assigned by order of appearance)
     private static readonly SolidColorBrush[] Palette =
     [
         Brush("#2563EB"), Brush("#7C3AED"), Brush("#0891B2"),
@@ -46,20 +71,18 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isOverviewTab = true;
     [ObservableProperty] private bool _isRebalanceTab = false;
 
-    /// <summary>
-    /// 配置分析「含現金」開關：預設 false（純投資商品配置，符合 Morningstar /
-    /// Yahoo Finance 等 portfolio tracker 的標準呈現）。勾選 true 時會把現金
-    /// 視為一個防禦性配置部位納入百分比計算。狀態為 in-memory（不持久化），
-    /// 跨 session 重啟會回到預設不含。
-    /// </summary>
-    [ObservableProperty] private bool _includeCashInAllocation;
-
-    partial void OnIncludeCashInAllocationChanged(bool _) => Rebuild();
-
     [RelayCommand]
     private void SwitchToOverview() { IsOverviewTab = true; IsRebalanceTab = false; }
     [RelayCommand]
-    private void SwitchToRebalance() { IsRebalanceTab = true; IsOverviewTab = false; }
+    private void SwitchToRebalance()
+    {
+        // Portfolio-Groups-Refactor P4 — Rebalance 用 per-symbol target 比例，by-group
+        // 模式下 row.Symbol = group name，會跟 targets dict 完全錯位。離開 Overview 時
+        // 強制切回 by-symbol，避免 Rebalance buy/sell 數字錯亂。
+        if (IsByGroupMode) IsByGroupMode = false;
+        IsRebalanceTab = true;
+        IsOverviewTab = false;
+    }
 
     // Rebalance mode
     [ObservableProperty] private bool _isFullRebalance = true;
@@ -155,34 +178,24 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
 
     partial void OnTotalPnlChanged(decimal _) => OnPropertyChanged(nameof(IsTotalPnlPositive));
 
-    private readonly ILocalizationService? _localization;
-
-    private string L(string key, string fallback) =>
-        _localization?.Get(key, fallback) ?? fallback;
-
-    // L4: localized "現金" display label. Symbol stays "現金" (domain key for
-    // the target-percentage dictionary lookup); only the display Name varies.
-    private string CashLabel => L("Allocation.Cash", "現金");
-
     // Ctor — consumes IPortfolioPositionFeed (PortfolioViewModel implements it)
     // so this VM can be unit-tested against a stub feed without constructing
     // the full portfolio dependency graph (L3 decoupling).
     public AllocationViewModel(
         IPortfolioPositionFeed portfolio,
         IAppSettingsService? settings = null,
-        ILocalizationService? localization = null)
+        PortfolioGroupCatalog? groupCatalog = null)
     {
         ArgumentNullException.ThrowIfNull(portfolio);
         _portfolio = portfolio;
         _settings = settings;
-        _localization = localization;
+        _groupCatalog = groupCatalog;
         _dispatcher = Dispatcher.CurrentDispatcher;
         AllocationRows = new ReadOnlyObservableCollection<AllocationRowViewModel>(_allocationRows);
 
         _positionsObservable = portfolio.Positions as INotifyCollectionChanged;
         if (_positionsObservable is not null)
             _positionsObservable.CollectionChanged += OnCollectionChanged;
-        portfolio.PropertyChanged += OnPortfolioPropertyChanged;
 
         // Subscribe to each existing position's property changes
         foreach (var row in portfolio.Positions)
@@ -193,12 +206,6 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         ColorSchemeService.SchemeChanged += OnSchemeChanged;
 
         Rebuild();
-    }
-
-    private void OnPortfolioPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(IPortfolioPositionFeed.TotalCash))
-            Rebuild();
     }
 
     private void OnSchemeChanged()
@@ -244,35 +251,51 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         var targets = _settings?.Current?.TargetAllocations
                       ?? new Dictionary<string, decimal>();
 
-        // Investment positions (sorted largest first for treemap)
-        var investItems = _portfolio.Positions
-            .GroupBy(p => p.Symbol)
-            .Select(g => (
-                Symbol: g.Key,
-                Name: g.First().Name,
-                Cat: CategoryOf(g.First()),
-                Value: g.Sum(p => p.MarketValue),
-                Price: g.First().CurrentPrice,
-                Pnl: g.Sum(p => p.Pnl),
-                PnlPct: g.Average(p => p.PnlPercent)))
-            .OrderByDescending(i => i.Value)
-            .ToList();
+        // Portfolio-Groups-Refactor P4 — IsByGroupMode 切換 aggregation key:
+        //   false (default) → 依 Symbol（既有行為）
+        //   true            → 依 PortfolioGroupId（每個 bucket 一列；row Symbol/Name 顯示 group.Name）
+        // null PortfolioGroupId 視為 DefaultId，跟 Trade backfill 對齊。
+        var investItems = IsByGroupMode
+            ? _portfolio.Positions
+                .GroupBy(p => p.PortfolioGroupId ?? Assetra.Core.Models.PortfolioGroup.DefaultId)
+                .Select(g => (
+                    Symbol: ResolveGroupLabel(g.Key),
+                    Name: ResolveGroupLabel(g.Key),
+                    Cat: "Group",
+                    Value: g.Sum(p => p.MarketValue),
+                    Price: 0m,
+                    Pnl: g.Sum(p => p.Pnl),
+                    PnlPct: g.Sum(p => p.MarketValue) > 0m
+                        ? g.Sum(p => p.Pnl) / g.Sum(p => p.MarketValue) * 100m
+                        : 0m))
+                .OrderByDescending(i => i.Value)
+                .ToList()
+            : _portfolio.Positions
+                .GroupBy(p => p.Symbol)
+                .Select(g => (
+                    Symbol: g.Key,
+                    Name: g.First().Name,
+                    Cat: CategoryOf(g.First()),
+                    Value: g.Sum(p => p.MarketValue),
+                    Price: g.First().CurrentPrice,
+                    Pnl: g.Sum(p => p.Pnl),
+                    PnlPct: g.Average(p => p.PnlPercent)))
+                .OrderByDescending(i => i.Value)
+                .ToList();
 
-        var cashTotal = _portfolio.TotalCash;
         var investTotal = investItems.Sum(i => i.Value);
 
-        // 配置百分比的分母：預設只算「投資商品」(投資組合內部配置)；勾選含現金 → 投資+現金。
-        // TotalValue 仍存「總資產」(invest + cash) 給其他 binding 用，但 percentage 用的是
-        // denominator (依 toggle 切換)。
-        var denominator = IncludeCashInAllocation ? investTotal + cashTotal : investTotal;
-        TotalValue = investTotal + cashTotal;
+        // 投資資產頁的配置分析只呈現投資商品本身，不混入現金帳戶。
+        // 全域現金與總資產由「財務儀表板」負責，避免兩個頁面說不同故事。
+        var denominator = investTotal;
+        TotalValue = investTotal;
         TotalInvestment = investTotal;
-        TotalCash = cashTotal;
+        TotalCash = 0m;
         TotalPnl = investItems.Sum(i => i.Pnl);
         AssetCount = investItems.Count;
 
         // Build investment rows (palette colors assigned by investment rank)
-        var allRows = new List<AllocationRowViewModel>(investItems.Count + 1);
+        var allRows = new List<AllocationRowViewModel>(investItems.Count);
         for (int idx = 0; idx < investItems.Count; idx++)
         {
             var item = investItems[idx];
@@ -285,21 +308,7 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
             allRows.Add(row);
         }
 
-        // Cash row：only emitted when the user explicitly opts in via IncludeCashInAllocation.
-        // Default: cash excluded — pure investment allocation matches industry convention
-        // (Morningstar / Yahoo Finance) and prevents diluting the rebalance signal.
-        if (IncludeCashInAllocation && cashTotal > 0)
-        {
-            // Symbol "現金" stays as the dictionary key (matches saved target
-            // percentages); Name is localized for display.
-            var cashRow = new AllocationRowViewModel("現金", CashLabel, "cash", cashTotal, 0m, 0m, 0m, CashBrush);
-            cashRow.ActualPercent = denominator > 0 ? Math.Round(cashTotal / denominator * 100m, 1) : 0m;
-            cashRow.TargetPercent = targets.TryGetValue("現金", out var cashTarget) ? cashTarget : 0m;
-            cashRow.EditTargetText = cashRow.TargetPercent.ToString("G");
-            allRows.Add(cashRow);
-        }
-
-        // Final sort (cash may sit anywhere by value)
+        // Final sort
         allRows.Sort((a, b) => b.MarketValue.CompareTo(a.MarketValue));
 
         _allocationRows.Clear();
@@ -378,6 +387,18 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>
+    /// Portfolio-Groups-Refactor P4 — 將 group id 解析成 display name；catalog 沒灌入或
+    /// 找不到對應群組時，fallback 為「未指派」+ id 前 8 碼，方便除錯且不會凍結 UI。
+    /// </summary>
+    private string ResolveGroupLabel(Guid groupId)
+    {
+        var found = _groupCatalog?.Groups.FirstOrDefault(g => g.Id == groupId);
+        if (found is not null) return found.Name;
+        if (groupId == Assetra.Core.Models.PortfolioGroup.DefaultId) return "預設群組";
+        return $"未指派 ({groupId.ToString()[..8]})";
+    }
+
     private static string CategoryOf(PortfolioRowViewModel row) => row.AssetType switch
     {
         Core.Models.AssetType.Fund => "fund",
@@ -390,7 +411,6 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     public void Dispose()
     {
         ColorSchemeService.SchemeChanged -= OnSchemeChanged;
-        _portfolio.PropertyChanged -= OnPortfolioPropertyChanged;
 
         // C1 leak fix: also unsubscribe Positions.CollectionChanged and the
         // per-row PropertyChanged handlers attached at construction.

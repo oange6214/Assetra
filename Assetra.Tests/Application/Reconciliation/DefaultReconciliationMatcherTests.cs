@@ -110,6 +110,27 @@ public class DefaultReconciliationMatcherTests
     }
 
     [Fact]
+    public void SignedAmount_BuyUsesActualCashAmountWhenPresent()
+    {
+        var m = new DefaultReconciliationMatcher();
+        var trade = new Trade(
+            Id: Guid.NewGuid(),
+            Symbol: "AAPL",
+            Exchange: "NASDAQ",
+            Name: "Apple",
+            Type: TradeType.Buy,
+            TradeDate: new DateTime(2026, 4, 28),
+            Price: 188m,
+            Quantity: 2,
+            RealizedPnl: null,
+            RealizedPnlPct: null,
+            CashAmount: 12_250m,
+            Commission: 0m);
+
+        Assert.Equal(-12_250m, m.SignedAmount(trade));
+    }
+
+    [Fact]
     public void Constructor_RejectsNegativeTolerances()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new DefaultReconciliationMatcher(dateToleranceDays: -1));

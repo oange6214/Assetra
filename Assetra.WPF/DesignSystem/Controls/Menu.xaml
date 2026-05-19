@@ -14,7 +14,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="2,4" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="HasDropShadow" Value="True" />
@@ -47,7 +47,7 @@
     <Style x:Key="AppMenuItem" TargetType="{x:Type MenuItem}">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="Padding" Value="12,6" />
         <Setter Property="Cursor" Value="Hand" />

@@ -8,6 +8,7 @@ using Assetra.Core.Models;
 using Assetra.Core.Trading;
 using Assetra.WPF.Features.Categories;
 using Assetra.WPF.Features.Portfolio.SubViewModels.Tx;
+using Assetra.WPF.Features.PortfolioGroups;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -57,7 +58,9 @@ internal sealed record TransactionDialogDependencies(
     // round-trips. ReloadAllAsync runs one load and applies every slice in
     // sequence — used by ConfirmTx's edit-cleanup branch only. Optional with a
     // null-default so existing test factories without the delegate still build.
-    Func<Task>? ReloadAllAsync = null);
+    Func<Task>? ReloadAllAsync = null,
+    // Portfolio-Groups-Refactor P3 — 群組目錄。null 時 dialog 隱藏 group ComboBox。
+    PortfolioGroupCatalog? GroupCatalog = null);
 
 /// <summary>
 /// Owns all transaction-dialog observable state, validation, and commands.
@@ -78,6 +81,16 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private readonly ISnackbarService? _snackbar;
     private readonly ICategoryRepository? _categoryRepository;
     private readonly IAutoCategorizationRuleRepository? _ruleRepository;
+
+    /// <summary>Portfolio-Groups-Refactor P3 — 共用群組目錄（從 DI 注入），可為 null。</summary>
+    public PortfolioGroupCatalog? GroupCatalog { get; private set; }
+
+    /// <summary>True 當啟用群組功能（catalog 非 null 且有 row）— XAML 由此決定 ComboBox 可見性。</summary>
+    public bool IsGroupSelectorVisible => GroupCatalog is { Groups.Count: > 0 };
+
+    /// <summary>使用者在 trade dialog 內選定的群組。null = 沿用 PortfolioGroup.DefaultId。</summary>
+    [ObservableProperty]
+    private PortfolioGroup? _selectedPortfolioGroup;
     private IReadOnlyList<AutoCategorizationRule> _autoRulesCache = Array.Empty<AutoCategorizationRule>();
 
     // Shared parent collections exposed as forwarding properties so TxForm XAML
@@ -162,7 +175,19 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             if (e.PropertyName is nameof(AddAssetDialog.AddPrice)
                               or nameof(AddAssetDialog.AddQuantity)
                               or nameof(AddAssetDialog.AddCost))
+            {
+                OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
                 NotifyImpactPreviewChanged();
+            }
+            // P3 — keep Buy.InstrumentCurrency in sync with the selected symbol's
+            // currency (filled by SelectSuggestion after the user picks an autocomplete
+            // entry, or via AddExchange → registry lookup as fallback). Buy.IsCrossCurrency
+            // depends on this and drives the FX-rate field visibility in BuyTxForm.xaml.
+            if (e.PropertyName is nameof(AddAssetDialog.AddSymbolCurrency)
+                              or nameof(AddAssetDialog.AddExchange))
+            {
+                Buy.InstrumentCurrency = ResolveCurrentInstrumentCurrency();
+            }
         };
 
         _getDefaultCashAccount = deps.GetDefaultCashAccount;
@@ -176,6 +201,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _localize = deps.Localize;
         _categoryRepository = deps.CategoryRepository;
         _ruleRepository = deps.AutoCategorizationRuleRepository;
+        GroupCatalog = deps.GroupCatalog;
 
         ExpenseCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_expenseCategories);
         IncomeCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_incomeCategories);
@@ -374,11 +400,24 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                     Sell.Quantity = string.Empty;
                 Sell.IsEtf = Sell.Position is not null && _search.IsEtf(Sell.Position.Symbol);
                 Sell.IsBondEtf = Sell.Position is not null && _search.IsBondEtf(Sell.Position.Symbol);
+                // P3 — sync instrument currency from chosen position so SellTxForm can
+                // show cross-currency banner + FX rate field via Sell.IsCrossCurrency.
+                Sell.InstrumentCurrency = Sell.Position is null
+                    ? string.Empty
+                    : Assetra.Core.Models.StockExchangeRegistry.ResolveDefaultCurrency(Sell.Position.Exchange);
                 UpdateSellTxPreview();
                 break;
             case nameof(SellTxViewModel.Quantity):
                 Sell.QuantityError = ValidatePositiveIntOrEmpty(Sell.Quantity);
                 UpdateSellTxPreview();
+                break;
+            case nameof(SellTxViewModel.ActualCashAmount):
+                Sell.ActualCashAmountError = ValidatePositiveDecimalOrEmpty(Sell.ActualCashAmount);
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(SellTxViewModel.FxRate):
+                Sell.FxRateError = ValidatePositiveDecimalOrEmpty(Sell.FxRate);
+                NotifyImpactPreviewChanged();
                 break;
         }
     }
@@ -439,6 +478,18 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public bool TxTypeIsTransfer => TxType == "transfer";
     public bool TxTypeIsBuy => TxType == "buy";
     public bool TxTypeIsSell => TxType == "sell";
+
+    /// <summary>
+    /// Portfolio-Groups-Refactor P3 — TxType 是「投資相關」（買/賣/股利）才需暴露
+    /// 群組 ComboBox。現金流 / 借款 / 信用卡 / 轉帳 / 收入 概念上屬於 default group。
+    /// </summary>
+    public bool TxTypeSupportsGroupSelection => TxType is "buy" or "sell" or "cashDiv" or "stockDiv";
+
+    /// <summary>
+    /// Composite visibility flag for the group ComboBox at the top of the per-type form
+    /// area: catalog must be loaded AND the current TxType must benefit from grouping.
+    /// </summary>
+    public bool ShouldShowGroupSelector => IsGroupSelectorVisible && TxTypeSupportsGroupSelection;
 
     /// <summary>
     /// Dialog 動態標題的 i18n resource key。依使用者選的 TxType 切換成「新增買入交易」、
@@ -673,6 +724,25 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     ///   2. TxCashAccountName (typed text) → FindOrCreateAccountAsync. TWD default currency.
     ///   3. null — no cash linkage.
     /// </summary>
+    /// <summary>
+    /// P3 — resolves the **instrument** currency for the current Buy form state.
+    /// Order of preference:
+    ///   1. <c>AddSymbolCurrency</c> (filled by autocomplete suggestion — most trusted)
+    ///   2. <c>AddExchange</c> → <c>StockExchangeRegistry.ResolveDefaultCurrency</c>
+    ///   3. fallback "TWD"
+    /// Returns the upper-cased ISO 4217 code. Mirrors <c>AddAssetDialogViewModel.ResolveInstrumentCurrencyForBuy</c>
+    /// but uses only data already in-memory (no symbol re-search).
+    /// </summary>
+    private string ResolveCurrentInstrumentCurrency()
+    {
+        if (!string.IsNullOrWhiteSpace(AddAssetDialog.AddSymbolCurrency))
+            return AddAssetDialog.AddSymbolCurrency.Trim().ToUpperInvariant();
+        if (!string.IsNullOrWhiteSpace(AddAssetDialog.AddExchange))
+            return Assetra.Core.Models.StockExchangeRegistry
+                .ResolveDefaultCurrency(AddAssetDialog.AddExchange.Trim());
+        return "TWD";
+    }
+
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Used by Task 19 XAML binding")]
     private async Task<Guid?> ResolveCashAccountIdAsync(bool requireAccount = false)
     {
@@ -751,6 +821,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(TxTypeIsTransfer));
         OnPropertyChanged(nameof(TxTypeIsBuy));
         OnPropertyChanged(nameof(TxTypeIsSell));
+        OnPropertyChanged(nameof(TxTypeSupportsGroupSelection));
+        OnPropertyChanged(nameof(ShouldShowGroupSelector));
         // Buy.IsStock/IsNonStock/IsCrypto no longer gate on TxType — XAML form
         // visibility is gated by TxTypeIsBuy on the parent StackPanel, which
         // is already raised above. No notification needed for Buy.X here.
@@ -782,6 +854,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         {
             case nameof(DividendTxViewModel.Position):
                 UpdateDivTotal();
+                // MultiCurrency-Trade-Refactor P3 — sync instrument currency from
+                // chosen dividend position so CashDividendTxForm can show the
+                // cross-currency banner + FxRate field via Div.IsCrossCurrency.
+                Div.InstrumentCurrency = Div.Position is null
+                    ? string.Empty
+                    : Assetra.Core.Models.StockExchangeRegistry.ResolveDefaultCurrency(Div.Position.Exchange);
                 break;
             case nameof(DividendTxViewModel.PerShare):
                 Div.PerShareError = ValidatePositiveDecimalOrEmpty(Div.PerShare);
@@ -795,6 +873,14 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 break;
             case nameof(DividendTxViewModel.StockNewShares):
                 Div.StockNewSharesError = ValidatePositiveIntOrEmpty(Div.StockNewShares);
+                break;
+            case nameof(DividendTxViewModel.ActualCashAmount):
+                Div.ActualCashAmountError = ValidatePositiveDecimalOrEmpty(Div.ActualCashAmount);
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(DividendTxViewModel.FxRate):
+                Div.FxRateError = ValidatePositiveDecimalOrEmpty(Div.FxRate);
+                NotifyImpactPreviewChanged();
                 break;
         }
     }
@@ -840,6 +926,15 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             case nameof(BuyTxViewModel.TotalIncludesFee):
                 AddAssetDialog.UpdateBuyPreview();
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
+                break;
+            case nameof(BuyTxViewModel.ActualCashAmount):
+                Buy.ActualCashAmountError = ValidatePositiveDecimalOrEmpty(Buy.ActualCashAmount);
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(BuyTxViewModel.FxRate):
+                // P3 — same validation pattern as ActualCashAmount; empty allowed (= implicit 1.0).
+                Buy.FxRateError = ValidatePositiveDecimalOrEmpty(Buy.FxRate);
+                NotifyImpactPreviewChanged();
                 break;
         }
     }
@@ -907,6 +1002,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Loan.PrincipalError = string.Empty;
         Loan.InterestPaidError = string.Empty;
         Buy.TotalCostError = string.Empty;
+        Buy.ActualCashAmountError = string.Empty;
         TxCommissionDiscountError = string.Empty;
         TxAmount = string.Empty;
         TxNote = string.Empty;
@@ -932,6 +1028,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Buy.PriceMode = state.TxBuyPriceMode;
         Buy.TotalCost = string.Empty;
         Buy.TotalIncludesFee = true;  // Reset to default — most broker totals include fee.
+        Buy.ActualCashAmount = string.Empty;
         Buy.MetaOnly = false;
         Div.InputMode = state.TxDivInputMode;
         Div.TotalInput = string.Empty;
@@ -973,7 +1070,37 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         AddAssetDialog.AddCostError = string.Empty;
         AddAssetDialog.AddCryptoQtyError = string.Empty;
         AddAssetDialog.AddCryptoPriceError = string.Empty;
+        // Portfolio-Groups-Refactor P3 — 開新交易時刷新 catalog 並預設選 DefaultGroup。
+        _ = EnsureGroupsLoadedAsync(restoreFromEditTradeId: null);
         IsTxDialogOpen = true;
+    }
+
+    /// <summary>
+    /// Portfolio-Groups-Refactor P3 — 確保 group catalog 已載入，並依情境設定
+    /// <see cref="SelectedPortfolioGroup"/>。restoreFromEditTradeId 指定時試圖
+    /// 從 trade row 還原；否則預設為 DefaultGroup。
+    /// </summary>
+    private async Task EnsureGroupsLoadedAsync(Guid? restoreFromEditTradeId)
+    {
+        if (GroupCatalog is null) return;
+        try
+        {
+            await GroupCatalog.EnsureLoadedAsync().ConfigureAwait(true);
+            OnPropertyChanged(nameof(IsGroupSelectorVisible));
+            OnPropertyChanged(nameof(ShouldShowGroupSelector));
+
+            Guid? targetId = null;
+            if (restoreFromEditTradeId is { } editId)
+            {
+                var trade = Trades.FirstOrDefault(t => t.Id == editId);
+                targetId = trade?.PortfolioGroupId;
+            }
+            SelectedPortfolioGroup = GroupCatalog.FindById(targetId) ?? GroupCatalog.Default;
+        }
+        catch
+        {
+            // 群組載入失敗時不阻斷 dialog；ComboBox 維持空。
+        }
     }
 
     [RelayCommand]
@@ -994,6 +1121,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Loan.PrincipalError = string.Empty;
         Loan.InterestPaidError = string.Empty;
         Buy.TotalCostError = string.Empty;
+        Buy.ActualCashAmountError = string.Empty;
         TxCommissionDiscountError = string.Empty;
         TxNote = editState.TxNote;
 
@@ -1059,6 +1187,15 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 AddAssetDialog.IsSuggestionsOpen = false;
                 TxCashAccount = editState.TxCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
+                Buy.ActualCashAmount = editState.TxActualCashAmount;
+                // MultiCurrency-Trade-Refactor P3 — restore cross-currency FX rate + currency
+                // so the banner + FxRate field re-appear when reopening a cross-currency Buy.
+                // InstrumentCurrency must be set explicitly because the autocomplete chain
+                // clears AddSymbolCurrency on AddSymbol set, and TxCashAccount push wires the
+                // funding side only.
+                Buy.FxRate = editState.TxFxRate;
+                if (!string.IsNullOrWhiteSpace(editState.TxInstrumentCurrency))
+                    Buy.InstrumentCurrency = editState.TxInstrumentCurrency;
                 // Infer the original "金額已含手續費" state from the recorded
                 // Commission. A trade saved via the new total-mode-with-fee
                 // path has Commission == 0 (or null); a trade that went through
@@ -1087,6 +1224,24 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 TxCashAccount = editState.TxCashAccount;
                 SellPanel.SellCashAccount = editState.SellCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
+                // P3 — restore cross-currency state. InstrumentCurrency falls back to the
+                // Position-derived value via OnSellTxChanged when Sell.Position is assigned,
+                // but explicit set wins to handle Trade rows for de-listed / archived positions.
+                if (!string.IsNullOrWhiteSpace(editState.TxInstrumentCurrency))
+                    Sell.InstrumentCurrency = editState.TxInstrumentCurrency;
+                // Same gate as CashDividend below — only restore CashAmount overrides for
+                // genuinely cross-currency sells, so same-currency revisions can re-derive.
+                var sellCashCcy = editState.TxCashAccount?.Currency;
+                var sellIsCrossCcy =
+                    !string.IsNullOrWhiteSpace(editState.TxFxRate)
+                    || (!string.IsNullOrWhiteSpace(editState.TxInstrumentCurrency)
+                        && !string.IsNullOrWhiteSpace(sellCashCcy)
+                        && !string.Equals(editState.TxInstrumentCurrency, sellCashCcy, StringComparison.OrdinalIgnoreCase));
+                if (sellIsCrossCcy)
+                {
+                    Sell.ActualCashAmount = editState.TxActualCashAmount;
+                    Sell.FxRate = editState.TxFxRate;
+                }
                 RestoreCommissionFields(row);
                 UpdateSellTxPreview();
                 break;
@@ -1096,6 +1251,25 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 Div.PerShare = editState.TxDivPerShare;
                 TxCashAccount = editState.TxCashAccount;
                 TxUseCashAccount = editState.TxUseCashAccount;
+                if (!string.IsNullOrWhiteSpace(editState.TxInstrumentCurrency))
+                    Div.InstrumentCurrency = editState.TxInstrumentCurrency;
+                // P3 — restore cross-currency overrides ONLY when the trade actually was
+                // cross-currency. For same-currency dividends, CashAmount on disk is just
+                // (PerShare × Qty); restoring it would prevent revision from re-deriving
+                // a new CashAmount when the user changes PerShare. Detection: FxRate
+                // recorded → definitely cross-currency; otherwise compare instrument vs
+                // cash account currency.
+                var divCashCcy = editState.TxCashAccount?.Currency;
+                var divIsCrossCcy =
+                    !string.IsNullOrWhiteSpace(editState.TxFxRate)
+                    || (!string.IsNullOrWhiteSpace(editState.TxInstrumentCurrency)
+                        && !string.IsNullOrWhiteSpace(divCashCcy)
+                        && !string.Equals(editState.TxInstrumentCurrency, divCashCcy, StringComparison.OrdinalIgnoreCase));
+                if (divIsCrossCcy)
+                {
+                    Div.ActualCashAmount = editState.TxActualCashAmount;
+                    Div.FxRate = editState.TxFxRate;
+                }
                 break;
 
             case TradeType.StockDividend:
@@ -1144,6 +1318,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 break;
         }
 
+        // Portfolio-Groups-Refactor P3 — 還原 SelectedPortfolioGroup 自編輯目標 trade 的 PortfolioGroupId。
+        _ = EnsureGroupsLoadedAsync(restoreFromEditTradeId: row.Id);
         IsTxDialogOpen = true;
     }
 

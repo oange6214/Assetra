@@ -24,12 +24,55 @@ public partial class MainWindow : Window
         // WM_GETMINMAXINFO so the maximized size is clamped to the
         // monitor's work area (taskbar excluded).
         SourceInitialized += MainWindow_SourceInitialized;
+        Loaded += MainWindow_Loaded;
     }
 
     private void MainWindow_SourceInitialized(object? sender, EventArgs e)
     {
         var hwnd = new WindowInteropHelper(this).Handle;
         HwndSource.FromHwnd(hwnd)?.AddHook(WndProc);
+    }
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e) =>
+        ClampInitialBoundsToWorkArea();
+
+    private void ClampInitialBoundsToWorkArea()
+    {
+        if (WindowState != WindowState.Normal)
+            return;
+
+        var hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero)
+            return;
+
+        var monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+        if (monitor == IntPtr.Zero)
+            return;
+
+        var info = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
+        if (!GetMonitorInfo(monitor, ref info))
+            return;
+
+        var source = PresentationSource.FromVisual(this);
+        var transform = source?.CompositionTarget?.TransformFromDevice ?? System.Windows.Media.Matrix.Identity;
+        var workTopLeft = transform.Transform(new Point(info.rcWork.Left, info.rcWork.Top));
+        var workBottomRight = transform.Transform(new Point(info.rcWork.Right, info.rcWork.Bottom));
+        var workWidth = Math.Max(0, workBottomRight.X - workTopLeft.X);
+        var workHeight = Math.Max(0, workBottomRight.Y - workTopLeft.Y);
+
+        if (workWidth <= 0 || workHeight <= 0)
+            return;
+
+        MinWidth = Math.Min(MinWidth, workWidth);
+        MinHeight = Math.Min(MinHeight, workHeight);
+
+        var currentWidth = double.IsNaN(Width) || Width <= 0 ? ActualWidth : Width;
+        var currentHeight = double.IsNaN(Height) || Height <= 0 ? ActualHeight : Height;
+
+        Width = Math.Min(currentWidth, workWidth);
+        Height = Math.Min(currentHeight, workHeight);
+        Left = workTopLeft.X + Math.Max(0, (workWidth - Width) / 2);
+        Top = workTopLeft.Y + Math.Max(0, (workHeight - Height) / 2);
     }
 
     private void SearchBackdrop_MouseDown(object sender, MouseButtonEventArgs e) =>
@@ -131,6 +174,7 @@ public partial class MainWindow : Window
     {
         if (sender is System.Windows.Controls.Button btn && btn.ContextMenu is { } menu)
         {
+            menu.DataContext = btn.DataContext;
             menu.PlacementTarget = btn;
             menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             menu.IsOpen = true;

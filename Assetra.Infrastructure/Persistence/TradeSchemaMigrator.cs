@@ -12,11 +12,16 @@ internal static class TradeSchemaMigrator
         "loan_label", "liability_asset_id", "parent_trade_id",
         "category_id", "recurring_source_id",
         "version", "last_modified_at", "last_modified_by_device", "is_deleted", "is_pending_push",
+        // MultiCurrency-Trade-Refactor P1
+        "instrument_currency", "commission_currency", "fx_rate",
+        // Portfolio-Groups-Refactor P1
+        "portfolio_group_id",
     };
 
     private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "REAL", "TEXT", "TEXT NOT NULL DEFAULT ''",
+        "TEXT NOT NULL DEFAULT 'TWD'",
         "INTEGER NOT NULL DEFAULT 0",
     };
 
@@ -69,6 +74,18 @@ internal static class TradeSchemaMigrator
             MigrateAddColumn(conn, tx, "category_id", "TEXT");
             MigrateAddColumn(conn, tx, "recurring_source_id", "TEXT");
 
+            // MultiCurrency-Trade-Refactor P1：標的計價幣別 + 手續費幣別 + FX rate。
+            // 預設 instrument_currency='TWD' 讓既有資料保有可解讀語意；P2 backfill
+            // 會依 exchange 把外幣標的（NYSE/NASDAQ/HKEX/TSE）改成對應幣別。
+            // commission_currency / fx_rate 預設 NULL 表示「與標的幣別相同 / 1.0」。
+            MigrateAddColumn(conn, tx, "instrument_currency", "TEXT NOT NULL DEFAULT 'TWD'");
+            MigrateAddColumn(conn, tx, "commission_currency", "TEXT");
+            MigrateAddColumn(conn, tx, "fx_rate", "REAL");
+
+            // Portfolio-Groups-Refactor P1 — 每筆 trade 屬於一個 portfolio_group。
+            // nullable，既有 row 預設 NULL，下方 backfill 把它們設成 DefaultGroupId。
+            MigrateAddColumn(conn, tx, "portfolio_group_id", "TEXT");
+
             // Sync columns (v0.20.7) — mirror Category schema
             MigrateAddColumn(conn, tx, "version", "INTEGER NOT NULL DEFAULT 0");
             MigrateAddColumn(conn, tx, "last_modified_at", "TEXT NOT NULL DEFAULT ''");
@@ -91,6 +108,9 @@ internal static class TradeSchemaMigrator
             BackfillLoanLabels(conn, tx, cmd);
             NormalizeLegacyInterestTrades(cmd);
             BackfillIncomeTradeNameFromCashAccount(conn, tx, cmd);
+            FixWronglyTaggedUsTickers(cmd);
+            BackfillInstrumentCurrencyFromExchange(cmd);
+            BackfillPortfolioGroupId(cmd);
 
             tx.Commit();
         }
@@ -221,6 +241,103 @@ internal static class TradeSchemaMigrator
                          FROM asset a
                         WHERE a.id = trade.cash_account_id
                    );
+            """;
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// 修復「使用者輸入美股 ticker 但沒從 autocomplete 選，被 InferExchange 預設成 TWSE」的歷史資料。
+    /// 觸發條件（保守）：
+    ///   - exchange 目前是 TWSE 或 TPEX（台灣 venue tag）
+    ///   - symbol 長度 1–5、完全沒有數字、首字母是英文字母
+    /// → 改為 NASDAQ。所有台股代號都含數字（2330 / 00981A / 0050），不會誤判。
+    /// 之後 <c>BackfillInstrumentCurrencyFromExchange</c> 會把新的 NASDAQ row 自動補上 instrument_currency='USD'。
+    /// Idempotent — 已修正過的 row（exchange 已是 NASDAQ）跳過 WHERE clause 不會重複處理。
+    /// 同時修 portfolio + portfolio_position_log 兩個關聯表（如果存在），確保所有 read path 都看到正確 exchange。
+    /// </summary>
+    private static void FixWronglyTaggedUsTickers(SqliteCommand cmd)
+    {
+        var conn = cmd.Connection!;
+        var tx = cmd.Transaction!;
+
+        // The shared filter clause — captured once so all three tables apply the
+        // exact same heuristic, no chance of drift.
+        const string filterClause = """
+                     UPPER(exchange) IN ('TWSE', 'TPEX')
+                 AND LENGTH(symbol) BETWEEN 1 AND 5
+                 AND symbol NOT GLOB '*[0-9]*'
+                 AND symbol GLOB '[A-Za-z]*'
+            """;
+
+        cmd.CommandText = $"""
+            UPDATE trade
+               SET exchange = 'NASDAQ'
+             WHERE {filterClause};
+            """;
+        cmd.ExecuteNonQuery();
+
+        if (TableExists(conn, tx, "portfolio"))
+        {
+            cmd.CommandText = $"""
+                UPDATE portfolio
+                   SET exchange = 'NASDAQ',
+                       currency = 'USD'
+                 WHERE {filterClause};
+                """;
+            cmd.ExecuteNonQuery();
+        }
+
+        if (TableExists(conn, tx, "portfolio_position_log"))
+        {
+            cmd.CommandText = $"""
+                UPDATE portfolio_position_log
+                   SET exchange = 'NASDAQ'
+                 WHERE {filterClause};
+                """;
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    /// <summary>
+    /// MultiCurrency-Trade-Refactor P2：把外幣交易所的歷史 trade row 從預設的
+    /// <c>instrument_currency='TWD'</c> 修正為對應的標的幣別。
+    /// 跟 <see cref="Assetra.Infrastructure.History.ExchangeCurrencyResolver"/> 的對照表保持一致。
+    /// idempotent — 只動 instrument_currency 仍為 'TWD' 且 exchange 為外幣交易所的列；
+    /// 使用者後續手動改幣別後不會被回填覆寫（因為 WHERE clause 不會抓到非 TWD 列）。
+    /// </summary>
+    /// <summary>
+    /// Portfolio-Groups-Refactor P1：把既有 trades 的 portfolio_group_id (NULL) 設成
+    /// 預設群組 (PortfolioGroup.DefaultId)。Idempotent — 已設過群組的 row 跳過。
+    /// 預設群組由 PortfolioGroupSchemaMigrator 在 db init 時 INSERT OR IGNORE seed。
+    /// </summary>
+    private static void BackfillPortfolioGroupId(SqliteCommand cmd)
+    {
+        cmd.CommandText = """
+            UPDATE trade
+               SET portfolio_group_id = '00000000-0000-0000-0000-000000000001'
+             WHERE portfolio_group_id IS NULL;
+            """;
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void BackfillInstrumentCurrencyFromExchange(SqliteCommand cmd)
+    {
+        cmd.CommandText = """
+            UPDATE trade
+               SET instrument_currency = CASE UPPER(exchange)
+                       WHEN 'NYSE'     THEN 'USD'
+                       WHEN 'NASDAQ'   THEN 'USD'
+                       WHEN 'NYSEARCA' THEN 'USD'
+                       WHEN 'AMEX'     THEN 'USD'
+                       WHEN 'BATS'     THEN 'USD'
+                       WHEN 'IEX'      THEN 'USD'
+                       WHEN 'HKEX'     THEN 'HKD'
+                       WHEN 'TSE'      THEN 'JPY'
+                       ELSE instrument_currency
+                   END
+             WHERE instrument_currency = 'TWD'
+               AND UPPER(exchange) IN
+                   ('NYSE','NASDAQ','NYSEARCA','AMEX','BATS','IEX','HKEX','TSE');
             """;
         cmd.ExecuteNonQuery();
     }

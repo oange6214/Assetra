@@ -28,6 +28,7 @@
 
     <Style x:Key="PageTitleText" TargetType="TextBlock">
         <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Display}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Xl}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
@@ -70,6 +71,7 @@
 
     <Style x:Key="FormSectionHeader" TargetType="TextBlock">
         <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Display}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Md}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
@@ -110,7 +112,7 @@
 
     <Style x:Key="MetricValue" TargetType="TextBlock">
         <Setter Property="Margin" Value="0,8,0,0" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Numeric}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Xl}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />

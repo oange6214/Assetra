@@ -162,7 +162,9 @@ internal static class PortfolioServiceCollectionExtensions
             sp.GetRequiredService<PortfolioViewModelFactory>().Create());
         services.AddSingleton<AllocationViewModel>(sp => new AllocationViewModel(
             sp.GetRequiredService<PortfolioViewModel>(),
-            sp.GetRequiredService<IAppSettingsService>()));
+            sp.GetRequiredService<IAppSettingsService>(),
+            // Portfolio-Groups-Refactor P4 — 給 "依群組" toggle 用。
+            sp.GetService<Assetra.WPF.Features.PortfolioGroups.PortfolioGroupCatalog>()));
         services.AddSingleton<DashboardViewModel>(sp => new DashboardViewModel(
             sp.GetRequiredService<PortfolioViewModel>(),
             sp.GetService<IThemeService>()));
@@ -184,7 +186,9 @@ internal static class PortfolioServiceCollectionExtensions
             // Phase C 擴展：保險 / 退休 / 實物資產焦點卡
             sp.GetService<Assetra.WPF.Features.Insurance.InsurancePolicyViewModel>(),
             sp.GetService<Assetra.WPF.Features.Retirement.RetirementViewModel>(),
-            sp.GetService<Assetra.WPF.Features.PhysicalAsset.PhysicalAssetViewModel>()));
+            sp.GetService<Assetra.WPF.Features.PhysicalAsset.PhysicalAssetViewModel>(),
+            // Portfolio-Groups-Refactor P5 — Hero 用 group balance 算 goal 進度。
+            sp.GetService<Assetra.Core.Interfaces.IGroupBalanceQueryService>()));
 
         return services;
     }

@@ -264,11 +264,17 @@ public sealed class BalanceSheetService : IBalanceSheetService
         TradeType.Withdrawal or TradeType.CreditCardPayment
             => -(t.CashAmount ?? 0m),
         TradeType.Transfer => -(t.CashAmount ?? 0m),
-        TradeType.Buy => -((t.Price * t.Quantity) + (t.Commission ?? 0m)),
-        TradeType.Sell => (t.Price * t.Quantity) - (t.Commission ?? 0m),
+        TradeType.Buy => -BuyCashAmount(t),
+        TradeType.Sell => SellCashAmount(t),
         TradeType.LoanRepay => -((t.Principal ?? 0m) + (t.InterestPaid ?? 0m)),
         _ => 0m,
     };
+
+    private static decimal BuyCashAmount(Trade t) =>
+        t.CashAmount ?? (t.Price * t.Quantity + (t.Commission ?? 0m));
+
+    private static decimal SellCashAmount(Trade t) =>
+        t.CashAmount ?? (t.Price * t.Quantity - (t.Commission ?? 0m));
 
     private static decimal ComputeLiabilityBalance(AssetItem item, IEnumerable<Trade> trades)
     {

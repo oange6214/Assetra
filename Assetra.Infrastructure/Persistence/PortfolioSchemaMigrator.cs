@@ -8,6 +8,8 @@ internal static class PortfolioSchemaMigrator
     {
         "asset_type", "created_at", "updated_at", "display_name", "currency", "is_active", "is_etf",
         "version", "last_modified_at", "last_modified_by_device", "is_deleted", "is_pending_push",
+        // Portfolio-Groups-Refactor P1
+        "portfolio_group_id",
     };
 
     private static readonly HashSet<string> AllowedLegacyDropColumns = new(StringComparer.OrdinalIgnoreCase)
@@ -22,6 +24,8 @@ internal static class PortfolioSchemaMigrator
         "TEXT NOT NULL DEFAULT 'TWD'",
         "INTEGER NOT NULL DEFAULT 1",
         "INTEGER NOT NULL DEFAULT 0",
+        // Portfolio-Groups-Refactor P1 — nullable FK
+        "TEXT",
     };
 
     public static void EnsureInitialized(string connectionString)
@@ -71,6 +75,10 @@ internal static class PortfolioSchemaMigrator
                 "is_deleted", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
             SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio",
                 "is_pending_push", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+            // Portfolio-Groups-Refactor P1
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio",
+                "portfolio_group_id", "TEXT", AllowedColumns, AllowedTypeDefs);
+            BackfillPortfolioGroupId(conn, tx);
 
             DeduplicateEntries(conn, tx);
             EnsureUniqueIndex(conn, tx);
@@ -88,6 +96,21 @@ internal static class PortfolioSchemaMigrator
             tx.Rollback();
             throw;
         }
+    }
+
+    /// <summary>
+    /// Portfolio-Groups-Refactor P1：既有 portfolio rows 預設掛到 DefaultGroupId。
+    /// </summary>
+    private static void BackfillPortfolioGroupId(SqliteConnection conn, SqliteTransaction tx)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            UPDATE portfolio
+               SET portfolio_group_id = '00000000-0000-0000-0000-000000000001'
+             WHERE portfolio_group_id IS NULL;
+            """;
+        cmd.ExecuteNonQuery();
     }
 
     private static void DeduplicateEntries(SqliteConnection conn, SqliteTransaction tx)

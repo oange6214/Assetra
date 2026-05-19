@@ -130,6 +130,19 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// <summary>True 當 IBenchmarkComparisonService 已注入。隱藏整個對標區用。</summary>
     [ObservableProperty] private bool _hasBenchmark;
 
+    /// <summary>
+    /// 對標區實際比對的時間範圍顯示字串（如「2026-04-12 ~ 2026-05-12 · 30 天」）。
+    /// 由 UpdateBenchmarksAsync 在每次計算前依照 filtered snapshots 的首末日設定，
+    /// 讓使用者知道「同期」是哪段期間。</summary>
+    [ObservableProperty] private string _benchmarkPeriodDisplay = "—";
+
+    /// <summary>
+    /// 「可用資料 X 天」hint：snapshot 表實際涵蓋的日數。
+    /// 用於告訴使用者 chip（30 / 90 / 180 / 365）若超過此值，畫面會 clamp 到實際範圍。
+    /// 為空字串時 UI 隱藏 hint（首次 mount 前）。
+    /// </summary>
+    [ObservableProperty] private string _dataRangeHint = string.Empty;
+
     // v2：使用者自訂對標。每個項目是 (symbol, display) — UI 用 ObservableCollection
     // 綁定，序列化結果直接從 AppSettings.CustomBenchmarkSymbols 拉。最多 4 個。
     private readonly System.Collections.ObjectModel.ObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow> _customBenchmarks = [];
@@ -174,8 +187,35 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     {
         _allSnapshots = await _historyQueryService.GetSnapshotsAsync();
         OnPropertyChanged(nameof(Snapshots));
-        // Stage 4：餵入報酬日曆 sub-VM；獨立 try-catch 以免破壞主流程。
-        try { ReturnCalendar.UpdateSnapshots(_allSnapshots); }
+
+        // 算「可用資料 X 天」hint — 以實際涵蓋日數（end - start + 1）為準，
+        // 而不是 count（snapshot 可能跳過假日）。供 chip 區顯示，讓使用者知道
+        // 90/180/365 chip 為什麼可能看起來跟 30 一樣。
+        if (_allSnapshots.Count >= 2)
+        {
+            var minDate = _allSnapshots.Min(s => s.SnapshotDate);
+            var maxDate = _allSnapshots.Max(s => s.SnapshotDate);
+            var spanDays = maxDate.DayNumber - minDate.DayNumber + 1;
+            DataRangeHint = $"可用資料 {spanDays} 天";
+        }
+        else if (_allSnapshots.Count == 1)
+        {
+            DataRangeHint = "可用資料 1 天";
+        }
+        else
+        {
+            DataRangeHint = string.Empty;
+        }
+
+        // Stage 4：餵入報酬日曆 sub-VM。日曆仍以 daily snapshot 市值變化為主；
+        // 交易只用於同日買入/賣出/股利 cash-flow 調整，避免本金進出被看成報酬。
+        IReadOnlyList<Trade> allTrades = [];
+        if (_trades is not null)
+        {
+            try { allTrades = await _trades.GetAllAsync(); }
+            catch (Exception ex) when (ex is not OperationCanceledException) { allTrades = []; }
+        }
+        try { ReturnCalendar.UpdatePortfolioData(_allSnapshots, allTrades); }
         catch (Exception ex) when (ex is not OperationCanceledException) { /* swallow */ }
         await RefreshChartAsync();
     }
@@ -253,9 +293,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         KpiEndValue = endValue;
         KpiAbsolutePnl = endValue - startValue;
 
-        // 預設用 naive；若 TWR 服務 + 交易 repo 都注入則切換為 TWR。
+        // 用 naive return 先填，TWR 服務若可用再 refine 覆寫
         var naiveReturn = startValue == 0m ? 0m : (endValue - startValue) / startValue;
-        KpiReturnPct = await TryComputeTwrAsync(filtered, points).ConfigureAwait(false) ?? naiveReturn;
+        KpiReturnPct = naiveReturn;
 
         // 年化：用實際日數 + 365 day year
         var startDate = points[0].DateTime;
@@ -273,10 +313,36 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             KpiAnnualizedPct = 0m;
         }
 
-        var series = filtered
+        // ⚠ 雙保險：(1) 強制 reset 觸發 PropertyChanged false→true，繞過 ObservableProperty
+        // 的相等性短路；(2) marshal 回 UI thread 確保 binding 接收得到通知。
+        // 初次載入鏈經過數個 ConfigureAwait(false) await，到這裡可能在 threadpool；
+        // 若同時 HasKpis 已是 true（不大可能但理論上有），單純 set true 不會 fire。
+        // 強制 false→true 確保訊號一定走出去。
+        InvokeOnUi(() =>
+        {
+            HasKpis = false;
+            HasKpis = true;
+        });
+
+        // 跟 BuildPointsAsync 一致 — 剝掉領頭的「建倉假象」低值點，避免波動率/TWR 算出
+        // 20000% 那種荒謬數字（從 $0 跳到 $8.8M 的單日 return 是 +infinity）。
+        // 移到 TWR 之前計算，TWR 也使用這個 cleaned series。
+        var rawSeries = filtered
             .OrderBy(s => s.SnapshotDate)
             .Select(s => (s.SnapshotDate, s.MarketValue))
             .ToList();
+        var seriesMedian = rawSeries.Count == 0 ? 0m
+            : rawSeries.Select(s => s.MarketValue).OrderBy(v => v).ElementAt(rawSeries.Count / 2);
+        var seriesThreshold = seriesMedian * 0.05m;
+        var seriesFirstValid = 0;
+        while (seriesFirstValid < rawSeries.Count - 1 && rawSeries[seriesFirstValid].MarketValue < seriesThreshold)
+            seriesFirstValid++;
+        var series = rawSeries.Skip(seriesFirstValid).ToList();
+
+        // 進階：TWR refine 報酬率（涵蓋現金流影響）— 用 cleaned series 而非 raw filtered，
+        // 避免領頭低值點把 segment return 放大到幾千 %。
+        var twrRefined = await TryComputeTwrAsync(series).ConfigureAwait(false);
+        if (twrRefined.HasValue) KpiReturnPct = twrRefined.Value;
 
         // 最大回撤（只在有 IDrawdownCalculator 時計算）
         KpiMaxDrawdownPct = _drawdown is not null && series.Count >= 2
@@ -310,8 +376,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         {
             KpiHhi = 0m;
         }
-
-        HasKpis = true;
+        // HasKpis 已在第一個 await 之前設好（避免初次渲染 bug），這裡不再重設
     }
 
     // ── Stage 1: 對標 TWR 計算 ─────────────────────────────────────────
@@ -321,8 +386,13 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     {
         if (_benchmark is null || filtered.Count < 2)
         {
-            BenchmarkTaiexDisplay = BenchmarkTw0050Display =
-                BenchmarkTw00981ADisplay = BenchmarkDeposit15Display = "—";
+            InvokeOnUi(() =>
+            {
+                BenchmarkTaiexDisplay = BenchmarkTw0050Display =
+                    BenchmarkTw00981ADisplay = BenchmarkDeposit15Display = "—";
+                BenchmarkPeriodDisplay = "—";
+                _customBenchmarks.Clear();
+            });
             return;
         }
 
@@ -331,9 +401,15 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var period = new PerformancePeriod(startDate, endDate);
 
         // 1.5% 年化定存的合成報酬：(1.015)^(days/365) − 1
-        var days = Math.Max(1, endDate.DayNumber - startDate.DayNumber);
-        var depositTwr = (decimal)(Math.Pow(1.015, days / 365.0) - 1.0);
-        BenchmarkDeposit15Display = FormatPct(depositTwr);
+        // 注意：annualize 用 segment 天數（end - start）；UI 顯示用 inclusive 天數（+1）
+        // 以對齊 chip 區的「可用資料 N 天」hint（兩處同樣定義成 calendar day 含頭含尾）。
+        var segmentDays = Math.Max(1, endDate.DayNumber - startDate.DayNumber);
+        var inclusiveDays = segmentDays + 1;
+        var depositTwr = (decimal)(Math.Pow(1.015, segmentDays / 365.0) - 1.0);
+
+        // 期間文字：例「2026-04-12 ~ 2026-05-12 · 23 天」。實際使用 filtered 的首末日，
+        // 因為 snapshot 可能稀疏，跟 chip 上的「近 30 天」不一定完全對應。
+        var periodText = $"{startDate:yyyy-MM-dd} ~ {endDate:yyyy-MM-dd} · {inclusiveDays} 天";
 
         // 三個 ETF / index — 平行抓
         var taiexTask = SafeBenchmarkAsync("^TWII", period);
@@ -342,21 +418,36 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
         await Task.WhenAll(taiexTask, tw0050Task, tw00981aTask).ConfigureAwait(false);
 
-        BenchmarkTaiexDisplay = FormatPct(taiexTask.Result);
-        BenchmarkTw0050Display = FormatPct(tw0050Task.Result);
-        BenchmarkTw00981ADisplay = FormatPct(tw00981aTask.Result);
+        var taiexText = FormatPct(taiexTask.Result);
+        var tw0050Text = FormatPct(tw0050Task.Result);
+        var tw00981aText = FormatPct(tw00981aTask.Result);
+        var depositText = FormatPct(depositTwr);
 
         // v2：自訂對標清單。最多 4 個避免畫面爆掉；每抓一個 TWR 都 try-catch。
         var custom = _settings?.Current.CustomBenchmarkSymbols ?? new List<string>();
-        _customBenchmarks.Clear();
+        var customRows = new List<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow>();
         foreach (var symbol in custom.Take(4))
         {
             if (string.IsNullOrWhiteSpace(symbol)) continue;
             var twr = await SafeBenchmarkAsync(symbol, period).ConfigureAwait(false);
-            _customBenchmarks.Add(new Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow(
+            customRows.Add(new Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow(
                 Symbol: symbol,
                 Display: FormatPct(twr)));
         }
+
+        // 一次 marshal 回 UI thread：避免 cross-thread 漏 binding 通知 +
+        // ObservableCollection mutate 在非 UI thread 會 throw。
+        InvokeOnUi(() =>
+        {
+            BenchmarkPeriodDisplay = periodText;
+            BenchmarkTaiexDisplay = taiexText;
+            BenchmarkTw0050Display = tw0050Text;
+            BenchmarkTw00981ADisplay = tw00981aText;
+            BenchmarkDeposit15Display = depositText;
+            _customBenchmarks.Clear();
+            foreach (var row in customRows)
+                _customBenchmarks.Add(row);
+        });
     }
 
     private async Task<decimal?> SafeBenchmarkAsync(string symbol, PerformancePeriod period)
@@ -376,28 +467,37 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// 不足時回傳 null（caller fallback 到 naive 計算）。
     /// </summary>
     private async Task<decimal?> TryComputeTwrAsync(
-        IReadOnlyList<PortfolioDailySnapshot> filtered,
-        IReadOnlyList<DateTimePoint> points)
+        IReadOnlyList<(DateOnly Date, decimal Value)> valuations)
     {
-        if (_twr is null || _trades is null || filtered.Count < 2)
+        if (_twr is null || _trades is null || valuations.Count < 2)
             return null;
 
         try
         {
-            // Valuations 用 filtered snapshots（已經過 chart filter 的 base 幣別轉換）
-            // 為簡化，使用 snapshot 原始 MarketValue（單幣別 user 預設情境）。
-            var valuations = filtered
-                .OrderBy(s => s.SnapshotDate)
-                .Select(s => (s.SnapshotDate, s.MarketValue))
-                .ToList();
-
-            var startDate = filtered.Min(s => s.SnapshotDate);
-            var endDate = filtered.Max(s => s.SnapshotDate);
+            // 注意：valuations 必須已經剝掉領頭低值點，否則 segment return 會爆。
+            // caller (UpdateKpisAsync) 已經處理過了。
+            var startDate = valuations[0].Date;
+            var endDate = valuations[^1].Date;
             var period = new PerformancePeriod(startDate, endDate);
 
             var allTrades = await _trades.GetAllAsync().ConfigureAwait(false);
-            var flows = Assetra.Application.Analysis.PerformanceFlowBuilder.BuildPerformanceFlows(
+            var rawFlows = Assetra.Application.Analysis.PerformanceFlowBuilder.BuildPerformanceFlows(
                 allTrades, period);
+
+            // ⚠ 符號慣例對齊：PerformanceFlowBuilder 產的 flow 是「投資人現金角度」
+            //   （Buy = 負，因為投資人掏錢出去；Sell = 正）。
+            //   但 TimeWeightedReturnCalculator 跑在「MarketValue 序列」上，需要的
+            //   是「投資組合角度」的 flow（Buy = 正，因為 MarketValue 因 Buy 而增加；
+            //   Sell = 負，因為 MarketValue 因 Sell 而減少）。
+            //   兩個 sign convention 剛好相反；這裡統一 negate 一次。
+            //   不修 Builder 本身是因為它對外宣告的 contract 是投資人角度，改了會
+            //   影響到任何未來呼叫者（例：XIRR 用的是投資人角度，不應反向）。
+            //   過去這裡漏 negate 導致 Buy 在 TWR 公式裡被當成 2 倍貢獻，算出 6234%
+            //   這種荒謬數字。修正後 Buy/Sell 對 segment return 的影響歸零，
+            //   TWR 只反映真實市場波動。
+            var flows = rawFlows
+                .Select(f => new Assetra.Core.Models.Analysis.CashFlow(f.Date, -f.Amount, f.Currency))
+                .ToList();
 
             return _twr.Compute(valuations, flows);
         }
@@ -449,17 +549,29 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     private async Task<IReadOnlyList<DateTimePoint>> BuildPointsAsync(
         IReadOnlyList<PortfolioDailySnapshot> snapshots)
     {
-        var points = new List<DateTimePoint>(snapshots.Count);
+        var raw = new List<(DateTime When, decimal Val)>(snapshots.Count);
         foreach (var snapshot in snapshots.OrderBy(s => s.SnapshotDate))
         {
             var value = await ConvertMarketValueToBaseAsync(snapshot);
-            if (value is null)
-                continue;
-
-            points.Add(new DateTimePoint(
-                snapshot.SnapshotDate.ToDateTime(TimeOnly.MinValue),
-                (double)value.Value));
+            if (value is null) continue;
+            raw.Add((snapshot.SnapshotDate.ToDateTime(TimeOnly.MinValue), value.Value));
         }
+        if (raw.Count == 0) return [];
+
+        // ── 跳過「期初建倉」假象點 ─────────────────────────────────────
+        // 問題：建倉日前後快照從 $0 跳到 $8.8M，會讓 KPI 區間報酬率算成「無限大」
+        // 然後被 startValue==0 守衛壓成 0%，造成「期間賺很多但顯示 0%」的誤導。
+        // 解法：以中位數的 5% 為門檻，剝掉前面所有「值 < 中位數 × 0.05」的領頭點。
+        // 這保留正常的小幅波動（不會誤殺真實低值），但濾掉建倉初期假象。
+        var median = raw.Select(p => p.Val).OrderBy(v => v).ElementAt(raw.Count / 2);
+        var threshold = median * 0.05m;
+        var firstValidIdx = 0;
+        while (firstValidIdx < raw.Count - 1 && raw[firstValidIdx].Val < threshold)
+            firstValidIdx++;
+
+        var points = new List<DateTimePoint>(raw.Count - firstValidIdx);
+        for (var i = firstValidIdx; i < raw.Count; i++)
+            points.Add(new DateTimePoint(raw[i].When, (double)raw[i].Val));
         return points;
     }
 
@@ -563,4 +675,18 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
     private string GetString(string key, string fallback) =>
         _localization.Get(key, fallback);
+
+    /// <summary>
+    /// 強制把 action 跑在 UI thread 上。用於 marshal 在 threadpool 上完成的 KPI 計算
+    /// 結果回 UI，避免 PropertyChanged 在 view 首次 mount 階段漏掉。
+    /// 沒 Dispatcher（test/headless 環境）就 fallback 直接執行。
+    /// </summary>
+    private static void InvokeOnUi(Action action)
+    {
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.CheckAccess())
+            action();
+        else
+            dispatcher.Invoke(action);
+    }
 }

@@ -186,6 +186,8 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
         BindItem(cmd, item);
         StampSyncParams(cmd);
         var rowsAffected = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        if (rowsAffected == 0)
+            throw new InvalidOperationException($"Asset '{item.Id}' was not found for update.");
 
         // Diagnostic：直接 re-read subtype + group_id 驗證寫入是否真生效
         await using var verify = conn.CreateCommand();

@@ -49,6 +49,23 @@ public sealed class TradeRowViewModel : ObservableObject
     /// <summary>信用卡等負債資產 Id。</summary>
     public Guid? LiabilityAssetId { get; }
 
+    /// <summary>
+    /// MultiCurrency-Trade-Refactor P3 — 標的計價幣別 (ISO 4217)。預設 "TWD"，
+    /// 既有 row 從 DB 預設值繼承。Edit-trade 流程用此值還原 BuyTxViewModel.InstrumentCurrency。
+    /// </summary>
+    public string InstrumentCurrency { get; }
+
+    /// <summary>
+    /// P3 — 跨幣別交易匯率（標的 → 帳戶幣別）。null = 同幣別 / implicit 1.0。
+    /// </summary>
+    public decimal? FxRate { get; }
+
+    /// <summary>
+    /// Portfolio-Groups-Refactor P3 — 此筆交易所屬群組（bucket）。
+    /// null 代表 legacy row 尚未 backfill；UI 視為 DefaultId。
+    /// </summary>
+    public Guid? PortfolioGroupId { get; }
+
     // Type predicates — used by XAML DataTriggers and ViewModel filter queries.
     // Intentionally verbose (one-per-TradeType) rather than a single enum switch so that
     // binding {Binding IsBuy} / {Binding IsCashDividend} stays cheap and self-documenting.
@@ -142,8 +159,8 @@ public sealed class TradeRowViewModel : ObservableObject
     /// </summary>
     public decimal TotalAmount => Type switch
     {
-        TradeType.Buy => -(Price * Quantity + (Commission ?? 0)),
-        TradeType.Sell => +(Price * Quantity - (Commission ?? 0)),
+        TradeType.Buy => -BuyCashAmount(),
+        TradeType.Sell => +SellCashAmount(),
         TradeType.CashDividend => +(CashAmount ?? (Price * Quantity)),
         TradeType.Income or TradeType.Deposit or TradeType.LoanBorrow => +(CashAmount ?? 0),
         TradeType.Withdrawal or TradeType.LoanRepay or TradeType.Transfer => -(CashAmount ?? 0),
@@ -152,6 +169,12 @@ public sealed class TradeRowViewModel : ObservableObject
         TradeType.CreditCardPayment => +(CashAmount ?? 0),
         _ => 0,   // StockDividend
     };
+
+    private decimal BuyCashAmount() =>
+        CashAmount ?? (Price * Quantity + (Commission ?? 0m));
+
+    private decimal SellCashAmount() =>
+        CashAmount ?? (Price * Quantity - (Commission ?? 0m));
 
     /// <summary>
     /// 「手續費」欄顯示文字。非 Buy/Sell、null 或 0 都顯示 —，確保欄位對齊且讓使用者
@@ -264,5 +287,8 @@ public sealed class TradeRowViewModel : ObservableObject
         InterestPaid = t.InterestPaid;
         ToCashAccountId = t.ToCashAccountId;
         LiabilityAssetId = t.LiabilityAssetId;
+        InstrumentCurrency = t.InstrumentCurrency;
+        FxRate = t.FxRate;
+        PortfolioGroupId = t.PortfolioGroupId;
     }
 }

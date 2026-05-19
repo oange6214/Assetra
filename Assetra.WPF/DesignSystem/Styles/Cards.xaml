@@ -22,6 +22,7 @@
 
     <Style x:Key="FormSectionTitle" TargetType="TextBlock">
         <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Display}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Lg}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />

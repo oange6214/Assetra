@@ -77,6 +77,13 @@ public partial class AddAssetDialogViewModel : ObservableObject
     [ObservableProperty] private bool _addDialogIsInvestmentMode = true;
     [ObservableProperty] private string _addDialogMode = "account";
 
+    /// <summary>
+    /// Portfolio-Groups-Refactor P3 — TransactionDialogViewModel copies its own
+    /// SelectedPortfolioGroup into here before invoking ConfirmAddCommand so the
+    /// Buy request DTO carries the user's group choice. null = sealed-DefaultId by repo.
+    /// </summary>
+    public Guid? SelectedPortfolioGroupId { get; set; }
+
     /// <summary>True while the user is on the type-picker step (liability mode only).</summary>
     [ObservableProperty] private bool _isTypePickerStep;
 
@@ -104,6 +111,9 @@ public partial class AddAssetDialogViewModel : ObservableObject
 
     [ObservableProperty] private DateTime _addBuyDate = DateTime.Today;
     [ObservableProperty] private string _addSymbol = string.Empty;
+    [ObservableProperty] private string _addExchange = string.Empty;
+    [ObservableProperty] private string _addSymbolName = string.Empty;
+    [ObservableProperty] private string _addSymbolCurrency = string.Empty;
     [ObservableProperty] private string _addPrice = string.Empty;
     [ObservableProperty] private string _addQuantity = string.Empty;
     [ObservableProperty] private string _addError = string.Empty;
@@ -179,6 +189,9 @@ public partial class AddAssetDialogViewModel : ObservableObject
     {
         if (_suppressSuggestions)
             return;
+        AddExchange = string.Empty;
+        AddSymbolName = string.Empty;
+        AddSymbolCurrency = string.Empty;
         if (!AddTypeIsStock || string.IsNullOrWhiteSpace(value))
         {
             IsSuggestionsOpen = false;
@@ -203,6 +216,9 @@ public partial class AddAssetDialogViewModel : ObservableObject
         _suppressSuggestions = true;
         IsSuggestionsOpen = false;
         AddSymbol = suggestion.Symbol;
+        AddExchange = suggestion.Exchange;
+        AddSymbolName = suggestion.Name;
+        AddSymbolCurrency = suggestion.Currency;
         _suppressSuggestions = false;
         TriggerClosePriceFetch();
     }
@@ -233,7 +249,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
                 return;
             IsLoadingClosePrice = true;
             ClosePriceHint = string.Empty;
-            var result = await _addAssetWorkflow.LookupClosePriceAsync(symbol, buyDate, ct);
+            var result = await _addAssetWorkflow.LookupClosePriceAsync(symbol, buyDate, EmptyToNull(AddExchange), ct);
             if (ct.IsCancellationRequested || SuppressClosePriceAutoFill)
                 return;
 
@@ -308,7 +324,8 @@ public partial class AddAssetDialogViewModel : ObservableObject
             price,
             qty,
             BuyContext.CommissionDiscount,
-            overrideManualFee));
+            overrideManualFee,
+            EmptyToNull(AddExchange)));
 
         AddGrossAmount = preview.GrossAmount;
         AddCommission = preview.Commission;
@@ -500,7 +517,10 @@ public partial class AddAssetDialogViewModel : ObservableObject
 
             var metaSymbol = AddSymbol.Trim().ToUpper();
             await _addAssetWorkflow
-                .EnsureStockEntryAsync(new EnsureStockEntryRequest(metaSymbol))
+                .EnsureStockEntryAsync(new EnsureStockEntryRequest(
+                    metaSymbol,
+                    EmptyToNull(AddExchange),
+                    EmptyToNull(AddSymbolName)))
                 .ConfigureAwait(true);
 
             // No trade written. Clear input + refresh via AssetAdded event so the
@@ -520,8 +540,15 @@ public partial class AddAssetDialogViewModel : ObservableObject
         { AddError = "請輸入股票代號"; return; }
         if (!ParseHelpers.TryParseInt(AddQuantity, out var qty) || qty <= 0)
         { AddError = "股數無效"; return; }
-        if (!ParseHelpers.TryParseDecimal(AddPrice, out var price) || price <= 0)
-        { AddError = "成交價無效"; return; }
+
+        // MultiCurrency-Trade-Refactor P3 Mode C — 成交價現在是「optional 如果 ActualCash 有填」。
+        // 先 try-parse；若空但 ActualCashAmount + Qty 已知 (+ FxRate 對跨幣別)，下方會反推一個。
+        var hasPrice = ParseHelpers.TryParseDecimal(AddPrice, out var price) && price > 0;
+        if (!hasPrice && string.IsNullOrWhiteSpace(BuyContext.ActualCashAmount))
+        {
+            AddError = "成交價無效（或請改填實際扣款金額讓系統反推）";
+            return;
+        }
 
         var symbol = AddSymbol.Trim().ToUpper();
 
@@ -541,7 +568,88 @@ public partial class AddAssetDialogViewModel : ObservableObject
             { AddError = "手續費無效"; return; }
         }
 
+        decimal? actualCashAmount = null;
+        if (!string.IsNullOrWhiteSpace(BuyContext.ActualCashAmount))
+        {
+            if (!ParseHelpers.TryParseDecimal(BuyContext.ActualCashAmount, out var parsedActual) ||
+                parsedActual <= 0)
+            {
+                AddError = "實際扣款金額無效";
+                return;
+            }
+
+            actualCashAmount = parsedActual;
+        }
+
+        // P3 — 跨幣別交易解析 FX rate。空字串視為 null（同幣別或使用者沒填）。
+        decimal? fxRate = null;
+        if (!string.IsNullOrWhiteSpace(BuyContext.FxRate))
+        {
+            if (!ParseHelpers.TryParseDecimal(BuyContext.FxRate, out var parsedFx) || parsedFx <= 0)
+            {
+                AddError = "匯率無效";
+                return;
+            }
+            fxRate = parsedFx;
+        }
+
+        // P3 — 跨幣別交易：FxRate 或 ActualCashAmount 至少要有一個；皆空才報錯。
+        // 之前邏輯硬性要求 ActualCashAmount，這裡放寬：使用者只填 FxRate 也能完成交易，
+        // 因為系統可以反推 CashAmount = Price × Qty × FxRate + Commission。
+        if (BuyContext.UseCashAccount &&
+            actualCashAmount is null && fxRate is null &&
+            IsCrossCurrencyCashDebit())
+        {
+            AddError = "跨幣別買入請填寫匯率或券商實際扣款金額（擇一）";
+            return;
+        }
+
+        // P3 Mode C — 「只知道扣款金額 + 股數」快速輸入：當 Price 為空 + ActualCash 有填時，
+        // 從現金反推 Price。對同幣別交易直接除；對跨幣別則需要 FxRate（用 1.0 fallback
+        // 若兩個都沒填，避免靜默用錯匯率產生荒謬成本均價）。手續費粗估：留空時當 0
+        // （適用券商實際扣款已含手續費的多數情境，跟「金額已含手續費」的精神一致）。
+        if (!hasPrice && actualCashAmount is { } cash && qty > 0)
+        {
+            var feeForPrice = manualFee ?? 0m;
+            var grossNative = cash - feeForPrice;
+            if (grossNative <= 0)
+            {
+                AddError = "實際扣款金額不足以扣除手續費，請檢查";
+                return;
+            }
+            var rateForPrice = fxRate ?? 1m;
+            if (rateForPrice <= 0)
+            {
+                AddError = "跨幣別反推單價需要匯率";
+                return;
+            }
+            price = grossNative / qty / rateForPrice;
+            hasPrice = true;
+
+            // ⚠ 寫回 AddPrice 讓 UI 顯示推算值（使用者下次能看到），但不寫回 AddCommission /
+            // AddTotalCost 因為 preview 走另一條路；只更新 AddPrice 影響有限。
+            AddPrice = price.ToString("F4", System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        // P3 — 雙保險：若兩者皆填，ActualCashAmount 為權威。如果只填一個，
+        // 自動反推另一個寫入 DB，未來報表想還原 USD 成本基礎不需要重新查匯率。
+        // 反推公式：CashAmount ≈ Price × Qty × FxRate + Commission (僅 estimate；
+        // 不去動 commission 換匯，多數情境誤差可接受)。
+        if (actualCashAmount is null && fxRate is { } fxOnly && qty > 0 && price > 0)
+        {
+            // 從匯率推算 cash amount（含預估手續費；commission 取自 preview）
+            actualCashAmount = price * qty * fxOnly + (manualFee ?? 0m);
+        }
+        else if (fxRate is null && actualCashAmount is { } cashOnly && qty > 0 && price > 0)
+        {
+            // 從現金扣款 + 估算手續費反推匯率：(cash − fee) / (price × qty)
+            var grossInFunding = cashOnly - (manualFee ?? 0m);
+            if (grossInFunding > 0)
+                fxRate = grossInFunding / (price * qty);
+        }
+
         var cashAccId = BuyContext.UseCashAccount ? BuyContext.CashAccountId : null;
+
         await _addAssetWorkflow.ExecuteStockBuyAsync(new StockBuyRequest(
             symbol,
             price,
@@ -549,12 +657,20 @@ public partial class AddAssetDialogViewModel : ObservableObject
             AddBuyDate,
             cashAccId,
             BuyContext.CommissionDiscount,
-            manualFee));
+            manualFee,
+            EmptyToNull(AddExchange),
+            EmptyToNull(AddSymbolName),
+            actualCashAmount,
+            fxRate,
+            SelectedPortfolioGroupId));
 
         // Cash balance reflects the Buy trade written above via the projection service;
         // no manual AdjustCashAccountAsync needed (single-truth architecture).
 
         AddSymbol = string.Empty;
+        AddExchange = string.Empty;
+        AddSymbolName = string.Empty;
+        AddSymbolCurrency = string.Empty;
         AddPrice = string.Empty;
         AddQuantity = string.Empty;
         AddGrossAmount = 0;
@@ -567,6 +683,50 @@ public partial class AddAssetDialogViewModel : ObservableObject
     }
 
     private Task AddStockAsync() => AddPosition();
+
+    private static string? EmptyToNull(string value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private bool IsCrossCurrencyCashDebit()
+    {
+        var instrumentCurrency = ResolveInstrumentCurrencyForBuy();
+        if (string.IsNullOrWhiteSpace(instrumentCurrency))
+            return false;
+
+        // A typed-but-not-yet-created account currently defaults to TWD in
+        // TransactionDialogViewModel.ResolveCashAccountIdAsync, so treat an
+        // unknown selected currency as TWD for the safeguard.
+        var cashCurrency = string.IsNullOrWhiteSpace(BuyContext.CashAccountCurrency)
+            ? "TWD"
+            : BuyContext.CashAccountCurrency.Trim();
+
+        return !string.Equals(instrumentCurrency, cashCurrency, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string ResolveInstrumentCurrencyForBuy()
+    {
+        if (!string.IsNullOrWhiteSpace(AddSymbolCurrency))
+            return AddSymbolCurrency.Trim().ToUpperInvariant();
+
+        var exchange = EmptyToNull(AddExchange);
+        if (string.IsNullOrWhiteSpace(exchange))
+        {
+            var typedSymbol = AddSymbol.Trim();
+            var exactMatch = _addAssetWorkflow.SearchSymbols(typedSymbol, 8)
+                .FirstOrDefault(s => string.Equals(s.Symbol, typedSymbol, StringComparison.OrdinalIgnoreCase));
+            if (exactMatch is not null)
+            {
+                if (!string.IsNullOrWhiteSpace(exactMatch.Currency))
+                    return exactMatch.Currency.Trim().ToUpperInvariant();
+
+                exchange = exactMatch.Exchange;
+            }
+        }
+
+        return string.IsNullOrWhiteSpace(exchange)
+            ? "TWD"
+            : StockExchangeRegistry.ResolveDefaultCurrency(exchange);
+    }
 
     // ── Crypto ────────────────────────────────────────────────────────────────────────
 
@@ -590,7 +750,8 @@ public partial class AddAssetDialogViewModel : ObservableObject
             qty,
             price * qty,
             price,
-            cryptoBuyDate));
+            cryptoBuyDate,
+            SelectedPortfolioGroupId));
 
         AddCryptoSymbol = string.Empty;
         AddCryptoQty = string.Empty;
@@ -619,7 +780,8 @@ public partial class AddAssetDialogViewModel : ObservableObject
             1m,
             cost,
             cost,
-            nonStockDate));
+            nonStockDate,
+            SelectedPortfolioGroupId));
 
         AddName = string.Empty;
         AddCost = string.Empty;

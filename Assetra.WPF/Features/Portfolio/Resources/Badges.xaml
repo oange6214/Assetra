@@ -61,7 +61,7 @@
         強調色文字 — 視覺上幾乎跟 status badge（例：「預設」）等量，搶走帳戶
         名稱的焦點。新樣式：弱化背景、移除邊框、regular weight + muted 文字，
         把它定位為「次要 metadata」而非「狀態警示」。
-
+        
         AccentSubtle / AppAccent 仍是「強調色」語意；subtype 只是「這個帳戶是
         什麼類別」的補充資訊，不該搶 KPI 數字或預設 badge 的視覺。
     -->

@@ -61,7 +61,13 @@ public static class TradeSyncMapper
             trade.LiabilityAssetId,
             trade.ParentTradeId,
             trade.CategoryId,
-            trade.RecurringSourceId);
+            trade.RecurringSourceId,
+            // MultiCurrency-Trade-Refactor P1
+            trade.InstrumentCurrency,
+            trade.CommissionCurrency,
+            trade.FxRate?.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            // Portfolio-Groups-Refactor P1
+            trade.PortfolioGroupId);
 
         return new SyncEnvelope(
             EntityId: trade.Id,
@@ -107,7 +113,14 @@ public static class TradeSyncMapper
             LiabilityAssetId: dto.LiabilityAssetId,
             ParentTradeId: dto.ParentTradeId,
             CategoryId: dto.CategoryId,
-            RecurringSourceId: dto.RecurringSourceId);
+            RecurringSourceId: dto.RecurringSourceId,
+            // MultiCurrency-Trade-Refactor P1 — 舊 payload 未含這些 key 時走預設值
+            // (InstrumentCurrency="TWD"、CommissionCurrency=null、FxRate=null)
+            InstrumentCurrency: string.IsNullOrWhiteSpace(dto.InstrumentCurrency) ? "TWD" : dto.InstrumentCurrency!,
+            CommissionCurrency: dto.CommissionCurrency,
+            FxRate: dto.FxRate is null ? null : decimal.Parse(dto.FxRate, inv),
+            // Portfolio-Groups-Refactor P1 — 舊 payload 缺欄位時走 null，repo 寫入時 fallback DefaultId
+            PortfolioGroupId: dto.PortfolioGroupId);
     }
 
     private sealed record TradePayloadDto(
@@ -134,5 +147,11 @@ public static class TradeSyncMapper
         [property: JsonPropertyName("liability_asset_id")] Guid? LiabilityAssetId,
         [property: JsonPropertyName("parent_trade_id")] Guid? ParentTradeId,
         [property: JsonPropertyName("category_id")] Guid? CategoryId,
-        [property: JsonPropertyName("recurring_source_id")] Guid? RecurringSourceId);
+        [property: JsonPropertyName("recurring_source_id")] Guid? RecurringSourceId,
+        // MultiCurrency-Trade-Refactor P1 — 新欄位附在尾端，舊 payload 缺欄位走預設
+        [property: JsonPropertyName("instrument_currency")] string? InstrumentCurrency = null,
+        [property: JsonPropertyName("commission_currency")] string? CommissionCurrency = null,
+        [property: JsonPropertyName("fx_rate")] string? FxRate = null,
+        // Portfolio-Groups-Refactor P1
+        [property: JsonPropertyName("portfolio_group_id")] Guid? PortfolioGroupId = null);
 }

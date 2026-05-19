@@ -15,7 +15,7 @@ namespace Assetra.WPF.Features.Portfolio.SubViewModels;
 ///   * Income / CashDividend / Deposit / LoanBorrow → +amount
 ///   * Withdrawal / CreditCardPayment              → −amount
 ///   * LoanRepay                                    → −(principal + interest)
-///   * Buy                                          → −(price × qty)  (fees ignored, see note)
+///   * Buy                                          → −actual cash debit, else preview total
 ///
 ///   Liability balance line
 ///   ──────────────────────
@@ -34,10 +34,8 @@ namespace Assetra.WPF.Features.Portfolio.SubViewModels;
 /// is backed out (per the same-target-vs-different-target rule) and the new
 /// delta is then applied so the projection reflects post-save state.
 ///
-/// Buy fee caveat: commission and tax depend on the discount mode + manual
-/// override path. The preview deliberately uses the gross (price × qty) figure
-/// to keep the math obvious; it understates the actual cash decrease by the
-/// commission (typically 0.05–0.1% of gross). Acceptable for sanity-check UX.
+/// Buy amount: the preview first uses the broker-confirmed actual cash debit
+/// when present, then falls back to the buy preview total, then to gross cost.
 /// </summary>
 public partial class TransactionDialogViewModel
 {
@@ -87,9 +85,7 @@ public partial class TransactionDialogViewModel
     }
 
     /// <summary>
-    /// Computes the signed cash impact of the in-flight trade. Buy is included
-    /// here (Phase 2) using gross (price × qty) — fees are intentionally
-    /// excluded for math clarity; see file-level comment.
+    /// Computes the signed cash impact of the in-flight trade.
     /// </summary>
     private bool TryComputeNewCashDelta(out decimal delta)
     {
@@ -127,15 +123,30 @@ public partial class TransactionDialogViewModel
                 return true;
 
             case "buy":
-                if (!TryReadBuyGrossCost(out var grossCost) || grossCost <= 0)
+                if (!TryReadBuyCashOut(out var cashOut) || cashOut <= 0)
                     return false;
-                delta = -grossCost;
+                delta = -cashOut;
                 return true;
 
             default:
                 // Sell / Transfer / StockDiv / CreditCardCharge: no cash line.
                 return false;
         }
+    }
+
+    private bool TryReadBuyCashOut(out decimal cashOut)
+    {
+        cashOut = 0;
+        if (!string.IsNullOrWhiteSpace(Buy.ActualCashAmount))
+            return ParseHelpers.TryParseDecimal(Buy.ActualCashAmount, out cashOut) && cashOut > 0;
+
+        if (AddAssetDialog.AddTotalCost > 0)
+        {
+            cashOut = AddAssetDialog.AddTotalCost;
+            return true;
+        }
+
+        return TryReadBuyGrossCost(out cashOut);
     }
 
     /// <summary>
@@ -180,10 +191,17 @@ public partial class TransactionDialogViewModel
             TradeType.Withdrawal
                 or TradeType.CreditCardPayment
                 or TradeType.LoanRepay => -oldAmount,
-            TradeType.Buy => -oldAmount,
+            TradeType.Buy => -BuyCashAmount(oldRow),
+            TradeType.Sell => SellCashAmount(oldRow),
             _ => 0,
         };
     }
+
+    private static decimal BuyCashAmount(TradeRowViewModel row) =>
+        row.CashAmount ?? (row.Price * row.Quantity + (row.Commission ?? 0m));
+
+    private static decimal SellCashAmount(TradeRowViewModel row) =>
+        row.CashAmount ?? (row.Price * row.Quantity - (row.Commission ?? 0m));
 
     // ─────────────────────────────────────────────────────────────
     // Liability balance line
@@ -309,8 +327,16 @@ public partial class TransactionDialogViewModel
         OnPropertyChanged(nameof(HasImpactPreview));
     }
 
-    partial void OnTxCashAccountChanged(CashAccountRowViewModel? value) =>
+    partial void OnTxCashAccountChanged(CashAccountRowViewModel? value)
+    {
         NotifyImpactPreviewChanged();
+        // P3 — push selected cash account's currency into Buy / Sell / Div VMs so XAML can
+        // toggle the FX-rate field via *.IsCrossCurrency.
+        var ccy = value?.Currency ?? string.Empty;
+        Buy.CashAccountCurrency = ccy;
+        Sell.CashAccountCurrency = ccy;
+        Div.CashAccountCurrency = ccy;
+    }
 
     // OnTxCreditCardChanged retired — CreditCard sub-VM PropertyChanged is wired
     // via OnCreditCardTxChanged in the main partial.

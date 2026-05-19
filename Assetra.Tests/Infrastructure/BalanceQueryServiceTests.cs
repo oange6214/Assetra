@@ -14,10 +14,10 @@ public class BalanceQueryServiceTests
     /// <summary>M1 — service defaults to TWD when no <see cref="IAssetRepository"/> is wired.</summary>
     private static Money TWD(decimal amount) => new(amount, "TWD");
 
-    private static Trade Buy(Guid cashId, decimal price, int qty, decimal commission = 0m)
+    private static Trade Buy(Guid cashId, decimal price, int qty, decimal commission = 0m, decimal? cashAmount = null)
         => new(Guid.NewGuid(), "2330", "TWSE", "TSMC", TradeType.Buy,
                DateTime.Today, price, qty, null, null,
-               CashAccountId: cashId, Commission: commission);
+               CashAmount: cashAmount, CashAccountId: cashId, Commission: commission);
 
     private static Trade Sell(Guid cashId, decimal price, int qty, decimal commission = 0m)
         => new(Guid.NewGuid(), "2330", "TWSE", "TSMC", TradeType.Sell,
@@ -119,6 +119,15 @@ public class BalanceQueryServiceTests
         var svc = Create(Deposit(id, 1_000_000m), Buy(id, 500m, 1000, commission: 713m));
         // 1_000_000 − (500×1000 + 713) = 499_287
         Assert.Equal(TWD(499_287m), await svc.GetCashBalanceAsync(id));
+    }
+
+    [Fact]
+    public async Task Cash_BuyUsesActualCashAmountWhenPresent()
+    {
+        var id = Guid.NewGuid();
+        var svc = Create(Deposit(id, 1_000_000m), Buy(id, 100m, 10, commission: 1m, cashAmount: 35_500m));
+
+        Assert.Equal(TWD(964_500m), await svc.GetCashBalanceAsync(id));
     }
 
     [Fact]

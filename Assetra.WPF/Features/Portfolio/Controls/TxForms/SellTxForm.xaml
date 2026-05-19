@@ -56,12 +56,23 @@
             Text="{Binding Sell.QuantityError}"
             Visibility="{Binding Sell.QuantityError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-        <TextBlock
-            Margin="0,0,0,4"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.SellPrice}" />
+        <!--
+            賣出價 + instrument-currency badge — non-TWD 才渲染。
+            MultiCurrency-Trade-Refactor P3.
+        -->
+        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+            <TextBlock
+                FontSize="{StaticResource Font.Size.Xs}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{DynamicResource Portfolio.Tx.SellPrice}" />
+            <TextBlock
+                Margin="6,0,0,0"
+                FontSize="{StaticResource Font.Size.Xs}"
+                Foreground="{DynamicResource AppAccent}"
+                Text="{Binding Sell.InstrumentCurrencyBadge}"
+                Visibility="{Binding Sell.InstrumentCurrencyBadge, Converter={StaticResource StringToVisibilityConverter}}" />
+        </StackPanel>
         <TextBox
             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
             IsEnabled="{Binding AreEconomicFieldsEditable}"
@@ -283,6 +294,76 @@
                 Foreground="{DynamicResource AppAccent}"
                 Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
                 Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+            <!--
+                MultiCurrency-Trade-Refactor P3 — Sell side mirror of BuyTxForm.xaml.
+                跨幣別賣出（標的幣別 ≠ 入帳帳戶幣別）時顯示 banner + 匯率 + 實際入帳金額。
+                同幣別（台股 + TWD 帳戶）UI 完全沒變化。
+            -->
+            <Border
+                Margin="0,12,0,0"
+                Padding="10,8"
+                Background="{DynamicResource AppAccentSubtle}"
+                BorderBrush="{DynamicResource AppAccent}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource Radius.Sm}"
+                Visibility="{Binding Sell.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Portfolio.Tx.CrossCurrency.Banner}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Tx.CrossCurrency.SellHint}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <StackPanel Visibility="{Binding Sell.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock
+                    Margin="0,12,0,4"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Portfolio.Tx.FxRate}" />
+                <TextBox
+                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                    Text="{Binding Sell.FxRate, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Style="{StaticResource FormFieldError}"
+                    Text="{Binding Sell.FxRateError}"
+                    Visibility="{Binding Sell.FxRateError, Converter={StaticResource StringToVisibilityConverter}}" />
+                <TextBlock
+                    Margin="0,2,0,0"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppTextMuted}"
+                    Text="{DynamicResource Portfolio.Tx.FxRate.Hint}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+
+            <TextBlock
+                Margin="0,12,0,4"
+                FontSize="{StaticResource Font.Size.Xs}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{DynamicResource Portfolio.Tx.SellActualCashAmount}" />
+            <TextBox
+                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                Text="{Binding Sell.ActualCashAmount, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock
+                Style="{StaticResource FormFieldError}"
+                Text="{Binding Sell.ActualCashAmountError}"
+                Visibility="{Binding Sell.ActualCashAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
+            <TextBlock
+                Margin="0,2,0,0"
+                FontSize="{StaticResource Font.Size.Xs}"
+                Foreground="{DynamicResource AppTextMuted}"
+                Text="{DynamicResource Portfolio.Tx.SellActualCashAmountHint}"
+                TextWrapping="Wrap" />
         </StackPanel>
     </StackPanel>
 </UserControl>

@@ -37,6 +37,9 @@ internal static class SqliteSchemaHelper
         "reconciliation_session",
         "reconciliation_diff",
         "fx_rate",
+        "financial_goal",
+        "portfolio_group",
+        "fire_plan",
     };
 
     /// <summary>

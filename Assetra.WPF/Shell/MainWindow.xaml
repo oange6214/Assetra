@@ -2,11 +2,11 @@
     x:Class="Assetra.WPF.Shell.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:beh="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:chrome="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:beh="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:shell="clr-namespace:Assetra.WPF.Shell"
     xmlns:snackbar="clr-namespace:Assetra.WPF.Features.Snackbar"
@@ -20,8 +20,8 @@
     Background="{DynamicResource AppBackground}"
     Icon="pack://application:,,,/Assetra.WPF;component/Assets/windows/assetra-app.ico"
     ResizeMode="CanResize"
-    WindowStyle="None"
     WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
     mc:Ignorable="d">
 
     <chrome:WindowChrome.WindowChrome>
@@ -125,8 +125,8 @@
                 <StackPanel
                     Grid.Column="1"
                     VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                    chrome:WindowChrome.IsHitTestVisibleInChrome="True">
+                    chrome:WindowChrome.IsHitTestVisibleInChrome="True"
+                    Orientation="Horizontal">
                     <Button
                         Width="32"
                         Height="32"
@@ -175,8 +175,8 @@
 
                 <TextBlock
                     Grid.Column="2"
-                    Margin="14,0"
                     MinWidth="0"
+                    Margin="14,0"
                     VerticalAlignment="Center"
                     FontFamily="{StaticResource Font.Family.Base}"
                     FontSize="{StaticResource Font.Size.Base}"
@@ -190,8 +190,8 @@
                     Grid.Column="3"
                     Margin="0,0,8,0"
                     VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                    chrome:WindowChrome.IsHitTestVisibleInChrome="True">
+                    chrome:WindowChrome.IsHitTestVisibleInChrome="True"
+                    Orientation="Horizontal">
                     <!--
                         Global "Add" menu — high-frequency creation actions are reachable
                         from every section. Ctrl+N remains a direct shortcut for adding a
@@ -202,14 +202,15 @@
                         每個 menu item 切到對應頁面並開啟正確的 dialog，解決使用者
                         「新增的資料去哪了」的困惑。
                         實作：Button.Click 程式化開啟 ContextMenu。
-
+                        
                         UI refresh：原本是填色（AppPrimaryButton），跟旁邊的小巧
                         icon button（主題切換 / 最小化 / 關閉）視覺重量不一致 —
                         title bar 是 shell 區域，不該被一顆深色 CTA 主導。改用
                         icon-only style（Add24 + 小 chevron 提示有 dropdown），與
                         旁邊一致。tooltip 顯示完整意圖，發現性靠 hover 即可。
                     -->
-                    <Button x:Name="AddMenuButton"
+                    <Button
+                        x:Name="AddMenuButton"
                         Width="44"
                         Height="32"
                         Margin="0,0,4,0"
@@ -217,19 +218,30 @@
                         Click="AddMenuButton_Click"
                         Style="{StaticResource AppIconButton}"
                         ToolTip="{DynamicResource Portfolio.AddRecord.Tooltip}">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <ds:AppIcon FontSize="{StaticResource Font.Size.Md}" Foreground="{DynamicResource AppTextMuted}" Symbol="Add24" />
-                            <ds:AppIcon Margin="2,0,0,0" FontSize="9" Foreground="{DynamicResource AppTextMuted}" Symbol="ChevronDown24" />
+                        <StackPanel
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                            <ds:AppIcon
+                                FontSize="{StaticResource Font.Size.Md}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Symbol="Add24" />
+                            <ds:AppIcon
+                                Margin="2,0,0,0"
+                                FontSize="9"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Symbol="ChevronDown24" />
                         </StackPanel>
                         <Button.ContextMenu>
-                            <ContextMenu
-                                DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
-                                Placement="Bottom">
+                            <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}" Placement="Bottom">
                                 <MenuItem Command="{Binding AddTransactionFromMenuCommand}">
                                     <MenuItem.Header>
                                         <StackPanel>
                                             <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Transaction}" />
-                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Transaction.Hint}" />
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{DynamicResource Portfolio.AddRecord.Menu.Transaction.Hint}" />
                                         </StackPanel>
                                     </MenuItem.Header>
                                 </MenuItem>
@@ -237,7 +249,10 @@
                                     <MenuItem.Header>
                                         <StackPanel>
                                             <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.BuyTransaction}" />
-                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.BuyTransaction.Hint}" />
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{DynamicResource Portfolio.AddRecord.Menu.BuyTransaction.Hint}" />
                                         </StackPanel>
                                     </MenuItem.Header>
                                 </MenuItem>
@@ -246,7 +261,10 @@
                                     <MenuItem.Header>
                                         <StackPanel>
                                             <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Account}" />
-                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Account.Hint}" />
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{DynamicResource Portfolio.AddRecord.Menu.Account.Hint}" />
                                         </StackPanel>
                                     </MenuItem.Header>
                                 </MenuItem>
@@ -254,7 +272,58 @@
                                     <MenuItem.Header>
                                         <StackPanel>
                                             <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Liability}" />
-                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Liability.Hint}" />
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{DynamicResource Portfolio.AddRecord.Menu.Liability.Hint}" />
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <!--
+                                    其他四類資產（不動產 / 保險 / 退休 / 實物）— 與 NavRail 一致，
+                                    讓 quick-add menu 對齊側邊欄資產分類，避免要回首頁才能找入口。
+                                -->
+                                <MenuItem Command="{Binding AddRealEstateFromMenuCommand}">
+                                    <MenuItem.Header>
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.RealEstate}" />
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{DynamicResource Portfolio.AddRecord.Menu.RealEstate.Hint}" />
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <MenuItem Command="{Binding AddInsuranceFromMenuCommand}">
+                                    <MenuItem.Header>
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Insurance}" />
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{DynamicResource Portfolio.AddRecord.Menu.Insurance.Hint}" />
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <MenuItem Command="{Binding AddRetirementFromMenuCommand}">
+                                    <MenuItem.Header>
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Retirement}" />
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{DynamicResource Portfolio.AddRecord.Menu.Retirement.Hint}" />
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <MenuItem Command="{Binding AddPhysicalAssetFromMenuCommand}">
+                                    <MenuItem.Header>
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.PhysicalAsset}" />
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{DynamicResource Portfolio.AddRecord.Menu.PhysicalAsset.Hint}" />
                                         </StackPanel>
                                     </MenuItem.Header>
                                 </MenuItem>
@@ -262,7 +331,10 @@
                                     <MenuItem.Header>
                                         <StackPanel>
                                             <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Category}" />
-                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Category.Hint}" />
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{DynamicResource Portfolio.AddRecord.Menu.Category.Hint}" />
                                         </StackPanel>
                                     </MenuItem.Header>
                                 </MenuItem>
@@ -271,7 +343,10 @@
                                     <MenuItem.Header>
                                         <StackPanel>
                                             <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Recurring}" />
-                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Recurring.Hint}" />
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{DynamicResource Portfolio.AddRecord.Menu.Recurring.Hint}" />
                                         </StackPanel>
                                     </MenuItem.Header>
                                 </MenuItem>
@@ -279,7 +354,10 @@
                                     <MenuItem.Header>
                                         <StackPanel>
                                             <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Alert}" />
-                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Alert.Hint}" />
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{DynamicResource Portfolio.AddRecord.Menu.Alert.Hint}" />
                                         </StackPanel>
                                     </MenuItem.Header>
                                 </MenuItem>
@@ -287,7 +365,10 @@
                                     <MenuItem.Header>
                                         <StackPanel>
                                             <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.Goal}" />
-                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.AddRecord.Menu.Goal.Hint}" />
+                                            <TextBlock
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{DynamicResource Portfolio.AddRecord.Menu.Goal.Hint}" />
                                         </StackPanel>
                                     </MenuItem.Header>
                                 </MenuItem>
@@ -321,8 +402,8 @@
                     Grid.Column="4"
                     Margin="0,0,8,0"
                     VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                    chrome:WindowChrome.IsHitTestVisibleInChrome="True">
+                    chrome:WindowChrome.IsHitTestVisibleInChrome="True"
+                    Orientation="Horizontal">
                     <Button
                         Width="40"
                         Height="32"
@@ -563,10 +644,7 @@
         -->
         <Grid Grid.Row="1" DataContext="{Binding Portfolio}">
             <!--  ── Cash / Liability detail overlays (floating side panel with backdrop) ──  -->
-            <Grid
-    
-                Panel.ZIndex="180"
-                Visibility="{Binding HasSelectedCashRow, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Panel.ZIndex="180" Visibility="{Binding HasSelectedCashRow, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <!--  Click-to-close backdrop  -->
                 <Border beh:BackdropClickToCloseBehavior.Command="{Binding CloseCashDetailCommand}" Style="{StaticResource AppDialogOverlayBorder}" />
 
@@ -682,7 +760,10 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Button.Style>
-                                    <ds:AppIcon FontSize="12" Foreground="{DynamicResource AppTextSecondary}" Symbol="Archive24">
+                                    <ds:AppIcon
+                                        FontSize="12"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Symbol="Archive24">
                                         <ds:AppIcon.Style>
                                             <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
                                                 <Setter Property="Symbol" Value="Archive24" />
@@ -837,7 +918,10 @@
                                     <ItemsControl ItemsSource="{Binding SelectedCashTrades}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Margin="0,0,0,10" Padding="12" Style="{StaticResource FormCard}">
+                                                <Border
+                                                    Margin="0,0,0,10"
+                                                    Padding="12"
+                                                    Style="{StaticResource FormCard}">
                                                     <StackPanel>
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
@@ -979,9 +1063,7 @@
         -->
         <Grid Grid.Row="1" DataContext="{Binding Portfolio}">
             <!--  Liability detail overlay  -->
-            <Grid
-                Panel.ZIndex="180"
-                Visibility="{Binding HasSelectedLiabilityRow, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Panel.ZIndex="180" Visibility="{Binding HasSelectedLiabilityRow, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Border beh:BackdropClickToCloseBehavior.Command="{Binding CloseLiabilityDetailCommand}" Style="{StaticResource AppDialogOverlayBorder}" />
                 <Border
                     HorizontalAlignment="Right"
@@ -1197,7 +1279,10 @@
                                     <ItemsControl ItemsSource="{Binding SelectedLiabilityTrades}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Margin="0,0,0,10" Padding="12" Style="{StaticResource FormCard}">
+                                                <Border
+                                                    Margin="0,0,0,10"
+                                                    Padding="12"
+                                                    Style="{StaticResource FormCard}">
                                                     <StackPanel>
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
@@ -1602,6 +1687,130 @@
             Panel.ZIndex="200"
             DataContext="{Binding Portfolio}" />
 
+        <!--
+            新增投資 (前身為「加入觀察標的」watchlist) dialog — hoisted to MainWindow
+            so the backdrop dims NavRail + title bar like other top-level dialogs.
+            DataContext = PortfolioViewModel (IsAddWatchlistOpen / Confirm 等都在那)。
+        -->
+        <Grid
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="190"
+            beh:EscapeKeyCommandBehavior.Command="{Binding CloseAddWatchlistDialogCommand}"
+            DataContext="{Binding Portfolio}"
+            Visibility="{Binding IsAddWatchlistOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Background="#80000000">
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding CloseAddWatchlistDialogCommand}" />
+                </Border.InputBindings>
+            </Border>
+            <Border Width="420" Padding="24,20,24,20"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Md}">
+                <!--
+                    Grid 而不是 StackPanel — 把 close 按鈕用 absolute positioning
+                    釘在卡片右上角；表單內容仍放在中央 StackPanel。
+                -->
+                <Grid>
+                    <!-- Top-right close button. Negative margin 讓它「貼齊」卡片邊緣，
+                         保留 32x32 hit area 但視覺上看起來是邊角的浮動 icon。 -->
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Margin="0,-4,-8,0"
+                            Width="32" Height="32" Padding="0"
+                            Panel.ZIndex="5"
+                            Command="{Binding CloseAddWatchlistDialogCommand}"
+                            Style="{StaticResource AppIconButton}"
+                            ToolTip="{DynamicResource Common.Close}">
+                        <ds:AppIcon FontSize="13" Foreground="{DynamicResource AppTextMuted}" Symbol="Dismiss24" />
+                    </Button>
+
+                    <StackPanel Margin="0,0,32,0">
+                        <!-- 標題 + 描述 -->
+                        <TextBlock Margin="0,0,0,6"
+                                   FontSize="{StaticResource Font.Size.Lg}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{DynamicResource Portfolio.Watchlist.AddTitle}" />
+                        <TextBlock Margin="0,0,0,18"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Text="{DynamicResource Portfolio.Watchlist.AddHint}"
+                                   TextWrapping="Wrap" />
+
+                        <!-- 類型 -->
+                        <TextBlock Margin="0,0,0,4"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextSecondary}"
+                                   Text="{DynamicResource Portfolio.Watchlist.AssetType}" />
+                        <ComboBox Margin="0,0,0,12"
+                                  ItemsSource="{Binding WatchlistAssetTypeOptions}"
+                                  SelectedItem="{Binding WatchlistAssetType, Mode=TwoWay}"
+                                  Style="{StaticResource FormComboBox}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource AssetTypeToLocalizedNameConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <!-- 代號 -->
+                        <TextBlock Margin="0,0,0,4"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextSecondary}"
+                                   Text="{DynamicResource Portfolio.Watchlist.Symbol}" />
+                        <TextBox Margin="0,0,0,12"
+                                 FontFamily="{StaticResource Font.Family.Base}"
+                                 Style="{StaticResource AppTextBox}"
+                                 Text="{Binding WatchlistSymbol, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <!-- 名稱 -->
+                        <TextBlock Margin="0,0,0,4"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextSecondary}"
+                                   Text="{DynamicResource Portfolio.Watchlist.Name}" />
+                        <TextBox Margin="0,0,0,12"
+                                 Style="{StaticResource AppTextBox}"
+                                 Text="{Binding WatchlistName, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <!-- 幣別 -->
+                        <TextBlock Margin="0,0,0,4"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextSecondary}"
+                                   Text="{DynamicResource Portfolio.Watchlist.Currency}" />
+                        <ComboBox Margin="0,0,0,4"
+                                  ItemsSource="{Binding WatchlistCurrencyOptions}"
+                                  SelectedItem="{Binding WatchlistCurrency, Mode=TwoWay}"
+                                  Style="{StaticResource FormComboBox}" />
+
+                        <TextBlock Margin="0,10,0,0"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppDown}"
+                                   Text="{Binding WatchlistError}"
+                                   Visibility="{Binding WatchlistError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+                        <!-- 動作列：拉高到 36，間距加大，更現代 -->
+                        <StackPanel Margin="0,22,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
+                            <Button Height="36" MinWidth="84" Margin="0,0,10,0" Padding="16,0"
+                                    Command="{Binding CloseAddWatchlistDialogCommand}"
+                                    Content="{DynamicResource Portfolio.Cancel}"
+                                    Style="{StaticResource AppSecondaryButton}" />
+                            <Button Height="36" MinWidth="84" Padding="16,0"
+                                    Command="{Binding ConfirmAddWatchlistCommand}"
+                                    Content="{DynamicResource Portfolio.Watchlist.AddButton}"
+                                    Style="{StaticResource AppPrimaryButton}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
         <!--  EditAssetDialog (編輯現有資產) — same shell promotion as above.  -->
         <pcontrols:EditAssetDialog
             Grid.Row="0"
@@ -1683,13 +1892,13 @@
                             <!--  Loan-only fields  -->
                             <StackPanel Visibility="{Binding IsLoanEdit, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Border
+                                    Height="1"
                                     Margin="0,4,0,12"
-                                    Background="{DynamicResource AppBorderLight}"
-                                    Height="1" />
+                                    Background="{DynamicResource AppBorderLight}" />
                                 <TextBlock
                                     Margin="0,0,0,8"
-                                    FontWeight="SemiBold"
                                     FontSize="{StaticResource Font.Size.Sm}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.EditLiability.LoanSection}" />
 
@@ -1736,8 +1945,8 @@
 
                                 <CheckBox
                                     Margin="0,4,0,4"
-                                    IsChecked="{Binding RecomputeSchedule, Mode=TwoWay}"
-                                    Content="{DynamicResource Portfolio.EditLiability.Recompute}" />
+                                    Content="{DynamicResource Portfolio.EditLiability.Recompute}"
+                                    IsChecked="{Binding RecomputeSchedule, Mode=TwoWay}" />
                                 <TextBlock
                                     Margin="22,0,0,8"
                                     FontSize="{StaticResource Font.Size.Xs}"
@@ -1749,13 +1958,13 @@
                             <!--  Credit card-only fields  -->
                             <StackPanel Visibility="{Binding IsCreditCardEdit, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Border
+                                    Height="1"
                                     Margin="0,4,0,12"
-                                    Background="{DynamicResource AppBorderLight}"
-                                    Height="1" />
+                                    Background="{DynamicResource AppBorderLight}" />
                                 <TextBlock
                                     Margin="0,0,0,8"
-                                    FontWeight="SemiBold"
                                     FontSize="{StaticResource Font.Size.Sm}"
+                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{DynamicResource Portfolio.EditLiability.CreditCardSection}" />
 

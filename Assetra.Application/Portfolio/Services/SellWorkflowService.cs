@@ -55,10 +55,18 @@ public sealed class SellWorkflowService : ISellWorkflowService
             Quantity: request.SellQuantity,
             RealizedPnl: realizedPnl,
             RealizedPnlPct: realizedPnlPct,
+            // P3 — 跨幣別賣出時帶入「實際入帳」覆寫，避免用 SellPrice × Qty 估錯。
+            CashAmount: request.ActualCashAmount,
             CashAccountId: request.CashAccountId,
             PortfolioEntryId: request.PortfolioEntryId,
             Commission: request.Commission,
-            CommissionDiscount: request.CommissionDiscount);
+            CommissionDiscount: request.CommissionDiscount,
+            // MultiCurrency-Trade-Refactor P2 — Sell 跟 Buy 對稱，標的幣別由 exchange 推導
+            // (用 StockExchangeRegistry，跟 Buy/Dividend 走同一份 mapping)。
+            InstrumentCurrency: Assetra.Core.Models.StockExchangeRegistry.ResolveDefaultCurrency(request.Exchange),
+            FxRate: request.FxRate,
+            // Portfolio-Groups-Refactor P3
+            PortfolioGroupId: request.PortfolioGroupId);
 
         await _tradeRepository.AddAsync(trade).ConfigureAwait(false);
 

@@ -40,6 +40,13 @@ internal sealed class InMemoryAssetRepo : IAssetRepository
         return Task.CompletedTask;
     }
 
+    public Task UnarchiveItemAsync(Guid id)
+    {
+        if (Items.TryGetValue(id, out var v))
+            Items[id] = v with { IsActive = true };
+        return Task.CompletedTask;
+    }
+
     public Task<int> HasTradeReferencesAsync(Guid id, CancellationToken ct = default)
         => Task.FromResult(HasTradeReferencesResult);
 

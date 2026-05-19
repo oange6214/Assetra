@@ -44,7 +44,7 @@
     <Style x:Key="AppDatePickerTextBox" TargetType="{x:Type primitives:DatePickerTextBox}">
         <Setter Property="MinHeight" Value="{StaticResource Control.Height.Md}" />
         <Setter Property="Padding" Value="10,6" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="Background" Value="{DynamicResource AppSurface}" />
@@ -102,7 +102,7 @@
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Medium}" />
         <Setter Property="MinWidth" Value="46" />
@@ -188,7 +188,7 @@
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Medium}" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -289,7 +289,7 @@
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="CalendarDayButtonStyle" Value="{StaticResource AppCalendarDayButton}" />
         <Setter Property="CalendarButtonStyle" Value="{StaticResource AppCalendarButton}" />
@@ -356,7 +356,7 @@
     -->
     <Style x:Key="AppDatePicker" TargetType="{x:Type DatePicker}">
         <Setter Property="MinHeight" Value="{StaticResource Control.Height.Md}" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="Background" Value="{DynamicResource AppSurface}" />

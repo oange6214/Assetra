@@ -464,18 +464,8 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <DockPanel Grid.Row="0" Margin="0,0,0,16">
-                    <Button
-                        Width="32"
-                        Height="32"
-                        Padding="0"
-                        Command="{Binding CancelAddFormCommand}"
-                        DockPanel.Dock="Right"
-                        Style="{StaticResource AppIconButton}"
-                        ToolTip="{DynamicResource Common.Close}">
-                        <ds:AppIcon FontSize="12" Symbol="Dismiss24" />
-                    </Button>
-                    <StackPanel>
+                <Grid Grid.Row="0" Margin="0,0,0,16">
+                    <StackPanel Margin="0,4,40,0">
                         <TextBlock Style="{StaticResource FormSectionTitle}" Text="{DynamicResource Alerts.Form.Title}" />
                         <TextBlock
                             Margin="0,4,0,0"
@@ -483,7 +473,19 @@
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Alerts.Form.Hint}" />
                     </StackPanel>
-                </DockPanel>
+                    <Button
+                        Width="32"
+                        Height="32"
+                        Margin="0,-4,-4,0"
+                        Padding="0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Command="{Binding CancelAddFormCommand}"
+                        Style="{StaticResource AppIconButton}"
+                        ToolTip="{DynamicResource Common.Close}">
+                        <ds:AppIcon FontSize="13" Symbol="Dismiss24" />
+                    </Button>
+                </Grid>
 
                 <UniformGrid Grid.Row="1" Columns="2" Rows="2">
                     <StackPanel Margin="0,0,12,12">

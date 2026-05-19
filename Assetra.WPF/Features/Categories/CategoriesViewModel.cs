@@ -22,6 +22,9 @@ public partial class CategoriesViewModel : ObservableObject
     private readonly ILocalizationService _localization;
     private readonly CollectionViewSource _expenseViewSource = new();
     private readonly CollectionViewSource _incomeViewSource = new();
+    /// <summary>本月「未使用」的支出 / 收入分類，預設摺疊。</summary>
+    private readonly CollectionViewSource _inactiveExpenseViewSource = new();
+    private readonly CollectionViewSource _inactiveIncomeViewSource = new();
 
     private readonly ObservableCollection<CategoryRowViewModel> _categories = [];
     private readonly ObservableCollection<AutoCategorizationRuleRowViewModel> _rules = [];
@@ -32,6 +35,81 @@ public partial class CategoriesViewModel : ObservableObject
     public ReadOnlyObservableCollection<BudgetRowViewModel> Budgets { get; }
 
     public ICollectionView ExpenseView { get; }
+
+    /// <summary>本月「未使用」支出 / 收入分類列表 — disclosure 區域用。</summary>
+    public ICollectionView InactiveExpenseView { get; }
+    public ICollectionView InactiveIncomeView { get; }
+
+    /// <summary>是否展開「本月未使用」支出區塊。預設 false（折疊）。</summary>
+    [ObservableProperty] private bool _showInactiveExpenses;
+    /// <summary>是否展開「本月未使用」收入區塊。預設 false（折疊）。</summary>
+    [ObservableProperty] private bool _showInactiveIncomes;
+
+    /// <summary>本月未使用的支出 / 收入分類數量，標籤顯示用。</summary>
+    [ObservableProperty] private int _inactiveExpenseCount;
+    [ObservableProperty] private int _inactiveIncomeCount;
+
+    /// <summary>標籤顯示時是否該 disclosure 區整段隱藏（0 筆 → 不顯示 header）。</summary>
+    public bool HasInactiveExpenses => InactiveExpenseCount > 0;
+    public bool HasInactiveIncomes => InactiveIncomeCount > 0;
+
+    partial void OnInactiveExpenseCountChanged(int value) => OnPropertyChanged(nameof(HasInactiveExpenses));
+    partial void OnInactiveIncomeCountChanged(int value) => OnPropertyChanged(nameof(HasInactiveIncomes));
+
+    [RelayCommand]
+    private void ToggleInactiveExpenses() => ShowInactiveExpenses = !ShowInactiveExpenses;
+
+    [RelayCommand]
+    private void ToggleInactiveIncomes() => ShowInactiveIncomes = !ShowInactiveIncomes;
+
+    /// <summary>
+    /// 把分類在它所屬的 view（同 Kind + 同活躍狀態）中往前 / 往後挪一格。
+    /// 用 SortOrder 互換 + 兩筆 UpdateAsync 持久化。
+    /// 在 view 邊界（已經是第一筆 / 最後一筆）的情況直接 no-op。
+    /// </summary>
+    [RelayCommand]
+    private async Task MoveCategoryUp(CategoryRowViewModel? row)
+    {
+        if (row is null) return;
+        var view = ResolveSiblingView(row);
+        var siblings = view?.Cast<CategoryRowViewModel>().ToList();
+        if (siblings is null) return;
+        var idx = siblings.IndexOf(row);
+        if (idx <= 0) return;
+        await SwapSortOrderAsync(row, siblings[idx - 1]);
+    }
+
+    [RelayCommand]
+    private async Task MoveCategoryDown(CategoryRowViewModel? row)
+    {
+        if (row is null) return;
+        var view = ResolveSiblingView(row);
+        var siblings = view?.Cast<CategoryRowViewModel>().ToList();
+        if (siblings is null) return;
+        var idx = siblings.IndexOf(row);
+        if (idx < 0 || idx >= siblings.Count - 1) return;
+        await SwapSortOrderAsync(row, siblings[idx + 1]);
+    }
+
+    /// <summary>選對 row 所屬的 sibling view（active vs inactive × expense vs income）。</summary>
+    private ICollectionView? ResolveSiblingView(CategoryRowViewModel row)
+    {
+        if (row.IsExpense)
+            return row.HasMonthlyActivity ? ExpenseView : InactiveExpenseView;
+        return row.HasMonthlyActivity ? IncomeView : InactiveIncomeView;
+    }
+
+    private async Task SwapSortOrderAsync(CategoryRowViewModel a, CategoryRowViewModel b)
+    {
+        var tmp = a.SortOrder;
+        a.SortOrder = b.SortOrder;
+        b.SortOrder = tmp;
+        await _repository.UpdateAsync(a.ToModel()).ConfigureAwait(true);
+        await _repository.UpdateAsync(b.ToModel()).ConfigureAwait(true);
+        RebuildHierarchy(); // 子分類間互換要重新依 SortOrder 排序
+        // 重排 view（依 SortOrder 升序）— CollectionView 不會自動偵測 sort key 改變。
+        RefreshCategoryViews();
+    }
     public ICollectionView IncomeView { get; }
 
     /// <summary>
@@ -44,6 +122,17 @@ public partial class CategoriesViewModel : ObservableObject
     [ObservableProperty] private CategoryKind _addKind = CategoryKind.Expense;
     [ObservableProperty] private string _addIcon = string.Empty;
     [ObservableProperty] private string _addColorHex = string.Empty;
+
+    /// <summary>新增分類時選定的父分類；null = 建立為頂層分類。</summary>
+    [ObservableProperty] private Guid? _addParentId;
+
+    /// <summary>
+    /// 新增分類對話框的「父分類」選項 — 同 Kind 的頂層分類（避免循環巢狀）。
+    /// 第一個項目永遠是 ParentOption(null, "（無 — 頂層分類）")。
+    /// 由 OnAddKindChanged / RebuildHierarchy 重新整理。
+    /// </summary>
+    private readonly ObservableCollection<ParentOption> _addParentOptions = [];
+    public ReadOnlyObservableCollection<ParentOption> AddParentOptions { get; }
     [ObservableProperty] private string _addError = string.Empty;
     [ObservableProperty] private bool _isLoaded;
     [ObservableProperty] private bool _showArchived;
@@ -97,7 +186,12 @@ public partial class CategoriesViewModel : ObservableObject
     public bool HasNoBudgets => Budgets.Count == 0;
     public bool HasBudgets   => Budgets.Count > 0;
 
-    [RelayCommand] private void OpenAddCategory() { AddError = string.Empty; IsAddCategoryOpen = true; }
+    [RelayCommand] private void OpenAddCategory()
+    {
+        AddError = string.Empty;
+        RefreshAddParentOptions();
+        IsAddCategoryOpen = true;
+    }
     [RelayCommand] private void CloseAddCategory() { IsAddCategoryOpen = false; AddError = string.Empty; }
     [RelayCommand] private void OpenAddRule() { AddRuleError = string.Empty; IsAddRuleOpen = true; }
     [RelayCommand] private void CloseAddRule() { IsAddRuleOpen = false; AddRuleError = string.Empty; }
@@ -179,17 +273,48 @@ public partial class CategoriesViewModel : ObservableObject
         Budgets = new ReadOnlyObservableCollection<BudgetRowViewModel>(_budgets);
         AvailableCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_availableCategories);
         IconOptions = new ReadOnlyObservableCollection<CategoryVisualOption>(_iconOptions);
+        AddParentOptions = new ReadOnlyObservableCollection<ParentOption>(_addParentOptions);
 
+        // 「活躍」views — 本月有交易的 **頂層** 分類；子分類在 row template
+        // 內以巢狀 ItemsControl 渲染。父分類只要自己或任一子分類有活動就算活躍。
         _expenseViewSource.Source = Categories;
         ExpenseView = _expenseViewSource.View;
-        ExpenseView.Filter = o => o is CategoryRowViewModel r && r.IsExpense && (ShowArchived || !r.IsArchived);
+        ExpenseView.Filter = o => o is CategoryRowViewModel r
+            && r.IsExpense
+            && r.IsTopLevel
+            && (ShowArchived || !r.IsArchived)
+            && (r.HasMonthlyActivity || r.Children.Any(child => child.HasMonthlyActivity));
 
-        // Income column needs its own view — use a wrapper observable collection bound separately.
         _incomeViewSource.Source = Categories;
         IncomeView = _incomeViewSource.View;
-        IncomeView.Filter = o => o is CategoryRowViewModel r && r.IsIncome && (ShowArchived || !r.IsArchived);
+        IncomeView.Filter = o => o is CategoryRowViewModel r
+            && r.IsIncome
+            && r.IsTopLevel
+            && (ShowArchived || !r.IsArchived)
+            && (r.HasMonthlyActivity || r.Children.Any(child => child.HasMonthlyActivity));
         IncomeView.SortDescriptions.Add(new SortDescription(nameof(CategoryRowViewModel.SortOrder), ListSortDirection.Ascending));
         ExpenseView.SortDescriptions.Add(new SortDescription(nameof(CategoryRowViewModel.SortOrder), ListSortDirection.Ascending));
+
+        // 「未使用」views — 頂層且自己 + 全部後代都沒交易。
+        _inactiveExpenseViewSource.Source = Categories;
+        InactiveExpenseView = _inactiveExpenseViewSource.View;
+        InactiveExpenseView.Filter = o => o is CategoryRowViewModel r
+            && r.IsExpense
+            && r.IsTopLevel
+            && (ShowArchived || !r.IsArchived)
+            && !r.HasMonthlyActivity
+            && !r.Children.Any(child => child.HasMonthlyActivity);
+        InactiveExpenseView.SortDescriptions.Add(new SortDescription(nameof(CategoryRowViewModel.SortOrder), ListSortDirection.Ascending));
+
+        _inactiveIncomeViewSource.Source = Categories;
+        InactiveIncomeView = _inactiveIncomeViewSource.View;
+        InactiveIncomeView.Filter = o => o is CategoryRowViewModel r
+            && r.IsIncome
+            && r.IsTopLevel
+            && (ShowArchived || !r.IsArchived)
+            && !r.HasMonthlyActivity
+            && !r.Children.Any(child => child.HasMonthlyActivity);
+        InactiveIncomeView.SortDescriptions.Add(new SortDescription(nameof(CategoryRowViewModel.SortOrder), ListSortDirection.Ascending));
 
         _localization.LanguageChanged += OnLanguageChanged;
         RefreshIconOptions();
@@ -223,6 +348,10 @@ public partial class CategoriesViewModel : ObservableObject
     {
         ExpenseView?.Refresh();
         IncomeView?.Refresh();
+        InactiveExpenseView?.Refresh();
+        InactiveIncomeView?.Refresh();
+        InactiveExpenseCount = InactiveExpenseView?.Cast<object>().Count() ?? 0;
+        InactiveIncomeCount = InactiveIncomeView?.Cast<object>().Count() ?? 0;
         NotifyEmptyStatesChanged();
     }
 
@@ -243,7 +372,30 @@ public partial class CategoriesViewModel : ObservableObject
         RefreshCategoryViews();
     }
 
-    partial void OnAddKindChanged(CategoryKind value) => ApplyAddDefaults(value);
+    partial void OnAddKindChanged(CategoryKind value)
+    {
+        ApplyAddDefaults(value);
+        RefreshAddParentOptions();
+    }
+
+    /// <summary>
+    /// 重整新增對話框的父分類選項 — 取同 Kind 的頂層分類（IsTopLevel=true 且非封存）。
+    /// 永遠在最前加一個「無 — 頂層分類」selector，讓使用者能建立頂層。
+    /// </summary>
+    private void RefreshAddParentOptions()
+    {
+        _addParentOptions.Clear();
+        _addParentOptions.Add(new ParentOption(null, GetString("Categories.Field.NoParent", "（無 — 頂層分類）")));
+        foreach (var c in _categories
+            .Where(c => c.Kind == AddKind && c.IsTopLevel && !c.IsArchived)
+            .OrderBy(c => c.SortOrder))
+        {
+            _addParentOptions.Add(new ParentOption(c.Id, c.Name));
+        }
+        // 若先前選的父分類被刪掉，reset 為 null
+        if (AddParentId.HasValue && _addParentOptions.All(o => o.Id != AddParentId))
+            AddParentId = null;
+    }
 
     public async Task LoadAsync()
     {
@@ -255,7 +407,121 @@ public partial class CategoriesViewModel : ObservableObject
         RefreshAvailableCategories();
         await LoadRulesAsync().ConfigureAwait(true);
         await LoadBudgetsAsync().ConfigureAwait(true);
+        await RefreshMonthlyUsageAsync().ConfigureAwait(true);
+        ApplyBudgetsToCategoryRows();
+        RebuildHierarchy();
+        // Stats 改變後 filters 不會自動 re-evaluate（CollectionView 只在 collection 變動時觸發），
+        // 手動 Refresh 一次讓 active / inactive 重新分組。
+        RefreshCategoryViews();
         IsLoaded = true;
+    }
+
+    /// <summary>
+    /// 用 ParentId 把扁平的 _categories 列表組成父子樹 — 每個父 row 的 Children
+    /// 集合填入它的子分類（依 SortOrder 升序）。子分類本身的 Children 永遠空。
+    /// 在 LoadAsync 之後 / Insert / Delete / SwapSortOrder 之後都該重建。
+    /// </summary>
+    private void RebuildHierarchy()
+    {
+        // 先清空所有 children — 避免重複加入
+        foreach (var c in _categories) c.Children.Clear();
+
+        var byId = _categories.ToDictionary(c => c.Id);
+        var grouped = _categories
+            .Where(c => c.ParentId.HasValue)
+            .GroupBy(c => c.ParentId!.Value);
+        foreach (var g in grouped)
+        {
+            if (!byId.TryGetValue(g.Key, out var parent)) continue;
+            foreach (var child in g.OrderBy(x => x.SortOrder))
+                parent.Children.Add(child);
+        }
+    }
+
+    /// <summary>
+    /// 取出單筆交易應該計入「本月分類使用金額」的數字。
+    /// - 收入 / 支出 / 股利等：金額在 <c>CashAmount</c>
+    /// - 買 / 賣 / 借款 / 還款等：金額是 <c>Price * Quantity</c>
+    /// 一律取絕對值（顯示「流動量」概念，正負語意已由分類 Kind 決定）。
+    /// </summary>
+    private static decimal TradeAmountForCategory(Trade t)
+    {
+        if (t.CashAmount.HasValue && t.CashAmount.Value != 0m)
+            return Math.Abs(t.CashAmount.Value);
+        return Math.Abs(t.Price * t.Quantity);
+    }
+
+    /// <summary>
+    /// 把本月 / 本年的預算上限投影到對應分類的 row VM 上，讓「收支分類」頁的每一列
+    /// 都能就地顯示 progress bar，不必跳到「預算」tab 才看得到。
+    /// 優先匹配「本月 Monthly」預算；若無，退而求其次用「本年 Yearly」÷12 當月預算。
+    /// 找不到任何匹配的 → BudgetAmount 維持 0，row 不顯示 progress bar。
+    /// </summary>
+    private void ApplyBudgetsToCategoryRows()
+    {
+        var today = DateTime.Today;
+        var thisMonth = _budgets
+            .Where(b => b.CategoryId.HasValue
+                     && b.Mode == BudgetMode.Monthly
+                     && b.Year == today.Year
+                     && b.Month == today.Month)
+            .ToDictionary(b => b.CategoryId!.Value, b => b.Amount);
+        var thisYear = _budgets
+            .Where(b => b.CategoryId.HasValue
+                     && b.Mode == BudgetMode.Yearly
+                     && b.Year == today.Year)
+            .ToDictionary(b => b.CategoryId!.Value, b => b.Amount);
+
+        foreach (var row in _categories)
+        {
+            if (thisMonth.TryGetValue(row.Id, out var monthBudget))
+                row.BudgetAmount = monthBudget;
+            else if (thisYear.TryGetValue(row.Id, out var yearBudget))
+                row.BudgetAmount = yearBudget / 12m; // 年度預算攤平到月
+            else
+                row.BudgetAmount = 0m;
+        }
+    }
+
+    /// <summary>
+    /// 計算每個分類「本月」的交易筆數與金額合計。
+    /// 用 ABS(amount) 加總，讓支出與收入都用正數顯示（語意：「本月此分類流動 $N」）。
+    /// 與 RefreshBudgetSpentAsync 同樣走全部 trades 過濾 + group by 分類，
+    /// 對個人理財場景 (trade 數量有限) 性能足夠。
+    /// </summary>
+    private async Task RefreshMonthlyUsageAsync()
+    {
+        if (_categories.Count == 0) return;
+
+        var today = DateTime.Today;
+        var monthStartLocal = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Local);
+        var nextMonthLocal = monthStartLocal.AddMonths(1);
+        var fromUtc = monthStartLocal.ToUniversalTime();
+        var toUtc = nextMonthLocal.ToUniversalTime();
+
+        var allTrades = await _tradeRepository.GetAllAsync().ConfigureAwait(true);
+        var thisMonthByCat = allTrades
+            .Where(t => t.CategoryId.HasValue
+                        && t.TradeDate >= fromUtc
+                        && t.TradeDate < toUtc)
+            .GroupBy(t => t.CategoryId!.Value)
+            .ToDictionary(
+                g => g.Key,
+                g => (Count: g.Count(), Amount: g.Sum(TradeAmountForCategory)));
+
+        foreach (var row in _categories)
+        {
+            if (thisMonthByCat.TryGetValue(row.Id, out var stat))
+            {
+                row.MonthlyCount = stat.Count;
+                row.MonthlyAmount = stat.Amount;
+            }
+            else
+            {
+                row.MonthlyCount = 0;
+                row.MonthlyAmount = 0m;
+            }
+        }
     }
 
     private async Task LoadBudgetsAsync()
@@ -333,9 +599,11 @@ public partial class CategoriesViewModel : ObservableObject
         if (categoryId is null)
             return GetString("Categories.Budget.Total", "（總預算）");
         var c = Categories.FirstOrDefault(x => x.Id == categoryId);
+        // Same as LookupCategoryDisplay — Icon is a Fluent symbol name, not emoji.
+        // Only return Name; icons should be rendered separately by row template.
         return c is null
             ? GetString("Categories.Rule.UnknownCategory", "（未知分類）")
-            : string.IsNullOrEmpty(c.Icon) ? c.Name : $"{c.Icon} {c.Name}";
+            : c.Name;
     }
 
     private async Task LoadRulesAsync()
@@ -360,9 +628,11 @@ public partial class CategoriesViewModel : ObservableObject
     private string LookupCategoryDisplay(Guid id)
     {
         var c = Categories.FirstOrDefault(x => x.Id == id);
-        return c is null
-            ? GetString("Categories.Rule.UnknownCategory", "（未知分類）")
-            : string.IsNullOrEmpty(c.Icon) ? c.Name : $"{c.Icon} {c.Name}";
+        if (c is null) return GetString("Categories.Rule.UnknownCategory", "（未知分類）");
+        // Icon 欄存的是 Fluent symbol 名稱（"Home24" / "Briefcase24" ...），不是 emoji。
+        // 直接拼進顯示字串會渲染成「Home24 居住」的怪畫面 — 只取 Name；icon 由
+        // 上層 row template 用 ds:AppIcon Symbol="{Binding Icon}" 渲染。
+        return c.Name;
     }
 
     [RelayCommand]
@@ -384,11 +654,20 @@ public partial class CategoriesViewModel : ObservableObject
         }
 
         var sort = (Categories.Where(c => c.Kind == AddKind).Select(c => c.SortOrder).DefaultIfEmpty(0).Max()) + 1;
+        // 父分類必須跟自己同 Kind 且必須是頂層（不允許三層巢狀）。Defensive check —
+        // UI 已過濾選項，但 race condition / 程式錯誤的話用 null 退回頂層比較安全。
+        Guid? parentId = null;
+        if (AddParentId.HasValue)
+        {
+            var parent = Categories.FirstOrDefault(c => c.Id == AddParentId.Value);
+            if (parent is not null && parent.Kind == AddKind && parent.IsTopLevel)
+                parentId = AddParentId;
+        }
         var category = new ExpenseCategory(
             Id: Guid.NewGuid(),
             Name: name,
             Kind: AddKind,
-            ParentId: null,
+            ParentId: parentId,
             Icon: NullIfBlank(AddIcon),
             ColorHex: NullIfBlank(AddColorHex),
             SortOrder: sort,
@@ -396,9 +675,13 @@ public partial class CategoriesViewModel : ObservableObject
 
         await _repository.AddAsync(category).ConfigureAwait(true);
         _categories.Add(CategoryRowViewModel.FromModel(category));
+        RebuildHierarchy();
         RefreshAvailableCategories();
+        RefreshAddParentOptions();
+        RefreshCategoryViews();
 
         AddName = string.Empty;
+        AddParentId = null;
         ApplyAddDefaults(AddKind);
         IsAddCategoryOpen = false;
 
@@ -491,6 +774,7 @@ public partial class CategoriesViewModel : ObservableObject
         }
         await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
         _categories.Remove(row);
+        RebuildHierarchy();
         RefreshAvailableCategories();
         _snackbar.Success(string.Format(
             GetString("Categories.Toast.Deleted", "已刪除分類「{0}」"), row.Name));
@@ -819,3 +1103,9 @@ public partial class CategoriesViewModel : ObservableObject
 }
 
 public sealed record CategoryVisualOption(string Value, string Label);
+
+/// <summary>
+/// 新增 / 編輯分類對話框的父分類選項。Id=null 代表「無父 — 建立為頂層」。
+/// 顯示在 ComboBox 內，ItemTemplate 綁 Display。
+/// </summary>
+public sealed record ParentOption(Guid? Id, string Display);

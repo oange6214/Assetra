@@ -45,7 +45,9 @@ public static class PortfolioSyncMapper
             entry.DisplayName,
             entry.Currency,
             entry.IsActive,
-            entry.IsEtf);
+            entry.IsEtf,
+            // Portfolio-Groups-Refactor P3 — 群組連結也走 sync，多裝置共享 bucket assignment.
+            entry.PortfolioGroupId);
 
         return new SyncEnvelope(
             EntityId: entry.Id,
@@ -74,7 +76,8 @@ public static class PortfolioSyncMapper
             DisplayName: dto.DisplayName,
             Currency: dto.Currency,
             IsActive: dto.IsActive,
-            IsEtf: dto.IsEtf);
+            IsEtf: dto.IsEtf,
+            PortfolioGroupId: dto.PortfolioGroupId);
     }
 
     private sealed record PortfolioPayloadDto(
@@ -85,5 +88,7 @@ public static class PortfolioSyncMapper
         [property: JsonPropertyName("display_name")] string DisplayName,
         [property: JsonPropertyName("currency")] string Currency,
         [property: JsonPropertyName("is_active")] bool IsActive,
-        [property: JsonPropertyName("is_etf")] bool IsEtf);
+        [property: JsonPropertyName("is_etf")] bool IsEtf,
+        // Portfolio-Groups-Refactor P3 — 舊 payload 缺欄位走 null，repo 寫入時 fallback DefaultId.
+        [property: JsonPropertyName("portfolio_group_id")] Guid? PortfolioGroupId = null);
 }

@@ -52,8 +52,8 @@ public class StockExchangeRegistryTests
     }
 
     [Fact]
-    public void Known_HasAllSevenExchanges()
+    public void Known_HasAllSupportedExchanges()
     {
-        Assert.Equal(7, StockExchangeRegistry.Known.Count);
+        Assert.Equal(10, StockExchangeRegistry.Known.Count);
     }
 }

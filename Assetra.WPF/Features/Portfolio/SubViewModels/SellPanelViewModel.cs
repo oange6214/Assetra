@@ -43,6 +43,26 @@ public partial class SellPanelViewModel : ObservableObject
     public Func<DateTime> GetSellTradeDate { get; set; } = () => DateTime.UtcNow;
 
     /// <summary>
+    /// MultiCurrency-Trade-Refactor P3 — raw text of Sell.ActualCashAmount from the
+    /// Tx dialog (cross-currency: 券商實際入帳金額，扣款帳戶幣別)。
+    /// Empty string = same-currency or user hasn't filled (let workflow auto-estimate).
+    /// </summary>
+    public Func<string> GetSellActualCashAmount { get; set; } = () => string.Empty;
+
+    /// <summary>
+    /// P3 — raw text of Sell.FxRate from the Tx dialog (instrument → funding ccy).
+    /// Empty string = same-currency or implicit 1.0.
+    /// </summary>
+    public Func<string> GetSellFxRate { get; set; } = () => string.Empty;
+
+    /// <summary>
+    /// Portfolio-Groups-Refactor P3 — TransactionDialogViewModel rebinds this
+    /// before calling <c>ExecuteSellFromTxDialogAsync</c> so the sell trade carries
+    /// the user's group choice. null = repo fallback (DefaultId).
+    /// </summary>
+    public Func<Guid?> GetSelectedPortfolioGroupId { get; set; } = () => null;
+
+    /// <summary>
     /// Cash account list for the sell-panel cash-account picker.
     /// Wired by the parent VM to its own <c>CashAccounts</c> collection.
     /// </summary>
@@ -168,6 +188,47 @@ public partial class SellPanelViewModel : ObservableObject
         if (SellingRow is null)
             return;
         var row = SellingRow;
+
+        // MultiCurrency-Trade-Refactor P3 — parse optional cross-currency overrides.
+        // 同幣別交易 (TWD 股 + TWD 帳戶) 兩者皆為空，flow 走原本路徑（CashAmount 由 workflow 估算）。
+        decimal? sellActual = null;
+        var actualRaw = GetSellActualCashAmount();
+        if (!string.IsNullOrWhiteSpace(actualRaw))
+        {
+            if (!ParseHelpers.TryParseDecimal(actualRaw, out var parsedActual) || parsedActual <= 0)
+            { SellPanelError = "實際入帳金額無效"; return; }
+            sellActual = parsedActual;
+        }
+        decimal? sellFx = null;
+        var fxRaw = GetSellFxRate();
+        if (!string.IsNullOrWhiteSpace(fxRaw))
+        {
+            if (!ParseHelpers.TryParseDecimal(fxRaw, out var parsedFx) || parsedFx <= 0)
+            { SellPanelError = "匯率無效"; return; }
+            sellFx = parsedFx;
+        }
+
+        // P3 — 雙保險自動反推（同 Buy 邏輯）。讓使用者填 FxRate 或 ActualCashAmount 擇一即可，
+        // 系統存兩者方便未來報表還原。
+        if (ParseHelpers.TryParseDecimal(SellPriceInput, out var sp) && sp > 0)
+        {
+            var sellQty = GetSellQtyOverride();
+            if (sellQty > 0)
+            {
+                if (sellActual is null && sellFx is { } fxOnly)
+                {
+                    // Sell：CashAmount = Price × Qty × FxRate − Commission（粗略，未換匯 commission）
+                    sellActual = sp * sellQty * fxOnly;
+                }
+                else if (sellFx is null && sellActual is { } cashOnly)
+                {
+                    var grossInFunding = cashOnly;
+                    if (sp * sellQty > 0)
+                        sellFx = grossInFunding / (sp * sellQty);
+                }
+            }
+        }
+
         var submit = _controller.BuildSubmission(
             row,
             SellPriceInput,
@@ -176,7 +237,10 @@ public partial class SellPanelViewModel : ObservableObject
             GetSellTradeDate(),
             GetTxCommissionDiscountValue(),
             IsSellEtf,
-            SellCashAccount?.Id);
+            SellCashAccount?.Id,
+            sellActual,
+            sellFx,
+            GetSelectedPortfolioGroupId());
         SellPanelError = submit.Error ?? string.Empty;
         if (submit.Request is null)
             return;

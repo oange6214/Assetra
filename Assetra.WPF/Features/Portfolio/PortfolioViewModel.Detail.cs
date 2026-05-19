@@ -32,6 +32,7 @@ public partial class PortfolioViewModel
     [NotifyPropertyChangedFor(nameof(SelectedPositionDividendIncome))]
     [NotifyPropertyChangedFor(nameof(SelectedPositionRealizedTotal))]
     [NotifyPropertyChangedFor(nameof(SelectedPositionTradeAvgPrice))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionTradeAvgPriceAsMoney))]
     [NotifyPropertyChangedFor(nameof(HasSelectedPositionRealized))]
     private PortfolioRowViewModel? _selectedPositionRow;
 
@@ -160,6 +161,9 @@ public partial class PortfolioViewModel
         }
     }
 
+    public Money SelectedPositionTradeAvgPriceAsMoney =>
+        new(SelectedPositionTradeAvgPrice, SelectedPositionRow?.Currency ?? "TWD");
+
     /// <summary>Sum of all CashDividend trades for the selected position (gross dividend income).</summary>
     public decimal SelectedPositionDividendIncome =>
         SelectedPositionRow is { } r
@@ -188,6 +192,7 @@ public partial class PortfolioViewModel
         OnPropertyChanged(nameof(SelectedPositionDividendIncome));
         OnPropertyChanged(nameof(SelectedPositionRealizedTotal));
         OnPropertyChanged(nameof(SelectedPositionTradeAvgPrice));
+        OnPropertyChanged(nameof(SelectedPositionTradeAvgPriceAsMoney));
         OnPropertyChanged(nameof(HasSelectedPositionRealized));
     }
 

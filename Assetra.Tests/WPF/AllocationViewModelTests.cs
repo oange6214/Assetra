@@ -60,32 +60,30 @@ public sealed class AllocationViewModelTests
     }
 
     [Fact]
-    public void Constructor_EmptyFeed_NoCashRowByDefault()
+    public void Constructor_EmptyFeed_IgnoresCash()
     {
         var feed = new StubFeed { TotalCash = 1000m };
         var vm = new AllocationViewModel(feed);
 
-        // v0.28+: cash row excluded by default (Morningstar convention) — only
-        // emitted when IncludeCashInAllocation = true. TotalValue still reports
-        // invest + cash for KPI bindings.
+        // Allocation analysis is investment-only; global cash is owned by
+        // Financial Overview / Dashboard, not the investment asset page.
         Assert.Empty(vm.AllocationRows);
-        Assert.Equal(1000m, vm.TotalValue);
+        Assert.Equal(0m, vm.TotalValue);
         Assert.Equal(0m, vm.TotalInvestment);
-        Assert.Equal(1000m, vm.TotalCash);
+        Assert.Equal(0m, vm.TotalCash);
     }
 
     [Fact]
-    public void IncludeCashInAllocation_True_EmitsCashRow()
+    public void Constructor_WithCash_DoesNotEmitCashRow()
     {
         var feed = new StubFeed { TotalCash = 1000m };
-        var vm = new AllocationViewModel(feed)
-        {
-            IncludeCashInAllocation = true,
-        };
+        feed.PositionsList.Add(Position("A", 500m));
+        var vm = new AllocationViewModel(feed);
 
-        var cashRow = vm.AllocationRows.FirstOrDefault(r => r.Symbol == "現金");
-        Assert.NotNull(cashRow);
-        Assert.Equal(1000m, cashRow!.MarketValue);
+        Assert.DoesNotContain(vm.AllocationRows, r => r.Symbol == "現金");
+        Assert.Equal(500m, vm.TotalValue);
+        Assert.Equal(500m, vm.TotalInvestment);
+        Assert.Equal(0m, vm.TotalCash);
     }
 
     [Fact]
@@ -105,7 +103,7 @@ public sealed class AllocationViewModelTests
     }
 
     [Fact]
-    public void TotalCashChanged_TriggersRebuild()
+    public void TotalCashChanged_DoesNotAffectInvestmentAllocation()
     {
         var feed = new StubFeed { TotalCash = 0m };
         feed.PositionsList.Add(Position("A", 500m));
@@ -114,8 +112,8 @@ public sealed class AllocationViewModelTests
 
         feed.TotalCash = 1500m;
 
-        Assert.Equal(2000m, vm.TotalValue);
-        Assert.Equal(1500m, vm.TotalCash);
+        Assert.Equal(500m, vm.TotalValue);
+        Assert.Equal(0m, vm.TotalCash);
     }
 
     [Fact]

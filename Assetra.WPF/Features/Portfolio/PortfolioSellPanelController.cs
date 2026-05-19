@@ -42,7 +42,14 @@ internal sealed class PortfolioSellPanelController
         DateTime tradeDate,
         decimal commissionDiscount,
         bool isSellEtf,
-        Guid? cashAccountId)
+        Guid? cashAccountId,
+        // MultiCurrency-Trade-Refactor P3 — Sell-side cross-currency overrides (optional).
+        // Both null = same-currency happy path. When the user fills either or both in the
+        // dialog, they flow through to SellWorkflowService → Trade.CashAmount / Trade.FxRate.
+        decimal? actualCashAmount = null,
+        decimal? fxRate = null,
+        // Portfolio-Groups-Refactor P3 — 選定群組（bucket），null 由 repo fallback DefaultId。
+        Guid? portfolioGroupId = null)
     {
         if (row is null)
             return new SellPanelSubmitState(null, "賣出標的不存在");
@@ -95,7 +102,10 @@ internal sealed class PortfolioSellPanelController
                 sellCommission,
                 sellDiscount,
                 cashAccountId,
-                row.AllEntryIds),
+                row.AllEntryIds,
+                actualCashAmount,
+                fxRate,
+                portfolioGroupId),
             null);
     }
 }

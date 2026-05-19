@@ -45,6 +45,18 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     private readonly ILiabilityMutationWorkflowService _liabilityMutationWorkflowService;
     private readonly IPortfolioSummaryService _summaryService;
     private readonly IPortfolioHistoryMaintenanceService _historyMaintenanceService;
+
+    /// <summary>
+    /// Per-position 30 天歷史抓取用（sparkline 欄）。可選；null 時 sparkline 隱藏。
+    /// 已透過 CachedStockHistoryProvider 走快取，每符號每天最多打一次外部 API。
+    /// </summary>
+    private readonly Assetra.Core.Interfaces.IStockHistoryProvider? _stockHistory;
+
+    /// <summary>
+    /// Watchlist 用：呼叫 EnsureStockEntryAsync 建立 PortfolioEntry（不建 Trade）。
+    /// Null 時 watchlist 命令降級為「no-op + 錯誤訊息」。
+    /// </summary>
+    private Assetra.Application.Portfolio.Contracts.IAddAssetWorkflowService? _addAssetWorkflow;
     private readonly ILocalizationService? _localization;
     private readonly CompositeDisposable _disposables = new();
 
@@ -63,6 +75,15 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     public ReadOnlyObservableCollection<TradeRowViewModel> Trades { get; }
     public ReadOnlyObservableCollection<CashAccountRowViewModel> CashAccounts { get; }
     public ReadOnlyObservableCollection<LiabilityRowViewModel> Liabilities { get; }
+
+    /// <summary>
+    /// Portfolio-Groups-Refactor P4 — Positions tab chip row 用的群組目錄。
+    /// null = 功能未啟用，XAML 隱藏 chip row。
+    /// </summary>
+    public Assetra.WPF.Features.PortfolioGroups.PortfolioGroupCatalog? GroupCatalog { get; private set; }
+
+    /// <summary>XAML 用：是否暴露 group chip row。catalog 存在且至少 1 個 group 時 true。</summary>
+    public bool HasPortfolioGroups => GroupCatalog is { Groups.Count: > 0 };
 
     IReadOnlyList<PortfolioRowViewModel> Contracts.IPortfolioPositionFeed.Positions => Positions;
 
@@ -314,6 +335,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         _snackbar = ui.Snackbar;
         _settingsService = ui.Settings;
         _currencyService = services.Currency;
+        // Portfolio-Groups-Refactor P4 — Positions tab chip row 用。null = 功能未啟用。
+        GroupCatalog = services.GroupCatalog;
         _cryptoService = services.Crypto;
         _loadService = services.Load ?? new NullPortfolioLoadService();
         _transactionWorkflowService = services.TransactionWorkflow ?? new NullTransactionWorkflowService();
@@ -325,6 +348,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         _summaryService = services.Summary;
         _historyMaintenanceService = services.HistoryMaintenance
             ?? new NullPortfolioHistoryMaintenanceService();
+        _stockHistory = services.History;
         _localization = ui.Localization;
         Allocation = new AllocationPanelViewModel(ui.Localization);
         DivCalendar = new DividendCalendarViewModel(Trades);
@@ -356,6 +380,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
 
         // Resolve workflow services for Sub-VM construction (not held as VM fields).
         var addAssetWorkflow = services.AddAsset ?? new NullAddAssetWorkflowService();
+        _addAssetWorkflow = services.AddAsset; // 留 null 表示真的沒有；watchlist 命令會檢查
         var accountUpsertWorkflow = services.AccountUpsert ?? new NullAccountUpsertWorkflowService();
         var accountMutationWorkflow = services.AccountMutation ?? new NullAccountMutationWorkflowService();
         var creditCardMutationWorkflow = services.CreditCardMutation ?? new NullCreditCardMutationWorkflowService();
@@ -434,7 +459,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 RebuildTotals: RebuildTotals,
                 Localize: L,
                 CategoryRepository: services.CategoryRepository,
-                AutoCategorizationRuleRepository: services.AutoCategorizationRuleRepository));
+                AutoCategorizationRuleRepository: services.AutoCategorizationRuleRepository,
+                GroupCatalog: services.GroupCatalog));
         Transaction.TransactionCompleted += OnTransactionCompleted;
         Transaction.TradeDeleted += OnTradeDeleted;
 
@@ -469,6 +495,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
             _settingsService?.Current.PreferredCurrency ?? "TWD";
         SellPanel.GetTxCommissionDiscountValue = () => Transaction.TxCommissionDiscountValue;
         SellPanel.GetTxFee = () => Transaction.TxFee;
+        // MultiCurrency-Trade-Refactor P3 — bridge Tx-dialog Sell sub-VM's cross-currency
+        // fields into the sell panel so ConfirmSell can pick them up.
+        SellPanel.GetSellActualCashAmount = () => Transaction.Sell.ActualCashAmount;
+        SellPanel.GetSellFxRate = () => Transaction.Sell.FxRate;
+        // Portfolio-Groups-Refactor P3 — bridge selected group from Tx dialog to sell panel.
+        SellPanel.GetSelectedPortfolioGroupId = () => Transaction.SelectedPortfolioGroup?.Id;
 
         // Rebuild chart colours whenever the user switches theme
         if (ui.Theme is not null)
@@ -594,14 +626,24 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 g => g.OrderByDescending(t => t.TradeDate).First().CommissionDiscount!.Value,
                 StringComparer.OrdinalIgnoreCase);
 
+        // Portfolio-Groups-Refactor P4 — 同上，以 Symbol 分組取最新 Buy 的 PortfolioGroupId。
+        var latestGroup = Trades
+            .Where(t => t.Type == TradeType.Buy)
+            .GroupBy(t => t.Symbol, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(t => t.TradeDate).First().PortfolioGroupId,
+                StringComparer.OrdinalIgnoreCase);
+
         foreach (var row in Positions)
         {
-            if (!latestDiscount.TryGetValue(row.Symbol, out var disc))
-                continue;
-            if (row.CommissionDiscount == disc)
-                continue;
-            row.CommissionDiscount = disc;
-            row.Refresh();
+            if (latestDiscount.TryGetValue(row.Symbol, out var disc) && row.CommissionDiscount != disc)
+            {
+                row.CommissionDiscount = disc;
+                row.Refresh();
+            }
+            if (latestGroup.TryGetValue(row.Symbol, out var grp))
+                row.PortfolioGroupId = grp;
         }
     }
 
@@ -732,6 +774,18 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
 
     public async Task LoadAsync()
     {
+        // Portfolio-Groups-Refactor P4 — 先把 group catalog 灌好，PositionsTabPanel 的 chip
+        // row 才能在初次顯示就有資料。失敗不阻斷 portfolio 載入。
+        if (GroupCatalog is not null)
+        {
+            try
+            {
+                await GroupCatalog.EnsureLoadedAsync().ConfigureAwait(true);
+                OnPropertyChanged(nameof(HasPortfolioGroups));
+            }
+            catch { /* ignored */ }
+        }
+
         // Bypass OnMonthlyExpenseChanged (avoids premature save); RebuildTotals() below reads MonthlyExpense.
         Financial.InitializeMonthlyExpense(_settingsService?.Current?.MonthlyExpense ?? 0m);
 
@@ -740,6 +794,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         ApplyPositions(loaded);
         ApplyCashAccounts(loaded);
         ApplyLiabilities(loaded);
+        // 在 RebuildTotals 之前載完 loan schedules，讓「月付 / 下次到期」欄
+        // 首次顯示就有資料（不必等使用者切到負債頁點某列才 lazy-load）。
+        await EagerLoadLoanSchedulesAsync();
 
         RebuildTotals();
 
@@ -854,6 +911,17 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
             p.PercentOfPortfolio = weights.TryGetValue(p.Id, out var percent) ? percent : 0m;
 
         TotalCash = summary.TotalCash;
+        // 每張帳戶卡 / 列上的「佔比」百分比 — 同 PercentOfPortfolio 的做法回寫到 row VM。
+        if (TotalCash > 0m)
+        {
+            foreach (var c in CashAccounts)
+                c.PercentOfTotal = c.Balance / TotalCash * 100m;
+        }
+        else
+        {
+            foreach (var c in CashAccounts)
+                c.PercentOfTotal = 0m;
+        }
         TotalLiabilities = summary.TotalLiabilities;
         TotalAssets = summary.TotalAssets;
         NetWorth = summary.NetWorth;
@@ -867,6 +935,18 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         Financial.Apply(summary);
 
         Allocation.Apply(summary.AllocationSlices);
+
+        // KPI 展開面板用的 per-position 圓餅 — 每次 totals 重算同步刷新
+        RebuildPositionPieCharts();
+
+        // Sparkline — 每次 totals 重算順便 queue（去重；走 cache 多數 instant）
+        QueueSparklineLoadIfNeeded();
+
+        // Footer 統計：positions / cash / liability 都依 collection view 即時加總，
+        // 但 collection 內容變了不自動 raise PropertyChanged，這裡統一推一次。
+        RaisePositionsFilterStatsChanged();
+        RaiseCashFilterStatsChanged();
+        RaiseLiabilityFilterStatsChanged();
 
         // Fire-and-forget: record today's snapshot once prices are live
         AsyncHelpers.SafeFireAndForget(RecordSnapshotAsync, "Portfolio.RecordSnapshot");
@@ -1164,6 +1244,23 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     {
         var loaded = await _loadService.LoadAsync();
         ApplyLiabilities(loaded);
+        await EagerLoadLoanSchedulesAsync();
+    }
+
+    /// <summary>
+    /// 提早載入所有 loan 的攤還表 — 否則「月付 / 下次到期」欄首次開啟 App 會顯示「—」
+    /// 直到使用者點到該列才 lazy-load。對於只有少數負債的個人理財場景，eager load 成本
+    /// 可以接受，換來首屏即有完整資訊的體驗。
+    /// 從主 LoadAsync 與 LoadLiabilitiesAsync 兩處共用。
+    /// </summary>
+    private async Task EagerLoadLoanSchedulesAsync()
+    {
+        if (Loan is null) return;
+        foreach (var row in Liabilities.Where(l => l.IsLoan && !l.IsScheduleLoaded).ToList())
+        {
+            try { await Loan.LoadLoanScheduleAsync(row); }
+            catch { /* 單筆失敗不影響整體；該列維持 — 顯示 */ }
+        }
     }
 
     private void ApplyLiabilities(PortfolioLoadResult loaded)

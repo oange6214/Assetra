@@ -27,6 +27,11 @@ internal static class AppBootstrapper
             .AddAnalysisContext()
             .AddFxContext(paths.DbPath)
             .AddGoalsContext(paths.DbPath)
+            // Portfolio-Groups-Refactor P1：暴露 IPortfolioGroupRepository。Schema 在
+            // constructor 內 idempotent migrate（建 table + seed default group），順序
+            // 不重要——其他 schema migrator 內的 portfolio_group_id ALTER 是獨立 statement，
+            // 不會被 portfolio_group table 是否存在影響。
+            .AddPortfolioGroupsContext(paths.DbPath)
             .AddAlertsContext(paths.DbPath)
             .AddLoansContext(paths.DbPath)
             .AddImportContext(paths.DbPath)

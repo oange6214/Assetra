@@ -46,12 +46,18 @@ public sealed class DefaultReconciliationMatcher : IReconciliationMatcher
             TradeType.LoanRepay
                 => -(trade.CashAmount ?? ((trade.Principal ?? 0m) + (trade.InterestPaid ?? 0m))),
             TradeType.Buy
-                => -(trade.Price * trade.Quantity + (trade.Commission ?? 0m)),
+                => -BuyCashAmount(trade),
             TradeType.Sell
-                => trade.Price * trade.Quantity - (trade.Commission ?? 0m),
+                => SellCashAmount(trade),
             _ => 0m,
         };
     }
+
+    private static decimal BuyCashAmount(Trade trade) =>
+        trade.CashAmount ?? (trade.Price * trade.Quantity + (trade.Commission ?? 0m));
+
+    private static decimal SellCashAmount(Trade trade) =>
+        trade.CashAmount ?? (trade.Price * trade.Quantity - (trade.Commission ?? 0m));
 
     public DateOnly DateOf(Trade trade)
     {

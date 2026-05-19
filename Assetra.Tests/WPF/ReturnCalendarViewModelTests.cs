@@ -33,6 +33,112 @@ public sealed class ReturnCalendarViewModelTests
     }
 
     [Fact]
+    public void UpdatePortfolioData_AdjustsBuyCashFlowOutOfSnapshotDelta()
+    {
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 14), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 15), 0m, 5_000m, 0m, 1),
+        };
+        var trades = new[]
+        {
+            MakeTrade(new DateOnly(2026, 5, 15), TradeType.Buy, price: 100m, quantity: 40),
+        };
+        var vm = new ReturnCalendarViewModel();
+
+        vm.UpdatePortfolioData(snapshots, trades);
+
+        var day15 = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 15));
+        Assert.True(day15.HasData);
+        Assert.Equal(0m, day15.Delta);
+        Assert.Equal(0m, vm.MonthlyAbsolutePnl);
+    }
+
+    [Fact]
+    public void UpdatePortfolioData_KeepsMarketSnapshotReturnWhenNoCashFlow()
+    {
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 14), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 15), 0m, 1_100m, 0m, 1),
+        };
+        var vm = new ReturnCalendarViewModel();
+
+        vm.UpdatePortfolioData(snapshots, []);
+
+        var day15 = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 15));
+        Assert.True(day15.HasData);
+        Assert.Equal(100m, day15.Delta);
+        Assert.Equal(100m, vm.MonthlyAbsolutePnl);
+    }
+
+    [Fact]
+    public void UpdateSnapshots_IgnoresWeekendSnapshots()
+    {
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 14), 0m, 900m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 15), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 16), 0m, 2_000m, 0m, 1),
+        };
+        var vm = new ReturnCalendarViewModel();
+
+        vm.UpdateSnapshots(snapshots);
+
+        var day15 = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 15));
+        var day16 = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 16));
+        Assert.True(day15.HasData);
+        Assert.Equal(100m, day15.Delta);
+        Assert.False(day16.HasData);
+        Assert.Null(day16.Delta);
+        Assert.Equal(100m, vm.MonthlyAbsolutePnl);
+    }
+
+    [Fact]
+    public void UpdateSnapshots_PrefersWeekendBreakdownSnapshotForPreviousTradingDate()
+    {
+        var snapshots = new[]
+        {
+            MakeSnapshot(new DateOnly(2026, 5, 14), 1_000m, withBreakdown: true),
+            MakeSnapshot(new DateOnly(2026, 5, 15), 100m),
+            MakeSnapshot(new DateOnly(2026, 5, 16), 1_100m, withBreakdown: true),
+        };
+        var vm = new ReturnCalendarViewModel();
+
+        vm.UpdateSnapshots(snapshots);
+
+        var day15 = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 15));
+        var day16 = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 16));
+        Assert.True(day15.HasData);
+        Assert.Equal(100m, day15.Delta);
+        Assert.False(day16.HasData);
+        Assert.Null(day16.Delta);
+        Assert.Equal(100m, vm.MonthlyAbsolutePnl);
+    }
+
+    [Fact]
+    public void UpdateSnapshots_IgnoresLegacySnapshotAfterBreakdownSnapshotsBegin()
+    {
+        var snapshots = new[]
+        {
+            MakeSnapshot(new DateOnly(2026, 5, 14), 1_000m, withBreakdown: true),
+            MakeSnapshot(new DateOnly(2026, 5, 15), 100m),
+            MakeSnapshot(new DateOnly(2026, 5, 18), 1_100m, withBreakdown: true),
+        };
+        var vm = new ReturnCalendarViewModel();
+
+        vm.UpdateSnapshots(snapshots);
+
+        var day15 = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 15));
+        var day18 = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 18));
+        Assert.False(day15.HasData);
+        Assert.Null(day15.Delta);
+        Assert.True(day18.HasData);
+        Assert.Equal(100m, day18.Delta);
+        Assert.Equal(100m, vm.MonthlyAbsolutePnl);
+    }
+
+    [Fact]
     public void Cells_PopulateDailyDeltaAndTone()
     {
         // Day 1: 1000, Day 2: 1100 (+10%, strongest up), Day 3: 1090 (-0.9%, weak down)
@@ -63,8 +169,8 @@ public sealed class ReturnCalendarViewModelTests
         // 兩個月各 2 個 snapshot，確保每月內都有 delta（需要前一筆 baseline）。
         var snapshots = new[]
         {
-            new PortfolioDailySnapshot(new DateOnly(2026, 3, 1), 0m, 900m, 0m, 1),
-            new PortfolioDailySnapshot(new DateOnly(2026, 3, 15), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 3, 2), 0m, 900m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 3, 16), 0m, 1_000m, 0m, 1),
             new PortfolioDailySnapshot(new DateOnly(2026, 4, 15), 0m, 1_100m, 0m, 1),
         };
         var vm = new ReturnCalendarViewModel();
@@ -99,7 +205,7 @@ public sealed class ReturnCalendarViewModelTests
         // 5/4 = +200; 5/5 = -100 → 該週 (5/4–5/10 = Mon-Sun) total = +100
         var snapshots = new[]
         {
-            new PortfolioDailySnapshot(new DateOnly(2026, 5, 3), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 1), 0m, 1_000m, 0m, 1),
             new PortfolioDailySnapshot(new DateOnly(2026, 5, 4), 0m, 1_200m, 0m, 1),
             new PortfolioDailySnapshot(new DateOnly(2026, 5, 5), 0m, 1_100m, 0m, 1),
         };
@@ -117,18 +223,19 @@ public sealed class ReturnCalendarViewModelTests
     {
         var snapshots = new[]
         {
-            new PortfolioDailySnapshot(new DateOnly(2026, 2, 1), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 2, 2), 0m, 1_000m, 0m, 1),
             new PortfolioDailySnapshot(new DateOnly(2026, 4, 1), 0m, 1_100m, 0m, 1),
         };
         var vm = new ReturnCalendarViewModel();
         vm.UpdateSnapshots(snapshots);
 
         Assert.NotEmpty(vm.AvailableMonths);
-        // 倒序：第一個應該 >= 第二個
-        Assert.True(vm.AvailableMonths[0] >= vm.AvailableMonths[^1]);
+        // 倒序：第一個應該 >= 第二個（AvailableMonths 是 MonthOption，比 .Value）
+        Assert.True(vm.AvailableMonths[0].Value >= vm.AvailableMonths[^1].Value);
         // 應該包含至少 2/1 到 4/1 之間的月份
-        Assert.Contains(new DateOnly(2026, 2, 1), vm.AvailableMonths);
-        Assert.Contains(new DateOnly(2026, 4, 1), vm.AvailableMonths);
+        var values = vm.AvailableMonths.Select(m => m.Value).ToList();
+        Assert.Contains(new DateOnly(2026, 2, 1), values);
+        Assert.Contains(new DateOnly(2026, 4, 1), values);
     }
 
     [Fact]
@@ -137,12 +244,12 @@ public sealed class ReturnCalendarViewModelTests
         var snapshots = new[]
         {
             new PortfolioDailySnapshot(new DateOnly(2026, 5, 1), 0m, 1_000m, 0m, 1),
-            new PortfolioDailySnapshot(new DateOnly(2026, 5, 2), 0m, 1_100m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 4), 0m, 1_100m, 0m, 1),
         };
         var vm = new ReturnCalendarViewModel();
         vm.UpdateSnapshots(snapshots);
 
-        var cell = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 2));
+        var cell = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 4));
         Assert.False(vm.IsCellPopoverOpen);
 
         vm.SelectCellCommand.Execute(cell);
@@ -176,11 +283,11 @@ public sealed class ReturnCalendarViewModelTests
         var snapshots = new[]
         {
             new PortfolioDailySnapshot(new DateOnly(2026, 5, 1), 0m, 1_000m, 0m, 1),
-            new PortfolioDailySnapshot(new DateOnly(2026, 5, 2), 0m, 1_100m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 4), 0m, 1_100m, 0m, 1),
         };
         var vm = new ReturnCalendarViewModel();
         vm.UpdateSnapshots(snapshots);
-        var cell = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 2));
+        var cell = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 4));
         vm.SelectCellCommand.Execute(cell);
         Assert.True(vm.IsCellPopoverOpen);
 
@@ -195,19 +302,19 @@ public sealed class ReturnCalendarViewModelTests
     [Fact]
     public void UseAbsoluteForTone_RecomputesCellTone()
     {
-        // 5/2 Δ=+50 → 5% (UpStrongest by pct); 但絕對值 50 < 1000 → UpWeak by abs
+        // 5/4 Δ=+50 → 5% (UpStrongest by pct); 但絕對值 50 < 1000 → UpWeak by abs
         var snapshots = new[]
         {
             new PortfolioDailySnapshot(new DateOnly(2026, 5, 1), 0m, 1_000m, 0m, 1),
-            new PortfolioDailySnapshot(new DateOnly(2026, 5, 2), 0m, 1_050m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 4), 0m, 1_050m, 0m, 1),
         };
         var vm = new ReturnCalendarViewModel();
         vm.UpdateSnapshots(snapshots);
-        var cell = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 2));
+        var cell = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 4));
         Assert.Equal(CellTone.UpStrongest, cell.Tone);
 
         vm.UseAbsoluteForTone = true;
-        cell = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 2));
+        cell = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 4));
         Assert.Equal(CellTone.UpWeak, cell.Tone);   // |50| < 1000 → weak bucket
     }
 
@@ -231,16 +338,16 @@ public sealed class ReturnCalendarViewModelTests
     [Fact]
     public void YearViewCells_ColorsDaysWithSnapshotDelta()
     {
-        // 跨月場景：5/1 baseline, 5/2 +200 (5%) → 應有 tone
+        // 跨月場景：5/1 baseline, 5/4 +200 (20%) → 應有 tone
         var snapshots = new[]
         {
             new PortfolioDailySnapshot(new DateOnly(2026, 5, 1), 0m, 1_000m, 0m, 1),
-            new PortfolioDailySnapshot(new DateOnly(2026, 5, 2), 0m, 1_200m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 5, 4), 0m, 1_200m, 0m, 1),
         };
         var vm = new ReturnCalendarViewModel();
         vm.UpdateSnapshots(snapshots);
 
-        var dayWithData = vm.YearViewCells.First(c => c.Date == new DateOnly(2026, 5, 2));
+        var dayWithData = vm.YearViewCells.First(c => c.Date == new DateOnly(2026, 5, 4));
         Assert.True(dayWithData.HasData);
         Assert.NotEqual(CellTone.None, dayWithData.Tone);
 
@@ -269,4 +376,42 @@ public sealed class ReturnCalendarViewModelTests
         // lastValue = 1200 → (1200-1000)/1000 = 0.20
         Assert.Equal(0.20m, vm.MonthlyReturnPct);
     }
+
+    private static PortfolioDailySnapshot MakeSnapshot(DateOnly date, decimal marketValue, bool withBreakdown = false) =>
+        withBreakdown
+            ? new PortfolioDailySnapshot(
+                date,
+                TotalCost: 0m,
+                MarketValue: marketValue,
+                Pnl: 0m,
+                PositionCount: 1,
+                Currency: "TWD",
+                CashValue: 0m,
+                EquityValue: marketValue,
+                LiabilityValue: 0m)
+            : new PortfolioDailySnapshot(date, 0m, marketValue, 0m, 1);
+
+    private static Trade MakeTrade(
+        DateOnly date,
+        TradeType type,
+        decimal? realizedPnl = null,
+        decimal? cashAmount = null,
+        decimal price = 0m,
+        int quantity = 1,
+        decimal? commission = null,
+        Guid? parentTradeId = null) =>
+        new(
+            Guid.NewGuid(),
+            "2330",
+            "TWSE",
+            "台積電",
+            type,
+            date.ToDateTime(TimeOnly.MinValue),
+            price,
+            quantity,
+            realizedPnl,
+            null,
+            cashAmount,
+            Commission: commission,
+            ParentTradeId: parentTradeId);
 }

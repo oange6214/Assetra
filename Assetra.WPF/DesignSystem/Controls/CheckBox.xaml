@@ -13,7 +13,7 @@
         * Disabled   : opacity 0.45
     -->
     <Style x:Key="AppCheckBox" TargetType="{x:Type CheckBox}">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="Background" Value="Transparent" />

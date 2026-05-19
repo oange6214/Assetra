@@ -13,18 +13,25 @@
     d:DesignHeight="776"
     d:DesignWidth="1100"
     Background="{DynamicResource AppBackground}"
+    Loaded="TrendsView_Loaded"
     mc:Ignorable="d">
 
+    <!--
+        Row 順序（v2 重排）：原本 chart 用 Height="*" 在 Row 1，KPI/risk 在 Row 2/3 下方，
+        導致畫面短時 KPI 卡完全在 fold 之下，使用者看不到區間報酬等核心數字。重排後
+        KPI 與 risk row 上移到 chart 上方 — 一進頁就能看見「賺多少 / 報酬率」等摘要，
+        chart 用剩餘空間繪製趨勢。
+    -->
     <Grid Style="{StaticResource PageRootGrid}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <!--  period chip bar  -->
-            <RowDefinition Height="*" />
-            <!--  main chart  -->
             <RowDefinition Height="Auto" />
-            <!--  Stage 1: 區間 KPI 列（期初 / 期末 / 區間損益 / 報酬率 / 年化）  -->
+            <!--  KPI 列（期初 / 期末 / 區間損益 / 報酬率 / 年化）— 上移到 chart 上方  -->
             <RowDefinition Height="Auto" />
             <!--  風險指標列（最大回撤 / 波動率 / Sharpe / HHI）  -->
+            <RowDefinition Height="*" />
+            <!--  main chart — 拿剩餘高度  -->
             <RowDefinition Height="Auto" />
             <!--  對標比較區  -->
             <RowDefinition Height="Auto" />
@@ -84,11 +91,23 @@
                     GroupName="TrendsPeriod"
                     IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=All}"
                     Style="{StaticResource NavTabBtn}" />
+                <!--
+                    「可用資料 X 天」hint — 跟在 chip 後面，讓使用者一眼看到實際 snapshot
+                    範圍。若 chip 選了 180 / 365 但 hint 顯示「可用資料 22 天」，
+                    使用者就知道 chart / KPI / 對標數值跟 30 天 chip 一樣是預期行為。
+                    DataRangeHint 為空字串時 TextBlock 不渲染。
+                -->
+                <TextBlock
+                    Margin="12,0,0,0"
+                    VerticalAlignment="Center"
+                    FontSize="{DynamicResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppTextMuted}"
+                    Text="{Binding DataRangeHint}" />
             </StackPanel>
         </DockPanel>
 
         <!--  ── Chart / empty state — wrapped in FormCard for visual consistency ──  -->
-        <Border Grid.Row="1" Style="{StaticResource FormCard}">
+        <Border Grid.Row="3" Style="{StaticResource FormCard}">
             <Grid Style="{StaticResource PageContentGrid}">
                 <lvc:CartesianChart
                     Background="Transparent"
@@ -108,91 +127,94 @@
             </Grid>
         </Border>
 
-        <!--  ── Stage 1: 區間 KPI 列（期初/期末/絕對 PnL/報酬率/年化/最大回撤）──  -->
         <!--
-            注意：XAML StringFormat 中的逗號是 markup extension 分隔符，
-            需用單引號包住整段 format 字串避免被誤切。百分比 0.00% 同理。
+            ── Hero summary card（取代原本 5+4 個小卡）──
+            個人理財 dashboard 風格：一個 HERO 數字主視覺，搭配 supporting metrics 小字。
+            設計優先級：
+              1. 主視覺：報酬率 % + 區間損益 NT$（最大字、紅綠分色）
+              2. 期初 → 期末 走勢（中字）
+              3. 年化（小字、tooltip 解釋）
+            風險指標（最大回撤 / 波動率 / Sharpe / HHI）改放在圖表「下方」次要區，
+            非高頻使用者不該被它們淹沒。
         -->
-        <UniformGrid
-            Grid.Row="2"
-            Margin="0,12,0,0"
-            Columns="5"
-            Visibility="{Binding HasKpis, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <!--  期初  -->
-            <Border Margin="0,0,4,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}">
-                <StackPanel>
-                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
-                               Foreground="{DynamicResource AppTextMuted}"
-                               Text="{DynamicResource Trends.Kpi.StartValue}" />
-                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
-                               Foreground="{DynamicResource AppTextPrimary}"
-                               Text="{Binding KpiStartValue, StringFormat='N0'}" />
-                </StackPanel>
-            </Border>
-            <!--  期末  -->
-            <Border Margin="2,0,2,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}">
-                <StackPanel>
-                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
-                               Foreground="{DynamicResource AppTextMuted}"
-                               Text="{DynamicResource Trends.Kpi.EndValue}" />
-                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
-                               Foreground="{DynamicResource AppTextPrimary}"
-                               Text="{Binding KpiEndValue, StringFormat='N0'}" />
-                </StackPanel>
-            </Border>
-            <!--  區間絕對損益  -->
-            <Border Margin="2,0,2,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}">
-                <StackPanel>
-                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
-                               Foreground="{DynamicResource AppTextMuted}"
-                               Text="{DynamicResource Trends.Kpi.AbsolutePnl}" />
-                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
-                               Foreground="{DynamicResource AppTextPrimary}"
-                               Text="{Binding KpiAbsolutePnl, StringFormat='+#\,##0;-#\,##0;0'}" />
-                </StackPanel>
-            </Border>
-            <!--  區間報酬率  -->
-            <Border Margin="2,0,2,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}">
-                <StackPanel>
+        <Border Grid.Row="1"
+                Margin="0,12,0,0"
+                Padding="20,16"
+                Style="{StaticResource FormCard}"
+                Visibility="{Binding HasKpis, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!--  Left：HERO 報酬率 + 區間損益  -->
+                <StackPanel Grid.Column="0">
                     <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
                                Foreground="{DynamicResource AppTextMuted}"
                                Text="{DynamicResource Trends.Kpi.ReturnPct}" />
-                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
-                               Foreground="{DynamicResource AppTextPrimary}"
-                               Text="{Binding KpiReturnPct, StringFormat='+0.00%;-0.00%;0.00%'}" />
+                    <StackPanel Margin="0,2,0,0" Orientation="Horizontal" VerticalAlignment="Bottom">
+                        <TextBlock FontFamily="{StaticResource Font.Family.Base}"
+                                   FontSize="{StaticResource Font.Size.3xl}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding KpiReturnPct, StringFormat='+0.00%;-0.00%;0.00%'}"
+                                   Typography.NumeralAlignment="Tabular" />
+                        <TextBlock Margin="10,0,0,8"
+                                   VerticalAlignment="Bottom"
+                                   FontFamily="{StaticResource Font.Family.Base}"
+                                   FontSize="{StaticResource Font.Size.Md}"
+                                   Foreground="{DynamicResource AppTextSecondary}"
+                                   Text="{Binding KpiAbsolutePnl, StringFormat='+#\,##0;-#\,##0;0'}"
+                                   Typography.NumeralAlignment="Tabular" />
+                    </StackPanel>
+                    <!--  期初 → 期末 走勢小字  -->
+                    <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource Font.Family.Base}"
+                                   FontSize="{StaticResource Font.Size.Sm}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Text="{Binding KpiStartValue, StringFormat='N0'}"
+                                   Typography.NumeralAlignment="Tabular" />
+                        <TextBlock Margin="6,0,6,0"
+                                   FontSize="{StaticResource Font.Size.Sm}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Text="→" />
+                        <TextBlock FontFamily="{StaticResource Font.Family.Base}"
+                                   FontSize="{StaticResource Font.Size.Sm}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimary}"
+                                   Text="{Binding KpiEndValue, StringFormat='N0'}"
+                                   Typography.NumeralAlignment="Tabular" />
+                    </StackPanel>
                 </StackPanel>
-            </Border>
-            <!--  年化  -->
-            <Border Margin="4,0,0,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}">
-                <StackPanel>
-                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+
+                <!--  Right：年化（次要、靠右垂直置中）  -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock HorizontalAlignment="Right"
+                               FontSize="{DynamicResource Font.Size.Xs}"
                                Foreground="{DynamicResource AppTextMuted}"
                                Text="{DynamicResource Trends.Kpi.Annualized}" />
-                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                    <TextBlock Margin="0,4,0,0"
+                               HorizontalAlignment="Right"
+                               FontFamily="{StaticResource Font.Family.Base}"
+                               FontSize="{StaticResource Font.Size.Xl}"
+                               FontWeight="SemiBold"
                                Foreground="{DynamicResource AppTextPrimary}"
-                               Text="{Binding KpiAnnualizedPct, StringFormat='+0.00%;-0.00%;0.00%'}" />
+                               Text="{Binding KpiAnnualizedPct, StringFormat='+0.00%;-0.00%;0.00%'}"
+                               Typography.NumeralAlignment="Tabular" />
                 </StackPanel>
-            </Border>
-        </UniformGrid>
+            </Grid>
+        </Border>
 
         <!--
             ── 風險指標列 ──
-            從 Reports.Risk Expander 搬到 Trends（合併「動態觀察」語意）。
-            每張卡有獨立的 Has* 旗標控制顯示；都沒注入時整列空白。
+            從原本「KPI row 之後」改放在 chart 下方（與對標 row 同層次），
+            減少進階指標對主視覺的視覺競爭。波動率 / Sharpe 對個人理財一般使用者是
+            次要資訊；放這裡仍可看，但不會干擾主要「賺多少 / 報酬率」的訊息。
         -->
         <UniformGrid
-            Grid.Row="3"
-            Margin="0,8,0,0"
+            Grid.Row="2"
+            Margin="0,8,0,12"
             Columns="4"
             Visibility="{Binding HasKpis, Converter={StaticResource BooleanToVisibilityConverter}}">
             <!--  最大回撤  -->
@@ -264,12 +286,20 @@
             CornerRadius="{StaticResource Radius.Sm}"
             Visibility="{Binding HasBenchmark, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>
-                <TextBlock
-                    Margin="0,0,0,6"
-                    FontSize="{DynamicResource Font.Size.Xs}"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{DynamicResource Trends.Benchmark.Heading}" />
+                <DockPanel Margin="0,0,0,6" LastChildFill="False">
+                    <TextBlock
+                        DockPanel.Dock="Left"
+                        FontSize="{DynamicResource Font.Size.Xs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Trends.Benchmark.Heading}" />
+                    <!--  期間 subtitle：讓使用者清楚對標數值對應的時間範圍  -->
+                    <TextBlock
+                        DockPanel.Dock="Right"
+                        FontSize="{DynamicResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{Binding BenchmarkPeriodDisplay}" />
+                </DockPanel>
                 <UniformGrid Columns="4">
                     <StackPanel Margin="0,0,8,0">
                         <TextBlock FontSize="{DynamicResource Font.Size.Xs}"

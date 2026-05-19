@@ -153,12 +153,23 @@
 
                 <!--  單價輸入 (在 unit mode 顯示)  -->
                 <StackPanel d:Visibility="Visible" Visibility="{Binding Buy.IsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock
-                        Margin="0,0,0,4"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Portfolio.AddPrice}" />
+                    <!--
+                        Label + instrument-currency badge — badge 在標的計價為 USD/JPY/HKD 等
+                        非 TWD 時才出現（同幣別不渲染避免干擾）。MultiCurrency-Trade-Refactor P3.
+                    -->
+                    <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.AddPrice}" />
+                        <TextBlock
+                            Margin="6,0,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppAccent}"
+                            Text="{Binding Buy.InstrumentCurrencyBadge}"
+                            Visibility="{Binding Buy.InstrumentCurrencyBadge, Converter={StaticResource StringToVisibilityConverter}}" />
+                    </StackPanel>
                     <TextBox
                         behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                         IsEnabled="{Binding AreEconomicFieldsEditable}"
@@ -168,11 +179,22 @@
                         Text="{Binding AddAssetDialog.AddPriceError}"
                         Visibility="{Binding AddAssetDialog.AddPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
                     <TextBlock
-                        Margin="0,2,0,8"
+                        Margin="0,2,0,2"
                         FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{Binding AddAssetDialog.ClosePriceHint}"
                         Visibility="{Binding AddAssetDialog.ClosePriceHint, Converter={StaticResource StringToVisibilityConverter}}" />
+                    <!--
+                        Mode C hint — 成交價可留空，由實際扣款 + 股數反推。
+                        永遠顯示在 unit-mode 下，提示使用者偷懶選項。
+                        MultiCurrency-Trade-Refactor P3.
+                    -->
+                    <TextBlock
+                        Margin="0,2,0,8"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Portfolio.AddPrice.OptionalHint}"
+                        TextWrapping="Wrap" />
                 </StackPanel>
 
                 <!--  總額輸入 (在 total mode 顯示)  -->
@@ -483,6 +505,79 @@
                     Foreground="{DynamicResource AppAccent}"
                     Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
                     Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                <!--
+                    跨幣別 banner — Buy.IsCrossCurrency=true (標的幣別 ≠ 帳戶幣別) 時顯示，
+                    白話告訴使用者「為什麼底下兩個額外欄位變必填」。
+                    MultiCurrency-Trade-Refactor P3。
+                -->
+                <Border
+                    Margin="0,12,0,0"
+                    Padding="10,8"
+                    Background="{DynamicResource AppAccentSubtle}"
+                    BorderBrush="{DynamicResource AppAccent}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}"
+                    Visibility="{Binding Buy.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Portfolio.Tx.CrossCurrency.Banner}" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Tx.CrossCurrency.Hint}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <!--
+                    FX rate (跨幣別模式才顯示)。同幣別時隱藏 → Trade.FxRate = null = implicit 1.0。
+                -->
+                <StackPanel Visibility="{Binding Buy.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock
+                        Margin="0,12,0,4"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Tx.FxRate}" />
+                    <TextBox
+                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                        Text="{Binding Buy.FxRate, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock
+                        Style="{StaticResource FormFieldError}"
+                        Text="{Binding Buy.FxRateError}"
+                        Visibility="{Binding Buy.FxRateError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    <TextBlock
+                        Margin="0,2,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Portfolio.Tx.FxRate.Hint}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <TextBlock
+                    Margin="0,12,0,4"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Portfolio.Tx.ActualCashAmount}" />
+                <TextBox
+                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                    Text="{Binding Buy.ActualCashAmount, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Style="{StaticResource FormFieldError}"
+                    Text="{Binding Buy.ActualCashAmountError}"
+                    Visibility="{Binding Buy.ActualCashAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
+                <TextBlock
+                    Margin="0,2,0,0"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppTextMuted}"
+                    Text="{DynamicResource Portfolio.Tx.ActualCashAmountHint}"
+                    TextWrapping="Wrap" />
             </StackPanel>
         </StackPanel>
     </StackPanel>

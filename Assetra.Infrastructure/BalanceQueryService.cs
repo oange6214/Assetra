@@ -218,10 +218,16 @@ public sealed class BalanceQueryService : IBalanceQueryService
         TradeType.LoanRepay    => -(t.CashAmount ?? 0m),   // 全部付款從現金扣
         TradeType.CreditCardPayment => -(t.CashAmount ?? 0m),
         TradeType.Transfer     => -(t.CashAmount ?? 0m),   // 來源帳戶減少
-        TradeType.Buy          => -(t.Price * t.Quantity + (t.Commission ?? 0m)),
-        TradeType.Sell         => +(t.Price * t.Quantity - (t.Commission ?? 0m)),
+        TradeType.Buy          => -BuyCashAmount(t),
+        TradeType.Sell         => +SellCashAmount(t),
         _                      => 0m,
     };
+
+    private static decimal BuyCashAmount(Trade t) =>
+        t.CashAmount ?? (t.Price * t.Quantity + (t.Commission ?? 0m));
+
+    private static decimal SellCashAmount(Trade t) =>
+        t.CashAmount ?? (t.Price * t.Quantity - (t.Commission ?? 0m));
 
     private static string? GetLiabilityLabel(Trade t) => t.Type switch
     {

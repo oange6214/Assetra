@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel},
                                      IsDesignTimeCreatable=False}"
-    Visibility="{Binding GoalsWidget, Converter={StaticResource NullToVisibilityConverter}}"
+    Visibility="{Binding HasNoGoals, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -82,26 +82,12 @@
             </ItemsControl>
 
             <!--  空狀態 onboarding：當沒有任何目標時，給明顯的 CTA  -->
-            <Border Margin="0,4,0,0"
-                    Padding="14,12"
-                    Background="{DynamicResource AppHover}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}"
-                    Visibility="{Binding HasNoGoals, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel>
-                    <TextBlock FontSize="{StaticResource Font.Size.Xs}"
-                               Foreground="{DynamicResource AppTextSecondary}"
-                               Text="{DynamicResource Dashboard.Widget.Goals.Empty}"
-                               TextWrapping="Wrap" />
-                    <Button Margin="0,8,0,0"
-                            Padding="10,4"
-                            HorizontalAlignment="Left"
-                            Command="{Binding NavigateToGoalsCommand}"
-                            Content="{DynamicResource Dashboard.Widget.Goals.CreateFirst}"
-                            Style="{StaticResource AppSecondaryButton}" />
-                </StackPanel>
-            </Border>
+            <!--
+                v3 consolidation 2026-05-17：移除「尚未設定任何目標 + 建立第一個目標」
+                inner empty-state Border。原本跟 Hero CTA 雙重出現；現在整個 GoalsWidget
+                在 HasNoGoals=true 時透過 outer Visibility 隱藏，唯一的目標設定入口由
+                Hero「點此設定 →」承擔，視覺更乾淨。
+            -->
 
             <TextBlock Style="{StaticResource DashboardWidgetFooter}"
                        Text="{DynamicResource Dashboard.Widget.SeeMore}">

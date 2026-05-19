@@ -12,10 +12,25 @@ public static class StockExchangeRegistry
     public static readonly StockExchange NYSE = new("NYSE", "New York Stock Exchange", "USD", "US", "America/New_York");
     public static readonly StockExchange NASDAQ = new("NASDAQ", "Nasdaq Stock Market", "USD", "US", "America/New_York");
     public static readonly StockExchange AMEX = new("AMEX", "NYSE American", "USD", "US", "America/New_York");
+    public static readonly StockExchange NYSEARCA = new("NYSEARCA", "NYSE Arca", "USD", "US", "America/New_York");
+    public static readonly StockExchange BATS = new("BATS", "Cboe BZX", "USD", "US", "America/New_York");
+    public static readonly StockExchange IEX = new("IEX", "Investors Exchange", "USD", "US", "America/New_York");
     public static readonly StockExchange HKEX = new("HKEX", "Hong Kong Exchanges", "HKD", "HK", "Asia/Hong_Kong");
     public static readonly StockExchange TSE = new("TSE", "Tokyo Stock Exchange", "JPY", "JP", "Asia/Tokyo");
 
-    public static IReadOnlyList<StockExchange> Known { get; } = [TWSE, TPEX, NYSE, NASDAQ, AMEX, HKEX, TSE];
+    public static IReadOnlyList<StockExchange> Known { get; } =
+    [
+        TWSE,
+        TPEX,
+        NYSE,
+        NASDAQ,
+        AMEX,
+        NYSEARCA,
+        BATS,
+        IEX,
+        HKEX,
+        TSE,
+    ];
 
     private static readonly Dictionary<string, StockExchange> Map =
         Known.ToDictionary(e => e.Code, StringComparer.OrdinalIgnoreCase);

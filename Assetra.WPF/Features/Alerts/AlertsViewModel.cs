@@ -18,6 +18,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
     private readonly ISnackbarService _snackbar;
     private readonly ILocalizationService _localization;
     private readonly ICurrencyService? _currencyService;
+    private readonly ISymbolDirectory? _symbolDirectory;
     private IDisposable? _subscription;
 
     private readonly ObservableCollection<AlertRowViewModel> _rules = [];
@@ -25,6 +26,8 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
 
     // Add form
     [ObservableProperty] private string _addSymbol = string.Empty;
+    [ObservableProperty] private string _addExchange = string.Empty;
+    [ObservableProperty] private string _addSymbolName = string.Empty;
     [ObservableProperty] private string _addTargetPrice = string.Empty;
     [ObservableProperty] private string _addCondition = "突破";
     [ObservableProperty] private string _addError = string.Empty;
@@ -64,6 +67,8 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         if (_suppressSuggestions)
             return;
 
+        AddExchange = string.Empty;
+        AddSymbolName = string.Empty;
         if (string.IsNullOrWhiteSpace(value))
         {
             IsSuggestionsOpen = false;
@@ -71,7 +76,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
             return;
         }
 
-        SymbolSuggestions = _search.Search(value.Trim());
+        SymbolSuggestions = _symbolDirectory?.Search(value.Trim()) ?? _search.Search(value.Trim());
         IsSuggestionsOpen = SymbolSuggestions.Count > 0;
     }
 
@@ -82,13 +87,15 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         IScheduler uiScheduler,
         ISnackbarService snackbar,
         ILocalizationService localization,
-        ICurrencyService? currencyService = null)
+        ICurrencyService? currencyService = null,
+        ISymbolDirectory? symbolDirectory = null)
     {
         _alertService = alertRepo;
         _search = search;
         _snackbar = snackbar;
         _localization = localization;
         _currencyService = currencyService;
+        _symbolDirectory = symbolDirectory;
         Rules = new ReadOnlyObservableCollection<AlertRowViewModel>(_rules);
 
         _subscription = stockService.QuoteStream
@@ -132,6 +139,8 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         IsSuggestionsOpen = false;
         SymbolSuggestions = [];
         AddSymbol = string.Empty;
+        AddExchange = string.Empty;
+        AddSymbolName = string.Empty;
         AddTargetPrice = string.Empty;
         AddCondition = "突破";
         IsFormOpen = false;
@@ -147,7 +156,10 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         { AddError = "價格無效"; return; }
 
         var symbol = AddSymbol.Trim().ToUpper();
-        var exchange = _search.GetExchange(symbol);
+        var resolved = ResolveSymbol(symbol, AddExchange);
+        var exchange = string.IsNullOrWhiteSpace(AddExchange)
+            ? resolved?.Exchange ?? _search.GetExchange(symbol)
+            : AddExchange.Trim().ToUpperInvariant();
         if (exchange is null)
         { AddError = "找不到股票代號"; return; }
 
@@ -162,6 +174,8 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         IsSuggestionsOpen = false;
         SymbolSuggestions = [];
         AddSymbol = string.Empty;
+        AddExchange = string.Empty;
+        AddSymbolName = string.Empty;
         AddTargetPrice = string.Empty;
         IsFormOpen = false;
         var condLabel = condition == AlertCondition.Above
@@ -307,7 +321,7 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         Id = r.Id,
         Symbol = r.Symbol,
         Exchange = r.Exchange,
-        Name = _search.GetName(r.Symbol) ?? string.Empty,
+        Name = ResolveSymbol(r.Symbol, r.Exchange)?.Name ?? _search.GetName(r.Symbol) ?? string.Empty,
         Condition = r.Condition,
         TargetPrice = r.TargetPrice,
         IsTriggered = r.IsTriggered,
@@ -346,6 +360,11 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
         _suppressSuggestions = true;
         IsSuggestionsOpen = false;
         AddSymbol = suggestion.Symbol;
+        AddExchange = suggestion.Exchange;
+        AddSymbolName = suggestion.Name;
         _suppressSuggestions = false;
     }
+
+    private StockSearchResult? ResolveSymbol(string symbol, string? exchange = null) =>
+        _symbolDirectory?.Resolve(symbol, exchange);
 }

@@ -7,6 +7,7 @@ using Assetra.Core.Interfaces.Analysis;
 using Assetra.Infrastructure;
 using Assetra.WPF.Features.Portfolio.Controls;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
+using Assetra.WPF.Features.PortfolioGroups;
 using Assetra.WPF.Features.Snackbar;
 using Assetra.WPF.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -76,7 +77,9 @@ internal sealed class PortfolioViewModelFactory
                 sp.GetRequiredService<ISellWorkflowService>(),
                 new PortfolioSellPanelController(),
                 sp.GetRequiredService<ISnackbarService>(),
-                sp.GetRequiredService<ILocalizationService>()))
+                sp.GetRequiredService<ILocalizationService>()),
+            // Portfolio-Groups-Refactor P3 — 共用群組目錄注入。
+            GroupCatalog: sp.GetService<PortfolioGroupCatalog>())
         {
             Summary = sp.GetRequiredService<IPortfolioSummaryService>(),
         };

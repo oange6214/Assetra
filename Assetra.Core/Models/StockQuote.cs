@@ -12,4 +12,7 @@ public record StockQuote(
     decimal High,
     decimal Low,
     decimal PrevClose,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt,
+    string Currency = "TWD",
+    bool IsStale = false,
+    string ProviderStateMessage = "");

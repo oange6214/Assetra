@@ -22,7 +22,11 @@
         <conv:PercentToWidthConverter x:Key="PctToWidth" />
     </UserControl.Resources>
 
-    <Grid>
+    <!--
+        套用 PageRootGrid 樣式統一頁面 padding（與其他財務概覽 tab 一致：總覽 / 資產趨勢 / 報酬日曆）。
+        修前是裸 Grid 沒外邊距，內部卡片用 Margin="24" 個別控制，造成頁面跟其他 tab 視覺不齊。
+    -->
+    <Grid Style="{StaticResource PageRootGrid}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <!--  tab bar  -->
@@ -30,25 +34,28 @@
             <!--  content  -->
         </Grid.RowDefinitions>
 
-        <!--  ── Tab bar ───────────────────────────────────────────────────  -->
         <Border
             Grid.Row="0"
+            Margin="0,0,0,12"
+            Padding="2"
+            HorizontalAlignment="Left"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="0,0,0,1">
-            <StackPanel Margin="16,0" Orientation="Horizontal">
+            BorderThickness="1"
+            CornerRadius="{StaticResource Radius.Md}">
+            <StackPanel Orientation="Horizontal">
                 <RadioButton
                     Command="{Binding SwitchToOverviewCommand}"
                     Content="{DynamicResource Allocation.Tab.Overview}"
                     GroupName="AllocTabs"
                     IsChecked="{Binding IsOverviewTab, Mode=OneWay}"
-                    Style="{StaticResource NavTabBtn}" />
+                    Style="{StaticResource AppSegmentButton}" />
                 <RadioButton
                     Command="{Binding SwitchToRebalanceCommand}"
                     Content="{DynamicResource Allocation.Tab.Rebalance}"
                     GroupName="AllocTabs"
                     IsChecked="{Binding IsRebalanceTab, Mode=OneWay}"
-                    Style="{StaticResource NavTabBtn}" />
+                    Style="{StaticResource AppSegmentButton}" />
             </StackPanel>
         </Border>
 
@@ -59,15 +66,16 @@
             Visibility="{Binding IsOverviewTab, Converter={StaticResource BoolToVis}}">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" MinWidth="320" />
-                    <ColumnDefinition Width="*" MinWidth="360" />
+                    <ColumnDefinition Width="0.8*" MinWidth="360" />
+                    <ColumnDefinition Width="1.2*" MinWidth="520" />
                 </Grid.ColumnDefinitions>
 
-                <!--  Left: treemap  -->
-                <Border Style="{StaticResource FormCard}"
+                <!--  Left: ranked allocation list. Treemap hides tiny positions such as DRAM.  -->
+                <Border
                     Grid.Column="0"
-                    Margin="24,24,8,24"
-                    Padding="16">
+                    Margin="0,0,8,0"
+                    Padding="16"
+                    Style="{StaticResource FormCard}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -75,6 +83,28 @@
                         </Grid.RowDefinitions>
 
                         <DockPanel Grid.Row="0" Margin="0,0,0,10" LastChildFill="True">
+                            <!--
+                                Portfolio-Groups-Refactor P4 — 「依 Symbol / 依群組」切換。
+                                Catalog 未啟用時整個 StackPanel 隱藏，VM 維持 IsByGroupMode = false。
+                            -->
+                            <StackPanel
+                                DockPanel.Dock="Right"
+                                Orientation="Horizontal"
+                                Visibility="{Binding HasPortfolioGroups, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                                <RadioButton
+                                    Margin="0,0,12,0"
+                                    Content="{DynamicResource Allocation.GroupBy.Symbol}"
+                                    GroupName="AllocGroupBy"
+                                    IsChecked="{Binding IsBySymbolMode, Mode=OneWay}"
+                                    Command="{Binding SetByGroupModeCommand}"
+                                    CommandParameter="False" />
+                                <RadioButton
+                                    Content="{DynamicResource Allocation.GroupBy.Group}"
+                                    GroupName="AllocGroupBy"
+                                    IsChecked="{Binding IsByGroupMode, Mode=OneWay}"
+                                    Command="{Binding SetByGroupModeCommand}"
+                                    CommandParameter="True" />
+                            </StackPanel>
                             <TextBlock
                                 FontSize="{StaticResource Font.Size.Md}"
                                 FontWeight="SemiBold"
@@ -82,127 +112,137 @@
                                 Text="{DynamicResource Allocation.Overview.Title}" />
                         </DockPanel>
 
-                        <ItemsControl
+                        <ScrollViewer
                             Grid.Row="1"
-                            ItemsSource="{Binding AllocationRows}"
-                            UseLayoutRounding="True">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <controls:TreemapPanel />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemContainerStyle>
-                                <Style TargetType="ContentPresenter">
-                                    <Setter Property="controls:TreemapPanel.Weight" Value="{Binding ActualPercentWeight}" />
-                                </Style>
-                            </ItemsControl.ItemContainerStyle>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                                    <Border
-                                        controls:ToolTipBehavior.FollowMouse="True"
-                                        Background="{Binding PnlColorBrush}"
-                                        ClipToBounds="True">
-                                        <Border.ToolTip>
-                                            <ToolTip>
-                                                <StackPanel MinWidth="160">
-                                                    <TextBlock
-                                                        FontSize="{StaticResource Font.Size.Sm}"
-                                                        FontWeight="SemiBold"
-                                                        Text="{Binding Symbol}" />
-                                                    <TextBlock
-                                                        Margin="0,1,0,6"
-                                                        FontSize="{StaticResource Font.Size.Xs}"
-                                                        Foreground="{DynamicResource AppTextMuted}"
-                                                        Text="{Binding Name}" />
-                                                    <DockPanel Margin="0,2,0,0">
-                                                        <TextBlock
-                                                            DockPanel.Dock="Left"
-                                                            FontSize="{StaticResource Font.Size.Xs}"
-                                                            Text="{DynamicResource Portfolio.Allocation.Header.MarketValue}" />
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding AllocationRows}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+                                        <Border
+                                            Margin="0,0,0,10"
+                                            Padding="0,0,0,10"
+                                            BorderBrush="{DynamicResource AppBorderLight}"
+                                            BorderThickness="0,0,0,1">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <Grid Grid.Row="0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                                        <Border
+                                                            Width="10"
+                                                            Height="10"
+                                                            Margin="0,4,8,0"
+                                                            VerticalAlignment="Top"
+                                                            Background="{Binding ColorBrush}"
+                                                            CornerRadius="{StaticResource Radius.Xs}" />
+                                                        <StackPanel>
+                                                            <TextBlock
+                                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                                FontSize="{StaticResource Font.Size.Sm}"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                                Text="{Binding Symbol}"
+                                                                Typography.NumeralAlignment="Tabular" />
+                                                            <TextBlock
+                                                                Margin="0,1,8,0"
+                                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                                Foreground="{DynamicResource AppTextMuted}"
+                                                                Text="{Binding Name}"
+                                                                TextTrimming="CharacterEllipsis" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="1" HorizontalAlignment="Right">
                                                         <TextBlock
                                                             HorizontalAlignment="Right"
                                                             FontFamily="{StaticResource Font.Family.Base}"
-                                                            FontSize="{StaticResource Font.Size.Xs}"
+                                                            FontSize="{StaticResource Font.Size.Sm}"
                                                             FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
                                                             Text="{Binding MarketValue, StringFormat='NT\${0:N0}'}"
                                                             Typography.NumeralAlignment="Tabular" />
-                                                    </DockPanel>
-                                                    <DockPanel Margin="0,2,0,0">
-                                                        <TextBlock
-                                                            DockPanel.Dock="Left"
-                                                            FontSize="{StaticResource Font.Size.Xs}"
-                                                            Text="{DynamicResource Portfolio.Allocation.Header.ActualWeight}" />
                                                         <TextBlock
                                                             HorizontalAlignment="Right"
                                                             FontFamily="{StaticResource Font.Family.Base}"
                                                             FontSize="{StaticResource Font.Size.Xs}"
-                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextSecondary}"
                                                             Text="{Binding ActualPercentDisplay}"
                                                             Typography.NumeralAlignment="Tabular" />
-                                                    </DockPanel>
-                                                    <DockPanel Margin="0,2,0,0">
+                                                    </StackPanel>
+                                                </Grid>
+
+                                                <Grid Grid.Row="1" Height="5" Margin="0,8,0,0">
+                                                    <Border Background="{DynamicResource AppBorderLight}" CornerRadius="2.5" />
+                                                    <Border
+                                                        MinWidth="3"
+                                                        HorizontalAlignment="Left"
+                                                        Background="{Binding ColorBrush}"
+                                                        CornerRadius="2.5">
+                                                        <Border.Width>
+                                                            <MultiBinding Converter="{StaticResource PctToWidth}">
+                                                                <Binding Path="ActualPercent" />
+                                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                                                            </MultiBinding>
+                                                        </Border.Width>
+                                                    </Border>
+                                                </Grid>
+
+                                                <DockPanel Grid.Row="2" Margin="0,6,0,0" LastChildFill="False">
+                                                    <TextBlock
+                                                        DockPanel.Dock="Left"
+                                                        FontSize="{StaticResource Font.Size.Xs}"
+                                                        Foreground="{DynamicResource AppTextMuted}"
+                                                        Text="{DynamicResource Portfolio.Allocation.Header.Pnl}" />
+                                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                                                         <TextBlock
-                                                            DockPanel.Dock="Left"
-                                                            FontSize="{StaticResource Font.Size.Xs}"
-                                                            Text="{DynamicResource Portfolio.Allocation.Header.Pnl}" />
-                                                        <TextBlock
-                                                            HorizontalAlignment="Right"
                                                             FontFamily="{StaticResource Font.Family.Base}"
                                                             FontSize="{StaticResource Font.Size.Xs}"
                                                             FontWeight="SemiBold"
                                                             Text="{Binding PnlDisplay}"
-                                                            Typography.NumeralAlignment="Tabular" />
-                                                    </DockPanel>
-                                                    <DockPanel Margin="0,2,0,0">
+                                                            Typography.NumeralAlignment="Tabular">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsPnlPositive}" Value="True">
+                                                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
                                                         <TextBlock
-                                                            DockPanel.Dock="Left"
-                                                            FontSize="{StaticResource Font.Size.Xs}"
-                                                            Text="{DynamicResource Portfolio.Allocation.Header.PnlRate}" />
-                                                        <TextBlock
-                                                            HorizontalAlignment="Right"
+                                                            Margin="4,0,0,0"
                                                             FontFamily="{StaticResource Font.Family.Base}"
                                                             FontSize="{StaticResource Font.Size.Xs}"
-                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextSecondary}"
                                                             Text="{Binding PnlPercentDisplay}"
                                                             Typography.NumeralAlignment="Tabular" />
-                                                    </DockPanel>
-                                                </StackPanel>
-                                            </ToolTip>
-                                        </Border.ToolTip>
-                                        <StackPanel
-                                            Margin="4"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
-                                            <TextBlock
-                                                HorizontalAlignment="Center"
-                                                FontSize="{StaticResource Font.Size.Sm}"
-                                                FontWeight="SemiBold"
-                                                Foreground="{DynamicResource AppTextOnAccent}"
-                                                Text="{Binding Symbol}"
-                                                TextTrimming="CharacterEllipsis" />
-                                            <TextBlock
-                                                HorizontalAlignment="Center"
-                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                Foreground="{DynamicResource AppTextOnAccent}"
-                                                Text="{Binding ActualPercentDisplay}" />
-                                            <TextBlock
-                                                HorizontalAlignment="Center"
-                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                FontWeight="SemiBold"
-                                                Foreground="{DynamicResource AppTextOnAccent}"
-                                                Text="{Binding PnlPercentTreemap}" />
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                                    </StackPanel>
+                                                </DockPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
                     </Grid>
                 </Border>
 
-                <!--  Right: asset list DataGrid wrapped in FormCard for visual consistency with the left treemap card  -->
+                <!--  Right: precise asset table for sorting and numeric comparison.  -->
                 <Border
                     Grid.Column="1"
-                    Margin="8,24,24,24"
+                    Margin="8,0,0,0"
                     Padding="0"
                     Style="{StaticResource FormCard}"
                     ClipToBounds="True">
@@ -664,62 +704,77 @@
                 <!--  rows  -->
             </Grid.RowDefinitions>
 
-            <!--  Header card  -->
-            <Border Style="{StaticResource FormCard}"
+            <!--  Compact command bar  -->
+            <Border
                 Grid.Row="0"
-                Margin="24,24,24,16"
-                Padding="16">
-                <StackPanel>
-                    <TextBlock
-                        FontSize="{StaticResource Font.Size.Md}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{DynamicResource Allocation.Rebalance.Title}" />
-                    <TextBlock
-                        Margin="0,2,0,10"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource Allocation.Rebalance.Subtitle}"
-                        TextWrapping="Wrap" />
-                    <WrapPanel>
+                Margin="0,0,0,12"
+                Padding="14,12"
+                Style="{StaticResource FormCard}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Md}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Allocation.Rebalance.Title}" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Allocation.Rebalance.Subtitle}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel
+                        Grid.Column="1"
+                        Margin="0,0,12,0"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
                         <Border
-                            Margin="0,0,12,8"
                             Padding="2"
                             Background="{DynamicResource AppBackground}"
                             BorderBrush="{DynamicResource AppBorder}"
                             BorderThickness="1"
-                            CornerRadius="{StaticResource Radius.Sm}">
-                            <WrapPanel>
+                            CornerRadius="{StaticResource Radius.Md}">
+                            <StackPanel Orientation="Horizontal">
                                 <RadioButton
                                     Command="{Binding SetFullRebalanceCommand}"
                                     Content="{DynamicResource Allocation.Rebalance.Full}"
                                     GroupName="RebalanceMode"
                                     IsChecked="{Binding IsFullRebalance}"
-                                    Style="{StaticResource NavTabBtn}" />
+                                    Style="{StaticResource AppSegmentButton}" />
                                 <RadioButton
                                     Command="{Binding SetCashRebalanceCommand}"
                                     Content="{DynamicResource Allocation.Rebalance.CashFlow}"
                                     GroupName="RebalanceMode"
                                     IsChecked="{Binding IsCashRebalance}"
-                                    Style="{StaticResource NavTabBtn}" />
-                            </WrapPanel>
+                                    Style="{StaticResource AppSegmentButton}" />
+                            </StackPanel>
                         </Border>
-                        <Button
-                            MinHeight="30"
-                            Margin="0,0,0,8"
-                            Padding="10,0"
-                            Style="{StaticResource AppSecondaryButton}"
-                            Command="{Binding BeginEditTargetsCommand}">
-                            <TextBlock Text="{DynamicResource Allocation.Rebalance.EditTargets}" />
-                        </Button>
-                    </WrapPanel>
-                </StackPanel>
+                    </StackPanel>
+
+                    <Button
+                        Grid.Column="2"
+                        MinHeight="34"
+                        Padding="12,0"
+                        VerticalAlignment="Center"
+                        Command="{Binding BeginEditTargetsCommand}"
+                        Style="{StaticResource AppSecondaryButton}">
+                        <TextBlock Text="{DynamicResource Allocation.Rebalance.EditTargets}" />
+                    </Button>
+                </Grid>
             </Border>
 
             <!--  Cash-flow info bar (only when IsCashRebalance)  -->
             <Border Style="{StaticResource FormCard}"
                 Grid.Row="1"
-                Margin="24,0,24,16"
+                Margin="0,0,0,16"
                 Padding="16"
                 Visibility="{Binding IsCashRebalance, Converter={StaticResource BoolToVis}}">
                 <StackPanel>

@@ -23,11 +23,21 @@ public interface IBuyExecutionContext
     /// <summary>Raw text of the optional manual fee field. Empty string when not used.</summary>
     string TxFee { get; }
 
+    /// <summary>
+    /// Raw text of the optional actual cash debit field. This is the amount
+    /// deducted from the linked cash account, in that account's currency.
+    /// Empty string means "estimate from the trade price and fee".
+    /// </summary>
+    string ActualCashAmount { get; }
+
     /// <summary>True when the buy is "metadata only" (no Trade record written).</summary>
     bool BuyMetaOnly { get; }
 
     /// <summary>Cash account id to debit; null = no cash linkage.</summary>
     Guid? CashAccountId { get; }
+
+    /// <summary>Currency of the selected cash account, when known.</summary>
+    string? CashAccountCurrency { get; }
 
     /// <summary>True when the buy should debit a cash account.</summary>
     bool UseCashAccount { get; }
@@ -41,6 +51,13 @@ public interface IBuyExecutionContext
     /// "force commission = 0" path so Trade.CashAmount matches the user input.
     /// </summary>
     bool BuyTotalIncludesFee { get; }
+
+    /// <summary>
+    /// Raw text of the optional FX rate field (instrument currency → funding currency).
+    /// Empty string = same currency or user hasn't filled. Parsed at confirm-time.
+    /// MultiCurrency-Trade-Refactor P3.
+    /// </summary>
+    string FxRate { get => string.Empty; }
 }
 
 /// <summary>
@@ -53,8 +70,10 @@ public sealed class NullBuyContext : IBuyExecutionContext
 
     public decimal CommissionDiscount => 1m;
     public string TxFee => string.Empty;
+    public string ActualCashAmount => string.Empty;
     public bool BuyMetaOnly => false;
     public Guid? CashAccountId => null;
+    public string? CashAccountCurrency => null;
     public bool UseCashAccount => false;
     public bool BuyIsTotalMode => false;
     public bool BuyTotalIncludesFee => true;
@@ -67,8 +86,10 @@ public sealed class NullBuyContext : IBuyExecutionContext
 public sealed class StaticBuyContext(
     decimal commissionDiscount = 1m,
     string txFee = "",
+    string actualCashAmount = "",
     bool buyMetaOnly = false,
     Guid? cashAccountId = null,
+    string? cashAccountCurrency = null,
     bool useCashAccount = false,
     bool buyIsTotalMode = false,
     bool buyTotalIncludesFee = true)
@@ -76,8 +97,10 @@ public sealed class StaticBuyContext(
 {
     public decimal CommissionDiscount { get; } = commissionDiscount;
     public string TxFee { get; } = txFee;
+    public string ActualCashAmount { get; } = actualCashAmount;
     public bool BuyMetaOnly { get; } = buyMetaOnly;
     public Guid? CashAccountId { get; } = cashAccountId;
+    public string? CashAccountCurrency { get; } = cashAccountCurrency;
     public bool UseCashAccount { get; } = useCashAccount;
     public bool BuyIsTotalMode { get; } = buyIsTotalMode;
     public bool BuyTotalIncludesFee { get; } = buyTotalIncludesFee;

@@ -23,7 +23,7 @@
     <Style x:Key="AppDataGridColHeader" TargetType="DataGridColumnHeader">
         <Setter Property="Background" Value="{DynamicResource AppSurface}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Padding" Value="6,6" />

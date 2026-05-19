@@ -56,15 +56,41 @@ public sealed class AppIcon : Control
     /// <summary>Regular vs Filled variant, derived from the <see cref="Filled"/> flag.</summary>
     public static readonly DependencyProperty IconVariantProperty = IconVariantPropertyKey.DependencyProperty;
 
+    private static readonly DependencyPropertyKey ResolvedIconSizePropertyKey =
+        DependencyProperty.RegisterReadOnly(
+            nameof(ResolvedIconSize),
+            typeof(FluentCommon.IconSize),
+            typeof(AppIcon),
+            new FrameworkPropertyMetadata(FluentCommon.IconSize.Size16));
+
+    /// <summary>
+    /// 依 <see cref="Control.FontSize"/> 映射到最接近的原生 Fluent IconSize 變體
+    /// （Size16/Size20/Size24/Size32/Size48）。讓不同尺寸 icon 用各自設計師調好
+    /// 的筆畫粗細，而不是把 Size24 用 Viewbox 縮放（會讓 16px 看起來太細、44px
+    /// 看起來太粗）。
+    /// </summary>
+    public static readonly DependencyProperty ResolvedIconSizeProperty = ResolvedIconSizePropertyKey.DependencyProperty;
+
     static AppIcon()
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(AppIcon), new FrameworkPropertyMetadata(typeof(AppIcon)));
-        FontSizeProperty.OverrideMetadata(typeof(AppIcon), new FrameworkPropertyMetadata(16.0, FrameworkPropertyMetadataOptions.AffectsMeasure));
+        FontSizeProperty.OverrideMetadata(typeof(AppIcon),
+            new FrameworkPropertyMetadata(
+                16.0,
+                FrameworkPropertyMetadataOptions.AffectsMeasure,
+                OnFontSizeChanged));
+    }
+
+    private static void OnFontSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is AppIcon icon)
+            icon.RefreshResolvedSize();
     }
 
     public AppIcon()
     {
         Refresh();
+        RefreshResolvedSize();
     }
 
     public string Symbol
@@ -83,6 +109,8 @@ public sealed class AppIcon : Control
 
     public FluentCommon.IconVariant IconVariant => (FluentCommon.IconVariant)GetValue(IconVariantProperty);
 
+    public FluentCommon.IconSize ResolvedIconSize => (FluentCommon.IconSize)GetValue(ResolvedIconSizeProperty);
+
     private static void OnIconPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is AppIcon icon)
@@ -95,6 +123,17 @@ public sealed class AppIcon : Control
         SetValue(IconVariantPropertyKey, Filled
             ? FluentCommon.IconVariant.Filled
             : FluentCommon.IconVariant.Regular);
+    }
+
+    /// <summary>
+    /// 永遠選 Size24 — Fluent System Icons 的 Size24 變體最完整（所有 icon 都有，
+    /// 而 Size16/Size20/Size48 不少 icon 沒繪過，會出現缺字）。Viewbox 負責縮放到
+    /// 目標 FontSize，犧牲一點筆畫設計感換取「所有 icon 都看得到」的可靠性。
+    /// 屬性架構保留（未來可用），但暫時 hardcode。
+    /// </summary>
+    private void RefreshResolvedSize()
+    {
+        SetValue(ResolvedIconSizePropertyKey, FluentCommon.IconSize.Size24);
     }
 
     /// <summary>

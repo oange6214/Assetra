@@ -8,6 +8,7 @@ namespace Assetra.Core.Models;
 ///   Price    = 每股成交價
 ///   Quantity = 成交股數
 ///   RealizedPnl / RealizedPnlPct = 僅 Sell 時填入
+///   CashAmount = 實際現金進出金額（Buy 扣款、Sell 入帳；可不同於標的幣別成交總額）
 ///   CashAccountId = 扣款帳戶（Buy）或入帳帳戶（Sell）
 ///
 /// ─── 股利 ────────────────────────────────────────────────────────────────
@@ -87,7 +88,7 @@ public sealed record Trade(
     int Quantity,
     decimal? RealizedPnl,
     decimal? RealizedPnlPct,
-    decimal? CashAmount = null,          // 現金金額（收入 / 股利 / 存款 / 轉帳 …）
+    decimal? CashAmount = null,          // 實際現金進出金額（收入 / 股利 / 買賣扣入款 / 轉帳 …）
     Guid? CashAccountId = null,          // 來源或主要現金帳戶
     string? Note = null,                 // 收入類型標籤或備註
     Guid? PortfolioEntryId = null,       // 所屬持倉批次（Buy / Sell / StockDividend）
@@ -115,4 +116,32 @@ public sealed record Trade(
     Guid? ParentTradeId = null,          // 主交易 Id（費用子記錄使用）
     // ── 收支分類 / 週期交易來源（P1 收支管理）────────────────────
     Guid? CategoryId = null,             // 收支分類（ExpenseCategory.Id）
-    Guid? RecurringSourceId = null);     // 來源訂閱 / 週期交易（RecurringTransaction.Id）
+    Guid? RecurringSourceId = null,      // 來源訂閱 / 週期交易（RecurringTransaction.Id）
+    // ── 多幣別交易支援（MultiCurrency-Trade-Refactor P1）────────────
+    /// <summary>
+    /// 標的計價幣別（ISO 4217）。<see cref="Price"/> 與 <see cref="Commission"/>
+    /// (when <see cref="CommissionCurrency"/> is null) 都以此幣別計價。
+    /// 一律對齊 <see cref="Currency"/> 物件的 Code 寫法（"TWD"/"USD"/"JPY"/"HKD"/"EUR"）。
+    /// 預設 "TWD" 是為了讓既有資料在加欄位但尚未 backfill 時仍有可解讀的語意；
+    /// P2 backfill 會依 Exchange 把外幣標的改成對應幣別。
+    /// </summary>
+    string InstrumentCurrency = "TWD",
+    /// <summary>
+    /// 手續費的計價幣別。null 代表跟 <see cref="InstrumentCurrency"/> 一致
+    /// （多數情境）。複委託有時手續費是以本幣（TWD）計算而非標的幣別（USD），
+    /// 才會用到這個欄位。</summary>
+    string? CommissionCurrency = null,
+    /// <summary>
+    /// 標的幣別 → 扣款帳戶幣別 的匯率（<c>1 InstrumentCcy = FxRate FundingCcy</c>）。
+    /// null 代表兩個幣別相同（implicit 1.0），不需要 FX 轉換。
+    /// 跨幣別交易（複委託、外幣標的）必須填，否則
+    /// <see cref="CashAmount"/> 無法跟 <see cref="Price"/> × <see cref="Quantity"/> 對得起來。</summary>
+    decimal? FxRate = null,
+    // ── Portfolio-Groups-Refactor P1 ─────────────────────────────────
+    /// <summary>
+    /// 所屬投資組合群組（bucket，如「退休帳戶」「買房儲蓄」）。
+    /// null 代表尚未指派 — repository 在持久化時會替換成 <see cref="PortfolioGroup.DefaultId"/>，
+    /// 已存在的舊資料則由 schema migration backfill 補上 DefaultId。
+    /// 之後 UI / workflow 會把這個欄位暴露給使用者選擇。
+    /// </summary>
+    Guid? PortfolioGroupId = null);

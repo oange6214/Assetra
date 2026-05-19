@@ -13,10 +13,6 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <!--
-            Stage 4：cell 視覺。Tone enum 決定背景色階；紅綠依台灣慣例
-            （上漲紅、下跌綠）。非當月 / 無資料 cell 改用 muted。
-        -->
         <Style x:Key="DayCellBorder" TargetType="Border">
             <Setter Property="Margin" Value="2" />
             <Setter Property="Padding" Value="6,4" />
@@ -64,436 +60,507 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="16">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <!--  toolbar  -->
-            <RowDefinition Height="Auto" />
-            <!--  KPI line  -->
-            <RowDefinition Height="Auto" />
-            <!--  weekday header  -->
-            <RowDefinition Height="*" MinHeight="280" />
-            <!--  6 列 × 8 col grid（含週合計欄）— 拉伸填滿主要空間，使每列等高  -->
-            <RowDefinition Height="Auto" />
-            <!--  monthly bar chart：固定 100px 高，緊貼月曆下方  -->
-        </Grid.RowDefinitions>
+    <Grid Style="{StaticResource PageRootGrid}">
+        <Border Style="{StaticResource FormCard}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <!--  toolbar  -->
+                    <RowDefinition Height="Auto" />
+                    <!--  KPI line  -->
+                    <RowDefinition Height="Auto" />
+                    <!--  weekday header  -->
+                    <RowDefinition Height="*" MinHeight="280" />
+                    <!--  6 列 × 8 col grid（含週合計欄）— 拉伸填滿主要空間，使每列等高  -->
+                    <RowDefinition Height="Auto" />
+                    <!--  monthly bar chart：固定 100px 高，緊貼月曆下方  -->
+                </Grid.RowDefinitions>
 
-        <!--
-            ── Toolbar：月份切換 ──
-            ◄ ► 箭頭 + 月份下拉選單（保留兩種互動：快速翻頁與直接跳指定月份）。
-        -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="False">
-            <Button DockPanel.Dock="Left"
-                    Width="32" Height="32" Padding="0"
-                    Command="{Binding GoPrevCommand}"
-                    Style="{StaticResource AppIconButton}">
-                <ds:AppIcon Symbol="ChevronLeft24" FontSize="{StaticResource Font.Size.Md}" />
-            </Button>
-            <!--  月份下拉：點開後直接選任一月份  -->
-            <ComboBox DockPanel.Dock="Left"
-                      Margin="8,0"
-                      MinWidth="140"
-                      Height="32"
-                      ItemsSource="{Binding AvailableMonths}"
-                      SelectedItem="{Binding CurrentMonth, Mode=TwoWay}">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <!--
-                            DateOnly.Year / .Month 是 readonly get；TextBlock.Text 與 Run.Text
-                            預設 binding mode 是 TwoWay 會 throw InvalidOperationException
-                            （'cannot work on the read-only property'）。三處 binding 全部
-                            標明 Mode=OneWay。
-                        -->
-                        <TextBlock>
-                            <Run Text="{Binding Year, Mode=OneWay, StringFormat='0000'}" />
-                            <Run Text=" / " />
-                            <Run Text="{Binding Month, Mode=OneWay, StringFormat='00'}" />
-                        </TextBlock>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <Button DockPanel.Dock="Left"
-                    Width="32" Height="32" Padding="0"
-                    Command="{Binding GoNextCommand}"
-                    Style="{StaticResource AppIconButton}">
-                <ds:AppIcon Symbol="ChevronRight24" FontSize="{StaticResource Font.Size.Md}" />
-            </Button>
-            <Button DockPanel.Dock="Right"
-                    Padding="10,4"
-                    Command="{Binding GoTodayCommand}"
-                    Content="{DynamicResource Dashboard.Calendar.Today}"
-                    Style="{StaticResource AppSecondaryButton}" />
-            <!--  v2：絕對值 / 百分比 色階切換  -->
-            <CheckBox DockPanel.Dock="Right"
-                      Margin="0,0,12,0"
-                      VerticalAlignment="Center"
-                      IsChecked="{Binding UseAbsoluteForTone, Mode=TwoWay}"
-                      ToolTip="{DynamicResource Dashboard.Calendar.UseAbsolute.Tooltip}">
-                <TextBlock FontSize="{StaticResource Font.Size.Xs}"
-                           Foreground="{DynamicResource AppTextSecondary}"
-                           Text="{DynamicResource Dashboard.Calendar.UseAbsolute}" />
-            </CheckBox>
-            <!--  v2 #6d：年度熱度圖切換（GitHub contribution graph 風格）  -->
-            <CheckBox DockPanel.Dock="Right"
-                      Margin="0,0,12,0"
-                      VerticalAlignment="Center"
-                      IsChecked="{Binding IsYearView, Mode=TwoWay}">
-                <TextBlock FontSize="{StaticResource Font.Size.Xs}"
-                           Foreground="{DynamicResource AppTextSecondary}"
-                           Text="{DynamicResource Dashboard.Calendar.YearView}" />
-            </CheckBox>
-        </DockPanel>
+                <DockPanel
+                    Grid.Row="0"
+                    Margin="0,0,0,8"
+                    LastChildFill="False">
+                    <Button
+                        Width="32"
+                        Height="32"
+                        Padding="0"
+                        Command="{Binding GoPrevCommand}"
+                        DockPanel.Dock="Left"
+                        IsEnabled="{Binding CanGoPrev}"
+                        Style="{StaticResource AppIconButton}">
+                        <ds:AppIcon FontSize="{StaticResource Font.Size.Md}" Symbol="ChevronLeft24" />
+                    </Button>
 
-        <!--
-            ── 月份 KPI line：當月 PnL + 報酬率 ──
-            紅 / 綠依台灣慣例（漲紅跌綠），值為 0 時用 primary text。
-            兩個 number TextBlock 用 Style + DataTrigger 切換 Foreground。
-        -->
-        <StackPanel Grid.Row="1" Margin="0,0,0,12" Orientation="Horizontal"
+                    <ComboBox
+                        Height="32"
+                        MinWidth="140"
+                        Margin="8,0"
+                        DockPanel.Dock="Left"
+                        ItemsSource="{Binding AvailableMonths}"
+                        SelectedValue="{Binding CurrentMonth, Mode=TwoWay}"
+                        SelectedValuePath="Value">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Display}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button
+                        Width="32"
+                        Height="32"
+                        Padding="0"
+                        Command="{Binding GoNextCommand}"
+                        DockPanel.Dock="Left"
+                        IsEnabled="{Binding CanGoNext}"
+                        Style="{StaticResource AppIconButton}">
+                        <ds:AppIcon FontSize="{StaticResource Font.Size.Md}" Symbol="ChevronRight24" />
+                    </Button>
+                    <Button
+                        Padding="10,4"
+                        Command="{Binding GoTodayCommand}"
+                        Content="{DynamicResource Dashboard.Calendar.Today}"
+                        DockPanel.Dock="Right"
+                        Style="{StaticResource AppSecondaryButton}" />
+                    <!--  v2：絕對值 / 百分比 色階切換  -->
+                    <CheckBox
+                        Margin="0,0,12,0"
+                        VerticalAlignment="Center"
+                        DockPanel.Dock="Right"
+                        IsChecked="{Binding UseAbsoluteForTone, Mode=TwoWay}"
+                        ToolTip="{DynamicResource Dashboard.Calendar.UseAbsolute.Tooltip}">
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Dashboard.Calendar.UseAbsolute}" />
+                    </CheckBox>
+                    <!--  v2 #6d：年度熱度圖切換（GitHub contribution graph 風格）  -->
+                    <CheckBox
+                        Margin="0,0,12,0"
+                        VerticalAlignment="Center"
+                        DockPanel.Dock="Right"
+                        IsChecked="{Binding IsYearView, Mode=TwoWay}">
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Dashboard.Calendar.YearView}" />
+                    </CheckBox>
+                </DockPanel>
+
+                <!--
+                    ── 月份 KPI line：當月 PnL + 報酬率 ──
+                -->
+                <StackPanel
+                    Grid.Row="1"
+                    Margin="0,0,0,12"
+                    Orientation="Horizontal"
                     Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock VerticalAlignment="Center"
-                       FontSize="{StaticResource Font.Size.Xs}"
-                       Foreground="{DynamicResource AppTextMuted}"
-                       Text="{DynamicResource Dashboard.Calendar.MonthlyPnl}" />
-            <TextBlock Margin="6,0,16,0"
-                       VerticalAlignment="Center"
-                       FontSize="{StaticResource Font.Size.Lg}"
-                       FontWeight="SemiBold"
-                       Text="{Binding MonthlyAbsolutePnl, StringFormat='+#\,##0;-#\,##0;0'}"
-                       Typography.NumeralAlignment="Tabular">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsMonthlyPnlPositive}" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsMonthlyPnlNegative}" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-            <TextBlock VerticalAlignment="Center"
-                       FontSize="{StaticResource Font.Size.Xs}"
-                       Foreground="{DynamicResource AppTextMuted}"
-                       Text="{DynamicResource Dashboard.Calendar.MonthlyReturn}" />
-            <TextBlock Margin="6,0,0,0"
-                       VerticalAlignment="Center"
-                       FontSize="{StaticResource Font.Size.Lg}"
-                       FontWeight="SemiBold"
-                       Text="{Binding MonthlyReturnPct, StringFormat='+0.00%;-0.00%;0.00%'}"
-                       Typography.NumeralAlignment="Tabular">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsMonthlyPnlPositive}" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsMonthlyPnlNegative}" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-        </StackPanel>
-
-        <!--  ── Weekday header ── 7 天 + 1 個週合計欄 (年度檢視時隱藏)  -->
-        <Grid Grid.Row="2"
-              Visibility="{Binding IsYearView, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="80" />
-                <!--  Weekly P&L column  -->
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Mon}" />
-            <TextBlock Grid.Column="1" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Tue}" />
-            <TextBlock Grid.Column="2" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Wed}" />
-            <TextBlock Grid.Column="3" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Thu}" />
-            <TextBlock Grid.Column="4" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Fri}" />
-            <TextBlock Grid.Column="5" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Sat}" />
-            <TextBlock Grid.Column="6" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.Sun}" />
-            <TextBlock Grid.Column="7" Style="{StaticResource WeekHeaderText}" Text="{DynamicResource Dashboard.Calendar.WeeklyPnl}" />
-        </Grid>
-
-        <!--
-            ── 6 列 × (7 日 + 1 週合計) ──
-            ItemsControl 跑 Weeks 集合；每列模板繪製 7 個日 cell + 1 個週合計。
-            click cell → SelectCellCommand 開 popover；HasData=false 的 cell
-            command 內部 return 不開啟。
-        -->
-        <ItemsControl Grid.Row="3" ItemsSource="{Binding Weeks}"
-                      Visibility="{Binding IsYearView, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <!--
-                        UniformGrid Rows="6" 讓 6 列在可用垂直空間內等高分配；
-                        原本 StackPanel + 每列 Height=46 會把月曆固定在 276px 高，
-                        Row=\"*\" 剩餘空間變成大片空白（特別在大螢幕）。
-                    -->
-                    <UniformGrid Rows="6" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid MinHeight="42">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="80" />
-                        </Grid.ColumnDefinitions>
-                        <!--  7 個日 cell  -->
-                        <ItemsControl Grid.Column="0" Grid.ColumnSpan="7" ItemsSource="{Binding Days}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <UniformGrid Columns="7" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Style="{StaticResource DayCellBorder}" Cursor="Hand">
-                                        <Border.InputBindings>
-                                            <MouseBinding MouseAction="LeftClick"
-                                                          Command="{Binding DataContext.SelectCellCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                          CommandParameter="{Binding}" />
-                                        </Border.InputBindings>
-                                        <StackPanel>
-                                            <TextBlock FontSize="{StaticResource Font.Size.Sm}"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource AppTextPrimary}"
-                                                       Text="{Binding Day}" />
-                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}"
-                                                       Foreground="{DynamicResource AppTextSecondary}"
-                                                       Text="{Binding DeltaDisplay}"
-                                                       Typography.NumeralAlignment="Tabular"
-                                                       Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <!--  週合計 cell  -->
-                        <Border Grid.Column="7"
-                                Margin="2"
-                                Padding="6,4"
-                                Background="{DynamicResource AppHover}"
-                                BorderBrush="{DynamicResource AppBorderLight}"
-                                BorderThickness="1"
-                                CornerRadius="{StaticResource Radius.Xs}">
-                            <TextBlock VerticalAlignment="Center"
-                                       HorizontalAlignment="Right"
-                                       FontFamily="{StaticResource Font.Family.Base}"
-                                       FontSize="{StaticResource Font.Size.Xs}"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppTextPrimary}"
-                                       Text="{Binding TotalDisplay}"
-                                       Typography.NumeralAlignment="Tabular" />
-                        </Border>
-                    </Grid>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
-        <!--
-            ── v2 #6d：年度熱度圖（IsYearView=true 時取代月份 grid）──
-            GitHub-style：嚴格 7-row × ~54-col grid（Mon..Sun 為 row）。
-            每 column = 一週；月份標籤在每月首週欄的 column 上方。
-        -->
-        <StackPanel Grid.Row="3"
-                    Visibility="{Binding IsYearView, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <!--  Month labels row：每欄一個 label（多數空白，每月首週欄有月份字）  -->
-            <ItemsControl ItemsSource="{Binding YearViewWeekColumns}" Margin="0,0,0,4">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Width="12" Margin="1,0"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{Binding MonthLabel}" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
-            <!--  7-row × N-col 熱度圖：每 column 是 7 個 day cell 的垂直 stack  -->
-            <ItemsControl ItemsSource="{Binding YearViewWeekColumns}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <ItemsControl ItemsSource="{Binding Days}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Vertical" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Width="10" Height="10" Margin="1"
-                                            BorderBrush="{DynamicResource AppBorderLight}"
-                                            BorderThickness="0.5"
-                                            CornerRadius="2">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
-                                                <Style.Triggers>
-                                                    <!--  null cell（跨年 placeholder）：透明  -->
-                                                    <DataTrigger Binding="{Binding}" Value="{x:Null}">
-                                                        <Setter Property="Background" Value="Transparent" />
-                                                        <Setter Property="BorderBrush" Value="Transparent" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Tone}" Value="UpWeak">
-                                                        <Setter Property="Background" Value="#1AEF4444" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Tone}" Value="UpMedium">
-                                                        <Setter Property="Background" Value="#33EF4444" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Tone}" Value="UpStrong">
-                                                        <Setter Property="Background" Value="#66EF4444" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Tone}" Value="UpStrongest">
-                                                        <Setter Property="Background" Value="#99EF4444" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Tone}" Value="DownWeak">
-                                                        <Setter Property="Background" Value="#1A22C55E" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Tone}" Value="DownMedium">
-                                                        <Setter Property="Background" Value="#3322C55E" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Tone}" Value="DownStrong">
-                                                        <Setter Property="Background" Value="#6622C55E" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Tone}" Value="DownStrongest">
-                                                        <Setter Property="Background" Value="#9922C55E" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <Border.ToolTip>
-                                            <TextBlock>
-                                                <Run Text="{Binding Date.Year, Mode=OneWay, StringFormat='0000'}" />
-                                                <Run Text="/" />
-                                                <Run Text="{Binding Date.Month, Mode=OneWay, StringFormat='00'}" />
-                                                <Run Text="/" />
-                                                <Run Text="{Binding Date.Day, Mode=OneWay, StringFormat='00'}" />
-                                                <Run Text=" " />
-                                                <Run Text="{Binding DeltaDisplay, Mode=OneWay}" />
-                                            </TextBlock>
-                                        </Border.ToolTip>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
-
-        <!--
-            ── 月份迷你 bar chart ──
-            每日 PnL 直方圖：紅柱為當日獲利，綠柱為當日虧損。視覺上補充
-            熱度圖看不出的「分布感」— 月初密集還是月底密集？極端值在何處？
-        -->
-        <Border Grid.Row="4"
-                Margin="0,12,0,0"
-                Padding="0"
-                Background="Transparent"
-                Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <lvc:CartesianChart
-                Height="100"
-                Background="Transparent"
-                Series="{Binding MonthlyBarSeries}"
-                XAxes="{Binding BarXAxes}"
-                YAxes="{Binding BarYAxes}"
-                TooltipPosition="Top"
-                TooltipTextSize="10" />
-        </Border>
-
-        <!--
-            ── Cell popover ──
-            點 cell 後彈出當日明細摘要 + 「跳到當日交易」link。整層蓋滿 Grid
-            才能在四個 row 上方居中；click 背景關閉。
-        -->
-        <Grid Grid.RowSpan="5" Panel.ZIndex="180"
-              Visibility="{Binding IsCellPopoverOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <!--  半透明 backdrop  -->
-            <Border Background="#80000000">
-                <Border.InputBindings>
-                    <MouseBinding MouseAction="LeftClick" Command="{Binding CloseCellPopoverCommand}" />
-                </Border.InputBindings>
-            </Border>
-            <!--  popover content card  -->
-            <Border HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Width="320" Padding="20,16"
-                    Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Md}">
-                <StackPanel>
-                    <DockPanel Margin="0,0,0,8" LastChildFill="False">
-                        <TextBlock DockPanel.Dock="Left"
-                                   FontSize="{StaticResource Font.Size.Md}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}">
-                            <!--
-                                bug fix：原本 Year 沒標 Mode=OneWay；DateOnly.Year/Month/Day
-                                全部 readonly get → WPF 預設 TwoWay binding 直接 throw
-                                InvalidOperationException 在 SelectCell 命令觸發時。
-                                三個 Run 全部標明 Mode=OneWay。
-                            -->
-                            <Run Text="{Binding SelectedCell.Date.Year, Mode=OneWay, FallbackValue=''}" />
-                            <Run Text="/" />
-                            <Run Text="{Binding SelectedCell.Date.Month, Mode=OneWay, StringFormat='00', FallbackValue=''}" />
-                            <Run Text="/" />
-                            <Run Text="{Binding SelectedCell.Date.Day, Mode=OneWay, StringFormat='00', FallbackValue=''}" />
-                        </TextBlock>
-                        <Button DockPanel.Dock="Right" Width="28" Height="28" Padding="0"
-                                Command="{Binding CloseCellPopoverCommand}"
-                                Style="{StaticResource AppIconButton}">
-                            <ds:AppIcon Symbol="Dismiss24" FontSize="14"
-                                        Foreground="{DynamicResource AppTextMuted}" />
-                        </Button>
-                    </DockPanel>
-                    <TextBlock FontSize="{StaticResource Font.Size.Xs}"
-                               Foreground="{DynamicResource AppTextMuted}"
-                               Text="{DynamicResource Dashboard.Calendar.Popover.DailyPnl}" />
-                    <TextBlock Margin="0,4,0,12"
-                               FontSize="{StaticResource Font.Size.Xl}"
-                               FontWeight="SemiBold"
-                               Text="{Binding SelectedCell.DeltaDisplay, FallbackValue='—'}"
-                               Typography.NumeralAlignment="Tabular">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Dashboard.Calendar.MonthlyPnl}" />
+                    <TextBlock
+                        Margin="6,0,16,0"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Lg}"
+                        FontWeight="SemiBold"
+                        Text="{Binding MonthlyAbsolutePnl, StringFormat='+#\,##0;-#\,##0;0'}"
+                        Typography.NumeralAlignment="Tabular">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMonthlyPnlPositive}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsMonthlyPnlNegative}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
-                    <Button Command="{Binding OpenDayTransactionsCommand}"
-                            Content="{DynamicResource Dashboard.Calendar.Popover.OpenTransactions}"
-                            HorizontalAlignment="Stretch"
-                            Style="{StaticResource AppSecondaryButton}" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Dashboard.Calendar.MonthlyReturn}" />
+                    <TextBlock
+                        Margin="6,0,0,0"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Lg}"
+                        FontWeight="SemiBold"
+                        Text="{Binding MonthlyReturnPct, StringFormat='+0.00%;-0.00%;0.00%'}"
+                        Typography.NumeralAlignment="Tabular">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMonthlyPnlPositive}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsMonthlyPnlNegative}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </StackPanel>
-            </Border>
-        </Grid>
+
+                <!--  ── Weekday header ── 7 天 + 1 個週合計欄 (年度檢視時隱藏)  -->
+                <Grid Grid.Row="2" Visibility="{Binding IsYearView, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="80" />
+                        <!--  Weekly P&L column  -->
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Grid.Column="0"
+                        Style="{StaticResource WeekHeaderText}"
+                        Text="{DynamicResource Dashboard.Calendar.Mon}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        Style="{StaticResource WeekHeaderText}"
+                        Text="{DynamicResource Dashboard.Calendar.Tue}" />
+                    <TextBlock
+                        Grid.Column="2"
+                        Style="{StaticResource WeekHeaderText}"
+                        Text="{DynamicResource Dashboard.Calendar.Wed}" />
+                    <TextBlock
+                        Grid.Column="3"
+                        Style="{StaticResource WeekHeaderText}"
+                        Text="{DynamicResource Dashboard.Calendar.Thu}" />
+                    <TextBlock
+                        Grid.Column="4"
+                        Style="{StaticResource WeekHeaderText}"
+                        Text="{DynamicResource Dashboard.Calendar.Fri}" />
+                    <TextBlock
+                        Grid.Column="5"
+                        Style="{StaticResource WeekHeaderText}"
+                        Text="{DynamicResource Dashboard.Calendar.Sat}" />
+                    <TextBlock
+                        Grid.Column="6"
+                        Style="{StaticResource WeekHeaderText}"
+                        Text="{DynamicResource Dashboard.Calendar.Sun}" />
+                    <TextBlock
+                        Grid.Column="7"
+                        Style="{StaticResource WeekHeaderText}"
+                        Text="{DynamicResource Dashboard.Calendar.WeeklyPnl}" />
+                </Grid>
+
+                <!--
+                    ── 6 列 × (7 日 + 1 週合計) ──
+                -->
+                <ItemsControl
+                    Grid.Row="3"
+                    ItemsSource="{Binding Weeks}"
+                    Visibility="{Binding IsYearView, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="6" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid MinHeight="42">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="80" />
+                                </Grid.ColumnDefinitions>
+                                <!--  7 個日 cell  -->
+                                <ItemsControl
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="7"
+                                    ItemsSource="{Binding Days}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Columns="7" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Cursor="Hand" Style="{StaticResource DayCellBorder}">
+                                                <Border.InputBindings>
+                                                    <MouseBinding
+                                                        Command="{Binding DataContext.SelectCellCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        MouseAction="LeftClick" />
+                                                </Border.InputBindings>
+                                                <StackPanel>
+                                                    <TextBlock
+                                                        FontSize="{StaticResource Font.Size.Sm}"
+                                                        FontWeight="SemiBold"
+                                                        Foreground="{DynamicResource AppTextPrimary}"
+                                                        Text="{Binding Day}" />
+                                                    <TextBlock
+                                                        FontSize="{StaticResource Font.Size.Xs}"
+                                                        Foreground="{DynamicResource AppTextSecondary}"
+                                                        Text="{Binding DeltaDisplay}"
+                                                        Typography.NumeralAlignment="Tabular"
+                                                        Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <!--  週合計 cell  -->
+                                <Border
+                                    Grid.Column="7"
+                                    Margin="2"
+                                    Padding="6,4"
+                                    Background="{DynamicResource AppHover}"
+                                    BorderBrush="{DynamicResource AppBorderLight}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource Radius.Xs}">
+                                    <TextBlock
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding TotalDisplay}"
+                                        Typography.NumeralAlignment="Tabular" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!--
+                    ── v2 #6d：年度熱度圖（IsYearView=true 時取代月份 grid）──
+                    GitHub-style：嚴格 7-row × ~54-col grid（Mon..Sun 為 row）。
+                    每 column = 一週；月份標籤在每月首週欄的 column 上方。
+                -->
+                <!--
+                    Viewbox 包裹整個年度熱度圖讓固定尺寸 (10x10 cell, 12 column pitch)
+                    自動延展填滿可用寬度；Stretch=Uniform 保持 7-row 比例不變形。
+                    StretchDirection=UpOnly 避免小窗時把 cell 縮到不可辨識。
+                -->
+                <Viewbox
+                    Grid.Row="3"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top"
+                    Stretch="Uniform"
+                    StretchDirection="UpOnly"
+                    Visibility="{Binding IsYearView, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel>
+                        <!--  Month labels row：每欄一個 label（多數空白，每月首週欄有月份字）  -->
+                        <ItemsControl Margin="0,0,0,4" ItemsSource="{Binding YearViewWeekColumns}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                        Width="12"
+                                        Margin="1,0"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{Binding MonthLabel}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!--  7-row × N-col 熱度圖：每 column 是 7 個 day cell 的垂直 stack  -->
+                        <ItemsControl ItemsSource="{Binding YearViewWeekColumns}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ItemsControl ItemsSource="{Binding Days}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Vertical" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border
+                                                    Width="10"
+                                                    Height="10"
+                                                    Margin="1"
+                                                    BorderBrush="{DynamicResource AppBorderLight}"
+                                                    BorderThickness="0.5"
+                                                    CornerRadius="2">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+                                                            <Style.Triggers>
+                                                                <!--  null cell（跨年 placeholder）：透明  -->
+                                                                <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                                                    <Setter Property="Background" Value="Transparent" />
+                                                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Tone}" Value="UpWeak">
+                                                                    <Setter Property="Background" Value="#1AEF4444" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Tone}" Value="UpMedium">
+                                                                    <Setter Property="Background" Value="#33EF4444" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Tone}" Value="UpStrong">
+                                                                    <Setter Property="Background" Value="#66EF4444" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Tone}" Value="UpStrongest">
+                                                                    <Setter Property="Background" Value="#99EF4444" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Tone}" Value="DownWeak">
+                                                                    <Setter Property="Background" Value="#1A22C55E" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Tone}" Value="DownMedium">
+                                                                    <Setter Property="Background" Value="#3322C55E" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Tone}" Value="DownStrong">
+                                                                    <Setter Property="Background" Value="#6622C55E" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Tone}" Value="DownStrongest">
+                                                                    <Setter Property="Background" Value="#9922C55E" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <Border.ToolTip>
+                                                        <TextBlock>
+                                                            <Run Text="{Binding Date.Year, Mode=OneWay, StringFormat='0000'}" />
+                                                            <Run Text="/" />
+                                                            <Run Text="{Binding Date.Month, Mode=OneWay, StringFormat='00'}" />
+                                                            <Run Text="/" />
+                                                            <Run Text="{Binding Date.Day, Mode=OneWay, StringFormat='00'}" />
+                                                            <Run Text=" " />
+                                                            <Run Text="{Binding DeltaDisplay, Mode=OneWay}" />
+                                                        </TextBlock>
+                                                    </Border.ToolTip>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Viewbox>
+
+                <!--
+                    ── 月份迷你 bar chart ──
+                    每日 PnL 直方圖：紅柱為當日獲利，綠柱為當日虧損。視覺上補充
+                    熱度圖看不出的「分布感」— 月初密集還是月底密集？極端值在何處？
+                -->
+                <Border
+                    Grid.Row="4"
+                    Margin="0,12,0,0"
+                    Padding="0"
+                    Background="Transparent"
+                    Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <lvc:CartesianChart
+                        Height="100"
+                        Background="Transparent"
+                        Series="{Binding MonthlyBarSeries}"
+                        TooltipPosition="Top"
+                        TooltipTextSize="10"
+                        XAxes="{Binding BarXAxes}"
+                        YAxes="{Binding BarYAxes}" />
+                </Border>
+
+                <!--
+                    ── Cell popover ──
+                    點 cell 後彈出當日明細摘要 + 「跳到當日交易」link。整層蓋滿 Grid
+                    才能在四個 row 上方居中；click 背景關閉。
+                -->
+                <Grid
+                    Grid.RowSpan="5"
+                    Panel.ZIndex="180"
+                    Visibility="{Binding IsCellPopoverOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <!--  半透明 backdrop  -->
+                    <Border Background="#80000000">
+                        <Border.InputBindings>
+                            <MouseBinding Command="{Binding CloseCellPopoverCommand}" MouseAction="LeftClick" />
+                        </Border.InputBindings>
+                    </Border>
+                    <!--  popover content card  -->
+                    <Border
+                        Width="320"
+                        Padding="20,16"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource AppCardBackground}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Md}">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,8" LastChildFill="False">
+                                <TextBlock
+                                    DockPanel.Dock="Left"
+                                    FontSize="{StaticResource Font.Size.Md}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}">
+                                    <!--
+                                        bug fix：原本 Year 沒標 Mode=OneWay；DateOnly.Year/Month/Day
+                                        全部 readonly get → WPF 預設 TwoWay binding 直接 throw
+                                        InvalidOperationException 在 SelectCell 命令觸發時。
+                                        三個 Run 全部標明 Mode=OneWay。
+                                    -->
+                                    <Run Text="{Binding SelectedCell.Date.Year, Mode=OneWay, FallbackValue=''}" />
+                                    <Run Text="/" />
+                                    <Run Text="{Binding SelectedCell.Date.Month, Mode=OneWay, StringFormat='00', FallbackValue=''}" />
+                                    <Run Text="/" />
+                                    <Run Text="{Binding SelectedCell.Date.Day, Mode=OneWay, StringFormat='00', FallbackValue=''}" />
+                                </TextBlock>
+                                <Button
+                                    Width="28"
+                                    Height="28"
+                                    Padding="0"
+                                    Command="{Binding CloseCellPopoverCommand}"
+                                    DockPanel.Dock="Right"
+                                    Style="{StaticResource AppIconButton}">
+                                    <ds:AppIcon
+                                        FontSize="14"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Symbol="Dismiss24" />
+                                </Button>
+                            </DockPanel>
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Dashboard.Calendar.Popover.DailyPnl}" />
+                            <TextBlock
+                                Margin="0,4,0,12"
+                                FontSize="{StaticResource Font.Size.Xl}"
+                                FontWeight="SemiBold"
+                                Text="{Binding SelectedCell.DeltaDisplay, FallbackValue='—'}"
+                                Typography.NumeralAlignment="Tabular">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <Button
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding OpenDayTransactionsCommand}"
+                                Content="{DynamicResource Dashboard.Calendar.Popover.OpenTransactions}"
+                                Style="{StaticResource AppSecondaryButton}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

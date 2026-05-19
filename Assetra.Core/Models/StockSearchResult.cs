@@ -5,4 +5,5 @@ public record StockSearchResult(
     string Name,
     string Exchange,
     string Sector = "",
-    bool IsEtf = false);
+    bool IsEtf = false,
+    string Currency = "TWD");

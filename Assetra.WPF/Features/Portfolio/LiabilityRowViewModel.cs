@@ -20,12 +20,14 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PaidPercent))]
     [NotifyPropertyChangedFor(nameof(PaidPercentDisplay))]
+    [NotifyPropertyChangedFor(nameof(PaidPercentValue))]
     [NotifyPropertyChangedFor(nameof(BalanceAsMoney))]
     private decimal _balance;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PaidPercent))]
     [NotifyPropertyChangedFor(nameof(PaidPercentDisplay))]
+    [NotifyPropertyChangedFor(nameof(PaidPercentValue))]
     [NotifyPropertyChangedFor(nameof(OriginalAmountAsMoney))]
     private decimal _originalAmount;
 
@@ -83,6 +85,10 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
         OnPropertyChanged(nameof(PaidInterest));
         OnPropertyChanged(nameof(RemainingFromSchedule));
         OnPropertyChanged(nameof(HasSchedule));
+        OnPropertyChanged(nameof(NextUnpaidEntry));
+        OnPropertyChanged(nameof(NextPaymentDateDisplay));
+        OnPropertyChanged(nameof(NextPaymentAmount));
+        OnPropertyChanged(nameof(RemainingPeriodsDisplay));
     }
 
     [ObservableProperty]
@@ -106,6 +112,43 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
     public LoanScheduleRowViewModel? NextUnpaidEntry =>
         ScheduleEntries.FirstOrDefault(e => !e.IsPaid);
 
+    /// <summary>下次繳款日字串；尚未載入 schedule 或攤還表已繳完時顯示「—」。</summary>
+    public string NextPaymentDateDisplay =>
+        NextUnpaidEntry?.DueDate.ToString("MM/dd") ?? "—";
+
+    /// <summary>下次月付本息（攤還表）。null 時顯示 dash。</summary>
+    public decimal? NextPaymentAmount => NextUnpaidEntry?.TotalAmount;
+
+    /// <summary>「剩 N 期 / 總 M 期」短描述；信用卡無 schedule 時顯示空字串。</summary>
+    public string RemainingPeriodsDisplay
+    {
+        get
+        {
+            if (!IsLoan || !LoanTermMonths.HasValue) return string.Empty;
+            var paid = ScheduleEntries.Count(e => e.IsPaid);
+            var remaining = LoanTermMonths.Value - paid;
+            return remaining > 0 ? $"剩 {remaining} 期 / {LoanTermMonths.Value}" : $"已結清 / {LoanTermMonths.Value}";
+        }
+    }
+
+    /// <summary>信用卡的「結帳 / 到期日」短字串。Loan 時為空。</summary>
+    public string CardCycleDisplay
+    {
+        get
+        {
+            if (!IsCreditCard) return string.Empty;
+            var bill = BillingDay.HasValue ? $"結帳 {BillingDay.Value}" : null;
+            var due = DueDay.HasValue ? $"到期 {DueDay.Value}" : null;
+            return string.Join(" / ", new[] { bill, due }.Where(s => s is not null));
+        }
+    }
+
+    /// <summary>0–100 範圍的「已繳百分比」— XAML 進度條用。</summary>
+    public decimal PaidPercentValue =>
+        OriginalAmount > 0m
+            ? Math.Clamp((OriginalAmount - Balance) / OriginalAmount * 100m, 0m, 100m)
+            : 0m;
+
     public void NotifyCurrencyChanged() => OnPropertyChanged(nameof(Balance));
 
     public void RefreshScheduleSummary()
@@ -114,6 +157,9 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
         OnPropertyChanged(nameof(PaidInterest));
         OnPropertyChanged(nameof(RemainingFromSchedule));
         OnPropertyChanged(nameof(NextUnpaidEntry));
+        OnPropertyChanged(nameof(NextPaymentDateDisplay));
+        OnPropertyChanged(nameof(NextPaymentAmount));
+        OnPropertyChanged(nameof(RemainingPeriodsDisplay));
     }
 
     public LiabilityRowViewModel(string label, LiabilitySnapshot snapshot, AssetItem? asset = null)

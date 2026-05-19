@@ -4,6 +4,7 @@ using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Fire;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Fire;
+using Assetra.WPF.Features.PortfolioGroups;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -18,6 +19,39 @@ public sealed partial class FireViewModel : ObservableObject
     private readonly IFinancialGoalRepository _goals;
     private readonly ISnackbarService? _snackbar;
     private readonly ILocalizationService? _localization;
+    private readonly IGroupBalanceQueryService? _groupBalance;
+
+    /// <summary>
+    /// Portfolio-Groups-Refactor P6 — 共用 group catalog。null = 功能未啟用，
+    /// XAML 上的 group 選擇器隱藏，FIRE 仍可用全域淨資產計算。
+    /// </summary>
+    public PortfolioGroupCatalog? GroupCatalog { get; }
+
+    public bool HasPortfolioGroups => GroupCatalog is { Groups.Count: > 0 };
+
+    /// <summary>
+    /// 使用者在 FIRE 頁選的 group。Set 時若 catalog 注入了 <see cref="IGroupBalanceQueryService"/>，
+    /// 自動把該 group 的累計淨值填入 <see cref="CurrentNetWorth"/>，給使用者一個合理的起始值。
+    /// null = 用全域 / 手動輸入。
+    /// </summary>
+    [ObservableProperty]
+    private PortfolioGroup? _selectedGroup;
+
+    partial void OnSelectedGroupChanged(PortfolioGroup? value) => _ = ApplyGroupNetWorthAsync(value);
+
+    private async Task ApplyGroupNetWorthAsync(PortfolioGroup? group)
+    {
+        if (group is null || _groupBalance is null) return;
+        try
+        {
+            var nv = await _groupBalance.ComputeNetValueAsync(group.Id).ConfigureAwait(true);
+            CurrentNetWorth = nv.ToString("N0", CultureInfo.InvariantCulture);
+        }
+        catch
+        {
+            // Silent failure — user can still type the value manually.
+        }
+    }
 
     [ObservableProperty] private string _currentNetWorth = "1,000,000";
     [ObservableProperty] private string _annualExpenses = "600,000";
@@ -40,7 +74,9 @@ public sealed partial class FireViewModel : ObservableObject
         IFireCalculatorService calculator,
         IFinancialGoalRepository goals,
         ISnackbarService? snackbar = null,
-        ILocalizationService? localization = null)
+        ILocalizationService? localization = null,
+        PortfolioGroupCatalog? groupCatalog = null,
+        IGroupBalanceQueryService? groupBalance = null)
     {
         ArgumentNullException.ThrowIfNull(calculator);
         ArgumentNullException.ThrowIfNull(goals);
@@ -48,7 +84,18 @@ public sealed partial class FireViewModel : ObservableObject
         _goals = goals;
         _snackbar = snackbar;
         _localization = localization;
+        GroupCatalog = groupCatalog;
+        _groupBalance = groupBalance;
         WealthPath = new ReadOnlyObservableCollection<FireWealthPoint>(_wealthPath);
+    }
+
+    /// <summary>
+    /// 外部呼叫（FireView Loaded）以確保 group catalog 預先載入給 ComboBox 用。
+    /// </summary>
+    public Task EnsureGroupCatalogLoadedAsync()
+    {
+        var t = GroupCatalog?.EnsureLoadedAsync() ?? Task.CompletedTask;
+        return t.ContinueWith(_ => OnPropertyChanged(nameof(HasPortfolioGroups)), TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     private string L(string key, string fallback) =>
@@ -109,7 +156,11 @@ public sealed partial class FireViewModel : ObservableObject
                 FireNumber,
                 current,
                 deadline,
-                "Generated from FIRE calculator.");
+                "Generated from FIRE calculator.",
+                LinkedAssetClass: null,
+                // Portfolio-Groups-Refactor P6 — 把 group 連結也寫到 FIRE goal，讓 Hero
+                // 在沒選 LinkedAssetClass 時走 group 算進度。
+                PortfolioGroupId: SelectedGroup?.Id);
 
             if (existing is null)
                 await _goals.AddAsync(goal).ConfigureAwait(true);

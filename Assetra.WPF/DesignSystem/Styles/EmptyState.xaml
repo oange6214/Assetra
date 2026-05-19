@@ -19,6 +19,7 @@
     <Style x:Key="EmptyStateTitle" TargetType="TextBlock">
         <Setter Property="Margin" Value="0,12,0,0" />
         <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Display}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Md}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />

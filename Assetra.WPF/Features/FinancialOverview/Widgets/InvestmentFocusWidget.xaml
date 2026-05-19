@@ -17,6 +17,78 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="DashboardWidgets.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <!--
+                MoverRow — symbol + name + 今日漲跌金額 + %.
+                Inlined from the retired TodaysMoversWidget so the merged
+                widget stays self-contained. The standalone widget is no
+                longer referenced from FinancialOverviewView.xaml.
+            -->
+            <DataTemplate x:Key="MoverRow">
+                <Grid Margin="0,3,0,3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="64" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Text="{Binding Symbol}" />
+                        <TextBlock Margin="6,0,0,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   Foreground="{DynamicResource AppTextSecondary}"
+                                   Text="{Binding Name}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1"
+                               Margin="8,0,8,0"
+                               VerticalAlignment="Center"
+                               FontFamily="{StaticResource Font.Family.Base}"
+                               FontSize="{StaticResource Font.Size.Sm}"
+                               FontWeight="SemiBold"
+                               Text="{Binding DayChange, StringFormat='+#\,##0;-#\,##0;0'}"
+                               Typography.NumeralAlignment="Tabular">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsDayChangePositive}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsDayChangePositive}" Value="False">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Grid.Column="2"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Right"
+                               FontFamily="{StaticResource Font.Family.Base}"
+                               FontSize="{StaticResource Font.Size.Xs}"
+                               Text="{Binding DayChangePercent, StringFormat={}{0:+0.00;-0.00;0.00}%}"
+                               Typography.NumeralAlignment="Tabular">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsDayChangePositive}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsDayChangePositive}" Value="False">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -63,37 +135,12 @@
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding InvestmentFocusWidget.TotalMarketValueDisplay}"
                         Typography.NumeralAlignment="Tabular" />
-                    <!--  當日 PnL：跌色／漲色 + 百分比  -->
-                    <StackPanel
-                        Margin="0,4,0,0"
-                        Orientation="Horizontal"
-                        Visibility="{Binding InvestmentFocusWidget.HasDayPnl, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            FontSize="{StaticResource Font.Size.Xs}"
-                            Foreground="{DynamicResource AppTextMuted}"
-                            Text="{DynamicResource Portfolio.Header.DailyPnL}" />
-                        <TextBlock
-                            Margin="6,0,0,0"
-                            VerticalAlignment="Center"
-                            FontSize="{StaticResource Font.Size.Sm}"
-                            FontWeight="SemiBold"
-                            Typography.NumeralAlignment="Tabular">
-                            <TextBlock.Style>
-                                <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding InvestmentFocusWidget.IsDayPnlPositive}" Value="True">
-                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                            <Run Text="{Binding InvestmentFocusWidget.SignedDayPnlDisplay, Mode=OneWay}" />
-                            <Run Text=" " />
-                            <Run Text="{Binding InvestmentFocusWidget.DayPnlPercentDisplay, Mode=OneWay}" />
-                        </TextBlock>
-                    </StackPanel>
+                    <!--
+                        v2 consolidation 2026-05-13：移除「本日盈虧 −NT$xxx (-1.82%)」line。
+                        Hero card 已永久顯示同樣資訊 (HasHeroTodayDelta + HeroTodayDeltaDisplay)，
+                        這裡再放第二次是雙重視覺噪音。InvestmentFocusWidget 改為純「holdings
+                        accumulated」視角（總市值 / 成本 / 總損益），把「今日」訊息留給 Hero。
+                    -->
                 </StackPanel>
 
                 <!--  投資成本  -->
@@ -140,20 +187,76 @@
             </Grid>
 
             <!--
-                30 天投資市值 sparkline — 視覺給「方向感」（漲跌趨勢），
-                沒軸 / 沒標籤 / 純線條；資料源是 DashboardViewModel.TenDaySeries
-                （cutoff 已調整為 -29 天 = 近 30 天）。
+                v2 redesign (2026-05-13)：從 48px 無軸 sparkline 升級為精緻趨勢圖。
+                - Series 沒變：DashboardViewModel.TenDaySeries 已經是 ResolveNetWorthValue()
+                  算出的淨值（Cash + Equity − Liability，舊資料 fallback MV），所以
+                  標題「近 30 日 淨值走勢」實打實對應資料
+                - 軸從 SparklineXAxes/YAxes（IsVisible=false）改綁 TenDayXAxes/YAxes
+                  （已含 MM/dd 日期 + NT$X.XM 金額 labeler）
+                - 高度 48 → 180，配上 section 副標題，視覺權重升級
+                - 漸層 fill 已在 LineSeries 內定義（accentColor.WithAlpha(32)）
             -->
-            <Border Margin="0,12,0,0"
-                    Height="48"
-                    Background="Transparent">
-                <lvc:CartesianChart
-                    Background="Transparent"
-                    Series="{Binding InvestmentFocusWidget.TenDaySeries}"
-                    XAxes="{Binding InvestmentFocusWidget.SparklineXAxes}"
-                    YAxes="{Binding InvestmentFocusWidget.SparklineYAxes}"
-                    TooltipPosition="Hidden" />
-            </Border>
+            <StackPanel Margin="0,16,0,0">
+                <TextBlock
+                    Margin="0,0,0,6"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Dashboard.Widget.Investment.NetWorthTrend}" />
+                <Border Height="180" Background="Transparent">
+                    <lvc:CartesianChart
+                        Background="Transparent"
+                        Series="{Binding InvestmentFocusWidget.TenDaySeries}"
+                        XAxes="{Binding InvestmentFocusWidget.TenDayXAxes}"
+                        YAxes="{Binding InvestmentFocusWidget.TenDayYAxes}"
+                        TooltipPosition="Top"
+                        TooltipTextSize="11" />
+                </Border>
+            </StackPanel>
+
+            <!--
+                v2 consolidation 2026-05-13 — Today's Movers 從獨立 widget 收進此卡。
+                邏輯上「今日漲跌前 N」是 investment performance 的橫切面，跟總市值 /
+                成本 / 總損益是同一個 narrative。獨立 card 反而把 narrative 切碎。
+                HasTodaysMovers=false (未開盤 / 無持倉) 時整段隱藏。
+            -->
+            <StackPanel Margin="0,16,0,0"
+                        Visibility="{Binding HasTodaysMovers, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Margin="0,0,0,6"
+                           FontSize="{StaticResource Font.Size.Xs}"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource AppTextSecondary}"
+                           Text="{DynamicResource Dashboard.Widget.TodaysMovers.Heading}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--  Gainers 欄  -->
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Margin="0,0,0,4"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppUp}"
+                                   Text="{DynamicResource Dashboard.Widget.TodaysMovers.Gainers}" />
+                        <ItemsControl ItemsSource="{Binding TopGainersToday}"
+                                      ItemTemplate="{StaticResource MoverRow}" />
+                    </StackPanel>
+
+                    <!--  Losers 欄  -->
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Margin="0,0,0,4"
+                                   FontSize="{StaticResource Font.Size.Xs}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppDown}"
+                                   Text="{DynamicResource Dashboard.Widget.TodaysMovers.Losers}" />
+                        <ItemsControl ItemsSource="{Binding TopLosersToday}"
+                                      ItemTemplate="{StaticResource MoverRow}" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
 
             <TextBlock Style="{StaticResource DashboardWidgetFooter}"
                        Text="{DynamicResource Dashboard.Widget.Investment.OpenLink}">

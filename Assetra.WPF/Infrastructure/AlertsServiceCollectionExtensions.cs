@@ -25,7 +25,8 @@ internal static class AlertsServiceCollectionExtensions
             sp.GetRequiredService<IScheduler>(),
             sp.GetRequiredService<ISnackbarService>(),
             sp.GetRequiredService<ILocalizationService>(),
-            sp.GetService<ICurrencyService>()));
+            sp.GetService<ICurrencyService>(),
+            sp.GetRequiredService<ISymbolDirectory>()));
 
         return services;
     }

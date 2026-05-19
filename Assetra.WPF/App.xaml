@@ -21,12 +21,14 @@
             <converters:DateDisplayConverter x:Key="DateDisplayConverter" />
             <converters:TradeTypeConverter x:Key="TradeTypeConverter" />
             <converters:ResourceKeyToStringConverter x:Key="ResourceKeyToStringConverter" />
+            <converters:AssetTypeToLocalizedNameConverter x:Key="AssetTypeToLocalizedNameConverter" />
             <converters:ZeroToVisibleConverter x:Key="ZeroToVisibleConverter" />
             <converters:NonZeroDecimalToVisibilityConverter x:Key="NonZeroDecimalToVisibilityConverter" />
             <converters:WidthScaleThresholdToBooleanConverter x:Key="WidthScaleThresholdToBooleanConverter" />
             <converters:WidthScaleThresholdToVisibilityConverter x:Key="WidthScaleThresholdToVisibilityConverter" />
             <converters:InverseWidthScaleThresholdToVisibilityConverter x:Key="InverseWidthScaleThresholdToVisibilityConverter" />
             <converters:AdaptivePanelWidthConverter x:Key="AdaptivePanelWidthConverter" />
+            <converters:SparklineSeriesConverter x:Key="SparklineSeriesConverter" />
 
             <ResourceDictionary.MergedDictionaries>
                 <!--  ── Design-system primitives (required by theme + styles) ──  -->

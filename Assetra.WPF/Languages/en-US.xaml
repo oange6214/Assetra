@@ -103,11 +103,22 @@
     <sys:String x:Key="Common.Symbol">Symbol</sys:String>
     <sys:String x:Key="Common.Name">Name</sys:String>
     <sys:String x:Key="Common.Asset">Asset</sys:String>
-    <sys:String x:Key="Common.Target">Target</sys:String>
+    <sys:String x:Key="Common.Target">Asset</sys:String>
     <sys:String x:Key="Common.Price">Price</sys:String>
     <sys:String x:Key="Common.Cancel">Cancel</sys:String>
     <sys:String x:Key="Common.Save">Save</sys:String>
     <sys:String x:Key="Common.Edit">Edit</sys:String>
+    <sys:String x:Key="PortfolioGroups.Nav">Groups</sys:String>
+    <sys:String x:Key="PortfolioGroups.Heading">Portfolio Groups</sys:String>
+    <sys:String x:Key="PortfolioGroups.Subheading">Organise trades and accounts into buckets (e.g. "Retirement", "House Fund") so goals and FIRE calculations map onto concrete groups.</sys:String>
+    <sys:String x:Key="PortfolioGroups.Add">New group</sys:String>
+    <sys:String x:Key="PortfolioGroups.Add.Title">New group</sys:String>
+    <sys:String x:Key="PortfolioGroups.Edit.Title">Edit group</sys:String>
+    <sys:String x:Key="PortfolioGroups.Form.Name">Name</sys:String>
+    <sys:String x:Key="PortfolioGroups.Form.Description">Description (optional)</sys:String>
+    <sys:String x:Key="PortfolioGroups.Form.Color">Color (Hex)</sys:String>
+    <sys:String x:Key="PortfolioGroups.Form.ColorHint">Enter hex code like #3B82F6 (blue). Leave blank to use the theme accent color.</sys:String>
+    <sys:String x:Key="PortfolioGroups.SystemBadge">System</sys:String>
     <sys:String x:Key="Common.Previous">Previous</sys:String>
     <sys:String x:Key="Common.Next">Next</sys:String>
     <sys:String x:Key="Common.Browse">Browse…</sys:String>
@@ -229,6 +240,14 @@
     <sys:String x:Key="Portfolio.AddRecord.Menu.Account.Hint">Creates an account you can manage from "Funds Accounts"</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Liability">Add Liability</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Liability.Hint">Creates a loan or credit card you can manage from "Liabilities"</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.RealEstate">Add Real Estate</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.RealEstate.Hint">Track a property or land, available on the "Real Estate" page</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Insurance">Add Insurance Policy</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Insurance.Hint">Record a policy, available on the "Insurance" page</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Retirement">Add Retirement Account</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Retirement.Hint">Track labor pension, voluntary contributions, or private retirement accounts</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.PhysicalAsset">Add Physical Asset</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.PhysicalAsset.Hint">Track vehicles, collectibles, or other physical assets</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Category">Add Category</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Category.Hint">Creates a category you can manage from "Categories"</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Recurring">Add Recurring Schedule</sys:String>
@@ -237,8 +256,10 @@
     <sys:String x:Key="Portfolio.AddRecord.Menu.Alert.Hint">Creates a price condition you can manage from "Alerts"</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Goal">Add Financial Goal</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Goal.Hint">Creates a goal you can track from "Goals"</sys:String>
-    <sys:String x:Key="Portfolio.AddCash">Add Account</sys:String>
-    <sys:String x:Key="Portfolio.AddLiability">Add Liability</sys:String>
+    <sys:String x:Key="Portfolio.AddCash">Account</sys:String>
+    <sys:String x:Key="Portfolio.AddLiability">Liability</sys:String>
+    <sys:String x:Key="Portfolio.AddCash.Full">Add Account</sys:String>
+    <sys:String x:Key="Portfolio.AddLiability.Full">Add Liability</sys:String>
     <sys:String x:Key="Portfolio.AddCreditCard">Add Liability</sys:String>
     <sys:String x:Key="Portfolio.Cash.AddHint">When creating the account, you can also record an opening deposit. Future deposits and withdrawals will update the balance automatically.</sys:String>
     <sys:String x:Key="Portfolio.Cash.InitialDeposit.Toggle">Record an initial deposit right away</sys:String>
@@ -293,6 +314,7 @@
     <sys:String x:Key="Portfolio.Cash.SetDefault">Set as Default</sys:String>
     <sys:String x:Key="Portfolio.Cash.UnsetDefault">Remove Default</sys:String>
     <sys:String x:Key="Portfolio.Cash.DefaultHint">Auto-selected when adding a new record</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Subtype">Type</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Title">Emergency Fund</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Months">months</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.MonthlyExpense">Monthly expenses</sys:String>
@@ -301,6 +323,43 @@
     <sys:String x:Key="Portfolio.Cash.Emergency.Warning">Caution</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Danger">Danger</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.NotSet">Set monthly expenses to calculate emergency runway</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Emergency.StatusLabel">Safety status</sys:String>
+    <sys:String x:Key="Portfolio.Liability.MonthlyPayment">Monthly</sys:String>
+    <sys:String x:Key="Portfolio.Liability.NextDue">Next due</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.All">All</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Group.All">All Groups</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.Stock">Stocks</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.Etf">ETFs</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.Fund">Funds</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.Bond">Bonds</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.Crypto">Crypto</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.PreciousMetal">Metals</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.ShowAllocation">Show allocation</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.ShowDailyPnl">Show daily P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.AllocationTitle">Holdings allocation</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.DailyPnlTitle">Daily P&amp;L (last 30 days)</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.Count">Count</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.MarketValue">Market value</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.Cost">Cost</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.Pnl">P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.Balance">Balance</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.Remaining">Remaining</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.MonthlyTotal">Monthly total</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.ShowCost">Show cost breakdown</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.ShowPnlBreakdown">Show P&amp;L breakdown</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.CostTitle">Cost breakdown</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.PnlBreakdownTitle">P&amp;L distribution</sys:String>
+    <sys:String x:Key="Portfolio.Sparkline">30d trend</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddTitle">Add investment</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddHint">Add the symbol to your investments (quantity 0). Record actual buys later via the Buy dialog.</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddCommand">Invest</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddCommand.Hint">Add a symbol to your investments now; record buys later.</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddSuccess">Added to investments</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AssetType">Type</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.Symbol">Symbol</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.Name">Name (optional, auto-fill if blank)</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.Currency">Currency</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddButton">Add</sys:String>
     <sys:String x:Key="Portfolio.Liability.Empty">No liabilities yet. Click "Add Liability" to create a loan or credit card.</sys:String>
     <sys:String x:Key="Portfolio.Liability.Name">Liability name</sys:String>
     <sys:String x:Key="Portfolio.Liability.Amount">Remaining balance</sys:String>
@@ -501,6 +560,7 @@
     <sys:String x:Key="Portfolio.Tx.LoanDisbursementAccount">Disbursement account</sys:String>
     <sys:String x:Key="Portfolio.Tx.NoCashLink">No Linkage</sys:String>
     <sys:String x:Key="Portfolio.Tx.Stock">Stock</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Group">Portfolio Group</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivPerShare">Dividend / Share</sys:String>
     <sys:String x:Key="Portfolio.Tx.HeldShares">Shares Held</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivTotal">Total</sys:String>
@@ -569,6 +629,18 @@
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee.Tooltip">When checked, the total is recorded as the actual cost basis with no extra 0.1425% commission added on top. Most broker confirmations already include the fee, so this is enabled by default.</sys:String>
     <sys:String x:Key="Portfolio.Tx.ActualCashAmount">Actual cash debit (optional)</sys:String>
     <sys:String x:Key="Portfolio.Tx.ActualCashAmountHint">For sub-brokerage or FX settlement, enter the broker's actual cash debit. Leave blank to estimate from price × shares + fee. Required for cross-currency debits.</sys:String>
+    <!-- MultiCurrency-Trade-Refactor P3 -->
+    <sys:String x:Key="Portfolio.Tx.CrossCurrency.Banner">Cross-currency trade (instrument currency ≠ cash account currency)</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint">Detected a cross-currency trade (e.g. US stock debited from a TWD account via sub-brokerage). To record cost basis and cash balance correctly, fill in the FX rate or the broker's actual cash debit — either one works; if both are provided, the actual cash debit takes precedence.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.FxRate">FX rate (instrument currency → account currency)</sys:String>
+    <sys:String x:Key="Portfolio.Tx.FxRate.Hint">e.g. USD instrument + TWD account → enter the trade-day rate (such as 31.5). Optional — if left blank, the actual cash debit is used as the source of truth.</sys:String>
+    <sys:String x:Key="Portfolio.AddPrice.OptionalHint">Don't know the unit price? Just fill in the actual cash debit and quantity — the price will be back-derived.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CrossCurrency.SellHint">Detected a cross-currency sale (e.g. US stock proceeds deposited to a TWD account). To record realized P&amp;L and cash balance correctly, fill in the FX rate or the broker's actual cash credit — either one works; if both are provided, the actual cash credit takes precedence.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.SellActualCashAmount">Actual cash credit (optional)</sys:String>
+    <sys:String x:Key="Portfolio.Tx.SellActualCashAmountHint">For sub-brokerage or FX settlement, enter the broker's actual cash credit. Leave blank to estimate from price × shares − fee. Required for cross-currency credits.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CrossCurrency.DivHint">Detected a cross-currency dividend (e.g. US stock USD dividend deposited to a TWD account). To record dividend income and cash balance correctly, fill in the FX rate or the broker's actual cash credit — either one works; if both are provided, the actual cash credit takes precedence.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DivActualCashAmount">Actual cash credit (optional)</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DivActualCashAmountHint">For sub-brokerage or FX settlement, enter the broker's actual deposit. Leave blank to estimate from per-share dividend × shares. Required for cross-currency deposits.</sys:String>
     <sys:String x:Key="Portfolio.Tx.Subtotal">Subtotal</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivInputMode">Input mode</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivModePerShare">Per share</sys:String>
@@ -738,6 +810,8 @@
     <sys:String x:Key="Allocation.Tab.Overview">Overview</sys:String>
     <sys:String x:Key="Allocation.Tab.Rebalance">Rebalance</sys:String>
     <sys:String x:Key="Allocation.Overview.Title">Allocation Overview</sys:String>
+    <sys:String x:Key="Allocation.GroupBy.Symbol">By Symbol</sys:String>
+    <sys:String x:Key="Allocation.GroupBy.Group">By Group</sys:String>
     <sys:String x:Key="Allocation.Summary.Investment">Holdings</sys:String>
     <sys:String x:Key="Allocation.Summary.Cash">Cash</sys:String>
     <sys:String x:Key="Allocation.Summary.Total">Total Assets</sys:String>
@@ -791,6 +865,14 @@
     <sys:String x:Key="FinancialOverview.Header.Assets">Other Assets</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Investments">Investment Assets</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Liabilities">Liabilities</sys:String>
+    <sys:String x:Key="FinancialOverview.Hero.Today">Today</sys:String>
+    <sys:String x:Key="FinancialOverview.Hero.GoalProgress">Goal progress</sys:String>
+    <sys:String x:Key="FinancialOverview.Hero.GoalLabel">Goal</sys:String>
+    <sys:String x:Key="FinancialOverview.Hero.NoGoal">No goal set</sys:String>
+    <sys:String x:Key="FinancialOverview.Hero.NoGoalCta">Set one →</sys:String>
+    <sys:String x:Key="FinancialOverview.Composition.Heading">Asset composition</sys:String>
+    <sys:String x:Key="FinancialOverview.Composition.Empty">No asset data</sys:String>
+    <sys:String x:Key="FinancialOverview.Composition.Liability">Liabilities</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.DebtRatio">Debt Ratio</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnl">Investment P&amp;L</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnlPercent">Investment Return</sys:String>
@@ -833,6 +915,20 @@
     <sys:String x:Key="Settings.TwelveData.TestFailed">Twelve Data connection test failed.</sys:String>
     <sys:String x:Key="Settings.TwelveData.NotTested">Twelve Data API key has not been tested yet.</sys:String>
     <sys:String x:Key="Settings.TwelveData.TestBeforeSave">Test the Twelve Data API key before saving this provider.</sys:String>
+    <!-- TwelveData help dialog — mirrors FugleHelp structure -->
+    <sys:String x:Key="Settings.TwelveDataHelp.Tooltip">View how to apply for and configure a Twelve Data API key</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Title">Twelve Data API Key Help</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Subtitle">Quick reference for applying and setting up US live quotes.</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Intro">Twelve Data provides live quotes plus fundamentals for US stocks / ETFs / indices. The Free tier (800 requests / day) is enough for personal use. Assetra uses it only for US quotes — Taiwan still goes through TWSE / TPEX / Fugle.</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step1.Title">1. Register a Twelve Data account</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step1.Body">Click "Open Twelve Data" below and register a free account by email — or sign in with Google / GitHub.</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step2.Title">2. Get the API key</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step2.Body">After login, open the Dashboard. The default plan is Basic Free (800 req/day). Under "API Keys" you'll see an auto-generated key — copy the full string.</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step3.Title">3. Paste in Settings and test</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step3.Body">Paste the key into the "Twelve Data API Key" field, click "Test connection" to verify; the key is only saved if the test passes.</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step4.Title">4. Mind the quota</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step4.Body">Free tier caps at 8 requests per minute and 800 per day. Assetra shows today's usage below the field so you can track it; upgrade the plan or pause US auto-refresh if you hit the limit.</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.OpenSite">Open Twelve Data</sys:String>
     <sys:String x:Key="Settings.Section.Ocr">OCR (PDF statement import)</sys:String>
     <sys:String x:Key="Settings.Ocr.TessdataPath">Tesseract tessdata path</sys:String>
     <sys:String x:Key="Settings.Ocr.TessdataPath.Hint">Folder containing .traineddata files. Leave blank to disable OCR — image-only PDF pages will be skipped.</sys:String>
@@ -868,6 +964,13 @@
     <sys:String x:Key="Settings.Sync.Conflicts.Status.UsedRemote">Adopted remote for {0}.</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">Market open</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">Market closed</sys:String>
+    <!-- Sync indicator (Phase 1) -->
+    <sys:String x:Key="StatusBar.Sync.Disabled">Sync off</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Synced">Synced</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Syncing">Syncing…</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Failed">Sync failed</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Offline">Offline</sys:String>
+    <sys:String x:Key="StatusBar.Sync.PendingFormat">{0} pending</sys:String>
 
     <!--  Categories  -->
     <sys:String x:Key="Nav.Categories">Categories</sys:String>
@@ -908,6 +1011,8 @@
     <sys:String x:Key="Categories.Field.Name">Name</sys:String>
     <sys:String x:Key="Categories.Field.Color">Color</sys:String>
     <sys:String x:Key="Categories.Field.CurrentIcon">Current icon</sys:String>
+    <sys:String x:Key="Categories.Field.Parent">Parent</sys:String>
+    <sys:String x:Key="Categories.Field.NoParent">(None — top level)</sys:String>
     <sys:String x:Key="Categories.Field.Preview">Preview</sys:String>
     <sys:String x:Key="Categories.PreviewPlaceholder">Name preview</sys:String>
     <sys:String x:Key="Categories.Icon.Food">Food</sys:String>
@@ -1134,6 +1239,7 @@
     <sys:String x:Key="Dashboard.Widget.Investment.Heading">Investment focus</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.TotalPnl">Total P&amp;L</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.OpenLink">→ Open Portfolio</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Investment.NetWorthTrend">Net worth · last 30 days</sys:String>
     <!-- Today's Movers — broker app intraday P&L cross-section -->
     <sys:String x:Key="Dashboard.Widget.TodaysMovers.Heading">Today's intraday P&amp;L</sys:String>
     <sys:String x:Key="Dashboard.Widget.TodaysMovers.Gainers">Top 3 gainers today</sys:String>
@@ -1151,6 +1257,7 @@
     <sys:String x:Key="Dashboard.Widget.AssetClass.PoliciesSuffix"> policies</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.Retirement">Retirement</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.RetirementAccountsSuffix"> accounts</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Investments">Investments</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.Physical">Physical</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.PhysicalItemsSuffix"> items</sys:String>
     <!-- Stage 4: Return calendar -->
@@ -1196,6 +1303,18 @@
     <sys:String x:Key="Goals.Add.Deadline">Deadline</sys:String>
     <sys:String x:Key="Goals.Add.Submit">Add</sys:String>
     <sys:String x:Key="Goals.Form.Hint">Set a target amount, current amount, and deadline to track progress.</sys:String>
+    <sys:String x:Key="Goals.Add.LinkedAssetClass">Auto-track from asset class</sys:String>
+    <sys:String x:Key="Goals.Add.LinkedAssetClass.Hint">Pick an asset class to auto-track progress against the dashboard's current value. Choose "Manual" to keep using the Current amount field above.</sys:String>
+    <sys:String x:Key="Goals.Add.PortfolioGroup">Linked portfolio group</sys:String>
+    <sys:String x:Key="Goals.Add.PortfolioGroup.Hint">A linked group takes precedence over the asset class above: progress = the group's current net value ÷ target. Useful for user-defined buckets like "Retirement" or "House Fund".</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.Manual">Manual (use Current amount)</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.NetWorth">Net worth (assets − liabilities)</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.TotalAssets">Total assets</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.Investments">Investments</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.Cash">Cash</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.RealEstate">Real estate</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.Retirement">Retirement</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.Physical">Physical assets</sys:String>
     <sys:String x:Key="Goals.Edit.Title">Edit goal</sys:String>
     <sys:String x:Key="Goals.Edit.Submit">Save</sys:String>
     <sys:String x:Key="Goals.Edit.Cancel">Cancel</sys:String>
@@ -1551,6 +1670,8 @@
     <!-- v0.25 FIRE Calculator -->
     <sys:String x:Key="Fire.Title">FIRE</sys:String>
     <sys:String x:Key="Fire.Input.NetWorth">Current Net Worth</sys:String>
+    <sys:String x:Key="Fire.Input.Group">Linked portfolio group</sys:String>
+    <sys:String x:Key="Fire.Input.Group.Hint">Picking a group auto-fills the current net worth from that bucket's running total (you can override). The saved FIRE goal remembers this link.</sys:String>
     <sys:String x:Key="Fire.Input.AnnualExpenses">Annual Expenses</sys:String>
     <sys:String x:Key="Fire.Input.AnnualSavings">Annual Savings</sys:String>
     <sys:String x:Key="Fire.Input.Return">Expected Annual Return</sys:String>

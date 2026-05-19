@@ -43,6 +43,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public RecurringViewModel Recurring { get; }
     public ReportsViewModel Reports { get; }
     public GoalsViewModel Goals { get; }
+    public Features.PortfolioGroups.PortfolioGroupsViewModel PortfolioGroups { get; }
     public ImportViewModel Import { get; }
     public ReconciliationViewModel Reconciliation { get; }
     public RealEstateViewModel RealEstate { get; }
@@ -185,6 +186,42 @@ public partial class MainViewModel : ObservableObject, IDisposable
             Goals.OpenAddFormCommand.Execute(null);
     }
 
+    /// <summary>新增不動產 — 切到不動產頁 + 開新增不動產 dialog。</summary>
+    [RelayCommand]
+    private void AddRealEstateFromMenu()
+    {
+        NavRail.ActiveSection = NavSection.RealEstate;
+        if (RealEstate.OpenAddFormCommand.CanExecute(null))
+            RealEstate.OpenAddFormCommand.Execute(null);
+    }
+
+    /// <summary>新增保險保單 — 切到保險頁 + 開新增保單 dialog。</summary>
+    [RelayCommand]
+    private void AddInsuranceFromMenu()
+    {
+        NavRail.ActiveSection = NavSection.Insurance;
+        if (Insurance.OpenAddFormCommand.CanExecute(null))
+            Insurance.OpenAddFormCommand.Execute(null);
+    }
+
+    /// <summary>新增退休專戶 — 切到退休專戶頁 + 開新增專戶 dialog。</summary>
+    [RelayCommand]
+    private void AddRetirementFromMenu()
+    {
+        NavRail.ActiveSection = NavSection.Retirement;
+        if (Retirement.OpenAddFormCommand.CanExecute(null))
+            Retirement.OpenAddFormCommand.Execute(null);
+    }
+
+    /// <summary>新增實物資產 — 切到實物資產頁 + 開新增資產 dialog。</summary>
+    [RelayCommand]
+    private void AddPhysicalAssetFromMenu()
+    {
+        NavRail.ActiveSection = NavSection.PhysicalAsset;
+        if (PhysicalAsset.OpenAddFormCommand.CanExecute(null))
+            PhysicalAsset.OpenAddFormCommand.Execute(null);
+    }
+
     // Theme
 
     private readonly IStockSearchService _searchService;
@@ -223,6 +260,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         RecurringViewModel recurring,
         ReportsViewModel reports,
         GoalsViewModel goals,
+        Features.PortfolioGroups.PortfolioGroupsViewModel portfolioGroups,
         ImportViewModel import,
         ReconciliationViewModel reconciliation,
         RealEstateViewModel realEstate,
@@ -249,6 +287,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         Recurring = recurring;
         Reports = reports;
         Goals = goals;
+        PortfolioGroups = portfolioGroups;
         Import = import;
         Reconciliation = reconciliation;
         RealEstate = realEstate;

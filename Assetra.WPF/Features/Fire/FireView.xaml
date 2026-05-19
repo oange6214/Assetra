@@ -32,6 +32,30 @@
             Padding="20"
             Style="{StaticResource FormCard}">
             <StackPanel>
+                <!--
+                    Portfolio-Groups-Refactor P6 — 群組篩選器。選擇後自動把該 group 的
+                    累計淨值填入「目前淨資產」，給 FIRE 計算一個合理起點。catalog 未注入
+                    時隱藏，FIRE 維持手動輸入流程。
+                -->
+                <StackPanel
+                    Margin="0,0,0,12"
+                    Visibility="{Binding HasPortfolioGroups, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                    <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Fire.Input.Group}" />
+                    <ComboBox
+                        Width="240"
+                        HorizontalAlignment="Left"
+                        DisplayMemberPath="Name"
+                        ItemsSource="{Binding GroupCatalog.Groups}"
+                        SelectedItem="{Binding SelectedGroup, Mode=TwoWay}"
+                        Style="{StaticResource FormComboBox}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Fire.Input.Group.Hint}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
                 <UniformGrid
                     Columns="5"
                     Style="{StaticResource PageFormGrid}">

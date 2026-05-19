@@ -2,7 +2,6 @@
     x:Class="Assetra.WPF.Features.Portfolio.Controls.DashboardTabPanel"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ctrl="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -15,12 +14,10 @@
             <!--
                 Slimmed dashboard (Portfolio Option A refactor): 10-day trend
                 chart moved to Trends page; Recent Trades moved to top-level
-                TransactionLog page. Dashboard keeps Hero + KPI metrics +
-                Top Holdings + Budget Summary so it stays portfolio-focused.
+                TransactionLog page. Dashboard keeps investment-only KPI
+                metrics and top holdings so it stays portfolio-focused.
             -->
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="16" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="16" />
                 <RowDefinition Height="Auto" />
@@ -38,7 +35,7 @@
                     <ColumnDefinition Width="2*" />
                 </Grid.ColumnDefinitions>
 
-                <!--  Hero: Net Worth  -->
+                <!--  Hero: investment market value  -->
                 <Border
                     Grid.Column="0"
                     Style="{StaticResource FormCard}">
@@ -46,13 +43,13 @@
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextMuted}"
-                            Text="{DynamicResource Portfolio.Header.NetWorth}" />
+                            Text="{DynamicResource Portfolio.Position.Summary.MarketValue}" />
                         <TextBlock
                             Margin="0,4,0,0"
                             FontSize="{StaticResource Font.Size.2xl}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{Binding NetWorthDisplay}" />
+                            Text="{Binding TotalMarketValueDisplay}" />
 
                         <!--  Day P&L (hidden until live prices arrive)  -->
                         <StackPanel
@@ -79,7 +76,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>
-                                <Run Text="{Binding DayPnlDisplay, Mode=OneWay}" />
+                                <Run Text="{Binding SignedDayPnlDisplay, Mode=OneWay}" />
                                 <Run Text=" " />
                                 <Run Text="{Binding DayPnlPercentDisplay, Mode=OneWay}" />
                             </TextBlock>
@@ -87,7 +84,7 @@
                     </StackPanel>
                 </Border>
 
-                <!--  Metric: 淨損益  -->
+                <!--  Metric: 淨損益試算  -->
                 <Border
                     Grid.Column="2"
                     Style="{StaticResource FormCard}">
@@ -125,7 +122,7 @@
                     </StackPanel>
                 </Border>
 
-                <!--  Metric: 總資產  -->
+                <!--  Metric: 付出成本  -->
                 <Border
                     Grid.Column="4"
                     Style="{StaticResource FormCard}">
@@ -133,17 +130,17 @@
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextMuted}"
-                            Text="{DynamicResource Portfolio.TotalAssets}" />
+                            Text="{DynamicResource Portfolio.Position.Summary.TotalCost}" />
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="{StaticResource Font.Size.Xl}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{Binding TotalAssetsDisplay}" />
+                            Text="{Binding TotalCostDisplay}" />
                     </StackPanel>
                 </Border>
 
-                <!--  Metric: 負債（中性色 — 負債金額不是漲跌數字，避免綠/紅誤導）  -->
+                <!--  Metric: 今日漲跌  -->
                 <Border
                     Grid.Column="6"
                     Style="{StaticResource FormCard}">
@@ -151,25 +148,28 @@
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Sm}"
                             Foreground="{DynamicResource AppTextMuted}"
-                            Text="{DynamicResource Portfolio.Header.Liabilities}" />
+                            Text="{DynamicResource Portfolio.Position.Summary.DayChange}" />
                         <TextBlock
                             Margin="0,6,0,0"
                             FontSize="{StaticResource Font.Size.Xl}"
                             FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{Binding TotalLiabilitiesDisplay}" />
+                            Text="{Binding SignedDayPnlDisplay}">
+                            <TextBlock.Style>
+                                <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                         <TextBlock
                             Margin="0,2,0,0"
                             FontSize="{StaticResource Font.Size.Xs}"
-                            Foreground="{DynamicResource AppTextMuted}">
-                            <Run Text="{DynamicResource Portfolio.Liability.DebtRatio}" />
-                            <Run Text=" " />
-                            <Run Text="{Binding DebtRatioValue, StringFormat={}{0:F1}%, Mode=OneWay}" />
-                            <Run Text="  /  " />
-                            <Run Text="{DynamicResource Portfolio.Liability.LeverageRatio}" />
-                            <Run Text=" " />
-                            <Run Text="{Binding LeverageRatio, StringFormat={}{0:F2}, Mode=OneWay}" />
-                        </TextBlock>
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{Binding DayPnlPercentDisplay}" />
                     </StackPanel>
                 </Border>
             </Grid>
@@ -283,9 +283,6 @@
                         </ItemsControl>
                     </StackPanel>
                 </Border>
-
-            <!--  ═══ Row 4: Budget Summary Card ═══  -->
-            <ctrl:BudgetSummaryCard Grid.Row="4" DataContext="{Binding BudgetSummary}" />
 
         </Grid>
     </ScrollViewer>

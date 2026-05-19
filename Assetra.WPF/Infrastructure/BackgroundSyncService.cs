@@ -1,4 +1,5 @@
 using Assetra.Core.Interfaces;
+using Assetra.Core.Interfaces.Sync;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -14,7 +15,7 @@ namespace Assetra.WPF.Infrastructure;
 /// 失敗只記 log，不擲——避免 hosted service crash 拖垮整個 app。
 /// </para>
 /// </summary>
-public sealed class BackgroundSyncService : BackgroundService
+public sealed class BackgroundSyncService : BackgroundService, IBackgroundSyncSignals
 {
     private static readonly TimeSpan PollGranularity = TimeSpan.FromSeconds(30);
 
@@ -22,6 +23,15 @@ public sealed class BackgroundSyncService : BackgroundService
     private readonly SyncPassphraseCache _passphraseCache;
     private readonly SyncCoordinator _coordinator;
     private readonly ILogger<BackgroundSyncService> _logger;
+
+    /// <inheritdoc />
+    public event EventHandler? SyncStarted;
+    /// <inheritdoc />
+    public event EventHandler<int>? SyncCompleted;
+    /// <inheritdoc />
+    public event EventHandler<string>? SyncFailed;
+    /// <inheritdoc />
+    public event EventHandler<bool>? EnabledChanged;
 
     public BackgroundSyncService(
         IAppSettingsService settings,
@@ -37,6 +47,21 @@ public sealed class BackgroundSyncService : BackgroundService
         _passphraseCache = passphraseCache;
         _coordinator = coordinator;
         _logger = logger;
+
+        // Watch AppSettings.SyncEnabled for changes so the status indicator
+        // can flip Disabled ↔ Idle without waiting for the next tick.
+        _settings.Changed += OnSettingsChanged;
+    }
+
+    private bool _lastEnabledKnown;
+    private void OnSettingsChanged()
+    {
+        var enabled = _settings.Current?.SyncEnabled ?? false;
+        if (enabled != _lastEnabledKnown)
+        {
+            _lastEnabledKnown = enabled;
+            EnabledChanged?.Invoke(this, enabled);
+        }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -55,17 +80,20 @@ public sealed class BackgroundSyncService : BackgroundService
                 {
                     try
                     {
+                        SyncStarted?.Invoke(this, EventArgs.Empty);
                         var result = await _coordinator.SyncAsync(passphrase, stoppingToken).ConfigureAwait(false);
                         lastRunAt = DateTimeOffset.UtcNow;
                         _logger.LogInformation(
                             "Background sync ok: pulled={Pulled} pushed={Pushed} auto={Auto} manual={Manual}",
                             result.PulledCount, result.PushedCount,
                             result.AutoResolvedConflicts, result.ManualConflicts);
+                        SyncCompleted?.Invoke(this, result.PushedCount);
                     }
                     catch (Exception ex) when (ex is not OperationCanceledException)
                     {
                         _logger.LogWarning(ex, "Background sync failed; will retry on next tick.");
                         lastRunAt = DateTimeOffset.UtcNow; // back off one interval after failure
+                        SyncFailed?.Invoke(this, ex.Message);
                     }
                 }
             }

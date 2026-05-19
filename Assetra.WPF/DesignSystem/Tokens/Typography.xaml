@@ -8,12 +8,19 @@
         Typography tokens
         ══════════════════════════════════════════════════════════
         Font family + size scale used across the app.
-        FontBase is the only family used; the fallback chain follows the
-        Asset Management CIS: SF Pro-style display typography first,
-        Inter/Helvetica for Latin fallbacks, then Noto Sans TC and Windows CJK.
+        
+        Assetra is a Windows-first, Traditional Chinese finance tool. Use
+        Segoe UI Variable Text for dense controls and data-heavy views,
+        Segoe UI Variable Display for headings, and keep numeric values on
+        the UI family with tabular figures enabled by TextStyles.
     -->
 
-    <FontFamily x:Key="Font.Family.Base">SF Pro Display, Inter, Helvetica Neue, Noto Sans TC, Taipei Sans TC Beta, Segoe UI Variable Display, Segoe UI, Microsoft JhengHei UI, Microsoft YaHei UI, sans-serif</FontFamily>
+    <FontFamily x:Key="Font.Family.UI">Segoe UI Variable Text, Segoe UI, Microsoft JhengHei UI, Noto Sans TC, Taipei Sans TC Beta, Microsoft YaHei UI, sans-serif</FontFamily>
+    <FontFamily x:Key="Font.Family.Display">Segoe UI Variable Display, Segoe UI, Microsoft JhengHei UI, Noto Sans TC, Taipei Sans TC Beta, Microsoft YaHei UI, sans-serif</FontFamily>
+    <FontFamily x:Key="Font.Family.Numeric">Segoe UI Variable Text, Segoe UI, Microsoft JhengHei UI, Noto Sans TC, Taipei Sans TC Beta, Microsoft YaHei UI, sans-serif</FontFamily>
+
+    <!--  Back-compat alias for existing XAML. New styles should choose UI / Display / Numeric explicitly.  -->
+    <FontFamily x:Key="Font.Family.Base">Segoe UI Variable Text, Segoe UI, Microsoft JhengHei UI, Noto Sans TC, Taipei Sans TC Beta, Microsoft YaHei UI, sans-serif</FontFamily>
     <sys:Double x:Key="Font.Size.Xs">12</sys:Double>
     <sys:Double x:Key="Font.Size.Sm">14</sys:Double>
     <sys:Double x:Key="Font.Size.Base">16</sys:Double>

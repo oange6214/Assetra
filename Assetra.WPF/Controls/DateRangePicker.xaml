@@ -27,8 +27,23 @@
                         <Border
                             x:Name="Bd"
                             Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{StaticResource Radius.Sm}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <!--
+                                直接用 TextBlock 取代 ContentPresenter：ContentPresenter 把
+                                string Content 自動 wrap 成 TextBlock 時不會把 Button.Foreground
+                                傳進去，導致選中態 Foreground=AppTextOnAccent (白) 切換時，實際
+                                日期文字仍是 AppTextPrimary (深灰)，跟 AppAccent (深 navy) 背景
+                                重疊變不可讀。直接 TemplateBinding 解決。
+                            -->
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Foreground="{TemplateBinding Foreground}"
+                                FontSize="{TemplateBinding FontSize}"
+                                FontWeight="{TemplateBinding FontWeight}"
+                                Text="{TemplateBinding Content}" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -56,6 +71,18 @@
                 <DataTrigger Binding="{Binding IsRangeEnd}" Value="True">
                     <Setter Property="Background" Value="{DynamicResource AppAccent}" />
                     <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+                <!--
+                    今天：用 1px AppAccent 外框 + SemiBold，不動 Background / Foreground，
+                    所以跟 IsRangeStart/IsRangeEnd（會把 Background 變實色）疊加時不衝突
+                    —— 今天剛好是 start/end 也能看出來（實色填底 + 外框 + 粗體）。
+                    放在 triggers 最後但只設 BorderBrush/Thickness/FontWeight，不會被前面的
+                    DataTrigger 覆寫顏色。
+                -->
+                <DataTrigger Binding="{Binding IsToday}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                    <Setter Property="BorderThickness" Value="1" />
                     <Setter Property="FontWeight" Value="SemiBold" />
                 </DataTrigger>
             </Style.Triggers>

@@ -28,7 +28,7 @@
 
     <!--  ── Global TextBlock ──  -->
     <Style TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Base}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
@@ -42,7 +42,7 @@
         fonts so Chinese characters render correctly.
     -->
     <Style TargetType="ToolTip">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="Background" Value="{DynamicResource AppSurface}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
@@ -55,7 +55,7 @@
     <Style x:Key="AppTextBox" TargetType="{x:Type TextBox}">
         <Setter Property="MinHeight" Value="{StaticResource Control.Height.Md}" />
         <Setter Property="Padding" Value="10,6" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
         <Setter Property="Background" Value="{DynamicResource Brush.Surface}" />
@@ -144,7 +144,7 @@
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
@@ -217,7 +217,7 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="Padding" Value="10,6" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
@@ -256,7 +256,7 @@
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Background" Value="{DynamicResource AppBackground}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource FormComboBoxItem}" />
@@ -317,8 +317,19 @@
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             Content="{TemplateBinding SelectionBoxItem}"
-                            ContentTemplate="{TemplateBinding ItemTemplate}"
+                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                             IsHitTestVisible="False" />
+                        <!--
+                            ⚠ 用 SelectionBoxItemTemplate（不是 ItemTemplate）：
+                            - 顯式 ItemTemplate → SelectionBoxItemTemplate 同 ItemTemplate
+                            - 只用 DisplayMemberPath → SelectionBoxItemTemplate 是 WPF 自動生的
+                            那個顯示 Display property 的 inline template，且 ContentTemplateSelector 不會被 set
+                            原本綁 ItemTemplate 在 DisplayMemberPath 場景下：
+                            - ItemTemplate=null → ContentTemplate=null
+                            - WPF 在 SelectionBoxItem 也另設了 ContentTemplateSelector
+                            - 雙設 → throw warning「ContentTemplateSelector will be ignored」
+                            改綁 SelectionBoxItemTemplate 一次解決兩種使用方式。
+                        -->
 
                         <TextBox
                             x:Name="PART_EditableTextBox"

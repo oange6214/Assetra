@@ -7,7 +7,6 @@
     xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
-    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     xmlns:widgets="clr-namespace:Assetra.WPF.Features.FinancialOverview.Widgets"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel}}"
     d:DesignHeight="800"
@@ -15,44 +14,433 @@
     Background="{DynamicResource AppBackground}"
     mc:Ignorable="d">
 
+    <!--
+        Gear button + KPI bar 原本放在 ScrollViewer 外面（Row 0 / Row 1），導致 KPI 寬度
+        跟 ScrollViewer 內容寬度不對齊：scrollbar 出現時 widgets 損失 17px 右側空間，KPI
+        卻保留滿寬，右側差一條。整段搬進 ScrollViewer 內就所有橫向 padding / scrollbar
+        gutter 一致。
+    -->
     <Grid Style="{StaticResource PageRootGrid}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+        <ScrollViewer
+            Margin="0"
+            VerticalScrollBarVisibility="Auto">
+            <StackPanel>
 
-        <!--  Gear icon to open the KPI selector dialog  -->
-        <Button
-            Grid.Row="0"
-            Width="32"
-            Height="32"
-            Margin="0,0,0,8"
-            Padding="0"
-            HorizontalAlignment="Right"
-            Command="{Binding OpenKpiEditorCommand}"
-            Style="{StaticResource AppIconButton}"
-            ToolTip="{DynamicResource Settings.OverviewKpis.Title}">
-            <ds:AppIcon Symbol="Settings24" FontSize="{StaticResource Font.Size.Md}" />
-        </Button>
+                <!--
+                    ═══ ❶ HERO card (v2 redesign 2026-05-13) ═══
+                    永久顯示 淨資產 + 目標進度 + 今日漲跌。
+                    - 淨資產是 universal hero indicator，不該被 KPI dialog 砍掉
+                    - 目標進度條：未設定目標時顯示 CTA「尚未設定目標 → 點此設定」
+                    - 今日漲跌：HasHeroTodayDelta=false 時整段隱藏，避免「未開盤」期間佔位
+                -->
+                <Border
+                    Margin="0,0,0,12"
+                    Padding="20,16"
+                    Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Md}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <!--  Left: 淨資產大字 + 目標進度條  -->
+                        <StackPanel Grid.Column="0">
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource FinancialOverview.Header.NetWorth}" />
+                            <!--
+                                Hero 大字綁 BalanceSheetNetWorthDisplay 而非 TotalNetWorthDisplay
+                                — 後者 = (TotalAssets + TotalInvestments − TotalLiabilities) 漏掉
+                                Physical/RealEstate/Retirement 等不在 IFinancialOverviewQueryService
+                                的資產類別，會少算。BalanceSheet 系列直接從各 widget VM 加總，
+                                跟「資產組成」view 的金額一致。
+                            -->
+                            <TextBlock
+                                Margin="0,4,0,8"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.2xl}"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding BalanceSheetNetWorthDisplay}"
+                                Typography.NumeralAlignment="Tabular" />
 
-        <!--
-            KPI Bar — driven by AppSettings.OverviewKpis. The user picks
-            which 3-6 metrics to show in the Settings page; this view just
-            renders whatever the ViewModel emits.
-        -->
-        <ItemsControl
-            Grid.Row="1"
-            Margin="0,0,0,16"
-            ItemsSource="{Binding KpiCards}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <UniformGrid Rows="1" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border Margin="4,0" Style="{StaticResource FormCard}">
+                            <!--  Goal progress bar — visible when HasGoalTarget  -->
+                            <StackPanel Visibility="{Binding HasGoalTarget, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Grid Height="6" Margin="0,0,0,4">
+                                    <Border Background="{DynamicResource AppBorder}" CornerRadius="3" />
+                                    <Border HorizontalAlignment="Left" Background="{DynamicResource AppAccent}" CornerRadius="3">
+                                        <Border.Width>
+                                            <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                                <Binding Path="HeroGoalProgressValue" />
+                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                                            </MultiBinding>
+                                        </Border.Width>
+                                    </Border>
+                                </Grid>
+                                <DockPanel LastChildFill="False">
+                                    <TextBlock DockPanel.Dock="Left"
+                                               FontSize="{StaticResource Font.Size.Xs}"
+                                               Foreground="{DynamicResource AppTextMuted}">
+                                        <Run Text="{DynamicResource FinancialOverview.Hero.GoalProgress}" />
+                                        <Run Text=" " />
+                                        <Run Text="{Binding HeroGoalProgressDisplay, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock DockPanel.Dock="Right"
+                                               FontSize="{StaticResource Font.Size.Xs}"
+                                               Foreground="{DynamicResource AppTextMuted}">
+                                        <Run Text="{DynamicResource FinancialOverview.Hero.GoalLabel}" />
+                                        <Run Text=": " />
+                                        <Run Text="{Binding HeroGoalTargetDisplay, Mode=OneWay}" />
+                                    </TextBlock>
+                                </DockPanel>
+                            </StackPanel>
+
+                            <!--
+                                No-goal CTA — v3 2026-05-17：改成可點擊（左鍵跳 Goals tab
+                                觸發建立目標流程）。底部 GoalsWidget 在無目標時已自動隱藏
+                                (避免 Hero + widget 兩處 CTA 重複)，所以此處變成唯一的
+                                目標設定入口；Cursor=Hand 讓使用者一眼看出 actionable。
+                            -->
+                            <TextBlock
+                                Cursor="Hand"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Visibility="{Binding HasGoalTarget, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                <TextBlock.InputBindings>
+                                    <MouseBinding Command="{Binding NavigateToGoalsAndAddCommand}" MouseAction="LeftClick" />
+                                </TextBlock.InputBindings>
+                                <Run Text="{DynamicResource FinancialOverview.Hero.NoGoal}" />
+                                <Run Text="   " />
+                                <Run Foreground="{DynamicResource AppAccent}" Text="{DynamicResource FinancialOverview.Hero.NoGoalCta}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!--  Right: 今日漲跌（盤後 / 無報價時整段不渲染）  -->
+                        <StackPanel
+                            Grid.Column="1"
+                            Margin="16,0,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding HasHeroTodayDelta, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock
+                                HorizontalAlignment="Right"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource FinancialOverview.Hero.Today}" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                HorizontalAlignment="Right"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Lg}"
+                                FontWeight="SemiBold"
+                                Text="{Binding HeroTodayDeltaDisplay, Mode=OneWay}"
+                                Typography.NumeralAlignment="Tabular">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsHeroTodayPositive}" Value="True">
+                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!--
+                    ═══ ❷ 公式列 — 總資產 − 總負債 = 淨資產 ═══
+                    三個對等 card 用 "−" 和 "=" operator 連接，把 balance-sheet 等式
+                    視覺化。固定永久顯示，KPI dialog 已不再列出這三個。
+                -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <!--  總資產  -->
+                    <Border Grid.Column="0"
+                            Padding="{StaticResource Padding.Card}"
+                            Background="{DynamicResource AppCardBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                        <StackPanel>
+                            <TextBlock FontSize="{StaticResource Font.Size.Xs}"
+                                       Foreground="{DynamicResource AppTextMuted}"
+                                       Text="{DynamicResource FinancialOverview.Header.TotalAssets}" />
+                            <!--
+                                綁 BalanceSheetTotalAssetsDisplay 而非 TotalAssetsDisplay。
+                                後者只是 asset_item 表的 cash + 手動 entry，會漏 Physical /
+                                RealEstate / Retirement。BalanceSheet 系列直接從各 widget
+                                VM 加總，跟資產組成 view 一致。
+                            -->
+                            <TextBlock Margin="0,4,0,0"
+                                       FontFamily="{StaticResource Font.Family.Base}"
+                                       FontSize="{StaticResource Font.Size.Lg}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AppTextPrimary}"
+                                       Text="{Binding BalanceSheetTotalAssetsDisplay}"
+                                       Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </Border>
+                    <!--  − operator  -->
+                    <TextBlock Grid.Column="1"
+                               Margin="12,0"
+                               VerticalAlignment="Center"
+                               FontSize="{StaticResource Font.Size.Lg}"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource AppTextMuted}"
+                               Text="−" />
+                    <!--  總負債  -->
+                    <Border Grid.Column="2"
+                            Padding="{StaticResource Padding.Card}"
+                            Background="{DynamicResource AppCardBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                        <StackPanel>
+                            <TextBlock FontSize="{StaticResource Font.Size.Xs}"
+                                       Foreground="{DynamicResource AppTextMuted}"
+                                       Text="{DynamicResource FinancialOverview.Header.Liabilities}" />
+                            <TextBlock Margin="0,4,0,0"
+                                       FontFamily="{StaticResource Font.Family.Base}"
+                                       FontSize="{StaticResource Font.Size.Lg}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AppDown}"
+                                       Text="{Binding TotalLiabilitiesDisplay}"
+                                       Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </Border>
+                    <!--  = operator  -->
+                    <TextBlock Grid.Column="3"
+                               Margin="12,0"
+                               VerticalAlignment="Center"
+                               FontSize="{StaticResource Font.Size.Lg}"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource AppTextMuted}"
+                               Text="=" />
+                    <!--  淨資產 (re-displayed compact for visual closure of equation)  -->
+                    <Border Grid.Column="4"
+                            Padding="{StaticResource Padding.Card}"
+                            Background="{DynamicResource AppCardBackground}"
+                            BorderBrush="{DynamicResource AppAccent}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                        <StackPanel>
+                            <TextBlock FontSize="{StaticResource Font.Size.Xs}"
+                                       Foreground="{DynamicResource AppTextMuted}"
+                                       Text="{DynamicResource FinancialOverview.Header.NetWorth}" />
+                            <TextBlock Margin="0,4,0,0"
+                                       FontFamily="{StaticResource Font.Family.Base}"
+                                       FontSize="{StaticResource Font.Size.Lg}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AppAccent}"
+                                       Text="{Binding BalanceSheetNetWorthDisplay}"
+                                       Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+
+                <!--  ── Widgets（與 KPI bar 同一個 ScrollViewer / StackPanel 內，橫向對齊） ──  -->
+
+                <!--
+                    Plan A 重排（v0.x）：
+                      1. AssetClassFocusWidget — 主要導航入口（現金/負債/不動產/...），
+                         上移到 KPI 緊鄰下方，使用者一進頁面就能跳到目標資產類
+                      2. TodaysMoversWidget — 每日掃視（盤中誰漲誰跌）
+                      3. InvestmentFocusWidget — 投資 drill-down 含 30d sparkline
+                      4. AssistantWidget — 洞察提醒（沒洞察時整段隱藏）
+                      5. GoalsWidget + FireWidget — 長期規劃，並排
+                      6. 資產 / 收支 expander — 詳細列表
+                    移除：原本 KPI 下方獨立「30 天投資組合趨勢」sparkline 區塊 —
+                      與 InvestmentFocusWidget 內畫的線是同一張，重複佔空間。
+                -->
+
+                <!--
+                    ═══ ❸ 資產組成（v2 取代「資產類焦點」6 cards） ═══
+                    水平 stacked bar 把 4-5 個資產類視覺化（金額比例 = 視覺寬度），
+                    下方 legend 行列出每類絕對金額 + 佔比。
+                    - 自動排除 0 值類（保險、退休空 → 不渲染）
+                    - 負債放在 stacked bar 底下、紅色獨立 bar，避免跟資產混色
+                    - 點 legend item 跳到對應 tab（沿用原 NavigateToXxxCommand）
+                    舊的 AssetClassFocusWidget 已不再使用，保留檔案以備回退。
+                -->
+                <Border Margin="0,0,0,16"
+                        Padding="{StaticResource Padding.Card}"
+                        Background="{DynamicResource AppCardBackground}"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Sm}"
+                        Visibility="{Binding HasCompositionData, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,10">
+                            <TextBlock DockPanel.Dock="Left"
+                                       VerticalAlignment="Center"
+                                       FontSize="{StaticResource Font.Size.Sm}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AppTextPrimary}"
+                                       Text="{DynamicResource FinancialOverview.Composition.Heading}" />
+                            <TextBlock DockPanel.Dock="Right"
+                                       VerticalAlignment="Center"
+                                       FontFamily="{StaticResource Font.Family.Base}"
+                                       FontSize="{StaticResource Font.Size.Sm}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AppTextPrimary}"
+                                       Text="{Binding CompositionTotalDisplay, Mode=OneWay}"
+                                       Typography.NumeralAlignment="Tabular" />
+                        </DockPanel>
+
+                        <!--  Real stacked bar with per-segment proportional widths  -->
+                        <Grid Height="14" Margin="0,0,0,4">
+                            <Border Background="{DynamicResource AppBorder}" CornerRadius="2" />
+                            <ItemsControl ItemsSource="{Binding CompositionSlices}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding ColorHex, Converter={StaticResource HexToBrushConverter}}"
+                                                Margin="0,0,1,0"
+                                                ToolTip="{Binding NameKey, Converter={StaticResource ResourceKeyToStringConverter}}">
+                                            <Border.Width>
+                                                <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                                    <Binding Path="Percent" />
+                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                </MultiBinding>
+                                            </Border.Width>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+
+                        <!--  Legend rows — each: ▇ name 65% NT$8.67M  -->
+                        <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding CompositionSlices}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2,0,2" Cursor="Hand">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Width="10" Height="10"
+                                                VerticalAlignment="Center"
+                                                Background="{Binding ColorHex, Converter={StaticResource HexToBrushConverter}}"
+                                                CornerRadius="2" />
+                                        <TextBlock Grid.Column="2"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="{StaticResource Font.Size.Xs}"
+                                                   Foreground="{DynamicResource AppTextSecondary}"
+                                                   Text="{Binding NameKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                        <TextBlock Grid.Column="3"
+                                                   VerticalAlignment="Center"
+                                                   FontFamily="{StaticResource Font.Family.Base}"
+                                                   FontSize="{StaticResource Font.Size.Xs}"
+                                                   Foreground="{DynamicResource AppTextMuted}"
+                                                   Text="{Binding PercentDisplay}"
+                                                   Typography.NumeralAlignment="Tabular" />
+                                        <TextBlock Grid.Column="5"
+                                                   VerticalAlignment="Center"
+                                                   FontFamily="{StaticResource Font.Family.Base}"
+                                                   FontSize="{StaticResource Font.Size.Xs}"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AppTextPrimary}"
+                                                   Text="{Binding ValueDisplay}"
+                                                   Typography.NumeralAlignment="Tabular" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!--  Liabilities standalone (red, separated visually) — 只在有負債時顯示  -->
+                        <StackPanel Margin="0,12,0,0"
+                                    Visibility="{Binding HasLiabilities, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Border Height="3" Margin="0,0,0,6" Background="{DynamicResource AppBorder}" CornerRadius="1.5" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="10" Height="10"
+                                        VerticalAlignment="Center"
+                                        Background="{DynamicResource AppDown}"
+                                        CornerRadius="2" />
+                                <TextBlock Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           FontSize="{StaticResource Font.Size.Xs}"
+                                           Foreground="{DynamicResource AppTextSecondary}"
+                                           Text="{DynamicResource FinancialOverview.Composition.Liability}" />
+                                <TextBlock Grid.Column="3"
+                                           VerticalAlignment="Center"
+                                           FontFamily="{StaticResource Font.Family.Base}"
+                                           FontSize="{StaticResource Font.Size.Xs}"
+                                           Foreground="{DynamicResource AppTextMuted}"
+                                           Text="{Binding LiabilityShareDisplay}"
+                                           Typography.NumeralAlignment="Tabular" />
+                                <TextBlock Grid.Column="5"
+                                           VerticalAlignment="Center"
+                                           FontFamily="{StaticResource Font.Family.Base}"
+                                           FontSize="{StaticResource Font.Size.Xs}"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppDown}"
+                                           Text="{Binding CompositionLiabilityDisplay}"
+                                           Typography.NumeralAlignment="Tabular" />
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!--
+                    KPI bar + 齒輪按鈕同列：齒輪原本獨佔一整列只放一顆 32×32 按鈕，
+                    上方留白 ~40px 浪費。用 DockPanel 把齒輪 dock 到右側、KPI bar 填左側。
+                    齒輪 VerticalAlignment=Top 對齊 KPI 卡頂端，視覺輕量。
+                    用負 Margin 抵消內部每張卡的 4px 左右 margin，讓 KPI bar 的最外側
+                    對齊容器邊緣（與下方 widgets 對齊）。
+                -->
+                <DockPanel Margin="0,0,0,16" LastChildFill="True">
+                    <Button
+                        DockPanel.Dock="Right"
+                        Width="32"
+                        Height="32"
+                        Margin="8,0,0,0"
+                        Padding="0"
+                        VerticalAlignment="Top"
+                        Command="{Binding OpenKpiEditorCommand}"
+                        Style="{StaticResource AppIconButton}"
+                        ToolTip="{DynamicResource Settings.OverviewKpis.Title}">
+                        <ds:AppIcon Symbol="Settings24" FontSize="{StaticResource Font.Size.Md}" />
+                    </Button>
+                    <ItemsControl
+                        Margin="-4,0,-4,0"
+                        ItemsSource="{Binding KpiCards}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="1" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="4,0" Style="{StaticResource FormCard}">
                         <StackPanel>
                             <TextBlock
                                 FontSize="{StaticResource Font.Size.Xs}"
@@ -82,79 +470,41 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
+                            <!--
+                                Optional secondary line — 例：負債比率 27.1% 下方顯示
+                                「槓桿比 1.37」副值。HasSecondary=false 時 TextBlock 不渲染。
+                            -->
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Typography.NumeralAlignment="Tabular"
+                                Visibility="{Binding HasSecondary, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Run Text="{Binding SecondaryLabelKey, Converter={StaticResource ResourceKeyToStringConverter}, Mode=OneWay}" />
+                                <Run Text=" " />
+                                <Run Text="{Binding SecondaryValueDisplay, Mode=OneWay}" />
+                            </TextBlock>
                         </StackPanel>
                     </Border>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
-        <!--  ── Accordion  ───────────────────────────────────────────────────  -->
-        <ScrollViewer
-            Grid.Row="2"
-            Margin="0"
-            VerticalScrollBarVisibility="Auto">
-            <StackPanel>
+                    </ItemsControl>
+                </DockPanel>
 
                 <!--
-                    30 天投資組合 sparkline — 給 KPI bar 一個「方向感」。
-                    純線條無軸；資料源是 InvestmentFocusWidget.TenDaySeries（cutoff -29 天）。
-                    註：理想是淨值（資產 + 投資 − 負債）每日 sparkline，但目前
-                    PortfolioDailySnapshot 只記錄投資 MarketValue（CashValue /
-                    LiabilityValue 兩欄存在但未持久化）。這版以投資組合趨勢為
-                    proxy；完整淨值 sparkline 待 daily NW snapshot 基建完成。
+                    v2 consolidation 2026-05-13：TodaysMoversWidget 已合併進
+                    InvestmentFocusWidget 內「今日漲跌」sub-section。獨立 widget
+                    保留檔案但不再被引用，避免訊息分散。
                 -->
-                <Border Height="56" Margin="0,0,0,16"
-                        Padding="12,8"
-                        Background="{DynamicResource AppCardBackground}"
-                        BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource Radius.Sm}"
-                        Visibility="{Binding InvestmentFocusWidget, Converter={StaticResource NullToVisibilityConverter}}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                                   VerticalAlignment="Center"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{DynamicResource Dashboard.Overview.PortfolioTrend30d}" />
-                        <lvc:CartesianChart Grid.Column="1"
-                                            Margin="12,0,0,0"
-                                            Background="Transparent"
-                                            Series="{Binding InvestmentFocusWidget.TenDaySeries}"
-                                            XAxes="{Binding InvestmentFocusWidget.SparklineXAxes}"
-                                            YAxes="{Binding InvestmentFocusWidget.SparklineYAxes}"
-                                            TooltipPosition="Hidden" />
-                    </Grid>
-                </Border>
 
-                <!--
-                    Stage 2.5 (Dashboard consolidation)：總覽 tab 上的 widget。
-                    DataContext = FinancialOverviewViewModel；widget 內部用
-                    GoalsWidget / FireWidget / AssistantWidget 屬性投影既有 VM。
-                    每個 widget 在對應 VM 未注入時自動隱藏（NullToVisibilityConverter）。
-                -->
-                <widgets:AssistantWidget />
-                <!--
-                    Long-term refactor：投資焦點卡放在 Assistant 之後、Goals/FIRE 之前。
-                    優先序：「我有多少 / 賺多少」(投資) → 「想達成什麼」(目標 / FIRE)。
-                -->
+                <!--  ↓ 投資焦點：總市值 / 成本 / 總損益 + 淨值走勢 + 今日漲跌 (merged) -->
                 <widgets:InvestmentFocusWidget />
-                <!--
-                    Today's Movers — broker app「即時損益」的橫切面，與
-                    InvestmentFocus (aggregate today P&L) 對比是「per-position
-                    today」視角。沒持倉 / 全部 DayChange=0 時自動隱藏。
-                -->
-                <widgets:TodaysMoversWidget />
-                <!--
-                    Phase C：現金 / 負債 / 不動產三在一焦點卡。同模式可擴展到
-                    crypto / 保險 / 退休 / 實物等其他資產類 — 加新項目時只要
-                    擴 grid columns 即可，不會再回到「每資產類做 mini-dashboard」
-                    的反模式。
-                -->
-                <widgets:AssetClassFocusWidget />
+
+                <!--  ↓ 助手洞察：有洞察才顯示（widget 內部 visibility 控制） -->
+                <widgets:AssistantWidget />
+
+                <!--  ↓ 目標 / FIRE 並排 -->
                 <Grid Margin="0,0,0,4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -164,196 +514,21 @@
                     <widgets:FireWidget Grid.Column="1" Margin="6,0,0,0" />
                 </Grid>
 
-                <!--  資產 Expander  -->
-                <Expander
-                    Margin="0,0,0,16"
-                    IsExpanded="True"
-                    Style="{StaticResource AppExpander}">
-                    <Expander.Header>
-                        <TextBlock
-                            FontSize="{StaticResource Font.Size.Md}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppUp}"
-                            Text="{DynamicResource FinancialOverview.Section.Assets}" />
-                    </Expander.Header>
-                    <ItemsControl Margin="0,4,0,4" ItemsSource="{Binding AssetGroups}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:AssetGroupVm}">
-                                <StackPanel Margin="8,4">
-                                    <Grid Margin="0,2,0,4">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock
-                                            Grid.Column="0"
-                                            FontSize="{StaticResource Font.Size.Base}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{Binding Name}" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            FontSize="{StaticResource Font.Size.Base}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{Binding SubtotalDisplay}" />
-                                    </Grid>
-                                    <ItemsControl ItemsSource="{Binding Items}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate DataType="{x:Type vm:AssetItemVm}">
-                                                <Grid Margin="12,2,0,2">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock
-                                                        Grid.Column="0"
-                                                        FontSize="{StaticResource Font.Size.Base}"
-                                                        Foreground="{DynamicResource AppTextPrimary}"
-                                                        Text="{Binding Name}" />
-                                                    <TextBlock
-                                                        Grid.Column="1"
-                                                        FontSize="{StaticResource Font.Size.Base}"
-                                                        Foreground="{DynamicResource AppTextPrimary}"
-                                                        Text="{Binding CurrentValueDisplay}" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Expander>
-
-                <!--  投資 Expander  -->
-                <Expander
-                    Margin="0,0,0,16"
-                    IsExpanded="True"
-                    Style="{StaticResource AppExpander}">
-                    <Expander.Header>
-                        <TextBlock
-                            FontSize="{StaticResource Font.Size.Md}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppAccent}"
-                            Text="{DynamicResource FinancialOverview.Section.Investments}" />
-                    </Expander.Header>
-                    <ItemsControl Margin="0,4,0,4" ItemsSource="{Binding InvestGroups}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:AssetGroupVm}">
-                                <StackPanel Margin="8,4">
-                                    <Grid Margin="0,2,0,4">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock
-                                            Grid.Column="0"
-                                            FontSize="{StaticResource Font.Size.Base}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{Binding Name}" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            FontSize="{StaticResource Font.Size.Base}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{Binding SubtotalDisplay}" />
-                                    </Grid>
-                                    <ItemsControl ItemsSource="{Binding Items}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate DataType="{x:Type vm:AssetItemVm}">
-                                                <Grid Margin="12,2,0,2">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock
-                                                        Grid.Column="0"
-                                                        FontSize="{StaticResource Font.Size.Base}"
-                                                        Foreground="{DynamicResource AppTextPrimary}"
-                                                        Text="{Binding Name}" />
-                                                    <TextBlock
-                                                        Grid.Column="1"
-                                                        FontSize="{StaticResource Font.Size.Base}"
-                                                        Foreground="{DynamicResource AppTextPrimary}"
-                                                        Text="{Binding CurrentValueDisplay}" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Expander>
-
-                <!--  負債 Expander  -->
-                <Expander
-                    Margin="0,0,0,16"
-                    IsExpanded="True"
-                    Style="{StaticResource AppExpander}">
-                    <Expander.Header>
-                        <TextBlock
-                            FontSize="{StaticResource Font.Size.Md}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppDown}"
-                            Text="{DynamicResource FinancialOverview.Section.Liabilities}" />
-                    </Expander.Header>
-                    <ItemsControl Margin="0,4,0,4" ItemsSource="{Binding LiabGroups}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:AssetGroupVm}">
-                                <StackPanel Margin="8,4">
-                                    <Grid Margin="0,2,0,4">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock
-                                            Grid.Column="0"
-                                            FontSize="{StaticResource Font.Size.Base}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{Binding Name}" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            FontSize="{StaticResource Font.Size.Base}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{Binding SubtotalDisplay}" />
-                                    </Grid>
-                                    <ItemsControl ItemsSource="{Binding Items}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate DataType="{x:Type vm:AssetItemVm}">
-                                                <Grid Margin="12,2,0,2">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock
-                                                        Grid.Column="0"
-                                                        FontSize="{StaticResource Font.Size.Base}"
-                                                        Foreground="{DynamicResource AppTextPrimary}"
-                                                        Text="{Binding Name}" />
-                                                    <TextBlock
-                                                        Grid.Column="1"
-                                                        FontSize="{StaticResource Font.Size.Base}"
-                                                        Foreground="{DynamicResource AppDown}"
-                                                        Text="{Binding CurrentValueDisplay}" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Expander>
+                <!--
+                    Removed (v2 consolidation 2026-05-13)：資產 / 投資 / 負債 三個
+                    Expander 已從總覽移除。理由：
+                    - 跟 ❹ 資產組成 view 嚴重重複（後者是 aggregated stacked bar
+                      + legend，前者是 grouped flat list — 同樣資料兩種呈現）
+                    - 每個 tab 分頁本身已有 DataGrid 細部資料，drill-down 走
+                      navigation 即可，不需要 dashboard inline 全展開
+                    - 減少 scroll 高度 ~600px，視覺集中
+                -->
 
             </StackPanel>
         </ScrollViewer>
 
         <!--  ── KPI selector dialog ──────────────────────────────────────  -->
         <Grid
-            Grid.Row="0"
-            Grid.RowSpan="3"
             behaviors:EscapeKeyCommandBehavior.Command="{Binding CloseKpiEditorCommand}"
             Visibility="{Binding IsKpiEditorOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <!--  Backdrop  -->

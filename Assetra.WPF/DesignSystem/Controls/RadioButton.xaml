@@ -8,7 +8,7 @@
         disabled). Inner dot fades in via Opacity trigger.
     -->
     <Style x:Key="AppRadioButton" TargetType="{x:Type RadioButton}">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="Background" Value="Transparent" />

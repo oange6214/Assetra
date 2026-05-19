@@ -18,72 +18,72 @@
 
     <!--  Heading  -->
     <Style x:Key="TextStyle.Heading.Lg" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Display}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Xl}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Semibold}" />
     </Style>
 
     <Style x:Key="TextStyle.Heading.Md" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Display}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Lg}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Semibold}" />
     </Style>
 
     <Style x:Key="TextStyle.Heading.Sm" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Display}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Base}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Semibold}" />
     </Style>
 
     <!--  Body  -->
     <Style x:Key="TextStyle.Body.Lg" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Md}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Regular}" />
     </Style>
 
     <Style x:Key="TextStyle.Body.Md" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Base}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Regular}" />
     </Style>
 
     <Style x:Key="TextStyle.Body.Sm" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Regular}" />
     </Style>
 
     <Style x:Key="TextStyle.Body.Strong.Md" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Base}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Medium}" />
     </Style>
 
     <!--  Caption  -->
     <Style x:Key="TextStyle.Caption" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Regular}" />
     </Style>
 
     <!--  Numeric — tabular figures for column-aligned finance values  -->
     <Style x:Key="TextStyle.Numeric.Display" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Numeric}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.2xl}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Semibold}" />
         <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
     </Style>
 
     <Style x:Key="TextStyle.Numeric.Body" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Numeric}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Medium}" />
         <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
     </Style>
 
     <Style x:Key="TextStyle.Numeric.Caption" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Numeric}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Regular}" />
         <Setter Property="Typography.NumeralAlignment" Value="Tabular" />

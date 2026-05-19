@@ -23,6 +23,8 @@ internal static class AssetSchemaMigrator
         "liability_subtype", "billing_day", "due_day", "credit_limit", "issuer_name",
         "subtype",
         "version", "last_modified_at", "last_modified_by_device", "is_deleted", "is_pending_push",
+        // Portfolio-Groups-Refactor P1 — cash account 可選屬於某 group
+        "portfolio_group_id",
     };
 
     private static readonly HashSet<string> AssetAllowedTypeDefs = new(StringComparer.OrdinalIgnoreCase)
@@ -92,6 +94,9 @@ internal static class AssetSchemaMigrator
             BackfillLiabilitySubtype(cmd);
             // 必須在 subtype 欄位存在之後才能跑（依 subtype 重新分配 group_id）。
             ReclassifyCashAccountsBySubtype(cmd);
+            // Portfolio-Groups-Refactor P1 — 既有 cash account / 投資資產 row backfill 到
+            // DefaultGroup，跟 Trade / PortfolioEntry 對齊 acceptance criteria。
+            BackfillPortfolioGroupId(cmd);
 
             tx.Commit();
         }
@@ -226,6 +231,11 @@ internal static class AssetSchemaMigrator
             "is_deleted", "INTEGER NOT NULL DEFAULT 0", AssetAllowedColumns, AssetAllowedTypeDefs);
         SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
             "is_pending_push", "INTEGER NOT NULL DEFAULT 0", AssetAllowedColumns, AssetAllowedTypeDefs);
+
+        // Portfolio-Groups-Refactor P1 — 現金 / asset items 可選屬於 group。
+        // 不做 backfill：cash account 設不設 group 是 user choice，沒設就跟著 trade 的群組推導。
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
+            "portfolio_group_id", "TEXT", AssetAllowedColumns, AssetAllowedTypeDefs);
     }
 
     private static void AddGroupSyncColumns(SqliteConnection conn, SqliteTransaction tx)
@@ -317,6 +327,16 @@ internal static class AssetSchemaMigrator
         cmd.ExecuteNonQuery();
 
         cmd.CommandText = "DROP TABLE IF EXISTS liability_account;";
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void BackfillPortfolioGroupId(SqliteCommand cmd)
+    {
+        cmd.CommandText = """
+            UPDATE asset
+               SET portfolio_group_id = '00000000-0000-0000-0000-000000000001'
+             WHERE portfolio_group_id IS NULL;
+            """;
         cmd.ExecuteNonQuery();
     }
 

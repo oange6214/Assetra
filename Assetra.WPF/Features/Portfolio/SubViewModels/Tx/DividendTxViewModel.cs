@@ -50,6 +50,33 @@ public sealed partial class DividendTxViewModel : ObservableObject
     [ObservableProperty] private string _stockNewShares = string.Empty;
     [ObservableProperty] private string _stockNewSharesError = string.Empty;
 
+    // ── Cross-currency (cash dividend only; stock dividend has no cash flow) ──
+    // MultiCurrency-Trade-Refactor P3 — same shape as BuyTxViewModel / SellTxViewModel.
+
+    [ObservableProperty] private string _actualCashAmount = string.Empty;
+    [ObservableProperty] private string _actualCashAmountError = string.Empty;
+    [ObservableProperty] private string _fxRate = string.Empty;
+    [ObservableProperty] private string _fxRateError = string.Empty;
+    [ObservableProperty] private string _instrumentCurrency = string.Empty;
+    [ObservableProperty] private string _cashAccountCurrency = string.Empty;
+
+    /// <summary>
+    /// True when <see cref="InstrumentCurrency"/> ≠ <see cref="CashAccountCurrency"/>.
+    /// Drives CashDividendTxForm's cross-currency banner + FxRate field visibility.
+    /// </summary>
+    public bool IsCrossCurrency
+    {
+        get
+        {
+            var instr = string.IsNullOrWhiteSpace(InstrumentCurrency) ? "TWD" : InstrumentCurrency.Trim().ToUpperInvariant();
+            var cash = string.IsNullOrWhiteSpace(CashAccountCurrency) ? "TWD" : CashAccountCurrency.Trim().ToUpperInvariant();
+            return !string.Equals(instr, cash, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    partial void OnInstrumentCurrencyChanged(string value) => OnPropertyChanged(nameof(IsCrossCurrency));
+    partial void OnCashAccountCurrencyChanged(string value) => OnPropertyChanged(nameof(IsCrossCurrency));
+
     /// <summary>Reset all dividend fields back to defaults.</summary>
     public void Reset()
     {
@@ -63,5 +90,11 @@ public sealed partial class DividendTxViewModel : ObservableObject
         StockPosition = null;
         StockNewShares = string.Empty;
         StockNewSharesError = string.Empty;
+        ActualCashAmount = string.Empty;
+        ActualCashAmountError = string.Empty;
+        FxRate = string.Empty;
+        FxRateError = string.Empty;
+        InstrumentCurrency = string.Empty;
+        CashAccountCurrency = string.Empty;
     }
 }

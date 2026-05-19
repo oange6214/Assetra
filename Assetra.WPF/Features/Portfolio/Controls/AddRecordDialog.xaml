@@ -477,6 +477,28 @@
                                     -->
                                     <StackPanel Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                         <Border Height="2" Background="Transparent" />
+
+                                        <!--
+                                            Portfolio-Groups-Refactor P3 — 群組（bucket）選擇器。
+                                            僅在 catalog 載入完成且當前 TxType 為投資相關（buy/sell/cashDiv/stockDiv）
+                                            時顯示。其他類型（現金流 / 借款 / 信用卡 / 轉帳）保留全域 default group。
+                                        -->
+                                        <StackPanel
+                                            Margin="0,0,0,12"
+                                            Visibility="{Binding ShouldShowGroupSelector, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <TextBlock
+                                                Margin="0,0,0,4"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.Tx.Group}" />
+                                            <ComboBox
+                                                DisplayMemberPath="Name"
+                                                ItemsSource="{Binding GroupCatalog.Groups}"
+                                                SelectedItem="{Binding SelectedPortfolioGroup, Mode=TwoWay}"
+                                                Style="{StaticResource FormComboBox}" />
+                                        </StackPanel>
+
                                         <!--  ======== 買入欄位 ========  -->
                                         <txforms:BuyTxForm />
 

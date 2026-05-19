@@ -1,5 +1,7 @@
+using System.IO;
 using System.Net.Http;
 using System.Reactive.Concurrency;
+using Assetra.Application.MarketData;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Sync;
 using Assetra.Core.Interfaces;
@@ -8,6 +10,7 @@ using Assetra.Infrastructure;
 using Assetra.Infrastructure.FinMind;
 using Assetra.Infrastructure.History;
 using Assetra.Infrastructure.Http;
+using Assetra.Infrastructure.MarketData;
 using Assetra.Infrastructure.Persistence;
 using Assetra.Infrastructure.Scheduling;
 using Assetra.Infrastructure.Search;
@@ -33,28 +36,62 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<ILocalizationService, WpfLocalizationService>();
         services.AddSingleton<IThemeService, AppThemeService>();
 
+        // Phase 1 sync indicator — counter lives at the platform layer because
+        // it only needs the dbPath; the aggregator service is registered in
+        // AddAssetraSync where BackgroundSyncService is wired.
+        services.AddSingleton<Assetra.Core.Interfaces.Sync.IPendingPushCounter>(
+            _ => new Assetra.Infrastructure.Sync.SqlitePendingPushCounter(dbPath));
+
         services.AddSingleton<HttpClient>(_ =>
         {
             var client = new HttpClient();
             client.DefaultRequestHeaders.UserAgent.ParseAdd(
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36");
-            client.Timeout = TimeSpan.FromSeconds(20);
+            // 45s — Twelve Data free tier 偶爾 cold-start 超過 20s（原本的值會 single-attempt 就放棄）。
+            // 配合 TwelveDataClient 的 3-attempt retry，整體最差情境約 45s × 3 = 2.25 min。
+            client.Timeout = TimeSpan.FromSeconds(45);
             return client;
         });
         services.AddSingleton<ITwseClient, TwseClient>();
         services.AddSingleton<ITpexClient, TpexClient>();
         services.AddSingleton<FugleClient>();
+        services.AddSingleton<TwelveDataClient>();
+        services.AddSingleton<ITwelveDataQuotaTracker, TwelveDataQuotaTracker>();
+        services.AddSingleton<TwelveDataQuoteProvider>();
+        services.AddSingleton<ITwelveDataConnectionTester>(sp => sp.GetRequiredService<TwelveDataQuoteProvider>());
+        services.AddSingleton<IEquityQuoteProvider>(sp => sp.GetRequiredService<TwelveDataQuoteProvider>());
+        // Yahoo Finance — fallback for foreign equities when Twelve Data fails / times out /
+        // doesn't have the symbol. Registered AFTER TwelveData so EquityRouter prefers
+        // Twelve Data first and only falls through to Yahoo on failure. No API key needed.
+        services.AddSingleton<IEquityQuoteProvider, YahooFinanceQuoteProvider>();
+        services.AddSingleton<IEquityQuoteProvider, FugleEquityQuoteProvider>();
+        services.AddSingleton<IEquityQuoteProvider, TwseEquityQuoteProvider>();
+        services.AddSingleton<IEquityQuoteProvider, TpexEquityQuoteProvider>();
+        services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<IEquityQuoteCache, InMemoryEquityQuoteCache>();
+        services.AddSingleton<ITradingCalendarService, TradingCalendarService>();
+        services.AddSingleton<EquityRouter>();
+        services.AddSingleton<IEquityRouter>(sp => sp.GetRequiredService<EquityRouter>());
         services.AddSingleton<IStockSearchService>(_ => new StockSearchService(assetsDir));
+        services.AddSingleton<NasdaqSymbolDirectory>(sp => new NasdaqSymbolDirectory(
+            Path.Combine(assetsDir, "market-data", "nasdaq"),
+            sp.GetRequiredService<HttpClient>()));
+        services.AddSingleton<IRefreshableSymbolDirectory>(sp => sp.GetRequiredService<NasdaqSymbolDirectory>());
+        services.AddSingleton<StockSearchSymbolDirectory>();
+        services.AddSingleton<ISymbolDirectory>(sp => new CompositeSymbolDirectory(
+        [
+            sp.GetRequiredService<StockSearchSymbolDirectory>(),
+            sp.GetRequiredService<NasdaqSymbolDirectory>(),
+        ]));
         services.AddSingleton<IScheduler>(_ =>
             new DispatcherScheduler(System.Windows.Application.Current.Dispatcher));
         services.AddSingleton<IStockService>(sp => new StockScheduler(
-            sp.GetRequiredService<ITwseClient>(),
-            sp.GetRequiredService<ITpexClient>(),
+            sp.GetRequiredService<IEquityRouter>(),
             sp.GetRequiredService<IPortfolioRepository>(),
             sp.GetRequiredService<IAlertRepository>(),
-            sp.GetRequiredService<IAppSettingsService>(),
-            sp.GetRequiredService<FugleClient>(),
-            sp.GetRequiredService<IScheduler>()));
+            sp.GetRequiredService<IScheduler>(),
+            calendar: sp.GetRequiredService<ITradingCalendarService>(),
+            timeProvider: sp.GetRequiredService<TimeProvider>()));
 
         services.AddSingleton<IAppSettingsService>(sp =>
             new AppSettingsService(sp.GetRequiredService<ILogger<AppSettingsService>>()));
@@ -72,7 +109,8 @@ internal static class ServiceCollectionExtensions
                 sp.GetRequiredService<FinMindApiStatus>(),
                 sp.GetRequiredService<ILogger<FinMindService>>()));
         services.AddSingleton<IFinMindService>(sp => sp.GetRequiredService<FinMindService>());
-        services.AddSingleton<IStockHistoryProvider>(sp =>
+        services.AddSingleton<IEquityOhlcCacheRepository>(_ => new EquityOhlcCacheSqliteRepository(dbPath));
+        services.AddSingleton<DynamicHistoryProvider>(sp =>
         {
             var settingsSvc = sp.GetRequiredService<IAppSettingsService>();
             var http = sp.GetRequiredService<HttpClient>();
@@ -92,6 +130,10 @@ internal static class ServiceCollectionExtensions
                 finMindStatus,
                 sp.GetRequiredService<FugleClient>());
         });
+        services.AddSingleton<IStockHistoryProvider>(sp => new CachedStockHistoryProvider(
+            sp.GetRequiredService<DynamicHistoryProvider>(),
+            sp.GetRequiredService<IEquityOhlcCacheRepository>(),
+            sp.GetRequiredService<TimeProvider>()));
 
         services.AddSingleton<SnackbarViewModel>();
         services.AddSingleton<ISnackbarService>(sp =>
@@ -172,7 +214,24 @@ internal static class ServiceCollectionExtensions
             metadataPath));
         services.AddSingleton<SyncPassphraseCache>();
         services.AddSingleton<ConflictResolutionViewModel>();
-        services.AddHostedService<BackgroundSyncService>();
+
+        // BackgroundSyncService must be a SINGLE instance exposed under two
+        // service identities: IHostedService (for the .NET host loop) and
+        // IBackgroundSyncSignals (for the status indicator to subscribe to).
+        // Register the concrete type as singleton, then forward both interfaces.
+        services.AddSingleton<BackgroundSyncService>();
+        services.AddSingleton<Assetra.Core.Interfaces.Sync.IBackgroundSyncSignals>(
+            sp => sp.GetRequiredService<BackgroundSyncService>());
+        services.AddHostedService(sp => sp.GetRequiredService<BackgroundSyncService>());
+
+        // Phase 1 sync status indicator (see docs/planning/Sync-Status-Indicator.md).
+        // Counter is registered in AddAssetraPersistence where dbPath is in scope.
+        services.AddSingleton<Assetra.Core.Interfaces.Sync.IGlobalSyncStatusService>(sp =>
+            new Assetra.Infrastructure.Sync.GlobalSyncStatusService(
+                sp.GetRequiredService<Assetra.Core.Interfaces.Sync.IBackgroundSyncSignals>(),
+                sp.GetRequiredService<Assetra.Core.Interfaces.Sync.IPendingPushCounter>(),
+                sp.GetRequiredService<IScheduler>(),
+                initiallyEnabled: sp.GetRequiredService<IAppSettingsService>().Current?.SyncEnabled ?? false));
         return services;
     }
 }

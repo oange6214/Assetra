@@ -274,8 +274,8 @@ public class PortfolioViewModelTests
         var repo = new Mock<IPortfolioRepository>();
         repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(() => created1.ToList());
         repo.Setup(r => r.FindOrCreatePortfolioEntryAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<AssetType>(), It.IsAny<string?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
-            .Callback((string sym, string exch, string? n, AssetType at, string? cur, bool etf, CancellationToken _) =>
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<AssetType>(), It.IsAny<string?>(), It.IsAny<bool>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .Callback((string sym, string exch, string? n, AssetType at, string? cur, bool etf, Guid? _, CancellationToken _) =>
                 created1.Add(new PortfolioEntry(entryId1, sym, exch, at, n ?? string.Empty)))
             .ReturnsAsync(entryId1);
         repo.Setup(r => r.UnarchiveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
@@ -307,8 +307,8 @@ public class PortfolioViewModelTests
         var repo = new Mock<IPortfolioRepository>();
         repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(() => created2.ToList());
         repo.Setup(r => r.FindOrCreatePortfolioEntryAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<AssetType>(), It.IsAny<string?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
-            .Callback((string sym, string exch, string? n, AssetType at, string? cur, bool etf, CancellationToken _) =>
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<AssetType>(), It.IsAny<string?>(), It.IsAny<bool>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .Callback((string sym, string exch, string? n, AssetType at, string? cur, bool etf, Guid? _, CancellationToken _) =>
                 created2.Add(new PortfolioEntry(entryId2, sym, exch, at, n ?? string.Empty)))
             .ReturnsAsync(entryId2);
         repo.Setup(r => r.UnarchiveAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
@@ -510,6 +510,7 @@ public class PortfolioViewModelTests
         public Task<Guid> FindOrCreateAccountAsync(string name, string currency, CancellationToken ct = default) =>
             Task.FromResult(Guid.NewGuid());
         public Task ArchiveItemAsync(Guid id) => Task.CompletedTask;
+        public Task UnarchiveItemAsync(Guid id) => Task.CompletedTask;
         public Task<int> HasTradeReferencesAsync(Guid id, CancellationToken ct = default) => Task.FromResult(0);
 
         public Task<IReadOnlyList<AssetGroup>> GetGroupsAsync() =>
@@ -2626,6 +2627,7 @@ public class PortfolioViewModelTests
         public async Task<ClosePriceLookupResult> LookupClosePriceAsync(
             string symbol,
             DateTime buyDate,
+            string? exchange = null,
             CancellationToken ct = default)
         {
             await Task.Delay(delayMs, ct);

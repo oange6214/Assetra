@@ -68,12 +68,21 @@
                     Foreground="{DynamicResource AppTextPrimary}"
                     Text="{Binding Name}"
                     TextTrimming="CharacterEllipsis" />
-                <TextBlock
-                    Margin="0,2,0,0"
-                    FontSize="{DynamicResource Font.Size.Xs}"
-                    Foreground="{DynamicResource AppTextMuted}"
-                    Text="{Binding Exchange}"
-                    TextTrimming="CharacterEllipsis" />
+                <StackPanel Margin="0,2,0,0" Orientation="Horizontal">
+                    <TextBlock
+                        FontSize="{DynamicResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{Binding Exchange}" />
+                    <TextBlock
+                        Margin="4,0"
+                        FontSize="{DynamicResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="·" />
+                    <TextBlock
+                        FontSize="{DynamicResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{Binding Currency}" />
+                </StackPanel>
             </StackPanel>
         </Grid>
     </DataTemplate>

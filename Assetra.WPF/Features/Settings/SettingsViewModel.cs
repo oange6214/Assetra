@@ -126,6 +126,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     private bool _isRefreshingUsSymbolDirectory;
 
     [ObservableProperty] private bool _isFugleHelpOpen;
+    [ObservableProperty] private bool _isTwelveDataHelpOpen;
     [ObservableProperty] private string _ocrTessdataPath = string.Empty;
     [ObservableProperty] private string _ocrLanguage = "eng";
     [ObservableProperty] private string _defaultHomeSection = "FinancialOverview";
@@ -864,6 +865,21 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     private void OpenFugleDeveloperSite()
     {
         Process.Start(new ProcessStartInfo("https://developer.fugle.tw/") { UseShellExecute = true });
+    }
+
+    // ── Twelve Data help dialog (mirrors Fugle help triad) ─────────────────
+    [RelayCommand]
+    private void OpenTwelveDataHelp() => IsTwelveDataHelpOpen = true;
+
+    [RelayCommand]
+    private void CloseTwelveDataHelp() => IsTwelveDataHelpOpen = false;
+
+    [RelayCommand]
+    private void OpenTwelveDataSite()
+    {
+        // Lands on the homepage; signed-in users get redirected to the dashboard
+        // (where the API key lives). Anonymous users see Register / Sign-in CTA.
+        Process.Start(new ProcessStartInfo("https://twelvedata.com/") { UseShellExecute = true });
     }
 
     public string DataFolderPath => Path.Combine(

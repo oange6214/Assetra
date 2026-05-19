@@ -36,25 +36,33 @@ public sealed class AccountUpsertWorkflowService : IAccountUpsertWorkflowService
             Subtype: subtype);
 
         await _assetRepository.AddItemAsync(account).ConfigureAwait(false);
-        return new AccountUpsertResult(account);
+        var persisted = await _assetRepository.GetByIdAsync(account.Id).ConfigureAwait(false);
+        return new AccountUpsertResult(persisted ?? account);
     }
 
     public async Task<AccountUpsertResult> UpdateAsync(UpdateAccountRequest request, CancellationToken ct = default)
     {
         ct.ThrowIfCancellationRequested();
 
+        var existing = await _assetRepository.GetByIdAsync(request.AccountId).ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"Cash account '{request.AccountId}' was not found.");
+        if (existing.Type != FinancialType.Asset)
+            throw new InvalidOperationException($"Asset '{request.AccountId}' is not a cash account.");
+
         var subtype = string.IsNullOrWhiteSpace(request.Subtype) ? null : request.Subtype.Trim();
-        var account = new AssetItem(
-            request.AccountId,
-            request.Name.Trim(),
-            FinancialType.Asset,
-            ResolveGroupIdForSubtype(subtype),
-            request.Currency,
-            request.CreatedDate,
-            Subtype: subtype);
+        var account = existing with
+        {
+            Name = request.Name.Trim(),
+            GroupId = ResolveGroupIdForSubtype(subtype),
+            Currency = request.Currency,
+            CreatedDate = request.CreatedDate,
+            Subtype = subtype,
+        };
 
         await _assetRepository.UpdateItemAsync(account).ConfigureAwait(false);
-        return new AccountUpsertResult(account);
+        var persisted = await _assetRepository.GetByIdAsync(account.Id).ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"Cash account '{request.AccountId}' disappeared after update.");
+        return new AccountUpsertResult(persisted);
     }
 
     public Task<Guid> FindOrCreateAccountAsync(string name, string currency, CancellationToken ct = default) =>

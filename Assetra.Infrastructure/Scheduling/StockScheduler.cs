@@ -4,18 +4,16 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
-using Assetra.Infrastructure.Http;
 
 namespace Assetra.Infrastructure.Scheduling;
 
 internal sealed class StockScheduler : IStockService
 {
-    private readonly ITwseClient _twse;
-    private readonly ITpexClient _tpex;
+    private readonly IEquityRouter _router;
     private readonly IPortfolioRepository _portfolio;
     private readonly IAlertRepository _alerts;
-    private readonly IAppSettingsService _settings;
-    private readonly FugleClient _fugle;
+    private readonly ITradingCalendarService _calendar;
+    private readonly TimeProvider _timeProvider;
     private readonly IScheduler _scheduler;
     private readonly TimeSpan _interval;
     // ReplaySubject(1) replays the last emission to any late subscriber,
@@ -23,21 +21,46 @@ internal sealed class StockScheduler : IStockService
     private readonly ReplaySubject<IReadOnlyList<StockQuote>> _subject = new(1);
     private readonly CompositeDisposable _disposables = new();
 
+    /// <summary>
+    /// Tracks which (symbol, exchange) pairs have already received at least one
+    /// quote tick. Off-hours US fetches (which <see cref="ShouldFetchQuotes"/>
+    /// would normally suppress) are still allowed for cold rows so the user can
+    /// see last-close prices immediately after adding a position outside market
+    /// hours. Subsequent polls respect the calendar gate so quota isn't burned
+    /// refreshing static last-close data every interval.
+    /// </summary>
+    private readonly HashSet<(string Symbol, string Exchange)> _seenEntries =
+        new(SeenEntryComparer.Instance);
+
+    private sealed class SeenEntryComparer : IEqualityComparer<(string Symbol, string Exchange)>
+    {
+        public static readonly SeenEntryComparer Instance = new();
+
+        public bool Equals((string Symbol, string Exchange) x, (string Symbol, string Exchange) y) =>
+            string.Equals(x.Symbol, y.Symbol, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(x.Exchange, y.Exchange, StringComparison.OrdinalIgnoreCase);
+
+        public int GetHashCode((string Symbol, string Exchange) obj) => HashCode.Combine(
+            obj.Symbol.ToUpperInvariant(),
+            obj.Exchange.ToUpperInvariant());
+    }
+
     public IObservable<IReadOnlyList<StockQuote>> QuoteStream => _subject.AsObservable();
 
-    public StockScheduler(ITwseClient twse, ITpexClient tpex,
+    public StockScheduler(
+        IEquityRouter router,
         IPortfolioRepository portfolio,
         IAlertRepository alerts,
-        IAppSettingsService settings,
-        FugleClient fugle,
-        IScheduler scheduler, TimeSpan? interval = null)
+        IScheduler scheduler,
+        TimeSpan? interval = null,
+        ITradingCalendarService? calendar = null,
+        TimeProvider? timeProvider = null)
     {
-        _twse = twse;
-        _tpex = tpex;
+        _router = router;
         _portfolio = portfolio;
         _alerts = alerts;
-        _settings = settings;
-        _fugle = fugle;
+        _calendar = calendar ?? AlwaysOpenTradingCalendar.Instance;
+        _timeProvider = timeProvider ?? TimeProvider.System;
         _scheduler = scheduler;
         _interval = interval ?? TimeSpan.FromSeconds(10);
     }
@@ -74,34 +97,38 @@ internal sealed class StockScheduler : IStockService
             .DistinctBy(e => (e.Symbol, e.Exchange))
             .ToList();
 
-        var twseSymbols = entries.Where(e => e.Exchange == "TWSE").Select(e => e.Symbol).ToList();
-        var tpexSymbols = entries.Where(e => e.Exchange == "TPEX").Select(e => e.Symbol).ToList();
-        var useFugle = string.Equals(_settings.Current.QuoteProvider, "fugle", StringComparison.OrdinalIgnoreCase)
-                       && _fugle.IsConfigured;
+        var now = _timeProvider.GetUtcNow();
 
-        if (useFugle)
-        {
-            var fugleResults = await Task.WhenAll(entries.Select(async e =>
-            {
-                var quote = await _fugle.FetchQuoteAsync(e.Symbol).ConfigureAwait(false);
-                return quote;
-            })).ConfigureAwait(false);
+        // Two-gate filter:
+        //   1. Market-hours filter: only entries whose exchange is in session right now
+        //   2. Cold-row bypass: entries we've never quoted at least once are ALWAYS allowed
+        //      through, regardless of session, so the user sees last-close immediately
+        //      after adding a foreign position outside US trading hours.
+        entries = entries
+            .Where(e => ShouldFetchQuotes(e.Exchange, now) || !_seenEntries.Contains((e.Symbol, e.Exchange)))
+            .ToList();
 
-            var available = fugleResults.Where(q => q is not null).Cast<StockQuote>().ToList();
-            var missingSymbols = entries
-                .Where(e => available.All(q => !Matches(q, e.Symbol, e.Exchange)))
-                .ToList();
+        if (entries.Count == 0)
+            return [];
 
-            if (missingSymbols.Count == 0)
-                return available;
+        var quoteResults = await _router.GetQuotesAsync(
+            entries.Select(e => new EquityInstrumentKey(e.Symbol, e.Exchange)).ToList(),
+            EquityQuoteCachePolicies.SchedulerRefresh)
+            .ConfigureAwait(false);
 
-            twseSymbols = missingSymbols.Where(e => e.Exchange == "TWSE").Select(e => e.Symbol).ToList();
-            tpexSymbols = missingSymbols.Where(e => e.Exchange == "TPEX").Select(e => e.Symbol).ToList();
-            var fallback = await FetchOfficialAsync(twseSymbols, tpexSymbols).ConfigureAwait(false);
-            return [.. available, .. fallback];
-        }
+        var quotes = quoteResults
+            .Where(r => r.IsSuccess && r.Value is not null)
+            .Select(r => EquityQuoteLegacyMapper.ToStockQuote(r.Value!))
+            .ToList();
 
-        return await FetchOfficialAsync(twseSymbols, tpexSymbols).ConfigureAwait(false);
+        // Mark every entry we actually attempted as seen (success or fail).
+        // Failed cold rows shouldn't keep re-firing every 10s — quota protection.
+        // If the underlying issue resolves (e.g. user adds API key), restart picks
+        // them up via the regular hours gate or app relaunch resets _seenEntries.
+        foreach (var entry in entries)
+            _seenEntries.Add((entry.Symbol, entry.Exchange));
+
+        return quotes;
     }
 
     private static string NormalizeSymbol(string symbol) =>
@@ -110,29 +137,29 @@ internal sealed class StockScheduler : IStockService
     private static string NormalizeExchange(string exchange) =>
         exchange.Trim().ToUpperInvariant();
 
-    private static bool Matches(StockQuote quote, string symbol, string exchange) =>
-        string.Equals(quote.Symbol, symbol, StringComparison.OrdinalIgnoreCase)
-        && string.Equals(quote.Exchange, exchange, StringComparison.OrdinalIgnoreCase);
+    private bool ShouldFetchQuotes(string exchange, DateTimeOffset now) =>
+        IsTaiwanExchange(exchange) || _calendar.ShouldRefreshQuotes(exchange, now);
 
-    private async Task<IReadOnlyList<StockQuote>> FetchOfficialAsync(
-        IReadOnlyList<string> twseSymbols,
-        IReadOnlyList<string> tpexSymbols)
-    {
-        var twseTask = twseSymbols.Count > 0
-            ? _twse.FetchQuotesAsync(twseSymbols)
-            : Task.FromResult<IReadOnlyList<StockQuote>>([]);
-        var tpexTask = tpexSymbols.Count > 0
-            ? _tpex.FetchQuotesAsync(tpexSymbols)
-            : Task.FromResult<IReadOnlyList<StockQuote>>([]);
-
-        var twseResults = await twseTask.ConfigureAwait(false);
-        var tpexResults = await tpexTask.ConfigureAwait(false);
-        return [.. twseResults, .. tpexResults];
-    }
+    private static bool IsTaiwanExchange(string exchange) =>
+        string.Equals(exchange, "TWSE", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(exchange, "TPEX", StringComparison.OrdinalIgnoreCase);
 
     public void Dispose()
     {
         _disposables.Dispose();
         _subject.Dispose();
+    }
+
+    private sealed class AlwaysOpenTradingCalendar : ITradingCalendarService
+    {
+        public static readonly AlwaysOpenTradingCalendar Instance = new();
+
+        private AlwaysOpenTradingCalendar()
+        {
+        }
+
+        public TradingDayKind GetTradingDayKind(string exchange, DateOnly localDate) => TradingDayKind.FullSession;
+
+        public bool ShouldRefreshQuotes(string exchange, DateTimeOffset utcNow) => true;
     }
 }

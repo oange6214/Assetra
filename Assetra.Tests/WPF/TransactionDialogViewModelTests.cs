@@ -436,6 +436,103 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
+    public async Task ConfirmAdd_Stock_InvalidActualCashAmount_ReturnsErrorWithoutRecording()
+    {
+        var addWorkflow = new Mock<IAddAssetWorkflowService>();
+        addWorkflow.Setup(w => w.SearchSymbols(It.IsAny<string>(), It.IsAny<int>()))
+            .Returns([]);
+        addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
+            .Returns(new BuyPreviewResult(1000m, 0m, 1000m, 10m));
+        var vm = new AddAssetDialogViewModel(
+            addWorkflow.Object,
+            Mock.Of<IAccountUpsertWorkflowService>(),
+            Mock.Of<ITransactionWorkflowService>(),
+            Mock.Of<ICreditCardMutationWorkflowService>())
+        {
+            BuyContext = new StaticBuyContext(actualCashAmount: "abc"),
+        };
+
+        vm.AddAssetType = "stock";
+        vm.AddSymbol = "AAPL";
+        vm.AddPrice = "100";
+        vm.AddQuantity = "10";
+
+        await vm.ConfirmAddCommand.ExecuteAsync(null);
+
+        Assert.Contains("實際扣款", vm.AddError);
+        addWorkflow.Verify(w => w.ExecuteStockBuyAsync(
+            It.IsAny<StockBuyRequest>(),
+            It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ConfirmAdd_Stock_CrossCurrencyCashAccountRequiresActualCashAmount()
+    {
+        var addWorkflow = new Mock<IAddAssetWorkflowService>();
+        addWorkflow.Setup(w => w.SearchSymbols(It.IsAny<string>(), It.IsAny<int>()))
+            .Returns([]);
+        addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
+            .Returns(new BuyPreviewResult(1000m, 0m, 1000m, 10m));
+        var vm = new AddAssetDialogViewModel(
+            addWorkflow.Object,
+            Mock.Of<IAccountUpsertWorkflowService>(),
+            Mock.Of<ITransactionWorkflowService>(),
+            Mock.Of<ICreditCardMutationWorkflowService>())
+        {
+            BuyContext = new StaticBuyContext(
+                cashAccountId: Guid.NewGuid(),
+                cashAccountCurrency: "TWD",
+                useCashAccount: true),
+        };
+
+        vm.AddAssetType = "stock";
+        vm.AddSymbol = "AAPL";
+        vm.AddSymbolCurrency = "USD";
+        vm.AddPrice = "100";
+        vm.AddQuantity = "10";
+
+        await vm.ConfirmAddCommand.ExecuteAsync(null);
+
+        Assert.Contains("跨幣別", vm.AddError);
+        addWorkflow.Verify(w => w.ExecuteStockBuyAsync(
+            It.IsAny<StockBuyRequest>(),
+            It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ConfirmAdd_Stock_CrossCurrencyTypedSymbolUsesDirectoryCurrency()
+    {
+        var addWorkflow = new Mock<IAddAssetWorkflowService>();
+        addWorkflow.Setup(w => w.SearchSymbols(It.IsAny<string>(), It.IsAny<int>()))
+            .Returns([new StockSearchResult("AAPL", "Apple Inc.", "NASDAQ", Currency: "USD")]);
+        addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
+            .Returns(new BuyPreviewResult(1000m, 0m, 1000m, 10m));
+        var vm = new AddAssetDialogViewModel(
+            addWorkflow.Object,
+            Mock.Of<IAccountUpsertWorkflowService>(),
+            Mock.Of<ITransactionWorkflowService>(),
+            Mock.Of<ICreditCardMutationWorkflowService>())
+        {
+            BuyContext = new StaticBuyContext(
+                cashAccountId: Guid.NewGuid(),
+                cashAccountCurrency: "TWD",
+                useCashAccount: true),
+        };
+
+        vm.AddAssetType = "stock";
+        vm.AddSymbol = "AAPL";
+        vm.AddPrice = "100";
+        vm.AddQuantity = "10";
+
+        await vm.ConfirmAddCommand.ExecuteAsync(null);
+
+        Assert.Contains("跨幣別", vm.AddError);
+        addWorkflow.Verify(w => w.ExecuteStockBuyAsync(
+            It.IsAny<StockBuyRequest>(),
+            It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
     public async Task ExecuteSellFromTxDialogAsync_InvalidManualFee_ReturnsErrorWithoutRecording()
     {
         var workflow = new Mock<ISellWorkflowService>();

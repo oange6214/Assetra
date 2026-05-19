@@ -456,7 +456,23 @@
                         </StackPanel>
 
                         <StackPanel Margin="0,16,0,0">
-                            <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.TwelveDataApiKey}" />
+                            <!--
+                                Label + info button — parallel to FugleApiKey row.
+                                Click opens TwelveDataHelpDialog (申請與設定步驟).
+                            -->
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Settings.TwelveDataApiKey}" />
+                                <Button
+                                    Margin="6,-2,0,0"
+                                    Command="{Binding OpenTwelveDataHelpCommand}"
+                                    Padding="0" Style="{StaticResource AppGhostButton}"
+                                    ToolTip="{DynamicResource Settings.TwelveDataHelp.Tooltip}">
+                                    <ds:AppIcon Symbol="Info24" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" />
+                                </Button>
+                            </StackPanel>
                             <StackPanel MaxWidth="420" Margin="0,8,0,0">
                                 <PasswordBox
                                     x:Name="TwelveDataApiKeyBox"
@@ -1003,5 +1019,6 @@
         </ScrollViewer>
 
         <controls:FugleHelpDialog />
+        <controls:TwelveDataHelpDialog />
     </Grid>
 </UserControl>

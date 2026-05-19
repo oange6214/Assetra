@@ -29,9 +29,16 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
             Quantity: request.Quantity,
             RealizedPnl: null,
             RealizedPnlPct: null,
-            CashAmount: request.TotalAmount,
+            // P3 — 跨幣別股息：使用者填的 ActualCashAmount（帳戶幣別）覆寫
+            // PerShare × Quantity（標的幣別）。同幣別交易 fallback 為原本算法。
+            CashAmount: request.ActualCashAmount ?? request.TotalAmount,
             CashAccountId: request.CashAccountId,
-            Note: null);
+            Note: null,
+            // MultiCurrency-Trade-Refactor P2 — 股息標的幣別跟 Buy/Sell 一致
+            InstrumentCurrency: Assetra.Core.Models.StockExchangeRegistry.ResolveDefaultCurrency(request.Exchange),
+            FxRate: request.FxRate,
+            // Portfolio-Groups-Refactor P3
+            PortfolioGroupId: request.PortfolioGroupId);
 
         await _txService.RecordAsync(mainTrade).ConfigureAwait(false);
 
@@ -65,7 +72,9 @@ public sealed class TransactionWorkflowService : ITransactionWorkflowService
             CashAmount: null,
             CashAccountId: null,
             Note: null,
-            PortfolioEntryId: request.PortfolioEntryId);
+            PortfolioEntryId: request.PortfolioEntryId,
+            // MultiCurrency-Trade-Refactor P2 — 配股標的幣別跟標的本身一致
+            InstrumentCurrency: Assetra.Core.Models.StockExchangeRegistry.ResolveDefaultCurrency(request.Exchange));
 
         await _txService.RecordAsync(trade).ConfigureAwait(false);
     }

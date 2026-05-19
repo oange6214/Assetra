@@ -11,6 +11,12 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:AppIcon}">
+                    <!--
+                        Viewbox 做向量平滑縮放（避免字型 hinting 在邊緣 size 糊掉），
+                        但內層 FluentIcon 的 IconSize 動態跟著 ResolvedIconSize —
+                        每個尺寸都拿該 size variant 原生筆畫粗細，再由 Viewbox 微調到目標大小。
+                        兩者並用：拿筆畫設計品質 + 拿縮放平滑度。
+                    -->
                     <Viewbox
                         Width="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
                         Height="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
@@ -20,7 +26,7 @@
                             FontSize="24"
                             Foreground="{TemplateBinding Foreground}"
                             Icon="{Binding IconElement, RelativeSource={RelativeSource TemplatedParent}}"
-                            IconSize="Size24"
+                            IconSize="{Binding ResolvedIconSize, RelativeSource={RelativeSource TemplatedParent}}"
                             IconVariant="{Binding IconVariant, RelativeSource={RelativeSource TemplatedParent}}" />
                     </Viewbox>
                 </ControlTemplate>
@@ -35,6 +41,12 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:AppIcon}">
+                    <!--
+                        Viewbox 做向量平滑縮放（避免字型 hinting 在邊緣 size 糊掉），
+                        但內層 FluentIcon 的 IconSize 動態跟著 ResolvedIconSize —
+                        每個尺寸都拿該 size variant 原生筆畫粗細，再由 Viewbox 微調到目標大小。
+                        兩者並用：拿筆畫設計品質 + 拿縮放平滑度。
+                    -->
                     <Viewbox
                         Width="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
                         Height="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
@@ -44,7 +56,7 @@
                             FontSize="24"
                             Foreground="{TemplateBinding Foreground}"
                             Icon="{Binding IconElement, RelativeSource={RelativeSource TemplatedParent}}"
-                            IconSize="Size24"
+                            IconSize="{Binding ResolvedIconSize, RelativeSource={RelativeSource TemplatedParent}}"
                             IconVariant="{Binding IconVariant, RelativeSource={RelativeSource TemplatedParent}}" />
                     </Viewbox>
                 </ControlTemplate>

@@ -82,8 +82,8 @@ public sealed class CashFlowStatementService : ICashFlowStatementService
             => t.CashAmount ?? 0m,
         TradeType.Withdrawal or TradeType.CreditCardPayment
             => -(t.CashAmount ?? 0m),
-        TradeType.Buy => -((t.Price * t.Quantity) + (t.Commission ?? 0m)),
-        TradeType.Sell => (t.Price * t.Quantity) - (t.Commission ?? 0m),
+        TradeType.Buy => -BuyCashAmount(t),
+        TradeType.Sell => SellCashAmount(t),
         TradeType.LoanRepay => -((t.Principal ?? 0m) + (t.InterestPaid ?? 0m)),
         // CreditCardCharge: not a cash outflow until payment; we record it as 0 here so financing sums match the
         // outstanding-credit movement, but expose it on the operating side via category-tagged Withdrawals.
@@ -92,4 +92,10 @@ public sealed class CashFlowStatementService : ICashFlowStatementService
         TradeType.Transfer => 0m,
         _ => 0m,
     };
+
+    private static decimal BuyCashAmount(Trade t) =>
+        t.CashAmount ?? (t.Price * t.Quantity + (t.Commission ?? 0m));
+
+    private static decimal SellCashAmount(Trade t) =>
+        t.CashAmount ?? (t.Price * t.Quantity - (t.Commission ?? 0m));
 }

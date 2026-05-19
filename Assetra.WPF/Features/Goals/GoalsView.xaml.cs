@@ -32,6 +32,11 @@ public partial class GoalsView : UserControl
     private void RequestLoadIfReady()
     {
         if (IsVisible && DataContext is GoalsViewModel vm && !vm.IsLoaded && !vm.IsLoading)
+        {
             vm.LoadCommand.Execute(null);
+            // Portfolio-Groups-Refactor P5 — fire-and-forget group catalog warm so the
+            // ComboBox shows the user's groups when the Add dialog opens.
+            _ = vm.EnsureGroupCatalogLoadedAsync();
+        }
     }
 }

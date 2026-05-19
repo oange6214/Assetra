@@ -21,6 +21,7 @@ namespace Assetra.WPF.Features.FinancialOverview.Calendar;
 public sealed partial class ReturnCalendarViewModel : ObservableObject
 {
     private IReadOnlyList<PortfolioDailySnapshot> _allSnapshots = [];
+    private Dictionary<DateOnly, decimal> _portfolioCashFlowsByDate = [];
 
     /// <summary>
     /// 在 cstor 抓 UI thread 的 SynchronizationContext；UpdateSnapshots 可能
@@ -43,10 +44,16 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
 
     /// <summary>
     /// 下拉選單用的月份清單（從最早 snapshot 月份到目前月份，倒序）。
-    /// XAML ComboBox 綁這個，SelectedItem 雙向到 CurrentMonth。
+    /// 用 MonthOption record（含預先格式好的 Display 字串）— DateOnly 直接綁
+    /// ComboBox 在 SelectionBoxItem path 上 Run / Path=. 都有奇怪的解析失敗
+    /// （顯示空白），改成 ComboBox.DisplayMemberPath="Display" + SelectedValue
+    /// 路徑後可靠多了。
     /// </summary>
-    private readonly ObservableCollection<DateOnly> _availableMonths = [];
-    public ReadOnlyObservableCollection<DateOnly> AvailableMonths { get; }
+    private readonly ObservableCollection<MonthOption> _availableMonths = [];
+    public ReadOnlyObservableCollection<MonthOption> AvailableMonths { get; }
+
+    private static MonthOption ToOption(DateOnly d) =>
+        new(d, $"{d.Year:0000} / {d.Month:00}");
 
     /// <summary>月份彙總：當月絕對損益總和。</summary>
     [ObservableProperty]
@@ -71,7 +78,13 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     /// 切換不重抓資料，只重算 cell tone。
     /// </summary>
     [ObservableProperty] private bool _useAbsoluteForTone;
-    partial void OnUseAbsoluteForToneChanged(bool _) => Rebuild();
+    partial void OnUseAbsoluteForToneChanged(bool _)
+    {
+        Rebuild();
+        // 年度檢視也要立即重算 tone — 否則切換後得切走再切回來才生效。
+        OnPropertyChanged(nameof(YearViewCells));
+        OnPropertyChanged(nameof(YearViewWeekColumns));
+    }
 
     /// <summary>
     /// v2 #6d：年度檢視 — 把 12 個月併成一個熱度圖（GitHub contribution graph style）。
@@ -124,9 +137,9 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     private readonly ObservableCollection<WeekRowVm> _weeks = [];
     public ReadOnlyObservableCollection<WeekRowVm> Weeks { get; }
 
-    /// <summary>是否可以往前一個月 — 在有更早 snapshot 時為 true。</summary>
-    public bool CanGoPrev => _allSnapshots.Count > 0
-        && _allSnapshots.Min(s => s.SnapshotDate) < CurrentMonth;
+    /// <summary>是否可以往前一個月 — 在有更早統計來源資料時為 true。</summary>
+    public bool CanGoPrev => TryGetCalendarDateRange(out var earliest, out _)
+        && earliest < CurrentMonth;
 
     /// <summary>是否可以往後一個月 — 不超過今天。</summary>
     public bool CanGoNext => CurrentMonth < new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
@@ -136,14 +149,39 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
         _uiContext = SynchronizationContext.Current;
         Cells = new ReadOnlyObservableCollection<DailyCellVm>(_cells);
         Weeks = new ReadOnlyObservableCollection<WeekRowVm>(_weeks);
-        AvailableMonths = new ReadOnlyObservableCollection<DateOnly>(_availableMonths);
+        AvailableMonths = new ReadOnlyObservableCollection<MonthOption>(_availableMonths);
+        // 初始至少含 CurrentMonth — 避免 snapshots 還沒載入時，ComboBox 因
+        // ItemsSource 空但 SelectedValue 設了 CurrentMonth 而清空，造成 dropdown
+        // 顯示空白。UpdateSnapshots 之後會用完整月份清單覆寫。
+        _availableMonths.Add(ToOption(CurrentMonth));
         Rebuild();
+    }
+
+    /// <summary>
+    /// 由 PortfolioHistoryViewModel 在每次 LoadAsync 後呼叫。報酬日曆仍以每日
+    /// snapshot 市值變化為主；交易只用來調整同日買入、賣出、股利等現金流，
+    /// 避免「投入本金」或「賣出本金」被誤看成當日報酬。
+    /// </summary>
+    public void UpdatePortfolioData(IReadOnlyList<PortfolioDailySnapshot> snapshots, IReadOnlyList<Trade> trades)
+    {
+        _allSnapshots = snapshots ?? [];
+        _portfolioCashFlowsByDate = BuildPortfolioCashFlowsByDate(trades ?? []);
+
+        if (_uiContext is not null && SynchronizationContext.Current != _uiContext)
+        {
+            _uiContext.Post(_ => ApplyCalendarDataOnUi(), null);
+        }
+        else
+        {
+            ApplyCalendarDataOnUi();
+        }
     }
 
     /// <summary>由 PortfolioHistoryViewModel 在每次 LoadAsync 後呼叫。</summary>
     public void UpdateSnapshots(IReadOnlyList<PortfolioDailySnapshot> snapshots)
     {
         _allSnapshots = snapshots ?? [];
+        _portfolioCashFlowsByDate = [];
 
         if (_uiContext is not null && SynchronizationContext.Current != _uiContext)
         {
@@ -155,14 +193,14 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
         }
     }
 
-    private void ApplySnapshotsOnUi()
+    private void ApplySnapshotsOnUi() => ApplyCalendarDataOnUi();
+
+    private void ApplyCalendarDataOnUi()
     {
-        // 重建月份下拉選單：從最早 snapshot 月份到目前月份，倒序。
+        // 重建月份下拉選單：從最早資料月份到目前月份，倒序。
         _availableMonths.Clear();
-        if (_allSnapshots.Count > 0)
+        if (TryGetCalendarDateRange(out var earliest, out var latest))
         {
-            var earliest = _allSnapshots.Min(s => s.SnapshotDate);
-            var latest = _allSnapshots.Max(s => s.SnapshotDate);
             var today = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
             var stop = latest > today ? new DateOnly(latest.Year, latest.Month, 1) : today;
             var cursor = new DateOnly(earliest.Year, earliest.Month, 1);
@@ -173,17 +211,25 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
                 cursor = cursor.AddMonths(1);
             }
             list.Reverse();
-            foreach (var m in list) _availableMonths.Add(m);
+            foreach (var m in list) _availableMonths.Add(ToOption(m));
+        }
+        else
+        {
+            _availableMonths.Add(ToOption(CurrentMonth));
         }
 
         // 若預設月份沒有資料，跳到最新有資料的月份。
-        if (_allSnapshots.Count > 0)
+        if (TryGetCalendarDateRange(out _, out var latestDataDate))
         {
-            var latest = _allSnapshots.Max(s => s.SnapshotDate);
-            var target = new DateOnly(latest.Year, latest.Month, 1);
+            var target = new DateOnly(latestDataDate.Year, latestDataDate.Month, 1);
             CurrentMonth = target;
         }
         Rebuild();
+        // 強制 ComboBox 重新解析 SelectedValue — Clear() 過 _availableMonths 後
+        // ComboBox 的 SelectedValue 會掉成 null（找不到舊 value）；若 target 剛好
+        // 等於原本 CurrentMonth（例如建構式預設 2026/05 + 最新 snapshot 也是 2026/05），
+        // setter 不會 fire PropertyChanged，ComboBox 永遠停在 null 顯示空白。
+        OnPropertyChanged(nameof(CurrentMonth));
         OnPropertyChanged(nameof(CanGoPrev));
         OnPropertyChanged(nameof(CanGoNext));
     }
@@ -198,6 +244,7 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     [RelayCommand]
     private void GoPrev()
     {
+        if (!CanGoPrev) return;
         var prev = CurrentMonth.AddMonths(-1);
         CurrentMonth = new DateOnly(prev.Year, prev.Month, 1);
     }
@@ -253,8 +300,13 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
         var mondayOffset = dow == 0 ? 6 : dow - 1;
         var gridStart = firstOfMonth.AddDays(-mondayOffset);
 
-        // 按 SnapshotDate 建索引方便 O(1) 查詢
-        var snapshotByDate = _allSnapshots.ToDictionary(s => s.SnapshotDate);
+        // 按 SnapshotDate 建索引方便 O(1) 查詢。報酬日曆只呈現交易日；
+        // 週末快照會折回前一個交易日，並排除新舊 snapshot schema 混用造成的
+        // legacy 回補異常值。
+        var tradingSnapshots = BuildReturnCalendarSnapshots(_allSnapshots);
+        var snapshotByDate = tradingSnapshots
+            .GroupBy(s => s.SnapshotDate)
+            .ToDictionary(g => g.Key, g => g.Last());
 
         // 前一個有資料的 snapshot；用於算當月第一天前的 baseline。
         decimal? prevValue = null;
@@ -264,7 +316,7 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
             .FirstOrDefault();
         if (earliestInMonth != default)
         {
-            var prior = _allSnapshots
+            var prior = tradingSnapshots
                 .Where(s => s.SnapshotDate < earliestInMonth)
                 .OrderByDescending(s => s.SnapshotDate)
                 .FirstOrDefault();
@@ -279,14 +331,16 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
         {
             var date = gridStart.AddDays(i);
             var isCurrentMonth = date.Month == firstOfMonth.Month && date.Year == firstOfMonth.Year;
-            var hasSnapshot = snapshotByDate.TryGetValue(date, out var snap);
             var isWeekend = date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+            PortfolioDailySnapshot? snap = null;
+            var hasSnapshot = !isWeekend && snapshotByDate.TryGetValue(date, out snap);
 
             decimal? delta = null;
             decimal? deltaPct = null;
             if (hasSnapshot && prevValue.HasValue && prevValue.Value != 0m)
             {
-                delta = snap!.MarketValue - prevValue.Value;
+                var cashFlowAdjustment = _portfolioCashFlowsByDate.GetValueOrDefault(date);
+                delta = snap!.MarketValue - prevValue.Value + cashFlowAdjustment;
                 deltaPct = delta / prevValue.Value;
                 if (isCurrentMonth)
                 {
@@ -312,7 +366,7 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
 
         MonthlyAbsolutePnl = monthlyDelta;
         if (monthOpenValue.HasValue && monthOpenValue.Value > 0m && lastValue.HasValue)
-            MonthlyReturnPct = (lastValue.Value - monthOpenValue.Value) / monthOpenValue.Value;
+            MonthlyReturnPct = monthlyDelta / monthOpenValue.Value;
         else
             MonthlyReturnPct = 0m;
         HasData = _cells.Any(c => c.HasData);
@@ -454,15 +508,17 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     private IReadOnlyList<DailyCellVm> BuildYearCells()
     {
         var year = CurrentMonth.Year;
-        var snapshotByDate = _allSnapshots
+        var tradingSnapshots = BuildReturnCalendarSnapshots(_allSnapshots);
+        var snapshotByDate = tradingSnapshots
             .Where(s => s.SnapshotDate.Year == year)
-            .ToDictionary(s => s.SnapshotDate);
+            .GroupBy(s => s.SnapshotDate)
+            .ToDictionary(g => g.Key, g => g.Last());
         var cells = new List<DailyCellVm>(366);
         var date = new DateOnly(year, 1, 1);
         var end = new DateOnly(year, 12, 31);
 
         // 找年初前最後一個 snapshot 作為計算 day 1 delta 的 baseline
-        decimal? prev = _allSnapshots
+        decimal? prev = tradingSnapshots
             .Where(s => s.SnapshotDate < date)
             .OrderByDescending(s => s.SnapshotDate)
             .FirstOrDefault()?.MarketValue;
@@ -474,7 +530,8 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
             decimal? deltaPct = null;
             if (has && prev.HasValue && prev.Value != 0m)
             {
-                delta = snap!.MarketValue - prev.Value;
+                var cashFlowAdjustment = _portfolioCashFlowsByDate.GetValueOrDefault(date);
+                delta = snap!.MarketValue - prev.Value + cashFlowAdjustment;
                 deltaPct = delta / prev.Value;
             }
             if (has) prev = snap!.MarketValue;
@@ -548,6 +605,177 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
         }
         return columns;
     }
+
+    private bool TryGetCalendarDateRange(out DateOnly earliest, out DateOnly latest)
+    {
+        IReadOnlyCollection<DateOnly> dates = BuildReturnCalendarSnapshots(_allSnapshots)
+            .Select(s => s.SnapshotDate)
+            .ToArray();
+
+        if (dates.Count == 0)
+        {
+            earliest = default;
+            latest = default;
+            return false;
+        }
+
+        earliest = dates.Min();
+        latest = dates.Max();
+        return true;
+    }
+
+    private static IReadOnlyList<PortfolioDailySnapshot> BuildReturnCalendarSnapshots(
+        IEnumerable<PortfolioDailySnapshot> snapshots)
+    {
+        var normalized = snapshots
+            .Select(s => (EffectiveDate: TryGetReturnCalendarSnapshotDate(s), Snapshot: s))
+            .Where(x => x.EffectiveDate.HasValue)
+            .OrderBy(x => x.EffectiveDate!.Value)
+            .ThenBy(x => x.Snapshot.SnapshotDate)
+            .ToList();
+
+        var firstBreakdownDate = normalized
+            .Where(x => HasSnapshotBreakdown(x.Snapshot))
+            .Select(x => x.EffectiveDate)
+            .FirstOrDefault();
+
+        var result = new List<PortfolioDailySnapshot>();
+        foreach (var group in normalized.GroupBy(x => x.EffectiveDate!.Value).OrderBy(g => g.Key))
+        {
+            IEnumerable<(DateOnly? EffectiveDate, PortfolioDailySnapshot Snapshot)> candidates = group;
+
+            // v0.17+ 的 live snapshot 有 Cash/Equity/Liability breakdown；舊回補資料沒有。
+            // 一旦資料流已進入新 schema，後續缺 breakdown 的 snapshot 多半是舊回補或
+            // migration residue，不能混進報酬日曆，否則會把每日 PnL 算成不同口徑。
+            if (firstBreakdownDate.HasValue && group.Key >= firstBreakdownDate.Value)
+            {
+                candidates = candidates.Where(x => HasSnapshotBreakdown(x.Snapshot));
+            }
+
+            var chosen = candidates
+                .OrderByDescending(x => x.Snapshot.SnapshotDate)
+                .Select(x => x.Snapshot)
+                .FirstOrDefault();
+
+            if (chosen is null)
+                continue;
+
+            result.Add(chosen.SnapshotDate == group.Key
+                ? chosen
+                : chosen with { SnapshotDate = group.Key });
+        }
+
+        return result;
+    }
+
+    private static bool HasSnapshotBreakdown(PortfolioDailySnapshot snapshot) =>
+        snapshot.CashValue.HasValue || snapshot.EquityValue.HasValue || snapshot.LiabilityValue.HasValue;
+
+    private static DateOnly? TryGetReturnCalendarSnapshotDate(PortfolioDailySnapshot snapshot)
+    {
+        if (IsReturnCalendarTradingDate(snapshot.SnapshotDate))
+            return snapshot.SnapshotDate;
+
+        // 週末由即時報價刷新出的 v0.17+ snapshot 通常代表前一個交易日的收盤資料；
+        // 舊格式週末 snapshot 缺少 breakdown，無法判斷來源口徑，維持忽略。
+        if (!HasSnapshotBreakdown(snapshot))
+            return null;
+
+        return snapshot.SnapshotDate.DayOfWeek switch
+        {
+            DayOfWeek.Saturday => snapshot.SnapshotDate.AddDays(-1),
+            DayOfWeek.Sunday => snapshot.SnapshotDate.AddDays(-2),
+            _ => snapshot.SnapshotDate,
+        };
+    }
+
+    private static Dictionary<DateOnly, decimal> BuildPortfolioCashFlowsByDate(IEnumerable<Trade> trades)
+    {
+        var flows = new Dictionary<DateOnly, decimal>();
+        foreach (var trade in trades)
+        {
+            var amount = ResolvePortfolioCashFlow(trade);
+            if (amount == 0m)
+                continue;
+
+            var date = ToLocalDate(trade.TradeDate);
+            flows[date] = flows.TryGetValue(date, out var existing)
+                ? existing + amount
+                : amount;
+        }
+
+        return flows;
+    }
+
+    private static decimal ResolvePortfolioCashFlow(Trade trade) =>
+        trade.Type switch
+        {
+            // 投資人角度的 cash flow：Buy 為負、Sell / 股利為正。
+            // 日報酬用 MarketValueDelta + CashFlow，才能把本金進出歸零，只留下
+            // 價格變動與交易成本/股利。
+            TradeType.Buy => -ResolveBuyCashOutflow(trade),
+            TradeType.Sell => ResolveSellCashInflow(trade),
+            TradeType.CashDividend => ResolveCashAmount(trade),
+            // 股利/收入等主交易的附屬費用子記錄，用 Withdrawal 保存。
+            TradeType.Withdrawal when trade.ParentTradeId.HasValue => -ResolveCashAmount(trade),
+            _ => 0m,
+        };
+
+    private static decimal ResolveBuyCashOutflow(Trade trade)
+    {
+        if (trade.CashAmount is { } cashAmount)
+            return Math.Abs(cashAmount);
+
+        return ResolveInstrumentNotionalInFundingCurrency(trade)
+            + ResolveCommissionInFundingCurrency(trade);
+    }
+
+    private static decimal ResolveSellCashInflow(Trade trade)
+    {
+        if (trade.CashAmount is { } cashAmount)
+            return Math.Abs(cashAmount);
+
+        return ResolveInstrumentNotionalInFundingCurrency(trade)
+            - ResolveCommissionInFundingCurrency(trade);
+    }
+
+    private static decimal ResolveCashAmount(Trade trade)
+    {
+        if (trade.CashAmount is { } cashAmount)
+            return Math.Abs(cashAmount);
+
+        return ResolveInstrumentNotionalInFundingCurrency(trade);
+    }
+
+    private static decimal ResolveInstrumentNotionalInFundingCurrency(Trade trade)
+    {
+        var amount = trade.Price * trade.Quantity;
+        return amount * (trade.FxRate ?? 1m);
+    }
+
+    private static decimal ResolveCommissionInFundingCurrency(Trade trade)
+    {
+        var commission = trade.Commission ?? 0m;
+        if (commission == 0m)
+            return 0m;
+
+        // CommissionCurrency=null 代表跟標的幣別一致，需跟 notional 一樣套 FxRate。
+        // 若已明確指定手續費幣別，通常代表它已是扣款帳戶幣別，不再二次轉換。
+        return string.IsNullOrWhiteSpace(trade.CommissionCurrency)
+            ? commission * (trade.FxRate ?? 1m)
+            : commission;
+    }
+
+    private static DateOnly ToLocalDate(DateTime value)
+    {
+        var local = value.Kind == DateTimeKind.Utc
+            ? value.ToLocalTime()
+            : value;
+        return DateOnly.FromDateTime(local);
+    }
+
+    private static bool IsReturnCalendarTradingDate(DateOnly date) =>
+        date.DayOfWeek is not DayOfWeek.Saturday and not DayOfWeek.Sunday;
 
     private static string FormatDelta(decimal? delta)
     {
@@ -636,6 +864,13 @@ public sealed record DailyCellVm(
     decimal? Delta,
     string DeltaDisplay,
     CellTone Tone);
+
+/// <summary>
+/// ComboBox 月份下拉選項。Display 是預先格式好的「yyyy / MM」字串，
+/// 讓 ComboBox 用 DisplayMemberPath 顯示；Value 用於 SelectedValue 雙向綁
+/// 回 ViewModel 的 DateOnly CurrentMonth。
+/// </summary>
+public sealed record MonthOption(DateOnly Value, string Display);
 
 /// <summary>cell 色階。XAML 用 DataTrigger 把 Tone 對應到 brush。</summary>
 public enum CellTone

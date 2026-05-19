@@ -15,11 +15,15 @@ namespace Assetra.Infrastructure.Persistence;
 /// last_modified_at、is_pending_push=1；RemoveAsync 改為 soft delete（保留 row、is_deleted=1、bump version）。
 /// </para>
 /// </summary>
-public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolioSyncStore
+public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolioSyncStore, Assetra.Core.Interfaces.Sync.ILocalChangeCountSource
 {
     private readonly string _connectionString;
     private readonly Func<string> _deviceIdProvider;
     private readonly TimeProvider _time;
+
+    public string SyncDomain => PortfolioSyncMapper.EntityType;
+    public event EventHandler<int>? LocalChangeCountChanged;
+    private void RaiseLocalChange(int delta = 1) => LocalChangeCountChanged?.Invoke(this, delta);
 
     public PortfolioSqliteRepository(string dbPath, string deviceId = "local", TimeProvider? time = null)
         : this(dbPath, () => deviceId, time)
@@ -36,7 +40,7 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
     }
 
     private const string SelectClause =
-        "id, symbol, exchange, asset_type, display_name, currency, is_active, is_etf";
+        "id, symbol, exchange, asset_type, display_name, currency, is_active, is_etf, portfolio_group_id";
 
     private const string SyncSelectClause = SelectClause +
         ", version, last_modified_at, last_modified_by_device, is_deleted";
@@ -69,15 +73,18 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
             INSERT OR IGNORE INTO portfolio
                 (id, symbol, exchange, asset_type, display_name, currency,
                  created_at, updated_at, is_active, is_etf,
+                 portfolio_group_id,
                  version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
             VALUES
                 ($id, $sym, $ex, $at, $dn, $cur,
                  $now, $now, $ia, $etf,
+                 $portfolio_group_id,
                  1, $now, $device, 0, 1);
             """;
         BindEntry(cmd, entry);
         StampSyncParams(cmd);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        RaiseLocalChange();
     }
 
     public async Task UpdateAsync(PortfolioEntry entry, CancellationToken ct = default)
@@ -100,6 +107,7 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
         cmd.Parameters.AddWithValue("$at", entry.AssetType.ToString());
         StampSyncParams(cmd);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        RaiseLocalChange();
     }
 
     public async Task UpdateMetadataAsync(Guid id, string displayName, string currency, CancellationToken ct = default)
@@ -123,6 +131,7 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
         cmd.Parameters.AddWithValue("$cur", currency);
         StampSyncParams(cmd);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        RaiseLocalChange();
     }
 
     public async Task RemoveAsync(Guid id, CancellationToken ct = default)
@@ -145,6 +154,7 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
         cmd.Parameters.AddWithValue("$id", id.ToString());
         StampSyncParams(cmd);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        RaiseLocalChange();
     }
 
     public async Task ArchiveAsync(Guid id, CancellationToken ct = default)
@@ -191,6 +201,7 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
         string symbol, string exchange, string? displayName, AssetType assetType,
         string? currency = null,
         bool isEtf = false,
+        Guid? portfolioGroupId = null,
         CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(symbol);
@@ -218,10 +229,12 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
                 INSERT INTO portfolio
                     (id, symbol, exchange, asset_type, created_at, updated_at,
                      display_name, currency, is_active, is_etf,
+                     portfolio_group_id,
                      version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
                 VALUES
                     ($id, $s, $e, $t, $now, $now,
                      $dn, $cur, 1, $etf,
+                     $portfolio_group_id,
                      1, $now, $device, 0, 1);
                 """;
             ins.Parameters.AddWithValue("$id", id.ToString());
@@ -231,6 +244,8 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
             ins.Parameters.AddWithValue("$dn", (object?)displayName ?? "");
             ins.Parameters.AddWithValue("$cur", resolvedCurrency);
             ins.Parameters.AddWithValue("$etf", isEtf ? 1 : 0);
+            ins.Parameters.AddWithValue("$portfolio_group_id",
+                (portfolioGroupId ?? PortfolioGroup.DefaultId).ToString());
             StampSyncParams(ins);
             await ins.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
             return id;
@@ -277,11 +292,13 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
         while (await reader.ReadAsync(ct).ConfigureAwait(false))
         {
             var entry = MapEntry(reader);
+            // SelectClause grew from 8 → 9 columns (portfolio_group_id appended for P3),
+            // so sync ordinals shift by +1.
             var version = new EntityVersion(
-                Version: reader.GetInt64(8),
-                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(9)),
-                LastModifiedByDevice: reader.GetString(10));
-            var isDeleted = reader.GetInt32(11) != 0;
+                Version: reader.GetInt64(9),
+                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(10)),
+                LastModifiedByDevice: reader.GetString(11));
+            var isDeleted = reader.GetInt32(12) != 0;
             results.Add(PortfolioSyncMapper.ToEnvelope(entry, version, isDeleted));
         }
         return results;
@@ -338,10 +355,12 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
                     INSERT INTO portfolio
                         (id, symbol, exchange, asset_type, created_at, updated_at,
                          display_name, currency, is_active, is_etf,
+                         portfolio_group_id,
                          version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
                     VALUES
                         ($id, $sym, $ex, 'Stock', $now, $now,
                          '', 'TWD', 0, 0,
+                         '00000000-0000-0000-0000-000000000001',
                          $ver, $modAt, $modBy, 1, 0)
                     ON CONFLICT(id) DO UPDATE SET
                         is_deleted = 1,
@@ -370,10 +389,12 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
                 INSERT INTO portfolio
                     (id, symbol, exchange, asset_type, created_at, updated_at,
                      display_name, currency, is_active, is_etf,
+                     portfolio_group_id,
                      version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
                 VALUES
                     ($id, $sym, $ex, $at, $now, $now,
                      $dn, $cur, $ia, $etf,
+                     $portfolio_group_id,
                      $ver, $modAt, $modBy, 0, 0)
                 ON CONFLICT(id) DO UPDATE SET
                     symbol = excluded.symbol,
@@ -384,6 +405,7 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
                     currency = excluded.currency,
                     is_active = excluded.is_active,
                     is_etf = excluded.is_etf,
+                    portfolio_group_id = excluded.portfolio_group_id,
                     version = excluded.version,
                     last_modified_at = excluded.last_modified_at,
                     last_modified_by_device = excluded.last_modified_by_device,
@@ -427,6 +449,10 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
         cmd.Parameters.AddWithValue("$cur", e.Currency);
         cmd.Parameters.AddWithValue("$ia", e.IsActive ? 1 : 0);
         cmd.Parameters.AddWithValue("$etf", e.IsEtf ? 1 : 0);
+        // Portfolio-Groups-Refactor P3 — null fallback DefaultId（同 TradeSqliteRepository 慣例），
+        // 確保新 entry row 不寫入 NULL 等下次 schema migration backfill。
+        cmd.Parameters.AddWithValue("$portfolio_group_id",
+            (e.PortfolioGroupId ?? PortfolioGroup.DefaultId).ToString());
     }
 
     private static PortfolioEntry MapEntry(SqliteDataReader r)
@@ -442,7 +468,9 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
             r.IsDBNull(4) ? string.Empty : r.GetString(4),
             r.IsDBNull(5) ? "TWD" : r.GetString(5),
             isActive,
-            isEtf);
+            isEtf,
+            // Portfolio-Groups-Refactor P3 — schema column always non-null post-backfill.
+            r.IsDBNull(8) ? null : Guid.Parse(r.GetString(8)));
     }
 
     private static async Task<IReadOnlyList<PortfolioEntry>> ReadEntriesAsync(SqliteCommand cmd, CancellationToken ct)

@@ -51,5 +51,19 @@ internal static class AppStartupTasks
                 Log.Warning(ex, "Background task {Task} failed at startup", nameof(StockListDownloader.UpdateAsync));
             }
         });
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var directory = provider.GetService<IRefreshableSymbolDirectory>();
+                if (directory is not null)
+                    await directory.RefreshAsync(force: false).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Background task {Task} failed at startup", nameof(IRefreshableSymbolDirectory.RefreshAsync));
+            }
+        });
     }
 }

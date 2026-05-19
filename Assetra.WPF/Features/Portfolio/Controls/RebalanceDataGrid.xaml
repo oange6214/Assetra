@@ -18,7 +18,7 @@
 
     <Grid>
         <ScrollViewer
-            Margin="24,0,24,24"
+            Margin="0"
             HorizontalScrollBarVisibility="Disabled"
             VerticalScrollBarVisibility="Auto">
             <ScrollViewer.Style>
@@ -250,7 +250,7 @@
         </ScrollViewer>
 
         <Border
-            Margin="24,0,24,24"
+            Margin="0"
             Padding="0"
             ClipToBounds="True">
             <Border.Style>

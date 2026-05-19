@@ -383,6 +383,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -431,6 +432,59 @@
                         <StackPanel Grid.Row="2" Grid.Column="2">
                             <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Notes}" />
                             <TextBox Text="{Binding AddNotes, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+
+                        <!--
+                            2026-05-17：「自動追蹤資產類別」dropdown — Row 3 跨 3 欄。
+                            選非「手動」項時 Hero (FinancialOverviewViewModel.PrimaryGoal) 會自動
+                            以 dashboard 對應類別值算進度，不再依賴使用者手打 CurrentAmount。
+                            未來 Portfolio-Groups-Refactor 上線後此欄會升級為「連結到群組」。
+                        -->
+                        <StackPanel
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="3"
+                            Margin="0,14,0,0">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.LinkedAssetClass}" />
+                            <ComboBox
+                                ItemsSource="{Binding LinkedAssetClassOptions}"
+                                SelectedValuePath="Value"
+                                SelectedValue="{Binding AddLinkedAssetClass, Mode=TwoWay}"
+                                Style="{StaticResource FormComboBox}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding LabelKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Goals.Add.LinkedAssetClass.Hint}"
+                                TextWrapping="Wrap" />
+
+                            <!--
+                                Portfolio-Groups-Refactor P5 — 連結到具體群組（bucket）。
+                                設定後優先於 LinkedAssetClass：Hero 用該 group 的
+                                IGroupBalanceQueryService 結果作為進度分子。
+                            -->
+                            <StackPanel
+                                Margin="0,14,0,0"
+                                Visibility="{Binding IsGroupSelectorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.PortfolioGroup}" />
+                                <ComboBox
+                                    DisplayMemberPath="Name"
+                                    ItemsSource="{Binding GroupCatalog.Groups}"
+                                    SelectedItem="{Binding AddPortfolioGroup, Mode=TwoWay}"
+                                    Style="{StaticResource FormComboBox}" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Goals.Add.PortfolioGroup.Hint}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
                         </StackPanel>
                     </Grid>
                     </Border>

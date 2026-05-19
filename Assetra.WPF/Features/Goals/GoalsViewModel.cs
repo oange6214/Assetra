@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Assetra.WPF.Features.Fire;
+using Assetra.WPF.Features.PortfolioGroups;
 
 namespace Assetra.WPF.Features.Goals;
 
@@ -18,6 +19,18 @@ public sealed partial class GoalsViewModel : ObservableObject
     private readonly IFinancialGoalRepository _repository;
     private readonly ICurrencyService? _currency;
     private readonly ILocalizationService? _localization;
+
+    /// <summary>
+    /// Portfolio-Groups-Refactor P5 — 共用群組目錄，給 dialog 內的 group ComboBox 用。
+    /// null = 群組功能未啟用，UI 隱藏 group 選項。
+    /// </summary>
+    public PortfolioGroupCatalog? GroupCatalog { get; }
+
+    /// <summary>True 當啟用群組功能（catalog 非 null 且有 row）。</summary>
+    public bool IsGroupSelectorVisible => GroupCatalog is { Groups.Count: > 0 };
+
+    /// <summary>Add/Edit form 內當前選擇的 group。null = 不連結（沿用 LinkedAssetClass）。</summary>
+    [ObservableProperty] private PortfolioGroup? _addPortfolioGroup;
 
     private readonly ObservableCollection<GoalRowViewModel> _goals = [];
     public ReadOnlyObservableCollection<GoalRowViewModel> Goals { get; }
@@ -67,6 +80,25 @@ public sealed partial class GoalsViewModel : ObservableObject
     [ObservableProperty] private string _addNotes = string.Empty;
     [ObservableProperty] private string? _addError;
     [ObservableProperty] private bool _isFormOpen;
+    /// <summary>
+    /// 2026-05-17：auto-track 目標進度的資產類別 selection。
+    /// 空字串 / "Manual" = manual mode（沿用 CurrentAmount）；其他值 = 自動模式。
+    /// 對應 <see cref="FinancialGoal.LinkedAssetClass"/>。
+    /// </summary>
+    [ObservableProperty] private string _addLinkedAssetClass = string.Empty;
+
+    /// <summary>Dropdown 用：(displayKey, value) — value 對應 FinancialGoal.LinkedAssetClass。</summary>
+    public IReadOnlyList<(string LabelKey, string Value)> LinkedAssetClassOptions { get; } =
+    [
+        ("Goals.LinkedAssetClass.Manual",     ""),
+        ("Goals.LinkedAssetClass.NetWorth",   "NetWorth"),
+        ("Goals.LinkedAssetClass.TotalAssets","TotalAssets"),
+        ("Goals.LinkedAssetClass.Investments","Investments"),
+        ("Goals.LinkedAssetClass.Cash",       "Cash"),
+        ("Goals.LinkedAssetClass.RealEstate", "RealEstate"),
+        ("Goals.LinkedAssetClass.Retirement", "Retirement"),
+        ("Goals.LinkedAssetClass.Physical",   "Physical"),
+    ];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditing))]
@@ -99,12 +131,14 @@ public sealed partial class GoalsViewModel : ObservableObject
     public GoalsViewModel(
         IFinancialGoalRepository repository,
         ICurrencyService? currency = null,
-        ILocalizationService? localization = null)
+        ILocalizationService? localization = null,
+        PortfolioGroupCatalog? groupCatalog = null)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
         _currency = currency;
         _localization = localization;
+        GroupCatalog = groupCatalog;
         Goals = new ReadOnlyObservableCollection<GoalRowViewModel>(_goals);
         _goals.CollectionChanged += (_, _) =>
         {
@@ -176,7 +210,11 @@ public sealed partial class GoalsViewModel : ObservableObject
             target,
             current,
             AddDeadline is { } dt ? DateOnly.FromDateTime(dt) : null,
-            string.IsNullOrWhiteSpace(AddNotes) ? null : AddNotes.Trim());
+            string.IsNullOrWhiteSpace(AddNotes) ? null : AddNotes.Trim(),
+            // Auto-track mode：空字串 / "Manual" 都 normalise 為 null（manual）。
+            string.IsNullOrWhiteSpace(AddLinkedAssetClass) ? null : AddLinkedAssetClass,
+            // Portfolio-Groups-Refactor P5 — 設定後優先於 LinkedAssetClass。
+            AddPortfolioGroup?.Id);
 
         try
         {
@@ -215,6 +253,9 @@ public sealed partial class GoalsViewModel : ObservableObject
         AddCurrentAmount = row.Goal.CurrentAmount.ToString("0.##", CultureInfo.InvariantCulture);
         AddDeadline = row.Goal.Deadline is { } d ? d.ToDateTime(TimeOnly.MinValue) : null;
         AddNotes = row.Goal.Notes ?? string.Empty;
+        AddLinkedAssetClass = row.Goal.LinkedAssetClass ?? string.Empty;
+        // Portfolio-Groups-Refactor P5 — 還原 group 選擇。
+        AddPortfolioGroup = GroupCatalog?.FindById(row.Goal.PortfolioGroupId);
     }
 
     partial void OnAddTargetAmountChanged(string value) =>
@@ -257,9 +298,18 @@ public sealed partial class GoalsViewModel : ObservableObject
         AddCurrentAmount = string.Empty;
         AddDeadline = null;
         AddNotes = string.Empty;
+        AddLinkedAssetClass = string.Empty;
+        AddPortfolioGroup = null;
         AddError = null;
         IsFormOpen = false;
     }
+
+    /// <summary>
+    /// Portfolio-Groups-Refactor P5 — UI 在 dialog 開啟前呼叫，確保 catalog 已載入。
+    /// 非同步無回傳；catalog 載入失敗時 ComboBox 維持空，不阻斷 dialog。
+    /// </summary>
+    public Task EnsureGroupCatalogLoadedAsync() =>
+        GroupCatalog?.EnsureLoadedAsync() ?? Task.CompletedTask;
 
     private void UpsertGoal(FinancialGoal goal)
     {

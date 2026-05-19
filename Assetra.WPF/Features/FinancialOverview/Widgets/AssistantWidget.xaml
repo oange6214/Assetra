@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel},
                                      IsDesignTimeCreatable=False}"
-    Visibility="{Binding AssistantWidget, Converter={StaticResource NullToVisibilityConverter}}"
+    Visibility="{Binding AssistantWidget.InsightCards.Count, Converter={StaticResource ZeroToVisibleConverter}, ConverterParameter=Inverse}"
     mc:Ignorable="d">
 
     <UserControl.Resources>

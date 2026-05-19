@@ -236,7 +236,11 @@ public sealed class ReconciliationService : IReconciliationService
     private static decimal StatementCashAmountForTrade(Trade trade, decimal statementAmount)
         => trade.Type switch
         {
-            TradeType.Withdrawal or TradeType.Transfer or TradeType.LoanRepay or TradeType.CreditCardPayment
+            TradeType.Buy
+                or TradeType.Withdrawal
+                or TradeType.Transfer
+                or TradeType.LoanRepay
+                or TradeType.CreditCardPayment
                 => Math.Abs(statementAmount),
             _ => statementAmount,
         };

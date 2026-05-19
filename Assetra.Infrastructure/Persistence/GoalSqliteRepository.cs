@@ -20,7 +20,7 @@ public sealed class GoalSqliteRepository : IFinancialGoalRepository
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT id, name, target_amount, current_amount, deadline, notes
+            SELECT id, name, target_amount, current_amount, deadline, notes, linked_asset_class, portfolio_group_id
             FROM financial_goal
             ORDER BY rowid;
             """;
@@ -37,7 +37,9 @@ public sealed class GoalSqliteRepository : IFinancialGoalRepository
                 (decimal)reader.GetDouble(2),
                 (decimal)reader.GetDouble(3),
                 deadline,
-                reader.IsDBNull(5) ? null : reader.GetString(5)));
+                reader.IsDBNull(5) ? null : reader.GetString(5),
+                reader.IsDBNull(6) ? null : reader.GetString(6),
+                reader.IsDBNull(7) ? null : Guid.Parse(reader.GetString(7))));
         }
         return results;
     }
@@ -49,9 +51,9 @@ public sealed class GoalSqliteRepository : IFinancialGoalRepository
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             INSERT INTO financial_goal
-                (id, name, target_amount, current_amount, deadline, notes, created_at, updated_at)
+                (id, name, target_amount, current_amount, deadline, notes, linked_asset_class, portfolio_group_id, created_at, updated_at)
             VALUES
-                ($id, $name, $target, $current, $deadline, $notes, $created_at, $updated_at);
+                ($id, $name, $target, $current, $deadline, $notes, $linked_asset_class, $portfolio_group_id, $created_at, $updated_at);
             """;
         BindGoalParams(cmd, goal);
         var now = DateTime.UtcNow.ToString("o");
@@ -67,12 +69,14 @@ public sealed class GoalSqliteRepository : IFinancialGoalRepository
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             UPDATE financial_goal SET
-                name           = $name,
-                target_amount  = $target,
-                current_amount = $current,
-                deadline       = $deadline,
-                notes          = $notes,
-                updated_at     = $updated_at
+                name                = $name,
+                target_amount       = $target,
+                current_amount      = $current,
+                deadline            = $deadline,
+                notes               = $notes,
+                linked_asset_class  = $linked_asset_class,
+                portfolio_group_id  = $portfolio_group_id,
+                updated_at          = $updated_at
             WHERE id = $id;
             """;
         BindGoalParams(cmd, goal);
@@ -107,5 +111,9 @@ public sealed class GoalSqliteRepository : IFinancialGoalRepository
         cmd.Parameters.AddWithValue("$deadline",
             goal.Deadline?.ToString("yyyy-MM-dd") ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("$notes", goal.Notes ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("$linked_asset_class",
+            string.IsNullOrWhiteSpace(goal.LinkedAssetClass) ? (object)DBNull.Value : goal.LinkedAssetClass);
+        cmd.Parameters.AddWithValue("$portfolio_group_id",
+            goal.PortfolioGroupId.HasValue ? (object)goal.PortfolioGroupId.Value.ToString() : DBNull.Value);
     }
 }

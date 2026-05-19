@@ -440,15 +440,29 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <StackPanel Style="{StaticResource AppDialogHeader}">
-                        <TextBlock
-                            Style="{StaticResource AppDialogTitle}"
-                            Text="{DynamicResource Recurring.AddForm.Title}" />
-                        <TextBlock
-                            Style="{StaticResource AppDialogSubtitle}"
-                            Text="{DynamicResource Recurring.AddForm.Hint}"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
+                    <Grid Margin="0,0,0,16">
+                        <StackPanel Margin="0,4,40,0">
+                            <TextBlock
+                                Style="{StaticResource AppDialogTitle}"
+                                Text="{DynamicResource Recurring.AddForm.Title}" />
+                            <TextBlock
+                                Style="{StaticResource AppDialogSubtitle}"
+                                Text="{DynamicResource Recurring.AddForm.Hint}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button
+                            Width="32"
+                            Height="32"
+                            Margin="0,-4,-4,0"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Command="{Binding CloseAddFormCommand}"
+                            Style="{StaticResource AppIconButton}"
+                            ToolTip="{DynamicResource Common.Close}">
+                            <ds:AppIcon FontSize="13" Symbol="Dismiss24" />
+                        </Button>
+                    </Grid>
 
                     <Border
                         Grid.Row="1"

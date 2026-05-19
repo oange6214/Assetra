@@ -255,6 +255,7 @@ public class BalanceSheetServiceTests
         public Task DeleteItemAsync(Guid id) => Task.CompletedTask;
         public Task<Guid> FindOrCreateAccountAsync(string n, string c, CancellationToken ct = default) => Task.FromResult(Guid.NewGuid());
         public Task ArchiveItemAsync(Guid id) => Task.CompletedTask;
+        public Task UnarchiveItemAsync(Guid id) => Task.CompletedTask;
         public Task<int> HasTradeReferencesAsync(Guid id, CancellationToken ct = default) => Task.FromResult(0);
         public Task<IReadOnlyList<AssetGroup>> GetGroupsAsync() => Task.FromResult<IReadOnlyList<AssetGroup>>([]);
         public Task AddGroupAsync(AssetGroup g) => Task.CompletedTask;

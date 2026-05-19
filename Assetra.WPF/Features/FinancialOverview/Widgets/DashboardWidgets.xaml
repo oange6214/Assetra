@@ -27,11 +27,24 @@
         <Setter Property="Margin" Value="0,0,0,10" />
     </Style>
 
+    <!--
+        Footer link 樣式 — Hand cursor 與 hover 變色只作用在「實際文字」上。
+        刻意不設 Background=Transparent / HorizontalAlignment=Stretch，因為那會讓
+        TextBlock 的 hit-test 區域整列展開到 widget 寬度，造成滑到 body 內容區也
+        顯示 Hand 的錯覺（用戶反饋已實際看到）。Hover 時直接變色而非變底色，
+        affordance 仍清楚但區域不會誤導。
+    -->
     <Style x:Key="DashboardWidgetFooter" TargetType="TextBlock">
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
         <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
         <Setter Property="Margin" Value="0,10,0,0" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="Cursor" Value="Hand" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="TextDecorations" Value="Underline" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
 </ResourceDictionary>

@@ -16,6 +16,8 @@ public partial class TransactionDialogViewModel
         // The two dialogs are mutually exclusive in practice; this is an acceptable coupling.
         AddAssetDialog.AddAssetType = Buy.AssetType;
         AddAssetDialog.AddError = string.Empty;
+        // Portfolio-Groups-Refactor P3 — propagate group choice into the Buy request via AddAssetDialog.
+        AddAssetDialog.SelectedPortfolioGroupId = SelectedPortfolioGroup?.Id;
 
         await AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 

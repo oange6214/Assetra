@@ -24,7 +24,7 @@
     <Style x:Key="StatusBadge.Text" TargetType="TextBlock">
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Base}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
         <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Medium}" />
     </Style>

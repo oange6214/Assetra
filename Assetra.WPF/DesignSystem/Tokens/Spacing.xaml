@@ -21,6 +21,13 @@
     <Thickness x:Key="Padding.Card">16</Thickness>
     <Thickness x:Key="Padding.Page">24,20</Thickness>
     <Thickness x:Key="Padding.Dialog">24</Thickness>
+    <!--
+        Padding.SectionStrip — outer container for "row 0" strips that hold
+        inline summary cards above a datagrid (Liabilities / Accounts / Positions
+        tab panels). Standardises the previously ad-hoc "16,12" vs "12,8" mix
+        so every tab strip has the same breathing room around its card row.
+    -->
+    <Thickness x:Key="Padding.SectionStrip">16,12</Thickness>
     <Thickness x:Key="Margin.Section">0,16,0,0</Thickness>
     <Thickness x:Key="Gap.Form">12</Thickness>
 

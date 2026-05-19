@@ -103,11 +103,23 @@
     <sys:String x:Key="Common.Symbol">代號</sys:String>
     <sys:String x:Key="Common.Name">名稱</sys:String>
     <sys:String x:Key="Common.Asset">資產</sys:String>
-    <sys:String x:Key="Common.Target">標的</sys:String>
+    <sys:String x:Key="Common.Target">資產</sys:String>
     <sys:String x:Key="Common.Price">現價</sys:String>
     <sys:String x:Key="Common.Cancel">取消</sys:String>
     <sys:String x:Key="Common.Save">儲存</sys:String>
     <sys:String x:Key="Common.Edit">編輯</sys:String>
+    <!-- Portfolio Groups (Portfolio-Groups-Refactor P2) -->
+    <sys:String x:Key="PortfolioGroups.Nav">群組</sys:String>
+    <sys:String x:Key="PortfolioGroups.Heading">投資群組管理</sys:String>
+    <sys:String x:Key="PortfolioGroups.Subheading">把交易與帳戶分到不同群組（如「退休帳戶」「買房儲蓄」），讓目標與 FIRE 計算對應到具體 bucket。</sys:String>
+    <sys:String x:Key="PortfolioGroups.Add">新增群組</sys:String>
+    <sys:String x:Key="PortfolioGroups.Add.Title">新增群組</sys:String>
+    <sys:String x:Key="PortfolioGroups.Edit.Title">編輯群組</sys:String>
+    <sys:String x:Key="PortfolioGroups.Form.Name">群組名稱</sys:String>
+    <sys:String x:Key="PortfolioGroups.Form.Description">說明（選填）</sys:String>
+    <sys:String x:Key="PortfolioGroups.Form.Color">顯色 (Hex)</sys:String>
+    <sys:String x:Key="PortfolioGroups.Form.ColorHint">輸入 Hex 色碼如 #3B82F6（藍）。留空使用主題預設色。</sys:String>
+    <sys:String x:Key="PortfolioGroups.SystemBadge">系統</sys:String>
     <sys:String x:Key="Common.Previous">上一頁</sys:String>
     <sys:String x:Key="Common.Next">下一頁</sys:String>
     <sys:String x:Key="Common.Browse">瀏覽…</sys:String>
@@ -230,6 +242,14 @@
     <sys:String x:Key="Portfolio.AddRecord.Menu.Account.Hint">建立後可在「資金帳戶」查看與管理</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Liability">新增負債</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Liability.Hint">建立貸款或信用卡，之後可在「負債」查看</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.RealEstate">新增不動產</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.RealEstate.Hint">建立房地產、土地紀錄，之後可在「不動產」查看</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Insurance">新增保險保單</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Insurance.Hint">建立保單紀錄，之後可在「保險保單」查看</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Retirement">新增退休專戶</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.Retirement.Hint">建立勞退、自願提撥或私人退休金帳戶</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.PhysicalAsset">新增實物資產</sys:String>
+    <sys:String x:Key="Portfolio.AddRecord.Menu.PhysicalAsset.Hint">建立車輛、收藏品等實物，之後可在「實物資產」查看</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Category">新增收支分類</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Category.Hint">建立後可在「收支分類」管理與套用</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Recurring">新增訂閱排程</sys:String>
@@ -238,8 +258,12 @@
     <sys:String x:Key="Portfolio.AddRecord.Menu.Alert.Hint">設定價格條件，之後可在「警示」查看</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Goal">新增財務目標</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Goal.Hint">建立後可在「財務目標」追蹤進度</sys:String>
-    <sys:String x:Key="Portfolio.AddCash">新增帳戶</sys:String>
-    <sys:String x:Key="Portfolio.AddLiability">新增負債</sys:String>
+    <!-- header button labels (paired with + icon → 文字只留主詞即可) -->
+    <sys:String x:Key="Portfolio.AddCash">帳戶</sys:String>
+    <sys:String x:Key="Portfolio.AddLiability">負債</sys:String>
+    <!-- empty-state CTAs（沒有 icon，需要完整描述）-->
+    <sys:String x:Key="Portfolio.AddCash.Full">新增帳戶</sys:String>
+    <sys:String x:Key="Portfolio.AddLiability.Full">新增負債</sys:String>
     <sys:String x:Key="Portfolio.AddCreditCard">新增負債</sys:String>
     <sys:String x:Key="Portfolio.Cash.AddHint">建立帳戶時可選擇一併記錄初始存入；之後的存提款會自動累計餘額。</sys:String>
     <sys:String x:Key="Portfolio.Cash.InitialDeposit.Toggle">建立後立即記錄一筆存入</sys:String>
@@ -294,6 +318,7 @@
     <sys:String x:Key="Portfolio.Cash.SetDefault">設為預設</sys:String>
     <sys:String x:Key="Portfolio.Cash.UnsetDefault">取消預設</sys:String>
     <sys:String x:Key="Portfolio.Cash.DefaultHint">新增交易時自動帶入此帳戶</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Subtype">類別</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Title">緊急預備金</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Months">個月</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.MonthlyExpense">每月預估開銷</sys:String>
@@ -302,6 +327,43 @@
     <sys:String x:Key="Portfolio.Cash.Emergency.Warning">注意</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.Danger">危險</sys:String>
     <sys:String x:Key="Portfolio.Cash.Emergency.NotSet">請設定每月開銷以計算緊急預備金</sys:String>
+    <sys:String x:Key="Portfolio.Cash.Emergency.StatusLabel">安全等級</sys:String>
+    <sys:String x:Key="Portfolio.Liability.MonthlyPayment">月付</sys:String>
+    <sys:String x:Key="Portfolio.Liability.NextDue">下次到期</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.All">全部</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Group.All">全部群組</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.Stock">個股</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.Etf">ETF</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.Fund">基金</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.Bond">債券</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.Crypto">加密</sys:String>
+    <sys:String x:Key="Portfolio.Filter.AssetType.PreciousMetal">貴金屬</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.ShowAllocation">展開持股佔比</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.ShowDailyPnl">展開每日損益</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.AllocationTitle">持股佔比</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.DailyPnlTitle">過去 30 天每日損益</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.Count">筆數</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.MarketValue">市值</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.Cost">成本</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.Pnl">損益</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.Balance">餘額</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.Remaining">剩餘</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.MonthlyTotal">月付合計</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.ShowCost">展開成本分布</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.ShowPnlBreakdown">展開盈虧檔數</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.CostTitle">付出成本分布</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.PnlBreakdownTitle">盈虧檔數分布</sys:String>
+    <sys:String x:Key="Portfolio.Sparkline">30 天走勢</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddTitle">新增投資</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddHint">先把標的加入投資資產列表（數量 0），之後再透過買入交易補上交易紀錄。</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddCommand">投資</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddCommand.Hint">先把標的加進投資資產，之後再透過買入交易補上紀錄</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddSuccess">已加入投資資產</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AssetType">類型</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.Symbol">代號</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.Name">名稱（選填，留空自動帶入）</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.Currency">幣別</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddButton">新增</sys:String>
     <sys:String x:Key="Portfolio.Liability.Empty">尚未有負債項目，請按「新增負債」建立貸款或信用卡。</sys:String>
     <sys:String x:Key="Portfolio.Liability.Name">負債名稱</sys:String>
     <sys:String x:Key="Portfolio.Liability.Amount">剩餘金額</sys:String>
@@ -502,6 +564,7 @@
     <sys:String x:Key="Portfolio.Tx.LoanDisbursementAccount">撥款帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tx.NoCashLink">不連動</sys:String>
     <sys:String x:Key="Portfolio.Tx.Stock">股票</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Group">所屬群組</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivPerShare">每股股利（元）</sys:String>
     <sys:String x:Key="Portfolio.Tx.HeldShares">持有股數</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivTotal">合計</sys:String>
@@ -570,6 +633,19 @@
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee.Tooltip">勾選時將總額直接視為持倉成本，不再額外加 0.1425% 手續費；多數券商的成交回報已含手續費，預設勾選。</sys:String>
     <sys:String x:Key="Portfolio.Tx.ActualCashAmount">實際扣款金額（選填）</sys:String>
     <sys:String x:Key="Portfolio.Tx.ActualCashAmountHint">複委託或外幣換匯後，請填券商實際扣款；留空時以成交價 × 股數 + 手續費估算。跨幣別扣款時必填。</sys:String>
+    <!--  MultiCurrency-Trade-Refactor P3 — 跨幣別 banner + FX rate  -->
+    <sys:String x:Key="Portfolio.Tx.CrossCurrency.Banner">跨幣別交易（標的幣別 ≠ 扣款帳戶幣別）</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint">系統偵測到此交易跨幣別（例：美股以台幣帳戶扣款的複委託）。為了正確記錄持倉成本與現金餘額，請填寫匯率或券商實際扣款金額；兩者擇一即可，皆填則以實際扣款為權威。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.FxRate">匯率（標的幣別 → 帳戶幣別）</sys:String>
+    <sys:String x:Key="Portfolio.Tx.FxRate.Hint">例：標的為 USD、帳戶為 TWD，請填當日匯率（如 31.5）。可留空，僅以實際扣款金額為準。</sys:String>
+    <!--  MultiCurrency-Trade-Refactor P3 Mode C — 成交價可留空，由實際扣款 + 股數 反推  -->
+    <sys:String x:Key="Portfolio.AddPrice.OptionalHint">不知道單價？把實際扣款金額和股數填好即可，系統會自動反推。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CrossCurrency.SellHint">系統偵測到此賣出跨幣別（例如：賣出美股後入款到台幣帳戶）。為了正確記錄已實現損益與現金餘額，請填寫匯率或券商實際入帳金額；兩者擇一即可，皆填則以實際入帳為權威。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.SellActualCashAmount">實際入帳金額（選填）</sys:String>
+    <sys:String x:Key="Portfolio.Tx.SellActualCashAmountHint">複委託或外幣換匯後，請填券商實際入帳金額；留空時以賣出價 × 股數 − 手續費估算。跨幣別入帳時必填。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CrossCurrency.DivHint">系統偵測到此股息跨幣別（例如：美股配 USD 股息入款到台幣帳戶）。為了正確記錄股息收入與現金餘額，請填寫匯率或券商實際入帳金額；兩者擇一即可，皆填則以實際入帳為權威。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DivActualCashAmount">實際入帳金額（選填）</sys:String>
+    <sys:String x:Key="Portfolio.Tx.DivActualCashAmountHint">複委託或外幣換匯後，請填券商實際入帳金額；留空時以每股股利 × 持股數估算。跨幣別入帳時必填。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Subtotal">總計</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivInputMode">輸入方式</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivModePerShare">每股股利</sys:String>
@@ -610,7 +686,8 @@
     <sys:String x:Key="Portfolio.Position.HideEmpty">隱藏空倉</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.MarketValue">總市值</sys:String>
     <sys:String x:Key="Portfolio.QuoteSetup.Title">Twelve Data API key 尚未設定</sys:String>
-    <sys:String x:Key="Portfolio.QuoteSetup.Message">若要查詢美股即時報價，請到「設定 > 資料來源」輸入 API key，並通過連線測試。</sys:String>
+    <sys:String x:Key="Portfolio.QuoteSetup.Message">
+        若要查詢美股即時報價，請到「設定 >資料來源」輸入 API key，並通過連線測試。</sys:String>
     <sys:String x:Key="Portfolio.QuoteState.Stale">快取報價</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.TotalCost">總付出成本</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.Pnl">淨損益試算</sys:String>
@@ -740,6 +817,8 @@
     <sys:String x:Key="Allocation.Tab.Overview">配置概覽</sys:String>
     <sys:String x:Key="Allocation.Tab.Rebalance">再平衡</sys:String>
     <sys:String x:Key="Allocation.Overview.Title">配置概覽</sys:String>
+    <sys:String x:Key="Allocation.GroupBy.Symbol">依 Symbol</sys:String>
+    <sys:String x:Key="Allocation.GroupBy.Group">依群組</sys:String>
     <sys:String x:Key="Allocation.Summary.Investment">持股市值</sys:String>
     <sys:String x:Key="Allocation.Summary.Cash">現金</sys:String>
     <sys:String x:Key="Allocation.Summary.Total">總資產</sys:String>
@@ -793,6 +872,15 @@
     <sys:String x:Key="FinancialOverview.Header.Assets">其他資產</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Investments">投資資產</sys:String>
     <sys:String x:Key="FinancialOverview.Header.Liabilities">總負債</sys:String>
+    <!-- Hero card + formula row + composition view（總覽 redesign 2026-05-13）-->
+    <sys:String x:Key="FinancialOverview.Hero.Today">今日漲跌</sys:String>
+    <sys:String x:Key="FinancialOverview.Hero.GoalProgress">目標達成</sys:String>
+    <sys:String x:Key="FinancialOverview.Hero.GoalLabel">目標</sys:String>
+    <sys:String x:Key="FinancialOverview.Hero.NoGoal">尚未設定目標</sys:String>
+    <sys:String x:Key="FinancialOverview.Hero.NoGoalCta">點此設定 →</sys:String>
+    <sys:String x:Key="FinancialOverview.Composition.Heading">資產組成</sys:String>
+    <sys:String x:Key="FinancialOverview.Composition.Empty">尚無資產資料</sys:String>
+    <sys:String x:Key="FinancialOverview.Composition.Liability">負債</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.DebtRatio">負債比率</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnl">投資淨損益</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.InvestmentPnlPercent">投資報酬率</sys:String>
@@ -835,6 +923,20 @@
     <sys:String x:Key="Settings.TwelveData.TestFailed">Twelve Data 連線測試失敗。</sys:String>
     <sys:String x:Key="Settings.TwelveData.NotTested">Twelve Data API Key 尚未測試。</sys:String>
     <sys:String x:Key="Settings.TwelveData.TestBeforeSave">請先測試 Twelve Data API Key，再儲存此報價來源。</sys:String>
+    <!--  TwelveData help dialog — 鏡 FugleHelp 結構  -->
+    <sys:String x:Key="Settings.TwelveDataHelp.Tooltip">查看 Twelve Data API Key 申請與設定說明</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Title">Twelve Data API Key 教學</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Subtitle">在 app 內快速查看美股即時報價的申請流程與設定步驟。</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Intro">Twelve Data 為美股 / ETF / 指數提供即時報價與基本面資料；Free 方案每日 800 次請求對個人使用足夠。Assetra 僅用於美股報價，台股仍走 TWSE / TPEX / Fugle。</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step1.Title">1. 註冊 Twelve Data 帳號</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step1.Body">點下方「前往 Twelve Data」按鈕，使用 email 註冊免費帳號，或以 Google / GitHub 登入。</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step2.Title">2. 取得 API Key</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step2.Body">登入後進入 Dashboard，預設方案為 Basic Free（每日 800 次）。在「API Keys」區會看到自動產生的 key，複製整串字串。</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step3.Title">3. 回到 Settings 貼上並測試</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step3.Body">把 key 貼到「Twelve Data API Key」欄位，按「測試連線」確認可用；測試通過後此 key 才會被儲存使用。</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step4.Title">4. 注意配額限制</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.Step4.Body">免費方案每分鐘最多 8 次、每日最多 800 次請求。Assetra 會在欄位下方顯示「今日用量」幫你追蹤；超過配額時建議升級或暫停美股自動刷新。</sys:String>
+    <sys:String x:Key="Settings.TwelveDataHelp.OpenSite">前往 Twelve Data</sys:String>
     <sys:String x:Key="Settings.Section.Ocr">OCR（PDF 對帳單匯入）</sys:String>
     <sys:String x:Key="Settings.Ocr.TessdataPath">Tesseract tessdata 路徑</sys:String>
     <sys:String x:Key="Settings.Ocr.TessdataPath.Hint">指向包含 .traineddata 檔案的資料夾。空白 = 不啟用 OCR，圖片頁 PDF 會被略過。</sys:String>
@@ -870,6 +972,13 @@
     <sys:String x:Key="Settings.Sync.Conflicts.Status.UsedRemote">已採用雲端版本：{0}</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">盤中</sys:String>
     <sys:String x:Key="StatusBar.MarketClosed">休市</sys:String>
+    <!-- Sync indicator (Phase 1, see docs/planning/Sync-Status-Indicator.md) -->
+    <sys:String x:Key="StatusBar.Sync.Disabled">未啟用同步</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Synced">已同步</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Syncing">同步中…</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Failed">同步失敗</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Offline">離線</sys:String>
+    <sys:String x:Key="StatusBar.Sync.PendingFormat">{0} 筆待同步</sys:String>
 
     <!--  Categories  -->
     <sys:String x:Key="Nav.Categories">收支分類</sys:String>
@@ -910,6 +1019,8 @@
     <sys:String x:Key="Categories.Field.Name">名稱</sys:String>
     <sys:String x:Key="Categories.Field.Color">顏色</sys:String>
     <sys:String x:Key="Categories.Field.CurrentIcon">目前圖示</sys:String>
+    <sys:String x:Key="Categories.Field.Parent">父分類</sys:String>
+    <sys:String x:Key="Categories.Field.NoParent">（無 — 頂層分類）</sys:String>
     <sys:String x:Key="Categories.Field.Preview">預覽</sys:String>
     <sys:String x:Key="Categories.PreviewPlaceholder">尚未輸入名稱</sys:String>
     <sys:String x:Key="Categories.Icon.Food">飲食</sys:String>
@@ -1138,6 +1249,7 @@
     <sys:String x:Key="Dashboard.Widget.Investment.Heading">投資焦點</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.TotalPnl">總損益</sys:String>
     <sys:String x:Key="Dashboard.Widget.Investment.OpenLink">→ 前往投資資產</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Investment.NetWorthTrend">近 30 日 淨值走勢</sys:String>
     <!--  Today's Movers — broker app「即時損益」橫切面  -->
     <sys:String x:Key="Dashboard.Widget.TodaysMovers.Heading">今日即時損益</sys:String>
     <sys:String x:Key="Dashboard.Widget.TodaysMovers.Gainers">今日漲幅前 3</sys:String>
@@ -1146,17 +1258,18 @@
     <!--  Phase C：資產類焦點卡（現金 / 負債 / 不動產 三在一）  -->
     <sys:String x:Key="Dashboard.Widget.AssetClass.Heading">資產類焦點</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.Cash">現金</sys:String>
-    <sys:String x:Key="Dashboard.Widget.AssetClass.CashAccountsSuffix"> 個帳戶</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.CashAccountsSuffix">個帳戶</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.Liability">負債</sys:String>
-    <sys:String x:Key="Dashboard.Widget.AssetClass.LiabilityItemsSuffix"> 項</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.LiabilityItemsSuffix">項</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.RealEstate">不動產</sys:String>
-    <sys:String x:Key="Dashboard.Widget.AssetClass.PropertiesSuffix"> 戶</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.PropertiesSuffix">戶</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.Insurance">保險</sys:String>
-    <sys:String x:Key="Dashboard.Widget.AssetClass.PoliciesSuffix"> 張</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.PoliciesSuffix">張</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.Retirement">退休</sys:String>
-    <sys:String x:Key="Dashboard.Widget.AssetClass.RetirementAccountsSuffix"> 個帳戶</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.RetirementAccountsSuffix">個帳戶</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.Investments">投資</sys:String>
     <sys:String x:Key="Dashboard.Widget.AssetClass.Physical">實物</sys:String>
-    <sys:String x:Key="Dashboard.Widget.AssetClass.PhysicalItemsSuffix"> 項</sys:String>
+    <sys:String x:Key="Dashboard.Widget.AssetClass.PhysicalItemsSuffix">項</sys:String>
     <!--  Stage 4：報酬日曆  -->
     <sys:String x:Key="Dashboard.Calendar.Today">今日</sys:String>
     <sys:String x:Key="Dashboard.Calendar.MonthlyPnl">當月損益</sys:String>
@@ -1200,6 +1313,19 @@
     <sys:String x:Key="Goals.Add.Deadline">期限</sys:String>
     <sys:String x:Key="Goals.Add.Submit">新增</sys:String>
     <sys:String x:Key="Goals.Form.Hint">設定目標金額、目前金額與期限，用來追蹤達成進度。</sys:String>
+    <!-- 2026-05-17 短期妥協：auto-track linked asset class options -->
+    <sys:String x:Key="Goals.Add.LinkedAssetClass">自動追蹤資產類別</sys:String>
+    <sys:String x:Key="Goals.Add.LinkedAssetClass.Hint">選擇要對應的資產類別後，進度會自動取自 dashboard 上的當前值；選「手動」則沿用上方「目前金額」欄位。</sys:String>
+    <sys:String x:Key="Goals.Add.PortfolioGroup">連結到投資組合群組</sys:String>
+    <sys:String x:Key="Goals.Add.PortfolioGroup.Hint">設定群組後優先於「自動追蹤資產類別」：進度 = 該群組目前累計淨值 ÷ 目標金額。適合用「退休帳戶」「買房儲蓄」這種使用者自訂 bucket。</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.Manual">手動（沿用目前金額）</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.NetWorth">淨資產（資產 − 負債）</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.TotalAssets">總資產</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.Investments">投資資產</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.Cash">現金</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.RealEstate">不動產</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.Retirement">退休專戶</sys:String>
+    <sys:String x:Key="Goals.LinkedAssetClass.Physical">實物資產</sys:String>
     <sys:String x:Key="Goals.Edit.Title">編輯目標</sys:String>
     <sys:String x:Key="Goals.Edit.Submit">儲存</sys:String>
     <sys:String x:Key="Goals.Edit.Cancel">取消</sys:String>
@@ -1555,6 +1681,8 @@
     <!--  v0.25 FIRE 計算機  -->
     <sys:String x:Key="Fire.Title">FIRE</sys:String>
     <sys:String x:Key="Fire.Input.NetWorth">目前淨資產</sys:String>
+    <sys:String x:Key="Fire.Input.Group">選擇投資組合群組</sys:String>
+    <sys:String x:Key="Fire.Input.Group.Hint">選擇群組後會自動把該 bucket 的累計淨值填入「目前淨資產」，可直接覆寫。儲存為 Goal 時會記住此群組連結。</sys:String>
     <sys:String x:Key="Fire.Input.AnnualExpenses">年支出</sys:String>
     <sys:String x:Key="Fire.Input.AnnualSavings">年儲蓄</sys:String>
     <sys:String x:Key="Fire.Input.Return">預期年化報酬率</sys:String>

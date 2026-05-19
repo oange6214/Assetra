@@ -46,10 +46,12 @@ public class SettingsViewModelTests
         return new ConflictResolutionViewModel(queue, queue);
     }
 
-    private SettingsViewModel CreateVm(ISnackbarService? snackbar = null) =>
+    private SettingsViewModel CreateVm(
+        ISnackbarService? snackbar = null,
+        ITwelveDataConnectionTester? twelveDataTester = null) =>
         new(_mockSettings.Object, _mockTheme.Object,
             _mockLocalization.Object, _mockCurrency.Object,
-            CreateSyncVm(), CreateConflictsVm(), snackbar);
+            CreateSyncVm(), CreateConflictsVm(), snackbar, twelveDataTester: twelveDataTester);
 
     [Fact]
     public void Constructor_DarkTheme_SetsIsDarkThemeTrue()
@@ -119,6 +121,33 @@ public class SettingsViewModelTests
     }
 
     [Fact]
+    public async Task SaveDataSourceSettingsCommand_TwelveDataRequiresSuccessfulTestBeforeSave()
+    {
+        var saved = new List<AppSettings>();
+        _mockSettings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>()))
+            .Callback<AppSettings>(saved.Add)
+            .Returns(Task.CompletedTask);
+        var tester = new FakeTwelveDataTester(success: true);
+        var vm = CreateVm(twelveDataTester: tester);
+
+        vm.TwelveDataApiKey = "demo-key";
+
+        Assert.False(vm.CanSaveDataSourceSettings);
+        await vm.SaveDataSourceSettingsCommand.ExecuteAsync(null);
+        Assert.Empty(saved);
+
+        await vm.TestTwelveDataConnectionCommand.ExecuteAsync(null);
+        Assert.True(vm.CanSaveDataSourceSettings);
+
+        await vm.SaveDataSourceSettingsCommand.ExecuteAsync(null);
+
+        var settings = Assert.Single(saved);
+        Assert.Equal("official", settings.QuoteProvider);
+        Assert.Equal("demo-key", settings.TwelveDataApiKey);
+        Assert.Equal(1, tester.CallCount);
+    }
+
+    [Fact]
     public async Task BaseCurrencyChanged_PersistsSetting()
     {
         var saved = new TaskCompletionSource<AppSettings>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -158,5 +187,34 @@ public class SettingsViewModelTests
         }
 
         Assert.True(condition());
+    }
+
+    private sealed class FakeTwelveDataTester(bool success) : ITwelveDataConnectionTester
+    {
+        public int CallCount { get; private set; }
+
+        public Task<MarketDataResult<EquityQuote>> TestAsync(string apiKey, CancellationToken ct = default)
+        {
+            CallCount++;
+            var key = new EquityInstrumentKey("AAPL", "NASDAQ");
+            var result = success
+                ? MarketDataResult<EquityQuote>.Success(new EquityQuote(
+                    key,
+                    100m,
+                    previousClose: 99m,
+                    change: 1m,
+                    changePercent: 1m,
+                    currency: "USD",
+                    updatedAt: DateTimeOffset.UnixEpoch,
+                    sourceProvider: "Twelve Data",
+                    isDelayed: true))
+                : MarketDataResult<EquityQuote>.Failure(new MarketDataError(
+                    MarketDataErrorCode.MissingApiKey,
+                    "Missing key",
+                    Provider: "Twelve Data",
+                    Instrument: key));
+
+            return Task.FromResult(result);
+        }
     }
 }

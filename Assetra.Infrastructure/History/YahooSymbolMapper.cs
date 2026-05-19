@@ -6,7 +6,7 @@ namespace Assetra.Infrastructure.History;
 /// <list type="bullet">
 ///   <item>TWSE → <c>{symbol}.TW</c></item>
 ///   <item>TPEX → <c>{symbol}.TWO</c></item>
-///   <item>NYSE / NASDAQ / AMEX → <c>{symbol}</c> (bare)</item>
+///   <item>US venues → <c>{symbol}</c> (bare)</item>
 ///   <item>HKEX → <c>{symbol}.HK</c></item>
 ///   <item>TSE  → <c>{symbol}.T</c></item>
 ///   <item>unknown → bare symbol (caller-validated)</item>
@@ -25,7 +25,7 @@ public static class YahooSymbolMapper
             "TPEX" => $"{s}.TWO",
             "HKEX" => $"{s}.HK",
             "TSE" => $"{s}.T",
-            "NYSE" or "NASDAQ" or "AMEX" => s,
+            "NYSE" or "NASDAQ" or "NYSEARCA" or "AMEX" or "BATS" or "IEX" => s,
             _ => s,
         };
     }
@@ -34,6 +34,6 @@ public static class YahooSymbolMapper
     public static bool IsForeignExchange(string? exchange)
     {
         var ex = exchange?.Trim().ToUpperInvariant();
-        return ex is "NYSE" or "NASDAQ" or "AMEX" or "HKEX" or "TSE";
+        return ex is "NYSE" or "NASDAQ" or "NYSEARCA" or "AMEX" or "BATS" or "IEX" or "HKEX" or "TSE";
     }
 }

@@ -39,6 +39,50 @@ public sealed partial class SellTxViewModel : ObservableObject
     [ObservableProperty] private bool _isEtf;
     [ObservableProperty] private bool _isBondEtf;
 
+    // MultiCurrency-Trade-Refactor P3 — Sell side mirrors Buy: when the
+    // sold instrument's currency differs from the receiving cash account's
+    // currency, expose ActualCashAmount + FxRate fields. Same field semantics
+    // as BuyTxViewModel — see BuyTxViewModel for full docs.
+    [ObservableProperty] private string _actualCashAmount = string.Empty;
+    [ObservableProperty] private string _actualCashAmountError = string.Empty;
+    [ObservableProperty] private string _fxRate = string.Empty;
+    [ObservableProperty] private string _fxRateError = string.Empty;
+    [ObservableProperty] private string _instrumentCurrency = string.Empty;
+    [ObservableProperty] private string _cashAccountCurrency = string.Empty;
+
+    /// <summary>
+    /// True when <see cref="InstrumentCurrency"/> ≠ <see cref="CashAccountCurrency"/>.
+    /// Empty currency on either side treated as "TWD" (avoids false positives during init).
+    /// </summary>
+    public bool IsCrossCurrency
+    {
+        get
+        {
+            var instr = string.IsNullOrWhiteSpace(InstrumentCurrency) ? "TWD" : InstrumentCurrency.Trim().ToUpperInvariant();
+            var cash = string.IsNullOrWhiteSpace(CashAccountCurrency) ? "TWD" : CashAccountCurrency.Trim().ToUpperInvariant();
+            return !string.Equals(instr, cash, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    partial void OnInstrumentCurrencyChanged(string value)
+    {
+        OnPropertyChanged(nameof(IsCrossCurrency));
+        OnPropertyChanged(nameof(InstrumentCurrencyBadge));
+    }
+    partial void OnCashAccountCurrencyChanged(string value) => OnPropertyChanged(nameof(IsCrossCurrency));
+
+    /// <summary>P3 — mirror of BuyTxViewModel.InstrumentCurrencyBadge for Sell side.</summary>
+    public string InstrumentCurrencyBadge
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(InstrumentCurrency))
+                return string.Empty;
+            var c = InstrumentCurrency.Trim().ToUpperInvariant();
+            return c == "TWD" ? string.Empty : $"({c} / 股)";
+        }
+    }
+
     public bool HasPreview => GrossAmount > 0;
 
     /// <summary>Suppress auto-fill of TxAmount when Position is set programmatically (Edit mode).</summary>
@@ -61,6 +105,12 @@ public sealed partial class SellTxViewModel : ObservableObject
         QuantityError = string.Empty;
         IsEtf = false;
         IsBondEtf = false;
+        ActualCashAmount = string.Empty;
+        ActualCashAmountError = string.Empty;
+        FxRate = string.Empty;
+        FxRateError = string.Empty;
+        InstrumentCurrency = string.Empty;
+        CashAccountCurrency = string.Empty;
         ResetPreview();
     }
 }

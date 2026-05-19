@@ -196,6 +196,75 @@
                 Foreground="{DynamicResource AppAccent}"
                 Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
                 Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+            <!--
+                MultiCurrency-Trade-Refactor P3 — CashDividend mirror of Buy/Sell.
+                跨幣別股息（美股配 USD 股息入 TWD 帳戶）顯示 banner + 匯率 + 實際入帳。
+            -->
+            <Border
+                Margin="0,12,0,0"
+                Padding="10,8"
+                Background="{DynamicResource AppAccentSubtle}"
+                BorderBrush="{DynamicResource AppAccent}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource Radius.Sm}"
+                Visibility="{Binding Div.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Portfolio.Tx.CrossCurrency.Banner}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Tx.CrossCurrency.DivHint}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <StackPanel Visibility="{Binding Div.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock
+                    Margin="0,12,0,4"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Portfolio.Tx.FxRate}" />
+                <TextBox
+                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                    Text="{Binding Div.FxRate, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Style="{StaticResource FormFieldError}"
+                    Text="{Binding Div.FxRateError}"
+                    Visibility="{Binding Div.FxRateError, Converter={StaticResource StringToVisibilityConverter}}" />
+                <TextBlock
+                    Margin="0,2,0,0"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppTextMuted}"
+                    Text="{DynamicResource Portfolio.Tx.FxRate.Hint}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+
+            <TextBlock
+                Margin="0,12,0,4"
+                FontSize="{StaticResource Font.Size.Xs}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{DynamicResource Portfolio.Tx.DivActualCashAmount}" />
+            <TextBox
+                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                Text="{Binding Div.ActualCashAmount, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock
+                Style="{StaticResource FormFieldError}"
+                Text="{Binding Div.ActualCashAmountError}"
+                Visibility="{Binding Div.ActualCashAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
+            <TextBlock
+                Margin="0,2,0,0"
+                FontSize="{StaticResource Font.Size.Xs}"
+                Foreground="{DynamicResource AppTextMuted}"
+                Text="{DynamicResource Portfolio.Tx.DivActualCashAmountHint}"
+                TextWrapping="Wrap" />
         </StackPanel>
     </StackPanel>
 </UserControl>

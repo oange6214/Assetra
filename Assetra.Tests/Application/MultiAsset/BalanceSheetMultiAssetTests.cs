@@ -152,6 +152,7 @@ public class BalanceSheetMultiAssetTests
         public Task DeleteItemAsync(Guid id) => Task.CompletedTask;
         public Task<Guid> FindOrCreateAccountAsync(string name, string currency, CancellationToken ct = default) => Task.FromResult(Guid.NewGuid());
         public Task ArchiveItemAsync(Guid id) => Task.CompletedTask;
+        public Task UnarchiveItemAsync(Guid id) => Task.CompletedTask;
         public Task<int> HasTradeReferencesAsync(Guid id, CancellationToken ct = default) => Task.FromResult(0);
         public Task<IReadOnlyList<AssetEvent>> GetEventsAsync(Guid assetId) => Task.FromResult<IReadOnlyList<AssetEvent>>([]);
         public Task AddEventAsync(AssetEvent evt) => Task.CompletedTask;

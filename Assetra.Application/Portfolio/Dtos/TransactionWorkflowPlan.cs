@@ -28,7 +28,14 @@ public sealed record CashDividendTransactionRequest(
     decimal TotalAmount,
     DateTime TradeDate,
     Guid? CashAccountId,
-    decimal Fee);
+    decimal Fee,
+    // MultiCurrency-Trade-Refactor P3 — 跨幣別股息：標的計 USD 股息、入款 TWD 帳戶。
+    // ActualCashAmount = 券商實際入帳（帳戶幣別）；FxRate = 標的→帳戶匯率。
+    // 同幣別股息兩者皆 null。
+    decimal? ActualCashAmount = null,
+    decimal? FxRate = null,
+    // Portfolio-Groups-Refactor P3
+    Guid? PortfolioGroupId = null);
 
 public sealed record StockDividendTransactionRequest(
     string Symbol,

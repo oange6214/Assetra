@@ -60,12 +60,26 @@ public class CashFlowStatementServiceTests
         Assert.Equal(5000m, stmt.ClosingCash);
     }
 
+    [Fact]
+    public async Task GenerateAsync_BuyUsesActualCashAmountWhenPresent()
+    {
+        var trades = new FakeTradeRepo();
+        trades.Store.Add(MakeBuy(new DateTime(2026, 4, 10), 100m, 10, cashAmount: 35_500m));
+
+        var svc = new CashFlowStatementService(trades);
+        var stmt = await svc.GenerateAsync(ReportPeriod.Month(2026, 4));
+
+        Assert.Equal(-35_500m, stmt.Investing.Total);
+        Assert.Equal(-35_500m, stmt.NetChange);
+    }
+
     private static Trade MakeIncome(DateTime when, decimal amt) =>
         new(Guid.NewGuid(), "", "", "i", TradeType.Income, when, 0m, 1, null, null, CashAmount: amt);
     private static Trade MakeWithdrawal(DateTime when, decimal amt) =>
         new(Guid.NewGuid(), "", "", "w", TradeType.Withdrawal, when, 0m, 1, null, null, CashAmount: amt);
-    private static Trade MakeBuy(DateTime when, decimal price, int qty) =>
-        new(Guid.NewGuid(), "X", "TW", "stock", TradeType.Buy, when, price, qty, null, null);
+    private static Trade MakeBuy(DateTime when, decimal price, int qty, decimal? cashAmount = null) =>
+        new(Guid.NewGuid(), "X", "TW", "stock", TradeType.Buy, when, price, qty, null, null,
+            CashAmount: cashAmount);
     private static Trade MakeLoanBorrow(DateTime when, decimal amt) =>
         new(Guid.NewGuid(), "", "", "loan", TradeType.LoanBorrow, when, 0m, 1, null, null,
             CashAmount: amt, LoanLabel: "TestLoan");

@@ -17,6 +17,8 @@ public partial class SettingsView : UserControl
         {
             if (FugleApiKeyBox.Password != vm.FugleApiKey)
                 FugleApiKeyBox.Password = vm.FugleApiKey;
+            if (TwelveDataApiKeyBox.Password != vm.TwelveDataApiKey)
+                TwelveDataApiKeyBox.Password = vm.TwelveDataApiKey;
             SubscribeToPassphraseCleared(vm.Sync);
         }
     }
@@ -28,6 +30,12 @@ public partial class SettingsView : UserControl
     {
         if (DataContext is SettingsViewModel vm && sender is PasswordBox box && vm.FugleApiKey != box.Password)
             vm.FugleApiKey = box.Password;
+    }
+
+    private void TwelveDataApiKeyBox_OnPasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is SettingsViewModel vm && sender is PasswordBox box && vm.TwelveDataApiKey != box.Password)
+            vm.TwelveDataApiKey = box.Password;
     }
 
     private async void OnUiScaleSliderDragCompleted(object sender, DragCompletedEventArgs e)

@@ -8,35 +8,35 @@ public sealed class PortfolioSummaryService : IPortfolioSummaryService
     {
         ArgumentNullException.ThrowIfNull(input);
 
-        var totalCost = input.Positions.Sum(p => p.Cost);
-        var totalMarketValue = input.Positions.Sum(p => p.MarketValue);
-        var totalPnl = input.Positions.Sum(p => p.NetValue - p.Cost);
+        var totalCost = input.Positions.Sum(p => p.BaseCost);
+        var totalMarketValue = input.Positions.Sum(p => p.BaseMarketValue);
+        var totalPnl = input.Positions.Sum(p => p.BaseNetValue - p.BaseCost);
         var totalPnlPercent = totalCost > 0 ? totalPnl / totalCost * 100m : 0m;
         var isTotalPositive = totalPnl >= 0;
 
-        var totalNetValue = input.Positions.Sum(p => p.NetValue);
+        var totalNetValue = input.Positions.Sum(p => p.BaseNetValue);
         var positionWeights = input.Positions
             .Select(p => new PositionWeightResult(
                 p.Id,
-                totalNetValue > 0 ? p.NetValue / totalNetValue * 100m : 0m))
+                totalNetValue > 0 ? p.BaseNetValue / totalNetValue * 100m : 0m))
             .ToList();
 
-        var totalCash = input.CashAccounts.Sum(c => c.Balance);
-        var totalLiabilities = input.Liabilities.Sum(l => l.Balance);
+        var totalCash = input.CashAccounts.Sum(c => c.BaseBalance);
+        var totalLiabilities = input.Liabilities.Sum(l => l.BaseBalance);
         var totalAssets = totalMarketValue + totalCash;
         var netWorth = totalAssets - totalLiabilities;
 
         var priced = input.Positions
-            .Where(p => !p.IsLoadingPrice && p.PrevClose > 0)
+            .Where(p => !p.IsLoadingPrice && p.BasePrevClose > 0)
             .ToList();
         var hasDayPnl = priced.Count > 0;
-        var dayPnl = priced.Sum(p => (p.CurrentPrice - p.PrevClose) * p.Quantity);
-        var dayPnlBase = priced.Sum(p => p.PrevClose * p.Quantity);
+        var dayPnl = priced.Sum(p => (p.BaseCurrentPrice - p.BasePrevClose) * p.Quantity);
+        var dayPnlBase = priced.Sum(p => p.BasePrevClose * p.Quantity);
         var dayPnlPercent = dayPnlBase > 0 ? dayPnl / dayPnlBase * 100m : 0m;
         var isDayPnlPositive = dayPnl >= 0;
 
         var totalOriginalLiabilities = input.Liabilities.Sum(l =>
-            l.OriginalAmount > 0 ? l.OriginalAmount : l.Balance);
+            l.BaseOriginalAmount > 0 ? l.BaseOriginalAmount : l.BaseBalance);
         var debtRatioValue = totalAssets > 0
             ? Math.Min(totalLiabilities / totalAssets * 100m, 100m)
             : 0m;
@@ -50,7 +50,7 @@ public sealed class PortfolioSummaryService : IPortfolioSummaryService
             .Select(g => new
             {
                 AssetType = g.Key,
-                Value = g.Sum(p => p.MarketValue > 0 ? p.MarketValue : p.Cost),
+                Value = g.Sum(p => p.BaseMarketValue > 0 ? p.BaseMarketValue : p.BaseCost),
             })
             .Where(g => g.Value > 0)
             .ToList();

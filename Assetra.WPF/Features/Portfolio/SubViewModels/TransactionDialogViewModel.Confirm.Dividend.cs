@@ -42,6 +42,34 @@ public partial class TransactionDialogViewModel
         if (feeError is not null)
         { TxError = feeError; return; }
 
+        // MultiCurrency-Trade-Refactor P3 — parse optional cross-currency fields.
+        // 同幣別股息（如台股配 TWD 股息入 TWD 帳戶）兩者皆空。
+        decimal? divActualCash = null;
+        if (!string.IsNullOrWhiteSpace(Div.ActualCashAmount))
+        {
+            if (!ParseHelpers.TryParseDecimal(Div.ActualCashAmount, out var parsedActual) || parsedActual <= 0)
+            { TxError = "實際入帳金額無效"; return; }
+            divActualCash = parsedActual;
+        }
+        decimal? divFxRate = null;
+        if (!string.IsNullOrWhiteSpace(Div.FxRate))
+        {
+            if (!ParseHelpers.TryParseDecimal(Div.FxRate, out var parsedFx) || parsedFx <= 0)
+            { TxError = "匯率無效"; return; }
+            divFxRate = parsedFx;
+        }
+
+        // P3 — 雙保險自動反推：擇一填寫即可，存兩者方便未來報表還原。
+        // total = perShare × Quantity（標的幣別）。
+        if (divActualCash is null && divFxRate is { } fxOnly && total > 0)
+        {
+            divActualCash = total * fxOnly;
+        }
+        else if (divFxRate is null && divActualCash is { } cashOnly && total > 0)
+        {
+            divFxRate = cashOnly / total;
+        }
+
         var divName = string.IsNullOrEmpty(Div.Position.Name)
                       ? Div.Position.Symbol
                       : Div.Position.Name;
@@ -56,7 +84,10 @@ public partial class TransactionDialogViewModel
             total,
             tradeDate,
             cashAccId,
-            fee));
+            fee,
+            divActualCash,
+            divFxRate,
+            SelectedPortfolioGroup?.Id));
 
         await AfterTxSuccessAsync();
     }

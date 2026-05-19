@@ -28,6 +28,13 @@ public sealed partial class CashAccountRowViewModel : ObservableObject
     [ObservableProperty] private bool _isActive;
 
     /// <summary>
+    /// 此帳戶餘額佔總現金的百分比（0–100）。由 <c>PortfolioViewModel.RebuildTotals</c>
+    /// 在計算 TotalCash 後統一回寫，避免 row VM 持有對 owner 的反向參考。
+    /// 用於 AccountsTabPanel 的「佔比」欄。
+    /// </summary>
+    [ObservableProperty] private decimal _percentOfTotal;
+
+    /// <summary>
     /// 帳戶細分類（手邊現金 / 銀行活存 / 數位活存 / 證券交割戶 / …）。
     /// 改值時 AccountUpsertWorkflowService 會依 subtype 重新分配 GroupId，
     /// 因此影響財務總覽分組顯示。null = 自訂或未設。

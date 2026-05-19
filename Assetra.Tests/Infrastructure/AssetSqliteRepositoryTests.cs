@@ -118,6 +118,27 @@ public class AssetSqliteRepositoryTests : IDisposable
     }
 
     [Fact]
+    public async Task Items_UpdateSubtypeAndGroup_RoundTripsThroughGetByType()
+    {
+        var repo = new AssetSqliteRepository(_dbPath);
+        var bankGroupId = new Guid("11111111-1111-1111-1111-111111111101");
+        var item = new AssetItem(Guid.NewGuid(), "富邦", FinancialType.Asset,
+            null, "TWD", new DateOnly(2026, 4, 20));
+        await repo.AddItemAsync(item);
+
+        await repo.UpdateItemAsync(item with
+        {
+            Subtype = "銀行活存",
+            GroupId = bankGroupId,
+        });
+
+        var assets = await repo.GetItemsByTypeAsync(FinancialType.Asset);
+        var found = Assert.Single(assets.Where(i => i.Id == item.Id));
+        Assert.Equal("銀行活存", found.Subtype);
+        Assert.Equal(bankGroupId, found.GroupId);
+    }
+
+    [Fact]
     public async Task Items_Delete_RemovesItem()
     {
         var repo = new AssetSqliteRepository(_dbPath);

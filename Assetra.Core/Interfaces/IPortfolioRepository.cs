@@ -15,6 +15,8 @@ public interface IPortfolioRepository
         string? displayName, AssetType assetType,
         string? currency = null,
         bool isEtf = false,
+        // Portfolio-Groups-Refactor P3 — 新 entry 的群組指派；null = DefaultId fallback。
+        Guid? portfolioGroupId = null,
         CancellationToken ct = default);
     Task ArchiveAsync(Guid id, CancellationToken ct = default);
     Task UnarchiveAsync(Guid id, CancellationToken ct = default);

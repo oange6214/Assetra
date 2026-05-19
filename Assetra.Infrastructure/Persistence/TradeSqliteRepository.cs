@@ -21,11 +21,15 @@ namespace Assetra.Infrastructure.Persistence;
 ///         與 <see cref="RemoveAsync"/> 對齊；cloud 會收到每筆被連動刪除的 trade tombstone。</item>
 /// </list>
 /// </summary>
-public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
+public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, Assetra.Core.Interfaces.Sync.ILocalChangeCountSource
 {
     private readonly string _connectionString;
     private readonly Func<string> _deviceIdProvider;
     private readonly TimeProvider _time;
+
+    public string SyncDomain => TradeSyncMapper.EntityType;
+    public event EventHandler<int>? LocalChangeCountChanged;
+    private void RaiseLocalChange(int delta = 1) => LocalChangeCountChanged?.Invoke(this, delta);
 
     public TradeSqliteRepository(string dbPath, string deviceId = "local", TimeProvider? time = null)
         : this(dbPath, () => deviceId, time)
@@ -63,7 +67,11 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
         "cash_amount, cash_account_id, note, portfolio_entry_id, commission, " +
         "commission_discount, loan_label, principal, interest_paid, " +
         "to_cash_account_id, liability_asset_id, parent_trade_id, " +
-        "category_id, recurring_source_id";
+        "category_id, recurring_source_id, " +
+        // MultiCurrency-Trade-Refactor P1 — 三個新欄位，跟其他 optional 欄位一樣 append on end
+        "instrument_currency, commission_currency, fx_rate, " +
+        // Portfolio-Groups-Refactor P1
+        "portfolio_group_id";
 
     private const string SyncSelectClause = SelectClause +
         ", version, last_modified_at, last_modified_by_device, is_deleted";
@@ -98,7 +106,16 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
         LiabilityAssetId: r.IsDBNull(20) ? null : Guid.Parse(r.GetString(20)),
         ParentTradeId: r.IsDBNull(21) ? null : Guid.Parse(r.GetString(21)),
         CategoryId: r.IsDBNull(22) ? null : Guid.Parse(r.GetString(22)),
-        RecurringSourceId: r.IsDBNull(23) ? null : Guid.Parse(r.GetString(23)));
+        RecurringSourceId: r.IsDBNull(23) ? null : Guid.Parse(r.GetString(23)),
+        // MultiCurrency-Trade-Refactor P1
+        // instrument_currency 有 NOT NULL DEFAULT 'TWD'，理論上不會 NULL；
+        // 加 fallback 是為了非常舊的 row 萬一 schema migration 跑之前讀過就好。
+        InstrumentCurrency: r.IsDBNull(24) ? "TWD" : r.GetString(24),
+        CommissionCurrency: r.IsDBNull(25) ? null : r.GetString(25),
+        FxRate: r.IsDBNull(26) ? null : (decimal)r.GetDouble(26),
+        // Portfolio-Groups-Refactor P1 — 既有 row 由 schema migration backfill 補上 DefaultId；
+        // 萬一遇到 race，從 NULL 讀到的話也保留 null 由上層處理（之後 backfill 會再補一次）。
+        PortfolioGroupId: r.IsDBNull(27) ? null : Guid.Parse(r.GetString(27)));
 
     private static void BindTradeParams(SqliteCommand cmd, Trade t)
     {
@@ -126,6 +143,17 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
         cmd.Parameters.AddWithValue("$parent_id", t.ParentTradeId.HasValue ? (object)t.ParentTradeId.Value.ToString() : DBNull.Value);
         cmd.Parameters.AddWithValue("$category_id", t.CategoryId.HasValue ? (object)t.CategoryId.Value.ToString() : DBNull.Value);
         cmd.Parameters.AddWithValue("$recurring_source_id", t.RecurringSourceId.HasValue ? (object)t.RecurringSourceId.Value.ToString() : DBNull.Value);
+        // MultiCurrency-Trade-Refactor P1
+        cmd.Parameters.AddWithValue("$instr_ccy",
+            string.IsNullOrWhiteSpace(t.InstrumentCurrency) ? (object)"TWD" : t.InstrumentCurrency);
+        cmd.Parameters.AddWithValue("$comm_ccy",
+            t.CommissionCurrency is not null ? (object)t.CommissionCurrency : DBNull.Value);
+        cmd.Parameters.AddWithValue("$fx_rate",
+            t.FxRate.HasValue ? (object)(double)t.FxRate.Value : DBNull.Value);
+        // Portfolio-Groups-Refactor P1 — null 時自動 fallback 到 DefaultId，避免新 row 寫入 NULL
+        // 而需要等下次 schema migration backfill 才會補上。
+        cmd.Parameters.AddWithValue("$portfolio_group_id",
+            (t.PortfolioGroupId ?? PortfolioGroup.DefaultId).ToString());
     }
 
     // ─── Queries (filter is_deleted = 0) ─────────────────────────────────
@@ -257,6 +285,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
         cmd.Parameters.AddWithValue("$device", CurrentDeviceId());
         var rows = await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
         ThrowIfInsertIgnored(rows, trade);
+        RaiseLocalChange();
     }
 
     public async Task UpdateAsync(Trade trade, CancellationToken ct = default)
@@ -279,6 +308,10 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
                 parent_trade_id = $parent_id,
                 category_id = $category_id,
                 recurring_source_id = $recurring_source_id,
+                instrument_currency = $instr_ccy,
+                commission_currency = $comm_ccy,
+                fx_rate = $fx_rate,
+                portfolio_group_id = $portfolio_group_id,
                 updated_at = $now,
                 version = version + 1,
                 last_modified_at = $now,
@@ -290,6 +323,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
         cmd.Parameters.AddWithValue("$now", _time.GetUtcNow().UtcDateTime.ToString("o"));
         cmd.Parameters.AddWithValue("$device", CurrentDeviceId());
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        RaiseLocalChange();
     }
 
     public async Task RemoveAsync(Guid id, CancellationToken ct = default)
@@ -328,6 +362,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
         }
 
         await tx.CommitAsync(ct).ConfigureAwait(false);
+        RaiseLocalChange();
     }
 
     // v0.20.8: cascade bulk deletes converted to soft delete so cloud receives tombstone events.
@@ -506,6 +541,8 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
              loan_label, principal, interest_paid, to_cash_account_id,
              liability_asset_id,
              parent_trade_id, category_id, recurring_source_id,
+             instrument_currency, commission_currency, fx_rate,
+             portfolio_group_id,
              created_at, updated_at,
              version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
         VALUES
@@ -515,6 +552,8 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
              $loan_label, $princ, $int, $to_acct,
              $liability_asset_id,
              $parent_id, $category_id, $recurring_source_id,
+             $instr_ccy, $comm_ccy, $fx_rate,
+             $portfolio_group_id,
              $now, $now,
              1, $now, $device, 0, 1);
         """;
@@ -532,11 +571,14 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
         while (await reader.ReadAsync(ct).ConfigureAwait(false))
         {
             var trade = MapTrade(reader);
+            // ⚠ Ordinals here track the tail of SyncSelectClause = SelectClause + sync cols.
+            // SelectClause now has 28 cols (24 base + 3 MultiCurrency P1 + 1 PortfolioGroup P1).
+            // Keep these ordinals in lock-step with SelectClause column count.
             var version = new EntityVersion(
-                Version: reader.GetInt64(24),
-                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(25)),
-                LastModifiedByDevice: reader.GetString(26));
-            var isDeleted = reader.GetInt32(27) != 0;
+                Version: reader.GetInt64(28),
+                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(29)),
+                LastModifiedByDevice: reader.GetString(30));
+            var isDeleted = reader.GetInt32(31) != 0;
             results.Add(TradeSyncMapper.ToEnvelope(trade, version, isDeleted));
         }
         return results;
@@ -625,6 +667,8 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
                      loan_label, principal, interest_paid, to_cash_account_id,
                      liability_asset_id,
                      parent_trade_id, category_id, recurring_source_id,
+                     instrument_currency, commission_currency, fx_rate,
+                     portfolio_group_id,
                      created_at, updated_at,
                      version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
                 VALUES
@@ -634,6 +678,8 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
                      $loan_label, $princ, $int, $to_acct,
                      $liability_asset_id,
                      $parent_id, $category_id, $recurring_source_id,
+                     $instr_ccy, $comm_ccy, $fx_rate,
+                     $portfolio_group_id,
                      $now, $now,
                      $ver, $modAt, $modBy, 0, 0)
                 ON CONFLICT(id) DO UPDATE SET
@@ -660,6 +706,10 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore
                     parent_trade_id = excluded.parent_trade_id,
                     category_id = excluded.category_id,
                     recurring_source_id = excluded.recurring_source_id,
+                    instrument_currency = excluded.instrument_currency,
+                    commission_currency = excluded.commission_currency,
+                    fx_rate = excluded.fx_rate,
+                    portfolio_group_id = excluded.portfolio_group_id,
                     updated_at = excluded.updated_at,
                     version = excluded.version,
                     last_modified_at = excluded.last_modified_at,

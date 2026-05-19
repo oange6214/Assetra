@@ -430,6 +430,28 @@
                         </Popup>
                     </Grid>
 
+                    <!--
+                        +新增交易 — 交易記錄頁的主要動作；放最右側讓使用者能直接從這頁
+                        建立新交易，不必繞 nav rail 或右上 quick-add menu。
+                    -->
+                    <Button
+                        MinHeight="32"
+                        Margin="8,0,0,0"
+                        Padding="10,0"
+                        VerticalAlignment="Center"
+                        Command="{Binding AddRecordCommand}"
+                        DockPanel.Dock="Right"
+                        Style="{StaticResource AppSecondaryButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <ds:AppIcon
+                                Margin="0,0,6,0"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Symbol="Add24" />
+                            <TextBlock VerticalAlignment="Center" Text="{DynamicResource Portfolio.AddRecord.Menu.Transaction}" />
+                        </StackPanel>
+                    </Button>
+
                     <!--  日期範圍 — 使用 DateRangePicker 單一控制項（雙月曆 popup + 範圍高亮）  -->
                     <controls:DateRangePicker
                         Width="260"

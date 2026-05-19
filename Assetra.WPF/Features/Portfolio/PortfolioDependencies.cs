@@ -5,6 +5,7 @@ using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Analysis;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
+using Assetra.WPF.Features.PortfolioGroups;
 using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Portfolio;
@@ -131,7 +132,12 @@ public sealed record PortfolioServices(
     /// <summary>風險指標：Sharpe 比率（從 Reports 搬到 Trends）。</summary>
     ISharpeRatioCalculator? Sharpe = null,
     /// <summary>風險指標：HHI 集中度（從 Reports 搬到 Trends）。</summary>
-    IConcentrationAnalyzer? Concentration = null)
+    IConcentrationAnalyzer? Concentration = null,
+    /// <summary>
+    /// Portfolio-Groups-Refactor P3 — 群組 (bucket) 目錄。為 null 時 trade dialog
+    /// 的群組 ComboBox 隱藏，行為等同尚未啟用群組功能。
+    /// </summary>
+    PortfolioGroupCatalog? GroupCatalog = null)
 {
     /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。

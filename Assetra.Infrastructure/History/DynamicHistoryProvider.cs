@@ -35,6 +35,12 @@ internal sealed class DynamicHistoryProvider : IStockHistoryProvider
         if (YahooSymbolMapper.IsForeignExchange(exchange))
             return _yahoo.GetHistoryAsync(symbol, exchange, period, ct);
 
+        // ^TWII / ^GSPC 等 Yahoo index symbols：TWSE/Fugle/FinMind 都只懂個股代號，
+        // 不接受 ^ 開頭的指數代號。一律 route 到 Yahoo 拿。修了 benchmark 對標 row
+        // 顯示「加權指數 —」的問題（其他 0050/00981A 個股代號正常）。
+        if (!string.IsNullOrEmpty(symbol) && symbol.StartsWith('^'))
+            return _yahoo.GetHistoryAsync(symbol, exchange, period, ct);
+
         IStockHistoryProvider active = _settings.Current.HistoryProvider switch
         {
             "fugle" => _fugle,
