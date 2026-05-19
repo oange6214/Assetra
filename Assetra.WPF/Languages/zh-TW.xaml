@@ -819,6 +819,7 @@
     <sys:String x:Key="Allocation.Overview.Title">配置概覽</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Symbol">依 Symbol</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Group">依群組</sys:String>
+    <sys:String x:Key="Allocation.GroupBy.Currency">依幣別</sys:String>
     <sys:String x:Key="Allocation.Summary.Investment">持股市值</sys:String>
     <sys:String x:Key="Allocation.Summary.Cash">現金</sys:String>
     <sys:String x:Key="Allocation.Summary.Total">總資產</sys:String>

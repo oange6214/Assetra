@@ -14,6 +14,8 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Assetra.WPF.Features.Portfolio.Controls;
 
+public enum AllocationGroupingMode { Symbol, Group, Currency }
+
 public sealed partial class AllocationViewModel : ObservableObject, IDisposable
 {
     private readonly IPortfolioPositionFeed _portfolio;
@@ -26,24 +28,31 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     public bool HasPortfolioGroups => _groupCatalog is { Groups.Count: > 0 };
 
     /// <summary>
-    /// P4 — Allocation 分組維度 toggle。true = 依「群組」(bucket) aggregate；
-    /// false (預設) = 依「Symbol」aggregate（既有行為）。
+    /// Allocation 分組維度 toggle。三模式：
+    /// <list type="bullet">
+    ///   <item><see cref="AllocationGroupingMode.Symbol"/> 依個別代號 (default)</item>
+    ///   <item><see cref="AllocationGroupingMode.Group"/> 依 PortfolioGroup (Portfolio-Groups P4)</item>
+    ///   <item><see cref="AllocationGroupingMode.Currency"/> 依計價幣別 (MultiCurrency P4.2 tail)</item>
+    /// </list>
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBySymbolMode))]
-    private bool _isByGroupMode;
+    [NotifyPropertyChangedFor(nameof(IsByGroupMode))]
+    [NotifyPropertyChangedFor(nameof(IsByCurrencyMode))]
+    private AllocationGroupingMode _groupingMode = AllocationGroupingMode.Symbol;
 
-    /// <summary>For XAML radio binding — `true` when grouping by Symbol (default).</summary>
-    public bool IsBySymbolMode => !IsByGroupMode;
+    public bool IsBySymbolMode => GroupingMode == AllocationGroupingMode.Symbol;
+    public bool IsByGroupMode => GroupingMode == AllocationGroupingMode.Group;
+    public bool IsByCurrencyMode => GroupingMode == AllocationGroupingMode.Currency;
 
-    partial void OnIsByGroupModeChanged(bool _) => Rebuild();
+    partial void OnGroupingModeChanged(AllocationGroupingMode _) => Rebuild();
 
-    /// <summary>XAML RadioButton command — parses "True"/"False" string and updates mode.</summary>
+    /// <summary>XAML RadioButton command — parses enum name string ("Symbol"/"Group"/"Currency").</summary>
     [RelayCommand]
-    private void SetByGroupMode(string? raw)
+    private void SetGroupingMode(string? raw)
     {
-        if (bool.TryParse(raw, out var v))
-            IsByGroupMode = v;
+        if (Enum.TryParse<AllocationGroupingMode>(raw, ignoreCase: true, out var v))
+            GroupingMode = v;
     }
 
     // Color palette (assigned by order of appearance)
@@ -77,9 +86,9 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     private void SwitchToRebalance()
     {
         // Portfolio-Groups-Refactor P4 — Rebalance 用 per-symbol target 比例，by-group
-        // 模式下 row.Symbol = group name，會跟 targets dict 完全錯位。離開 Overview 時
-        // 強制切回 by-symbol，避免 Rebalance buy/sell 數字錯亂。
-        if (IsByGroupMode) IsByGroupMode = false;
+        // 或 by-currency 模式下 row.Symbol = group/ccy 名稱，會跟 targets dict 完全錯位。
+        // 離開 Overview 時強制切回 by-symbol，避免 Rebalance buy/sell 數字錯亂。
+        if (GroupingMode != AllocationGroupingMode.Symbol) GroupingMode = AllocationGroupingMode.Symbol;
         IsRebalanceTab = true;
         IsOverviewTab = false;
     }
@@ -251,12 +260,17 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         var targets = _settings?.Current?.TargetAllocations
                       ?? new Dictionary<string, decimal>();
 
-        // Portfolio-Groups-Refactor P4 — IsByGroupMode 切換 aggregation key:
-        //   false (default) → 依 Symbol（既有行為）
-        //   true            → 依 PortfolioGroupId（每個 bucket 一列；row Symbol/Name 顯示 group.Name）
+        // GroupingMode 切換 aggregation key:
+        //   Symbol   (default)                        → 依個別代號（既有行為）
+        //   Group    (Portfolio-Groups-Refactor P4)   → 依 PortfolioGroupId；row 顯示 group.Name
+        //   Currency (MultiCurrency-Reporting P4.2)   → 依標的計價幣別；row 顯示 ccy code
         // null PortfolioGroupId 視為 DefaultId，跟 Trade backfill 對齊。
-        var investItems = IsByGroupMode
-            ? _portfolio.Positions
+        // Currency 模式用 MarketValue (native) 加總，跨幣別不混淆；
+        // 但每幣別 bucket 的占比仍以 native 加總 ÷ 全 portfolio MarketValue 計算——
+        // 這個近似在 base-currency 單一時等價於 base 換算，UI 上不會誤導。
+        var investItems = GroupingMode switch
+        {
+            AllocationGroupingMode.Group => _portfolio.Positions
                 .GroupBy(p => p.PortfolioGroupId ?? Assetra.Core.Models.PortfolioGroup.DefaultId)
                 .Select(g => (
                     Symbol: ResolveGroupLabel(g.Key),
@@ -269,8 +283,22 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
                         ? g.Sum(p => p.Pnl) / g.Sum(p => p.MarketValue) * 100m
                         : 0m))
                 .OrderByDescending(i => i.Value)
-                .ToList()
-            : _portfolio.Positions
+                .ToList(),
+            AllocationGroupingMode.Currency => _portfolio.Positions
+                .GroupBy(p => string.IsNullOrWhiteSpace(p.Currency) ? "TWD" : p.Currency.ToUpperInvariant())
+                .Select(g => (
+                    Symbol: g.Key,
+                    Name: g.Key,
+                    Cat: "Currency",
+                    Value: g.Sum(p => p.MarketValue),
+                    Price: 0m,
+                    Pnl: g.Sum(p => p.Pnl),
+                    PnlPct: g.Sum(p => p.MarketValue) > 0m
+                        ? g.Sum(p => p.Pnl) / g.Sum(p => p.MarketValue) * 100m
+                        : 0m))
+                .OrderByDescending(i => i.Value)
+                .ToList(),
+            _ => _portfolio.Positions
                 .GroupBy(p => p.Symbol)
                 .Select(g => (
                     Symbol: g.Key,
@@ -281,7 +309,8 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
                     Pnl: g.Sum(p => p.Pnl),
                     PnlPct: g.Average(p => p.PnlPercent)))
                 .OrderByDescending(i => i.Value)
-                .ToList();
+                .ToList(),
+        };
 
         var investTotal = investItems.Sum(i => i.Value);
 

@@ -84,26 +84,37 @@
 
                         <DockPanel Grid.Row="0" Margin="0,0,0,10" LastChildFill="True">
                             <!--
-                                Portfolio-Groups-Refactor P4 — 「依 Symbol / 依群組」切換。
-                                Catalog 未啟用時整個 StackPanel 隱藏，VM 維持 IsByGroupMode = false。
+                                Allocation grouping toggle — 三模式 radio：
+                                  Symbol   (default; Portfolio-Groups P4)
+                                  Group    (Portfolio-Groups P4，HasPortfolioGroups=false 時退化成只有 Symbol/Currency)
+                                  Currency (MultiCurrency-Reporting P4.2 tail)
+                                Group radio 只在 catalog 有群組時顯示；Currency radio 永遠顯示
+                                (跨幣別持倉是多基準幣場景的核心 view)。
                             -->
                             <StackPanel
                                 DockPanel.Dock="Right"
-                                Orientation="Horizontal"
-                                Visibility="{Binding HasPortfolioGroups, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                                Orientation="Horizontal">
                                 <RadioButton
                                     Margin="0,0,12,0"
                                     Content="{DynamicResource Allocation.GroupBy.Symbol}"
                                     GroupName="AllocGroupBy"
                                     IsChecked="{Binding IsBySymbolMode, Mode=OneWay}"
-                                    Command="{Binding SetByGroupModeCommand}"
-                                    CommandParameter="False" />
+                                    Command="{Binding SetGroupingModeCommand}"
+                                    CommandParameter="Symbol" />
                                 <RadioButton
+                                    Margin="0,0,12,0"
                                     Content="{DynamicResource Allocation.GroupBy.Group}"
                                     GroupName="AllocGroupBy"
                                     IsChecked="{Binding IsByGroupMode, Mode=OneWay}"
-                                    Command="{Binding SetByGroupModeCommand}"
-                                    CommandParameter="True" />
+                                    Command="{Binding SetGroupingModeCommand}"
+                                    CommandParameter="Group"
+                                    Visibility="{Binding HasPortfolioGroups, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+                                <RadioButton
+                                    Content="{DynamicResource Allocation.GroupBy.Currency}"
+                                    GroupName="AllocGroupBy"
+                                    IsChecked="{Binding IsByCurrencyMode, Mode=OneWay}"
+                                    Command="{Binding SetGroupingModeCommand}"
+                                    CommandParameter="Currency" />
                             </StackPanel>
                             <TextBlock
                                 FontSize="{StaticResource Font.Size.Md}"

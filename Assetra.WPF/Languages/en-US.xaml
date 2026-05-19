@@ -812,6 +812,7 @@
     <sys:String x:Key="Allocation.Overview.Title">Allocation Overview</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Symbol">By Symbol</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Group">By Group</sys:String>
+    <sys:String x:Key="Allocation.GroupBy.Currency">By Currency</sys:String>
     <sys:String x:Key="Allocation.Summary.Investment">Holdings</sys:String>
     <sys:String x:Key="Allocation.Summary.Cash">Cash</sys:String>
     <sys:String x:Key="Allocation.Summary.Total">Total Assets</sys:String>
