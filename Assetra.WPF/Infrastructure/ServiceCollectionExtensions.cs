@@ -42,6 +42,15 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<Assetra.Core.Interfaces.Sync.IPendingPushCounter>(
             _ => new Assetra.Infrastructure.Sync.SqlitePendingPushCounter(dbPath));
 
+        // MultiCurrency-Reporting P4.1 — historical FX rate store. Used by
+        // later P4.x phases for multi-currency reporting aggregation. Repo
+        // schema migration runs lazily in the constructor.
+        services.AddSingleton<IFxRateHistoryRepository>(
+            _ => new FxRateHistorySqliteRepository(dbPath));
+        services.AddSingleton<IFxRateHistoryService>(sp =>
+            new Assetra.Application.Fx.FxRateHistoryService(
+                sp.GetRequiredService<IFxRateHistoryRepository>()));
+
         services.AddSingleton<HttpClient>(_ =>
         {
             var client = new HttpClient();

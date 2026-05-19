@@ -37,6 +37,7 @@ internal static class SqliteSchemaHelper
         "reconciliation_session",
         "reconciliation_diff",
         "fx_rate",
+        "fx_rate_history",
         "financial_goal",
         "portfolio_group",
         "fire_plan",
