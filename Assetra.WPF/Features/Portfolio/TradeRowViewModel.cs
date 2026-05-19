@@ -249,26 +249,31 @@ public sealed class TradeRowViewModel : ObservableObject
 
     /// <summary>
     /// True when the trade's economic fields (symbol / price / quantity / cash amount) are
-    /// <b>not</b> modifiable in edit mode — only date and note can change. Used by the
-    /// dialog XAML to lock input fields with a disabled style. Matches the meta-only branch
-    /// in <see cref="PortfolioViewModel.ConfirmTx"/>.
+    /// <b>not</b> safe to direct-edit — only date and note can change. Caller (dialog VM)
+    /// shows the locked-summary card + forces explicit 修訂 flow for these.
     /// <list type="bullet">
-    /// <item><description><b>Sell</b>: lot is gone by the time we edit.</description></item>
-    /// <item><description><b>Buy / StockDividend without <see cref="PortfolioEntryId"/></b>:
-    /// legacy trades that can't be safely replaced.</description></item>
+    /// <item><description><b>Sell</b>: realized P&amp;L is FIFO-computed and stored on the
+    /// Trade row; editing in place would silently invalidate downstream P&amp;L. User must
+    /// click 修訂 to consciously delete + create new.</description></item>
     /// <item><description><b>Cross-currency Transfer leg</b> (paired Withdrawal/Deposit with
     /// "轉帳 →"/"轉帳 ←" note prefix): the partner leg is a separate record without a FK
     /// link, so editing one would leave the other orphaned. Pair-aware deletion is a
     /// schema-level concern; until that lands, legs stay locked.</description></item>
     /// </list>
+    /// <para>
+    /// Buy / StockDividend WITHOUT <see cref="PortfolioEntryId"/> used to be in this list
+    /// (the "legacy trade" case) but were relaxed — they unlock via implicit revision
+    /// (delete-old + create-new). Trade row is source of truth; cost basis projects from
+    /// the journal on next reload, so updating the Buy is safe.
+    /// </para>
+    /// <para>
     /// Native Transfer records (single trade with <see cref="ToCashAccountId"/>) ARE
     /// directly editable — ConfirmTx falls through to ConfirmTransferAsync which creates
     /// a fresh trade (or pair, if the user changed amounts to differ), and the post-success
     /// block deletes the single old record.
+    /// </para>
     /// </summary>
-    public bool IsMetaOnlyEditType => Type == TradeType.Sell ||
-        ((Type == TradeType.Buy || Type == TradeType.StockDividend) && PortfolioEntryId is null) ||
-        IsTransferLeg;
+    public bool IsMetaOnlyEditType => Type == TradeType.Sell || IsTransferLeg;
 
     /// <summary>
     /// 貨幣切換時由 PortfolioViewModel 呼叫，強制金額欄位重新通知。

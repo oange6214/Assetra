@@ -246,19 +246,19 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// account / etc.) on the dialog. Two cases enable it:
     /// <list type="bullet">
     /// <item>Not editing — i.e. creating a new trade.</item>
-    /// <item>Editing a non-meta-only type (Income / CashDividend / Buy with PortfolioEntryId / …)
-    /// where the underlying ConfirmTx flow safely supports delete-old + create-new.</item>
+    /// <item>Editing a non-meta-only type (Income / CashDividend / Buy / StockDividend / …)
+    /// where ConfirmTx promotes the save to implicit revision (delete-old + create-new).</item>
     /// </list>
-    /// Locks down to false only for meta-only types (Sell / Transfer / legacy Buy without entry),
-    /// where the trade has dependent state that direct editing would corrupt.
+    /// Locks to false only for meta-only types (Sell / Transfer leg), where dependent state
+    /// would silently corrupt — user must click 修訂 to consciously do the revision flow.
     /// </summary>
-    public bool AreEconomicFieldsEditable => !IsEditMode;
+    public bool AreEconomicFieldsEditable => !IsEditMode || !IsEditingMetaOnly;
 
     /// <summary>
     /// True when the dialog should show the locked-core summary card. Only meta-only edits
-    /// need this — direct-edit flows show their normal form fields with live values pre-filled.
+    /// need this — non-meta-only edits show the normal form fields pre-filled with live values.
     /// </summary>
-    public bool ShowEditLockedSummary => IsEditMode;
+    public bool ShowEditLockedSummary => IsEditMode && IsEditingMetaOnly;
 
     partial void OnEditingTradeIdChanged(Guid? _)
     {

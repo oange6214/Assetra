@@ -1074,16 +1074,18 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
-    public void TradeRowViewModel_IsMetaOnly_TrueForLegacyUnlinkedBuy()
+    public void TradeRowViewModel_IsMetaOnly_FalseForLegacyUnlinkedBuy()
     {
-        // Legacy Buy without PortfolioEntryId falls back to meta-only edit.
+        // Source-of-truth pass：Buy 沒掛 PortfolioEntryId（legacy / imported）也視為
+        // 可直接編輯。ConfirmTx 走 implicit-revision (delete-old + create-new) 路徑，
+        // cost basis 從交易記錄重新 project 出來，不需要 PortfolioEntry 連結保護。
         var row = new TradeRowViewModel(new Trade(
             Id: Guid.NewGuid(), Symbol: "2330", Exchange: "TWSE", Name: "TSMC",
             Type: TradeType.Buy, TradeDate: DateTime.UtcNow,
             Price: 100, Quantity: 1000,
             RealizedPnl: null, RealizedPnlPct: null,
             PortfolioEntryId: null));
-        Assert.True(row.IsMetaOnlyEditType);
+        Assert.False(row.IsMetaOnlyEditType);
     }
 
     [Fact]

@@ -65,17 +65,37 @@ public partial class TransactionDialogViewModel
             }
         }
 
+        // Snapshot the "is meta-only" decision BEFORE clearing EditingTradeId, since the
+        // computed property depends on it.
+        var editingMetaOnly = oldRow is not null && IsEditingMetaOnly;
+        // Whether we should silently delete the old trade after a successful create and
+        // skip the 「保留 / 取代原紀錄」 prompt. Set when promoting an unlocked edit to
+        // implicit revision below — user already opted into changing the economic fields
+        // by editing them, so re-prompting them is friction without value.
+        var implicitRevision = false;
+
         // Clear EditingTradeId so downstream handlers (e.g. inline "which symbol is this
         // buy for" logic) don't mistake this for an in-progress edit loop.
         EditingTradeId = null;
 
-        // Safe edit mode updates only metadata in-place so balances, positions, FIFO lots,
-        // and paired ledger effects stay untouched. Full economic changes intentionally go
-        // through Create Revision, which clears EditingTradeId and reaches the create-new path.
+        // Branch on edit type:
+        // 1. Meta-only types (Sell / Transfer leg) — only date + note can change in place.
+        //    The dialog showed the locked-summary card, never exposed economic fields.
+        // 2. Non-meta-only types (Buy / Income / CashDiv / native Transfer / loan / …) —
+        //    economic fields were live in the dialog; promote to implicit revision so the
+        //    new values actually save (delete-old + create-new under the hood). User
+        //    treats trades as source of truth; no prompt needed.
         if (oldRow is not null && !IsRevisionMode)
         {
-            await UpdateTradeMetaOnlyAsync(oldRow);
-            return;
+            if (editingMetaOnly)
+            {
+                await UpdateTradeMetaOnlyAsync(oldRow);
+                return;
+            }
+            // Promote to implicit revision and fall through to dispatcher.
+            IsRevisionMode = true;
+            _revisionSourceTradeId = oldRow.Id;
+            implicitRevision = true;
         }
 
         var revisionSourceTradeId = _revisionSourceTradeId;
@@ -114,6 +134,15 @@ public partial class TransactionDialogViewModel
         if (revisionSourceTradeId.HasValue)
         {
             IsRevisionMode = false;
+            // Implicit revision (came from non-meta-only edit, not the explicit 修訂 button):
+            // silently delete the original trade — same effect as the user clicking
+            // 「取代原紀錄」on the prompt. The dialog already exposed the new economic
+            // values, so re-prompting just adds friction.
+            if (implicitRevision)
+            {
+                await ReplaceOriginalRecordAsync().ConfigureAwait(true);
+                return;
+            }
             IsRevisionReplacePromptOpen = true;
             RevisionReplacePromptError = string.Empty;
             IsTxDialogOpen = true;
