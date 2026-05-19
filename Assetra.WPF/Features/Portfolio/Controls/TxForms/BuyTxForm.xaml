@@ -36,37 +36,13 @@
 
         <!--  Stock/ETF: Symbol + autocomplete  -->
         <StackPanel d:Visibility="Visible" Visibility="{Binding Buy.IsStock, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <!--  Dual-mode toggle: full Buy trade vs. metadata-only (Task 18 Option B) — Stock only  -->
-            <TextBlock
-                Margin="0,0,0,4"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Tx.BuyMode}" />
-            <Grid Margin="0,0,0,12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <RadioButton
-                    Grid.Column="0"
-                    Margin="0,0,3,0"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Center"
-                    Content="{DynamicResource Portfolio.Tx.BuyModeFull}"
-                    GroupName="TxBuyMode"
-                    IsChecked="True"
-                    Style="{StaticResource SegmentBtn}" />
-                <RadioButton
-                    Grid.Column="1"
-                    Margin="3,0,0,0"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Center"
-                    Content="{DynamicResource Portfolio.Tx.BuyModeMetaOnly}"
-                    GroupName="TxBuyMode"
-                    IsChecked="{Binding Buy.MetaOnly, Mode=TwoWay}"
-                    Style="{StaticResource SegmentBtn}" />
-            </Grid>
+            <!--
+                「買入模式 (含交易紀錄 / 僅登記標的)」toggle 已移除。
+                「僅登記標的」流程在投資資產頁面有專門的「新增投資」按鈕
+                (PortfolioViewModel.OpenAddWatchlistDialogCommand → AddWatchlistDialog)，
+                這邊統一為「含交易紀錄」的買入單。Buy.MetaOnly 在 VM 仍保留為
+                預設 false 的屬性，下游 ConfirmBuyAsync 邏輯維持不動。
+            -->
 
             <TextBlock
                 Margin="0,0,0,4"

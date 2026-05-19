@@ -364,25 +364,12 @@
                                         <Border Height="2" Background="Transparent" />
 
                                         <!--
-                                            Portfolio-Groups-Refactor P3 — 群組（bucket）選擇器。
-                                            僅在 catalog 載入完成且當前 TxType 為投資相關（buy/sell/cashDiv/stockDiv）
-                                            時顯示。其他類型（現金流 / 借款 / 信用卡 / 轉帳）保留全域 default group。
+                                            「所屬群組」selector 已移除 — 使用者反映此 dialog 應該專注
+                                            在交易本身，bucket 分組屬於投資資產頁面的管理動作而不是
+                                            每筆交易的決策點。SelectedPortfolioGroup 在 VM 仍保有預設
+                                            值（DefaultId），所有 group filter / KPI 仍正常運作；只是
+                                            不再從新增交易 dialog 暴露切換。
                                         -->
-                                        <StackPanel
-                                            Margin="0,0,0,12"
-                                            Visibility="{Binding ShouldShowGroupSelector, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <TextBlock
-                                                Margin="0,0,0,4"
-                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                FontWeight="SemiBold"
-                                                Foreground="{DynamicResource AppTextSecondary}"
-                                                Text="{DynamicResource Portfolio.Tx.Group}" />
-                                            <ComboBox
-                                                DisplayMemberPath="Name"
-                                                ItemsSource="{Binding GroupCatalog.Groups}"
-                                                SelectedItem="{Binding SelectedPortfolioGroup, Mode=TwoWay}"
-                                                Style="{StaticResource FormComboBox}" />
-                                        </StackPanel>
 
                                         <!--  ======== 買入欄位 ========  -->
                                         <txforms:BuyTxForm />
