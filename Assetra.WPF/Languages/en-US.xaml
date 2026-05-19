@@ -1489,6 +1489,8 @@
     <sys:String x:Key="Reports.Export.Status.Success">Exported: {0}</sys:String>
     <sys:String x:Key="Reports.Export.Status.Failed">Export failed: {0}</sys:String>
     <sys:String x:Key="Reports.Statement.Empty">No report data is available.</sys:String>
+    <sys:String x:Key="Reports.Card.Loading">Loading…</sys:String>
+    <sys:String x:Key="Reports.SlowLoad.Notice">Loading is slow — network or FX service may be unstable.</sys:String>
     <sys:String x:Key="Reports.Income.Total">Income Total</sys:String>
     <sys:String x:Key="Reports.Expense.Total">Expense Total</sys:String>
     <sys:String x:Key="Reports.Net.Total">Net</sys:String>

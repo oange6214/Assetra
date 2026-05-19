@@ -1500,6 +1500,8 @@
     <sys:String x:Key="Reports.Export.Status.Success">已匯出：{0}</sys:String>
     <sys:String x:Key="Reports.Export.Status.Failed">匯出失敗：{0}</sys:String>
     <sys:String x:Key="Reports.Statement.Empty">目前沒有可顯示的報表資料。</sys:String>
+    <sys:String x:Key="Reports.Card.Loading">載入中…</sys:String>
+    <sys:String x:Key="Reports.SlowLoad.Notice">資料載入時間較長，可能網路不穩或匯率服務忙線中。</sys:String>
     <sys:String x:Key="Reports.Income.Total">收入合計</sys:String>
     <sys:String x:Key="Reports.Expense.Total">支出合計</sys:String>
     <sys:String x:Key="Reports.Net.Total">淨額</sys:String>

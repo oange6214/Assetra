@@ -133,11 +133,38 @@ public sealed class BalanceSheetService : IBalanceSheetService
         }
         var liabilityTotal = liabilityRows.Sum(r => r.Amount);
 
+        // Surface FX gaps as warnings — only when a currency we tried to
+        // convert actually has data riding on it. Avoids noisy warnings for
+        // currencies the user doesn't hold.
+        var warnings = BuildFxWarnings(fxFactors, baseCurrency);
+
         return new BalanceSheet(
             AsOf: asOf,
             Assets: new StatementSection("Assets", assetRows, assetTotal),
             Liabilities: new StatementSection("Liabilities", liabilityRows, liabilityTotal),
-            NetWorth: assetTotal - liabilityTotal);
+            NetWorth: assetTotal - liabilityTotal,
+            Warnings: warnings);
+    }
+
+    /// <summary>
+    /// Build a single user-facing warning string per missing FX rate. The
+    /// status indicator + Reports VM render these verbatim in a banner so
+    /// users know why a foreign-currency amount looks unconverted.
+    /// </summary>
+    private static IReadOnlyList<string>? BuildFxWarnings(
+        Dictionary<string, decimal?> fxFactors, string? baseCurrency)
+    {
+        if (fxFactors.Count == 0 || string.IsNullOrWhiteSpace(baseCurrency)) return null;
+        var missing = fxFactors
+            .Where(kv => kv.Value is null)
+            .Select(kv => kv.Key)
+            .OrderBy(c => c, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (missing.Count == 0) return null;
+        return new[]
+        {
+            $"匯率資料缺失：{string.Join(", ", missing)} — 部分數值未換算到 {baseCurrency}",
+        };
     }
 
     private void AppendRealEstateRows(

@@ -108,6 +108,7 @@
                 Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}" />
         </DockPanel>
 
+
         <!--  ── Metric cards: Income / Expense / Net + Savings rate ──  -->
         <UniformGrid
             Grid.Row="1"
@@ -368,6 +369,44 @@
 
         <!--  ── Statements (Income / Balance / CashFlow) ──  -->
         <StackPanel Grid.Row="3" Margin="0,16,0,0">
+
+            <!--  Slow-load notice — fires when LoadAsync exceeds 5 sec (typically network FX)  -->
+            <Border Margin="0,0,0,12" Padding="12,8"
+                    Background="#33F59E0B"
+                    BorderBrush="#F59E0B"
+                    BorderThickness="0,0,0,2"
+                    CornerRadius="4"
+                    Visibility="{Binding IsSlowLoad, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <ds:AppIcon Margin="0,0,8,0" VerticalAlignment="Center" FontSize="14" Foreground="#B45309" Symbol="Warning24" />
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="{StaticResource Font.Size.Sm}"
+                               Foreground="{DynamicResource AppTextPrimary}"
+                               Text="{DynamicResource Reports.SlowLoad.Notice}" />
+                </StackPanel>
+            </Border>
+
+            <!--  Statement-level warnings (missing FX rates etc.)  -->
+            <Border Margin="0,0,0,12" Padding="12,8"
+                    Background="#332563EB"
+                    BorderBrush="#2563EB"
+                    BorderThickness="0,0,0,2"
+                    CornerRadius="4"
+                    Visibility="{Binding HasStatementWarnings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ItemsControl ItemsSource="{Binding StatementWarnings}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,2,0,2" Orientation="Horizontal">
+                                <ds:AppIcon Margin="0,0,8,0" VerticalAlignment="Center" FontSize="14" Foreground="#1D4ED8" Symbol="Info24" />
+                                <TextBlock VerticalAlignment="Center"
+                                           FontSize="{StaticResource Font.Size.Sm}"
+                                           Foreground="{DynamicResource AppTextPrimary}"
+                                           Text="{Binding}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
             <Expander Style="{StaticResource AppExpander}" Header="{DynamicResource Reports.IncomeStatement.Title}" IsExpanded="False" Margin="0,0,0,16">
                 <Grid Margin="12">
                     <Grid.RowDefinitions>
@@ -386,9 +425,15 @@
                     <TextBlock
                         Grid.Row="1"
                         FontStyle="Italic"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Reports.Card.Loading}"
+                        Visibility="{Binding IsIncomeLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock
+                        Grid.Row="1"
+                        FontStyle="Italic"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Reports.Statement.Empty}"
-                        Visibility="{Binding HasIncomeStatement, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                        Visibility="{Binding ShouldShowIncomeEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <StackPanel Grid.Row="1" Visibility="{Binding HasIncomeStatement, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -507,9 +552,15 @@
                     <TextBlock
                         Grid.Row="1"
                         FontStyle="Italic"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Reports.Card.Loading}"
+                        Visibility="{Binding IsBalanceLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock
+                        Grid.Row="1"
+                        FontStyle="Italic"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Reports.Statement.Empty}"
-                        Visibility="{Binding HasBalanceSheet, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                        Visibility="{Binding ShouldShowBalanceEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <StackPanel Grid.Row="1" Visibility="{Binding HasBalanceSheet, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Reports.Balance.AsOf}" />
@@ -637,9 +688,15 @@
                     <TextBlock
                         Grid.Row="1"
                         FontStyle="Italic"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Reports.Card.Loading}"
+                        Visibility="{Binding IsCashFlowLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock
+                        Grid.Row="1"
+                        FontStyle="Italic"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Reports.Statement.Empty}"
-                        Visibility="{Binding HasCashFlowStatement, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                        Visibility="{Binding ShouldShowCashFlowEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <StackPanel Grid.Row="1" Visibility="{Binding HasCashFlowStatement, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid>
                             <Grid.ColumnDefinitions>

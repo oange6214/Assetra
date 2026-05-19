@@ -42,14 +42,17 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasIncomeStatement))]
+    [NotifyPropertyChangedFor(nameof(ShouldShowIncomeEmpty))]
     private IncomeStatement? _incomeStatement;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasBalanceSheet))]
+    [NotifyPropertyChangedFor(nameof(ShouldShowBalanceEmpty))]
     private BalanceSheet? _balanceSheet;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasCashFlowStatement))]
+    [NotifyPropertyChangedFor(nameof(ShouldShowCashFlowEmpty))]
     private CashFlowStatement? _cashFlowStatement;
 
     /// <summary>
@@ -102,6 +105,39 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string? _errorMessage;
+
+    // Per-card loading states — let the user see Income/Balance/CashFlow load
+    // independently when FX or other slow IO holds up one of them.
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShouldShowIncomeEmpty))]
+    private bool _isIncomeLoading;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShouldShowBalanceEmpty))]
+    private bool _isBalanceLoading;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShouldShowCashFlowEmpty))]
+    private bool _isCashFlowLoading;
+    [ObservableProperty] private bool _isTaxLoading;
+
+    /// <summary>True when neither loading nor data — show "目前沒有可顯示的報表資料".</summary>
+    public bool ShouldShowIncomeEmpty   => !IsIncomeLoading   && IncomeStatement   is null;
+    public bool ShouldShowBalanceEmpty  => !IsBalanceLoading  && BalanceSheet      is null;
+    public bool ShouldShowCashFlowEmpty => !IsCashFlowLoading && CashFlowStatement is null;
+
+    /// <summary>
+    /// Flips true if <see cref="LoadAsync"/> doesn't finish within 5 seconds —
+    /// surfaces "資料載入時間較長，可能網路不穩" banner so the user knows the
+    /// page isn't broken, just slow. Auto-resets when load completes.
+    /// </summary>
+    [ObservableProperty] private bool _isSlowLoad;
+
+    /// <summary>
+    /// Aggregate warnings from all 3 statements (e.g. missing FX rates). UI
+    /// renders these as an info banner so silent fx-fallback no longer looks
+    /// like data corruption.
+    /// </summary>
+    public ObservableCollection<string> StatementWarnings { get; } = new();
+    public bool HasStatementWarnings => StatementWarnings.Count > 0;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasReport))]
@@ -249,8 +285,24 @@ public sealed partial class ReportsViewModel : ObservableObject
     {
         if (IsLoading) return;
         IsLoading = true;
+        IsSlowLoad = false;
         ErrorMessage = null;
         ClearReportDetails();
+
+        // Slow-load warning: if the full load doesn't finish in 5 seconds,
+        // surface a banner so the user knows the page is waiting on slow IO
+        // (typically network-backed FX rates) rather than dead-locked.
+        using var slowCts = new System.Threading.CancellationTokenSource();
+        var slowTimer = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5), slowCts.Token).ConfigureAwait(false);
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => IsSlowLoad = true);
+            }
+            catch (TaskCanceledException) { /* finished in time, no banner */ }
+        });
+
         try
         {
             try
@@ -278,6 +330,8 @@ public sealed partial class ReportsViewModel : ObservableObject
         }
         finally
         {
+            slowCts.Cancel(); // tell the 5-sec timer to stop if it hasn't fired
+            IsSlowLoad = false;
             IsLoading = false;
         }
     }
@@ -289,6 +343,7 @@ public sealed partial class ReportsViewModel : ObservableObject
 
         if (_incomeService is not null)
         {
+            IsIncomeLoading = true;
             try
             {
                 IncomeStatement = await _incomeService.GenerateAsync(period).ConfigureAwait(true);
@@ -298,23 +353,28 @@ public sealed partial class ReportsViewModel : ObservableObject
                 IncomeStatement = null;
                 detailErrors.Add(ex.Message);
             }
+            finally { IsIncomeLoading = false; }
         }
 
         if (_balanceService is not null)
         {
+            IsBalanceLoading = true;
             try
             {
                 BalanceSheet = await _balanceService.GenerateAsync(period.End).ConfigureAwait(true);
+                CollectStatementWarnings(BalanceSheet?.Warnings);
             }
             catch (Exception ex)
             {
                 BalanceSheet = null;
                 detailErrors.Add(ex.Message);
             }
+            finally { IsBalanceLoading = false; }
         }
 
         if (_cashFlowService is not null)
         {
+            IsCashFlowLoading = true;
             try
             {
                 CashFlowStatement = await _cashFlowService.GenerateAsync(period).ConfigureAwait(true);
@@ -324,10 +384,12 @@ public sealed partial class ReportsViewModel : ObservableObject
                 CashFlowStatement = null;
                 detailErrors.Add(ex.Message);
             }
+            finally { IsCashFlowLoading = false; }
         }
 
         if (_trades is not null)
         {
+            IsTaxLoading = true;
             try
             {
                 // Tax is annual — pass the year from the dialog state. Re-runs
@@ -375,6 +437,7 @@ public sealed partial class ReportsViewModel : ObservableObject
                 AmtResult = null;
                 detailErrors.Add(ex.Message);
             }
+            finally { IsTaxLoading = false; }
         }
 
         // Performance / Risk 計算已搬到「財務概覽 → 資產趨勢」tab。Reports
@@ -393,6 +456,25 @@ public sealed partial class ReportsViewModel : ObservableObject
         _multiYearTaxRows.Clear();
         OnPropertyChanged(nameof(HasMultiYearTax));
         AmtResult = null;
+        StatementWarnings.Clear();
+        OnPropertyChanged(nameof(HasStatementWarnings));
+    }
+
+    /// <summary>
+    /// Hoist localized warnings from one statement up to the page-level
+    /// banner. Dedupe on text so callers can pass overlapping warnings
+    /// without producing visual noise.
+    /// </summary>
+    private void CollectStatementWarnings(IReadOnlyList<string>? warnings)
+    {
+        if (warnings is null || warnings.Count == 0) return;
+        foreach (var w in warnings)
+        {
+            if (string.IsNullOrWhiteSpace(w)) continue;
+            if (!StatementWarnings.Contains(w))
+                StatementWarnings.Add(w);
+        }
+        OnPropertyChanged(nameof(HasStatementWarnings));
     }
 
 
