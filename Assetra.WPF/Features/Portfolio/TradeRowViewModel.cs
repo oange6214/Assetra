@@ -19,6 +19,22 @@ public sealed class TradeRowViewModel : ObservableObject
     public int Quantity { get; }
     public decimal? RealizedPnl { get; }
     public decimal? RealizedPnlPct { get; }
+    /// <summary>
+    /// MultiCurrency-Reporting P4.5b — market component of realized PnL
+    /// (stock pick contribution) in base currency. Same as <see cref="RealizedPnl"/>
+    /// for same-currency trades. Null = breakdown unavailable (UI shows "—").
+    /// </summary>
+    public decimal? RealizedMarketPnl { get; }
+    /// <summary>
+    /// MultiCurrency-Reporting P4.5b — FX component of realized PnL
+    /// (currency drift contribution) in base currency. Zero for same-currency
+    /// trades. Null = breakdown unavailable.
+    /// </summary>
+    public decimal? RealizedFxPnl { get; }
+    /// <summary>True when the breakdown is computed and meaningful (mixed-currency).
+    /// UI uses this to decide whether to show the breakdown columns vs hyphen.</summary>
+    public bool HasRealizedPnlBreakdown =>
+        RealizedMarketPnl.HasValue && RealizedFxPnl.HasValue;
     public decimal? CashAmount { get; }
     /// <summary>Buy: brokerage commission. Sell: commission + transaction tax. Null for legacy or non-stock trades.</summary>
     public decimal? Commission { get; }
@@ -276,6 +292,8 @@ public sealed class TradeRowViewModel : ObservableObject
         Quantity = t.Quantity;
         RealizedPnl = t.RealizedPnl;
         RealizedPnlPct = t.RealizedPnlPct;
+        RealizedMarketPnl = t.RealizedMarketPnl;
+        RealizedFxPnl = t.RealizedFxPnl;
         CashAmount = t.CashAmount;
         Commission = t.Commission;
         CommissionDiscount = t.CommissionDiscount;
