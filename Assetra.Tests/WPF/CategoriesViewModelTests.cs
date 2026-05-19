@@ -180,14 +180,17 @@ public sealed class CategoriesViewModelTests
         await vm.LoadAsync();
         var row = vm.Categories.Single();
         var budget = vm.Budgets.Single();
-        Assert.Equal("🍜 飲食", budget.CategoryDisplay);
+        // CategoryDisplay returns Name only — Icon (Fluent symbol name like
+        // "Home24") is rendered separately by the row template. See
+        // CategoriesViewModel.LookupBudgetCategoryDisplay for the rationale.
+        Assert.Equal("飲食", budget.CategoryDisplay);
 
         row.EnterEditMode();
         row.EditName = "餐飲";
         row.EditIcon = "🍱";
         await vm.SaveEditCommand.ExecuteAsync(row);
 
-        Assert.Equal("🍱 餐飲", budget.CategoryDisplay);
+        Assert.Equal("餐飲", budget.CategoryDisplay);
     }
 
     private sealed class FakeCategoryRepo(List<ExpenseCategory> seed) : ICategoryRepository
