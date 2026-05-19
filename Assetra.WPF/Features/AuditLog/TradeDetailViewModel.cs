@@ -75,6 +75,12 @@ public sealed partial class TradeDetailViewModel : ObservableObject
                     AddIfPresent("已實現損益", t.RealizedPnl?.ToString("N2"), prev?.RealizedPnl?.ToString("N2"));
                     AddIfPresent("損益率", t.RealizedPnlPct is null ? null : $"{t.RealizedPnlPct:P2}",
                         prev?.RealizedPnlPct is null ? null : $"{prev.RealizedPnlPct:P2}");
+                    // P4.5c — surface the market / FX split for sells where FX
+                    // history was available at sell time. Both fields are null
+                    // for same-currency trades and for sells made before P4.5b
+                    // shipped — AddIfPresent suppresses the row in those cases.
+                    AddIfPresent("　└ 股票判斷貢獻", t.RealizedMarketPnl?.ToString("N2"), prev?.RealizedMarketPnl?.ToString("N2"));
+                    AddIfPresent("　└ 匯率漂移貢獻", t.RealizedFxPnl?.ToString("N2"), prev?.RealizedFxPnl?.ToString("N2"));
                 }
                 AddIfPresent("手續費", t.Commission?.ToString("N0"), prev?.Commission?.ToString("N0"));
                 AddIfPresent("折扣", t.CommissionDiscount?.ToString("P0"), prev?.CommissionDiscount?.ToString("P0"));
