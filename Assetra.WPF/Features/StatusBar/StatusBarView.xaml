@@ -26,23 +26,73 @@
 
             <!--  Left: sync indicator + market status (split by a thin divider)  -->
             <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                <!--  ── Sync status (dot + label) — Phase 1 of Sync-Status-Indicator  -->
-                <StackPanel
-                    VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                    ToolTip="{Binding SyncStatusText}">
-                    <Ellipse
-                        Width="7"
-                        Height="7"
-                        Margin="0,0,5,0"
-                        VerticalAlignment="Center"
-                        Fill="{Binding SyncStatusBrush}" />
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{Binding SyncStatusText}" />
-                </StackPanel>
+                <!--  ── Sync status (clickable chip → Phase 2 popover)  -->
+                <Grid VerticalAlignment="Center">
+                    <ToggleButton
+                        x:Name="SyncChip"
+                        Padding="6,2"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        IsChecked="{Binding SyncPopover.IsOpen, Mode=TwoWay}"
+                        ToolTip="{Binding SyncStatusText}">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border
+                                                x:Name="Bd"
+                                                Padding="{TemplateBinding Padding}"
+                                                Background="{TemplateBinding Background}"
+                                                CornerRadius="4">
+                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHoverOverlay}" />
+                                                </Trigger>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppActiveOverlay}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ToggleButton.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse
+                                Width="7"
+                                Height="7"
+                                Margin="0,0,5,0"
+                                VerticalAlignment="Center"
+                                Fill="{Binding SyncStatusBrush}" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding SyncStatusText}" />
+                        </StackPanel>
+                    </ToggleButton>
+
+                    <!--  Anchored popover above the chip; opens via the ToggleButton's IsChecked.  -->
+                    <Popup
+                        AllowsTransparency="True"
+                        IsOpen="{Binding SyncPopover.IsOpen, Mode=TwoWay}"
+                        Placement="Top"
+                        PlacementTarget="{Binding ElementName=SyncChip}"
+                        StaysOpen="False"
+                        VerticalOffset="-6">
+                        <ContentControl Content="{Binding SyncPopover}">
+                            <ContentControl.Resources>
+                                <DataTemplate DataType="{x:Type vm:SyncStatusPopoverViewModel}">
+                                    <vm:SyncStatusPopoverView />
+                                </DataTemplate>
+                            </ContentControl.Resources>
+                        </ContentControl>
+                    </Popup>
+                </Grid>
 
                 <!--  Divider  -->
                 <Border

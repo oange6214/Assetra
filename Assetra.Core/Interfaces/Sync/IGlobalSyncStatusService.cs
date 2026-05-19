@@ -32,4 +32,11 @@ public interface IGlobalSyncStatusService : IDisposable
     /// invoked again after a restore / wipe operation that bypasses the event flow.
     /// </summary>
     Task RefreshAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Per-domain breakdown used by the Phase 2 popover. Returns a snapshot of
+    /// the in-memory counter — no DB query. Ordering is service-defined (typically
+    /// by <c>Targets</c> list in <c>SqlitePendingPushCounter</c>).
+    /// </summary>
+    IReadOnlyList<DomainSyncStatus> GetPerDomain();
 }

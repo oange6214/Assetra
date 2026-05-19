@@ -24,6 +24,10 @@ public sealed class BackgroundSyncService : BackgroundService, IBackgroundSyncSi
     private readonly SyncCoordinator _coordinator;
     private readonly ILogger<BackgroundSyncService> _logger;
 
+    // Phase 2 immediate-sync — set by RequestImmediateSync() to break the
+    // 30-sec poll early and force the next tick to run regardless of interval.
+    private readonly System.Threading.SemaphoreSlim _immediateSync = new(0, 1);
+
     /// <inheritdoc />
     public event EventHandler? SyncStarted;
     /// <inheritdoc />
@@ -64,6 +68,18 @@ public sealed class BackgroundSyncService : BackgroundService, IBackgroundSyncSi
         }
     }
 
+    /// <summary>
+    /// Phase 2 popover "立即同步" entry point. Signals the background loop to
+    /// skip the remaining poll wait and reset the interval check so the next
+    /// iteration runs immediately. Idempotent — multiple calls coalesce into
+    /// one tick because the semaphore has max-count 1.
+    /// </summary>
+    public void RequestImmediateSync()
+    {
+        // Try-release — if the slot is already 1, do nothing (already pending).
+        try { _immediateSync.Release(); } catch (System.Threading.SemaphoreFullException) { }
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var lastRunAt = DateTimeOffset.MinValue;
@@ -102,8 +118,24 @@ public sealed class BackgroundSyncService : BackgroundService, IBackgroundSyncSi
                 _logger.LogError(ex, "Background sync loop error");
             }
 
-            try { await Task.Delay(PollGranularity, stoppingToken).ConfigureAwait(false); }
+            // Wait for the poll interval OR an immediate-sync signal. If
+            // immediate fires, reset lastRunAt so the next iteration's
+            // interval check passes regardless of how recent the last run was.
+            try
+            {
+                var immediateTask = _immediateSync.WaitAsync(PollGranularity, stoppingToken);
+                if (await immediateTask.ConfigureAwait(false))
+                {
+                    lastRunAt = DateTimeOffset.MinValue;
+                }
+            }
             catch (OperationCanceledException) { break; }
         }
+    }
+
+    public override void Dispose()
+    {
+        _immediateSync.Dispose();
+        base.Dispose();
     }
 }

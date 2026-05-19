@@ -979,6 +979,24 @@
     <sys:String x:Key="StatusBar.Sync.Failed">同步失敗</sys:String>
     <sys:String x:Key="StatusBar.Sync.Offline">離線</sys:String>
     <sys:String x:Key="StatusBar.Sync.PendingFormat">{0} 筆待同步</sys:String>
+    <!-- Phase 2 popover -->
+    <sys:String x:Key="Sync.Popover.Title">同步狀態</sys:String>
+    <sys:String x:Key="Sync.Popover.TriggerNow">立即同步</sys:String>
+    <sys:String x:Key="Sync.Popover.NeverSynced">尚未同步過</sys:String>
+    <sys:String x:Key="Sync.Popover.LastSyncedFormat">上次同步：{0:yyyy-MM-dd HH:mm}</sys:String>
+    <!-- Per-domain labels (mapped from stable domain keys) -->
+    <sys:String x:Key="Sync.Domain.Trade">交易記錄</sys:String>
+    <sys:String x:Key="Sync.Domain.Portfolio">投資資產</sys:String>
+    <sys:String x:Key="Sync.Domain.Asset">資金帳戶</sys:String>
+    <sys:String x:Key="Sync.Domain.AssetEvent">資產異動</sys:String>
+    <sys:String x:Key="Sync.Domain.Category">收支分類</sys:String>
+    <sys:String x:Key="Sync.Domain.AutoCategorizationRule">自動分類規則</sys:String>
+    <sys:String x:Key="Sync.Domain.Recurring">訂閱排程</sys:String>
+    <sys:String x:Key="Sync.Domain.RealEstate">不動產</sys:String>
+    <sys:String x:Key="Sync.Domain.Insurance">保險保單</sys:String>
+    <sys:String x:Key="Sync.Domain.Retirement">退休專戶</sys:String>
+    <sys:String x:Key="Sync.Domain.PhysicalAsset">實物資產</sys:String>
+    <sys:String x:Key="Sync.Domain.Alert">警示</sys:String>
 
     <!--  Categories  -->
     <sys:String x:Key="Nav.Categories">收支分類</sys:String>

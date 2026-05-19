@@ -70,16 +70,24 @@ public partial class StatusBarViewModel : ObservableObject, IDisposable
 
     private static Brush Freeze(SolidColorBrush b) { b.Freeze(); return b; }
 
+    /// <summary>
+    /// Sync-Status-Indicator Phase 2 popover. Lives on the status bar so the
+    /// chip can toggle <c>SyncPopover.IsOpen</c> directly via binding.
+    /// </summary>
+    public SyncStatusPopoverViewModel? SyncPopover { get; }
+
     public StatusBarViewModel(
         IScheduler uiScheduler,
         ILocalizationService localization,
-        IGlobalSyncStatusService? sync = null)
+        IGlobalSyncStatusService? sync = null,
+        SyncStatusPopoverViewModel? syncPopover = null)
     {
         ArgumentNullException.ThrowIfNull(uiScheduler);
         ArgumentNullException.ThrowIfNull(localization);
 
         _localization = localization;
         _sync = sync;
+        SyncPopover = syncPopover;
 
         UpdateStatus(DateTime.Now);
 

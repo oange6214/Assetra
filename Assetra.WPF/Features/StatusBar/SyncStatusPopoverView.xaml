@@ -1,0 +1,92 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.StatusBar.SyncStatusPopoverView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.StatusBar"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:SyncStatusPopoverViewModel},
+                                     IsDesignTimeCreatable=False}"
+    d:DesignHeight="260"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
+
+    <Border
+        Width="300"
+        Padding="16,14"
+        Background="{DynamicResource AppCardBackground}"
+        BorderBrush="{DynamicResource AppBorder}"
+        BorderThickness="1"
+        CornerRadius="{StaticResource Radius.Md}">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="16" Direction="270" Opacity="0.18" ShadowDepth="4" />
+        </Border.Effect>
+
+        <StackPanel>
+            <!--  Title  -->
+            <TextBlock
+                Margin="0,0,0,10"
+                FontSize="{StaticResource Font.Size.Md}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource Sync.Popover.Title}" />
+
+            <!--  Per-domain list  -->
+            <ItemsControl ItemsSource="{Binding Rows}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:SyncDomainRow}">
+                        <Grid Margin="0,3,0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ds:AppIcon
+                                Grid.Column="0"
+                                Margin="0,0,8,0"
+                                VerticalAlignment="Center"
+                                FontSize="13"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Symbol="{Binding StatusIcon}" />
+                            <TextBlock
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding LocalizedName}" />
+                            <TextBlock
+                                Grid.Column="2"
+                                VerticalAlignment="Center"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{Binding PendingCount}"
+                                Typography.NumeralAlignment="Tabular" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!--  Divider  -->
+            <Border
+                Height="1"
+                Margin="0,10,0,10"
+                Background="{DynamicResource AppBorder}" />
+
+            <!--  Last synced timestamp  -->
+            <TextBlock
+                Margin="0,0,0,10"
+                FontSize="{StaticResource Font.Size.Xs}"
+                Foreground="{DynamicResource AppTextMuted}"
+                Text="{Binding LastSyncedDisplay}" />
+
+            <!--  Trigger button  -->
+            <Button
+                HorizontalAlignment="Stretch"
+                Command="{Binding TriggerSyncCommand}"
+                Content="{DynamicResource Sync.Popover.TriggerNow}"
+                Style="{StaticResource AppPrimaryButton}" />
+        </StackPanel>
+    </Border>
+</UserControl>

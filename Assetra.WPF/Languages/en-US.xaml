@@ -971,6 +971,23 @@
     <sys:String x:Key="StatusBar.Sync.Failed">Sync failed</sys:String>
     <sys:String x:Key="StatusBar.Sync.Offline">Offline</sys:String>
     <sys:String x:Key="StatusBar.Sync.PendingFormat">{0} pending</sys:String>
+    <!-- Phase 2 popover -->
+    <sys:String x:Key="Sync.Popover.Title">Sync Status</sys:String>
+    <sys:String x:Key="Sync.Popover.TriggerNow">Sync Now</sys:String>
+    <sys:String x:Key="Sync.Popover.NeverSynced">Not yet synced</sys:String>
+    <sys:String x:Key="Sync.Popover.LastSyncedFormat">Last sync: {0:yyyy-MM-dd HH:mm}</sys:String>
+    <sys:String x:Key="Sync.Domain.Trade">Trades</sys:String>
+    <sys:String x:Key="Sync.Domain.Portfolio">Investments</sys:String>
+    <sys:String x:Key="Sync.Domain.Asset">Cash Accounts</sys:String>
+    <sys:String x:Key="Sync.Domain.AssetEvent">Asset Events</sys:String>
+    <sys:String x:Key="Sync.Domain.Category">Categories</sys:String>
+    <sys:String x:Key="Sync.Domain.AutoCategorizationRule">Auto Rules</sys:String>
+    <sys:String x:Key="Sync.Domain.Recurring">Recurring</sys:String>
+    <sys:String x:Key="Sync.Domain.RealEstate">Real Estate</sys:String>
+    <sys:String x:Key="Sync.Domain.Insurance">Insurance</sys:String>
+    <sys:String x:Key="Sync.Domain.Retirement">Retirement</sys:String>
+    <sys:String x:Key="Sync.Domain.PhysicalAsset">Physical Assets</sys:String>
+    <sys:String x:Key="Sync.Domain.Alert">Alerts</sys:String>
 
     <!--  Categories  -->
     <sys:String x:Key="Nav.Categories">Categories</sys:String>

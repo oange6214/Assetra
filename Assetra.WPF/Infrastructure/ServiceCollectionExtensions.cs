@@ -147,6 +147,13 @@ internal static class ServiceCollectionExtensions
     {
         services.AddSingleton<NavRailViewModel>();
         services.AddSingleton<MainViewModel>();
+
+        // Phase 2 sync popover wiring — trigger delegates to BackgroundSyncService.RequestImmediateSync
+        // so the popover can fire an out-of-band sync push from a clean abstraction.
+        services.AddSingleton<Assetra.WPF.Features.StatusBar.BackgroundSyncTrigger>(sp =>
+            new Assetra.WPF.Features.StatusBar.BackgroundSyncTrigger(
+                () => sp.GetRequiredService<BackgroundSyncService>().RequestImmediateSync()));
+        services.AddSingleton<Assetra.WPF.Features.StatusBar.SyncStatusPopoverViewModel>();
         services.AddSingleton<StatusBarViewModel>();
         services.AddSingleton<SyncSettingsViewModel>();
         services.AddSingleton<SettingsViewModel>();

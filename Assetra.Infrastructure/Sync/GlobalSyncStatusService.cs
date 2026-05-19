@@ -3,6 +3,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models.Sync;
+// `DomainSyncStatus` lives in Assetra.Core.Models.Sync — imported above.
 
 namespace Assetra.Infrastructure.Sync;
 
@@ -37,6 +38,7 @@ public sealed class GlobalSyncStatusService : IGlobalSyncStatusService
     private string? _lastError;
     private bool _enabled;
     private int _totalPending;
+    private IReadOnlyList<DomainSyncStatus> _perDomain = Array.Empty<DomainSyncStatus>();
     private bool _disposed;
 
     public GlobalSyncStatusService(
@@ -86,11 +88,18 @@ public sealed class GlobalSyncStatusService : IGlobalSyncStatusService
         {
             var counts = await _counter.CountPendingByDomainAsync(ct).ConfigureAwait(false);
             var total = counts.Values.Sum();
+            // Materialize per-domain snapshot in counter-defined order. Ordering
+            // is stable across polls so the popover doesn't shuffle rows.
+            var perDomain = counts
+                .Select(kv => new DomainSyncStatus(kv.Key, kv.Value))
+                .ToList();
             bool changed;
             lock (_gate)
             {
-                changed = _totalPending != total;
+                changed = _totalPending != total
+                          || !PerDomainEqualsLocked(perDomain);
                 _totalPending = total;
+                _perDomain = perDomain;
             }
             if (changed) Emit();
         }
@@ -98,6 +107,22 @@ public sealed class GlobalSyncStatusService : IGlobalSyncStatusService
         {
             // Best-effort poll; an isolated DB hiccup shouldn't crash the UI.
         }
+    }
+
+    private bool PerDomainEqualsLocked(IReadOnlyList<DomainSyncStatus> next)
+    {
+        if (_perDomain.Count != next.Count) return false;
+        for (int i = 0; i < next.Count; i++)
+        {
+            if (_perDomain[i].DomainKey != next[i].DomainKey) return false;
+            if (_perDomain[i].PendingCount != next[i].PendingCount) return false;
+        }
+        return true;
+    }
+
+    public IReadOnlyList<DomainSyncStatus> GetPerDomain()
+    {
+        lock (_gate) return _perDomain;
     }
 
     private void OnSyncStarted(object? sender, EventArgs e)

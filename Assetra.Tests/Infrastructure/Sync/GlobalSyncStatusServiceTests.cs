@@ -124,6 +124,45 @@ public sealed class GlobalSyncStatusServiceTests : IDisposable
         Assert.Equal(GlobalSyncState.Idle, svc.Current.State);
     }
 
+    // ── Phase 2: GetPerDomain ────────────────────────────────────────
+
+    [Fact]
+    public async Task GetPerDomain_ReturnsRowsAfterRefresh()
+    {
+        _counter.SetCounts(new() { ["Trade"] = 2, ["Asset"] = 0, ["Portfolio"] = 5 });
+        var svc = Build(enabled: true);
+
+        await svc.RefreshAsync();
+
+        var rows = svc.GetPerDomain();
+        Assert.Equal(3, rows.Count);
+        var trade = rows.Single(r => r.DomainKey == "Trade");
+        var asset = rows.Single(r => r.DomainKey == "Asset");
+        var portfolio = rows.Single(r => r.DomainKey == "Portfolio");
+        Assert.Equal(2, trade.PendingCount);
+        Assert.False(trade.IsSynced);
+        Assert.Equal(0, asset.PendingCount);
+        Assert.True(asset.IsSynced);
+        Assert.Equal(5, portfolio.PendingCount);
+    }
+
+    [Fact]
+    public async Task GetPerDomain_UpdatesOnSubsequentPolls()
+    {
+        _counter.SetCounts(new() { ["Trade"] = 1 });
+        var svc = Build(enabled: true);
+        await svc.RefreshAsync();
+        Assert.Equal(1, svc.GetPerDomain().Single().PendingCount);
+
+        _counter.SetCounts(new() { ["Trade"] = 4, ["Asset"] = 2 });
+        await svc.RefreshAsync();
+
+        var rows = svc.GetPerDomain();
+        Assert.Equal(2, rows.Count);
+        Assert.Equal(4, rows.Single(r => r.DomainKey == "Trade").PendingCount);
+        Assert.Equal(2, rows.Single(r => r.DomainKey == "Asset").PendingCount);
+    }
+
     [Fact]
     public async Task EnabledChanged_False_TransitionsToDisabledOverridingPending()
     {
