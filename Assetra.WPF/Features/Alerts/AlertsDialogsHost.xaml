@@ -12,11 +12,15 @@
 
     <!--
         外提到 MainWindow 的 Alerts dialog host — 包含新增 / 編輯規則表單與
-        刪除確認 modal。Root Grid 沒有 Visibility 綁定：兩個子 modal 各自靠
-        IsFormOpen / IsDeleteConfirmOpen 控制顯示，未開啟時 host 透明且不
-        攔截 hit-test。
+        刪除確認 modal。
+
+        Root Grid 故意**不**設 Background：WPF 只有設了背景 (含 Transparent)
+        的 Panel 才會吞 hit-test。預設 null background 讓 host 在 modal 沒開
+        時對 NavRail / title bar / status bar 點擊完全透明。內層 modal Grid
+        各自靠 IsFormOpen / IsDeleteConfirmOpen 控制 Visibility，開啟時自帶
+        AppDialogOverlay 背景才會接住點擊。
     -->
-    <Grid Background="Transparent" IsHitTestVisible="True">
+    <Grid>
 
         <!--  警示 — 新增 / 編輯表單  -->
         <Grid

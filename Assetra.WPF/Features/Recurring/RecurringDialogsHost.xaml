@@ -12,9 +12,10 @@
 
     <!--
         外提到 MainWindow 的 Recurring dialog host — 包含新增訂閱表單與
-        刪除確認 modal。
+        刪除確認 modal。Root Grid 不設 Background：modal 沒開時 host 對
+        NavRail / title bar / status bar 點擊完全透明（避免吞 hit-test）。
     -->
-    <Grid Background="Transparent" IsHitTestVisible="True">
+    <Grid>
 
         <!--  訂閱排程 — 新增表單  -->
         <Grid

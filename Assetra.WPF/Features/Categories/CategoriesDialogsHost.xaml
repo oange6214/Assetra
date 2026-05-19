@@ -15,8 +15,11 @@
         外提到 MainWindow 的 Categories dialog host — 包含 4 個 modal：
         新增分類 / 新增規則 / 新增預算 / 刪除確認。每個 modal 用 Grid 包住，
         overlay + card 共用同一個 Visibility 綁定。
+
+        Root Grid 不設 Background：modal 沒開時 host 對 NavRail / title bar /
+        status bar 點擊完全透明（避免吞 hit-test）。
     -->
-    <Grid Background="Transparent" IsHitTestVisible="True">
+    <Grid>
 
         <!--  分類 — 新增分類  -->
         <Grid
