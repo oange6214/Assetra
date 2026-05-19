@@ -274,8 +274,13 @@
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{DynamicResource Portfolio.TradeHistory.Type}" />
+                                            <!--
+                                                DisplayMemberPath 跟 ItemTemplate 互斥 (WPF 限制：
+                                                同時設會丟 InvalidOperationException at runtime)。
+                                                這裡用 ItemTemplate 是因為 DisplayKey 是 i18n
+                                                resource key，需要走 Converter 解析成當下語系字串。
+                                            -->
                                             <ComboBox
-                                                DisplayMemberPath="DisplayKey"
                                                 ItemsSource="{Binding AvailableTradeTypes}"
                                                 SelectedValuePath="Key"
                                                 SelectedValue="{Binding TxType, Mode=TwoWay}"
