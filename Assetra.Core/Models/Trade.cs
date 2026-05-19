@@ -144,4 +144,18 @@ public sealed record Trade(
     /// 已存在的舊資料則由 schema migration backfill 補上 DefaultId。
     /// 之後 UI / workflow 會把這個欄位暴露給使用者選擇。
     /// </summary>
-    Guid? PortfolioGroupId = null);
+    Guid? PortfolioGroupId = null,
+    // ── MultiCurrency-Reporting P4.5b ─────────────────────────────────
+    /// <summary>
+    /// 已實現損益的「市場部分」（投資判斷貢獻）— base currency 計價。
+    /// <c>= (sell_price - buy_avg_price) × qty × sell_fx_rate</c>。
+    /// 同幣別交易時等同於 <see cref="RealizedPnl"/>。null = 賣出時 FX history
+    /// 缺資料或 Buy 端未指派，無法計算；UI 顯示「—」。
+    /// </summary>
+    decimal? RealizedMarketPnl = null,
+    /// <summary>
+    /// 已實現損益的「FX 部分」（匯率漂移貢獻）— base currency 計價。
+    /// <c>= buy_cost_native × (sell_fx_rate - buy_fx_rate)</c>。
+    /// 同幣別交易為 0。null = 無法計算（同 <see cref="RealizedMarketPnl"/>）。
+    /// </summary>
+    decimal? RealizedFxPnl = null);

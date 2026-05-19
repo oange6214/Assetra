@@ -67,7 +67,10 @@ public static class TradeSyncMapper
             trade.CommissionCurrency,
             trade.FxRate?.ToString(System.Globalization.CultureInfo.InvariantCulture),
             // Portfolio-Groups-Refactor P1
-            trade.PortfolioGroupId);
+            trade.PortfolioGroupId,
+            // MultiCurrency-Reporting P4.5b — realized PnL market/FX split
+            trade.RealizedMarketPnl?.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            trade.RealizedFxPnl?.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
         return new SyncEnvelope(
             EntityId: trade.Id,
@@ -120,7 +123,10 @@ public static class TradeSyncMapper
             CommissionCurrency: dto.CommissionCurrency,
             FxRate: dto.FxRate is null ? null : decimal.Parse(dto.FxRate, inv),
             // Portfolio-Groups-Refactor P1 — 舊 payload 缺欄位時走 null，repo 寫入時 fallback DefaultId
-            PortfolioGroupId: dto.PortfolioGroupId);
+            PortfolioGroupId: dto.PortfolioGroupId,
+            // MultiCurrency-Reporting P4.5b — 舊 payload 缺欄位走 null
+            RealizedMarketPnl: dto.RealizedMarketPnl is null ? null : decimal.Parse(dto.RealizedMarketPnl, inv),
+            RealizedFxPnl: dto.RealizedFxPnl is null ? null : decimal.Parse(dto.RealizedFxPnl, inv));
     }
 
     private sealed record TradePayloadDto(
@@ -153,5 +159,8 @@ public static class TradeSyncMapper
         [property: JsonPropertyName("commission_currency")] string? CommissionCurrency = null,
         [property: JsonPropertyName("fx_rate")] string? FxRate = null,
         // Portfolio-Groups-Refactor P1
-        [property: JsonPropertyName("portfolio_group_id")] Guid? PortfolioGroupId = null);
+        [property: JsonPropertyName("portfolio_group_id")] Guid? PortfolioGroupId = null,
+        // MultiCurrency-Reporting P4.5b — realized PnL market/FX split (decimals as strings to avoid drift)
+        [property: JsonPropertyName("realized_market_pnl")] string? RealizedMarketPnl = null,
+        [property: JsonPropertyName("realized_fx_pnl")] string? RealizedFxPnl = null);
 }

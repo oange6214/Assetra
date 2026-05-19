@@ -16,6 +16,8 @@ internal static class TradeSchemaMigrator
         "instrument_currency", "commission_currency", "fx_rate",
         // Portfolio-Groups-Refactor P1
         "portfolio_group_id",
+        // MultiCurrency-Reporting P4.5b — realized PnL split into market vs FX
+        "realized_market_pnl", "realized_fx_pnl",
     };
 
     private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -85,6 +87,13 @@ internal static class TradeSchemaMigrator
             // Portfolio-Groups-Refactor P1 — 每筆 trade 屬於一個 portfolio_group。
             // nullable，既有 row 預設 NULL，下方 backfill 把它們設成 DefaultGroupId。
             MigrateAddColumn(conn, tx, "portfolio_group_id", "TEXT");
+
+            // MultiCurrency-Reporting P4.5b — realized PnL split into
+            // "market gain" (your stock pick) + "fx gain" (currency drift).
+            // Both nullable — only populated for sells with FX history coverage.
+            // Existing rows stay NULL → UI shows "—".
+            MigrateAddColumn(conn, tx, "realized_market_pnl", "REAL");
+            MigrateAddColumn(conn, tx, "realized_fx_pnl", "REAL");
 
             // Sync columns (v0.20.7) — mirror Category schema
             MigrateAddColumn(conn, tx, "version", "INTEGER NOT NULL DEFAULT 0");

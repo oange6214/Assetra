@@ -118,7 +118,9 @@ internal static class PortfolioServiceCollectionExtensions
                 sp.GetRequiredService<ITradeRepository>(),
                 sp.GetRequiredService<IPortfolioRepository>(),
                 sp.GetRequiredService<IPortfolioPositionLogRepository>(),
-                sp.GetRequiredService<IPositionQueryService>()));
+                sp.GetRequiredService<IPositionQueryService>(),
+                // P4.5b — optional FX history for the realized PnL split.
+                sp.GetService<IFxRateHistoryService>()));
         services.AddSingleton<IPositionDeletionWorkflowService>(sp =>
             new PositionDeletionWorkflowService(
                 sp.GetRequiredService<ITradeRepository>(),

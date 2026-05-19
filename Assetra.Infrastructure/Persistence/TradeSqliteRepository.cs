@@ -71,7 +71,9 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
         // MultiCurrency-Trade-Refactor P1 — 三個新欄位，跟其他 optional 欄位一樣 append on end
         "instrument_currency, commission_currency, fx_rate, " +
         // Portfolio-Groups-Refactor P1
-        "portfolio_group_id";
+        "portfolio_group_id, " +
+        // MultiCurrency-Reporting P4.5b — realized PnL market/FX split
+        "realized_market_pnl, realized_fx_pnl";
 
     private const string SyncSelectClause = SelectClause +
         ", version, last_modified_at, last_modified_by_device, is_deleted";
@@ -115,7 +117,12 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
         FxRate: r.IsDBNull(26) ? null : (decimal)r.GetDouble(26),
         // Portfolio-Groups-Refactor P1 — 既有 row 由 schema migration backfill 補上 DefaultId；
         // 萬一遇到 race，從 NULL 讀到的話也保留 null 由上層處理（之後 backfill 會再補一次）。
-        PortfolioGroupId: r.IsDBNull(27) ? null : Guid.Parse(r.GetString(27)));
+        PortfolioGroupId: r.IsDBNull(27) ? null : Guid.Parse(r.GetString(27)),
+        // MultiCurrency-Reporting P4.5b — realized PnL market/FX split.
+        // Populated by SellWorkflowService at sell time when FX history is available.
+        // Existing rows / same-currency / pre-FX-history trades → NULL → UI "—".
+        RealizedMarketPnl: r.IsDBNull(28) ? null : (decimal)r.GetDouble(28),
+        RealizedFxPnl: r.IsDBNull(29) ? null : (decimal)r.GetDouble(29));
 
     private static void BindTradeParams(SqliteCommand cmd, Trade t)
     {
@@ -154,6 +161,11 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
         // 而需要等下次 schema migration backfill 才會補上。
         cmd.Parameters.AddWithValue("$portfolio_group_id",
             (t.PortfolioGroupId ?? PortfolioGroup.DefaultId).ToString());
+        // MultiCurrency-Reporting P4.5b — nullable; existing rows / same-ccy trades stay NULL.
+        cmd.Parameters.AddWithValue("$rm_pnl",
+            t.RealizedMarketPnl.HasValue ? (object)(double)t.RealizedMarketPnl.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$rfx_pnl",
+            t.RealizedFxPnl.HasValue ? (object)(double)t.RealizedFxPnl.Value : DBNull.Value);
     }
 
     // ─── Queries (filter is_deleted = 0) ─────────────────────────────────
@@ -312,6 +324,8 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
                 commission_currency = $comm_ccy,
                 fx_rate = $fx_rate,
                 portfolio_group_id = $portfolio_group_id,
+                realized_market_pnl = $rm_pnl,
+                realized_fx_pnl = $rfx_pnl,
                 updated_at = $now,
                 version = version + 1,
                 last_modified_at = $now,
@@ -543,6 +557,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
              parent_trade_id, category_id, recurring_source_id,
              instrument_currency, commission_currency, fx_rate,
              portfolio_group_id,
+             realized_market_pnl, realized_fx_pnl,
              created_at, updated_at,
              version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
         VALUES
@@ -554,6 +569,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
              $parent_id, $category_id, $recurring_source_id,
              $instr_ccy, $comm_ccy, $fx_rate,
              $portfolio_group_id,
+             $rm_pnl, $rfx_pnl,
              $now, $now,
              1, $now, $device, 0, 1);
         """;
@@ -572,13 +588,13 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
         {
             var trade = MapTrade(reader);
             // ⚠ Ordinals here track the tail of SyncSelectClause = SelectClause + sync cols.
-            // SelectClause now has 28 cols (24 base + 3 MultiCurrency P1 + 1 PortfolioGroup P1).
+            // SelectClause now has 30 cols (24 base + 3 MultiCurrency P1 + 1 PortfolioGroup + 2 P4.5b breakdown).
             // Keep these ordinals in lock-step with SelectClause column count.
             var version = new EntityVersion(
-                Version: reader.GetInt64(28),
-                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(29)),
-                LastModifiedByDevice: reader.GetString(30));
-            var isDeleted = reader.GetInt32(31) != 0;
+                Version: reader.GetInt64(30),
+                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(31)),
+                LastModifiedByDevice: reader.GetString(32));
+            var isDeleted = reader.GetInt32(33) != 0;
             results.Add(TradeSyncMapper.ToEnvelope(trade, version, isDeleted));
         }
         return results;
@@ -669,6 +685,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
                      parent_trade_id, category_id, recurring_source_id,
                      instrument_currency, commission_currency, fx_rate,
                      portfolio_group_id,
+                     realized_market_pnl, realized_fx_pnl,
                      created_at, updated_at,
                      version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
                 VALUES
@@ -680,6 +697,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
                      $parent_id, $category_id, $recurring_source_id,
                      $instr_ccy, $comm_ccy, $fx_rate,
                      $portfolio_group_id,
+                     $rm_pnl, $rfx_pnl,
                      $now, $now,
                      $ver, $modAt, $modBy, 0, 0)
                 ON CONFLICT(id) DO UPDATE SET
@@ -710,6 +728,8 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
                     commission_currency = excluded.commission_currency,
                     fx_rate = excluded.fx_rate,
                     portfolio_group_id = excluded.portfolio_group_id,
+                    realized_market_pnl = excluded.realized_market_pnl,
+                    realized_fx_pnl = excluded.realized_fx_pnl,
                     updated_at = excluded.updated_at,
                     version = excluded.version,
                     last_modified_at = excluded.last_modified_at,
