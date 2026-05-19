@@ -27,6 +27,8 @@ public sealed class SqlitePendingPushCounter : IPendingPushCounter
         ("Retirement", "retirement_account"),
         ("PhysicalAsset", "physical_asset"),
         ("Alert", "alert"),
+        ("FinancialGoal", "financial_goal"),
+        ("PortfolioGroup", "portfolio_group"),
     ];
 
     public SqlitePendingPushCounter(string dbPath)

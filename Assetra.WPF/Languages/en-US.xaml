@@ -988,6 +988,8 @@
     <sys:String x:Key="Sync.Domain.Retirement">Retirement</sys:String>
     <sys:String x:Key="Sync.Domain.PhysicalAsset">Physical Assets</sys:String>
     <sys:String x:Key="Sync.Domain.Alert">Alerts</sys:String>
+    <sys:String x:Key="Sync.Domain.FinancialGoal">Goals</sys:String>
+    <sys:String x:Key="Sync.Domain.PortfolioGroup">Investment Groups</sys:String>
 
     <!--  Categories  -->
     <sys:String x:Key="Nav.Categories">Categories</sys:String>

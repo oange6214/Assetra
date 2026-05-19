@@ -8,11 +8,15 @@ internal static class GoalSchemaMigrator
     {
         "linked_asset_class",
         "portfolio_group_id",
+        // Sync columns (Sync-Goal-PortfolioGroup pass)
+        "version", "last_modified_at", "last_modified_by_device", "is_deleted", "is_pending_push",
     };
 
     private static readonly HashSet<string> AllowedTypeDefs = new(StringComparer.OrdinalIgnoreCase)
     {
         "TEXT",
+        "INTEGER NOT NULL DEFAULT 0",
+        "TEXT NOT NULL DEFAULT ''",
     };
 
     public static void EnsureInitialized(string connectionString)
@@ -94,6 +98,20 @@ internal static class GoalSchemaMigrator
             // 不 backfill：null 代表 user 未選，progress 走 manual / LinkedAssetClass 路徑。
             SqliteSchemaHelper.MigrateAddColumn(conn, tx, "financial_goal",
                 "portfolio_group_id", "TEXT", AllowedColumns, AllowedTypeDefs);
+
+            // Sync columns — mirror the other domain repos (Trade / Asset / Category /
+            // Portfolio / ...). Existing rows seed to version=0 / empty-string metadata;
+            // BackgroundSyncService's first push will stamp them properly.
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "financial_goal",
+                "version", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "financial_goal",
+                "last_modified_at", "TEXT NOT NULL DEFAULT ''", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "financial_goal",
+                "last_modified_by_device", "TEXT NOT NULL DEFAULT ''", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "financial_goal",
+                "is_deleted", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "financial_goal",
+                "is_pending_push", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
 
             tx.Commit();
         }

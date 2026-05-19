@@ -997,6 +997,8 @@
     <sys:String x:Key="Sync.Domain.Retirement">退休專戶</sys:String>
     <sys:String x:Key="Sync.Domain.PhysicalAsset">實物資產</sys:String>
     <sys:String x:Key="Sync.Domain.Alert">警示</sys:String>
+    <sys:String x:Key="Sync.Domain.FinancialGoal">財務目標</sys:String>
+    <sys:String x:Key="Sync.Domain.PortfolioGroup">投資群組</sys:String>
 
     <!--  Categories  -->
     <sys:String x:Key="Nav.Categories">收支分類</sys:String>

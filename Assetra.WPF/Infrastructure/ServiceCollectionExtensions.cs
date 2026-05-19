@@ -190,6 +190,11 @@ internal static class ServiceCollectionExtensions
             new AutoCategorizationRuleLocalChangeQueue(sp.GetRequiredService<IAutoCategorizationRuleSyncStore>()));
         services.AddSingleton<RecurringTransactionLocalChangeQueue>(sp =>
             new RecurringTransactionLocalChangeQueue(sp.GetRequiredService<IRecurringTransactionSyncStore>()));
+        // Sync-Goal-PortfolioGroup pass — Goal + PortfolioGroup now ride sync.
+        services.AddSingleton<FinancialGoalLocalChangeQueue>(sp =>
+            new FinancialGoalLocalChangeQueue(sp.GetRequiredService<IFinancialGoalSyncStore>()));
+        services.AddSingleton<PortfolioGroupLocalChangeQueue>(sp =>
+            new PortfolioGroupLocalChangeQueue(sp.GetRequiredService<IPortfolioGroupSyncStore>()));
 
         services.AddSingleton<CompositeLocalChangeQueue>(sp =>
         {
@@ -207,6 +212,8 @@ internal static class ServiceCollectionExtensions
                 [InsurancePolicySyncMapper.EntityType] = sp.GetRequiredService<InsurancePolicyLocalChangeQueue>(),
                 [RetirementAccountSyncMapper.EntityType] = sp.GetRequiredService<RetirementAccountLocalChangeQueue>(),
                 [PhysicalAssetSyncMapper.EntityType] = sp.GetRequiredService<PhysicalAssetLocalChangeQueue>(),
+                [Assetra.Infrastructure.Sync.FinancialGoalSyncMapper.EntityType] = sp.GetRequiredService<FinancialGoalLocalChangeQueue>(),
+                [Assetra.Infrastructure.Sync.PortfolioGroupSyncMapper.EntityType] = sp.GetRequiredService<PortfolioGroupLocalChangeQueue>(),
             };
             return new CompositeLocalChangeQueue(map);
         });

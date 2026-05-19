@@ -5,6 +5,17 @@ namespace Assetra.Infrastructure.Persistence;
 
 internal static class PortfolioGroupSchemaMigrator
 {
+    private static readonly HashSet<string> AllowedColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "version", "last_modified_at", "last_modified_by_device", "is_deleted", "is_pending_push",
+    };
+
+    private static readonly HashSet<string> AllowedTypeDefs = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "INTEGER NOT NULL DEFAULT 0",
+        "TEXT NOT NULL DEFAULT ''",
+    };
+
     public static void EnsureInitialized(string connectionString)
     {
         using var conn = new SqliteConnection(connectionString);
@@ -47,6 +58,18 @@ internal static class PortfolioGroupSchemaMigrator
             seed.Parameters.AddWithValue("$desc", "系統建立的預設群組。所有未指定群組的交易與現金帳戶都會掛在此群組下，可重新命名但不能刪除。");
             seed.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
             seed.ExecuteNonQuery();
+
+            // Sync columns — mirror every other domain repo.
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio_group",
+                "version", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio_group",
+                "last_modified_at", "TEXT NOT NULL DEFAULT ''", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio_group",
+                "last_modified_by_device", "TEXT NOT NULL DEFAULT ''", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio_group",
+                "is_deleted", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
+            SqliteSchemaHelper.MigrateAddColumn(conn, tx, "portfolio_group",
+                "is_pending_push", "INTEGER NOT NULL DEFAULT 0", AllowedColumns, AllowedTypeDefs);
 
             tx.Commit();
         }

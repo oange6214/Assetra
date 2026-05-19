@@ -19,7 +19,10 @@ internal static class PortfolioGroupsServiceCollectionExtensions
         this IServiceCollection services,
         string dbPath)
     {
-        services.AddSingleton<IPortfolioGroupRepository>(_ => new PortfolioGroupSqliteRepository(dbPath));
+        // Single concrete instance exposed as both the user-facing repo + sync store.
+        services.AddSingleton<PortfolioGroupSqliteRepository>(_ => new PortfolioGroupSqliteRepository(dbPath));
+        services.AddSingleton<IPortfolioGroupRepository>(sp => sp.GetRequiredService<PortfolioGroupSqliteRepository>());
+        services.AddSingleton<Assetra.Core.Interfaces.Sync.IPortfolioGroupSyncStore>(sp => sp.GetRequiredService<PortfolioGroupSqliteRepository>());
         services.AddSingleton<PortfolioGroupCatalog>();
         // Portfolio-Groups-Refactor P5 — Goal auto-tracking 用的 per-group 淨值計算。
         services.AddSingleton<IGroupBalanceQueryService>(sp =>
