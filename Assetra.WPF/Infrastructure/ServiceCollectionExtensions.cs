@@ -55,6 +55,11 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<IFxRateHistoryFetcher>(sp =>
             new Assetra.Infrastructure.Fx.YahooFxRateHistoryFetcher(
                 sp.GetRequiredService<HttpClient>()));
+        // P4.1c — orchestrator called from AppStartupTasks on every startup.
+        services.AddSingleton<Assetra.Application.Fx.FxRateHistoryRefresher>(sp =>
+            new Assetra.Application.Fx.FxRateHistoryRefresher(
+                sp.GetRequiredService<IFxRateHistoryFetcher>(),
+                sp.GetRequiredService<IFxRateHistoryRepository>()));
 
         services.AddSingleton<HttpClient>(_ =>
         {

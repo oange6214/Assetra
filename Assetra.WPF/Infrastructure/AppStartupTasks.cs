@@ -65,5 +65,33 @@ internal static class AppStartupTasks
                 Log.Warning(ex, "Background task {Task} failed at startup", nameof(IRefreshableSymbolDirectory.RefreshAsync));
             }
         });
+
+        // MultiCurrency-Reporting P4.1c — populate fx_rate_history from Yahoo
+        // on every startup. Last 7 days of data is enough to fill weekend /
+        // holiday gaps for reports rendered "today". Larger backfills will
+        // come from a future settings-page button.
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                // Brief delay so we don't race the splash + main window construction
+                // for CPU. FX backfill isn't time-sensitive.
+                await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+                var refresher = provider.GetService<Assetra.Application.Fx.FxRateHistoryRefresher>();
+                if (refresher is null) return;
+                var settings = provider.GetService<IAppSettingsService>()?.Current;
+                var baseCcy = string.IsNullOrWhiteSpace(settings?.BaseCurrency)
+                    ? "TWD" : settings!.BaseCurrency;
+                await refresher.RefreshAsync(
+                    baseCcy,
+                    Assetra.Application.Fx.FxRateHistoryRefresher.DefaultForeignCurrencies,
+                    daysBack: 7).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Background task {Task} failed at startup",
+                    nameof(Assetra.Application.Fx.FxRateHistoryRefresher));
+            }
+        });
     }
 }
