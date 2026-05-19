@@ -173,7 +173,16 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<Assetra.WPF.Features.StatusBar.BackgroundSyncTrigger>(sp =>
             new Assetra.WPF.Features.StatusBar.BackgroundSyncTrigger(
                 () => sp.GetRequiredService<BackgroundSyncService>().RequestImmediateSync()));
-        services.AddSingleton<Assetra.WPF.Features.StatusBar.SyncStatusPopoverViewModel>();
+        // Popover 在 sync 未啟用時主按鈕導向 Settings 頁。VM 不直接持 MainViewModel ref（會循環），
+        // 改用 lazy callback：點擊時才 resolve NavRailVM 並切到 Settings section。
+        services.AddSingleton<Assetra.WPF.Features.StatusBar.SyncStatusPopoverViewModel>(sp =>
+            new Assetra.WPF.Features.StatusBar.SyncStatusPopoverViewModel(
+                sp.GetRequiredService<Assetra.Core.Interfaces.Sync.IGlobalSyncStatusService>(),
+                sp.GetRequiredService<ILocalizationService>(),
+                sp.GetService<Assetra.WPF.Features.StatusBar.BackgroundSyncTrigger>(),
+                navigateToSettings: () =>
+                    sp.GetRequiredService<Assetra.WPF.Shell.NavRailViewModel>().ActiveSection
+                        = Assetra.WPF.Shell.NavSection.Settings));
         services.AddSingleton<StatusBarViewModel>();
         services.AddSingleton<SyncSettingsViewModel>();
         services.AddSingleton<SettingsViewModel>();

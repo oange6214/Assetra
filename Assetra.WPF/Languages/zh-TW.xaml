@@ -986,6 +986,8 @@
     <sys:String x:Key="Sync.Popover.TriggerNow">立即同步</sys:String>
     <sys:String x:Key="Sync.Popover.NeverSynced">尚未同步過</sys:String>
     <sys:String x:Key="Sync.Popover.LastSyncedFormat">上次同步：{0:yyyy-MM-dd HH:mm}</sys:String>
+    <sys:String x:Key="Sync.Popover.GoToSettings">前往啟用同步</sys:String>
+    <sys:String x:Key="Sync.Popover.DisabledHint">雲端同步尚未啟用，以上待推送的變更會在啟用後一次推送。</sys:String>
     <!--  Per-domain labels (mapped from stable domain keys)  -->
     <sys:String x:Key="Sync.Domain.Trade">交易記錄</sys:String>
     <sys:String x:Key="Sync.Domain.Portfolio">投資資產</sys:String>

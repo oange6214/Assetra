@@ -977,6 +977,8 @@
     <sys:String x:Key="Sync.Popover.TriggerNow">Sync Now</sys:String>
     <sys:String x:Key="Sync.Popover.NeverSynced">Not yet synced</sys:String>
     <sys:String x:Key="Sync.Popover.LastSyncedFormat">Last sync: {0:yyyy-MM-dd HH:mm}</sys:String>
+    <sys:String x:Key="Sync.Popover.GoToSettings">Enable Sync in Settings</sys:String>
+    <sys:String x:Key="Sync.Popover.DisabledHint">Cloud sync isn't enabled. Pending changes above will push the next time you enable it.</sys:String>
     <sys:String x:Key="Sync.Domain.Trade">Trades</sys:String>
     <sys:String x:Key="Sync.Domain.Portfolio">Investments</sys:String>
     <sys:String x:Key="Sync.Domain.Asset">Cash Accounts</sys:String>

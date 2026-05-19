@@ -18,11 +18,29 @@ public sealed partial class SyncStatusPopoverViewModel : ObservableObject, IDisp
     private readonly IGlobalSyncStatusService _sync;
     private readonly ILocalizationService _localization;
     private readonly BackgroundSyncTrigger? _trigger;
+    // 由 host (MainViewModel) 注入的「導航到 Settings 頁」callback。
+    // 設成可選：unit-test 沒提供時點按鈕不會崩，僅 no-op。
+    private readonly Action? _navigateToSettings;
 
     [ObservableProperty] private bool _isOpen;
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(LastSyncedDisplay))]
     private DateTimeOffset? _lastSyncedAt;
+
+    /// <summary>true 時 popover 顯示「未啟用同步」banner、主按鈕變成「前往啟用同步」。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSyncEnabled))]
+    [NotifyPropertyChangedFor(nameof(PrimaryButtonLabelKey))]
+    private bool _isSyncDisabled;
+
+    /// <summary>方便 XAML 用的反向：banner 用 IsSyncDisabled，內容區用 IsSyncEnabled。</summary>
+    public bool IsSyncEnabled => !IsSyncDisabled;
+
+    /// <summary>
+    /// 主按鈕的 DynamicResource key：disabled 時導向設定、enabled 時觸發同步。
+    /// </summary>
+    public string PrimaryButtonLabelKey
+        => IsSyncDisabled ? "Sync.Popover.GoToSettings" : "Sync.Popover.TriggerNow";
 
     public ObservableCollection<SyncDomainRow> Rows { get; } = new();
 
@@ -42,13 +60,15 @@ public sealed partial class SyncStatusPopoverViewModel : ObservableObject, IDisp
     public SyncStatusPopoverViewModel(
         IGlobalSyncStatusService sync,
         ILocalizationService localization,
-        BackgroundSyncTrigger? trigger = null)
+        BackgroundSyncTrigger? trigger = null,
+        Action? navigateToSettings = null)
     {
         ArgumentNullException.ThrowIfNull(sync);
         ArgumentNullException.ThrowIfNull(localization);
         _sync = sync;
         _localization = localization;
         _trigger = trigger;
+        _navigateToSettings = navigateToSettings;
 
         _sync.Changed += OnSyncChanged;
         // Seed from current snapshot in case the popover opens before any change event.
@@ -69,6 +89,7 @@ public sealed partial class SyncStatusPopoverViewModel : ObservableObject, IDisp
     {
         var current = _sync.Current;
         LastSyncedAt = current.LastSyncedAt;
+        IsSyncDisabled = current.State == Core.Models.Sync.GlobalSyncState.Disabled;
         var domains = _sync.GetPerDomain();
 
         // Reconcile rows: update existing, add new, remove stale. ItemsControl
@@ -100,12 +121,25 @@ public sealed partial class SyncStatusPopoverViewModel : ObservableObject, IDisp
     private string ResolveDomainLabel(string key)
         => _localization.Get($"Sync.Domain.{key}", key);
 
+    /// <summary>
+    /// Popover 主按鈕的 unified handler：
+    /// <list type="bullet">
+    ///   <item>同步未啟用 → 導航到 Settings 頁讓使用者開啟同步（UX 修：以前點了沒反應）</item>
+    ///   <item>已啟用 → 觸發 background loop 立即跑一次</item>
+    /// </list>
+    /// 不論哪種情況都關閉 popover 給點擊有 feedback。
+    /// </summary>
     [RelayCommand]
-    private void TriggerSync()
+    private void PrimaryAction()
     {
-        _trigger?.Request();
-        // Close the popover so the user gets feedback that the click did something;
-        // the indicator dot will spin briefly when the actual sync kicks off.
+        if (IsSyncDisabled)
+        {
+            _navigateToSettings?.Invoke();
+        }
+        else
+        {
+            _trigger?.Request();
+        }
         IsOpen = false;
     }
 

@@ -32,6 +32,25 @@
                 Foreground="{DynamicResource AppTextPrimary}"
                 Text="{DynamicResource Sync.Popover.Title}" />
 
+            <!--
+                同步未啟用時的提示 banner — 解開「為什麼有 N 筆 pending 但
+                立即同步沒反應」的困惑。下方按鈕也會切成「前往啟用同步」。
+            -->
+            <Border
+                Margin="0,0,0,10"
+                Padding="10,8"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppWarning}"
+                BorderThickness="3,0,0,0"
+                CornerRadius="{StaticResource Radius.Sm}"
+                Visibility="{Binding IsSyncDisabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Sync.Popover.DisabledHint}"
+                    TextWrapping="Wrap" />
+            </Border>
+
             <!--  Per-domain list  -->
             <ItemsControl ItemsSource="{Binding Rows}">
                 <ItemsControl.ItemTemplate>
@@ -81,11 +100,15 @@
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{Binding LastSyncedDisplay}" />
 
-            <!--  Trigger button  -->
+            <!--
+                Primary action — unified command 在 VM 判斷狀態：未啟用 → GoToSettings；
+                已啟用 → TriggerSync。Content 用 PrimaryButtonLabelKey 做 dynamic lookup，
+                狀態變化時自動換文字。
+            -->
             <Button
                 HorizontalAlignment="Stretch"
-                Command="{Binding TriggerSyncCommand}"
-                Content="{DynamicResource Sync.Popover.TriggerNow}"
+                Command="{Binding PrimaryActionCommand}"
+                Content="{Binding PrimaryButtonLabelKey, Converter={StaticResource ResourceKeyToStringConverter}}"
                 Style="{StaticResource AppPrimaryButton}" />
         </StackPanel>
     </Border>
