@@ -63,6 +63,13 @@ internal sealed record TransactionDialogDependencies(
     PortfolioGroupCatalog? GroupCatalog = null);
 
 /// <summary>
+/// 交易類型 ComboBox 的一個選項。Key 對齊 <see cref="TransactionDialogViewModel.TxType"/>
+/// 的字串字面，DisplayKey / GroupKey 是 DynamicResource 鍵 — XAML 透過
+/// ResourceKeyToStringConverter 解析成當下語系的字串。
+/// </summary>
+public sealed record TradeTypeOption(string Key, string DisplayKey, string GroupKey);
+
+/// <summary>
 /// Owns all transaction-dialog observable state, validation, and commands.
 /// After a successful record/delete, raises <see cref="TransactionCompleted"/> or
 /// <see cref="TradeDeleted"/> so <see cref="Portfolio.PortfolioViewModel"/> can
@@ -218,6 +225,28 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     // 新增紀錄 Dialog
     [ObservableProperty] private bool _isTxDialogOpen;
     [ObservableProperty] private string _txType = "income";
+
+    /// <summary>
+    /// 「交易類型」單一 ComboBox 的選項集 — 由 12 顆分四組的 RadioButton 收斂而來。
+    /// 使用 GroupKey 提供 ItemsControl.GroupStyle 視覺分組（投資 / 收入支出 / 資金帳戶 / 負債）。
+    /// Key 跟 <see cref="TxType"/> 字串字面對齊（"buy"/"sell"/...）；DisplayKey 走 DynamicResource
+    /// 用 lang 檔現成的 Portfolio.Tx.* / Portfolio.TradeType.* 字串。
+    /// </summary>
+    public IReadOnlyList<TradeTypeOption> AvailableTradeTypes { get; } = new TradeTypeOption[]
+    {
+        new("buy",                "Portfolio.Tx.Buy",                  "Portfolio.Record.Group.Investment"),
+        new("sell",               "Portfolio.Tx.Sell",                 "Portfolio.Record.Group.Investment"),
+        new("cashDiv",            "Portfolio.Tx.CashDiv",              "Portfolio.Record.Group.Investment"),
+        new("stockDiv",           "Portfolio.Tx.StockDiv",             "Portfolio.Record.Group.Investment"),
+        new("income",             "Portfolio.Tx.Income",               "Portfolio.Record.Group.IncomeExpense"),
+        new("deposit",            "Portfolio.TradeType.Deposit",       "Portfolio.Record.Group.Cash"),
+        new("withdrawal",         "Portfolio.Tx.WithdrawalAction",     "Portfolio.Record.Group.Cash"),
+        new("transfer",           "Portfolio.Tx.TransferAction",       "Portfolio.Record.Group.Cash"),
+        new("loanBorrow",         "Portfolio.TradeType.LoanBorrow",    "Portfolio.Record.Group.Liability"),
+        new("loanRepay",          "Portfolio.TradeType.LoanRepay",     "Portfolio.Record.Group.Liability"),
+        new("creditCardCharge",   "Portfolio.TradeType.CreditCardCharge",  "Portfolio.Record.Group.Liability"),
+        new("creditCardPayment",  "Portfolio.TradeType.CreditCardPayment", "Portfolio.Record.Group.Liability"),
+    };
 
     /// <summary>Non-null when editing an existing trade (vs. creating new).</summary>
     [ObservableProperty] private Guid? _editingTradeId;

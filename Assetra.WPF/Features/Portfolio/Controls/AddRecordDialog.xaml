@@ -211,6 +211,13 @@
                         </Border>
 
                         <StackPanel Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <!--
+                                Basic info — Phase 1 redesign：原本是 DockPanel(date 左 172px)
+                                + 4 個 group card × 12 顆 RadioButton（~190 行）拼出來的 type
+                                picker。現在收成 2 欄 Grid：日期 | 類型 ComboBox，視覺權重對齊
+                                使用者提供的參考設計。ComboBox 用 SelectedValue 綁 TxType 字串，
+                                跟舊的 RadioButton.IsChecked 等價語意完全相同。
+                            -->
                             <Border
                                 Margin="0,0,0,12"
                                 Padding="14,12"
@@ -218,28 +225,29 @@
                                 BorderBrush="{DynamicResource AppBorder}"
                                 BorderThickness="1"
                                 CornerRadius="{StaticResource Radius.Sm}">
-                                <DockPanel LastChildFill="True">
+                                <StackPanel>
                                     <TextBlock
-                                        DockPanel.Dock="Top"
                                         FontSize="{StaticResource Font.Size.Sm}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{DynamicResource Portfolio.Record.Section.Basic}" />
                                     <TextBlock
                                         Margin="0,4,0,12"
-                                        DockPanel.Dock="Top"
                                         FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="{DynamicResource Portfolio.Record.Section.BasicHint}"
                                         TextWrapping="Wrap"
                                         Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                                    <Border
-                                        Width="172"
-                                        Margin="0,0,12,0"
-                                        Padding="0"
-                                        Background="Transparent"
-                                        DockPanel.Dock="Left">
-                                        <StackPanel>
+
+                                    <!--  Date + Type — 平排兩欄  -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0">
                                             <TextBlock
                                                 Margin="0,0,0,4"
                                                 FontSize="{StaticResource Font.Size.Xs}"
@@ -252,201 +260,73 @@
                                                 SelectedDate="{Binding TxDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 Style="{StaticResource AppDatePicker}" />
                                         </StackPanel>
-                                    </Border>
+
+                                        <!--
+                                            Type picker — meta-only 編輯時隱藏（鎖定卡裡已顯示
+                                            type；改類型對 meta-only 沒意義）。
+                                        -->
+                                        <StackPanel
+                                            Grid.Column="2"
+                                            Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                            <TextBlock
+                                                Margin="0,0,0,4"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.TradeHistory.Type}" />
+                                            <ComboBox
+                                                DisplayMemberPath="DisplayKey"
+                                                ItemsSource="{Binding AvailableTradeTypes}"
+                                                SelectedValuePath="Key"
+                                                SelectedValue="{Binding TxType, Mode=TwoWay}"
+                                                Style="{StaticResource FormComboBox}">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding DisplayKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </StackPanel>
+                                    </Grid>
 
                                     <!--
-                                        Type picker — shown for new records and direct-edit
-                                        types (Income / CashDividend / Buy w/ entry / etc.).
-                                        Hidden ONLY for meta-only edits where changing type
-                                        would be meaningless (the locked summary already
-                                        states the immutable type).
+                                        顯示位置提示 — 選類型後告訴使用者這筆交易會出現在哪幾頁。
+                                        解決「新增的資料去哪了」first-time 困惑。
+                                        HasTxDestination 為 false（未選類型）時隱藏。
                                     -->
-                                    <StackPanel Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                        <TextBlock
-                                            Margin="0,0,0,4"
-                                            FontSize="{StaticResource Font.Size.Xs}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextSecondary}"
-                                            Text="{DynamicResource Portfolio.TradeHistory.Type}" />
-                                        <Border Padding="10" Style="{StaticResource FormCard}">
+                                    <Border
+                                        Margin="0,12,0,0"
+                                        Padding="10,8"
+                                        Background="{DynamicResource AppAccentSubtle}"
+                                        BorderBrush="{DynamicResource AppAccent}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource Radius.Sm}"
+                                        Visibility="{Binding HasTxDestination, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ds:AppIcon
+                                                Margin="0,1,8,0"
+                                                VerticalAlignment="Top"
+                                                FontSize="12"
+                                                Foreground="{DynamicResource AppAccent}"
+                                                Symbol="Info24" />
                                             <StackPanel>
-                                                <!--  1. 投資交易（買入 / 賣出 / 現金股利 / 股票股利）— Income 已搬出  -->
-                                                <Border
-                                                    Padding="8"
-                                                    Background="Transparent"
-                                                    BorderBrush="{DynamicResource AppBorder}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="{StaticResource Radius.Sm}">
-                                                    <StackPanel>
-                                                        <TextBlock
-                                                            FontSize="{StaticResource Font.Size.Xs}"
-                                                            FontWeight="SemiBold"
-                                                            Foreground="{DynamicResource AppTextMuted}"
-                                                            Text="{DynamicResource Portfolio.Record.Group.Investment}" />
-                                                        <WrapPanel Margin="0,6,0,0">
-                                                            <RadioButton
-                                                                Content="{DynamicResource Portfolio.Tx.Buy}"
-                                                                GroupName="TxType"
-                                                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=buy, Mode=TwoWay}"
-                                                                Style="{StaticResource SegmentBtn}" />
-                                                            <RadioButton
-                                                                Content="{DynamicResource Portfolio.Tx.Sell}"
-                                                                GroupName="TxType"
-                                                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=sell, Mode=TwoWay}"
-                                                                Style="{StaticResource SegmentBtn}" />
-                                                            <RadioButton
-                                                                Content="{DynamicResource Portfolio.Tx.CashDiv}"
-                                                                GroupName="TxType"
-                                                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=cashDiv, Mode=TwoWay}"
-                                                                Style="{StaticResource SegmentBtn}" />
-                                                            <RadioButton
-                                                                Content="{DynamicResource Portfolio.Tx.StockDiv}"
-                                                                GroupName="TxType"
-                                                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=stockDiv, Mode=TwoWay}"
-                                                                Style="{StaticResource SegmentBtn}" />
-                                                        </WrapPanel>
-                                                    </StackPanel>
-                                                </Border>
-
-                                                <!--  2. 收入與支出（薪資 / 一般收入；提款也是支出但走資金帳戶 group）  -->
-                                                <Border
-                                                    Margin="0,6,0,0"
-                                                    Padding="8"
-                                                    Background="Transparent"
-                                                    BorderBrush="{DynamicResource AppBorder}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="{StaticResource Radius.Sm}">
-                                                    <StackPanel>
-                                                        <TextBlock
-                                                            FontSize="{StaticResource Font.Size.Xs}"
-                                                            FontWeight="SemiBold"
-                                                            Foreground="{DynamicResource AppTextMuted}"
-                                                            Text="{DynamicResource Portfolio.Record.Group.IncomeExpense}" />
-                                                        <WrapPanel Margin="0,6,0,0">
-                                                            <RadioButton
-                                                                Content="{DynamicResource Portfolio.Tx.Income}"
-                                                                GroupName="TxType"
-                                                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=income, Mode=TwoWay}"
-                                                                Style="{StaticResource SegmentBtn}" />
-                                                        </WrapPanel>
-                                                    </StackPanel>
-                                                </Border>
-
-                                                <!--  3. 資金帳戶（存入 / 提款 / 轉帳）  -->
-                                                <Border
-                                                    Margin="0,6,0,0"
-                                                    Padding="8"
-                                                    Background="Transparent"
-                                                    BorderBrush="{DynamicResource AppBorder}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="{StaticResource Radius.Sm}">
-                                                    <StackPanel>
-                                                        <TextBlock
-                                                            FontSize="{StaticResource Font.Size.Xs}"
-                                                            FontWeight="SemiBold"
-                                                            Foreground="{DynamicResource AppTextMuted}"
-                                                            Text="{DynamicResource Portfolio.Record.Group.Cash}" />
-                                                        <WrapPanel Margin="0,6,0,0">
-                                                            <RadioButton
-                                                                Content="{DynamicResource Portfolio.TradeType.Deposit}"
-                                                                GroupName="TxType"
-                                                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=deposit, Mode=TwoWay}"
-                                                                Style="{StaticResource SegmentBtn}"
-                                                                ToolTip="{DynamicResource Portfolio.Tx.DepositHint}" />
-                                                            <RadioButton
-                                                                Content="{DynamicResource Portfolio.Tx.WithdrawalAction}"
-                                                                GroupName="TxType"
-                                                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=withdrawal, Mode=TwoWay}"
-                                                                Style="{StaticResource SegmentBtn}"
-                                                                ToolTip="{DynamicResource Portfolio.Tx.WithdrawalHint}" />
-                                                            <RadioButton
-                                                                Content="{DynamicResource Portfolio.Tx.TransferAction}"
-                                                                GroupName="TxType"
-                                                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=transfer, Mode=TwoWay}"
-                                                                Style="{StaticResource SegmentBtn}"
-                                                                ToolTip="{DynamicResource Portfolio.Tx.TransferHint}" />
-                                                        </WrapPanel>
-                                                    </StackPanel>
-                                                </Border>
-
-                                                <Border
-                                                    Margin="0,6,0,0"
-                                                    Padding="8"
-                                                    Background="Transparent"
-                                                    BorderBrush="{DynamicResource AppBorder}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="{StaticResource Radius.Sm}">
-                                                    <StackPanel>
-                                                        <TextBlock
-                                                            FontSize="{StaticResource Font.Size.Xs}"
-                                                            FontWeight="SemiBold"
-                                                            Foreground="{DynamicResource AppTextMuted}"
-                                                            Text="{DynamicResource Portfolio.Record.Group.Liability}" />
-                                                        <WrapPanel Margin="0,6,0,0">
-                                                            <RadioButton
-                                                                Content="{DynamicResource Portfolio.TradeType.LoanBorrow}"
-                                                                GroupName="TxType"
-                                                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=loanBorrow, Mode=TwoWay}"
-                                                                Style="{StaticResource SegmentBtn}" />
-                                                            <RadioButton
-                                                                Content="{DynamicResource Portfolio.TradeType.LoanRepay}"
-                                                                GroupName="TxType"
-                                                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=loanRepay, Mode=TwoWay}"
-                                                                Style="{StaticResource SegmentBtn}" />
-                                                            <RadioButton
-                                                                Content="{DynamicResource Portfolio.TradeType.CreditCardCharge}"
-                                                                GroupName="TxType"
-                                                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=creditCardCharge, Mode=TwoWay}"
-                                                                Style="{StaticResource SegmentBtn}" />
-                                                            <RadioButton
-                                                                Content="{DynamicResource Portfolio.TradeType.CreditCardPayment}"
-                                                                GroupName="TxType"
-                                                                IsChecked="{Binding TxType, Converter={StaticResource EqualityConverter}, ConverterParameter=creditCardPayment, Mode=TwoWay}"
-                                                                Style="{StaticResource SegmentBtn}" />
-                                                        </WrapPanel>
-                                                    </StackPanel>
-                                                </Border>
-
-                                                <!--
-                                                    顯示位置提示 — 選類型後告訴使用者這筆交易會出現在哪幾頁。
-                                                    解決「新增的資料去哪了」first-time 困惑。
-                                                    HasTxDestination 為 false（未選類型）時隱藏。
-                                                -->
-                                                <Border
-                                                    Margin="0,8,0,0"
-                                                    Padding="10,8"
-                                                    Background="{DynamicResource AppAccentSubtle}"
-                                                    BorderBrush="{DynamicResource AppAccent}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="{StaticResource Radius.Sm}"
-                                                    Visibility="{Binding HasTxDestination, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <ds:AppIcon
-                                                            Margin="0,1,8,0"
-                                                            VerticalAlignment="Top"
-                                                            FontSize="12"
-                                                            Foreground="{DynamicResource AppAccent}"
-                                                            Symbol="Info24" />
-                                                        <StackPanel>
-                                                            <TextBlock
-                                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                                Foreground="{DynamicResource AppTextSecondary}"
-                                                                Text="{DynamicResource Portfolio.Record.Destination.Hint}" />
-                                                            <TextBlock
-                                                                Margin="0,2,0,0"
-                                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                                FontWeight="SemiBold"
-                                                                Foreground="{DynamicResource AppAccent}"
-                                                                Text="{Binding TxDestinationKey, Converter={StaticResource ResourceKeyToStringConverter}}"
-                                                                TextWrapping="Wrap" />
-                                                        </StackPanel>
-                                                    </StackPanel>
-                                                </Border>
+                                                <TextBlock
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource Portfolio.Record.Destination.Hint}" />
+                                                <TextBlock
+                                                    Margin="0,2,0,0"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppAccent}"
+                                                    Text="{Binding TxDestinationKey, Converter={StaticResource ResourceKeyToStringConverter}}"
+                                                    TextWrapping="Wrap" />
                                             </StackPanel>
-                                        </Border>
-                                    </StackPanel>
-                                </DockPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
                             </Border>
+
 
                             <Border
                                 Padding="14,12"
