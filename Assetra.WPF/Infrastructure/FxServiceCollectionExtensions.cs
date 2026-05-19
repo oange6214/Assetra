@@ -1,6 +1,7 @@
 using Assetra.Application.Fx;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Analysis;
+using Assetra.Infrastructure.Fx;
 using Assetra.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,7 +14,17 @@ internal static class FxServiceCollectionExtensions
         string dbPath)
     {
         services.AddSingleton<IFxRateRepository>(_ => new FxRateSqliteRepository(dbPath));
-        services.AddSingleton<IFxRateProvider, StaticFxRateProvider>();
+
+        // P4.1e — hybrid provider tries fx_rate_history (P4.1 store) first, falls
+        // back to the legacy StaticFxRateProvider (fx_rate table). Existing
+        // callers inject IFxRateProvider and transparently get historical rates
+        // when available.
+        services.AddSingleton<StaticFxRateProvider>();
+        services.AddSingleton<IFxRateProvider>(sp =>
+            new HybridFxRateProvider(
+                history: sp.GetRequiredService<IFxRateHistoryService>(),
+                legacy:  sp.GetRequiredService<StaticFxRateProvider>()));
+
         services.AddSingleton<IMultiCurrencyValuationService, MultiCurrencyValuationService>();
         return services;
     }
