@@ -861,7 +861,9 @@
             <alloccontrols:RebalanceDataGrid Grid.Row="2" Grid.RowSpan="2" />
         </Grid>
 
-        <!--  ── 編輯目標配置 overlay ────────────────────────────────────────  -->
-        <alloccontrols:EditTargetsOverlay Grid.Row="0" Grid.RowSpan="2" />
+        <!--
+            EditTargetsOverlay 外提到 MainWindow.xaml，這樣 backdrop 能蓋住
+            NavRail + 標題列；VM (AllocationViewModel.IsEditingTargets) 不變。
+        -->
     </Grid>
 </UserControl>

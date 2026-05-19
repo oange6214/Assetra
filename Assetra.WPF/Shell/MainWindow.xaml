@@ -9,8 +9,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:alerts="clr-namespace:Assetra.WPF.Features.Alerts"
     xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
+    xmlns:goals="clr-namespace:Assetra.WPF.Features.Goals"
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:recurring="clr-namespace:Assetra.WPF.Features.Recurring"
+    xmlns:settingsCtrls="clr-namespace:Assetra.WPF.Features.Settings.Controls"
     xmlns:shell="clr-namespace:Assetra.WPF.Shell"
     xmlns:snackbar="clr-namespace:Assetra.WPF.Features.Snackbar"
     xmlns:statusbar="clr-namespace:Assetra.WPF.Features.StatusBar"
@@ -2774,6 +2776,85 @@
             Grid.RowSpan="3"
             Panel.ZIndex="190"
             DataContext="{Binding Categories}" />
+
+        <!--  財務目標 (Goals) — 新增 / 編輯 + 刪除確認 dialogs  -->
+        <goals:GoalsDialogsHost
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="191"
+            DataContext="{Binding Goals}" />
+
+        <!--
+            對帳 (Reconciliation) — 只有刪除確認一個 modal，直接 inline
+            而不另開 host UserControl。
+        -->
+        <Grid
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="192"
+            DataContext="{Binding Reconciliation}"
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                beh:EscapeKeyCommandBehavior.Command="{Binding CancelDeleteCommand}"
+                Style="{StaticResource AppDestructiveDialogShell}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Style="{StaticResource AppDialogSubtitle}">
+                        <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
+                        <Run Text="{Binding DeleteTargetName}" />
+                        <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />
+                    </TextBlock>
+
+                    <StackPanel Grid.Row="2" Style="{StaticResource AppDialogFooter}">
+                        <Button
+                            Margin="0,0,8,0"
+                            Command="{Binding CancelDeleteCommand}"
+                            Content="{DynamicResource Common.Cancel}"
+                            Style="{StaticResource AppSecondaryButton}" />
+                        <Button
+                            Command="{Binding ConfirmDeleteCommand}"
+                            Content="{DynamicResource Common.Delete}"
+                            Style="{StaticResource AppDangerButton}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!--
+            設定 — 兩個 help dialog (Fugle / TwelveData API)。Dialogs 本身已是
+            UserControl，這裡只是把它們的掛載點從 SettingsView 內部移到 MainWindow，
+            讓 backdrop 蓋住整個視窗。DataContext = SettingsViewModel。
+        -->
+        <settingsCtrls:FugleHelpDialog
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="193"
+            DataContext="{Binding Settings}" />
+        <settingsCtrls:TwelveDataHelpDialog
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="194"
+            DataContext="{Binding Settings}" />
+
+        <!--
+            Allocation 編輯目標 overlay — 同樣已是 UserControl，外提以讓 backdrop 蓋全視窗。
+        -->
+        <pcontrols:EditTargetsOverlay
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="195"
+            DataContext="{Binding Allocation}" />
 
         <!--  不動產 — 刪除確認  -->
         <Grid

@@ -1,0 +1,226 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Goals.GoalsDialogsHost"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Goals"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:GoalsViewModel}, IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <!--
+        外提到 MainWindow 的 Goals dialog host — 新增 / 編輯目標表單 +
+        刪除確認。Root Grid 不設 Background，避免吞 hit-test。
+    -->
+    <Grid>
+
+        <!--  財務目標 — 新增 / 編輯表單  -->
+        <Grid
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border
+                Width="640"
+                MaxWidth="720"
+                MaxHeight="680"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                behaviors:EscapeKeyCommandBehavior.Command="{Binding CancelEditCommand}"
+                SnapsToDevicePixels="True"
+                Style="{StaticResource AppDialogShell}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Style="{StaticResource AppDialogHeader}">
+                        <TextBlock
+                            Style="{StaticResource AppDialogTitle}"
+                            Text="{Binding FormTitle}" />
+                        <TextBlock
+                            Style="{StaticResource AppDialogSubtitle}"
+                            Text="{DynamicResource Goals.Form.Hint}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <Border
+                        Grid.Row="1"
+                        Style="{StaticResource FormSection}">
+                        <Grid>
+                            <Grid.Resources>
+                                <Style x:Key="FormFieldLabel" TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="0,0,0,6" />
+                                    <Setter Property="FontSize" Value="{DynamicResource Font.Size.Xs}" />
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                    <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+                                </Style>
+                                <Style BasedOn="{StaticResource AppTextBox}" TargetType="{x:Type TextBox}">
+                                    <Setter Property="MinHeight" Value="40" />
+                                </Style>
+                            </Grid.Resources>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="3"
+                                Margin="0,0,0,14">
+                                <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Name}" />
+                                <TextBox Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+
+                            <StackPanel
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Margin="0,0,0,14">
+                                <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Target}" />
+                                <TextBox
+                                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                                    Text="{Binding AddTargetAmount, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+
+                            <StackPanel
+                                Grid.Row="1"
+                                Grid.Column="2"
+                                Margin="0,0,0,14">
+                                <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Current}" />
+                                <TextBox
+                                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                                    Text="{Binding AddCurrentAmount, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="0">
+                                <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Deadline}" />
+                                <DatePicker
+                                    MinWidth="132"
+                                    HorizontalContentAlignment="Left"
+                                    SelectedDate="{Binding AddDeadline, Mode=TwoWay}"
+                                    Style="{StaticResource AppDatePicker}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="2">
+                                <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Notes}" />
+                                <TextBox Text="{Binding AddNotes, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+
+                            <StackPanel
+                                Grid.Row="3"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="3"
+                                Margin="0,14,0,0">
+                                <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.LinkedAssetClass}" />
+                                <ComboBox
+                                    ItemsSource="{Binding LinkedAssetClassOptions}"
+                                    SelectedValuePath="Value"
+                                    SelectedValue="{Binding AddLinkedAssetClass, Mode=TwoWay}"
+                                    Style="{StaticResource FormComboBox}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding LabelKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Goals.Add.LinkedAssetClass.Hint}"
+                                    TextWrapping="Wrap" />
+
+                                <StackPanel
+                                    Margin="0,14,0,0"
+                                    Visibility="{Binding IsGroupSelectorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.PortfolioGroup}" />
+                                    <ComboBox
+                                        DisplayMemberPath="Name"
+                                        ItemsSource="{Binding GroupCatalog.Groups}"
+                                        SelectedItem="{Binding AddPortfolioGroup, Mode=TwoWay}"
+                                        Style="{StaticResource FormComboBox}" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{DynamicResource Goals.Add.PortfolioGroup.Hint}"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Margin="24,10,24,0"
+                        Foreground="{DynamicResource AppDown}"
+                        Text="{Binding AddError}"
+                        Visibility="{Binding AddError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+                    <Border
+                        Grid.Row="3"
+                        Margin="0,16,0,0"
+                        Padding="0"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="0">
+                        <StackPanel Style="{StaticResource AppDialogFooter}">
+                            <Button
+                                Margin="0,0,8,0"
+                                Command="{Binding CancelEditCommand}"
+                                Content="{DynamicResource Goals.Edit.Cancel}"
+                                Style="{StaticResource AppSecondaryButton}" />
+                            <Button
+                                Command="{Binding AddCommand}"
+                                Content="{Binding SubmitText}"
+                                Style="{StaticResource AppPrimaryButton}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!--  財務目標 — 刪除確認  -->
+        <Grid
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsConfirmDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                behaviors:EscapeKeyCommandBehavior.Command="{Binding ConfirmDialogNoCommand}"
+                Style="{StaticResource AppDestructiveDialogShell}">
+                <StackPanel Margin="24,20">
+                    <TextBlock
+                        Margin="0,0,0,4"
+                        Style="{StaticResource AppDialogTitle}"
+                        Text="{DynamicResource Goals.Delete.ConfirmTitle}" />
+                    <TextBlock
+                        Margin="0,0,0,20"
+                        Style="{StaticResource AppDialogSubtitle}"
+                        Text="{Binding ConfirmDialogMessage}"
+                        TextWrapping="Wrap" />
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <Button
+                            Margin="0,0,8,0"
+                            Command="{Binding ConfirmDialogNoCommand}"
+                            Content="{DynamicResource Common.Cancel}"
+                            Style="{StaticResource AppSecondaryButton}" />
+                        <Button
+                            Command="{Binding ConfirmDialogYesCommand}"
+                            Content="{DynamicResource Common.Delete}"
+                            Style="{StaticResource AppDangerButton}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

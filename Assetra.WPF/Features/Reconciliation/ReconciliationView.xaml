@@ -382,50 +382,6 @@
             Margin="0,8,0,0"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{Binding StatusMessage}" />
-
-        <Grid
-            Grid.RowSpan="5"
-            Margin="-16"
-            Panel.ZIndex="190"
-            Style="{StaticResource AppDialogOverlay}"
-            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
-
-        <Border
-            Grid.RowSpan="5"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Panel.ZIndex="191"
-            behaviors:EscapeKeyCommandBehavior.Command="{Binding CancelDeleteCommand}"
-            Style="{StaticResource AppDestructiveDialogShell}"
-            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
-                <TextBlock
-                    Grid.Row="1"
-                    Style="{StaticResource AppDialogSubtitle}">
-                    <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
-                    <Run Text="{Binding DeleteTargetName}" />
-                    <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />
-                </TextBlock>
-
-                <StackPanel Grid.Row="2" Style="{StaticResource AppDialogFooter}">
-                    <Button
-                        Margin="0,0,8,0"
-                        Command="{Binding CancelDeleteCommand}"
-                        Content="{DynamicResource Common.Cancel}"
-                        Style="{StaticResource AppSecondaryButton}" />
-                    <Button
-                        Command="{Binding ConfirmDeleteCommand}"
-                        Content="{DynamicResource Common.Delete}"
-                        Style="{StaticResource AppDangerButton}" />
-                </StackPanel>
-            </Grid>
-        </Border>
+        <!-- 刪除確認 dialog 外提到 MainWindow.xaml。VM property 仍是 ReconciliationViewModel.IsDeleteConfirmOpen。-->
     </Grid>
 </UserControl>

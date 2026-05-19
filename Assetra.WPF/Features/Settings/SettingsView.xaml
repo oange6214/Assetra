@@ -1051,7 +1051,10 @@
             </StackPanel>
         </ScrollViewer>
 
-        <controls:FugleHelpDialog />
-        <controls:TwelveDataHelpDialog />
+        <!--
+            FugleHelpDialog / TwelveDataHelpDialog 外提到 MainWindow.xaml，
+            這樣 backdrop 能蓋住 NavRail + 標題列。
+            VM property (IsFugleHelpOpen / IsTwelveDataHelpOpen 等) 不變。
+        -->
     </Grid>
 </UserControl>
