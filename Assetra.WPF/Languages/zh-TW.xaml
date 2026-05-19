@@ -915,6 +915,9 @@
     <sys:String x:Key="Settings.BaseCurrency">估值基準幣別</sys:String>
     <sys:String x:Key="Settings.BaseCurrency.Tooltip">用於跨幣別資產合計與報表估值的基準幣別。與「主要貨幣」（顯示用）獨立。</sys:String>
     <sys:String x:Key="Settings.Section.Data">資料</sys:String>
+    <sys:String x:Key="Settings.Section.Trade">交易預設</sys:String>
+    <sys:String x:Key="Settings.DefaultCommissionDiscount">預設手續費折扣</sys:String>
+    <sys:String x:Key="Settings.DefaultCommissionDiscount.Hint">新增買入交易時自動帶入。輸入 0.1 ~ 1.0（1.0 = 無折扣，0.6 = 六折）。每筆交易內仍可用「手續費（選填）」手動覆寫。</sys:String>
     <sys:String x:Key="Settings.Version">版本</sys:String>
     <sys:String x:Key="Settings.FugleApiKey">Fugle API Key</sys:String>
     <sys:String x:Key="Settings.TwelveDataApiKey">美股即時報價來源 - Twelve Data API Key</sys:String>

@@ -216,4 +216,12 @@ public sealed record AppSettings(
     /// 不同於 <see cref="LastFxRefreshUtc"/>（live FX rate 即時報價）— 這個是
     /// historical FX backfill 跑進 <c>fx_rate_history</c> 表的時間戳。
     /// </summary>
-    DateTimeOffset? LastFxHistoryRefreshAt = null);
+    DateTimeOffset? LastFxHistoryRefreshAt = null,
+
+    /// <summary>
+    /// 預設手續費折扣 (0.1 ~ 1.0；1.0 = 無折扣 / 0.6 = 六折)。新增買入交易 dialog 開啟時
+    /// 自動帶入此值，使用者鮮少改券商折扣，所以從 dialog 內移到設定一次定終身。
+    /// 使用者在 dialog 內手動覆寫的「手續費（選填）」欄位仍是 trade-level override，
+    /// 不受此預設影響。
+    /// </summary>
+    decimal DefaultCommissionDiscount = 1.0m);

@@ -108,6 +108,12 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private double _uiScale = 1.0;
     [ObservableProperty] private string _primaryCurrency = "TWD";
     [ObservableProperty] private string _baseCurrency = "TWD";
+    /// <summary>
+    /// 預設手續費折扣字串輸入。0.1~1.0 之外或無法 parse 都會在儲存時被 sanitize 回 1.0。
+    /// 對應 <see cref="AppSettings.DefaultCommissionDiscount"/>，新增買入交易 dialog 開啟時帶入。
+    /// </summary>
+    [ObservableProperty] private string _defaultCommissionDiscount = "1.0";
+    [ObservableProperty] private string _defaultCommissionDiscountError = string.Empty;
     [ObservableProperty] private string _quoteProvider = "official";
     [ObservableProperty] private string _historyProvider = "twse";
     [ObservableProperty] private string _fugleApiKey = string.Empty;
@@ -323,6 +329,10 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
                 ? "TWD"
                 : s.PreferredCurrency;
             BaseCurrency = string.IsNullOrWhiteSpace(s.BaseCurrency) ? "TWD" : s.BaseCurrency;
+            // 預設手續費折扣 — 0.1~1.0 範圍外回 1.0；TextBox 顯示為 "0.6" / "1.0" 等格式。
+            var disc = s.DefaultCommissionDiscount;
+            if (disc <= 0m || disc > 1m) disc = 1.0m;
+            DefaultCommissionDiscount = disc.ToString("0.##");
             QuoteProvider = NormalizeTaiwanQuoteProvider(s.QuoteProvider);
             HistoryProvider = string.IsNullOrWhiteSpace(s.HistoryProvider) ? "twse" : s.HistoryProvider;
             FugleApiKey = s.FugleApiKey ?? string.Empty;
@@ -580,6 +590,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             UiScale = UiScale,
             PreferredCurrency = PrimaryCurrency,
             BaseCurrency = BaseCurrency,
+            DefaultCommissionDiscount = ParseCommissionDiscount(DefaultCommissionDiscount),
             QuoteProvider = NormalizeTaiwanQuoteProvider(QuoteProvider),
             HistoryProvider = HistoryProvider,
             FugleApiKey = FugleApiKey.Trim(),
@@ -972,6 +983,20 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         string.Equals(provider, "fugle", StringComparison.OrdinalIgnoreCase)
             ? "fugle"
             : "official";
+
+    /// <summary>
+    /// 把使用者輸入的「預設手續費折扣」字串轉成 0.1~1.0 區間的 decimal。
+    /// 空 / 不能 parse / 超出區間 → 回退到 1.0 (無折扣)。
+    /// </summary>
+    private static decimal ParseCommissionDiscount(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return 1.0m;
+        if (!decimal.TryParse(input.Trim(), System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.InvariantCulture, out var v))
+            return 1.0m;
+        if (v <= 0m || v > 1m) return 1.0m;
+        return v;
+    }
 
     public void Dispose()
     {

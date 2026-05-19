@@ -461,7 +461,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 Localize: L,
                 CategoryRepository: services.CategoryRepository,
                 AutoCategorizationRuleRepository: services.AutoCategorizationRuleRepository,
-                GroupCatalog: services.GroupCatalog));
+                GroupCatalog: services.GroupCatalog,
+                GetDefaultCommissionDiscount: () => _settingsService?.Current?.DefaultCommissionDiscount ?? 1.0m));
         Transaction.TransactionCompleted += OnTransactionCompleted;
         Transaction.TradeDeleted += OnTradeDeleted;
 

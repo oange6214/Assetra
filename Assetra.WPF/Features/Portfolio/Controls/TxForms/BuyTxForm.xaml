@@ -219,55 +219,12 @@
                     Text="{Binding AddAssetDialog.AddQuantityError}"
                     Visibility="{Binding AddAssetDialog.AddQuantityError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-                <TextBlock
-                    Margin="0,0,0,4"
-                    FontSize="{StaticResource Font.Size.Xs}"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{DynamicResource Portfolio.Tx.CommissionDiscount}" />
-                <Grid>
-                    <Grid.Visibility>
-                        <MultiBinding Converter="{StaticResource InverseWidthScaleThresholdToVisibilityConverter}" ConverterParameter="940">
-                            <Binding ElementName="Root" Path="ActualWidth" />
-                            <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                        </MultiBinding>
-                    </Grid.Visibility>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="80" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBox Grid.Column="0" Text="{Binding TxCommissionDiscount, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
-                        Grid.Column="1"
-                        Margin="8,0,0,0"
-                        VerticalAlignment="Center"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource Portfolio.Tx.CommissionDiscountHint}" />
-                </Grid>
-                <StackPanel>
-                    <StackPanel.Visibility>
-                        <MultiBinding Converter="{StaticResource WidthScaleThresholdToVisibilityConverter}" ConverterParameter="940">
-                            <Binding ElementName="Root" Path="ActualWidth" />
-                            <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
-                        </MultiBinding>
-                    </StackPanel.Visibility>
-                    <TextBox
-                        Width="96"
-                        HorizontalAlignment="Left"
-                        Text="{Binding TxCommissionDiscount, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
-                        Margin="0,6,0,0"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource Portfolio.Tx.CommissionDiscountHint}"
-                        TextWrapping="Wrap" />
-                </StackPanel>
-                <TextBlock
-                    Margin="0,0,0,12"
-                    Style="{StaticResource FormFieldError}"
-                    Text="{Binding TxCommissionDiscountError}"
-                    Visibility="{Binding TxCommissionDiscountError, Converter={StaticResource StringToVisibilityConverter}}" />
+                <!--
+                    「手續費折扣」欄位已搬到「設定 → 預設手續費折扣」(AppSettings.DefaultCommissionDiscount)。
+                    Dialog 開啟時自動由 SeedCommissionDiscountFromSettings() 帶入；
+                    使用者鮮少每筆交易改券商折扣，移除減少 dialog 噪音。下方「手續費（選填）」
+                    手動覆寫欄位仍保留作 per-trade override。
+                -->
 
                 <!--  Fee preview  -->
                 <Border
@@ -535,25 +492,12 @@
                         TextWrapping="Wrap" />
                 </StackPanel>
 
-                <TextBlock
-                    Margin="0,12,0,4"
-                    FontSize="{StaticResource Font.Size.Xs}"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{DynamicResource Portfolio.Tx.ActualCashAmount}" />
-                <TextBox
-                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                    Text="{Binding Buy.ActualCashAmount, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock
-                    Style="{StaticResource FormFieldError}"
-                    Text="{Binding Buy.ActualCashAmountError}"
-                    Visibility="{Binding Buy.ActualCashAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
-                <TextBlock
-                    Margin="0,2,0,0"
-                    FontSize="{StaticResource Font.Size.Xs}"
-                    Foreground="{DynamicResource AppTextMuted}"
-                    Text="{DynamicResource Portfolio.Tx.ActualCashAmountHint}"
-                    TextWrapping="Wrap" />
+                <!--
+                    「實際扣款金額（選填）」欄位已移除。複委託 / 跨幣別匯差等情境之後
+                    會用「新增投資項目」的資產級設定（資產幣別、是否複委託等）處理，
+                    不再每筆交易手動填。Buy.ActualCashAmount 屬性仍保留在 VM 但
+                    從這個 dialog 不暴露輸入點。
+                -->
             </StackPanel>
         </StackPanel>
     </StackPanel>

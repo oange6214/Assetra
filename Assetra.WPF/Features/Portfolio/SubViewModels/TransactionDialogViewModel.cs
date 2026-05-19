@@ -60,7 +60,10 @@ internal sealed record TransactionDialogDependencies(
     // null-default so existing test factories without the delegate still build.
     Func<Task>? ReloadAllAsync = null,
     // Portfolio-Groups-Refactor P3 — 群組目錄。null 時 dialog 隱藏 group ComboBox。
-    PortfolioGroupCatalog? GroupCatalog = null);
+    PortfolioGroupCatalog? GroupCatalog = null,
+    // 預設手續費折扣讀取 callback（由 AppSettings.DefaultCommissionDiscount 帶）。
+    // 用 Func 避免直接持 IAppSettingsService 介面參考，跟其他 callback 統一風格。
+    Func<decimal>? GetDefaultCommissionDiscount = null);
 
 /// <summary>
 /// 交易類型 ComboBox 的一個選項。Key 對齊 <see cref="TransactionDialogViewModel.TxType"/>
@@ -120,6 +123,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private readonly Func<Task> _loadTradesAsync;
     private readonly Func<Task> _reloadAccountBalancesAsync;
     private readonly Func<Task>? _reloadAllAsync;
+    private readonly Func<decimal>? _getDefaultCommissionDiscount;
     private readonly Action _rebuildTotals;
     private readonly Func<string, string, string> _localize;
 
@@ -209,6 +213,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _categoryRepository = deps.CategoryRepository;
         _ruleRepository = deps.AutoCategorizationRuleRepository;
         GroupCatalog = deps.GroupCatalog;
+        _getDefaultCommissionDiscount = deps.GetDefaultCommissionDiscount;
 
         ExpenseCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_expenseCategories);
         IncomeCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_incomeCategories);
@@ -393,8 +398,23 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     // 股利欄位（現金 + 股票）— 全部移到 Div (DividendTxViewModel)。
     public Tx.DividendTxViewModel Div { get; } = new();
 
-    // 手續費折扣（每筆交易可調，預設 1.0 = 無折扣）
+    // 手續費折扣 — UI 從 dialog 移到設定頁。dialog 仍持此屬性以便下游 fee 計算
+    // 公式（折扣 × 標準費率）不變；初始值由 SeedCommissionDiscountFromSettings()
+    // 在 OpenTxDialog / EditTrade 時從 AppSettings.DefaultCommissionDiscount 帶入。
     [ObservableProperty] private string _txCommissionDiscount = "1.0";
+
+    /// <summary>
+    /// 從 <see cref="AppSettings.DefaultCommissionDiscount"/> 帶 預設值到本 VM。
+    /// 在 dialog 開啟 / 進入編輯模式時呼叫；編輯既有交易時 TxCommissionDiscount 會被
+    /// EditTrade 後續邏輯覆寫成該筆原本的值，因此 seed 不會干擾編輯流程。
+    /// </summary>
+    private void SeedCommissionDiscountFromSettings()
+    {
+        var defaultDisc = _getDefaultCommissionDiscount?.Invoke() ?? 1.0m;
+        // 0.1 ~ 1.0 區間外的歷史壞值直接回 1.0；TextBox 用 "1.0" / "0.6" 等顯示格式。
+        if (defaultDisc <= 0m || defaultDisc > 1m) defaultDisc = 1.0m;
+        TxCommissionDiscount = defaultDisc.ToString("0.##");
+    }
 
     /// <summary>解析後的折扣值，用於計算。</summary>
     public decimal TxCommissionDiscountValue =>
@@ -1033,6 +1053,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Buy.TotalCostError = string.Empty;
         Buy.ActualCashAmountError = string.Empty;
         TxCommissionDiscountError = string.Empty;
+        // 從 AppSettings.DefaultCommissionDiscount 帶預設值 — 取代過去的硬碼 "1.0"。
+        SeedCommissionDiscountFromSettings();
         TxAmount = string.Empty;
         TxNote = string.Empty;
         _suppressCategoryAutoTracking = true;
@@ -1190,7 +1212,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         AddAssetDialog.AddCreditCardBillingDay = string.Empty;
         AddAssetDialog.AddCreditCardDueDay = string.Empty;
         AddAssetDialog.AddCreditCardLimit = string.Empty;
-        TxCommissionDiscount = "1.0";
+        SeedCommissionDiscountFromSettings();
         Buy.Reset();
         Div.InputMode = "perShare";
         Div.TotalInput = string.Empty;

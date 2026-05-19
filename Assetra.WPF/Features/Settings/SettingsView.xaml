@@ -340,6 +340,38 @@
                     </StackPanel>
                 </Border>
 
+                <!--  ── 交易預設 ──  -->
+                <TextBlock
+                    Margin="0,0,0,8"
+                    FontSize="{StaticResource Font.Size.Md}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    Text="{DynamicResource Settings.Section.Trade}" />
+
+                <Border Style="{StaticResource FormCard}"
+                    Margin="0,0,0,24"
+                    Padding="16,12">
+                    <StackPanel>
+                        <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.DefaultCommissionDiscount}" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Settings.DefaultCommissionDiscount.Hint}"
+                            TextWrapping="Wrap" />
+                        <TextBox
+                            Width="96"
+                            Margin="0,8,0,0"
+                            HorizontalAlignment="Left"
+                            Style="{StaticResource AppTextBox}"
+                            Text="{Binding DefaultCommissionDiscount, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Style="{StaticResource FormFieldError}"
+                            Text="{Binding DefaultCommissionDiscountError}"
+                            Visibility="{Binding DefaultCommissionDiscountError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    </StackPanel>
+                </Border>
+
                 <!--  ── 資料 ──  -->
                 <TextBlock
                     Margin="0,0,0,8"
