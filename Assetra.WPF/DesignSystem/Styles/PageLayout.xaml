@@ -26,10 +26,16 @@
         <Setter Property="Orientation" Value="Horizontal" />
     </Style>
 
+    <!--
+        Page title — 字級從 Xl (24px) 降到 Lg (20px) 與 action button 同高 baseline。
+        NavRail 已經給定位，title 文字主要是 action bar 的左側 anchor + 截圖時
+        的 page identity。SemiBold 維持讓它跟 body text 仍然有對比，但不再 shouty。
+        參考 Linear / Notion inline page title 的 typography weight。
+    -->
     <Style x:Key="PageTitleText" TargetType="TextBlock">
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="FontFamily" Value="{StaticResource Font.Family.Display}" />
-        <Setter Property="FontSize" Value="{StaticResource Font.Size.Xl}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Lg}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="TextTrimming" Value="CharacterEllipsis" />
