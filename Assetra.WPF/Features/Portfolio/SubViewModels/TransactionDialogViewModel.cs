@@ -263,6 +263,64 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private Guid? _revisionSourceTradeId;
     private bool _preserveRevisionSourceOnClose;
 
+    // Phase 2.1 — asset selector state (purely passive in this step: ComboBox exists,
+    // user can select, but no cascade to currency / cash account / type filter yet).
+    // P2.2 wires OnSelectedAssetChanged; P2.3 filters AvailableTradeTypes by Kind.
+    [ObservableProperty] private TxAssetSubject? _selectedAsset;
+
+    /// <summary>
+    /// 統一資產選擇器的 item 來源 — 動態組合 Positions / CashAccounts / Liabilities 三類。
+    /// 每次取值都重新組合（cheap，~tens of items），避免 collection-changed 訂閱噪音。
+    /// </summary>
+    public IReadOnlyList<TxAssetSubject> AvailableAssets => BuildAvailableAssets();
+
+    private IReadOnlyList<TxAssetSubject> BuildAvailableAssets()
+    {
+        var list = new List<TxAssetSubject>(Positions.Count + CashAccounts.Count + Liabilities.Count);
+        // 1. 投資持倉 (Stock / Fund / Crypto / Metal / Bond)
+        foreach (var p in Positions)
+        {
+            list.Add(new TxAssetSubject(
+                Kind: MapAssetType(p.AssetType),
+                Id: p.Id,
+                Display: string.IsNullOrEmpty(p.Symbol) ? p.Name : $"{p.Symbol} · {p.Name}",
+                Currency: string.IsNullOrWhiteSpace(p.Currency) ? "TWD" : p.Currency,
+                Symbol: p.Symbol));
+        }
+        // 2. 現金帳戶 — currency 已存在 row 上
+        foreach (var c in CashAccounts)
+        {
+            list.Add(new TxAssetSubject(
+                Kind: TxAssetKind.CashAccount,
+                Id: c.Id,
+                Display: $"{c.Name} · {c.Currency}",
+                Currency: c.Currency,
+                SuggestedCashAccountId: c.Id));
+        }
+        // 3. 負債（信用卡 / 貸款）— Legacy liabilities (AssetId is null) have Label as
+        //    the only stable handle; use Guid.Empty as a sentinel id for them so they
+        //    still appear in the picker. P2.2 cascade logic can no-op on Guid.Empty.
+        foreach (var liab in Liabilities)
+        {
+            list.Add(new TxAssetSubject(
+                Kind: TxAssetKind.Liability,
+                Id: liab.AssetId ?? Guid.Empty,
+                Display: liab.Label,
+                Currency: liab.BalanceAsMoney.Currency));
+        }
+        return list;
+    }
+
+    private static TxAssetKind MapAssetType(Core.Models.AssetType t) => t switch
+    {
+        Core.Models.AssetType.Stock => TxAssetKind.Stock,
+        Core.Models.AssetType.Fund => TxAssetKind.Fund,
+        Core.Models.AssetType.Crypto => TxAssetKind.Crypto,
+        Core.Models.AssetType.PreciousMetal => TxAssetKind.Metal,
+        Core.Models.AssetType.Bond => TxAssetKind.Bond,
+        _ => TxAssetKind.Stock,
+    };
+
     public bool IsEditMode => EditingTradeId.HasValue;
 
     /// <summary>

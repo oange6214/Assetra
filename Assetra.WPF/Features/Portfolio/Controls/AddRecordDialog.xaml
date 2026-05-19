@@ -239,6 +239,30 @@
                                         TextWrapping="Wrap"
                                         Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
 
+                                    <!--
+                                        AddRecordDialog Phase 2.1 — 「選擇資產」統一選擇器。
+                                        本階段 (P2.1) 純展示：使用者選了沒有 cascade，只是 SelectedAsset
+                                        observable 會 trigger PropertyChanged。P2.2 會接 OnSelectedAssetChanged
+                                        → 自動帶幣別 + 推薦現金帳戶；P2.3 → 過濾 AvailableTradeTypes。
+                                        編輯模式下擬作 read-only label，這版先讓它跟新增模式長一樣。
+                                    -->
+                                    <StackPanel
+                                        Margin="0,0,0,12"
+                                        Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                        <TextBlock
+                                            Margin="0,0,0,4"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{DynamicResource Portfolio.Tx.Asset.Label}" />
+                                        <ComboBox
+                                            DisplayMemberPath="Display"
+                                            ItemsSource="{Binding AvailableAssets}"
+                                            SelectedItem="{Binding SelectedAsset, Mode=TwoWay}"
+                                            Style="{StaticResource FormComboBox}"
+                                            ToolTip="{DynamicResource Portfolio.Tx.Asset.Hint}" />
+                                    </StackPanel>
+
                                     <!--  Date + Type — 平排兩欄  -->
                                     <Grid>
                                         <Grid.ColumnDefinitions>
