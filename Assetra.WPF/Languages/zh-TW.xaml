@@ -1000,6 +1000,15 @@
     <sys:String x:Key="Sync.Domain.FinancialGoal">財務目標</sys:String>
     <sys:String x:Key="Sync.Domain.PortfolioGroup">投資群組</sys:String>
 
+    <!-- P4.1d — FX history refresh (historical FX backfill, distinct from live FX) -->
+    <sys:String x:Key="Settings.FxHistory.SectionTitle">匯率歷史</sys:String>
+    <sys:String x:Key="Settings.FxHistory.SectionHint">每次啟動自動拉過去 7 天的歷史匯率到本機；當報表顯示「匯率資料缺失」時可手動觸發更新。</sys:String>
+    <sys:String x:Key="Settings.FxHistory.RefreshNow">立即更新</sys:String>
+    <sys:String x:Key="Settings.FxHistory.NeverRefreshed">尚未更新過</sys:String>
+    <sys:String x:Key="Settings.FxHistory.LastRefreshedFormat">上次更新：{0:yyyy-MM-dd HH:mm}</sys:String>
+    <sys:String x:Key="Settings.FxHistory.RefreshedSuccess">匯率歷史已更新</sys:String>
+    <sys:String x:Key="Settings.FxHistory.RefreshedFailed">匯率歷史更新失敗</sys:String>
+
     <!--  Categories  -->
     <sys:String x:Key="Nav.Categories">收支分類</sys:String>
     <sys:String x:Key="Categories.Title">收支分類管理</sys:String>

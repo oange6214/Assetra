@@ -991,6 +991,15 @@
     <sys:String x:Key="Sync.Domain.FinancialGoal">Goals</sys:String>
     <sys:String x:Key="Sync.Domain.PortfolioGroup">Investment Groups</sys:String>
 
+    <!-- P4.1d — FX history refresh -->
+    <sys:String x:Key="Settings.FxHistory.SectionTitle">FX History</sys:String>
+    <sys:String x:Key="Settings.FxHistory.SectionHint">Historical FX rates are pulled automatically at startup. Trigger a refresh manually when reports show "missing FX data".</sys:String>
+    <sys:String x:Key="Settings.FxHistory.RefreshNow">Refresh now</sys:String>
+    <sys:String x:Key="Settings.FxHistory.NeverRefreshed">Never refreshed</sys:String>
+    <sys:String x:Key="Settings.FxHistory.LastRefreshedFormat">Last refreshed: {0:yyyy-MM-dd HH:mm}</sys:String>
+    <sys:String x:Key="Settings.FxHistory.RefreshedSuccess">FX history updated</sys:String>
+    <sys:String x:Key="Settings.FxHistory.RefreshedFailed">FX history refresh failed</sys:String>
+
     <!--  Categories  -->
     <sys:String x:Key="Nav.Categories">Categories</sys:String>
     <sys:String x:Key="Categories.Title">Income &amp; Expense Categories</sys:String>

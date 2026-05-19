@@ -59,7 +59,8 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<Assetra.Application.Fx.FxRateHistoryRefresher>(sp =>
             new Assetra.Application.Fx.FxRateHistoryRefresher(
                 sp.GetRequiredService<IFxRateHistoryFetcher>(),
-                sp.GetRequiredService<IFxRateHistoryRepository>()));
+                sp.GetRequiredService<IFxRateHistoryRepository>(),
+                sp.GetService<IAppSettingsService>())); // P4.1d — persist LastFxRefreshAt
 
         services.AddSingleton<HttpClient>(_ =>
         {

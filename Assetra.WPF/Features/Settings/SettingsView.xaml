@@ -418,6 +418,31 @@
                                 Style="{StaticResource AppSecondaryButton}" />
                         </StackPanel>
 
+                        <!--  P4.1d — FX History (historical FX backfill — distinct from the live FX rate refresh above)  -->
+                        <StackPanel Margin="0,16,0,0">
+                            <TextBlock
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                FontWeight="SemiBold"
+                                Text="{DynamicResource Settings.FxHistory.SectionTitle}" />
+                            <TextBlock
+                                Margin="0,4,0,8"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Settings.FxHistory.SectionHint}"
+                                TextWrapping="Wrap" />
+                            <TextBlock
+                                Margin="0,0,0,8"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{Binding LastFxHistoryRefreshDisplay}" />
+                            <Button
+                                HorizontalAlignment="Left"
+                                Command="{Binding RefreshFxHistoryCommand}"
+                                Content="{DynamicResource Settings.FxHistory.RefreshNow}"
+                                IsEnabled="{Binding CanRefreshFxHistory}"
+                                Style="{StaticResource AppSecondaryButton}" />
+                        </StackPanel>
+
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock

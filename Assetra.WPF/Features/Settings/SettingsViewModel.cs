@@ -125,6 +125,24 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [NotifyPropertyChangedFor(nameof(CanRefreshUsSymbolDirectory))]
     private bool _isRefreshingUsSymbolDirectory;
 
+    // P4.1d — FX *history* refresh (distinct from the live FxRate refresh handled below)
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LastFxHistoryRefreshDisplay))]
+    private DateTimeOffset? _lastFxHistoryRefreshAt;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanRefreshFxHistory))]
+    private bool _isRefreshingFxHistory;
+
+    public string LastFxHistoryRefreshDisplay =>
+        LastFxHistoryRefreshAt is null
+            ? _localization?.Get("Settings.FxHistory.NeverRefreshed", "尚未更新過") ?? "尚未更新過"
+            : string.Format(
+                _localization?.Get("Settings.FxHistory.LastRefreshedFormat", "上次更新：{0:yyyy-MM-dd HH:mm}") ?? "上次更新：{0:yyyy-MM-dd HH:mm}",
+                LastFxHistoryRefreshAt.Value.LocalDateTime);
+
+    public bool CanRefreshFxHistory => !IsRefreshingFxHistory && _fxRefresher is not null;
+
     [ObservableProperty] private bool _isFugleHelpOpen;
     [ObservableProperty] private bool _isTwelveDataHelpOpen;
     [ObservableProperty] private string _ocrTessdataPath = string.Empty;
@@ -249,6 +267,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
     public string UiScaleDisplay => $"{_uiScalePreview:0.00}×";
 
+    private readonly Assetra.Application.Fx.FxRateHistoryRefresher? _fxRefresher;
+
     public SettingsViewModel(
         IAppSettingsService settings,
         IThemeService theme,
@@ -258,7 +278,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         ConflictResolutionViewModel conflicts,
         ISnackbarService? snackbar = null,
         IRefreshableSymbolDirectory? usSymbolDirectory = null,
-        ITwelveDataConnectionTester? twelveDataTester = null)
+        ITwelveDataConnectionTester? twelveDataTester = null,
+        Assetra.Application.Fx.FxRateHistoryRefresher? fxRefresher = null)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(theme);
@@ -274,6 +295,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         _usSymbolDirectory = usSymbolDirectory;
         _twelveDataTester = twelveDataTester;
         _snackbar = snackbar;
+        _fxRefresher = fxRefresher;
         Sync = sync;
         Conflicts = conflicts;
 
@@ -311,6 +333,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             DefaultHomeSection = string.IsNullOrWhiteSpace(s.DefaultHomeSection)
                 ? "FinancialOverview"
                 : s.DefaultHomeSection;
+            LastFxHistoryRefreshAt = s.LastFxHistoryRefreshAt;
             AmtRegularTaxableIncome = s.AmtRegularTaxableIncome;
             AmtRegularIncomeTax = s.AmtRegularIncomeTax;
             AmtInsuranceDeathProceeds = s.AmtInsuranceDeathProceeds;
@@ -797,6 +820,41 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         finally
         {
             IsRefreshingUsSymbolDirectory = false;
+        }
+    }
+
+    /// <summary>
+    /// P4.1d — manual trigger for the FX history refresher. Same pipeline as
+    /// the startup auto-refresh; the user-facing button just makes it on-demand.
+    /// On success <see cref="LastFxRefreshAt"/> updates to current time and
+    /// persists to AppSettings via the refresher's own settings hook.
+    /// </summary>
+    [RelayCommand]
+    private async Task RefreshFxHistoryAsync()
+    {
+        if (_fxRefresher is null || IsRefreshingFxHistory) return;
+
+        IsRefreshingFxHistory = true;
+        try
+        {
+            var baseCcy = string.IsNullOrWhiteSpace(BaseCurrency) ? "TWD" : BaseCurrency;
+            await _fxRefresher.RefreshAsync(
+                baseCcy,
+                Assetra.Application.Fx.FxRateHistoryRefresher.DefaultForeignCurrencies,
+                daysBack: 7).ConfigureAwait(true);
+            // Pull the freshly-persisted timestamp back from AppSettings.
+            LastFxHistoryRefreshAt = _settings.Current?.LastFxHistoryRefreshAt;
+            _snackbar?.Success(_localization.Get(
+                "Settings.Fx.RefreshedSuccess", "匯率歷史已更新"));
+        }
+        catch (Exception ex)
+        {
+            _snackbar?.Error(_localization.Get(
+                "Settings.Fx.RefreshedFailed", "匯率歷史更新失敗") + " " + ex.Message);
+        }
+        finally
+        {
+            IsRefreshingFxHistory = false;
         }
     }
 

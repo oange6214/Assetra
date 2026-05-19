@@ -207,4 +207,13 @@ public sealed record AppSettings(
     /// 與內建 4 個（TAIEX / 0050 / 00981A / 1.5% 定存）並列。
     /// 目前沒有編輯 UI；使用者編輯 settings.json 即可生效。
     /// </summary>
-    List<string>? CustomBenchmarkSymbols = null);
+    List<string>? CustomBenchmarkSymbols = null,
+
+    /// <summary>
+    /// MultiCurrency-Reporting P4.1d — 上次成功跑歷史匯率 backfill 的 UTC 時間戳。
+    /// null = 尚未跑過（新使用者 / 安裝後第一次 startup 還沒到 5-sec delay）。
+    /// 設定頁顯示給使用者看 + 提供「立即更新」按鈕。
+    /// 不同於 <see cref="LastFxRefreshUtc"/>（live FX rate 即時報價）— 這個是
+    /// historical FX backfill 跑進 <c>fx_rate_history</c> 表的時間戳。
+    /// </summary>
+    DateTimeOffset? LastFxHistoryRefreshAt = null);

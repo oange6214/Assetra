@@ -26,13 +26,16 @@ public sealed class FxRateHistoryRefresher
 
     private readonly IFxRateHistoryFetcher _fetcher;
     private readonly IFxRateHistoryRepository _repo;
+    private readonly IAppSettingsService? _settings;
 
     public FxRateHistoryRefresher(
         IFxRateHistoryFetcher fetcher,
-        IFxRateHistoryRepository repo)
+        IFxRateHistoryRepository repo,
+        IAppSettingsService? settings = null)
     {
         _fetcher = fetcher ?? throw new ArgumentNullException(nameof(fetcher));
         _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+        _settings = settings;
     }
 
     /// <summary>
@@ -80,11 +83,32 @@ public sealed class FxRateHistoryRefresher
             try
             {
                 await _repo.UpsertRangeAsync(collected, ct).ConfigureAwait(false);
+                await UpdateLastRefreshTimestampAsync().ConfigureAwait(false);
             }
             catch
             {
                 // DB hiccup during backfill is non-fatal — next startup tries again.
             }
+        }
+    }
+
+    /// <summary>
+    /// Persist <see cref="AppSettings.LastFxRefreshAt"/> = now so the settings
+    /// page can surface "上次更新" to the user. Failures swallowed — the
+    /// timestamp is purely informational; missing it just means stale UI.
+    /// </summary>
+    private async Task UpdateLastRefreshTimestampAsync()
+    {
+        if (_settings is null) return;
+        try
+        {
+            var current = _settings.Current ?? new AppSettings();
+            var updated = current with { LastFxHistoryRefreshAt = DateTimeOffset.UtcNow };
+            await _settings.SaveAsync(updated).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Best-effort timestamp; ignore errors.
         }
     }
 }
