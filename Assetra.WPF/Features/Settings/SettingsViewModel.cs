@@ -830,7 +830,17 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     /// persists to AppSettings via the refresher's own settings hook.
     /// </summary>
     [RelayCommand]
-    private async Task RefreshFxHistoryAsync()
+    private Task RefreshFxHistoryAsync() => RunFxRefreshAsync(daysBack: 7);
+
+    /// <summary>
+    /// P4.1f — deep backfill (365 days). Useful for users who want long
+    /// historical reports (year-end snapshots, multi-year trend charts) and
+    /// don't want to wait for the daily 7-day pull to gradually fill in.
+    /// </summary>
+    [RelayCommand]
+    private Task RefreshFxHistoryDeepAsync() => RunFxRefreshAsync(daysBack: 365);
+
+    private async Task RunFxRefreshAsync(int daysBack)
     {
         if (_fxRefresher is null || IsRefreshingFxHistory) return;
 
@@ -841,16 +851,15 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             await _fxRefresher.RefreshAsync(
                 baseCcy,
                 Assetra.Application.Fx.FxRateHistoryRefresher.DefaultForeignCurrencies,
-                daysBack: 7).ConfigureAwait(true);
-            // Pull the freshly-persisted timestamp back from AppSettings.
+                daysBack: daysBack).ConfigureAwait(true);
             LastFxHistoryRefreshAt = _settings.Current?.LastFxHistoryRefreshAt;
             _snackbar?.Success(_localization.Get(
-                "Settings.Fx.RefreshedSuccess", "匯率歷史已更新"));
+                "Settings.FxHistory.RefreshedSuccess", "匯率歷史已更新"));
         }
         catch (Exception ex)
         {
             _snackbar?.Error(_localization.Get(
-                "Settings.Fx.RefreshedFailed", "匯率歷史更新失敗") + " " + ex.Message);
+                "Settings.FxHistory.RefreshedFailed", "匯率歷史更新失敗") + " " + ex.Message);
         }
         finally
         {

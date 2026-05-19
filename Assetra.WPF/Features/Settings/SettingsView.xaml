@@ -435,12 +435,20 @@
                                 FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{Binding LastFxHistoryRefreshDisplay}" />
-                            <Button
-                                HorizontalAlignment="Left"
-                                Command="{Binding RefreshFxHistoryCommand}"
-                                Content="{DynamicResource Settings.FxHistory.RefreshNow}"
-                                IsEnabled="{Binding CanRefreshFxHistory}"
-                                Style="{StaticResource AppSecondaryButton}" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button
+                                    Margin="0,0,8,0"
+                                    Command="{Binding RefreshFxHistoryCommand}"
+                                    Content="{DynamicResource Settings.FxHistory.RefreshNow}"
+                                    IsEnabled="{Binding CanRefreshFxHistory}"
+                                    Style="{StaticResource AppSecondaryButton}" />
+                                <Button
+                                    Command="{Binding RefreshFxHistoryDeepCommand}"
+                                    Content="{DynamicResource Settings.FxHistory.DeepBackfill}"
+                                    IsEnabled="{Binding CanRefreshFxHistory}"
+                                    Style="{StaticResource AppSecondaryButton}"
+                                    ToolTip="{DynamicResource Settings.FxHistory.DeepBackfillHint}" />
+                            </StackPanel>
                         </StackPanel>
 
                         <StackPanel>
