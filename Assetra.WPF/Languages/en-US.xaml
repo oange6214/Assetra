@@ -1232,6 +1232,12 @@
     <sys:String x:Key="Trends.Period.All">All</sys:String>
     <sys:String x:Key="Trends.Empty">No history snapshots yet</sys:String>
     <sys:String x:Key="Trends.Hint">Data sourced from daily portfolio snapshots (market value)</sys:String>
+    <sys:String x:Key="Trends.Repair.Label">Repair date:</sys:String>
+    <sys:String x:Key="Trends.Repair.Button">Recompute</sys:String>
+    <sys:String x:Key="Trends.Repair.Success">Recomputed snapshot for {0:yyyy-MM-dd}</sys:String>
+    <sys:String x:Key="Trends.Repair.Failed">No history price or trade log for that date</sys:String>
+    <sys:String x:Key="Trends.Repair.Error">Repair failed: {0}</sys:String>
+    <sys:String x:Key="Trends.Repair.Unavailable">Snapshot repair service not available</sys:String>
     <sys:String x:Key="Trends.CustomRange">Custom range</sys:String>
     <!-- Stage 1 (Dashboard consolidation): period KPI strip + benchmarks -->
     <sys:String x:Key="Trends.Kpi.StartValue">Start</sys:String>

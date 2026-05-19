@@ -36,4 +36,7 @@ public sealed class PortfolioHistoryMaintenanceService : IPortfolioHistoryMainte
 
     public Task<int> BackfillAsync(CancellationToken ct = default)
         => _backfillService.BackfillAsync(ct);
+
+    public Task<bool> RepairSnapshotAsync(DateOnly date, CancellationToken ct = default)
+        => _backfillService.RepairSnapshotAsync(date, ct);
 }

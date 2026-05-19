@@ -148,6 +148,16 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     private readonly System.Collections.ObjectModel.ObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow> _customBenchmarks = [];
     public System.Collections.ObjectModel.ReadOnlyObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow> CustomBenchmarks { get; }
 
+    // 修復可疑點（partial-price snapshot 假象）— 由「修復這天」按鈕綁定。
+    // 可選注入：給 unit test / 簡化情境留路。
+    private readonly IPortfolioHistoryMaintenanceService? _maintenance;
+
+    /// <summary>DatePicker 綁定的「要修復的日期」。預設今日，按鈕觸發 RepairDate 命令。</summary>
+    [ObservableProperty] private DateTime _repairTargetDate = DateTime.Today;
+
+    /// <summary>修復後顯示的訊息（success / failure），3 秒後自動清空。</summary>
+    [ObservableProperty] private string _repairStatusMessage = string.Empty;
+
     public PortfolioHistoryViewModel(
         IPortfolioHistoryQueryService historyQueryService,
         ILocalizationService? localization = null,
@@ -159,7 +169,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         ITradeRepository? trades = null,
         IVolatilityCalculator? volatility = null,
         ISharpeRatioCalculator? sharpe = null,
-        IConcentrationAnalyzer? concentration = null)
+        IConcentrationAnalyzer? concentration = null,
+        IPortfolioHistoryMaintenanceService? maintenance = null)
     {
         _historyQueryService = historyQueryService;
         _localization = localization ?? NullLocalizationService.Instance;
@@ -172,6 +183,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         _volatility = volatility;
         _sharpe = sharpe;
         _concentration = concentration;
+        _maintenance = maintenance;
         HasDrawdown = _drawdown is not null;
         HasBenchmark = _benchmark is not null;
         HasVolatility = _volatility is not null;
@@ -248,6 +260,43 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             CustomEndDate = null;
             SelectedDays = days;
             await RefreshChartAsync();
+        }
+    }
+
+    /// <summary>
+    /// 「修復這天」按鈕：用歷史收盤價重算 <see cref="RepairTargetDate"/> 那一日的 snapshot
+    /// 並 UPSERT，覆蓋既有可能是 partial-price 假象的那筆。重算後重新載入 chart。
+    /// </summary>
+    [RelayCommand]
+    private async Task RepairDate()
+    {
+        if (_maintenance is null)
+        {
+            RepairStatusMessage = _localization.Get(
+                "Trends.Repair.Unavailable", "本機未啟用快照修復服務");
+            return;
+        }
+        try
+        {
+            var date = DateOnly.FromDateTime(RepairTargetDate);
+            var ok = await _maintenance.RepairSnapshotAsync(date);
+            if (ok)
+            {
+                await LoadAsync();
+                RepairStatusMessage = string.Format(
+                    _localization.Get("Trends.Repair.Success", "已重算 {0:yyyy-MM-dd} 的 snapshot"),
+                    date.ToDateTime(TimeOnly.MinValue));
+            }
+            else
+            {
+                RepairStatusMessage = _localization.Get(
+                    "Trends.Repair.Failed", "找不到該日的歷史價格或交易記錄");
+            }
+        }
+        catch (Exception ex)
+        {
+            RepairStatusMessage = string.Format(
+                _localization.Get("Trends.Repair.Error", "修復失敗：{0}"), ex.Message);
         }
     }
 

@@ -155,6 +155,19 @@ public partial class PortfolioViewModel
     {
         try
         {
+            // Partial-price guard — 解決「資產趨勢出現一日跳水 + 隔日反彈」假象。
+            //
+            // 原本只有 TotalMarketValue > 0 + positionCount > 0 兩道閘，無法防止 app
+            // 啟動時 quote API 還沒全部回來就觸發 snapshot 寫入：缺一檔股票的 quote
+            // → 該 row CurrentPrice = 0 → MarketValue 缺值 → TotalMarketValue 短少。
+            // INSERT OR REPLACE 寫進 DB 後，使用者切走頁面 / 關 app 前如果完整 quote
+            // 還沒回來，當日 snapshot 就是這個缺值版本，造成 trend chart 一日跳水。
+            //
+            // Guard：任一檔有持倉的 equity / fund position 還是 CurrentPrice = 0 就跳
+            // 過。Crypto / Bond 等可能合理為 0 的 type 不算（避免誤殺）。
+            if (HasUnpricedPositions())
+                return;
+
             var baseCcy = _settingsService?.Current?.BaseCurrency;
             var written = await _historyMaintenanceService.TryRecordSnapshotAsync(
                 TotalCost, TotalMarketValue, TotalPnl, Positions.Count,
@@ -170,6 +183,25 @@ public partial class PortfolioViewModel
         {
             Log.Warning(ex, "[Portfolio] RecordSnapshotAsync failed");
         }
+    }
+
+    /// <summary>
+    /// True 代表至少一檔「應該有報價」的持倉目前 CurrentPrice = 0，通常是 quote API
+    /// 還沒回應完。回 true 時 caller 應該跳過寫 snapshot，等下一輪 totals 重算再試。
+    /// </summary>
+    private bool HasUnpricedPositions()
+    {
+        foreach (var p in Positions)
+        {
+            if (p.Quantity <= 0) continue;
+            // 只認需要 live quote 才會有 price 的 type：Stock / Fund。
+            // Crypto / Bond / PreciousMetal 等 type 即使 CurrentPrice=0 也可能是手動估值 fallback。
+            if (p.AssetType is not (Core.Models.AssetType.Stock or Core.Models.AssetType.Fund))
+                continue;
+            if (p.CurrentPrice == 0m)
+                return true;
+        }
+        return false;
     }
 
     /// <summary>

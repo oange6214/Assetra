@@ -136,6 +136,80 @@ public sealed class PortfolioBackfillService
         return written;
     }
 
+    /// <summary>
+    /// 強制用 history price 重建單一指定日的 snapshot，覆蓋既有資料。
+    /// <para>
+    /// 用途：使用者察覺某日 trend chart 跳水 / 跳高，懷疑當天是 partial-price
+    /// snapshot 假象（如 app 啟動時某檔 quote 還沒回來）。按下「修復這一日」就會
+    /// 用歷史收盤價重算，UPSERT 覆蓋。
+    /// </para>
+    /// <para>
+    /// 回傳 true 代表成功覆寫；false 代表沒有對應 position log / 抓不到歷史價 /
+    /// 寫入失敗。
+    /// </para>
+    /// </summary>
+    public async Task<bool> RepairSnapshotAsync(DateOnly date, CancellationToken ct = default)
+    {
+        var logs = await _logRepo.GetAllAsync(ct).ConfigureAwait(false);
+        if (logs.Count == 0)
+            return false;
+
+        var positions = ReconstructPositions(logs, date);
+        if (positions.Count == 0)
+            return false;
+
+        var symbols = positions.Select(p => (p.Symbol, p.Exchange)).Distinct().ToList();
+        var prices = new Dictionary<string, decimal>();
+        foreach (var (symbol, exchange) in symbols)
+        {
+            if (ct.IsCancellationRequested) break;
+            try
+            {
+                var history = await _historyProvider.GetHistoryAsync(
+                    symbol, exchange, ChartPeriod.TwoYears, ct);
+                var match = history.FirstOrDefault(h => h.Date == date);
+                if (match != default)
+                    prices[symbol] = match.Close;
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException)
+            {
+                _logger.LogWarning(ex, "Repair: could not fetch price history for {Symbol}", symbol);
+            }
+        }
+
+        decimal totalCost = 0m, totalMarketValue = 0m;
+        int priced = 0;
+        foreach (var pos in positions)
+        {
+            if (!prices.TryGetValue(pos.Symbol, out var close))
+                continue;
+            totalCost += pos.BuyPrice * pos.Quantity;
+            totalMarketValue += close * pos.Quantity;
+            priced++;
+        }
+
+        if (priced == 0)
+            return false;
+
+        var snapshot = new PortfolioDailySnapshot(
+            date,
+            totalCost,
+            totalMarketValue,
+            totalMarketValue - totalCost,
+            positions.Count);
+
+        try
+        {
+            await _snapshotRepo.UpsertAsync(snapshot, ct).ConfigureAwait(false);
+            return true;
+        }
+        catch (Exception ex) when (ex is System.Data.Common.DbException or InvalidOperationException)
+        {
+            _logger.LogWarning(ex, "Repair: failed to write snapshot for {Date}", date);
+            return false;
+        }
+    }
+
     // helpers
 
     /// <summary>

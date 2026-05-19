@@ -60,6 +60,9 @@ public partial class PortfolioViewModel
 
         public Task<int> BackfillAsync(CancellationToken ct = default) =>
             Task.FromResult(0);
+
+        public Task<bool> RepairSnapshotAsync(DateOnly date, CancellationToken ct = default) =>
+            Task.FromResult(false);
     }
 
     private sealed class NullAccountMutationWorkflowService : IAccountMutationWorkflowService

@@ -19,4 +19,10 @@ public interface IPortfolioHistoryMaintenanceService
         CancellationToken ct = default);
 
     Task<int> BackfillAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// 強制用 history price 重新計算 <paramref name="date"/> 那一日的 snapshot 並 UPSERT。
+    /// 給「資產趨勢顯示一日跳水但其實是 partial-price snapshot 假象」的修復按鈕用。
+    /// </summary>
+    Task<bool> RepairSnapshotAsync(DateOnly date, CancellationToken ct = default);
 }
