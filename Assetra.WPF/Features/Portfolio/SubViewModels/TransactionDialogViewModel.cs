@@ -63,7 +63,10 @@ internal sealed record TransactionDialogDependencies(
     PortfolioGroupCatalog? GroupCatalog = null,
     // 預設手續費折扣讀取 callback（由 AppSettings.DefaultCommissionDiscount 帶）。
     // 用 Func 避免直接持 IAppSettingsService 介面參考，跟其他 callback 統一風格。
-    Func<decimal>? GetDefaultCommissionDiscount = null);
+    Func<decimal>? GetDefaultCommissionDiscount = null,
+    // P2.2 — 支援幣別清單（由 ICurrencyService.SupportedCurrencies 帶）。
+    // 跟 Settings 頁共用清單，避免不同 dropdown 看到不同的幣別子集。
+    Func<IReadOnlyList<string>>? GetSupportedCurrencies = null);
 
 /// <summary>
 /// 交易類型 ComboBox 的一個選項。Key 對齊 <see cref="TransactionDialogViewModel.TxType"/>
@@ -124,6 +127,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private readonly Func<Task> _reloadAccountBalancesAsync;
     private readonly Func<Task>? _reloadAllAsync;
     private readonly Func<decimal>? _getDefaultCommissionDiscount;
+    private readonly Func<IReadOnlyList<string>>? _getSupportedCurrencies;
     private readonly Action _rebuildTotals;
     private readonly Func<string, string, string> _localize;
 
@@ -214,6 +218,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _ruleRepository = deps.AutoCategorizationRuleRepository;
         GroupCatalog = deps.GroupCatalog;
         _getDefaultCommissionDiscount = deps.GetDefaultCommissionDiscount;
+        _getSupportedCurrencies = deps.GetSupportedCurrencies;
 
         ExpenseCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_expenseCategories);
         IncomeCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_incomeCategories);
@@ -263,10 +268,69 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private Guid? _revisionSourceTradeId;
     private bool _preserveRevisionSourceOnClose;
 
-    // Phase 2.1 — asset selector state (purely passive in this step: ComboBox exists,
-    // user can select, but no cascade to currency / cash account / type filter yet).
-    // P2.2 wires OnSelectedAssetChanged; P2.3 filters AvailableTradeTypes by Kind.
+    // Phase 2.1 — asset selector state. P2.2 adds the cascade below.
     [ObservableProperty] private TxAssetSubject? _selectedAsset;
+
+    // Phase 2.2 — currency dropdown is now a first-class field. When a user picks an
+    // asset, OnSelectedAssetChanged copies asset.Currency here unless the user has
+    // already manually changed the currency (tracked by _userTouchedCurrency).
+    // The dirty flag resets on each fresh dialog open so the next session starts clean.
+    [ObservableProperty] private string _txCurrency = "TWD";
+    private bool _userTouchedCurrency;
+    private bool _suppressCurrencyDirty;  // set when we (the VM) write TxCurrency programmatically
+
+    partial void OnTxCurrencyChanged(string value)
+    {
+        if (!_suppressCurrencyDirty) _userTouchedCurrency = true;
+    }
+
+    /// <summary>
+    /// 供 XAML ComboBox 用的支援幣別清單。優先用 DI 注入的 callback (跟 Settings 共用)；
+    /// 沒注入時 fallback 到 (asset 出現過的幣別 ∪ TWD/USD)，至少不會空清單。
+    /// </summary>
+    public IReadOnlyList<string> SupportedCurrencies
+    {
+        get
+        {
+            var fromService = _getSupportedCurrencies?.Invoke();
+            if (fromService is { Count: > 0 }) return fromService;
+            // Fallback：從目前 assets 看到的幣別 union 出來 + TWD/USD 保底
+            var set = new System.Collections.Generic.SortedSet<string>(StringComparer.OrdinalIgnoreCase) { "TWD", "USD" };
+            foreach (var a in AvailableAssets)
+                if (!string.IsNullOrWhiteSpace(a.Currency)) set.Add(a.Currency.ToUpperInvariant());
+            return set.ToList();
+        }
+    }
+
+    /// <summary>
+    /// P2.2 cascade — 使用者選了資產後自動帶幣別 + 推薦現金帳戶。
+    /// 守則：
+    /// <list type="bullet">
+    ///   <item>selected = null（清空）→ 不動其他欄位（避免清掉使用者已填的值）</item>
+    ///   <item>使用者已手動改過 TxCurrency → 不覆蓋（_userTouchedCurrency=true）</item>
+    ///   <item>SuggestedCashAccountId 找得到對應的 row → 設 TxCashAccount；找不到不動</item>
+    /// </list>
+    /// </summary>
+    partial void OnSelectedAssetChanged(TxAssetSubject? value)
+    {
+        if (value is null) return;
+
+        // 1. 幣別 — 只在使用者沒手動改過時 cascade
+        if (!_userTouchedCurrency && !string.IsNullOrWhiteSpace(value.Currency))
+        {
+            _suppressCurrencyDirty = true;
+            try { TxCurrency = value.Currency.ToUpperInvariant(); }
+            finally { _suppressCurrencyDirty = false; }
+        }
+
+        // 2. 現金帳戶 — 先用資產直接指定的 SuggestedCashAccountId，
+        //    沒指定時找跟 TxCurrency 同幣別的第一個 CashAccount。
+        Guid? cashId = value.SuggestedCashAccountId
+            ?? CashAccounts.FirstOrDefault(c =>
+                string.Equals(c.Currency, TxCurrency, StringComparison.OrdinalIgnoreCase))?.Id;
+        if (cashId is { } id)
+            TxCashAccount = CashAccounts.FirstOrDefault(c => c.Id == id);
+    }
 
     /// <summary>
     /// 統一資產選擇器的 item 來源 — 動態組合 Positions / CashAccounts / Liabilities 三類。
@@ -278,14 +342,20 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         var list = new List<TxAssetSubject>(Positions.Count + CashAccounts.Count + Liabilities.Count);
         // 1. 投資持倉 (Stock / Fund / Crypto / Metal / Bond)
+        //    SuggestedCashAccountId — 找跟此持倉幣別相符的第一個現金帳戶，給 P2.2 cascade 用。
+        //    沒找到時 null，P2.2 不會強制覆寫使用者已選的帳戶。
         foreach (var p in Positions)
         {
+            var ccy = string.IsNullOrWhiteSpace(p.Currency) ? "TWD" : p.Currency;
+            var sameCcyCash = CashAccounts.FirstOrDefault(c =>
+                string.Equals(c.Currency, ccy, StringComparison.OrdinalIgnoreCase));
             list.Add(new TxAssetSubject(
                 Kind: MapAssetType(p.AssetType),
                 Id: p.Id,
                 Display: string.IsNullOrEmpty(p.Symbol) ? p.Name : $"{p.Symbol} · {p.Name}",
-                Currency: string.IsNullOrWhiteSpace(p.Currency) ? "TWD" : p.Currency,
-                Symbol: p.Symbol));
+                Currency: ccy,
+                Symbol: p.Symbol,
+                SuggestedCashAccountId: sameCcyCash?.Id));
         }
         // 2. 現金帳戶 — currency 已存在 row 上
         foreach (var c in CashAccounts)
@@ -309,6 +379,47 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 Currency: liab.BalanceAsMoney.Currency));
         }
         return list;
+    }
+
+    /// <summary>
+    /// 編輯既有 trade 時找對應的 TxAssetSubject。寬鬆模式：找不到就回 null。
+    /// 解析順序：
+    /// <list type="number">
+    ///   <item>有 PortfolioEntryId → 找 Positions</item>
+    ///   <item>Buy/Sell/Dividend 走 Symbol → 找 Positions</item>
+    ///   <item>Cash flow (Deposit/Withdrawal/Income/Transfer) → 找 CashAccount by Id</item>
+    ///   <item>Loan / CreditCard → 找 Liability</item>
+    /// </list>
+    /// </summary>
+    private TxAssetSubject? ResolveAssetSubjectForTrade(TradeRowViewModel row)
+    {
+        var assets = AvailableAssets;
+        // 1. 直接以 PortfolioEntryId 命中
+        if (row.PortfolioEntryId is { } entryId)
+        {
+            var hit = assets.FirstOrDefault(a =>
+                a.Kind is TxAssetKind.Stock or TxAssetKind.Fund or TxAssetKind.Crypto or TxAssetKind.Metal or TxAssetKind.Bond
+                && a.Id == entryId);
+            if (hit is not null) return hit;
+        }
+        // 2. Buy / Sell / Dividend：走 symbol
+        if (row.Type is TradeType.Buy or TradeType.Sell or TradeType.CashDividend or TradeType.StockDividend
+            && !string.IsNullOrWhiteSpace(row.Symbol))
+        {
+            var hit = assets.FirstOrDefault(a =>
+                string.Equals(a.Symbol, row.Symbol, StringComparison.OrdinalIgnoreCase));
+            if (hit is not null) return hit;
+        }
+        // 3. Cash flow → CashAccount by CashAccountId
+        if (row.Type is TradeType.Deposit or TradeType.Withdrawal or TradeType.Income or TradeType.CashDividend
+            && row.CashAccountId is { } cashId)
+        {
+            var hit = assets.FirstOrDefault(a => a.Kind == TxAssetKind.CashAccount && a.Id == cashId);
+            if (hit is not null) return hit;
+        }
+        // 4. Loan / CreditCard → Liability by AssetId
+        // (Trade row 沒有直接的 LiabilityId — 留給 P2.3+ 進一步串連)
+        return null;
     }
 
     private static TxAssetKind MapAssetType(Core.Models.AssetType t) => t switch
@@ -1113,6 +1224,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxCommissionDiscountError = string.Empty;
         // 從 AppSettings.DefaultCommissionDiscount 帶預設值 — 取代過去的硬碼 "1.0"。
         SeedCommissionDiscountFromSettings();
+        // P2.2 — 新 dialog 一開始重置「使用者改過 currency」標記，否則上次手動改過會延續。
+        SelectedAsset = null;
+        _userTouchedCurrency = false;
         TxAmount = string.Empty;
         TxNote = string.Empty;
         _suppressCategoryAutoTracking = true;
@@ -1277,6 +1391,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
         TxType = editState.TxType;
         CreditCard.Card = editState.TxCreditCard;
+
+        // P2.2 — 編輯既有 trade 時嘗試還原 SelectedAsset 給 picker 顯示。寬鬆模式：找不到
+        // 對應的 Position / CashAccount / Liability 時保留 null（picker 顯示空白），不阻擋編輯。
+        // _userTouchedCurrency 設為 true 以避免下方的 cascade 把使用者原本記錄的 currency 蓋掉。
+        _userTouchedCurrency = true;
+        SelectedAsset = ResolveAssetSubjectForTrade(row);
 
         switch (row.Type)
         {

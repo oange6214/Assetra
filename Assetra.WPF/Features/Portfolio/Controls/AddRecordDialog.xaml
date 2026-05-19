@@ -263,6 +263,28 @@
                                             ToolTip="{DynamicResource Portfolio.Tx.Asset.Hint}" />
                                     </StackPanel>
 
+                                    <!--
+                                        P2.2 — 通用「幣別」ComboBox。選了資產後自動帶值；使用者可手動覆寫
+                                        (覆寫後 _userTouchedCurrency = true，後續切換資產不會被自動蓋掉)。
+                                        SupportedCurrencies 走 ICurrencyService（跟 Settings 共用清單）。
+                                    -->
+                                    <StackPanel
+                                        Margin="0,0,0,12"
+                                        Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                        <TextBlock
+                                            Margin="0,0,0,4"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{DynamicResource Portfolio.Tx.Currency}" />
+                                        <ComboBox
+                                            HorizontalAlignment="Left"
+                                            MinWidth="120"
+                                            ItemsSource="{Binding SupportedCurrencies}"
+                                            SelectedItem="{Binding TxCurrency, Mode=TwoWay}"
+                                            Style="{StaticResource FormComboBox}" />
+                                    </StackPanel>
+
                                     <!--  Date + Type — 平排兩欄  -->
                                     <Grid>
                                         <Grid.ColumnDefinitions>

@@ -462,7 +462,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 CategoryRepository: services.CategoryRepository,
                 AutoCategorizationRuleRepository: services.AutoCategorizationRuleRepository,
                 GroupCatalog: services.GroupCatalog,
-                GetDefaultCommissionDiscount: () => _settingsService?.Current?.DefaultCommissionDiscount ?? 1.0m));
+                GetDefaultCommissionDiscount: () => _settingsService?.Current?.DefaultCommissionDiscount ?? 1.0m,
+                GetSupportedCurrencies: () => _currencyService?.SupportedCurrencies ?? new[] { "TWD", "USD" }));
         Transaction.TransactionCompleted += OnTransactionCompleted;
         Transaction.TradeDeleted += OnTradeDeleted;
 
