@@ -237,12 +237,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     [ObservableProperty] private string _txType = "income";
 
     /// <summary>
-    /// 「交易類型」單一 ComboBox 的選項集 — 由 12 顆分四組的 RadioButton 收斂而來。
-    /// 使用 GroupKey 提供 ItemsControl.GroupStyle 視覺分組（投資 / 收入支出 / 資金帳戶 / 負債）。
-    /// Key 跟 <see cref="TxType"/> 字串字面對齊（"buy"/"sell"/...）；DisplayKey 走 DynamicResource
-    /// 用 lang 檔現成的 Portfolio.Tx.* / Portfolio.TradeType.* 字串。
+    /// 12 種 trade type 完整清單 — P2.3 之前 AvailableTradeTypes 直接回這份；P2.3 起依
+    /// SelectedAsset.Kind 過濾出子集。Key 跟 <see cref="TxType"/> 字面對齊。
     /// </summary>
-    public IReadOnlyList<TradeTypeOption> AvailableTradeTypes { get; } = new TradeTypeOption[]
+    private static readonly IReadOnlyList<TradeTypeOption> _allTradeTypes = new TradeTypeOption[]
     {
         new("buy",                "Portfolio.Tx.Buy",                  "Portfolio.Record.Group.Investment"),
         new("sell",               "Portfolio.Tx.Sell",                 "Portfolio.Record.Group.Investment"),
@@ -257,6 +255,58 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         new("creditCardCharge",   "Portfolio.TradeType.CreditCardCharge",  "Portfolio.Record.Group.Liability"),
         new("creditCardPayment",  "Portfolio.TradeType.CreditCardPayment", "Portfolio.Record.Group.Liability"),
     };
+
+    /// <summary>
+    /// P2.3 — asset-aware type 過濾。「交易類型」ComboBox 的可選清單，依目前
+    /// <see cref="SelectedAsset"/> 的 Kind 過濾。資產為 null 時回空集合，搭配
+    /// <see cref="CanSelectTxType"/> 把 ComboBox disable 起來。
+    /// </summary>
+    public IReadOnlyList<TradeTypeOption> AvailableTradeTypes
+    {
+        get
+        {
+            var allowed = ResolveAvailableTypeKeys(SelectedAsset);
+            if (allowed.Count == 0) return Array.Empty<TradeTypeOption>();
+            return _allTradeTypes.Where(o => allowed.Contains(o.Key)).ToList();
+        }
+    }
+
+    /// <summary>
+    /// True 才允許使用者開「交易類型」下拉。SelectedAsset = null 時 disabled。
+    /// </summary>
+    public bool CanSelectTxType => SelectedAsset is not null;
+
+    /// <summary>給 type ComboBox 用的 tooltip key — disabled 時提示「請先選擇資產」。</summary>
+    public string TxTypePickerHintKey => CanSelectTxType
+        ? "Portfolio.Tx.TypePicker.Hint"
+        : "Portfolio.Tx.TypePicker.NeedAsset";
+
+    /// <summary>
+    /// Asset-Kind → 可用 trade type key 對應表。改 mapping 時記得同步
+    /// docs/planning/AddRecordDialog-Phase2-AssetFirst.md 的 Type-Asset 相容性矩陣。
+    /// </summary>
+    private static IReadOnlySet<string> ResolveAvailableTypeKeys(TxAssetSubject? asset)
+    {
+        if (asset is null) return new HashSet<string>(StringComparer.Ordinal);
+        return asset.Kind switch
+        {
+            TxAssetKind.Stock => new HashSet<string>(StringComparer.Ordinal)
+                { "buy", "sell", "cashDiv", "stockDiv" },
+            TxAssetKind.Fund => new HashSet<string>(StringComparer.Ordinal)
+                { "buy", "sell", "cashDiv" },
+            TxAssetKind.Crypto => new HashSet<string>(StringComparer.Ordinal)
+                { "buy", "sell" },
+            TxAssetKind.Metal => new HashSet<string>(StringComparer.Ordinal)
+                { "buy", "sell" },
+            TxAssetKind.Bond => new HashSet<string>(StringComparer.Ordinal)
+                { "buy", "sell", "cashDiv" },  // 票息走 cashDiv
+            TxAssetKind.CashAccount => new HashSet<string>(StringComparer.Ordinal)
+                { "income", "deposit", "withdrawal", "transfer" },
+            TxAssetKind.Liability => new HashSet<string>(StringComparer.Ordinal)
+                { "loanBorrow", "loanRepay", "creditCardCharge", "creditCardPayment" },
+            _ => new HashSet<string>(StringComparer.Ordinal),
+        };
+    }
 
     /// <summary>Non-null when editing an existing trade (vs. creating new).</summary>
     [ObservableProperty] private Guid? _editingTradeId;
@@ -313,6 +363,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// </summary>
     partial void OnSelectedAssetChanged(TxAssetSubject? value)
     {
+        // P2.3 — 不管 value 是否 null，都要通知 AvailableTradeTypes / CanSelectTxType 重新計算。
+        OnPropertyChanged(nameof(AvailableTradeTypes));
+        OnPropertyChanged(nameof(CanSelectTxType));
+        OnPropertyChanged(nameof(TxTypePickerHintKey));
+
         if (value is null) return;
 
         // 1. 幣別 — 只在使用者沒手動改過時 cascade
@@ -330,6 +385,14 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 string.Equals(c.Currency, TxCurrency, StringComparison.OrdinalIgnoreCase))?.Id;
         if (cashId is { } id)
             TxCashAccount = CashAccounts.FirstOrDefault(c => c.Id == id);
+
+        // 3. P2.3 — 若 TxType 不在新 asset 的允許清單裡，自動切到第一個合法 type。
+        //    例：使用者剛剛在 stock 上選了「現金股利」，現在改選 cash account → 自動跳到「收入」。
+        var allowed = ResolveAvailableTypeKeys(value);
+        if (allowed.Count > 0 && !allowed.Contains(TxType))
+        {
+            TxType = AvailableTradeTypes[0].Key;
+        }
     }
 
     /// <summary>

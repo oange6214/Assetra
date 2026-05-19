@@ -327,10 +327,13 @@
                                                 resource key，需要走 Converter 解析成當下語系字串。
                                             -->
                                             <ComboBox
+                                                IsEnabled="{Binding CanSelectTxType}"
                                                 ItemsSource="{Binding AvailableTradeTypes}"
                                                 SelectedValuePath="Key"
                                                 SelectedValue="{Binding TxType, Mode=TwoWay}"
-                                                Style="{StaticResource FormComboBox}">
+                                                Style="{StaticResource FormComboBox}"
+                                                ToolTip="{Binding TxTypePickerHintKey, Converter={StaticResource ResourceKeyToStringConverter}}"
+                                                ToolTipService.ShowOnDisabled="True">
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>
                                                         <TextBlock Text="{Binding DisplayKey, Converter={StaticResource ResourceKeyToStringConverter}}" />

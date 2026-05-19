@@ -555,6 +555,8 @@
     <sys:String x:Key="Portfolio.Tx.Asset.Label">選擇資產</sys:String>
     <sys:String x:Key="Portfolio.Tx.Asset.Hint">選擇要記錄的資產 — 投資持倉、現金帳戶或負債。選完會自動帶入幣別與推薦的現金帳戶。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Currency">幣別</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TypePicker.Hint">依所選資產顯示適合的交易類型。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TypePicker.NeedAsset">請先選擇資產。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Amount">金額（元）</sys:String>
     <sys:String x:Key="Portfolio.Tx.Note">備註</sys:String>
     <sys:String x:Key="Portfolio.Tx.CashAccount">存入 / 扣款帳戶</sys:String>
