@@ -34,16 +34,11 @@
                     - 今日漲跌：HasHeroTodayDelta=false 時整段隱藏，避免「未開盤」期間佔位
                 -->
                 <!--
-                    Hero card border 也降階到 AppBorderLight — 主視覺由 hero 大字本身扛，
-                    border 只是 card 邊界提示，不該搶 hero 數字的注意力。
+                    P2.14 — Migrated to AppCardHero design-system style (Cards.xaml).
+                    Style 內已含 Padding=20,16 + Margin=0,0,0,12 + Radius.Md + BorderLight。
+                    Hero 大字本身扛主視覺，邊框只是 card 邊界提示。
                 -->
-                <Border
-                    Margin="0,0,0,12"
-                    Padding="20,16"
-                    Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorderLight}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Md}">
+                <Border Style="{StaticResource AppCardHero}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*" />
@@ -173,16 +168,10 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <!--
-                        總資產 — P2.12 BorderBrush 改 AppBorderLight (Layer2 < Layer3 = AppBorder
-                        =原色)，視覺重量降階；hero 上方淨資產 card 已是主焦點，summary 公式列
-                        不需要重邊框搶注意力。
+                        總資產 — P2.14 migrated to AppCardSummary (Cards.xaml)，
+                        BorderLight + Padding.Card + Radius.Sm。
                     -->
-                    <Border Grid.Column="0"
-                            Padding="{StaticResource Padding.Card}"
-                            Background="{DynamicResource AppCardBackground}"
-                            BorderBrush="{DynamicResource AppBorderLight}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource Radius.Sm}">
+                    <Border Grid.Column="0" Style="{StaticResource AppCardSummary}">
                         <StackPanel>
                             <TextBlock FontSize="{StaticResource Font.Size.Xs}"
                                        Foreground="{DynamicResource AppTextMuted}"
@@ -210,13 +199,8 @@
                                FontWeight="Bold"
                                Foreground="{DynamicResource AppTextMuted}"
                                Text="−" />
-                    <!--  總負債 (P2.12 — 同 lightening pass)  -->
-                    <Border Grid.Column="2"
-                            Padding="{StaticResource Padding.Card}"
-                            Background="{DynamicResource AppCardBackground}"
-                            BorderBrush="{DynamicResource AppBorderLight}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource Radius.Sm}">
+                    <!--  總負債 — P2.14 migrated to AppCardSummary  -->
+                    <Border Grid.Column="2" Style="{StaticResource AppCardSummary}">
                         <StackPanel>
                             <TextBlock FontSize="{StaticResource Font.Size.Xs}"
                                        Foreground="{DynamicResource AppTextMuted}"
@@ -238,13 +222,14 @@
                                FontWeight="Bold"
                                Foreground="{DynamicResource AppTextMuted}"
                                Text="=" />
-                    <!--  淨資產 (re-displayed compact for visual closure of equation)  -->
+                    <!--
+                        淨資產 (re-displayed compact for visual closure of equation)
+                        — 用 AppCardSummary 但 override BorderBrush 成 AppAccent 強調這
+                        是公式結果。
+                    -->
                     <Border Grid.Column="4"
-                            Padding="{StaticResource Padding.Card}"
-                            Background="{DynamicResource AppCardBackground}"
                             BorderBrush="{DynamicResource AppAccent}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource Radius.Sm}">
+                            Style="{StaticResource AppCardSummary}">
                         <StackPanel>
                             <TextBlock FontSize="{StaticResource Font.Size.Xs}"
                                        Foreground="{DynamicResource AppTextMuted}"
@@ -286,16 +271,11 @@
                     舊的 AssetClassFocusWidget 已不再使用，保留檔案以備回退。
                 -->
                 <!--
-                    P2.13 — Analytics tier card border lightened (AppBorder → AppBorderLight)
-                    to match the Hero / Summary tiers established in P2.12. 資產組成是 dashboard
-                    analytics 層級，視覺權重應低於 Hero 但高於 insights — 邊框降階一階即可。
+                    P2.14 — 資產組成 Analytics card migrated to AppCardSummary。Margin
+                    local override (style default Margin 是 0)，因為下方還有 widgets list。
                 -->
                 <Border Margin="0,0,0,16"
-                        Padding="{StaticResource Padding.Card}"
-                        Background="{DynamicResource AppCardBackground}"
-                        BorderBrush="{DynamicResource AppBorderLight}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource Radius.Sm}"
+                        Style="{StaticResource AppCardSummary}"
                         Visibility="{Binding HasCompositionData, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel>
                         <DockPanel Margin="0,0,0,10">
