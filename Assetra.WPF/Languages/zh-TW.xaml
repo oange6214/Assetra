@@ -510,6 +510,7 @@
     <sys:String x:Key="Portfolio.Record.ReviseTitle">刪除此筆並新增</sys:String>
     <sys:String x:Key="Portfolio.Record.CreateRevision">刪除此筆並新增</sys:String>
     <sys:String x:Key="Portfolio.Record.RevisionModeHint">已根據原紀錄帶入內容。儲存後將自動覆寫原紀錄。</sys:String>
+    <sys:String x:Key="Portfolio.Record.CreateSubtitle">記錄您的買入、賣出、股利、收支與轉帳。</sys:String>
     <sys:String x:Key="Portfolio.Record.EditSubtitle">只允許修改日期與備註；核心欄位會保留原樣。</sys:String>
     <sys:String x:Key="Portfolio.Record.RevisionSubtitle">儲存後將以這筆內容取代原紀錄。</sys:String>
     <sys:String x:Key="Portfolio.Record.ReplaceSubtitle">確認要取代原紀錄嗎？也可選擇保留兩筆。</sys:String>

@@ -51,7 +51,7 @@
                 -->
 
                 <!--  Row 1：數量 + 價格輸入模式 toggle  -->
-                <Grid Margin="0,0,0,8">
+                <Grid Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="12" />
@@ -60,7 +60,7 @@
 
                     <StackPanel Grid.Column="0">
                         <TextBlock
-                            Margin="0,0,0,4"
+                            Margin="0,0,0,6"
                             FontSize="{StaticResource Font.Size.Xs}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextSecondary}"
@@ -77,7 +77,7 @@
 
                     <StackPanel Grid.Column="2">
                         <TextBlock
-                            Margin="0,0,0,4"
+                            Margin="0,0,0,6"
                             FontSize="{StaticResource Font.Size.Xs}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextSecondary}"
@@ -111,15 +111,22 @@
                     </StackPanel>
                 </Grid>
 
-                <!--  Row 2：價格 / 總額 input + inline 取得市價 link  -->
-                <Grid Margin="0,0,0,4">
+                <!--
+                    Row 2：價格 label + inline 「取得市價」 link。Bottom-align 兩邊讓 baseline 一致
+                    (button padding 取消，避免比 label 高造成 label「飄」在上方的視覺問題)。
+                    Margin="0,0,0,6" 給 label → input 的 6px 呼吸空間，跟其他欄位一致。
+                -->
+                <Grid Margin="0,0,0,6">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <!--  Label — 單價模式：「單位價格 (USD)」、總額模式：「總價值 (USD)」  -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <StackPanel
+                        Grid.Column="0"
+                        VerticalAlignment="Bottom"
+                        Orientation="Horizontal">
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Xs}"
                             FontWeight="SemiBold"
@@ -144,18 +151,15 @@
                     </StackPanel>
 
                     <!--
-                        ⚡ 取得市價 link — 只在 unit-mode + Stock 時顯示。Stock 才有 close-price 抓取
-                        管線，crypto / metal / bond 還沒接。total mode 下使用者已直接輸入總金額，
-                        link 失去意義。
-                    -->
-                    <!--
-                        Stock 的 close-price 抓取 link — 只在 unit-mode 顯示。
+                        Stock 的 close-price 抓取 link — 只在 unit-mode 顯示。Padding=0 + Bottom
+                        align 讓 link baseline 對齊 label，避免 button padding 讓 label 看似飄高。
                         IsStock 過濾透過外層 StackPanel 已隱含（整個 BuyTxForm 在非 stock 時不渲染）。
                     -->
                     <Button
                         Grid.Column="1"
-                        Padding="6,2"
+                        Padding="0"
                         HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
                         Background="Transparent"
                         BorderThickness="0"
                         Command="{Binding AddAssetDialog.FetchMarketPriceCommand}"
@@ -353,14 +357,14 @@
         <!--  Non-stock (Fund/Metal/Bond): Name + Cost  -->
         <StackPanel Visibility="{Binding Buy.IsNonStock, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
-                Margin="0,0,0,4"
+                Margin="0,0,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Dialog.AddName}" />
-            <TextBox Margin="0,0,0,12" Text="{Binding AddAssetDialog.AddName, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Margin="0,0,0,14" Text="{Binding AddAssetDialog.AddName, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
-                Margin="0,0,0,4"
+                Margin="0,0,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
@@ -375,14 +379,14 @@
         <!--  Crypto: Symbol + Qty + Price  -->
         <StackPanel Visibility="{Binding Buy.IsCrypto, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
-                Margin="0,0,0,4"
+                Margin="0,0,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Dialog.CryptoSymbol}" />
-            <TextBox Margin="0,0,0,12" Text="{Binding AddAssetDialog.AddCryptoSymbol, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Margin="0,0,0,14" Text="{Binding AddAssetDialog.AddCryptoSymbol, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
-                Margin="0,0,0,4"
+                Margin="0,0,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
@@ -393,7 +397,7 @@
                 Text="{Binding AddAssetDialog.AddCryptoQtyError}"
                 Visibility="{Binding AddAssetDialog.AddCryptoQtyError, Converter={StaticResource StringToVisibilityConverter}}" />
             <TextBlock
-                Margin="0,12,0,4"
+                Margin="0,14,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
@@ -420,7 +424,7 @@
 
             <!--  手續費 (manual override; 留空 → 走 TxCommissionDiscount 自動計算)  -->
             <TextBlock
-                Margin="0,12,0,4"
+                Margin="0,14,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
@@ -431,7 +435,7 @@
                 Text="{Binding TxFeeError}"
                 Visibility="{Binding TxFeeError, Converter={StaticResource StringToVisibilityConverter}}" />
             <TextBlock
-                Margin="0,2,0,12"
+                Margin="0,4,0,14"
                 FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppTextMuted}"
                 Text="{DynamicResource Portfolio.Tx.FeeOverrideHint}"
@@ -439,14 +443,14 @@
 
             <!--  從現金帳戶扣款 — checkbox + dropdown (一致 with 借款/還款 / Transfer)  -->
             <CheckBox
-                Margin="0,0,0,4"
+                Margin="0,0,0,6"
                 Content="{Binding TxUseCashAccountLabel}"
                 FontSize="{StaticResource Font.Size.Xs}"
                 Foreground="{DynamicResource AppTextSecondary}"
                 IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
             <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <TextBlock
-                    Margin="0,0,0,4"
+                    Margin="0,0,0,6"
                     FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
@@ -504,7 +508,7 @@
                 -->
                 <StackPanel Visibility="{Binding Buy.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock
-                        Margin="0,12,0,4"
+                        Margin="0,14,0,6"
                         FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"

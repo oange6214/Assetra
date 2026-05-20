@@ -506,6 +506,7 @@
     <sys:String x:Key="Portfolio.Record.ReviseTitle">Delete and Recreate</sys:String>
     <sys:String x:Key="Portfolio.Record.CreateRevision">Delete and Recreate</sys:String>
     <sys:String x:Key="Portfolio.Record.RevisionModeHint">Prefilled from the original record. Saving will replace the original.</sys:String>
+    <sys:String x:Key="Portfolio.Record.CreateSubtitle">Log a buy, sell, dividend, transfer, or cash-flow entry.</sys:String>
     <sys:String x:Key="Portfolio.Record.EditSubtitle">Only the date and note can be changed here; the core details remain intact.</sys:String>
     <sys:String x:Key="Portfolio.Record.RevisionSubtitle">Saving will replace the original record with this content.</sys:String>
     <sys:String x:Key="Portfolio.Record.ReplaceSubtitle">Confirm replacement, or choose to keep both records.</sys:String>

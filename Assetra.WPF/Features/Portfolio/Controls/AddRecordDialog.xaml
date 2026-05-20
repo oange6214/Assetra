@@ -79,24 +79,20 @@
                                 TextWrapping="Wrap">
                                 <TextBlock.Style>
                                     <!--
-                                        Subtitle: only meta-only edits and revision /
-                                        replace flows show subtitle text. Direct-edit
-                                        types skip it because their form fields make
-                                        editability self-evident.
+                                        Subtitle: default = create-mode guidance ("記錄您的買入、賣出..."),
+                                        switches to mode-specific text when editing / revising / replacing.
+                                        Create mode 預設顯示 — 使用者打開 dialog 第一眼就知道這裡做什麼。
                                     -->
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Setter Property="Text" Value="{DynamicResource Portfolio.Record.CreateSubtitle}" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsEditingMetaOnly}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible" />
                                                 <Setter Property="Text" Value="{DynamicResource Portfolio.Record.EditSubtitle}" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsRevisionMode}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible" />
                                                 <Setter Property="Text" Value="{DynamicResource Portfolio.Record.RevisionSubtitle}" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsRevisionReplacePromptOpen}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible" />
                                                 <Setter Property="Text" Value="{DynamicResource Portfolio.Record.ReplaceSubtitle}" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -212,32 +208,13 @@
 
                         <StackPanel Visibility="{Binding IsRevisionReplacePromptOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <!--
-                                Basic info — Phase 1 redesign：原本是 DockPanel(date 左 172px)
-                                + 4 個 group card × 12 顆 RadioButton（~190 行）拼出來的 type
-                                picker。現在收成 2 欄 Grid：日期 | 類型 ComboBox，視覺權重對齊
-                                使用者提供的參考設計。ComboBox 用 SelectedValue 綁 TxType 字串，
-                                跟舊的 RadioButton.IsChecked 等價語意完全相同。
+                                P2.8 — 移除「基本資訊」 card border + 標題 + 提示文，flatten 整個表單。
+                                Dialog header 已用 subtitle 提示用途，內部不再需要 section 標題。
+                                所有欄位以一致的 vertical rhythm 排列：field block bottom margin = 14、
+                                label → input margin = 6（從原本 4 加寬，給標籤更舒適的呼吸感）。
                             -->
-                            <Border
-                                Margin="0,0,0,12"
-                                Padding="14,12"
-                                Background="{DynamicResource AppBackground}"
-                                BorderBrush="{DynamicResource AppBorder}"
-                                BorderThickness="1"
-                                CornerRadius="{StaticResource Radius.Sm}">
+                            <StackPanel>
                                 <StackPanel>
-                                    <TextBlock
-                                        FontSize="{StaticResource Font.Size.Sm}"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{DynamicResource Portfolio.Record.Section.Basic}" />
-                                    <TextBlock
-                                        Margin="0,4,0,12"
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{DynamicResource Portfolio.Record.Section.BasicHint}"
-                                        TextWrapping="Wrap"
-                                        Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
 
                                     <!--
                                         AddRecordDialog Phase 2.1 — 「選擇資產」統一選擇器。
@@ -247,10 +224,10 @@
                                         編輯模式下擬作 read-only label，這版先讓它跟新增模式長一樣。
                                     -->
                                     <StackPanel
-                                        Margin="0,0,0,12"
+                                        Margin="0,0,0,14"
                                         Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                         <TextBlock
-                                            Margin="0,0,0,4"
+                                            Margin="0,0,0,6"
                                             FontSize="{StaticResource Font.Size.Xs}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextSecondary}"
@@ -318,10 +295,10 @@
                                         SupportedCurrencies 走 ICurrencyService（跟 Settings 共用清單）。
                                     -->
                                     <StackPanel
-                                        Margin="0,0,0,12"
+                                        Margin="0,0,0,14"
                                         Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                         <TextBlock
-                                            Margin="0,0,0,4"
+                                            Margin="0,0,0,6"
                                             FontSize="{StaticResource Font.Size.Xs}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextSecondary}"
@@ -344,7 +321,7 @@
 
                                         <StackPanel Grid.Column="0">
                                             <TextBlock
-                                                Margin="0,0,0,4"
+                                                Margin="0,0,0,6"
                                                 FontSize="{StaticResource Font.Size.Xs}"
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppTextSecondary}"
@@ -364,7 +341,7 @@
                                             Grid.Column="2"
                                             Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                             <TextBlock
-                                                Margin="0,0,0,4"
+                                                Margin="0,0,0,6"
                                                 FontSize="{StaticResource Font.Size.Xs}"
                                                 FontWeight="SemiBold"
                                                 Foreground="{DynamicResource AppTextSecondary}"
@@ -398,7 +375,7 @@
                                         HasTxDestination 為 false（未選類型）時隱藏。
                                     -->
                                     <Border
-                                        Margin="0,12,0,0"
+                                        Margin="0,14,0,0"
                                         Padding="10,8"
                                         Background="{DynamicResource AppAccentSubtle}"
                                         BorderBrush="{DynamicResource AppAccent}"
@@ -428,7 +405,7 @@
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
-                            </Border>
+                            </StackPanel>
 
 
                             <!--
