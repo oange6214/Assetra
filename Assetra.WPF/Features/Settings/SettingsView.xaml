@@ -187,7 +187,7 @@
                                     <Border Margin="0,2"
                                             Padding="10,4"
                                             Background="{DynamicResource AppHover}"
-                                            BorderBrush="{DynamicResource AppBorder}"
+                                            BorderBrush="{DynamicResource AppBorderLight}"
                                             BorderThickness="1"
                                             CornerRadius="{StaticResource Radius.Sm}">
                                         <DockPanel LastChildFill="True">
@@ -314,7 +314,7 @@
                                 Margin="0,8,0,0"
                                 Padding="10,8"
                                 Background="{DynamicResource AppSurfaceAlt}"
-                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderBrush="{DynamicResource AppBorderLight}"
                                 BorderThickness="1"
                                 CornerRadius="{StaticResource Radius.Sm}">
                                 <ItemsControl ItemsSource="{Binding FxRateRows}">
@@ -1041,7 +1041,7 @@
                                         <Border
                                             Margin="0,0,0,6"
                                             Padding="8"
-                                            BorderBrush="{DynamicResource AppBorder}"
+                                            BorderBrush="{DynamicResource AppBorderLight}"
                                             BorderThickness="1"
                                             CornerRadius="{StaticResource Radius.Xs}">
                                             <StackPanel>

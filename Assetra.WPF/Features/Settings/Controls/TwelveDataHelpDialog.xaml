@@ -75,7 +75,7 @@
                             Margin="0,0,0,12"
                             Padding="12"
                             Background="{DynamicResource AppBackground}"
-                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderBrush="{DynamicResource AppBorderLight}"
                             BorderThickness="1"
                             CornerRadius="{StaticResource Radius.Sm}">
                             <TextBlock

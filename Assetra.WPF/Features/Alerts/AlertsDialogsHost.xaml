@@ -80,7 +80,7 @@
                                     StaysOpen="True">
                                     <Border
                                         Background="{DynamicResource AppSurface}"
-                                        BorderBrush="{DynamicResource AppBorder}"
+                                        BorderBrush="{DynamicResource AppBorderLight}"
                                         BorderThickness="1"
                                         CornerRadius="{StaticResource Radius.Sm}">
                                         <ListBox
