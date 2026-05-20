@@ -239,6 +239,31 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         }
     }
 
+    // P2.6 — 在 ConfirmTx 成功時被 TransactionDialogVM 透過 deps callback 觸發。
+    // 維護 AppSettings.RecentlyUsedAssetIds 的 LRU 清單：剛用的塞到 [0]、去重、
+    // 上限 AppSettings.MaxRecentlyUsedAssets。失敗不影響交易主流程。
+    private async Task RecordRecentAssetAsync(Guid id)
+    {
+        if (_settingsService is null || id == Guid.Empty) return;
+        try
+        {
+            var current = _settingsService.Current.RecentlyUsedAssetIds ?? new List<Guid>();
+            var updated = new List<Guid>(AppSettings.MaxRecentlyUsedAssets) { id };
+            foreach (var existing in current)
+            {
+                if (existing == id || existing == Guid.Empty) continue;
+                updated.Add(existing);
+                if (updated.Count >= AppSettings.MaxRecentlyUsedAssets) break;
+            }
+            var settings = _settingsService.Current with { RecentlyUsedAssetIds = updated };
+            await _settingsService.SaveAsync(settings);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to record recently used asset {AssetId}", id);
+        }
+    }
+
     [RelayCommand]
     private void RemoveTrade(TradeRowViewModel row)
     {
@@ -475,7 +500,11 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                     this!.Transaction!.CloseTxDialogCommand!.Execute(null);
                     if (OpenAddWatchlistDialogCommand.CanExecute(null))
                         OpenAddWatchlistDialogCommand.Execute(null);
-                }));
+                },
+                GetRecentAssetIds: () =>
+                    (IReadOnlyList<Guid>?)_settingsService?.Current?.RecentlyUsedAssetIds
+                        ?? Array.Empty<Guid>(),
+                RecordRecentAsset: id => _ = RecordRecentAssetAsync(id)));
         Transaction.TransactionCompleted += OnTransactionCompleted;
         Transaction.TradeDeleted += OnTradeDeleted;
 

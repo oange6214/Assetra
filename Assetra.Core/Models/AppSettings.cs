@@ -224,4 +224,19 @@ public sealed record AppSettings(
     /// 使用者在 dialog 內手動覆寫的「手續費（選填）」欄位仍是 trade-level override，
     /// 不受此預設影響。
     /// </summary>
-    decimal DefaultCommissionDiscount = 1.0m);
+    decimal DefaultCommissionDiscount = 1.0m,
+
+    /// <summary>
+    /// 新增交易 dialog「最近使用的資產」分組來源。最新（最後使用的）排在 [0]、最舊在末尾。
+    /// 上限由 <see cref="MaxRecentlyUsedAssets"/> 控制；超過時砍尾。
+    /// <para>
+    /// Id 對應 PortfolioEntry.Id / CashAccount.Id / Liability.AssetId。被刪除的資產 id
+    /// 仍可能留在這個清單裡 — 讀的時候 join 到 AvailableAssets 找不到就跳過。
+    /// </para>
+    /// null = 還沒紀錄過任何資產（新使用者）；空 list = 紀錄過但都被清掉。
+    /// </summary>
+    List<System.Guid>? RecentlyUsedAssetIds = null)
+{
+    /// <summary>「最近使用的資產」分組顯示上限。超過時 LRU 砍尾。</summary>
+    public const int MaxRecentlyUsedAssets = 6;
+}

@@ -221,6 +221,11 @@ public partial class TransactionDialogViewModel
             }
         }
 
+        // P2.6 — bump 剛交易的資產到 LRU 「最近使用」清單的最前面。
+        // 編輯 / 修正路徑前面已 return，這裡只記錄全新建立 flow，不會把編輯舊單也誤算成「最近使用」。
+        if (SelectedAsset is { Id: var assetId } && assetId != Guid.Empty)
+            _recordRecentAsset?.Invoke(assetId);
+
         TransactionCompleted?.Invoke(this, EventArgs.Empty);
 
         // 新交易建立成功 → 顯示「已新增 XXX，可在交易記錄查看」snackbar with action.

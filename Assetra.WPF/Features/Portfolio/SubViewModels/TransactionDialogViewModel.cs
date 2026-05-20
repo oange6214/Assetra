@@ -69,7 +69,12 @@ internal sealed record TransactionDialogDependencies(
     Func<IReadOnlyList<string>>? GetSupportedCurrencies = null,
     // P2.5 — 「+ 新增資產」CTA 的進入點。使用者點下去 → 關 dialog → 開「新增投資」流程
     // (PortfolioViewModel.OpenAddWatchlistDialogCommand)。null 時 sentinel 不渲染。
-    Action? OpenAddNewAsset = null);
+    Action? OpenAddNewAsset = null,
+    // P2.6 — 「最近使用的資產」 LRU 清單存取。Get 給 BuildAvailableAssets 讀，
+    // Record 在使用者確認交易後寫（PortfolioViewModel 接到 AppSettings.RecentlyUsedAssetIds）。
+    // null 時最近使用分組不會出現。
+    Func<IReadOnlyList<Guid>>? GetRecentAssetIds = null,
+    Action<Guid>? RecordRecentAsset = null);
 
 /// <summary>
 /// 交易類型 ComboBox 的一個選項。Key 對齊 <see cref="TransactionDialogViewModel.TxType"/>
@@ -132,6 +137,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private readonly Func<decimal>? _getDefaultCommissionDiscount;
     private readonly Func<IReadOnlyList<string>>? _getSupportedCurrencies;
     private readonly Action? _openAddNewAsset;
+    private readonly Func<IReadOnlyList<Guid>>? _getRecentAssetIds;
+    private readonly Action<Guid>? _recordRecentAsset;
     private readonly Action _rebuildTotals;
     private readonly Func<string, string, string> _localize;
 
@@ -225,6 +232,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _getDefaultCommissionDiscount = deps.GetDefaultCommissionDiscount;
         _getSupportedCurrencies = deps.GetSupportedCurrencies;
         _openAddNewAsset = deps.OpenAddNewAsset;
+        _getRecentAssetIds = deps.GetRecentAssetIds;
+        _recordRecentAsset = deps.RecordRecentAsset;
 
         ExpenseCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_expenseCategories);
         IncomeCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_incomeCategories);
@@ -489,10 +498,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     private IReadOnlyList<TxAssetSubject> BuildAvailableAssets()
     {
-        var list = new List<TxAssetSubject>(Positions.Count + CashAccounts.Count + Liabilities.Count + 1);
-        // 1. 投資持倉 (Stock / Fund / Crypto / Metal / Bond)
-        //    PrimaryName = entity name；SecondaryLine = "(SYMBOL) · CCY"，無 symbol 就降為 "CCY"。
-        //    SuggestedCashAccountId — 找跟此持倉幣別相符的第一個現金帳戶，給 P2.2 cascade 用。
+        // Step 1：先把三大類資產建到 `regular` 暫存清單。
+        var regular = new List<TxAssetSubject>(Positions.Count + CashAccounts.Count + Liabilities.Count);
+
+        // 1.1 投資持倉 (Stock / Fund / Crypto / Metal / Bond)
+        //     PrimaryName = entity name；SecondaryLine = "(SYMBOL) · CCY"，無 symbol 就降為 "CCY"。
+        //     SuggestedCashAccountId — 找跟此持倉幣別相符的第一個現金帳戶，給 P2.2 cascade 用。
         foreach (var p in Positions)
         {
             var ccy = string.IsNullOrWhiteSpace(p.Currency) ? "TWD" : p.Currency;
@@ -501,7 +512,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             var secondary = string.IsNullOrWhiteSpace(p.Symbol)
                 ? ccy
                 : $"({p.Symbol}) · {ccy}";
-            list.Add(new TxAssetSubject(
+            regular.Add(new TxAssetSubject(
                 Kind: MapAssetType(p.AssetType),
                 Id: p.Id,
                 PrimaryName: p.Name,
@@ -511,10 +522,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 Symbol: p.Symbol,
                 SuggestedCashAccountId: sameCcyCash?.Id));
         }
-        // 2. 現金帳戶 — SecondaryLine 「CASH · {ccy}」
+        // 1.2 現金帳戶 — SecondaryLine 「CASH · {ccy}」
         foreach (var c in CashAccounts)
         {
-            list.Add(new TxAssetSubject(
+            regular.Add(new TxAssetSubject(
                 Kind: TxAssetKind.CashAccount,
                 Id: c.Id,
                 PrimaryName: c.Name,
@@ -523,11 +534,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 Currency: c.Currency,
                 SuggestedCashAccountId: c.Id));
         }
-        // 3. 負債 — SecondaryLine 「DEBT · {ccy}」。Legacy (AssetId=null) 仍列入，
-        //    Id 用 Guid.Empty 哨兵，cascade 內可辨識為 fallback。
+        // 1.3 負債 — SecondaryLine 「DEBT · {ccy}」。Legacy (AssetId=null) 仍列入，
+        //     Id 用 Guid.Empty 哨兵，cascade 內可辨識為 fallback。
         foreach (var liab in Liabilities)
         {
-            list.Add(new TxAssetSubject(
+            regular.Add(new TxAssetSubject(
                 Kind: TxAssetKind.Liability,
                 Id: liab.AssetId ?? Guid.Empty,
                 PrimaryName: liab.Label,
@@ -535,13 +546,33 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 GroupKey: "Portfolio.Tx.Asset.Group.Liability",
                 Currency: liab.BalanceAsMoney.Currency));
         }
-        // 4. P2.5 — 「+ 新增資產」CTA sentinel。只在 _openAddNewAsset callback 有注入時加。
-        //    Group 排最後，使用者按下會關 dialog 並開「新增投資」流程。
-        //    Strings resolved here via _localize（其他資產 PrimaryName 直接是顯示字串，
-        //    XAML 不用通過 converter — 否則「NVIDIA Corp」這種非 key 字串會被誤解析）。
+
+        // Step 2：拼成最終 list = 最近使用 group → regular 三大群 → 新增資產 sentinel。
+        var final = new List<TxAssetSubject>(regular.Count + Core.Models.AppSettings.MaxRecentlyUsedAssets + 1);
+
+        // P2.6 — 最近使用的資產 group。從 _getRecentAssetIds (LRU 順序) 拿 id，到 regular
+        // 裡找對應 row，clone 並改 GroupKey 為「最近」，疊到 final 頂端。原本所屬 group 的
+        // 副本仍保留在 regular 區（兩處出現是刻意的：一次當捷徑、一次走完整目錄）。
+        // 找不到的 id（已刪除資產）跳過。Guid.Empty 跳過（legacy liability 沒穩定 id，無法 LRU）。
+        var recentIds = _getRecentAssetIds?.Invoke();
+        if (recentIds is { Count: > 0 })
+        {
+            foreach (var id in recentIds)
+            {
+                if (id == Guid.Empty || id == AddNewAssetSentinelId) continue;
+                var match = regular.FirstOrDefault(a => a.Id == id);
+                if (match is null) continue;
+                final.Add(match with { GroupKey = "Portfolio.Tx.Asset.Group.Recent" });
+                if (final.Count >= Core.Models.AppSettings.MaxRecentlyUsedAssets) break;
+            }
+        }
+
+        final.AddRange(regular);
+
+        // 「+ 新增資產」CTA sentinel — 永遠排最後。
         if (_openAddNewAsset is not null)
         {
-            list.Add(new TxAssetSubject(
+            final.Add(new TxAssetSubject(
                 Kind: TxAssetKind.None,
                 Id: AddNewAssetSentinelId,
                 PrimaryName: _localize("Portfolio.Tx.Asset.AddNew.Title", "+ 新增資產"),
@@ -549,7 +580,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 GroupKey: "Portfolio.Tx.Asset.Group.AddNew",
                 Currency: string.Empty));
         }
-        return list;
+        return final;
     }
 
     /// <summary>
