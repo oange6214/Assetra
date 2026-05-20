@@ -118,13 +118,32 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Image
+                <!--
+                    P2.11 — Brand block：Logo + 「Assetra」 文字組成一個視覺整體。原本 Logo
+                    在最左、App.Title 飄在 column 2 中段，視覺上沒有連結 (audit 文件指出像
+                    placeholder)。合併到同一個 StackPanel + Display font + slightly tracked
+                    spacing → 完整 brand presence。Cursor 預設 (drag region 仍走 WindowChrome)，
+                    不額外加 hover/click。
+                -->
+                <StackPanel
                     Grid.Column="0"
-                    Width="24"
-                    Height="24"
-                    Margin="14,0,10,0"
+                    Margin="14,0,12,0"
                     VerticalAlignment="Center"
-                    Source="{StaticResource AssetraLogo}" />
+                    Orientation="Horizontal">
+                    <Image
+                        Width="22"
+                        Height="22"
+                        VerticalAlignment="Center"
+                        Source="{StaticResource AssetraLogo}" />
+                    <TextBlock
+                        Margin="8,0,0,0"
+                        VerticalAlignment="Center"
+                        FontFamily="{StaticResource Font.Family.Display}"
+                        FontSize="{StaticResource Font.Size.Base}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource App.Title}" />
+                </StackPanel>
 
                 <!--  Left: Back / Forward / Search  -->
                 <StackPanel
@@ -178,17 +197,12 @@
                     </Button>
                 </StackPanel>
 
-                <TextBlock
-                    Grid.Column="2"
-                    MinWidth="0"
-                    Margin="14,0"
-                    VerticalAlignment="Center"
-                    FontFamily="{StaticResource Font.Family.Base}"
-                    FontSize="{StaticResource Font.Size.Base}"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource AppTextPrimary}"
-                    Text="{DynamicResource App.Title}"
-                    TextTrimming="CharacterEllipsis" />
+                <!--
+                    Column 2 stretch — empty drag region (window chrome handles dragging).
+                    原本這欄有重複的 App.Title TextBlock；brand block 已移到 column 0
+                    跟 Logo 合併，這裡留空當作 drag handle 即可。
+                -->
+                <Grid Grid.Column="2" />
 
                 <!--  Right: global app actions. Native window commands live in the final column so they never get clipped first.  -->
                 <StackPanel

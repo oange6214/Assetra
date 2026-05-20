@@ -147,12 +147,20 @@
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
 
+        <!--
+            P2.11 — section title 細化：原 12px SemiBold AppTextMuted 看起來跟 nav item label
+            (14px Sm) 太接近，視覺競爭。降成 11px Medium + uppercase + 字級拉開：使用者掃 nav
+            時 group label 退到背景、actual items 凸顯。Uppercase 是 WPF 沒有 native letter-spacing
+            的折衷實現分組質感（en/zh-CN-friendly：中文沒大小寫變化、英文有；至少英文 nav 立刻有
+            金融工具列的「ANALYTICS / ASSETS」 quality）。
+        -->
         <Style x:Key="NavRailGroupTitle" TargetType="{x:Type TextBlock}">
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
-            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="{StaticResource Font.Size.2Xs}" />
+            <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Medium}" />
             <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="Opacity" Value="0.72" />
         </Style>
 
         <Style x:Key="NavRailBadge" TargetType="{x:Type Border}">

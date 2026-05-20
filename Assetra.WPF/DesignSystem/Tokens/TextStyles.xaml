@@ -68,6 +68,19 @@
     </Style>
 
     <!--  Numeric — tabular figures for column-aligned finance values  -->
+
+    <!--
+        Hero metric — for dashboard 淨資產 / 主要指標。48px Bold tabular，
+        刻意比 Display(32) 大一階拉開 hero ↔ secondary 視覺權重，
+        對應 Personal Wealth Terminal review 的 Dashboard Rhythm。
+    -->
+    <Style x:Key="TextStyle.Numeric.Hero" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.Numeric}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.3xl}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+    </Style>
+
     <Style x:Key="TextStyle.Numeric.Display" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource Font.Family.Numeric}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.2xl}" />

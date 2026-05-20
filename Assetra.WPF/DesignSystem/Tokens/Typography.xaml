@@ -21,6 +21,7 @@
 
     <!--  Back-compat alias for existing XAML. New styles should choose UI / Display / Numeric explicitly.  -->
     <FontFamily x:Key="Font.Family.Base">Segoe UI Variable Text, Segoe UI, Microsoft JhengHei UI, Noto Sans TC, Taipei Sans TC Beta, Microsoft YaHei UI, sans-serif</FontFamily>
+    <sys:Double x:Key="Font.Size.2Xs">11</sys:Double>
     <sys:Double x:Key="Font.Size.Xs">12</sys:Double>
     <sys:Double x:Key="Font.Size.Sm">14</sys:Double>
     <sys:Double x:Key="Font.Size.Base">16</sys:Double>

@@ -58,14 +58,16 @@
                                 的資產類別，會少算。BalanceSheet 系列直接從各 widget VM 加總，
                                 跟「資產組成」view 的金額一致。
                             -->
+                            <!--
+                                P2.11 — 升級到 TextStyle.Numeric.Hero (3xl=48px Bold tabular)，
+                                跟 KPI dialog / 公式列的 secondary 金額拉開視覺差，對應
+                                Personal Wealth Terminal review 的 Dashboard Rhythm Hero 層級。
+                            -->
                             <TextBlock
                                 Margin="0,4,0,8"
-                                FontFamily="{StaticResource Font.Family.Base}"
-                                FontSize="{StaticResource Font.Size.2xl}"
-                                FontWeight="Bold"
                                 Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{Binding BalanceSheetNetWorthDisplay}"
-                                Typography.NumeralAlignment="Tabular" />
+                                Style="{StaticResource TextStyle.Numeric.Hero}"
+                                Text="{Binding BalanceSheetNetWorthDisplay}" />
 
                             <!--  Goal progress bar — visible when HasGoalTarget  -->
                             <StackPanel Visibility="{Binding HasGoalTarget, Converter={StaticResource BooleanToVisibilityConverter}}">
