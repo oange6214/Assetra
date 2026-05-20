@@ -77,15 +77,19 @@
                             Placeholder support — set TextBox.Tag="0.00" (or any hint string) and a
                             muted overlay TextBlock 顯示在沒輸入時。隨使用者打字後 Text!="" 觸發 trigger
                             把 placeholder Visibility 設成 Collapsed。Tag 為 null/空字串時 TextBlock
-                            渲染空白，沒有視覺干擾。HorizontalAlignment 跟著 HorizontalContentAlignment，
-                            這樣 right-aligned 的數字 textbox placeholder 也會靠右。
+                            渲染空白，沒有視覺干擾。HorizontalAlignment / VerticalAlignment 跟著
+                            HorizontalContentAlignment / VerticalContentAlignment — 這樣：
+                              - right-aligned 數字 textbox placeholder 靠右
+                              - multiline 備註 (VerticalContentAlignment=Top) placeholder 也靠頂，
+                                跟使用者點擊後的 cursor 位置一致，避免「placeholder 在中間、cursor
+                                跳到上方」的詭異斷層。
                         -->
                         <Grid>
                             <TextBlock
                                 x:Name="Placeholder"
                                 Margin="{TemplateBinding Padding}"
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalAlignment="Center"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                 FontFamily="{TemplateBinding FontFamily}"
                                 FontSize="{TemplateBinding FontSize}"
                                 Foreground="{DynamicResource Brush.Text.Muted}"

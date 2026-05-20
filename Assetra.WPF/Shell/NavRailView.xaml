@@ -599,20 +599,35 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!--  Hamburger toggle (unchanged from prior design).  -->
+                <!--
+                    Hamburger toggle. Expanded state：17px left padding 對齊下方
+                    nav item 的 icon 位置。Collapsed state：rail 變窄，固定 padding 把
+                    icon 推到偏左不置中 — 改用 Style.Triggers 在 IsChecked=False 時
+                    Padding=0 + HorizontalContentAlignment=Center 把 icon 居中。
+                -->
                 <ToggleButton
                     x:Name="PaneToggle"
                     Grid.Row="0"
                     Height="40"
                     Margin="0,8,0,8"
-                    Padding="17,0,0,0"
                     HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Left"
                     Background="Transparent"
                     BorderThickness="0"
                     Cursor="Hand"
                     IsChecked="True"
                     ToolTip="{DynamicResource Nav.Toggle}">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
+                            <Setter Property="Padding" Value="17,0,0,0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Left" />
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
                     <ToggleButton.Template>
                         <ControlTemplate TargetType="{x:Type ToggleButton}">
                             <Border
@@ -630,11 +645,21 @@
                         </ControlTemplate>
                     </ToggleButton.Template>
                     <ds:AppIcon
-                        HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         FontSize="{StaticResource Font.Size.Md}"
                         Foreground="{DynamicResource AppTextMuted}"
-                        Symbol="Navigation24" />
+                        Symbol="Navigation24">
+                        <ds:AppIcon.Style>
+                            <Style TargetType="ds:AppIcon">
+                                <Setter Property="HorizontalAlignment" Value="Left" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=PaneToggle}" Value="False">
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ds:AppIcon.Style>
+                    </ds:AppIcon>
                 </ToggleButton>
 
                 <!--
