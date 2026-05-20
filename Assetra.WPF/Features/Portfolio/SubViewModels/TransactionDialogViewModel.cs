@@ -479,10 +479,44 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 _availableAssetsView = System.Windows.Data.CollectionViewSource.GetDefaultView(AvailableAssets);
                 _availableAssetsView.GroupDescriptions.Add(
                     new System.Windows.Data.PropertyGroupDescription(nameof(TxAssetSubject.GroupKey)));
+                _availableAssetsView.Filter = AssetMatchesSearch;
             }
             return _availableAssetsView;
         }
     }
+
+    /// <summary>
+    /// P2.7 — 資產 picker 頂部搜尋框的過濾述詞。空字串 → 全部通過；非空 → 比對
+    /// PrimaryName / SecondaryLine / Symbol（皆 case-insensitive substring）。「+ 新增資產」
+    /// sentinel 永遠保留以避免使用者在搜尋無結果時卡住。搜尋時隱藏「最近使用」 group
+    /// 避免同一檔資產在 Recent + Investment 兩處同時出現造成重複視覺噪音。
+    /// </summary>
+    private bool AssetMatchesSearch(object obj)
+    {
+        if (obj is not TxAssetSubject a) return false;
+        if (a.Id == AddNewAssetSentinelId) return true;
+
+        var q = AssetSearchText;
+        if (string.IsNullOrWhiteSpace(q)) return true;
+
+        if (a.GroupKey == "Portfolio.Tx.Asset.Group.Recent") return false;
+
+        return Contains(a.PrimaryName, q)
+            || Contains(a.SecondaryLine, q)
+            || Contains(a.Symbol, q);
+
+        static bool Contains(string? source, string needle) =>
+            !string.IsNullOrEmpty(source) &&
+            source.Contains(needle, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// P2.7 — 頂部搜尋框雙向綁到這裡。VM 收到 keystroke 後 refresh view 觸發
+    /// <see cref="AssetMatchesSearch"/> 重跑過濾。
+    /// </summary>
+    [ObservableProperty] private string _assetSearchText = string.Empty;
+
+    partial void OnAssetSearchTextChanged(string value) => _availableAssetsView?.Refresh();
 
     private void InvalidateAvailableAssetsCache()
     {
@@ -1447,6 +1481,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         // P2.2 — 新 dialog 一開始重置「使用者改過 currency」標記，否則上次手動改過會延續。
         SelectedAsset = null;
         _userTouchedCurrency = false;
+        // P2.7 — 上次 dialog 殘留的搜尋字串可能誤過濾掉這次的資產，先清掉再 rebuild view。
+        AssetSearchText = string.Empty;
         // 資產清單可能在上次 dialog 期間有變動（新增持倉 / 帳戶 / 負債）— 重建 cache + grouped view。
         InvalidateAvailableAssetsCache();
         TxAmount = string.Empty;
@@ -1552,6 +1588,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private void EditTrade(TradeRowViewModel row)
     {
         IsRevisionMode = false;
+        // P2.7 — 編輯模式不需要殘留的搜尋字串干擾 picker。
+        AssetSearchText = string.Empty;
         // 資產清單可能在 dialog 上次關閉後有變動 — 進編輯模式前也重建 cache 一次，
         // 避免 ResolveAssetSubjectForTrade 命中 stale list 找不到剛改名的持倉。
         InvalidateAvailableAssetsCache();

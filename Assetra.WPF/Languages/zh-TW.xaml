@@ -108,6 +108,7 @@
     <sys:String x:Key="Common.Cancel">取消</sys:String>
     <sys:String x:Key="Common.Save">儲存</sys:String>
     <sys:String x:Key="Common.Edit">編輯</sys:String>
+    <sys:String x:Key="Common.Search.Placeholder">搜尋...</sys:String>
     <!--  Portfolio Groups (Portfolio-Groups-Refactor P2)  -->
     <sys:String x:Key="PortfolioGroups.Nav">群組</sys:String>
     <sys:String x:Key="PortfolioGroups.Heading">投資群組管理</sys:String>

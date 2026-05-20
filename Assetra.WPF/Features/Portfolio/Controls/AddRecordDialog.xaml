@@ -263,10 +263,18 @@
                                             GroupStyle.HeaderTemplate 用 ResourceKeyToStringConverter 解析
                                             「投資 / 現金 / 負債」i18n keys。
                                         -->
+                                        <!--
+                                            P2.7 — 套 FormComboBoxWithSearch（頂部嵌搜尋框）。Tag 是 style 內
+                                            search TextBox 的 TwoWay bridge — VM 收到 keystroke 後 Refresh
+                                            ICollectionView 觸發 AssetMatchesSearch 過濾。IsTextSearchEnabled
+                                            關掉 WPF 內建 type-ahead 避免跟 VM filter 互打。
+                                        -->
                                         <ComboBox
+                                            IsTextSearchEnabled="False"
                                             ItemsSource="{Binding AvailableAssetsView}"
                                             SelectedItem="{Binding SelectedAsset, Mode=TwoWay}"
-                                            Style="{StaticResource FormComboBox}"
+                                            Style="{StaticResource FormComboBoxWithSearch}"
+                                            Tag="{Binding AssetSearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                             ToolTip="{DynamicResource Portfolio.Tx.Asset.Hint}">
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate>

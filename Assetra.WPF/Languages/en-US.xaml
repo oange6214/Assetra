@@ -108,6 +108,7 @@
     <sys:String x:Key="Common.Cancel">Cancel</sys:String>
     <sys:String x:Key="Common.Save">Save</sys:String>
     <sys:String x:Key="Common.Edit">Edit</sys:String>
+    <sys:String x:Key="Common.Search.Placeholder">Search...</sys:String>
     <sys:String x:Key="PortfolioGroups.Nav">Groups</sys:String>
     <sys:String x:Key="PortfolioGroups.Heading">Portfolio Groups</sys:String>
     <sys:String x:Key="PortfolioGroups.Subheading">Organise trades and accounts into buckets (e.g. "Retirement", "House Fund") so goals and FIRE calculations map onto concrete groups.</sys:String>

@@ -384,6 +384,146 @@
         <Setter Property="ItemTemplate" Value="{StaticResource AppComboBoxDisplayTemplate}" />
     </Style>
 
+    <!--
+        FormComboBox with a search/filter TextBox docked at the popup top.
+        Bridge: caller binds VM filter text into ComboBox.Tag (TwoWay), the template
+        TextBox bind its Text to that Tag — VM gets keystroke updates without code-behind.
+        Caller is responsible for IsTextSearchEnabled="False" so WPF's built-in type-ahead
+        doesn't fight the VM filter. Drop-down item list is whatever ItemsSource provides
+        (typically an ICollectionView whose Filter predicate honors the same VM property).
+    -->
+    <Style
+        x:Key="FormComboBoxWithSearch"
+        BasedOn="{StaticResource FormComboBox}"
+        TargetType="ComboBox">
+        <Setter Property="StaysOpenOnEdit" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid x:Name="Root">
+                        <ToggleButton
+                            x:Name="ToggleButton"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            ClickMode="Press"
+                            Focusable="False"
+                            IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border
+                                        x:Name="Bd"
+                                        Background="{DynamicResource AppBackground}"
+                                        BorderBrush="{DynamicResource AppBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource Radius.Sm}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="24" />
+                                            </Grid.ColumnDefinitions>
+                                            <Rectangle Grid.Column="0" Fill="Transparent" />
+                                            <ds:AppIcon
+                                                Grid.Column="1"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                FontSize="10"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                IsHitTestVisible="False"
+                                                Symbol="ChevronDown24" />
+                                        </Grid>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding IsKeyboardFocusWithin, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value="True">
+                                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value="False">
+                                            <Setter TargetName="Bd" Property="Opacity" Value="0.5" />
+                                        </DataTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+
+                        <ContentPresenter
+                            x:Name="ContentPresenter"
+                            Margin="8,0,24,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Content="{TemplateBinding SelectionBoxItem}"
+                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                            IsHitTestVisible="False" />
+
+                        <Popup
+                            x:Name="PART_Popup"
+                            AllowsTransparency="True"
+                            IsOpen="{TemplateBinding IsDropDownOpen}"
+                            Placement="Bottom">
+                            <Border
+                                MinWidth="{Binding ActualWidth, ElementName=Root}"
+                                MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                Margin="0,2,0,0"
+                                Background="{DynamicResource AppSurface}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Sm}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Border
+                                        Grid.Row="0"
+                                        Padding="8,6"
+                                        Background="{DynamicResource AppSurface}"
+                                        BorderBrush="{DynamicResource AppBorder}"
+                                        BorderThickness="0,0,0,1">
+                                        <Grid>
+                                            <TextBox
+                                                x:Name="PART_SearchBox"
+                                                Padding="6,3"
+                                                Background="{DynamicResource AppBackground}"
+                                                BorderBrush="{DynamicResource AppBorder}"
+                                                BorderThickness="1"
+                                                FontFamily="{StaticResource Font.Family.UI}"
+                                                FontSize="{StaticResource Font.Size.Sm}"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBlock
+                                                Margin="14,0,8,0"
+                                                VerticalAlignment="Center"
+                                                FontFamily="{StaticResource Font.Family.UI}"
+                                                FontSize="{StaticResource Font.Size.Sm}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                IsHitTestVisible="False"
+                                                Text="{DynamicResource Common.Search.Placeholder}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Text, ElementName=PART_SearchBox}" Value="">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </Border>
+                                    <ScrollViewer Grid.Row="1" Focusable="False">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!--  Implicit default for bare <ComboBox/>.  -->
     <Style BasedOn="{StaticResource AppComboBox}" TargetType="{x:Type ComboBox}" />
 
