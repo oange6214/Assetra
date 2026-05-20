@@ -1,0 +1,117 @@
+using System.Collections.ObjectModel;
+using Assetra.WPF.Infrastructure;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+namespace Assetra.WPF.Shell;
+
+/// <summary>
+/// MainViewModel partial — Command Palette (Ctrl+Shift+K) state + filter.
+/// Separate from the existing global stock search (Ctrl+K) because they serve
+/// different mental models: stock search is asset lookup, command palette is
+/// app actions (navigate, toggle, add). Keeping them split avoids a single
+/// popup with two visual sections.
+/// </summary>
+public partial class MainViewModel
+{
+    [ObservableProperty] private string _commandPaletteText = string.Empty;
+    [ObservableProperty] private bool _isCommandPaletteOpen;
+
+    private readonly ObservableCollection<CommandPaletteEntry> _commandPaletteAllEntries = new();
+    private readonly ObservableCollection<CommandPaletteEntry> _commandPaletteResults = new();
+
+    public ReadOnlyObservableCollection<CommandPaletteEntry> CommandPaletteResults { get; private set; } = null!;
+
+    /// <summary>
+    /// Localization service is needed to resolve i18n title keys at filter time so the
+    /// substring match works on the rendered Chinese/English text the user sees, not
+    /// on the resource key string. Assigned by <see cref="InitializeCommandPalette"/>
+    /// from the main ctor.
+    /// </summary>
+    private Core.Interfaces.ILocalizationService? _localizationForPalette;
+
+    [RelayCommand]
+    private void ToggleCommandPalette() => IsCommandPaletteOpen = !IsCommandPaletteOpen;
+
+    [RelayCommand]
+    private void ExecuteCommandPaletteEntry(CommandPaletteEntry? entry)
+    {
+        if (entry is null) return;
+        IsCommandPaletteOpen = false;
+        entry.Execute.Invoke();
+    }
+
+    partial void OnCommandPaletteTextChanged(string value) => RefilterCommandPalette(value);
+
+    partial void OnIsCommandPaletteOpenChanged(bool value)
+    {
+        if (!value)
+            CommandPaletteText = string.Empty;
+        else
+            RefilterCommandPalette(CommandPaletteText);
+    }
+
+    private void RefilterCommandPalette(string query)
+    {
+        _commandPaletteResults.Clear();
+        var q = query?.Trim() ?? string.Empty;
+
+        foreach (var entry in _commandPaletteAllEntries)
+        {
+            if (string.IsNullOrEmpty(q))
+            {
+                _commandPaletteResults.Add(entry);
+                continue;
+            }
+            // 比對使用者看到的當下語系字串，不比對 resource key 本身。
+            var resolved = _localizationForPalette?.Get(entry.TitleKey, entry.TitleKey) ?? entry.TitleKey;
+            if (resolved.Contains(q, System.StringComparison.OrdinalIgnoreCase))
+                _commandPaletteResults.Add(entry);
+        }
+    }
+
+    /// <summary>
+    /// Seed built-in command palette entries. Called from the main constructor right
+    /// after sub-VMs are wired. Lambdas capture <c>this</c> so navigation / actions
+    /// flow through the existing commands rather than duplicating logic.
+    /// </summary>
+    private void InitializeCommandPalette(Core.Interfaces.ILocalizationService localization)
+    {
+        _localizationForPalette = localization;
+        void Nav(NavSection section) => NavRail.ActiveSection = section;
+
+        var group_Nav = "Nav.Section.Title";
+        var group_Action = "CommandPalette.Group.Action";
+
+        _commandPaletteAllEntries.Add(new("FinancialOverview.Nav.Label", group_Nav, () => Nav(NavSection.FinancialOverview)));
+        _commandPaletteAllEntries.Add(new("Nav.Portfolio", group_Nav, () => Nav(NavSection.Portfolio)));
+        _commandPaletteAllEntries.Add(new("Nav.TransactionLog", group_Nav, () => Nav(NavSection.TransactionLog)));
+        _commandPaletteAllEntries.Add(new("Nav.Reports", group_Nav, () => Nav(NavSection.Reports)));
+        _commandPaletteAllEntries.Add(new("Nav.Categories", group_Nav, () => Nav(NavSection.Categories)));
+        _commandPaletteAllEntries.Add(new("Nav.Assistant", group_Nav, () => Nav(NavSection.Assistant)));
+        _commandPaletteAllEntries.Add(new("Nav.CashAccounts", group_Nav, () => Nav(NavSection.CashAccounts)));
+        _commandPaletteAllEntries.Add(new("Nav.Liabilities", group_Nav, () => Nav(NavSection.Liabilities)));
+        _commandPaletteAllEntries.Add(new("Nav.Goals", group_Nav, () => Nav(NavSection.Goals)));
+        _commandPaletteAllEntries.Add(new("Fire.Title", group_Nav, () => Nav(NavSection.Fire)));
+        _commandPaletteAllEntries.Add(new("MonteCarlo.Title", group_Nav, () => Nav(NavSection.MonteCarlo)));
+        _commandPaletteAllEntries.Add(new("RealEstate.Title", group_Nav, () => Nav(NavSection.RealEstate)));
+        _commandPaletteAllEntries.Add(new("Insurance.Title", group_Nav, () => Nav(NavSection.Insurance)));
+        _commandPaletteAllEntries.Add(new("Retirement.Title", group_Nav, () => Nav(NavSection.Retirement)));
+        _commandPaletteAllEntries.Add(new("PhysicalAsset.Title", group_Nav, () => Nav(NavSection.PhysicalAsset)));
+        _commandPaletteAllEntries.Add(new("Nav.Recurring", group_Nav, () => Nav(NavSection.Recurring)));
+        _commandPaletteAllEntries.Add(new("Nav.Alerts", group_Nav, () => Nav(NavSection.Alerts)));
+        _commandPaletteAllEntries.Add(new("Nav.AuditLog", group_Nav, () => Nav(NavSection.AuditLog)));
+        _commandPaletteAllEntries.Add(new("Nav.Import", group_Nav, () => Nav(NavSection.Import)));
+        _commandPaletteAllEntries.Add(new("Nav.Settings", group_Nav, () => Nav(NavSection.Settings)));
+
+        _commandPaletteAllEntries.Add(new("CommandPalette.Action.AddTransaction", group_Action, () => AddTransactionFromMenuCommand.Execute(null)));
+        _commandPaletteAllEntries.Add(new("CommandPalette.Action.AddAccount", group_Action, () => AddAccountFromMenuCommand.Execute(null)));
+        _commandPaletteAllEntries.Add(new("CommandPalette.Action.AddLiability", group_Action, () => AddLiabilityFromMenuCommand.Execute(null)));
+        _commandPaletteAllEntries.Add(new("CommandPalette.Action.AddCategory", group_Action, () => AddCategoryFromMenuCommand.Execute(null)));
+        _commandPaletteAllEntries.Add(new("CommandPalette.Action.AddGoal", group_Action, () => AddGoalFromMenuCommand.Execute(null)));
+        _commandPaletteAllEntries.Add(new("CommandPalette.Action.ToggleTheme", group_Action, () => ToggleThemeCommand.Execute(null)));
+
+        CommandPaletteResults = new ReadOnlyObservableCollection<CommandPaletteEntry>(_commandPaletteResults);
+        RefilterCommandPalette(string.Empty);
+    }
+}

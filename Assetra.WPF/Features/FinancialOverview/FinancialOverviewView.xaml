@@ -33,11 +33,15 @@
                     - 目標進度條：未設定目標時顯示 CTA「尚未設定目標 → 點此設定」
                     - 今日漲跌：HasHeroTodayDelta=false 時整段隱藏，避免「未開盤」期間佔位
                 -->
+                <!--
+                    Hero card border 也降階到 AppBorderLight — 主視覺由 hero 大字本身扛，
+                    border 只是 card 邊界提示，不該搶 hero 數字的注意力。
+                -->
                 <Border
                     Margin="0,0,0,12"
                     Padding="20,16"
                     Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource Radius.Md}">
                     <Grid>
@@ -168,11 +172,15 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <!--  總資產  -->
+                    <!--
+                        總資產 — P2.12 BorderBrush 改 AppBorderLight (Layer2 < Layer3 = AppBorder
+                        =原色)，視覺重量降階；hero 上方淨資產 card 已是主焦點，summary 公式列
+                        不需要重邊框搶注意力。
+                    -->
                     <Border Grid.Column="0"
                             Padding="{StaticResource Padding.Card}"
                             Background="{DynamicResource AppCardBackground}"
-                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderBrush="{DynamicResource AppBorderLight}"
                             BorderThickness="1"
                             CornerRadius="{StaticResource Radius.Sm}">
                         <StackPanel>
@@ -202,11 +210,11 @@
                                FontWeight="Bold"
                                Foreground="{DynamicResource AppTextMuted}"
                                Text="−" />
-                    <!--  總負債  -->
+                    <!--  總負債 (P2.12 — 同 lightening pass)  -->
                     <Border Grid.Column="2"
                             Padding="{StaticResource Padding.Card}"
                             Background="{DynamicResource AppCardBackground}"
-                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderBrush="{DynamicResource AppBorderLight}"
                             BorderThickness="1"
                             CornerRadius="{StaticResource Radius.Sm}">
                         <StackPanel>

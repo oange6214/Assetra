@@ -44,6 +44,15 @@
             Key="K"
             Command="{Binding ToggleSearchCommand}"
             Modifiers="Ctrl" />
+        <!--
+            P2.12 — Ctrl+Shift+K = Command Palette (navigate / quick actions).
+            Ctrl+K stays as global stock search (existing convention)，因為兩者
+            mental model 不同：stock 搜尋是查 asset，command palette 是執行動作。
+        -->
+        <KeyBinding
+            Key="K"
+            Command="{Binding ToggleCommandPaletteCommand}"
+            Modifiers="Ctrl+Shift" />
         <KeyBinding
             Key="Left"
             Command="{Binding NavRail.GoBackCommand}"
@@ -462,11 +471,16 @@
                         Margin="2,0,0,0"
                         Padding="0"
                         Click="CloseButton_Click"
-                        Style="{StaticResource AppIconButton}"
+                        Style="{StaticResource AppWindowCloseButton}"
                         ToolTip="Close">
+                        <!--
+                            Icon Foreground 綁 parent Button.Foreground → 跟著 style trigger
+                            走 (idle=AppTextMuted、hover=White)。預設不能 hard-code 顏色
+                            否則 hover 紅底配灰 icon 不協調。
+                        -->
                         <ds:AppIcon
                             FontSize="{StaticResource Font.Size.Sm}"
-                            Foreground="{DynamicResource AppTextMuted}"
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                             Symbol="Dismiss24" />
                     </Button>
                 </StackPanel>
@@ -628,6 +642,122 @@
                             </ItemsControl>
                         </ScrollViewer>
                     </Grid>
+                </Grid>
+            </Border>
+        </Popup>
+
+        <!--
+            ═══ Command Palette popup (Ctrl+Shift+K) ═══
+            P2.12 — 簡化版 command palette。Backdrop 灰幕 + 中上 popup（沿用 search
+            popup 的視覺語言）。Item 列表是 i18n key 走 ResourceKeyToStringConverter
+            渲染當下語系字串。MouseLeftButtonUp 觸發 ExecuteCommandPaletteEntry 接力。
+        -->
+        <Border
+            x:Name="CommandPaletteBackdrop"
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="9"
+            Background="Black"
+            MouseDown="CommandPaletteBackdrop_MouseDown"
+            Opacity="0.35"
+            Visibility="{Binding IsCommandPaletteOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Popup
+            x:Name="CommandPalettePopup"
+            AllowsTransparency="True"
+            IsOpen="{Binding IsCommandPaletteOpen, Mode=TwoWay}"
+            Placement="Custom"
+            PlacementTarget="{Binding ElementName=MainShell}"
+            PopupAnimation="Fade"
+            StaysOpen="False">
+            <Border
+                MaxHeight="440"
+                Margin="12"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource Radius.Lg}">
+                <Border.Width>
+                    <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.52|360|620">
+                        <Binding ElementName="MainShell" Path="ActualWidth" />
+                        <Binding Path="Settings.UiScale" />
+                    </MultiBinding>
+                </Border.Width>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.Row="0"
+                        Padding="16,12"
+                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderThickness="0,0,0,1">
+                        <DockPanel>
+                            <ds:AppIcon
+                                Margin="0,0,10,0"
+                                VerticalAlignment="Center"
+                                DockPanel.Dock="Left"
+                                FontSize="{StaticResource Font.Size.Lg}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                IsHitTestVisible="False"
+                                Symbol="ChevronRight24" />
+                            <TextBox
+                                x:Name="CommandPaletteInput"
+                                VerticalContentAlignment="Center"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                FocusVisualStyle="{x:Null}"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Md}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Tag="{DynamicResource CommandPalette.Placeholder}"
+                                Text="{Binding CommandPaletteText, UpdateSourceTrigger=PropertyChanged}" />
+                        </DockPanel>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="1" MaxHeight="360" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl Focusable="False" ItemsSource="{Binding CommandPaletteResults}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        Padding="16,10"
+                                        Background="Transparent"
+                                        BorderBrush="{DynamicResource AppBorderLight}"
+                                        BorderThickness="0,0,0,1"
+                                        Cursor="Hand">
+                                        <Border.InputBindings>
+                                            <MouseBinding
+                                                MouseAction="LeftClick"
+                                                Command="{Binding DataContext.ExecuteCommandPaletteEntryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}" />
+                                        </Border.InputBindings>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock
+                                                Grid.Column="0"
+                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                FontSize="{StaticResource Font.Size.Sm}"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding TitleKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                Margin="12,0,0,0"
+                                                VerticalAlignment="Center"
+                                                FontFamily="{StaticResource Font.Family.Base}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{Binding GroupKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Grid>
             </Border>
         </Popup>

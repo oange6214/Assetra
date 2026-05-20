@@ -71,7 +71,7 @@
                             <TextBlock
                                 VerticalAlignment="Center"
                                 FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextPrimary}"
+                                Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{Binding SyncStatusText}" />
                         </StackPanel>
                     </ToggleButton>

@@ -184,6 +184,24 @@
     </Style>
 
     <!--
+        Window close (X) — Win11 convention：hover 變紅底白前景。原本沿用 AppIconButton
+        的 subtle 灰色 hover，沒有「這顆會關掉視窗，慎按」的視覺差異化。Audit 指出
+        title bar window controls 視覺太傳統，這個改動把 close 拉出來給品牌感升級。
+    -->
+    <Style
+        x:Key="AppWindowCloseButton"
+        BasedOn="{StaticResource AppIconButton}"
+        TargetType="{x:Type Button}">
+        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#E81123" />
+                <Setter Property="Foreground" Value="White" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--
         Empty-state action buttons include a built-in top margin so they
         sit comfortably below the description text. 24 px = Gap.Xl,
         matching AppEmptyStateActionBar for pages that don't wrap the

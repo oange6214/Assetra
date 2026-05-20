@@ -78,6 +78,10 @@ public partial class MainWindow : Window
     private void SearchBackdrop_MouseDown(object sender, MouseButtonEventArgs e) =>
         _viewModel.ToggleSearchCommand.Execute(null);
 
+    // P2.12 — Command palette backdrop dismiss (parallel to SearchBackdrop_MouseDown).
+    private void CommandPaletteBackdrop_MouseDown(object sender, MouseButtonEventArgs e) =>
+        _viewModel.ToggleCommandPaletteCommand.Execute(null);
+
     private void MinimizeButton_Click(object sender, RoutedEventArgs e) =>
         WindowState = WindowState.Minimized;
 

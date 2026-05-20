@@ -44,18 +44,31 @@ public partial class StatusBarViewModel : ObservableObject, IDisposable
     {
         get
         {
-            return _syncSnapshot.State switch
+            var baseLabel = _syncSnapshot.State switch
             {
-                GlobalSyncState.Disabled => _localization.Get("StatusBar.Sync.Disabled", "未啟用同步"),
+                GlobalSyncState.Disabled => _localization.Get("StatusBar.Sync.Disabled", "同步未開啟"),
                 GlobalSyncState.Idle     => _localization.Get("StatusBar.Sync.Synced", "已同步"),
                 GlobalSyncState.Syncing  => _localization.Get("StatusBar.Sync.Syncing", "同步中…"),
-                GlobalSyncState.Failed   => _localization.Get("StatusBar.Sync.Failed", "同步失敗"),
-                GlobalSyncState.Offline  => _localization.Get("StatusBar.Sync.Offline", "離線"),
+                GlobalSyncState.Failed   => _localization.Get("StatusBar.Sync.Failed", "同步未成功"),
+                GlobalSyncState.Offline  => _localization.Get("StatusBar.Sync.Offline", "離線模式"),
                 GlobalSyncState.Pending  => string.Format(
                     _localization.Get("StatusBar.Sync.PendingFormat", "{0} 筆待同步"),
                     _syncSnapshot.TotalPending),
                 _ => string.Empty,
             };
+
+            // P2.12 — Rich data 組合：Idle/Pending 狀態下加上「上次同步 14:23」尾巴，
+            // 讓使用者一眼知道資料新鮮度。Failed 加最後一次嘗試時間幫助 debug。
+            // 其他狀態 (Disabled/Syncing/Offline) 維持簡短不加尾。
+            if (_syncSnapshot.LastSyncedAt is { } lastSync &&
+                _syncSnapshot.State is GlobalSyncState.Idle or GlobalSyncState.Pending or GlobalSyncState.Failed)
+            {
+                var local = lastSync.ToLocalTime();
+                var format = _localization.Get("StatusBar.Sync.LastSyncedFormat", "{0} · 上次同步 {1:HH:mm}");
+                return string.Format(format, baseLabel, local.DateTime);
+            }
+
+            return baseLabel;
         }
     }
 

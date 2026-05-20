@@ -67,7 +67,10 @@
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.DivPerShare}" />
-            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding Div.PerShare, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox
+                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                Tag="{DynamicResource Portfolio.Tx.PricePlaceholder}"
+                Text="{Binding Div.PerShare, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,12"
                 Style="{StaticResource FormFieldError}"
@@ -83,7 +86,10 @@
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.DivTotalAmount}" />
-            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding Div.TotalInput, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox
+                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                Tag="{DynamicResource Portfolio.Tx.AmountPlaceholder}"
+                Text="{Binding Div.TotalInput, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Margin="0,0,0,12"
                 Style="{StaticResource FormFieldError}"
@@ -156,7 +162,10 @@
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
             Text="{DynamicResource Portfolio.Tx.Fee}" />
-        <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox
+            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+            Tag="{DynamicResource Portfolio.Tx.FeePlaceholder}"
+            Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Margin="0,0,0,12"
             Style="{StaticResource FormFieldError}"

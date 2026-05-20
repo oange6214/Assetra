@@ -268,7 +268,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
         Features.Assistant.AssistantViewModel assistant,
         Features.AuditLog.AuditLogViewModel auditLog,
         IThemeService themeService,
-        IStockSearchService searchService)
+        IStockSearchService searchService,
+        ILocalizationService localization)
     {
         NavRail = navRail;
         StatusBar = statusBar;
@@ -300,6 +301,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
         SearchResults = new ReadOnlyObservableCollection<StockSearchResult>(_searchResults);
 
         Portfolio.AttachTabViewModels(Dashboard, Allocation);
+
+        // P2.12 — Command Palette (Ctrl+Shift+K) seed must happen after sub-VMs are
+        // assigned (lambdas capture them).
+        InitializeCommandPalette(localization);
     }
 
     public void Dispose()

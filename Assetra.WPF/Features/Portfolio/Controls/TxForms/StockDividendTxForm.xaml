@@ -49,6 +49,7 @@
         <TextBox
             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
             IsEnabled="{Binding AreEconomicFieldsEditable}"
+            Tag="{DynamicResource Portfolio.Tx.QuantityPlaceholder}"
             Text="{Binding Div.StockNewShares, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Style="{StaticResource FormFieldError}"

@@ -50,6 +50,55 @@ For full ownership matrix, page patterns, phase plan, and acceptance rules see [
 - Component styles use `App*` or page-scoped patterns already centralized in `Styles/`.
 - Layout styles use `Page*`, `Form*`, `List*`, `Dashboard*`, or `Dialog*`.
 
+## Semantic Brush Reference
+
+Pick the brush by **intent** (what the color *means*), not by hex appearance. The
+table below maps common UX/UI review terminology onto the canonical `Brush.*`
+tokens. Both themes already provide all of these — runtime swap recolors
+automatically.
+
+| Intent | Brush token | Dark | Light |
+|--------|-------------|------|-------|
+| Primary action / CTA | `Brush.Accent` | Brand Gold | Brand Navy |
+| Primary action (hover) | `Brush.AccentHover` | Brand Gold (hover) | Brand Navy (hover) |
+| Subtle accent fill | `Brush.AccentSubtle` | Navy subtle | Navy subtle |
+| Destructive | `Brush.Danger` | Red.500 | Red.600 |
+| Success | `Brush.Success` | Green.500 | Green.700 |
+| Warning | `Brush.Warning` | Amber.400 | Amber.500 |
+| Info | `Brush.Info` | Cyan.400 | Cyan.600 |
+| Price/value up (漲) | `Brush.Up` | Green.500 | Green.700 |
+| Price/value down (跌) | `Brush.Down` | Red.500 | Red.600 |
+| Price/value flat (持平) | `Brush.Neutral` | Slate.400 | Slate.600 |
+| Risk / volatility | `Brush.Risk` | Amber.400 | Amber.500 |
+| Budget category | `Brush.Budget` | Brand GoldDark | Brand Gold |
+| Highlight / specialty | `Brush.Special` | Violet.400 | Violet.800 |
+| Focus ring (keyboard) | `Brush.FocusRing` | Blue.400 | Brand Navy |
+
+Page surface roles:
+
+| Intent | Brush token |
+|--------|-------------|
+| Page background | `Brush.Background` |
+| Card / panel surface | `Brush.Surface` |
+| Elevated surface (raised) | `Brush.SurfaceRaised` |
+| Border (default) | `Brush.Border` |
+| Border (stronger, hover/focus) | `Brush.BorderStrong` |
+| Border (lighter, summary cards) | `AppBorderLight` (alias pending Brush.* migration) |
+| Modal scrim | `Brush.ModalOverlay` |
+
+Text roles:
+
+| Intent | Brush token |
+|--------|-------------|
+| Primary text | `Brush.Text.Primary` |
+| Secondary text (label / hint) | `Brush.Text.Secondary` |
+| Muted text (caption / placeholder) | `Brush.Text.Muted` |
+| Text on accent fill | `Brush.Text.OnAccent` |
+
+> **Rule of thumb**: never hard-code a hex. If a needed intent isn't in the
+> table, either add a new `Brush.*` to both themes or compose from an existing
+> token via opacity.
+
 ## Migration Rules
 
 - Do not add page-local button, tab, input, or empty-state styles.
