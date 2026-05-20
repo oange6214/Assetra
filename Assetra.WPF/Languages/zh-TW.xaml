@@ -1009,6 +1009,7 @@
     <sys:String x:Key="StatusBar.Sync.Offline">離線模式</sys:String>
     <sys:String x:Key="StatusBar.Sync.PendingFormat">{0} 筆待同步</sys:String>
     <sys:String x:Key="StatusBar.Sync.LastSyncedFormat">{0} · 上次同步 {1:HH:mm}</sys:String>
+    <sys:String x:Key="StatusBar.Sync.SyncedWithCountFormat">{0} · 推送 {1} 筆</sys:String>
     <sys:String x:Key="StatusBar.TodayReturnPrefix">今日</sys:String>
 
     <!--  Command Palette (Ctrl+Shift+K)  -->

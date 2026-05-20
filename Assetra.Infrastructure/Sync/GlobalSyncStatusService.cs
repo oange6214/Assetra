@@ -38,6 +38,9 @@ public sealed class GlobalSyncStatusService : IGlobalSyncStatusService
     private string? _lastError;
     private bool _enabled;
     private int _totalPending;
+    // P2.14 — last SyncCompleted's pushed-row count, surfaced in the snapshot for
+    // the status bar's「已同步 · 推送 N 筆」 enriched label.
+    private int _lastPushedCount;
     private IReadOnlyList<DomainSyncStatus> _perDomain = Array.Empty<DomainSyncStatus>();
     private bool _disposed;
 
@@ -137,6 +140,7 @@ public sealed class GlobalSyncStatusService : IGlobalSyncStatusService
         {
             _lastSyncedAt = DateTimeOffset.UtcNow;
             _lastError = null;
+            _lastPushedCount = pushed;
             // Leave Syncing — settles to Idle/Pending in BuildSnapshotLocked
             // once the counter re-poll lands.
             _state = GlobalSyncState.Idle;
@@ -174,7 +178,7 @@ public sealed class GlobalSyncStatusService : IGlobalSyncStatusService
             (true, null, _, 0)          => GlobalSyncState.Idle,
             (true, null, _, _)          => GlobalSyncState.Pending,
         };
-        return new GlobalSyncSnapshot(state, _totalPending, _lastSyncedAt, _lastError);
+        return new GlobalSyncSnapshot(state, _totalPending, _lastSyncedAt, _lastError, _lastPushedCount);
     }
 
     public void Dispose()

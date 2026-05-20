@@ -66,9 +66,17 @@ public partial class StatusBarViewModel : ObservableObject, IDisposable
                 _ => string.Empty,
             };
 
-            // P2.12 — Rich data 組合：Idle/Pending 狀態下加上「上次同步 14:23」尾巴，
-            // 讓使用者一眼知道資料新鮮度。Failed 加最後一次嘗試時間幫助 debug。
-            // 其他狀態 (Disabled/Syncing/Offline) 維持簡短不加尾。
+            // P2.14 — Idle 狀態優先顯示「推送 N 筆」(剛同步完最新鮮的反饋)，
+            // fallback 才走「上次同步 14:23」 timestamp。Failed / Pending 維持
+            // timestamp 行為 — push count 對這兩個狀態意義不大。
+            if (_syncSnapshot.State == GlobalSyncState.Idle && _syncSnapshot.LastPushedCount > 0)
+            {
+                var format = _localization.Get("StatusBar.Sync.SyncedWithCountFormat", "{0} · 推送 {1} 筆");
+                return string.Format(format, baseLabel, _syncSnapshot.LastPushedCount);
+            }
+
+            // P2.12 — Rich data 組合：Idle/Pending/Failed 狀態下加上「上次同步 14:23」尾巴，
+            // 讓使用者一眼知道資料新鮮度。其他狀態 (Disabled/Syncing/Offline) 維持簡短不加尾。
             if (_syncSnapshot.LastSyncedAt is { } lastSync &&
                 _syncSnapshot.State is GlobalSyncState.Idle or GlobalSyncState.Pending or GlobalSyncState.Failed)
             {
