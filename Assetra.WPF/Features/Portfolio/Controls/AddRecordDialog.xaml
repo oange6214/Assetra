@@ -255,12 +255,53 @@
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{DynamicResource Portfolio.Tx.Asset.Label}" />
+                                        <!--
+                                            P2.5 fix — 直接綁 ItemTemplate（不用 DisplayMemberPath）解決
+                                            「ComboBox SelectionBox 顯示成 record ToString」的 bug。
+                                            兩行 layout：PrimaryName 大字、SecondaryLine 小字灰字。
+                                            ItemsSource 走 ICollectionView (AvailableAssetsView) 帶分組。
+                                            GroupStyle.HeaderTemplate 用 ResourceKeyToStringConverter 解析
+                                            「投資 / 現金 / 負債」i18n keys。
+                                        -->
                                         <ComboBox
-                                            DisplayMemberPath="Display"
-                                            ItemsSource="{Binding AvailableAssets}"
+                                            ItemsSource="{Binding AvailableAssetsView}"
                                             SelectedItem="{Binding SelectedAsset, Mode=TwoWay}"
                                             Style="{StaticResource FormComboBox}"
-                                            ToolTip="{DynamicResource Portfolio.Tx.Asset.Hint}" />
+                                            ToolTip="{DynamicResource Portfolio.Tx.Asset.Hint}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Margin="0,2,0,2">
+                                                        <TextBlock
+                                                            FontSize="{StaticResource Font.Size.Sm}"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding PrimaryName}" />
+                                                        <TextBlock
+                                                            Margin="0,2,0,0"
+                                                            FontSize="{StaticResource Font.Size.Xs}"
+                                                            Foreground="{DynamicResource AppTextMuted}"
+                                                            Text="{Binding SecondaryLine}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                            <ComboBox.GroupStyle>
+                                                <GroupStyle>
+                                                    <GroupStyle.HeaderTemplate>
+                                                        <DataTemplate>
+                                                            <Border
+                                                                Padding="6,4,0,4"
+                                                                BorderBrush="{DynamicResource AppBorder}"
+                                                                BorderThickness="0,0,0,1">
+                                                                <TextBlock
+                                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                                    FontWeight="SemiBold"
+                                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                                    Text="{Binding Name, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </GroupStyle.HeaderTemplate>
+                                                </GroupStyle>
+                                            </ComboBox.GroupStyle>
+                                        </ComboBox>
                                     </StackPanel>
 
                                     <!--

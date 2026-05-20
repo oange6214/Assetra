@@ -550,6 +550,9 @@
     <sys:String x:Key="Portfolio.Tx.Date">Date</sys:String>
     <sys:String x:Key="Portfolio.Tx.Asset.Label">Select asset</sys:String>
     <sys:String x:Key="Portfolio.Tx.Asset.Hint">Pick the asset this trade belongs to — investment holding, cash account, or liability. Currency and suggested cash account auto-fill on selection.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Asset.Group.Investment">Investments</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Asset.Group.Cash">Cash</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Asset.Group.Liability">Liabilities</sys:String>
     <sys:String x:Key="Portfolio.Tx.Currency">Currency</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.Hint">Shows trade types matching the selected asset.</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.NeedAsset">Pick an asset first.</sys:String>

@@ -398,48 +398,87 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     /// <summary>
     /// 統一資產選擇器的 item 來源 — 動態組合 Positions / CashAccounts / Liabilities 三類。
-    /// 每次取值都重新組合（cheap，~tens of items），避免 collection-changed 訂閱噪音。
+    /// 每次 dialog 開啟（OpenTxDialog / EditTrade）會 invalidate cache 重建；中間多次存取
+    /// 會走 cache 避免 ComboBox 重新展開時 list reference 變動觸發 ICollectionView 重建。
     /// </summary>
-    public IReadOnlyList<TxAssetSubject> AvailableAssets => BuildAvailableAssets();
+    private IReadOnlyList<TxAssetSubject>? _cachedAvailableAssets;
+    public IReadOnlyList<TxAssetSubject> AvailableAssets =>
+        _cachedAvailableAssets ??= BuildAvailableAssets();
+
+    /// <summary>
+    /// 帶 group header 的 view，XAML ComboBox.ItemsSource 綁這個（不是 AvailableAssets）。
+    /// GroupDescriptions 用 <see cref="TxAssetSubject.GroupKey"/>，XAML GroupStyle.HeaderTemplate
+    /// 走 ResourceKeyToStringConverter 把 key 解析成「投資」/「現金」/「負債」。
+    /// </summary>
+    private System.ComponentModel.ICollectionView? _availableAssetsView;
+    public System.ComponentModel.ICollectionView AvailableAssetsView
+    {
+        get
+        {
+            if (_availableAssetsView is null)
+            {
+                _availableAssetsView = System.Windows.Data.CollectionViewSource.GetDefaultView(AvailableAssets);
+                _availableAssetsView.GroupDescriptions.Add(
+                    new System.Windows.Data.PropertyGroupDescription(nameof(TxAssetSubject.GroupKey)));
+            }
+            return _availableAssetsView;
+        }
+    }
+
+    private void InvalidateAvailableAssetsCache()
+    {
+        _cachedAvailableAssets = null;
+        _availableAssetsView = null;
+        OnPropertyChanged(nameof(AvailableAssets));
+        OnPropertyChanged(nameof(AvailableAssetsView));
+    }
 
     private IReadOnlyList<TxAssetSubject> BuildAvailableAssets()
     {
         var list = new List<TxAssetSubject>(Positions.Count + CashAccounts.Count + Liabilities.Count);
         // 1. 投資持倉 (Stock / Fund / Crypto / Metal / Bond)
+        //    PrimaryName = entity name；SecondaryLine = "(SYMBOL) · CCY"，無 symbol 就降為 "CCY"。
         //    SuggestedCashAccountId — 找跟此持倉幣別相符的第一個現金帳戶，給 P2.2 cascade 用。
-        //    沒找到時 null，P2.2 不會強制覆寫使用者已選的帳戶。
         foreach (var p in Positions)
         {
             var ccy = string.IsNullOrWhiteSpace(p.Currency) ? "TWD" : p.Currency;
             var sameCcyCash = CashAccounts.FirstOrDefault(c =>
                 string.Equals(c.Currency, ccy, StringComparison.OrdinalIgnoreCase));
+            var secondary = string.IsNullOrWhiteSpace(p.Symbol)
+                ? ccy
+                : $"({p.Symbol}) · {ccy}";
             list.Add(new TxAssetSubject(
                 Kind: MapAssetType(p.AssetType),
                 Id: p.Id,
-                Display: string.IsNullOrEmpty(p.Symbol) ? p.Name : $"{p.Symbol} · {p.Name}",
+                PrimaryName: p.Name,
+                SecondaryLine: secondary,
+                GroupKey: "Portfolio.Tx.Asset.Group.Investment",
                 Currency: ccy,
                 Symbol: p.Symbol,
                 SuggestedCashAccountId: sameCcyCash?.Id));
         }
-        // 2. 現金帳戶 — currency 已存在 row 上
+        // 2. 現金帳戶 — SecondaryLine 「CASH · {ccy}」
         foreach (var c in CashAccounts)
         {
             list.Add(new TxAssetSubject(
                 Kind: TxAssetKind.CashAccount,
                 Id: c.Id,
-                Display: $"{c.Name} · {c.Currency}",
+                PrimaryName: c.Name,
+                SecondaryLine: $"CASH · {c.Currency}",
+                GroupKey: "Portfolio.Tx.Asset.Group.Cash",
                 Currency: c.Currency,
                 SuggestedCashAccountId: c.Id));
         }
-        // 3. 負債（信用卡 / 貸款）— Legacy liabilities (AssetId is null) have Label as
-        //    the only stable handle; use Guid.Empty as a sentinel id for them so they
-        //    still appear in the picker. P2.2 cascade logic can no-op on Guid.Empty.
+        // 3. 負債 — SecondaryLine 「DEBT · {ccy}」。Legacy (AssetId=null) 仍列入，
+        //    Id 用 Guid.Empty 哨兵，cascade 內可辨識為 fallback。
         foreach (var liab in Liabilities)
         {
             list.Add(new TxAssetSubject(
                 Kind: TxAssetKind.Liability,
                 Id: liab.AssetId ?? Guid.Empty,
-                Display: liab.Label,
+                PrimaryName: liab.Label,
+                SecondaryLine: $"DEBT · {liab.BalanceAsMoney.Currency}",
+                GroupKey: "Portfolio.Tx.Asset.Group.Liability",
                 Currency: liab.BalanceAsMoney.Currency));
         }
         return list;
@@ -1309,6 +1348,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         // P2.2 — 新 dialog 一開始重置「使用者改過 currency」標記，否則上次手動改過會延續。
         SelectedAsset = null;
         _userTouchedCurrency = false;
+        // 資產清單可能在上次 dialog 期間有變動（新增持倉 / 帳戶 / 負債）— 重建 cache + grouped view。
+        InvalidateAvailableAssetsCache();
         TxAmount = string.Empty;
         TxNote = string.Empty;
         _suppressCategoryAutoTracking = true;
@@ -1412,6 +1453,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private void EditTrade(TradeRowViewModel row)
     {
         IsRevisionMode = false;
+        // 資產清單可能在 dialog 上次關閉後有變動 — 進編輯模式前也重建 cache 一次，
+        // 避免 ResolveAssetSubjectForTrade 命中 stale list 找不到剛改名的持倉。
+        InvalidateAvailableAssetsCache();
         var editState = _tradeDialogController.CreateEditState(row, Positions, CashAccounts, Liabilities);
         EditingTradeId = editState.EditingTradeId;
         PopulateEditSummary(row);
