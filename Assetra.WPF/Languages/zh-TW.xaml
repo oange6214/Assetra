@@ -557,6 +557,9 @@
     <sys:String x:Key="Portfolio.Tx.Asset.Group.Investment">投資</sys:String>
     <sys:String x:Key="Portfolio.Tx.Asset.Group.Cash">現金</sys:String>
     <sys:String x:Key="Portfolio.Tx.Asset.Group.Liability">負債</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Asset.Group.AddNew">新增</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Asset.AddNew.Title">+ 新增資產</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Asset.AddNew.Hint">建立新的投資項目（會關閉此對話框）</sys:String>
     <sys:String x:Key="Portfolio.Tx.Currency">幣別</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.Hint">依所選資產顯示適合的交易類型。</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.NeedAsset">請先選擇資產。</sys:String>

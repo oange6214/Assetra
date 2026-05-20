@@ -423,25 +423,13 @@
                             </Border>
 
 
-                            <Border
-                                Padding="14,12"
-                                Background="{DynamicResource AppBackground}"
-                                BorderBrush="{DynamicResource AppBorder}"
-                                BorderThickness="1"
-                                CornerRadius="{StaticResource Radius.Sm}">
+                            <!--
+                                P2.5 — 移除「紀錄內容」section 標題 + 副標題 + 卡片邊框，
+                                跟參考設計對齊 (flat layout)。Per-type sub-panels 直接接在
+                                基本資訊區下方，視覺上是同一段表單。
+                            -->
+                            <Border Padding="0">
                                 <StackPanel>
-                                    <TextBlock
-                                        FontSize="{StaticResource Font.Size.Sm}"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{DynamicResource Portfolio.Record.Section.Details}" />
-                                    <TextBlock
-                                        Margin="0,4,0,12"
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{DynamicResource Portfolio.Record.Section.DetailsHint}"
-                                        TextWrapping="Wrap"
-                                        Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
 
                                     <!--
                                         Per-type form panel — shown for new records and

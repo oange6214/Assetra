@@ -66,7 +66,10 @@ internal sealed record TransactionDialogDependencies(
     Func<decimal>? GetDefaultCommissionDiscount = null,
     // P2.2 — 支援幣別清單（由 ICurrencyService.SupportedCurrencies 帶）。
     // 跟 Settings 頁共用清單，避免不同 dropdown 看到不同的幣別子集。
-    Func<IReadOnlyList<string>>? GetSupportedCurrencies = null);
+    Func<IReadOnlyList<string>>? GetSupportedCurrencies = null,
+    // P2.5 — 「+ 新增資產」CTA 的進入點。使用者點下去 → 關 dialog → 開「新增投資」流程
+    // (PortfolioViewModel.OpenAddWatchlistDialogCommand)。null 時 sentinel 不渲染。
+    Action? OpenAddNewAsset = null);
 
 /// <summary>
 /// 交易類型 ComboBox 的一個選項。Key 對齊 <see cref="TransactionDialogViewModel.TxType"/>
@@ -128,6 +131,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private readonly Func<Task>? _reloadAllAsync;
     private readonly Func<decimal>? _getDefaultCommissionDiscount;
     private readonly Func<IReadOnlyList<string>>? _getSupportedCurrencies;
+    private readonly Action? _openAddNewAsset;
     private readonly Action _rebuildTotals;
     private readonly Func<string, string, string> _localize;
 
@@ -220,6 +224,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         GroupCatalog = deps.GroupCatalog;
         _getDefaultCommissionDiscount = deps.GetDefaultCommissionDiscount;
         _getSupportedCurrencies = deps.GetSupportedCurrencies;
+        _openAddNewAsset = deps.OpenAddNewAsset;
 
         ExpenseCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_expenseCategories);
         IncomeCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_incomeCategories);
@@ -371,6 +376,15 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
         if (value is null) return;
 
+        // P2.5 — 「+ 新增資產」 sentinel 被選到 → 重置 SelectedAsset 並觸發新增資產流程。
+        // 重置必須先做，避免下次再選到同一個 sentinel 不會 raise PropertyChanged。
+        if (value.Id == AddNewAssetSentinelId)
+        {
+            SelectedAsset = null;
+            _openAddNewAsset?.Invoke();
+            return;
+        }
+
         // 1. 幣別 — 只在使用者沒手動改過時 cascade
         if (!_userTouchedCurrency && !string.IsNullOrWhiteSpace(value.Currency))
         {
@@ -393,6 +407,42 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         if (allowed.Count > 0 && !allowed.Contains(TxType))
         {
             TxType = AvailableTradeTypes[0].Key;
+        }
+
+        // 4. P2.5 — 把選的資產 sync 進 Buy / AddAssetDialog 內部欄位，讓下游 ConfirmBuyAsync
+        //    照舊運作但 BuyTxForm 不必再暴露 AssetType ComboBox + Symbol 輸入框。
+        SyncSelectedAssetIntoBuyState(value);
+    }
+
+    /// <summary>
+    /// P2.5 — 把 SelectedAsset 的 Kind / Symbol 灌進 Buy.AssetType + AddAssetDialog.AddSymbol，
+    /// 讓 ConfirmBuyAsync 沿用舊的內部欄位邏輯，但 UI 上不必再重複輸入。
+    /// </summary>
+    private void SyncSelectedAssetIntoBuyState(TxAssetSubject? asset)
+    {
+        if (asset is null) return;
+
+        // Kind → Buy.AssetType (string "stock" / "fund" / "metal" / "bond" / "crypto")
+        var nextAssetType = asset.Kind switch
+        {
+            TxAssetKind.Stock => "stock",
+            TxAssetKind.Fund => "fund",
+            TxAssetKind.Metal => "metal",
+            TxAssetKind.Bond => "bond",
+            TxAssetKind.Crypto => "crypto",
+            _ => Buy.AssetType,  // 非投資資產維持現值（不會走 Buy 流程）
+        };
+        if (Buy.AssetType != nextAssetType)
+            Buy.AssetType = nextAssetType;
+
+        // Symbol → AddAssetDialog.AddSymbol。Stock / Fund / Bond 等才有 Symbol；
+        // crypto / metal 不一定有；CashAccount / Liability 一定 null。
+        if (!string.IsNullOrWhiteSpace(asset.Symbol)
+            && !string.Equals(AddAssetDialog.AddSymbol, asset.Symbol, StringComparison.OrdinalIgnoreCase))
+        {
+            AddAssetDialog.SuppressSuggestions = true;
+            try { AddAssetDialog.AddSymbol = asset.Symbol; }
+            finally { AddAssetDialog.SuppressSuggestions = false; AddAssetDialog.IsSuggestionsOpen = false; }
         }
     }
 
@@ -433,9 +483,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(AvailableAssetsView));
     }
 
+    /// <summary>P2.5 — 「+ 新增資產」 sentinel 的識別 id（Guid.Empty 是 legacy liability，
+    /// 用 NullGuid 跟 sentinel 衝突，這裡用一個 fixed GUID 哨兵）。</summary>
+    public static readonly Guid AddNewAssetSentinelId = new("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA");
+
     private IReadOnlyList<TxAssetSubject> BuildAvailableAssets()
     {
-        var list = new List<TxAssetSubject>(Positions.Count + CashAccounts.Count + Liabilities.Count);
+        var list = new List<TxAssetSubject>(Positions.Count + CashAccounts.Count + Liabilities.Count + 1);
         // 1. 投資持倉 (Stock / Fund / Crypto / Metal / Bond)
         //    PrimaryName = entity name；SecondaryLine = "(SYMBOL) · CCY"，無 symbol 就降為 "CCY"。
         //    SuggestedCashAccountId — 找跟此持倉幣別相符的第一個現金帳戶，給 P2.2 cascade 用。
@@ -480,6 +534,20 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 SecondaryLine: $"DEBT · {liab.BalanceAsMoney.Currency}",
                 GroupKey: "Portfolio.Tx.Asset.Group.Liability",
                 Currency: liab.BalanceAsMoney.Currency));
+        }
+        // 4. P2.5 — 「+ 新增資產」CTA sentinel。只在 _openAddNewAsset callback 有注入時加。
+        //    Group 排最後，使用者按下會關 dialog 並開「新增投資」流程。
+        //    Strings resolved here via _localize（其他資產 PrimaryName 直接是顯示字串，
+        //    XAML 不用通過 converter — 否則「NVIDIA Corp」這種非 key 字串會被誤解析）。
+        if (_openAddNewAsset is not null)
+        {
+            list.Add(new TxAssetSubject(
+                Kind: TxAssetKind.None,
+                Id: AddNewAssetSentinelId,
+                PrimaryName: _localize("Portfolio.Tx.Asset.AddNew.Title", "+ 新增資產"),
+                SecondaryLine: _localize("Portfolio.Tx.Asset.AddNew.Hint", "建立新的投資項目"),
+                GroupKey: "Portfolio.Tx.Asset.Group.AddNew",
+                Currency: string.Empty));
         }
         return list;
     }

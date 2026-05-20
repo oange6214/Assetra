@@ -13,73 +13,19 @@
 
     <!--  ======== 買入欄位 ========  -->
     <StackPanel Visibility="{Binding TxTypeIsBuy, Converter={StaticResource BooleanToVisibilityConverter}}">
-        <!--  Asset type selector (ComboBox)  -->
-        <TextBlock
-            Margin="0,0,0,4"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.AssetType}" />
-        <ComboBox
-            Margin="0,0,0,12"
-            SelectedValue="{Binding Buy.AssetType, Mode=TwoWay}"
-            SelectedValuePath="Tag"
-            Style="{StaticResource FormComboBox}">
-            <ComboBox.Resources>
-                <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
-            </ComboBox.Resources>
-            <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeStock}" Tag="stock" />
-            <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeFund}" Tag="fund" />
-            <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeMetal}" Tag="metal" />
-            <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeBond}" Tag="bond" />
-            <ComboBoxItem Content="{DynamicResource Portfolio.Dialog.TypeCrypto}" Tag="crypto" />
-        </ComboBox>
+        <!--
+            P2.5 — 移除「資產類別 (Stock/Fund/Metal/Bond/Crypto)」ComboBox。
+            類別現在由統一資產選擇器決定（SelectedAsset.Kind → Buy.AssetType，
+            由 SyncSelectedAssetIntoBuyState() 同步）。使用者選 NVDA 即 Stock，
+            選 Vanguard Total World Stock 即 Fund — 不必再 dropdown 選一次。
 
-        <!--  Stock/ETF: Symbol + autocomplete  -->
+            同樣地，「代號」輸入框也拿掉 — Symbol 由 SelectedAsset.Symbol 帶。
+            非 Stock 子表單（Non-stock / Crypto）下面仍保留自己的 Name / Symbol
+            輸入欄位作為過渡，直到 + 新增資產 CTA 完整接上前不動。
+        -->
+
+        <!--  Stock/ETF：直接走到經濟欄位（單價/總額 toggle、數量等），代號 + 自動補全已拔  -->
         <StackPanel d:Visibility="Visible" Visibility="{Binding Buy.IsStock, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <!--
-                「買入模式 (含交易紀錄 / 僅登記標的)」toggle 已移除。
-                「僅登記標的」流程在投資資產頁面有專門的「新增投資」按鈕
-                (PortfolioViewModel.OpenAddWatchlistDialogCommand → AddWatchlistDialog)，
-                這邊統一為「含交易紀錄」的買入單。Buy.MetaOnly 在 VM 仍保留為
-                預設 false 的屬性，下游 ConfirmBuyAsync 邏輯維持不動。
-            -->
-
-            <TextBlock
-                Margin="0,0,0,4"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Symbol}" />
-            <Grid Margin="0,0,0,12">
-                <TextBox
-                    x:Name="TxSymbolBox"
-                    IsEnabled="{Binding AreEconomicFieldsEditable}"
-                    Text="{Binding AddAssetDialog.AddSymbol, UpdateSourceTrigger=PropertyChanged}" />
-                <Popup
-                    Width="{Binding ActualWidth, ElementName=TxSymbolBox}"
-                    AllowsTransparency="True"
-                    IsOpen="{Binding AddAssetDialog.IsSuggestionsOpen}"
-                    Placement="Bottom"
-                    PlacementTarget="{Binding ElementName=TxSymbolBox}"
-                    StaysOpen="True">
-                    <Border
-                        Background="{DynamicResource AppSurface}"
-                        BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource Radius.Sm}">
-                        <ListBox
-                            MaxHeight="240"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            ItemContainerStyle="{StaticResource StockSuggestionListBoxItemStyle}"
-                            ItemTemplate="{StaticResource StockSuggestionItemTemplate}"
-                            ItemsSource="{Binding AddAssetDialog.SymbolSuggestions}"
-                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                            SelectedItem="{Binding AddAssetDialog.SelectedSuggestion, Mode=TwoWay}" />
-                    </Border>
-                </Popup>
-            </Grid>
 
             <!--  Economic fields — hidden in meta-only mode  -->
             <StackPanel>

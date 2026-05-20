@@ -553,6 +553,9 @@
     <sys:String x:Key="Portfolio.Tx.Asset.Group.Investment">Investments</sys:String>
     <sys:String x:Key="Portfolio.Tx.Asset.Group.Cash">Cash</sys:String>
     <sys:String x:Key="Portfolio.Tx.Asset.Group.Liability">Liabilities</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Asset.Group.AddNew">Create new</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Asset.AddNew.Title">+ Add asset</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Asset.AddNew.Hint">Create a new investment item (closes this dialog)</sys:String>
     <sys:String x:Key="Portfolio.Tx.Currency">Currency</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.Hint">Shows trade types matching the selected asset.</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.NeedAsset">Pick an asset first.</sys:String>

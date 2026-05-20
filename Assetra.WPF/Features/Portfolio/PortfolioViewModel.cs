@@ -463,7 +463,19 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 AutoCategorizationRuleRepository: services.AutoCategorizationRuleRepository,
                 GroupCatalog: services.GroupCatalog,
                 GetDefaultCommissionDiscount: () => _settingsService?.Current?.DefaultCommissionDiscount ?? 1.0m,
-                GetSupportedCurrencies: () => _currencyService?.SupportedCurrencies ?? new[] { "TWD", "USD" }));
+                GetSupportedCurrencies: () => _currencyService?.SupportedCurrencies ?? new[] { "TWD", "USD" },
+                OpenAddNewAsset: () =>
+                {
+                    // P2.5 — 從新增交易 dialog 的「+ 新增資產」sentinel 觸發 → 關目前
+                    // dialog、開「新增投資」flow。使用者建立完後 dialog 重開時新資產會
+                    // 出現在 AvailableAssets（cache 在 OpenTxDialog 會 invalidate）。
+                    // CommunityToolkit.Mvvm 產生的 Command property 不會是 null，但 nullable
+                    // analyzer 看到 lambda capture this.Transaction 在語法順序上還沒初始化所以
+                    // 警告。實際上 lambda 在 dialog 開啟後才執行，Transaction 已被賦值。
+                    this!.Transaction!.CloseTxDialogCommand!.Execute(null);
+                    if (OpenAddWatchlistDialogCommand.CanExecute(null))
+                        OpenAddWatchlistDialogCommand.Execute(null);
+                }));
         Transaction.TransactionCompleted += OnTransactionCompleted;
         Transaction.TradeDeleted += OnTradeDeleted;
 
