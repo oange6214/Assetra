@@ -962,22 +962,15 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// 「新增信用卡消費」等。XAML 用 ResourceKeyToStringConverter 解析此 key。
     /// 編輯模式維持 Portfolio.Tx.EditTitle（在 XAML DataTrigger 處理）。
     /// </summary>
-    public string TxDynamicTitleKey => TxType switch
-    {
-        "buy" => "Portfolio.Record.Title.Buy",
-        "sell" => "Portfolio.Record.Title.Sell",
-        "cashDiv" => "Portfolio.Record.Title.CashDiv",
-        "stockDiv" => "Portfolio.Record.Title.StockDiv",
-        "income" => "Portfolio.Record.Title.Income",
-        "deposit" => "Portfolio.Record.Title.Deposit",
-        "withdrawal" => "Portfolio.Record.Title.Withdrawal",
-        "transfer" => "Portfolio.Record.Title.Transfer",
-        "loanBorrow" => "Portfolio.Record.Title.LoanBorrow",
-        "loanRepay" => "Portfolio.Record.Title.LoanRepay",
-        "creditCardCharge" => "Portfolio.Record.Title.CreditCardCharge",
-        "creditCardPayment" => "Portfolio.Record.Title.CreditCardPayment",
-        _ => "Portfolio.Record.Title",
-    };
+    /// <summary>
+    /// P2.15 — 統一回傳「新增交易」(Portfolio.Record.Title)。原本依 TxType 切
+    /// 「新增買入交易 / 新增賣出交易 ...」是 Phase 2 之前的設計，當時 user 點 menu
+    /// 已選好類型才開 dialog。Phase 2 之後 type picker 移到 dialog 內，user 開啟
+    /// 那瞬間 TxType 還沒選擇 / 是預設值，title 動態切就沒意義反而干擾 (e.g. 顯示
+    /// 「新增買入交易」但其實還沒挑類型)。Edit 模式仍由 XAML DataTrigger 切到
+    /// Portfolio.Tx.EditTitle，不受這裡影響。
+    /// </summary>
+    public string TxDynamicTitleKey => "Portfolio.Record.Title";
 
     /// <summary>「此筆交易會儲存於 ___ 」的 i18n resource key。null = 沒選類型，提示隱藏。</summary>
     public string? TxDestinationKey => TxType switch

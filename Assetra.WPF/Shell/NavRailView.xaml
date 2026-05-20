@@ -644,22 +644,20 @@
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </ToggleButton.Template>
+                    <!--
+                        AppIcon HorizontalAlignment=Left 維持原值 — 收合時的居中由
+                        外層 ToggleButton 的 HorizontalContentAlignment trigger 帶動
+                        ContentPresenter 對齊，AppIcon 在 ContentPresenter 內貼左
+                        但因 ContentPresenter 自己被 center，整體視覺仍然居中。
+                        (上一版用 AppIcon.Style 覆寫導致預設 implicit style 沒繼承，
+                        icon glyph render 不出來。)
+                    -->
                     <ds:AppIcon
+                        HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         FontSize="{StaticResource Font.Size.Md}"
                         Foreground="{DynamicResource AppTextMuted}"
-                        Symbol="Navigation24">
-                        <ds:AppIcon.Style>
-                            <Style TargetType="ds:AppIcon">
-                                <Setter Property="HorizontalAlignment" Value="Left" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsChecked, ElementName=PaneToggle}" Value="False">
-                                        <Setter Property="HorizontalAlignment" Value="Center" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ds:AppIcon.Style>
-                    </ds:AppIcon>
+                        Symbol="Navigation24" />
                 </ToggleButton>
 
                 <!--

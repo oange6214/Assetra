@@ -80,16 +80,19 @@
 
     <!--  ── SegmentBtn — RadioButton-based pill segment ──  -->
     <!--
-        MinHeight=Control.Height.Md (32) 跟 AppTextBox 高度對齊。原本 Padding="12,5" 算出
-        button 高約 26-28px，比 TextBox 矮 4-6px，並排時視覺上會「短一截」。加 MinHeight=32
-        後跟 input controls 等高，不再有「toggle vs input」高度差的視覺破綻。
+        P2.15 — 加 explicit Height (不只 MinHeight) = Control.Height.Md (40) 鎖死高度。
+        RadioButton 的 measure 行為偶爾會超 MinHeight 幾 px (native 計算 indicator
+        空間 + content padding 加起來 > 40)，造成跟相鄰 TextBox 視覺上「高一截」。
+        Padding 從 12,5 縮成 12,4 讓 natural height 更落在 40 之內，配合 Height 鎖
+        確保跟 TextBox / ComboBox / DatePicker 精準同高 (都是 40)。
     -->
     <Style x:Key="SegmentBtn" TargetType="RadioButton">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Padding" Value="12,5" />
+        <Setter Property="Padding" Value="12,4" />
         <Setter Property="MinHeight" Value="{StaticResource Control.Height.Md}" />
+        <Setter Property="Height" Value="{StaticResource Control.Height.Md}" />
         <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
         <Setter Property="Cursor" Value="Hand" />
