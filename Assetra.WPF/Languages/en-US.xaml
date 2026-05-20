@@ -560,8 +560,14 @@
     <sys:String x:Key="Portfolio.Tx.Currency">Currency</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.Hint">Shows trade types matching the selected asset.</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.NeedAsset">Pick an asset first.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TypePicker.Placeholder">Pick a type</sys:String>
+    <sys:String x:Key="Portfolio.Tx.QuantityPlaceholder">0</sys:String>
+    <sys:String x:Key="Portfolio.Tx.PricePlaceholder">0.00</sys:String>
+    <sys:String x:Key="Portfolio.Tx.AmountPlaceholder">0.00</sys:String>
+    <sys:String x:Key="Portfolio.Tx.FeePlaceholder">0</sys:String>
     <sys:String x:Key="Portfolio.Tx.Amount">Amount (TWD)</sys:String>
     <sys:String x:Key="Portfolio.Tx.Note">Note</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Note.Placeholder">Optional — add context for later review</sys:String>
     <sys:String x:Key="Portfolio.Tx.CashAccount">Account</sys:String>
     <sys:String x:Key="Portfolio.Tx.DepositAccount">Deposit account</sys:String>
     <sys:String x:Key="Portfolio.Tx.WithdrawalAccount">Payment account</sys:String>

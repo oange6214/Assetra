@@ -17,6 +17,7 @@
             <converters:StringEqualityConverter x:Key="EqualityConverter" />
             <converters:StatusTagToBrushConverter x:Key="StatusTagToBrushConverter" />
             <converters:PercentToWidthConverter x:Key="PercentToWidthConverter" />
+            <converters:SubtractDoubleConverter x:Key="SubtractDoubleConverter" />
             <converters:CurrencyConverter x:Key="CurrencyConverter" />
             <converters:DateDisplayConverter x:Key="DateDisplayConverter" />
             <converters:TradeTypeConverter x:Key="TradeTypeConverter" />

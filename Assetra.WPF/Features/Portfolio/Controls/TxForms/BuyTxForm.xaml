@@ -68,6 +68,7 @@
                         <TextBox
                             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                             IsEnabled="{Binding AreEconomicFieldsEditable}"
+                            Tag="{DynamicResource Portfolio.Tx.QuantityPlaceholder}"
                             Text="{Binding AddAssetDialog.AddQuantity, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock
                             Style="{StaticResource FormFieldError}"
@@ -151,9 +152,11 @@
                     </StackPanel>
 
                     <!--
-                        Stock 的 close-price 抓取 link — 只在 unit-mode 顯示。Padding=0 + Bottom
-                        align 讓 link baseline 對齊 label，避免 button padding 讓 label 看似飄高。
-                        IsStock 過濾透過外層 StackPanel 已隱含（整個 BuyTxForm 在非 stock 時不渲染）。
+                        Stock 的 close-price 抓取 link — Stock 都顯示（Unit + Total 兩種 mode）。
+                        Total mode 下抓回 unit price 後 PropertyChanged handler 會用 quantity 反推
+                        TotalCost 寫進可見 TextBox，使用者看見金額自動填上。
+                        Padding=0 + Bottom align 讓 link baseline 對齊 label，避免 button padding
+                        讓 label 看似飄高。IsStock 過濾透過外層 StackPanel 已隱含。
                     -->
                     <Button
                         Grid.Column="1"
@@ -164,8 +167,7 @@
                         BorderThickness="0"
                         Command="{Binding AddAssetDialog.FetchMarketPriceCommand}"
                         Cursor="Hand"
-                        ToolTip="{DynamicResource Portfolio.Tx.FetchMarketPrice.Hint}"
-                        Visibility="{Binding Buy.IsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        ToolTip="{DynamicResource Portfolio.Tx.FetchMarketPrice.Hint}">
                         <StackPanel Orientation="Horizontal">
                             <ds:AppIcon
                                 Margin="0,0,4,0"
@@ -187,11 +189,13 @@
                 <TextBox
                     behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                     IsEnabled="{Binding AreEconomicFieldsEditable}"
+                    Tag="{DynamicResource Portfolio.Tx.PricePlaceholder}"
                     Text="{Binding AddAssetDialog.AddPrice, UpdateSourceTrigger=PropertyChanged}"
                     Visibility="{Binding Buy.IsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <TextBox
                     behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                     IsEnabled="{Binding AreEconomicFieldsEditable}"
+                    Tag="{DynamicResource Portfolio.Tx.AmountPlaceholder}"
                     Text="{Binding Buy.TotalCost, UpdateSourceTrigger=PropertyChanged}"
                     Visibility="{Binding Buy.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <TextBlock
@@ -429,7 +433,10 @@
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
                 Text="{DynamicResource Portfolio.Tx.Fee}" />
-            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox
+                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                Tag="{DynamicResource Portfolio.Tx.FeePlaceholder}"
+                Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
                 Style="{StaticResource FormFieldError}"
                 Text="{Binding TxFeeError}"

@@ -73,14 +73,38 @@
                         BorderThickness="{TemplateBinding BorderThickness}"
                         CornerRadius="{StaticResource Radius.Sm}"
                         SnapsToDevicePixels="True">
-                        <ScrollViewer
-                            x:Name="PART_ContentHost"
-                            Margin="{TemplateBinding Padding}"
-                            Focusable="False"
-                            HorizontalScrollBarVisibility="Hidden"
-                            VerticalScrollBarVisibility="Hidden" />
+                        <!--
+                            Placeholder support — set TextBox.Tag="0.00" (or any hint string) and a
+                            muted overlay TextBlock 顯示在沒輸入時。隨使用者打字後 Text!="" 觸發 trigger
+                            把 placeholder Visibility 設成 Collapsed。Tag 為 null/空字串時 TextBlock
+                            渲染空白，沒有視覺干擾。HorizontalAlignment 跟著 HorizontalContentAlignment，
+                            這樣 right-aligned 的數字 textbox placeholder 也會靠右。
+                        -->
+                        <Grid>
+                            <TextBlock
+                                x:Name="Placeholder"
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="Center"
+                                FontFamily="{TemplateBinding FontFamily}"
+                                FontSize="{TemplateBinding FontSize}"
+                                Foreground="{DynamicResource Brush.Text.Muted}"
+                                IsHitTestVisible="False"
+                                Opacity="0.7"
+                                Text="{TemplateBinding Tag}"
+                                Visibility="Collapsed" />
+                            <ScrollViewer
+                                x:Name="PART_ContentHost"
+                                Margin="{TemplateBinding Padding}"
+                                Focusable="False"
+                                HorizontalScrollBarVisibility="Hidden"
+                                VerticalScrollBarVisibility="Hidden" />
+                        </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="Text" Value="">
+                            <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
+                        </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.BorderStrong}" />
                         </Trigger>
@@ -331,6 +355,23 @@
                             改綁 SelectionBoxItemTemplate 一次解決兩種使用方式。
                         -->
 
+                        <!--
+                            Placeholder overlay — ComboBox.Tag = 提示字串，SelectedItem=null 時顯示。
+                            ⚠ FormComboBoxWithSearch 把 Tag 拿去當 search-text bridge，所以那個 variant
+                            override 整個 Template 不繼承這個 placeholder。
+                        -->
+                        <TextBlock
+                            x:Name="PlaceholderText"
+                            Margin="8,0,24,0"
+                            VerticalAlignment="Center"
+                            FontFamily="{TemplateBinding FontFamily}"
+                            FontSize="{TemplateBinding FontSize}"
+                            Foreground="{DynamicResource Brush.Text.Muted}"
+                            IsHitTestVisible="False"
+                            Opacity="0.7"
+                            Text="{TemplateBinding Tag}"
+                            Visibility="Collapsed" />
+
                         <TextBox
                             x:Name="PART_EditableTextBox"
                             Margin="6,0,24,0"
@@ -368,6 +409,13 @@
                         <Trigger Property="IsEditable" Value="True">
                             <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible" />
                             <Setter TargetName="ContentPresenter" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                        <!--
+                            SelectedItem=null 時露出 placeholder（Tag 內容）。SelectedItem 一被選
+                            ContentPresenter 蓋過 placeholder → 自動切回隱藏。
+                        -->
+                        <Trigger Property="SelectedItem" Value="{x:Null}">
+                            <Setter TargetName="PlaceholderText" Property="Visibility" Value="Visible" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

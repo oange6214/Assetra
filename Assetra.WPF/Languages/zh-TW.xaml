@@ -564,8 +564,14 @@
     <sys:String x:Key="Portfolio.Tx.Currency">幣別</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.Hint">依所選資產顯示適合的交易類型。</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.NeedAsset">請先選擇資產。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TypePicker.Placeholder">請選擇類型</sys:String>
+    <sys:String x:Key="Portfolio.Tx.QuantityPlaceholder">0</sys:String>
+    <sys:String x:Key="Portfolio.Tx.PricePlaceholder">0.00</sys:String>
+    <sys:String x:Key="Portfolio.Tx.AmountPlaceholder">0.00</sys:String>
+    <sys:String x:Key="Portfolio.Tx.FeePlaceholder">0</sys:String>
     <sys:String x:Key="Portfolio.Tx.Amount">金額（元）</sys:String>
     <sys:String x:Key="Portfolio.Tx.Note">備註</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Note.Placeholder">選填 — 寫些註記方便日後查看</sys:String>
     <sys:String x:Key="Portfolio.Tx.CashAccount">存入 / 扣款帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tx.DepositAccount">存入帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tx.WithdrawalAccount">扣款帳戶</sys:String>

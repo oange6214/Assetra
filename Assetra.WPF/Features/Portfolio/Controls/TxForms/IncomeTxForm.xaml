@@ -93,17 +93,9 @@
             Style="{StaticResource FormComboBox}" />
 
         <!--
-            備註 — 自由文字輸入（曾為 ComboBox + IncomeNotes preset list）。
-            與其他 TxForm 一致：寫入 Trade.Note，不再參與分類運算（分類由
-            上面的 ComboBox 直接決定，AutoCategorizationEngine 仍會在使用者
-            未指定時嘗試從 Note 文字猜分類）。
+            P2.9 — TxNote 欄位已 unified 到 AddRecordDialog dialog level (always-visible
+            single source)，per-type 不再重複出現。AutoCategorizationEngine 仍從 dialog
+            上方共用的 TxNote 讀。
         -->
-        <TextBlock
-            Margin="0,12,0,4"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.Note}" />
-        <TextBox Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
     </StackPanel>
 </UserControl>

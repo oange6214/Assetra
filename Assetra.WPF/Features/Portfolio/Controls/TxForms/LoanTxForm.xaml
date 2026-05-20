@@ -294,13 +294,6 @@
                 TextWrapping="Wrap" />
         </StackPanel>
 
-        <!--  備註  -->
-        <TextBlock
-            Margin="0,8,0,4"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.Note}" />
-        <TextBox Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
+        <!--  P2.9 — TxNote 已 unified 到 AddRecordDialog dialog level。  -->
     </StackPanel>
 </UserControl>

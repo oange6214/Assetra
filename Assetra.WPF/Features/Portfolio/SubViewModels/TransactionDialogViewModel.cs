@@ -205,6 +205,18 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
                 OnPropertyChanged(nameof(TxBuyComputedUnitPriceDisplay));
                 NotifyImpactPreviewChanged();
+
+                // P2.9 — 取得市價在 Total mode 也要有用：fetched AddPrice 用 quantity
+                // 反推 TotalCost 寫進可見 TextBox。Unit mode 不必處理 (AddPrice 本身就是
+                // 使用者輸入的欄位)。AddQuantity 變動也走這條 — 使用者改數量後 TotalCost
+                // 會跟著校正，跟改 unit price 是對稱的。
+                if (Buy.IsTotalMode &&
+                    e.PropertyName is nameof(AddAssetDialog.AddPrice) or nameof(AddAssetDialog.AddQuantity) &&
+                    ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var price) && price > 0 &&
+                    ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) && qty > 0)
+                {
+                    Buy.TotalCost = (price * qty).ToString("0.##");
+                }
             }
             // P3 — keep Buy.InstrumentCurrency in sync with the selected symbol's
             // currency (filled by SelectSuggestion after the user picks an autocomplete

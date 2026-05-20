@@ -17,11 +17,16 @@
         <!--  半透明背景幕  -->
         <Grid Style="{StaticResource AppDialogOverlay}" />
 
-        <!--  Dialog card：固定舒適閱讀寬度 + 內容滾動。  -->
-        <!--  寬度跟隨視窗易讓表單欄位過寬難讀；採固定 600px 配合 ScrollViewer 高度上限。  -->
+        <!--
+            Dialog card：寬度固定 600px (表單欄位過寬難讀)，高度動態跟著視窗高度。
+            MaxHeight = Window.ActualHeight - 80 (40 上下留白) — 大螢幕可一次顯示
+            完所有欄位、小螢幕也能 fit。MinHeight=480 確保極端情境（迷你筆電視窗
+            被壓很小）至少看得到 header + 幾個欄位 + footer。
+        -->
         <Border
             Width="600"
-            MaxHeight="{StaticResource DialogMaxHeight}"
+            MinHeight="480"
+            MaxHeight="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=80}"
             Padding="0"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
@@ -290,6 +295,71 @@
                                     </StackPanel>
 
                                     <!--
+                                        P2.9 — 順序依使用者要求重排為 類型 | 日期 (paired) → 幣別 (own row)。
+                                        類型 col 0 在前因 type picker 是「依資產推導」緊接 asset 後最自然；
+                                        日期 col 2 在右。Currency 通常從資產自動帶，自己佔一行（窄控件 + 右側
+                                        留白 = 呼吸感），不擠進類型/日期那 row 造成 3 欄擁擠。
+                                    -->
+                                    <Grid Margin="0,0,0,14">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!--
+                                            Type picker — meta-only 編輯時隱藏（鎖定卡裡已顯示
+                                            type；改類型對 meta-only 沒意義）。
+                                        -->
+                                        <StackPanel
+                                            Grid.Column="0"
+                                            Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                            <TextBlock
+                                                Margin="0,0,0,6"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.TradeHistory.Type}" />
+                                            <!--
+                                                DisplayMemberPath 跟 ItemTemplate 互斥 (WPF 限制：
+                                                同時設會丟 InvalidOperationException at runtime)。
+                                                這裡用 ItemTemplate 是因為 DisplayKey 是 i18n
+                                                resource key，需要走 Converter 解析成當下語系字串。
+                                                Tag = placeholder「請選擇類型」，SelectedItem=null 時自動顯示。
+                                            -->
+                                            <ComboBox
+                                                IsEnabled="{Binding CanSelectTxType}"
+                                                ItemsSource="{Binding AvailableTradeTypes}"
+                                                SelectedValuePath="Key"
+                                                SelectedValue="{Binding TxType, Mode=TwoWay}"
+                                                Style="{StaticResource FormComboBox}"
+                                                Tag="{DynamicResource Portfolio.Tx.TypePicker.Placeholder}"
+                                                ToolTip="{Binding TxTypePickerHintKey, Converter={StaticResource ResourceKeyToStringConverter}}"
+                                                ToolTipService.ShowOnDisabled="True">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding DisplayKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock
+                                                Margin="0,0,0,6"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.Tx.Date}" />
+                                            <DatePicker
+                                                MinWidth="132"
+                                                HorizontalContentAlignment="Left"
+                                                SelectedDate="{Binding TxDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource AppDatePicker}" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!--
                                         P2.2 — 通用「幣別」ComboBox。選了資產後自動帶值；使用者可手動覆寫
                                         (覆寫後 _userTouchedCurrency = true，後續切換資產不會被自動蓋掉)。
                                         SupportedCurrencies 走 ICurrencyService（跟 Settings 共用清單）。
@@ -311,71 +381,14 @@
                                             Style="{StaticResource FormComboBox}" />
                                     </StackPanel>
 
-                                    <!--  Date + Type — 平排兩欄  -->
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="12" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock
-                                                Margin="0,0,0,6"
-                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                FontWeight="SemiBold"
-                                                Foreground="{DynamicResource AppTextSecondary}"
-                                                Text="{DynamicResource Portfolio.Tx.Date}" />
-                                            <DatePicker
-                                                MinWidth="132"
-                                                HorizontalContentAlignment="Left"
-                                                SelectedDate="{Binding TxDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                Style="{StaticResource AppDatePicker}" />
-                                        </StackPanel>
-
-                                        <!--
-                                            Type picker — meta-only 編輯時隱藏（鎖定卡裡已顯示
-                                            type；改類型對 meta-only 沒意義）。
-                                        -->
-                                        <StackPanel
-                                            Grid.Column="2"
-                                            Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                            <TextBlock
-                                                Margin="0,0,0,6"
-                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                FontWeight="SemiBold"
-                                                Foreground="{DynamicResource AppTextSecondary}"
-                                                Text="{DynamicResource Portfolio.TradeHistory.Type}" />
-                                            <!--
-                                                DisplayMemberPath 跟 ItemTemplate 互斥 (WPF 限制：
-                                                同時設會丟 InvalidOperationException at runtime)。
-                                                這裡用 ItemTemplate 是因為 DisplayKey 是 i18n
-                                                resource key，需要走 Converter 解析成當下語系字串。
-                                            -->
-                                            <ComboBox
-                                                IsEnabled="{Binding CanSelectTxType}"
-                                                ItemsSource="{Binding AvailableTradeTypes}"
-                                                SelectedValuePath="Key"
-                                                SelectedValue="{Binding TxType, Mode=TwoWay}"
-                                                Style="{StaticResource FormComboBox}"
-                                                ToolTip="{Binding TxTypePickerHintKey, Converter={StaticResource ResourceKeyToStringConverter}}"
-                                                ToolTipService.ShowOnDisabled="True">
-                                                <ComboBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding DisplayKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
-                                                    </DataTemplate>
-                                                </ComboBox.ItemTemplate>
-                                            </ComboBox>
-                                        </StackPanel>
-                                    </Grid>
-
                                     <!--
                                         顯示位置提示 — 選類型後告訴使用者這筆交易會出現在哪幾頁。
                                         解決「新增的資料去哪了」first-time 困惑。
                                         HasTxDestination 為 false（未選類型）時隱藏。
+                                        Margin Top=0 因為 currency 區塊已有 14px bottom margin，不需重複。
                                     -->
                                     <Border
-                                        Margin="0,14,0,0"
+                                        Margin="0,0,0,0"
                                         Padding="10,8"
                                         Background="{DynamicResource AppAccentSubtle}"
                                         BorderBrush="{DynamicResource AppAccent}"
@@ -496,14 +509,26 @@
                                         </StackPanel>
                                     </Border>
 
-                                    <StackPanel Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <!--
+                                        P2.9 — 備註 unified at dialog level (was: only-visible for meta-only edit).
+                                        所有 per-type forms 的 TxNote 欄位被刪除，這裡是 single source。
+                                        Margin Top=14 跟其他 field block 一致；placeholder 走 Tag。
+                                    -->
+                                    <StackPanel Margin="0,14,0,0">
                                         <TextBlock
-                                            Margin="0,0,0,4"
+                                            Margin="0,0,0,6"
                                             FontSize="{StaticResource Font.Size.Xs}"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{DynamicResource Portfolio.Tx.Note}" />
-                                        <TextBox Style="{StaticResource AppTextBox}" Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}" />
+                                        <TextBox
+                                            MinHeight="64"
+                                            AcceptsReturn="True"
+                                            Style="{StaticResource AppTextBox}"
+                                            Tag="{DynamicResource Portfolio.Tx.Note.Placeholder}"
+                                            Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}"
+                                            TextWrapping="Wrap"
+                                            VerticalContentAlignment="Top" />
                                     </StackPanel>
 
                                     <!--  Error  -->
