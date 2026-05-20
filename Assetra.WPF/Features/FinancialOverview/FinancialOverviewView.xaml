@@ -61,12 +61,24 @@
                                 P2.11 — 升級到 TextStyle.Numeric.Hero (3xl=48px Bold tabular)，
                                 跟 KPI dialog / 公式列的 secondary 金額拉開視覺差，對應
                                 Personal Wealth Terminal review 的 Dashboard Rhythm Hero 層級。
+                                P2.15 E — IsLoading=True 時改顯示 AppSkeletonRect placeholder
+                                取代直接 binding 突然出現的數字，pulse 動畫傳遞「資料正在路上」。
                             -->
-                            <TextBlock
-                                Margin="0,4,0,8"
-                                Foreground="{DynamicResource AppTextPrimary}"
-                                Style="{StaticResource TextStyle.Numeric.Hero}"
-                                Text="{Binding BalanceSheetNetWorthDisplay}" />
+                            <Grid Margin="0,4,0,8" Height="56">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Style="{StaticResource TextStyle.Numeric.Hero}"
+                                    Text="{Binding BalanceSheetNetWorthDisplay}"
+                                    Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                <Border
+                                    Width="220"
+                                    Height="40"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource AppSkeletonRect}"
+                                    Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </Grid>
 
                             <!--  Goal progress bar — visible when HasGoalTarget  -->
                             <StackPanel Visibility="{Binding HasGoalTarget, Converter={StaticResource BooleanToVisibilityConverter}}">

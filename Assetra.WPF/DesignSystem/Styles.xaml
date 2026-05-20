@@ -26,6 +26,8 @@
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Pagination.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/FilterToolbar.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/FormText.xaml" />
+        <!--  P2.15 — Loading skeleton primitives  -->
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Skeleton.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>
