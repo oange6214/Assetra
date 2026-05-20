@@ -991,13 +991,13 @@
     <sys:String x:Key="Settings.Sync.Conflicts.Status.KeptLocal">Kept local for {0}.</sys:String>
     <sys:String x:Key="Settings.Sync.Conflicts.Status.UsedRemote">Adopted remote for {0}.</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">Market open</sys:String>
-    <sys:String x:Key="StatusBar.MarketClosed">Market closed</sys:String>
+    <sys:String x:Key="StatusBar.MarketClosed">Markets closed</sys:String>
     <!-- Sync indicator (Phase 1) -->
-    <sys:String x:Key="StatusBar.Sync.Disabled">Sync off</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Disabled">Sync not enabled</sys:String>
     <sys:String x:Key="StatusBar.Sync.Synced">Synced</sys:String>
     <sys:String x:Key="StatusBar.Sync.Syncing">Syncing…</sys:String>
-    <sys:String x:Key="StatusBar.Sync.Failed">Sync failed</sys:String>
-    <sys:String x:Key="StatusBar.Sync.Offline">Offline</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Failed">Sync didn't complete</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Offline">Offline mode</sys:String>
     <sys:String x:Key="StatusBar.Sync.PendingFormat">{0} pending</sys:String>
     <!-- Phase 2 popover -->
     <sys:String x:Key="Sync.Popover.Title">Sync Status</sys:String>

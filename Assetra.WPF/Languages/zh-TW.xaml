@@ -1000,13 +1000,13 @@
     <sys:String x:Key="Settings.Sync.Conflicts.Status.KeptLocal">已保留本機版本：{0}</sys:String>
     <sys:String x:Key="Settings.Sync.Conflicts.Status.UsedRemote">已採用雲端版本：{0}</sys:String>
     <sys:String x:Key="StatusBar.MarketOpen">盤中</sys:String>
-    <sys:String x:Key="StatusBar.MarketClosed">休市</sys:String>
+    <sys:String x:Key="StatusBar.MarketClosed">市場已收盤</sys:String>
     <!--  Sync indicator (Phase 1, see docs/planning/Sync-Status-Indicator.md)  -->
-    <sys:String x:Key="StatusBar.Sync.Disabled">未啟用同步</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Disabled">同步未開啟</sys:String>
     <sys:String x:Key="StatusBar.Sync.Synced">已同步</sys:String>
     <sys:String x:Key="StatusBar.Sync.Syncing">同步中…</sys:String>
-    <sys:String x:Key="StatusBar.Sync.Failed">同步失敗</sys:String>
-    <sys:String x:Key="StatusBar.Sync.Offline">離線</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Failed">同步未成功</sys:String>
+    <sys:String x:Key="StatusBar.Sync.Offline">離線模式</sys:String>
     <sys:String x:Key="StatusBar.Sync.PendingFormat">{0} 筆待同步</sys:String>
     <!--  Phase 2 popover  -->
     <sys:String x:Key="Sync.Popover.Title">同步狀態</sys:String>
