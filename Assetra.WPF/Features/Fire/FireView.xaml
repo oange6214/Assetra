@@ -199,7 +199,7 @@
                                     Margin="0,0,0,8"
                                     Padding="14"
                                     Background="{DynamicResource AppSurface}"
-                                    BorderBrush="{DynamicResource AppBorder}"
+                                    BorderBrush="{DynamicResource AppBorderLight}"
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource Radius.Md}">
                                     <Grid>
