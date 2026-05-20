@@ -51,7 +51,7 @@
                             Margin="0,3,0,3"
                             Padding="10,8"
                             Background="{DynamicResource AppHover}"
-                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderBrush="{DynamicResource AppBorderLight}"
                             BorderThickness="1"
                             CornerRadius="{StaticResource Radius.Sm}">
                             <Grid>

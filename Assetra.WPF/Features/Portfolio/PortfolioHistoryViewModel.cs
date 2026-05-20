@@ -664,17 +664,21 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var labelColor = GetSkColor("AppTextSecondary", "#787B86");
         var separatorColor = GetSkColor("AppBorderLight", "#2E2E2E");
 
+        // P2.13 — Stroke 從 2px 降到 1.5px、GeometrySize 從 4 降到 3、
+        // GeometryStroke 取消（純 fill 圓點）— 整體更貼近現代金融儀表板的細
+        // 線質感，跟 audit「更淡更精緻、避免過重邊框」對齊。Fill alpha 32
+        // 已是非常淡（12.5%），不再動。
         ValueSeries =
         [
             new LineSeries<DateTimePoint>
             {
                 Values            = points,
                 Name              = GetString("Portfolio.History.MarketValue", "Market Value"),
-                Stroke            = new SolidColorPaint(accentColor, 2),
+                Stroke            = new SolidColorPaint(accentColor, 1.5f),
                 Fill              = new SolidColorPaint(fillColor),
-                GeometrySize      = 4,
+                GeometrySize      = 3,
                 GeometryFill      = new SolidColorPaint(accentColor),
-                GeometryStroke    = new SolidColorPaint(accentColor, 1),
+                GeometryStroke    = null,
                 LineSmoothness    = 0,
                 AnimationsSpeed   = TimeSpan.Zero,
             }

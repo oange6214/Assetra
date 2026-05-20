@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows.Data;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -21,6 +23,12 @@ public partial class MainViewModel
     private readonly ObservableCollection<CommandPaletteEntry> _commandPaletteResults = new();
 
     public ReadOnlyObservableCollection<CommandPaletteEntry> CommandPaletteResults { get; private set; } = null!;
+
+    /// <summary>
+    /// Grouped view of <see cref="CommandPaletteResults"/> — GroupDescriptions on GroupKey
+    /// gives the popup ListBox a 「導覽 / 動作」 section header treatment via GroupStyle.
+    /// </summary>
+    public ICollectionView CommandPaletteResultsView { get; private set; } = null!;
 
     /// <summary>
     /// Localization service is needed to resolve i18n title keys at filter time so the
@@ -112,6 +120,8 @@ public partial class MainViewModel
         _commandPaletteAllEntries.Add(new("CommandPalette.Action.ToggleTheme", group_Action, () => ToggleThemeCommand.Execute(null)));
 
         CommandPaletteResults = new ReadOnlyObservableCollection<CommandPaletteEntry>(_commandPaletteResults);
+        CommandPaletteResultsView = CollectionViewSource.GetDefaultView(CommandPaletteResults);
+        CommandPaletteResultsView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(CommandPaletteEntry.GroupKey)));
         RefilterCommandPalette(string.Empty);
     }
 }

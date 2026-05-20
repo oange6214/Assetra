@@ -305,6 +305,46 @@ public partial class MainViewModel : ObservableObject, IDisposable
         // P2.12 — Command Palette (Ctrl+Shift+K) seed must happen after sub-VMs are
         // assigned (lambdas capture them).
         InitializeCommandPalette(localization);
+
+        // P2.13 — 把今日 P&L % 推進 StatusBar 顯示。Portfolio 是真正的 DayPnl
+        // owner，StatusBar 不該知道 Portfolio 結構，所以這裡用 PropertyChanged 橋接。
+        Portfolio.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(PortfolioViewModel.DayPnlPercentDisplay)
+                                or nameof(PortfolioViewModel.HasDayPnl)
+                                or nameof(PortfolioViewModel.IsDayPnlPositive))
+                UpdateStatusBarTodayReturn();
+        };
+        UpdateStatusBarTodayReturn();
+    }
+
+    /// <summary>
+    /// P2.13 — 從 PortfolioVM 的 DayPnlPercentDisplay 取「(+1.23%)」 strip 掉
+    /// 括號，套上「今日」前綴 (i18n) 推給 StatusBar.TodayReturnText。
+    /// </summary>
+    private void UpdateStatusBarTodayReturn()
+    {
+        if (!Portfolio.HasDayPnl)
+        {
+            StatusBar.TodayReturnText = string.Empty;
+            return;
+        }
+        var raw = Portfolio.DayPnlPercentDisplay; // e.g. "(+1.23%)" or "(-0.45%)"
+        var stripped = raw.Trim('(', ')', ' ');
+        var prefix = LocalizationFallback("StatusBar.TodayReturnPrefix", "今日");
+        StatusBar.TodayReturnText = $"{prefix} {stripped}";
+        StatusBar.IsTodayReturnPositive = Portfolio.IsDayPnlPositive;
+    }
+
+    private static string LocalizationFallback(string key, string fallback)
+    {
+        try
+        {
+            if (System.Windows.Application.Current?.TryFindResource(key) is string s)
+                return s;
+        }
+        catch { /* ignore */ }
+        return fallback;
     }
 
     public void Dispose()

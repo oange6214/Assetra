@@ -112,8 +112,39 @@
                 <TextBlock
                     VerticalAlignment="Center"
                     FontSize="{StaticResource Font.Size.Xs}"
-                    Foreground="{DynamicResource AppTextPrimary}"
+                    Foreground="{DynamicResource AppTextSecondary}"
                     Text="{Binding MarketStatusText}" />
+
+                <!--
+                    P2.13 — Today's % P&L chip (從 PortfolioVM 經 MainViewModel 推進來)。
+                    HasDayPnl=false 時 TodayReturnText 是空字串，整個 chip + 分隔符
+                    透過 StringToVisibilityConverter 隱藏。Foreground 依 IsTodayReturnPositive
+                    切 Brush.Up / Brush.Down — 跟 hero card 一致的漲跌語意。
+                -->
+                <Border
+                    Width="1"
+                    Height="12"
+                    Margin="12,0"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource AppBorder}"
+                    Visibility="{Binding TodayReturnText, Converter={StaticResource StringToVisibilityConverter}}" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Text="{Binding TodayReturnText}"
+                    Typography.NumeralAlignment="Tabular"
+                    Visibility="{Binding TodayReturnText, Converter={StaticResource StringToVisibilityConverter}}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Down}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsTodayReturnPositive}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Up}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </StackPanel>
 
             <!--  Right: clock  -->

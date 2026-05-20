@@ -1009,10 +1009,13 @@
     <sys:String x:Key="StatusBar.Sync.Offline">離線模式</sys:String>
     <sys:String x:Key="StatusBar.Sync.PendingFormat">{0} 筆待同步</sys:String>
     <sys:String x:Key="StatusBar.Sync.LastSyncedFormat">{0} · 上次同步 {1:HH:mm}</sys:String>
+    <sys:String x:Key="StatusBar.TodayReturnPrefix">今日</sys:String>
 
     <!--  Command Palette (Ctrl+Shift+K)  -->
     <sys:String x:Key="CommandPalette.Placeholder">輸入動作或頁面名稱…</sys:String>
+    <sys:String x:Key="CommandPalette.Group.Nav">導覽</sys:String>
     <sys:String x:Key="CommandPalette.Group.Action">動作</sys:String>
+    <sys:String x:Key="Nav.Section.Title">導覽</sys:String>
     <sys:String x:Key="CommandPalette.Action.AddTransaction">新增交易</sys:String>
     <sys:String x:Key="CommandPalette.Action.AddAccount">新增資金帳戶</sys:String>
     <sys:String x:Key="CommandPalette.Action.AddLiability">新增負債</sys:String>

@@ -34,6 +34,15 @@ public partial class StatusBarViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _marketStatusText = string.Empty;
     [ObservableProperty] private string _clockText = string.Empty;
 
+    /// <summary>
+    /// P2.13 — 今日漲跌 % 文字（已含「今日」前綴），由 MainViewModel push 進來。
+    /// 空字串表示沒資料（隱藏 chip）。Status bar 上市場狀態旁邊顯示 e.g.「市場已收盤 · 今日 +0.82%」。
+    /// </summary>
+    [ObservableProperty] private string _todayReturnText = string.Empty;
+
+    /// <summary>True 當今日漲跌 ≥ 0 — 控制 chip 顏色 (Brush.Up vs Brush.Down)。</summary>
+    [ObservableProperty] private bool _isTodayReturnPositive = true;
+
     // ── Sync indicator ──────────────────────────────────────────────────
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SyncStatusText))]

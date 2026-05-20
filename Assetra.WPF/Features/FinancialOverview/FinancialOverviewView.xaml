@@ -285,10 +285,15 @@
                     - 點 legend item 跳到對應 tab（沿用原 NavigateToXxxCommand）
                     舊的 AssetClassFocusWidget 已不再使用，保留檔案以備回退。
                 -->
+                <!--
+                    P2.13 — Analytics tier card border lightened (AppBorder → AppBorderLight)
+                    to match the Hero / Summary tiers established in P2.12. 資產組成是 dashboard
+                    analytics 層級，視覺權重應低於 Hero 但高於 insights — 邊框降階一階即可。
+                -->
                 <Border Margin="0,0,0,16"
                         Padding="{StaticResource Padding.Card}"
                         Background="{DynamicResource AppCardBackground}"
-                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderBrush="{DynamicResource AppBorderLight}"
                         BorderThickness="1"
                         CornerRadius="{StaticResource Radius.Sm}"
                         Visibility="{Binding HasCompositionData, Converter={StaticResource BooleanToVisibilityConverter}}">

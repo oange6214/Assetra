@@ -418,10 +418,17 @@
                         <!--
                             SelectedItem=null 時露出 placeholder（Tag 內容）。SelectedItem 一被選
                             ContentPresenter 蓋過 placeholder → 自動切回隱藏。
+                            P2.13 — 改成 MultiTrigger 確保 IsEditable=True 時不顯示 placeholder
+                            (避免跟可見的 PART_EditableTextBox 重疊)。Editable mode 下使用者
+                            打字本身就是「placeholder」的替代品。
                         -->
-                        <Trigger Property="SelectedItem" Value="{x:Null}">
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="SelectedItem" Value="{x:Null}" />
+                                <Condition Property="IsEditable" Value="False" />
+                            </MultiTrigger.Conditions>
                             <Setter TargetName="PlaceholderText" Property="Visibility" Value="Visible" />
-                        </Trigger>
+                        </MultiTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

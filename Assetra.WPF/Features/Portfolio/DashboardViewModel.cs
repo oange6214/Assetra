@@ -201,16 +201,18 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
                 (double)ResolveNetWorthValue(s)))
             .ToList();
 
+        // P2.13 — Stroke 2→1.5、GeometrySize 4→3、GeometryStroke null。
+        // 跟 PortfolioHistory hero chart 統一視覺語言。
         TenDaySeries =
         [
             new LineSeries<DateTimePoint>
             {
                 Values          = points,
-                Stroke          = new SolidColorPaint(accentColor, 2),
+                Stroke          = new SolidColorPaint(accentColor, 1.5f),
                 Fill            = new SolidColorPaint(fillColor),
-                GeometrySize    = 4,
+                GeometrySize    = 3,
                 GeometryFill    = new SolidColorPaint(accentColor),
-                GeometryStroke  = new SolidColorPaint(accentColor, 1),
+                GeometryStroke  = null,
                 LineSmoothness  = 0,
                 AnimationsSpeed = TimeSpan.Zero,
             }

@@ -74,7 +74,7 @@
             <!--  Onboarding：尚未計算過 FIRE 時，引導使用者去 Fire 頁  -->
             <Border Padding="14,12"
                     Background="{DynamicResource AppHover}"
-                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource Radius.Sm}"
                     Visibility="{Binding FireWidget.HasCalculatedResult, Converter={StaticResource InverseBooleanToVisibilityConverter}}">

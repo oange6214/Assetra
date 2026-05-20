@@ -666,6 +666,7 @@
             x:Name="CommandPalettePopup"
             AllowsTransparency="True"
             IsOpen="{Binding IsCommandPaletteOpen, Mode=TwoWay}"
+            Opened="CommandPalettePopup_Opened"
             Placement="Custom"
             PlacementTarget="{Binding ElementName=MainShell}"
             PopupAnimation="Fade"
@@ -712,52 +713,87 @@
                                 FontFamily="{StaticResource Font.Family.Base}"
                                 FontSize="{StaticResource Font.Size.Md}"
                                 Foreground="{DynamicResource AppTextPrimary}"
+                                PreviewKeyDown="CommandPaletteInput_PreviewKeyDown"
                                 Tag="{DynamicResource CommandPalette.Placeholder}"
                                 Text="{Binding CommandPaletteText, UpdateSourceTrigger=PropertyChanged}" />
                         </DockPanel>
                     </Border>
 
-                    <ScrollViewer Grid.Row="1" MaxHeight="360" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl Focusable="False" ItemsSource="{Binding CommandPaletteResults}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border
-                                        Padding="16,10"
-                                        Background="Transparent"
-                                        BorderBrush="{DynamicResource AppBorderLight}"
-                                        BorderThickness="0,0,0,1"
-                                        Cursor="Hand">
-                                        <Border.InputBindings>
-                                            <MouseBinding
-                                                MouseAction="LeftClick"
-                                                Command="{Binding DataContext.ExecuteCommandPaletteEntryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                CommandParameter="{Binding}" />
-                                        </Border.InputBindings>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
+                    <!--
+                        P2.13 — ListBox (was ItemsControl) 走 grouped view 顯示 「導覽 / 動作」
+                        section header。SelectedItem 給 Up/Down 鍵盤導覽用，Border 樣式只是
+                        wrapper，實際 hover/selected 視覺由 ListBoxItem ContainerStyle 接管。
+                    -->
+                    <ListBox
+                        x:Name="CommandPaletteResultsList"
+                        Grid.Row="1"
+                        MaxHeight="360"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        ItemsSource="{Binding CommandPaletteResultsView}"
+                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border
+                                                x:Name="Bd"
+                                                Padding="16,10"
+                                                Background="Transparent"
+                                                BorderBrush="{DynamicResource AppBorderLight}"
+                                                BorderThickness="0,0,0,1">
+                                                <ContentPresenter />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHover}" />
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppAccentSubtle}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding TitleKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <Border
+                                            Padding="16,8,16,4"
+                                            Background="{DynamicResource AppSurfaceAlt}"
+                                            BorderBrush="{DynamicResource AppBorderLight}"
+                                            BorderThickness="0,0,0,1">
                                             <TextBlock
-                                                Grid.Column="0"
-                                                FontFamily="{StaticResource Font.Family.Base}"
-                                                FontSize="{StaticResource Font.Size.Sm}"
-                                                Foreground="{DynamicResource AppTextPrimary}"
-                                                Text="{Binding TitleKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
-                                            <TextBlock
-                                                Grid.Column="1"
-                                                Margin="12,0,0,0"
-                                                VerticalAlignment="Center"
-                                                FontFamily="{StaticResource Font.Family.Base}"
-                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                FontFamily="{StaticResource Font.Family.UI}"
+                                                FontSize="{StaticResource Font.Size.2Xs}"
+                                                FontWeight="{StaticResource Font.Weight.Medium}"
                                                 Foreground="{DynamicResource AppTextMuted}"
-                                                Text="{Binding GroupKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                                                Opacity="0.72"
+                                                Text="{Binding Name, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                        </Border>
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                            </GroupStyle>
+                        </ListBox.GroupStyle>
+                    </ListBox>
                 </Grid>
             </Border>
         </Popup>

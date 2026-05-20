@@ -1000,10 +1000,13 @@
     <sys:String x:Key="StatusBar.Sync.Offline">Offline mode</sys:String>
     <sys:String x:Key="StatusBar.Sync.PendingFormat">{0} pending</sys:String>
     <sys:String x:Key="StatusBar.Sync.LastSyncedFormat">{0} · last synced {1:HH:mm}</sys:String>
+    <sys:String x:Key="StatusBar.TodayReturnPrefix">Today</sys:String>
 
     <!--  Command Palette (Ctrl+Shift+K)  -->
     <sys:String x:Key="CommandPalette.Placeholder">Type an action or page…</sys:String>
+    <sys:String x:Key="CommandPalette.Group.Nav">Navigate</sys:String>
     <sys:String x:Key="CommandPalette.Group.Action">Action</sys:String>
+    <sys:String x:Key="Nav.Section.Title">Navigate</sys:String>
     <sys:String x:Key="CommandPalette.Action.AddTransaction">Add transaction</sys:String>
     <sys:String x:Key="CommandPalette.Action.AddAccount">Add cash account</sys:String>
     <sys:String x:Key="CommandPalette.Action.AddLiability">Add liability</sys:String>

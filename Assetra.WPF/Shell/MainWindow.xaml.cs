@@ -18,6 +18,7 @@ public partial class MainWindow : Window
 
         // Popup.CustomPopupPlacementCallback isn't XAML-settable; wire it here.
         SearchPopup.CustomPopupPlacementCallback = PlaceSearchPopup;
+        CommandPalettePopup.CustomPopupPlacementCallback = PlaceSearchPopup;
 
         // WindowStyle=None + WindowChrome makes the maximized window cover
         // the entire monitor including the Windows taskbar. Hook
@@ -81,6 +82,55 @@ public partial class MainWindow : Window
     // P2.12 — Command palette backdrop dismiss (parallel to SearchBackdrop_MouseDown).
     private void CommandPaletteBackdrop_MouseDown(object sender, MouseButtonEventArgs e) =>
         _viewModel.ToggleCommandPaletteCommand.Execute(null);
+
+    // P2.13 — Auto-focus + pre-select first item when palette opens. Popup.Opened fires
+    // AFTER the popup tree has IsOpen=true so Focus() will land on the rendered TextBox.
+    private void CommandPalettePopup_Opened(object? sender, EventArgs e)
+    {
+        CommandPaletteInput.Focus();
+        Keyboard.Focus(CommandPaletteInput);
+        if (CommandPaletteResultsList.Items.Count > 0)
+            CommandPaletteResultsList.SelectedIndex = 0;
+    }
+
+    // P2.13 — Up/Down/Enter/Esc on the input text box. Forwarded to the result list
+    // for arrow keys (no SelectionChanged ripple needed since SelectedIndex setter
+    // is direct) + Esc collapses + Enter executes selection-or-first.
+    private void CommandPaletteInput_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        var list = CommandPaletteResultsList;
+        switch (e.Key)
+        {
+            case Key.Down:
+                if (list.Items.Count > 0)
+                {
+                    list.SelectedIndex = Math.Min(list.SelectedIndex + 1, list.Items.Count - 1);
+                    if (list.SelectedItem is not null) list.ScrollIntoView(list.SelectedItem);
+                }
+                e.Handled = true;
+                break;
+            case Key.Up:
+                if (list.Items.Count > 0)
+                {
+                    list.SelectedIndex = list.SelectedIndex <= 0 ? 0 : list.SelectedIndex - 1;
+                    if (list.SelectedItem is not null) list.ScrollIntoView(list.SelectedItem);
+                }
+                e.Handled = true;
+                break;
+            case Key.Enter:
+                {
+                    var pick = list.SelectedItem ?? (list.Items.Count > 0 ? list.Items[0] : null);
+                    if (pick is CommandPaletteEntry entry)
+                        _viewModel.ExecuteCommandPaletteEntryCommand.Execute(entry);
+                    e.Handled = true;
+                    break;
+                }
+            case Key.Escape:
+                _viewModel.ToggleCommandPaletteCommand.Execute(null);
+                e.Handled = true;
+                break;
+        }
+    }
 
     private void MinimizeButton_Click(object sender, RoutedEventArgs e) =>
         WindowState = WindowState.Minimized;

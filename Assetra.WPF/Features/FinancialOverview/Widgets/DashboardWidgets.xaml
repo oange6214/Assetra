@@ -11,9 +11,14 @@
         widget 內容由各個 UserControl 自填，這裡只定義外框與行距。
     -->
 
+    <!--
+        P2.13 — BorderBrush 從 AppBorder (Layer3) 降到 AppBorderLight (Layer2)，
+        跟 P2.12 Hero / Summary card lightening 對齊。整個 dashboard 上層 widget
+        現在都有一致的「淡邊框」處理，視覺重量靠 Hero 大字 + Accent 色 chip 扛。
+    -->
     <Style x:Key="DashboardWidgetCard" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{StaticResource Radius.Md}" />
         <Setter Property="Padding" Value="16,14" />

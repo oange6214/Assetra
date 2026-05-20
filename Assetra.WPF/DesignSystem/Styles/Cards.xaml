@@ -28,4 +28,64 @@
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
     </Style>
 
+    <!--
+        ════════════════════════════════════════════════════════════
+        P2.13 — Dashboard card system
+        ════════════════════════════════════════════════════════════
+        AppCard*：dashboard / overview 區域用的卡片組件。跟 FormCard
+        差異：
+          - 圓角用 Radius.Md (不是 Lg) — dashboard 卡片密集，過大圓
+            角會破壞視覺對齊
+          - Border 用 AppBorderLight (Layer2) — 跟 Hero/Summary tier
+            lightening 一致
+        AppCardHero    : 高 emphasis card (e.g. 淨資產 hero) — accent
+                         邊框，padding 較大
+        AppCardSummary : 中 emphasis (公式列, KPI rows) — 標準 padding
+                         + light border
+        AppCardSubtle  : 低 emphasis (analytics widgets) — light border
+                         + 16,14 padding
+        Hero / Summary / Subtle 視覺差用 padding + border 顏色拉開，
+        而不是塞滿色塊（過工業）。
+    -->
+
+    <Style x:Key="AppCardHero" TargetType="Border">
+        <Setter Property="Padding" Value="20,16" />
+        <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Md}" />
+        <Setter Property="Margin" Value="0,0,0,12" />
+    </Style>
+
+    <Style x:Key="AppCardSummary" TargetType="Border">
+        <Setter Property="Padding" Value="{StaticResource Padding.Card}" />
+        <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Sm}" />
+    </Style>
+
+    <Style x:Key="AppCardSubtle" TargetType="Border">
+        <Setter Property="Padding" Value="16,14" />
+        <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Md}" />
+        <Setter Property="Margin" Value="0,0,0,12" />
+    </Style>
+
+    <Style x:Key="AppCardHeader" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+        <Setter Property="Margin" Value="0,0,0,10" />
+    </Style>
+
+    <Style x:Key="AppCardCaption" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+    </Style>
+
 </ResourceDictionary>
