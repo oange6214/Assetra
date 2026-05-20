@@ -275,8 +275,13 @@
     </Style>
 
     <!--  ── Form ComboBox shell + dropdown ──  -->
+    <!--
+        MinHeight 從硬碼 32 改成 Control.Height.Md (40) 對齊 AppTextBox / SegmentBtn /
+        AppDatePicker — 之前 ComboBox 比相鄰 TextBox 矮 8px 是視覺上「為什麼控件不齊」的
+        主因之一。
+    -->
     <Style x:Key="FormComboBox" TargetType="ComboBox">
-        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="MinHeight" Value="{StaticResource Control.Height.Md}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Background" Value="{DynamicResource AppBackground}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />

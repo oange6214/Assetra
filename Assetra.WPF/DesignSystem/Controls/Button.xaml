@@ -150,6 +150,11 @@
         </Style.Triggers>
     </Style>
 
+    <!--
+        Icon-only buttons (close X, toolbar dismiss, etc.) — borderless ghost style.
+        Hover gives surface fill 為 affordance；border 對 icon 按鈕來說只是視覺噪音。
+        BorderThickness=0 + BorderBrush=Transparent 雙保險避免 base style 的 border 漏出來。
+    -->
     <Style
         x:Key="AppIconButton"
         BasedOn="{StaticResource AppButtonBase}"
@@ -159,7 +164,8 @@
         <Setter Property="MinHeight" Value="32" />
         <Setter Property="Padding" Value="{StaticResource Padding.IconButton}" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{DynamicResource Brush.SurfaceRaised}" />

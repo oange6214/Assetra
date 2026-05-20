@@ -258,15 +258,25 @@
                                             Style="{StaticResource FormComboBoxWithSearch}"
                                             Tag="{Binding AssetSearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                             ToolTip="{DynamicResource Portfolio.Tx.Asset.Hint}">
+                                            <!--
+                                                P2.10 — ItemTemplate 從 2-line StackPanel 改成 1-line
+                                                Horizontal layout。原因：SelectionBoxItem 跟著 ItemTemplate
+                                                走，2-line 讓 ComboBox 的 SelectionBox 區域被撐成 ~50px 高，
+                                                跟旁邊 40px 高的 TextBox / SegmentBtn 視覺對不上。
+                                                PrimaryName + SecondaryLine 內嵌成「緯創  (3231) · TWD」
+                                                依舊保留資訊完整性，只是少了垂直層級；下拉項目也跟著
+                                                變單行，視覺更緊湊。
+                                            -->
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate>
-                                                    <StackPanel Margin="0,2,0,2">
+                                                    <StackPanel Orientation="Horizontal">
                                                         <TextBlock
                                                             FontSize="{StaticResource Font.Size.Sm}"
                                                             Foreground="{DynamicResource AppTextPrimary}"
                                                             Text="{Binding PrimaryName}" />
                                                         <TextBlock
-                                                            Margin="0,2,0,0"
+                                                            Margin="8,0,0,0"
+                                                            VerticalAlignment="Center"
                                                             FontSize="{StaticResource Font.Size.Xs}"
                                                             Foreground="{DynamicResource AppTextMuted}"
                                                             Text="{Binding SecondaryLine}" />
