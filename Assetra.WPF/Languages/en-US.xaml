@@ -233,8 +233,6 @@
     <sys:String x:Key="Portfolio.AddRecord.Tooltip">Add; Ctrl+N quickly adds a transaction</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Transaction">Add Transaction</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Transaction.Hint">Saved to "Transaction Log" and updates Investments, Accounts, or Liabilities</sys:String>
-    <sys:String x:Key="Portfolio.AddRecord.Menu.BuyTransaction">Add Buy Transaction</sys:String>
-    <sys:String x:Key="Portfolio.AddRecord.Menu.BuyTransaction.Hint">Quickly record a stock, ETF, or other investment purchase</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Investment">Add Investment</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Account">Add Funds Account</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Account.Hint">Creates an account you can manage from "Funds Accounts"</sys:String>

@@ -250,17 +250,10 @@
                                         </StackPanel>
                                     </MenuItem.Header>
                                 </MenuItem>
-                                <MenuItem Command="{Binding AddBuyTransactionFromMenuCommand}">
-                                    <MenuItem.Header>
-                                        <StackPanel>
-                                            <TextBlock FontWeight="SemiBold" Text="{DynamicResource Portfolio.AddRecord.Menu.BuyTransaction}" />
-                                            <TextBlock
-                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                Foreground="{DynamicResource AppTextMuted}"
-                                                Text="{DynamicResource Portfolio.AddRecord.Menu.BuyTransaction.Hint}" />
-                                        </StackPanel>
-                                    </MenuItem.Header>
-                                </MenuItem>
+                                <!--
+                                    「新增買入交易」已移除 — 「新增交易」已涵蓋（dialog 內可選交易類型）。
+                                    對應的 AddBuyTransactionFromMenuCommand + 兩個 lang key 一併拿掉。
+                                -->
                                 <Separator />
                                 <MenuItem Command="{Binding AddAccountFromMenuCommand}">
                                     <MenuItem.Header>

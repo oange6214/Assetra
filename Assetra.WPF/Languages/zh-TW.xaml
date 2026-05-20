@@ -235,8 +235,6 @@
     <sys:String x:Key="Portfolio.AddRecord.Tooltip">新增；Ctrl+N 可快速新增交易</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Transaction">新增交易</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Transaction.Hint">儲存後出現在「交易記錄」，並更新投資、帳戶或負債</sys:String>
-    <sys:String x:Key="Portfolio.AddRecord.Menu.BuyTransaction">新增買入交易</sys:String>
-    <sys:String x:Key="Portfolio.AddRecord.Menu.BuyTransaction.Hint">直接建立股票、ETF 或其他投資買入紀錄</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Investment">新增投資資產</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Account">新增資金帳戶</sys:String>
     <sys:String x:Key="Portfolio.AddRecord.Menu.Account.Hint">建立後可在「資金帳戶」查看與管理</sys:String>

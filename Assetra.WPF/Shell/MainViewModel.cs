@@ -123,14 +123,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
             Portfolio.AddRecordCommand.Execute(null);
     }
 
-    /// <summary>新增買入交易 — 切到投資資產頁 + 開買入 dialog。</summary>
-    [RelayCommand]
-    private void AddBuyTransactionFromMenu()
-    {
-        NavRail.ActiveSection = NavSection.Portfolio;
-        // OpenTxDialog already resets TxType to buy; keep this as an explicit quick-add shortcut.
-        Portfolio.Transaction.OpenTxDialog();
-    }
+    // 「新增買入交易」menu 已移除（「新增交易」涵蓋同樣功能 — dialog 內可選類型）。
+    // AddBuyTransactionFromMenuCommand 連同 lang key 也一併拿掉。
 
     /// <summary>新增資金帳戶 — 切到資金帳戶頁 + 開新增帳戶 dialog。</summary>
     [RelayCommand]
