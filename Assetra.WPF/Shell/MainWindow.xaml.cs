@@ -83,6 +83,10 @@ public partial class MainWindow : Window
     private void CommandPaletteBackdrop_MouseDown(object sender, MouseButtonEventArgs e) =>
         _viewModel.ToggleCommandPaletteCommand.Execute(null);
 
+    // P2.17 T04 — Shortcuts help backdrop dismiss.
+    private void ShortcutsBackdrop_MouseDown(object sender, MouseButtonEventArgs e) =>
+        _viewModel.ToggleShortcutsHelpCommand.Execute(null);
+
     // P2.13 — Auto-focus + pre-select first item when palette opens. Popup.Opened fires
     // AFTER the popup tree has IsOpen=true so Focus() will land on the rendered TextBox.
     private void CommandPalettePopup_Opened(object? sender, EventArgs e)

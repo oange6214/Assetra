@@ -1011,6 +1011,24 @@
 
     <!--  Command Palette (Ctrl+Shift+K)  -->
     <sys:String x:Key="CommandPalette.Placeholder">Type an action or page…</sys:String>
+
+    <!--  Keyboard shortcuts help (Ctrl+/) — P2.17 T04  -->
+    <sys:String x:Key="Shortcuts.Title">Keyboard shortcuts</sys:String>
+    <sys:String x:Key="Shortcuts.Subtitle">Press Ctrl+/ anytime to reopen this list</sys:String>
+    <sys:String x:Key="Shortcuts.Group.Navigation">Navigation</sys:String>
+    <sys:String x:Key="Shortcuts.Group.Action">Actions</sys:String>
+    <sys:String x:Key="Shortcuts.GlobalSearch">Global stock search</sys:String>
+    <sys:String x:Key="Shortcuts.CommandPalette">Command palette</sys:String>
+    <sys:String x:Key="Shortcuts.AddTransaction">Add transaction</sys:String>
+    <sys:String x:Key="Shortcuts.GoBack">Back</sys:String>
+    <sys:String x:Key="Shortcuts.GoForward">Forward</sys:String>
+    <sys:String x:Key="Shortcuts.NavFinancial">Financial overview</sys:String>
+    <sys:String x:Key="Shortcuts.NavPortfolio">Portfolio</sys:String>
+    <sys:String x:Key="Shortcuts.NavTransactions">Transactions</sys:String>
+    <sys:String x:Key="Shortcuts.NavReports">Reports</sys:String>
+    <sys:String x:Key="Shortcuts.NavCategories">Categories</sys:String>
+    <sys:String x:Key="Shortcuts.NavAssistant">Assistant</sys:String>
+    <sys:String x:Key="Shortcuts.ToggleHelp">Show this list</sys:String>
     <sys:String x:Key="CommandPalette.Group.Nav">Navigate</sys:String>
     <sys:String x:Key="CommandPalette.Group.Action">Action</sys:String>
     <sys:String x:Key="Nav.Section.Title">Navigate</sys:String>

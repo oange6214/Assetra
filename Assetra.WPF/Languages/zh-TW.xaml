@@ -1014,6 +1014,24 @@
 
     <!--  Command Palette (Ctrl+Shift+K)  -->
     <sys:String x:Key="CommandPalette.Placeholder">輸入動作或頁面名稱…</sys:String>
+
+    <!--  Keyboard shortcuts help (Ctrl+/) — P2.17 T04  -->
+    <sys:String x:Key="Shortcuts.Title">鍵盤快捷鍵</sys:String>
+    <sys:String x:Key="Shortcuts.Subtitle">隨時按 Ctrl+/ 打開這份清單</sys:String>
+    <sys:String x:Key="Shortcuts.Group.Navigation">導覽</sys:String>
+    <sys:String x:Key="Shortcuts.Group.Action">動作</sys:String>
+    <sys:String x:Key="Shortcuts.GlobalSearch">全域股票搜尋</sys:String>
+    <sys:String x:Key="Shortcuts.CommandPalette">命令面板</sys:String>
+    <sys:String x:Key="Shortcuts.AddTransaction">新增交易</sys:String>
+    <sys:String x:Key="Shortcuts.GoBack">上一頁</sys:String>
+    <sys:String x:Key="Shortcuts.GoForward">下一頁</sys:String>
+    <sys:String x:Key="Shortcuts.NavFinancial">財務總覽</sys:String>
+    <sys:String x:Key="Shortcuts.NavPortfolio">投資資產</sys:String>
+    <sys:String x:Key="Shortcuts.NavTransactions">交易記錄</sys:String>
+    <sys:String x:Key="Shortcuts.NavReports">報表</sys:String>
+    <sys:String x:Key="Shortcuts.NavCategories">收支分類</sys:String>
+    <sys:String x:Key="Shortcuts.NavAssistant">財務助理</sys:String>
+    <sys:String x:Key="Shortcuts.ToggleHelp">顯示這份清單</sys:String>
     <sys:String x:Key="CommandPalette.Group.Nav">導覽</sys:String>
     <sys:String x:Key="CommandPalette.Group.Action">動作</sys:String>
     <sys:String x:Key="Nav.Section.Title">導覽</sys:String>

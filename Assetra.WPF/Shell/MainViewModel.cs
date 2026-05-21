@@ -61,6 +61,12 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private bool _isSearchOpen;
 
+    /// <summary>P2.17 T04 — Keyboard shortcuts cheat-sheet popup. Ctrl+/ opens.</summary>
+    [ObservableProperty] private bool _isShortcutsHelpOpen;
+
+    [RelayCommand]
+    private void ToggleShortcutsHelp() => IsShortcutsHelpOpen = !IsShortcutsHelpOpen;
+
     private readonly ObservableCollection<StockSearchResult> _searchResults = new();
     public ReadOnlyObservableCollection<StockSearchResult> SearchResults { get; }
 

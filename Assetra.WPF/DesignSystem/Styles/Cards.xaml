@@ -88,4 +88,26 @@
         <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
     </Style>
 
+    <!--
+        P2.17 T04 — Keyboard shortcut chip (kbd-style)。Border + padding 模擬
+        實體鍵盤按鍵外觀，給 shortcuts help dialog / inline 顯示。
+    -->
+    <Style x:Key="AppKbdChip" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceAlt}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="MinWidth" Value="24" />
+        <Setter Property="Margin" Value="0,0,4,0" />
+    </Style>
+
+    <Style x:Key="AppKbdChipText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
+        <Setter Property="FontWeight" Value="{StaticResource Font.Weight.Medium}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
 </ResourceDictionary>

@@ -53,6 +53,11 @@
             Key="K"
             Command="{Binding ToggleCommandPaletteCommand}"
             Modifiers="Ctrl+Shift" />
+        <!--  P2.17 T04 — Ctrl+/ = Keyboard shortcuts help (VS Code 慣例)。  -->
+        <KeyBinding
+            Key="OemQuestion"
+            Command="{Binding ToggleShortcutsHelpCommand}"
+            Modifiers="Ctrl" />
         <KeyBinding
             Key="Left"
             Command="{Binding NavRail.GoBackCommand}"
@@ -797,6 +802,197 @@
                 </Grid>
             </Border>
         </Popup>
+
+        <!--
+            ═══ Keyboard Shortcuts Help popup (Ctrl+/) ═══
+            P2.17 T04 — 列出所有 keyboard shortcut 給 user 探索。Modal-like 體驗
+            (backdrop + center popup)。Esc 由 EscapeKeyCommandBehavior 在 Border
+            上處理。
+        -->
+        <Border
+            x:Name="ShortcutsBackdrop"
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="10"
+            Background="Black"
+            MouseDown="ShortcutsBackdrop_MouseDown"
+            Opacity="0.4"
+            Visibility="{Binding IsShortcutsHelpOpen, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Border
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Width="520"
+            MaxHeight="560"
+            Padding="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Panel.ZIndex="11"
+            beh:EscapeKeyCommandBehavior.Command="{Binding ToggleShortcutsHelpCommand}"
+            Style="{StaticResource AppDialogShell}"
+            Visibility="{Binding IsShortcutsHelpOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!--  Header  -->
+                <Border Grid.Row="0"
+                        Padding="20,14"
+                        BorderBrush="{DynamicResource AppBorderLight}"
+                        BorderThickness="0,0,0,1">
+                    <DockPanel>
+                        <Button Width="28" Height="28" Padding="0"
+                                Command="{Binding ToggleShortcutsHelpCommand}"
+                                DockPanel.Dock="Right"
+                                Style="{StaticResource AppIconButton}">
+                            <ds:AppIcon FontSize="12"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Symbol="Dismiss24" />
+                        </Button>
+                        <StackPanel>
+                            <TextBlock FontSize="{StaticResource Font.Size.Sm}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AppTextPrimary}"
+                                       Text="{DynamicResource Shortcuts.Title}" />
+                            <TextBlock Margin="0,2,0,0"
+                                       FontSize="{StaticResource Font.Size.Xs}"
+                                       Foreground="{DynamicResource AppTextMuted}"
+                                       Text="{DynamicResource Shortcuts.Subtitle}" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!--  Shortcut list  -->
+                <ScrollViewer Grid.Row="1" Padding="20,12" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!--  Group: Navigation  -->
+                        <TextBlock Margin="0,0,0,8"
+                                   FontFamily="{StaticResource Font.Family.UI}"
+                                   FontSize="{StaticResource Font.Size.2Xs}"
+                                   FontWeight="{StaticResource Font.Weight.Medium}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Opacity="0.72"
+                                   Text="{DynamicResource Shortcuts.Group.Navigation}" />
+
+                        <!--
+                            Row template:  DockPanel  [chip chip] (right-docked)  |  description (fill)
+                            Ctrl chip + key chip 之間沒 + sign，視覺貼近實體鍵盤的「按下兩鍵」感。
+                        -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.NavFinancial}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="1" /></Border>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.NavPortfolio}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="2" /></Border>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.NavTransactions}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="3" /></Border>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.NavReports}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="4" /></Border>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.NavCategories}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="5" /></Border>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.NavAssistant}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="6" /></Border>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.GoBack}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Alt" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="←" /></Border>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.GoForward}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Alt" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="→" /></Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <!--  Group: Action  -->
+                        <TextBlock Margin="0,0,0,8"
+                                   FontFamily="{StaticResource Font.Family.UI}"
+                                   FontSize="{StaticResource Font.Size.2Xs}"
+                                   FontWeight="{StaticResource Font.Weight.Medium}"
+                                   Foreground="{DynamicResource AppTextMuted}"
+                                   Opacity="0.72"
+                                   Text="{DynamicResource Shortcuts.Group.Action}" />
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.GlobalSearch}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="K" /></Border>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.CommandPalette}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Shift" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="K" /></Border>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.AddTransaction}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="N" /></Border>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.ToggleHelp}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="/" /></Border>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
 
         <!--  ── In-App Snackbar (ZIndex=15, bottom-center) ──  -->
         <snackbar:SnackbarView
