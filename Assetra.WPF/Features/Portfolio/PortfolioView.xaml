@@ -1057,7 +1057,7 @@
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
 
-                                <!--  Column header row  -->
+                                <!--  Column header row — P4.9c 移除 Note 欄（編輯改為點擊整列）  -->
                                 <Border
                                     Grid.Row="0"
                                     Padding="0,0,0,8"
@@ -1070,7 +1070,6 @@
                                             <ColumnDefinition Width="56" />
                                             <ColumnDefinition Width="72" />
                                             <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="36" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock
                                             Grid.Column="0"
@@ -1100,12 +1099,6 @@
                                             FontSize="{StaticResource Font.Size.Xs}"
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
-                                        <TextBlock
-                                            Grid.Column="5"
-                                            HorizontalAlignment="Right"
-                                            FontSize="{StaticResource Font.Size.Xs}"
-                                            Foreground="{DynamicResource AppTextSecondary}"
-                                            Text="{DynamicResource Portfolio.TradeHistory.Note}" />
                                     </Grid>
                                 </Border>
 
@@ -1130,15 +1123,32 @@
                                     </TextBlock.Style>
                                 </TextBlock>
 
-                                <!--  Trade rows — table-style horizontal layout  -->
+                                <!--  Trade rows — P4.9c 整列點擊觸發 EditTradeCommand（hover 反白 + Cursor=Hand）  -->
                                 <ItemsControl Grid.Row="1" ItemsSource="{Binding SelectedPositionTrades}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Border
-                                                Padding="0,10"
-                                                BorderBrush="{DynamicResource AppBorderLight}"
+                                                Padding="6,10"
                                                 BorderThickness="0,0,0,1"
+                                                Cursor="Hand"
                                                 ToolTip="{Binding Note}">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
+                                                        <Setter Property="Background" Value="Transparent" />
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Background" Value="{DynamicResource AppHover}" />
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <Border.InputBindings>
+                                                    <MouseBinding
+                                                        Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        MouseAction="LeftClick" />
+                                                </Border.InputBindings>
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="92" />
@@ -1146,7 +1156,6 @@
                                                         <ColumnDefinition Width="56" />
                                                         <ColumnDefinition Width="72" />
                                                         <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="36" />
                                                     </Grid.ColumnDefinitions>
                                                     <!--  日期  -->
                                                     <TextBlock
@@ -1241,23 +1250,6 @@
                                                             <Run Text=")" />
                                                         </TextBlock>
                                                     </StackPanel>
-                                                    <!--  備註 / Edit 按鈕  -->
-                                                    <Button
-                                                        Grid.Column="5"
-                                                        Width="28"
-                                                        Height="28"
-                                                        Padding="0"
-                                                        HorizontalAlignment="Right"
-                                                        VerticalAlignment="Center"
-                                                        Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                        CommandParameter="{Binding}"
-                                                        Style="{StaticResource AppIconButton}"
-                                                        ToolTip="{DynamicResource Common.Edit}">
-                                                        <ds:AppIcon
-                                                            FontSize="11"
-                                                            Foreground="{DynamicResource AppTextMuted}"
-                                                            Symbol="Edit24" />
-                                                    </Button>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
