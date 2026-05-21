@@ -24,7 +24,7 @@
         widget DataContext = FinancialOverviewViewModel（外層 view 的 context），
         裡面用 binding path 走進 GoalsWidget.Goals。
     -->
-    <Border Style="{StaticResource DashboardWidgetCard}">
+    <Border Style="{StaticResource AppCardSubtle}">
         <StackPanel>
             <DockPanel LastChildFill="True">
                 <ds:AppIcon

@@ -14,10 +14,14 @@
     <ItemsControl Width="340" ItemsSource="{Binding Items}">
         <ItemsControl.ItemTemplate>
             <DataTemplate DataType="{x:Type local:SnackbarItemViewModel}">
+                <!--
+                    P2.17 T06 — BorderBrush AppBorder → AppBorderLight 跟 card
+                    lightening 一致；Drop shadow 保留作 elevation hint。
+                -->
                 <Border
                     Margin="0,4,0,0"
                     Background="{DynamicResource AppSurface}"
-                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
                     ClipToBounds="True"
                     CornerRadius="{StaticResource Radius.Md}"

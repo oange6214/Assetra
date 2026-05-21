@@ -1029,6 +1029,7 @@
     <sys:String x:Key="Shortcuts.NavCategories">Categories</sys:String>
     <sys:String x:Key="Shortcuts.NavAssistant">Assistant</sys:String>
     <sys:String x:Key="Shortcuts.ToggleHelp">Show this list</sys:String>
+    <sys:String x:Key="CommandPalette.Group.Recent">Recent</sys:String>
     <sys:String x:Key="CommandPalette.Group.Nav">Navigate</sys:String>
     <sys:String x:Key="CommandPalette.Group.Action">Action</sys:String>
     <sys:String x:Key="Nav.Section.Title">Navigate</sys:String>

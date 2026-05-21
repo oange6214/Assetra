@@ -12,20 +12,11 @@
     -->
 
     <!--
-        P2.14 — Setters 直接對齊 design-system 的 AppCardSubtle (in Cards.xaml)：
-        BorderLight + Radius.Md + Padding 16,14 + Margin 0,0,0,12。不用 BasedOn 是
-        因為 Cards.xaml 跟這個 dict 在不同 ResourceDictionary，BasedOn 跨 dict
-        WPF 不支援。後續新 widget 建議直接用 AppCardSubtle (走 App-level resource
-        無需本地 dict)，這個 key 保留作 backwards-compat。
+        P2.17 T10 — DashboardWidgetCard 已 removed。4 個 widget (Investment /
+        Fire / Goals / Assistant) 改用 App-level Cards.xaml 的 AppCardSubtle，
+        single source of truth。如未來新 widget 想用 widget-specific 樣式，
+        在這檔加新 key，不再 fork AppCardSubtle 的內容。
     -->
-    <Style x:Key="DashboardWidgetCard" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource Radius.Md}" />
-        <Setter Property="Padding" Value="16,14" />
-        <Setter Property="Margin" Value="0,0,0,12" />
-    </Style>
 
     <Style x:Key="DashboardWidgetHeader" TargetType="TextBlock">
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />

@@ -488,8 +488,8 @@
                     Grid.RowSpan="5"
                     Panel.ZIndex="180"
                     Visibility="{Binding IsCellPopoverOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <!--  半透明 backdrop  -->
-                    <Border Background="#80000000">
+                    <!--  半透明 backdrop — P2.17 T09 hex→token (Brush.ModalOverlay)  -->
+                    <Border Background="{DynamicResource Brush.ModalOverlay}">
                         <Border.InputBindings>
                             <MouseBinding Command="{Binding CloseCellPopoverCommand}" MouseAction="LeftClick" />
                         </Border.InputBindings>

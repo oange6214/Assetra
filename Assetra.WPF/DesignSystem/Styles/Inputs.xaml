@@ -41,14 +41,38 @@
         FontFamily from the visual tree. Explicitly set CJK-capable
         fonts so Chinese characters render correctly.
     -->
+    <!--
+        P2.17 T05 — Tooltip refresh：
+          FontSize Sm → Xs (12px) 縮小不搶 main content
+          BorderBrush AppBorder → AppBorderLight 跟 card lightening convention 對齊
+          Padding 8,4 → 8,5 略寬一點呼吸
+          Template 加 CornerRadius=Radius.Sm 跟其他卡片一致
+          MaxWidth=320 避免長文 tooltip 拉成單行
+    -->
     <Style TargetType="ToolTip">
         <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
-        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
         <Setter Property="Background" Value="{DynamicResource AppSurface}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="Padding" Value="8,5" />
+        <Setter Property="MaxWidth" Value="320" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToolTip">
+                    <Border
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{StaticResource Radius.Sm}"
+                        SnapsToDevicePixels="True">
+                        <ContentPresenter />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!--  ── TextBox shell + variants ──  -->

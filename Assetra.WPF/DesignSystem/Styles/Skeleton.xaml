@@ -1,6 +1,7 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!--
         ════════════════════════════════════════════════════════════
@@ -17,13 +18,20 @@
           AppSkeletonCard  : Card 形狀佔位 (e.g. summary metric) — Height 固定 56
 
         所有 primitive 都有 EventTrigger Loaded → Storyboard 跑 Opacity
-        1.0 → 0.4 → 1.0 (1.2 sec) infinite，呈現 subtle pulse。
-        AutoReverse + IndefiniteRepeat 讓 shimmer 一直 loop。
+        1.0 → 0.45 → 1.0 (0.9 sec) infinite，呈現 subtle pulse。
 
         Theme：背景用 AppHover (Layer3 dark / NavySubtle light) — 比 page
         background 稍微亮但不到 surface，傳遞「這裡有東西、還沒到」的視覺
         重量。
+
+        ── P2.17 T08 — Reduced-motion ──
+        Motion.SkeletonPulseDuration 是 Duration token，預設 0:0:0.9s。
+        App.xaml.cs 在 startup 時若偵測到 SystemParameters.MenuAnimation=False
+        (Windows 系統偏好「減少動畫」開啟)，會 override 此 resource 成 0:0:0
+        讓 pulse 變成不動 (但 background 顏色仍存在，視覺上是 static
+        placeholder)，respect 使用者的無障礙設定。
     -->
+    <Duration x:Key="Motion.SkeletonPulseDuration">0:0:0.9</Duration>
 
     <Style x:Key="AppSkeletonBase" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource AppHover}" />
@@ -37,7 +45,7 @@
                             Storyboard.TargetProperty="Opacity"
                             From="1.0"
                             To="0.45"
-                            Duration="0:0:0.9" />
+                            Duration="{StaticResource Motion.SkeletonPulseDuration}" />
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>

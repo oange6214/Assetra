@@ -98,7 +98,7 @@
         點 footer 跳「投資資產」工作頁（持倉明細為預設）。
         widget 不顯示 Top Holdings — 那個跟 Positions tab 重複，使用者點進去看就好。
     -->
-    <Border Style="{StaticResource DashboardWidgetCard}">
+    <Border Style="{StaticResource AppCardSubtle}">
         <StackPanel>
             <DockPanel LastChildFill="True">
                 <ds:AppIcon

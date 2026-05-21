@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Data;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -21,6 +23,14 @@ public partial class MainViewModel
 
     private readonly ObservableCollection<CommandPaletteEntry> _commandPaletteAllEntries = new();
     private readonly ObservableCollection<CommandPaletteEntry> _commandPaletteResults = new();
+
+    /// <summary>
+    /// P2.17 T07 — LRU 最近使用過的 command TitleKey。新執行的塞到 [0]、去重、
+    /// 上限 5。Empty query 時 prepend 進結果，使用者開 palette 立刻看到熟用動作。
+    /// In-memory only (這個 process 的 session)；跨 session 持久化要 AppSettings 擴展。
+    /// </summary>
+    private readonly LinkedList<string> _commandPaletteRecentTitleKeys = new();
+    private const int CommandPaletteRecentLimit = 5;
 
     public ReadOnlyObservableCollection<CommandPaletteEntry> CommandPaletteResults { get; private set; } = null!;
 
@@ -46,7 +56,18 @@ public partial class MainViewModel
     {
         if (entry is null) return;
         IsCommandPaletteOpen = false;
+        RecordCommandPaletteRecent(entry.TitleKey);
         entry.Execute.Invoke();
+    }
+
+    private void RecordCommandPaletteRecent(string titleKey)
+    {
+        // 已存在 → 移到頭；不在 → 加到頭；超 limit → 砍尾。
+        var existing = _commandPaletteRecentTitleKeys.Find(titleKey);
+        if (existing is not null) _commandPaletteRecentTitleKeys.Remove(existing);
+        _commandPaletteRecentTitleKeys.AddFirst(titleKey);
+        while (_commandPaletteRecentTitleKeys.Count > CommandPaletteRecentLimit)
+            _commandPaletteRecentTitleKeys.RemoveLast();
     }
 
     partial void OnCommandPaletteTextChanged(string value) => RefilterCommandPalette(value);
@@ -63,6 +84,19 @@ public partial class MainViewModel
     {
         _commandPaletteResults.Clear();
         var q = query?.Trim() ?? string.Empty;
+
+        // P2.17 T07 — query 空時把 recent 5 條 prepend 到結果上方。Search 模式跳過
+        // recent，因為 user 已知道要找什麼、按頻率排序意義不大反而干擾比對。
+        if (string.IsNullOrEmpty(q))
+        {
+            const string recentGroupKey = "CommandPalette.Group.Recent";
+            foreach (var titleKey in _commandPaletteRecentTitleKeys)
+            {
+                var match = _commandPaletteAllEntries.FirstOrDefault(e => e.TitleKey == titleKey);
+                if (match is null) continue;
+                _commandPaletteResults.Add(match with { GroupKey = recentGroupKey });
+            }
+        }
 
         foreach (var entry in _commandPaletteAllEntries)
         {

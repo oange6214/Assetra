@@ -37,7 +37,9 @@
     <SolidColorBrush x:Key="AppNeutral" Color="{StaticResource Color.Slate.600}" />
 
     <!--  Semantic — status  -->
-    <SolidColorBrush x:Key="AppWarning"   Color="{StaticResource Color.Amber.500}" />
+    <SolidColorBrush x:Key="AppWarning"        Color="{StaticResource Color.Amber.500}" />
+    <SolidColorBrush x:Key="AppWarningSubtle"  Color="#FFF8EB" />
+    <SolidColorBrush x:Key="AppInfoSubtle"     Color="#EFF6FF" />
     <SolidColorBrush x:Key="AppSuccess"   Color="{StaticResource Color.Green.700}" />
     <SolidColorBrush x:Key="AppFocusRing" Color="{StaticResource Color.Brand.Navy}" />
 

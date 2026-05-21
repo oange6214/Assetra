@@ -24,7 +24,7 @@
         FireViewModel 的計算需要使用者按「計算」才會跑；此 widget 不主動觸發
         計算 — 點 footer 跳到 Fire 頁完整輸入後再回來看。
     -->
-    <Border Style="{StaticResource DashboardWidgetCard}">
+    <Border Style="{StaticResource AppCardSubtle}">
         <StackPanel>
             <DockPanel LastChildFill="True">
                 <ds:AppIcon

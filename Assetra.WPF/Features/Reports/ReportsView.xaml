@@ -370,15 +370,15 @@
         <!--  ── Statements (Income / Balance / CashFlow) ──  -->
         <StackPanel Grid.Row="3" Margin="0,16,0,0">
 
-            <!--  Slow-load notice — fires when LoadAsync exceeds 5 sec (typically network FX)  -->
+            <!--  Slow-load notice — P2.17 T09 hex→tokens (AppWarningSubtle / AppWarning)  -->
             <Border Margin="0,0,0,12" Padding="12,8"
-                    Background="#33F59E0B"
-                    BorderBrush="#F59E0B"
+                    Background="{DynamicResource AppWarningSubtle}"
+                    BorderBrush="{DynamicResource AppWarning}"
                     BorderThickness="0,0,0,2"
                     CornerRadius="4"
                     Visibility="{Binding IsSlowLoad, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal">
-                    <ds:AppIcon Margin="0,0,8,0" VerticalAlignment="Center" FontSize="14" Foreground="#B45309" Symbol="Warning24" />
+                    <ds:AppIcon Margin="0,0,8,0" VerticalAlignment="Center" FontSize="14" Foreground="{DynamicResource AppWarning}" Symbol="Warning24" />
                     <TextBlock VerticalAlignment="Center"
                                FontSize="{StaticResource Font.Size.Sm}"
                                Foreground="{DynamicResource AppTextPrimary}"
@@ -386,10 +386,10 @@
                 </StackPanel>
             </Border>
 
-            <!--  Statement-level warnings (missing FX rates etc.)  -->
+            <!--  Statement-level warnings — P2.17 T09 hex→tokens (AppInfoSubtle / Brush.Info)  -->
             <Border Margin="0,0,0,12" Padding="12,8"
-                    Background="#332563EB"
-                    BorderBrush="#2563EB"
+                    Background="{DynamicResource AppInfoSubtle}"
+                    BorderBrush="{DynamicResource Brush.Info}"
                     BorderThickness="0,0,0,2"
                     CornerRadius="4"
                     Visibility="{Binding HasStatementWarnings, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -397,7 +397,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Margin="0,2,0,2" Orientation="Horizontal">
-                                <ds:AppIcon Margin="0,0,8,0" VerticalAlignment="Center" FontSize="14" Foreground="#1D4ED8" Symbol="Info24" />
+                                <ds:AppIcon Margin="0,0,8,0" VerticalAlignment="Center" FontSize="14" Foreground="{DynamicResource Brush.Info}" Symbol="Info24" />
                                 <TextBlock VerticalAlignment="Center"
                                            FontSize="{StaticResource Font.Size.Sm}"
                                            Foreground="{DynamicResource AppTextPrimary}"

@@ -23,7 +23,7 @@
         Stage 2.5：助手 insight widget。投影 InsightCards 前 2 條當 pill 顯示。
         widget 不允許關閉單條（避免兩處 dismiss 邏輯）；點 footer 跳 Assistant 頁完整管理。
     -->
-    <Border Style="{StaticResource DashboardWidgetCard}">
+    <Border Style="{StaticResource AppCardSubtle}">
         <StackPanel>
             <DockPanel LastChildFill="True">
                 <ds:AppIcon

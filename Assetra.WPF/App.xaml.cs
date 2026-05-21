@@ -36,6 +36,16 @@ public partial class App : System.Windows.Application
         VelopackApp.Build().Run();
         base.OnStartup(e);
         DispatcherUnhandledException += OnDispatcherUnhandledException;
+
+        // P2.17 T08 — respect Windows「減少動畫效果」系統偏好。SystemParameters
+        // .MenuAnimation 為 false 代表使用者關掉了動畫，我們把 skeleton pulse
+        // duration override 成 0 讓動畫不跑（但 placeholder shape 依然在）。
+        // ClientAreaAnimation 也可參考但 MenuAnimation 在 Windows 對應較直接。
+        if (!SystemParameters.MenuAnimation)
+        {
+            Resources["Motion.SkeletonPulseDuration"] =
+                new System.Windows.Duration(System.TimeSpan.Zero);
+        }
         var shouldTryRecoveryUpdate = File.Exists(StartupMarkerPath);
         WriteStartupMarker();
         try

@@ -865,22 +865,20 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <!--  Empty state  -->
+            <!--
+                P2.17 T11 — Empty state migrated to AppEmptyState design system style.
+                原本 hand-rolled Opacity=0.4 + 自己定 font size，現在跟其他頁面 (Goals /
+                Fire / MonteCarlo 等已用) 一致的「居中 panel + 圖示 + 標題」標準。
+            -->
             <Border Visibility="{Binding HasNoTrades, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Opacity="0.4">
+                <StackPanel Style="{StaticResource AppEmptyState}">
                     <TextBlock
                         Margin="0,0,0,8"
                         HorizontalAlignment="Center"
                         FontSize="{StaticResource Font.Size.2xl}"
                         Text="&#x1F4CB;" />
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        FontSize="{StaticResource Font.Size.Sm}"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Portfolio.TradeHistory.Empty}" />
+                    <TextBlock Style="{StaticResource AppEmptyStateTitle}"
+                               Text="{DynamicResource Portfolio.TradeHistory.Empty}" />
                 </StackPanel>
             </Border>
         </Grid>

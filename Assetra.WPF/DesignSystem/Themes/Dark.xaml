@@ -35,6 +35,8 @@
 
     <!--  Semantic — status  -->
     <SolidColorBrush x:Key="AppWarning" Color="{StaticResource Color.Amber.400}" />
+    <SolidColorBrush x:Key="AppWarningSubtle" Color="#3E2C0F" />
+    <SolidColorBrush x:Key="AppInfoSubtle" Color="#0F2848" />
     <SolidColorBrush x:Key="AppSuccess" Color="{StaticResource Color.Green.500}" />
     <SolidColorBrush x:Key="AppFocusRing" Color="{StaticResource Color.Blue.400}" />
 

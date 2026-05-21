@@ -1032,6 +1032,7 @@
     <sys:String x:Key="Shortcuts.NavCategories">收支分類</sys:String>
     <sys:String x:Key="Shortcuts.NavAssistant">財務助理</sys:String>
     <sys:String x:Key="Shortcuts.ToggleHelp">顯示這份清單</sys:String>
+    <sys:String x:Key="CommandPalette.Group.Recent">最近使用</sys:String>
     <sys:String x:Key="CommandPalette.Group.Nav">導覽</sys:String>
     <sys:String x:Key="CommandPalette.Group.Action">動作</sys:String>
     <sys:String x:Key="Nav.Section.Title">導覽</sys:String>
