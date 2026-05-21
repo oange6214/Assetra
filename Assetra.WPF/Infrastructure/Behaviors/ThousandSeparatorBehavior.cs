@@ -35,6 +35,12 @@ public static class ThousandSeparatorBehavior
             if (tb.ReadLocalValue(Control.HorizontalContentAlignmentProperty) == DependencyProperty.UnsetValue)
                 tb.HorizontalContentAlignment = HorizontalAlignment.Right;
 
+            // P4.9d — HorizontalContentAlignment 只控制 placeholder TextBlock 的對齊；
+            // 真正影響 text + caret 對齊的是 TextAlignment（直接 property on TextBox）。
+            // 沒設 TextAlignment 時 caret 在 empty 狀態跑左邊，跟右靠 placeholder 衝突。
+            if (tb.ReadLocalValue(TextBox.TextAlignmentProperty) == DependencyProperty.UnsetValue)
+                tb.TextAlignment = TextAlignment.Right;
+
             if (tb.IsLoaded)
                 _ = tb.Dispatcher.BeginInvoke(() => FormatTextBox(tb), DispatcherPriority.Loaded);
         }

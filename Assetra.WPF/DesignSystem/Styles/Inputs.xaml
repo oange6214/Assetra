@@ -130,9 +130,22 @@
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="Text" Value="">
+                        <!--
+                            P4.9d — placeholder 預設 Collapsed，僅在「Text 為空 AND 沒 focus」
+                            時才出現。原本只看 Text=="" 觸發，造成 user 點進 textbox 時
+                            placeholder 跟 caret 同位置疊在一起、視覺上 caret 跟 placeholder
+                            重疊「奇怪位置」。改成 multi-trigger 後：
+                              - 未 focus + 空：顯示 placeholder 提示
+                              - 一點進去 (focus)：placeholder 立刻消失，caret 獨立可見
+                              - 有 text 任何狀態：placeholder 永遠隱藏
+                        -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Text" Value="" />
+                                <Condition Property="IsKeyboardFocused" Value="False" />
+                            </MultiTrigger.Conditions>
                             <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
-                        </Trigger>
+                        </MultiTrigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.BorderStrong}" />
                         </Trigger>
@@ -162,6 +175,8 @@
         BasedOn="{StaticResource AppTextBox}"
         TargetType="{x:Type TextBox}">
         <Setter Property="HorizontalContentAlignment" Value="Right" />
+        <!--  P4.9d — TextAlignment 才是 text + caret 的真實對齊；只設 HorizontalContentAlignment 只會搬 placeholder。  -->
+        <Setter Property="TextAlignment" Value="Right" />
     </Style>
 
     <Style
