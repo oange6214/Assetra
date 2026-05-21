@@ -162,3 +162,15 @@ AscentPortfolio 在 **資訊深度** + **視覺一致性** 上贏，
 User 決定動 → 一個 phase 一個 commit + 這份 MD 標進度。
 
 不要 proactive 開始，等 user 明確說「動 P4.1」之類才動。
+
+---
+
+## 進度
+
+| Phase | 狀態 | 備註 |
+|-------|------|------|
+| P4.1 | ✅ done | KPI 矩陣 ROI/XIRR × 1Y/3Y/累積；ViewModel inline 計算 + asset detail XAML 4×3 grid |
+| P4.2 | ✅ done | CapitalGain 實作（Sell.RealizedPnl 加總）+ Realized total / 資本利得 兩列改 signed + 依符號染色 |
+| P4.3 | ⏳ pending | — |
+| P4.4 | ⏳ pending | — |
+| P4.5 | ⏳ pending | — |

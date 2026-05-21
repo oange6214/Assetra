@@ -30,7 +30,10 @@ public partial class PortfolioViewModel
     [NotifyPropertyChangedFor(nameof(HasSelectedPositionRow))]
     [NotifyPropertyChangedFor(nameof(SelectedPositionTrades))]
     [NotifyPropertyChangedFor(nameof(SelectedPositionDividendIncome))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionCapitalGain))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionCapitalGainIsPositive))]
     [NotifyPropertyChangedFor(nameof(SelectedPositionRealizedTotal))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionRealizedTotalIsPositive))]
     [NotifyPropertyChangedFor(nameof(SelectedPositionTradeAvgPrice))]
     [NotifyPropertyChangedFor(nameof(SelectedPositionTradeAvgPriceAsMoney))]
     [NotifyPropertyChangedFor(nameof(HasSelectedPositionRealized))]
@@ -185,12 +188,25 @@ public partial class PortfolioViewModel
             : 0m;
 
     /// <summary>
-    /// Realized capital gain — placeholder 0 so the realized P&L card layout renders correctly.
+    /// 已實現資本利得 — 對該標的所有 Sell trade 的 <c>RealizedPnl</c> 加總。
+    /// 來源為 Trade row 寫入時計算的 FIFO realized P&amp;L（含手續費與證交稅）；
+    /// legacy / 缺值 trade 視為 0，不會中斷加總。
     /// </summary>
-    public decimal SelectedPositionCapitalGain => 0m;
+    public decimal SelectedPositionCapitalGain =>
+        SelectedPositionRow is { } r
+            ? Trades.Where(t => t.Type == TradeType.Sell &&
+                                string.Equals(t.Symbol, r.Symbol, StringComparison.OrdinalIgnoreCase))
+                    .Sum(t => t.RealizedPnl ?? 0m)
+            : 0m;
 
     public decimal SelectedPositionRealizedTotal =>
         SelectedPositionDividendIncome + SelectedPositionCapitalGain;
+
+    /// <summary>P4.2 — Capital gain 可能為負（虧損賣出），UI 依符號染色用。</summary>
+    public bool SelectedPositionCapitalGainIsPositive => SelectedPositionCapitalGain >= 0m;
+
+    /// <summary>P4.2 — Realized total 可能為負（虧損 &gt; 股息），UI 依符號染色用。</summary>
+    public bool SelectedPositionRealizedTotalIsPositive => SelectedPositionRealizedTotal >= 0m;
 
     // ── P4.1 — Asset KPI matrix (ROI / XIRR × 1Y / 3Y / 累積) ─────────────
     // 從 SelectedPositionTrades 重播交易，計算單一資產的視窗 ROI 與 XIRR。
@@ -332,7 +348,10 @@ public partial class PortfolioViewModel
         OnPropertyChanged(nameof(SelectedLiabilityTotalRepays));
         OnPropertyChanged(nameof(SelectedPositionTrades));
         OnPropertyChanged(nameof(SelectedPositionDividendIncome));
+        OnPropertyChanged(nameof(SelectedPositionCapitalGain));
+        OnPropertyChanged(nameof(SelectedPositionCapitalGainIsPositive));
         OnPropertyChanged(nameof(SelectedPositionRealizedTotal));
+        OnPropertyChanged(nameof(SelectedPositionRealizedTotalIsPositive));
         OnPropertyChanged(nameof(SelectedPositionTradeAvgPrice));
         OnPropertyChanged(nameof(SelectedPositionTradeAvgPriceAsMoney));
         OnPropertyChanged(nameof(HasSelectedPositionRealized));

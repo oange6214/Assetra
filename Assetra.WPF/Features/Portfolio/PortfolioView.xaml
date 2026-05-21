@@ -880,9 +880,19 @@
                                                     FontFamily="{StaticResource Font.Family.Base}"
                                                     FontSize="{StaticResource Font.Size.Sm}"
                                                     FontWeight="SemiBold"
-                                                    Foreground="{DynamicResource AppUp}"
-                                                    Text="{Binding SelectedPositionRealizedTotal, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
-                                                    Typography.NumeralAlignment="Tabular" />
+                                                    Text="{Binding SelectedPositionRealizedTotal, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
+                                                    Typography.NumeralAlignment="Tabular">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SelectedPositionRealizedTotalIsPositive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                             </Grid>
                                             <Grid Margin="14,6">
                                                 <Grid.ColumnDefinitions>
@@ -900,9 +910,19 @@
                                                     VerticalAlignment="Center"
                                                     FontFamily="{StaticResource Font.Family.Base}"
                                                     FontSize="{StaticResource Font.Size.Xs}"
-                                                    Foreground="{DynamicResource AppTextMuted}"
-                                                    Text="{Binding SelectedPositionCapitalGain, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
-                                                    Typography.NumeralAlignment="Tabular" />
+                                                    Text="{Binding SelectedPositionCapitalGain, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
+                                                    Typography.NumeralAlignment="Tabular">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SelectedPositionCapitalGainIsPositive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                             </Grid>
                                             <Grid Margin="14,6,14,12">
                                                 <Grid.ColumnDefinitions>
