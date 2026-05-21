@@ -347,28 +347,31 @@
                                         </Button>
                                     </UniformGrid>
 
-                                    <!--  Stats grid: formula order  -->
+                                    <!--
+                                        P4.4 — Stats grid 從 2×4 (7 張小卡 + 滿版 Pnl) 重排成 2×2
+                                        thematic：① 持有數量 ② 現價/均價（含成交均價 sub）
+                                        ③ 市值/成本（primary highlight、含淨值 sub）④ 總損益（% + 絕對）
+                                        每張 padding 16,14 比原本 14,12 略 bumped。原本的 cost / netval / sellfee
+                                        資訊以 sub-row 形式併入相鄰 card，cross-currency 與 day-change/quote-stale
+                                        指示器保留不丟。
+                                    -->
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="10" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="10" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="10" />
+                                            <RowDefinition Height="12" />
                                             <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="12" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
 
-                                        <!--  Card: 持有數量  -->
+                                        <!--  Card A (0,0): 持有數量  -->
                                         <Border
                                             Grid.Row="0"
                                             Grid.Column="0"
-                                            Padding="14,12"
+                                            Padding="16,14"
                                             Background="{DynamicResource AppBackground}"
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
@@ -389,11 +392,15 @@
                                             </StackPanel>
                                         </Border>
 
-                                        <!--  Card: 成本均價  -->
+                                        <!--
+                                            Card B (0,2): 現價 / 均價
+                                            現價 primary + DayChange inline；均價（成本均價）為 sub 行；
+                                            成交均價 muted sub-sub。Cross-currency / Quote-stale 指示器保留。
+                                        -->
                                         <Border
                                             Grid.Row="0"
                                             Grid.Column="2"
-                                            Padding="14,12"
+                                            Padding="16,14"
                                             Background="{DynamicResource AppBackground}"
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
@@ -402,79 +409,7 @@
                                                 <TextBlock
                                                     FontSize="{StaticResource Font.Size.Xs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
-                                                    Text="{DynamicResource Portfolio.Detail.CostAvgPrice}" />
-                                                <TextBlock
-                                                    Margin="0,4,0,2"
-                                                    FontFamily="{StaticResource Font.Family.Base}"
-                                                    FontSize="{StaticResource Font.Size.Xl}"
-                                                    FontWeight="SemiBold"
-                                                    Foreground="{DynamicResource AppTextPrimary}"
-                                                    Text="{Binding SelectedPositionRow.BuyPriceAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, Mode=OneWay, FallbackValue=''}"
-                                                    Typography.NumeralAlignment="Tabular" />
-                                                <TextBlock
-                                                    FontFamily="{StaticResource Font.Family.Base}"
-                                                    FontSize="{StaticResource Font.Size.Xs}"
-                                                    Foreground="{DynamicResource AppTextMuted}"
-                                                    Typography.NumeralAlignment="Tabular">
-                                                    <Run Text="{DynamicResource Portfolio.Detail.TradeAvgPrice}" />
-                                                    <Run Text=":" />
-                                                    <Run Text="{Binding SelectedPositionTradeAvgPriceAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, Mode=OneWay, FallbackValue=''}" />
-                                                </TextBlock>
-                                            </StackPanel>
-                                        </Border>
-
-                                        <!--  Card: 付出成本  -->
-                                        <Border
-                                            Grid.Row="2"
-                                            Grid.Column="0"
-                                            Padding="14,12"
-                                            Background="{DynamicResource AppBackground}"
-                                            BorderBrush="{DynamicResource AppBorder}"
-                                            BorderThickness="1"
-                                            CornerRadius="{StaticResource Radius.Sm}">
-                                            <StackPanel>
-                                                <TextBlock
-                                                    FontSize="{StaticResource Font.Size.Xs}"
-                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                    Text="{DynamicResource Portfolio.TotalCostPaid}" />
-                                                <TextBlock
-                                                    Margin="0,4,0,2"
-                                                    FontFamily="{StaticResource Font.Family.Base}"
-                                                    FontSize="{StaticResource Font.Size.Xl}"
-                                                    FontWeight="SemiBold"
-                                                    Foreground="{DynamicResource AppTextPrimary}"
-                                                    Text="{Binding SelectedPositionRow.CostAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}"
-                                                    Typography.NumeralAlignment="Tabular" />
-                                                <TextBlock
-                                                    FontFamily="{StaticResource Font.Family.Base}"
-                                                    FontSize="{StaticResource Font.Size.Xs}"
-                                                    Foreground="{DynamicResource AppTextMuted}"
-                                                    Text="{Binding SelectedPositionRow.CostBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount-approx, Mode=OneWay, FallbackValue=''}"
-                                                    Typography.NumeralAlignment="Tabular"
-                                                    Visibility="{Binding SelectedPositionRow.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
-                                                <TextBlock
-                                                    FontFamily="{StaticResource Font.Family.Base}"
-                                                    FontSize="{StaticResource Font.Size.Xs}"
-                                                    Foreground="{DynamicResource AppTextMuted}"
-                                                    Text="{DynamicResource Portfolio.TotalCostPaid.Hint}"
-                                                    TextTrimming="CharacterEllipsis" />
-                                            </StackPanel>
-                                        </Border>
-
-                                        <!--  Card: 現價  -->
-                                        <Border
-                                            Grid.Row="2"
-                                            Grid.Column="2"
-                                            Padding="14,12"
-                                            Background="{DynamicResource AppBackground}"
-                                            BorderBrush="{DynamicResource AppBorder}"
-                                            BorderThickness="1"
-                                            CornerRadius="{StaticResource Radius.Sm}">
-                                            <StackPanel>
-                                                <TextBlock
-                                                    FontSize="{StaticResource Font.Size.Xs}"
-                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                    Text="{DynamicResource Portfolio.Price}" />
+                                                    Text="{DynamicResource Portfolio.Detail.PriceAvg}" />
                                                 <StackPanel Margin="0,4,0,2" Orientation="Horizontal">
                                                     <TextBlock
                                                         FontFamily="{StaticResource Font.Family.Base}"
@@ -502,6 +437,7 @@
                                                         </TextBlock.Style>
                                                     </TextBlock>
                                                 </StackPanel>
+                                                <!--  Cross-currency 現價（base）  -->
                                                 <TextBlock
                                                     FontFamily="{StaticResource Font.Family.Base}"
                                                     FontSize="{StaticResource Font.Size.Xs}"
@@ -509,6 +445,28 @@
                                                     Text="{Binding SelectedPositionRow.CurrentPriceBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price-approx, Mode=OneWay, FallbackValue=''}"
                                                     Typography.NumeralAlignment="Tabular"
                                                     Visibility="{Binding SelectedPositionRow.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+                                                <!--  均價 sub 行（成本均價）  -->
+                                                <TextBlock
+                                                    Margin="0,6,0,0"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Typography.NumeralAlignment="Tabular">
+                                                    <Run Text="{DynamicResource Portfolio.Detail.AvgPrice}" />
+                                                    <Run Text=":" />
+                                                    <Run Text="{Binding SelectedPositionRow.BuyPriceAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, Mode=OneWay, FallbackValue=''}" />
+                                                </TextBlock>
+                                                <!--  成交均價 sub-sub muted  -->
+                                                <TextBlock
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Typography.NumeralAlignment="Tabular">
+                                                    <Run Text="{DynamicResource Portfolio.Detail.TradeAvgPrice}" />
+                                                    <Run Text=":" />
+                                                    <Run Text="{Binding SelectedPositionTradeAvgPriceAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price, Mode=OneWay, FallbackValue=''}" />
+                                                </TextBlock>
+                                                <!--  Quote-stale 提示  -->
                                                 <Border
                                                     Margin="0,6,0,0"
                                                     Style="{StaticResource StatusBadge.Info}"
@@ -519,15 +477,19 @@
                                             </StackPanel>
                                         </Border>
 
-                                        <!--  Card: 市值 — P4.3 #7 selected/primary highlight：accent border + subtle accent bg  -->
+                                        <!--
+                                            Card C (2,0): 市值 / 成本 — primary highlight（accent border + subtle accent bg, P4.3 #7）
+                                            市值 primary；成本 sub；淨值 sub-muted（with EstimatedSellFee 整合 tooltip）。
+                                        -->
                                         <Border
-                                            Grid.Row="4"
+                                            Grid.Row="2"
                                             Grid.Column="0"
-                                            Padding="14,12"
+                                            Padding="16,14"
                                             Background="{DynamicResource AppAccentSubtle}"
                                             BorderBrush="{DynamicResource AppAccent}"
                                             BorderThickness="1"
-                                            CornerRadius="{StaticResource Radius.Sm}">
+                                            CornerRadius="{StaticResource Radius.Sm}"
+                                            ToolTip="{DynamicResource Portfolio.NetVal.Tooltip}">
                                             <StackPanel>
                                                 <TextBlock
                                                     FontSize="{StaticResource Font.Size.Xs}"
@@ -548,57 +510,37 @@
                                                     Text="{Binding SelectedPositionRow.MarketValueBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount-approx, Mode=OneWay, FallbackValue=''}"
                                                     Typography.NumeralAlignment="Tabular"
                                                     Visibility="{Binding SelectedPositionRow.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
-                                            </StackPanel>
-                                        </Border>
-
-                                        <!--  Card: 淨值  -->
-                                        <Border
-                                            Grid.Row="4"
-                                            Grid.Column="2"
-                                            Padding="14,12"
-                                            Background="{DynamicResource AppBackground}"
-                                            BorderBrush="{DynamicResource AppBorder}"
-                                            BorderThickness="1"
-                                            CornerRadius="{StaticResource Radius.Sm}"
-                                            ToolTip="{DynamicResource Portfolio.NetVal.Tooltip}">
-                                            <StackPanel>
+                                                <!--  成本 sub 行  -->
                                                 <TextBlock
+                                                    Margin="0,6,0,0"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
                                                     FontSize="{StaticResource Font.Size.Xs}"
                                                     Foreground="{DynamicResource AppTextSecondary}"
-                                                    Text="{DynamicResource Portfolio.NetVal}" />
-                                                <TextBlock
-                                                    Margin="0,4,0,2"
-                                                    FontFamily="{StaticResource Font.Family.Base}"
-                                                    FontSize="{StaticResource Font.Size.Xl}"
-                                                    FontWeight="SemiBold"
-                                                    Foreground="{DynamicResource AppTextPrimary}"
-                                                    Text="{Binding SelectedPositionRow.NetValueAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, FallbackValue=''}"
-                                                    Typography.NumeralAlignment="Tabular" />
-                                                <TextBlock
-                                                    FontFamily="{StaticResource Font.Family.Base}"
-                                                    FontSize="{StaticResource Font.Size.Xs}"
-                                                    Foreground="{DynamicResource AppTextMuted}"
-                                                    Text="{Binding SelectedPositionRow.NetValueBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount-approx, Mode=OneWay, FallbackValue=''}"
-                                                    Typography.NumeralAlignment="Tabular"
-                                                    Visibility="{Binding SelectedPositionRow.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+                                                    Typography.NumeralAlignment="Tabular">
+                                                    <Run Text="{DynamicResource Portfolio.Detail.Cost}" />
+                                                    <Run Text=":" />
+                                                    <Run Text="{Binding SelectedPositionRow.CostAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}" />
+                                                </TextBlock>
+                                                <!--  淨值 sub-muted（賣出後實際可拿，扣手續費/證交稅）  -->
                                                 <TextBlock
                                                     FontFamily="{StaticResource Font.Family.Base}"
                                                     FontSize="{StaticResource Font.Size.Xs}"
                                                     Foreground="{DynamicResource AppTextMuted}"
                                                     Typography.NumeralAlignment="Tabular">
-                                                    <Run Text="{DynamicResource Portfolio.Detail.EstimatedSellFee}" />
+                                                    <Run Text="{DynamicResource Portfolio.NetVal}" />
                                                     <Run Text=":" />
-                                                    <Run Text="{Binding SelectedPositionRow.EstimatedSellFeeAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}" />
+                                                    <Run Text="{Binding SelectedPositionRow.NetValueAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}" />
                                                 </TextBlock>
                                             </StackPanel>
                                         </Border>
 
-                                        <!--  Card: 淨損益試算 + %  -->
+                                        <!--
+                                            Card D (2,2): 總損益 — signed primary + % sub + tooltip 解釋預估賣出費
+                                        -->
                                         <Border
-                                            Grid.Row="6"
-                                            Grid.Column="0"
-                                            Grid.ColumnSpan="3"
-                                            Padding="14,12"
+                                            Grid.Row="2"
+                                            Grid.Column="2"
+                                            Padding="16,14"
                                             Background="{DynamicResource AppBackground}"
                                             BorderBrush="{DynamicResource AppBorder}"
                                             BorderThickness="1"
@@ -650,6 +592,16 @@
                                                     Text="{Binding SelectedPositionRow.PnlBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-approx, Mode=OneWay, FallbackValue=''}"
                                                     Typography.NumeralAlignment="Tabular"
                                                     Visibility="{Binding SelectedPositionRow.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+                                                <!--  預估賣出費/稅 sub-muted（影響淨值 / 損益試算）  -->
+                                                <TextBlock
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Typography.NumeralAlignment="Tabular">
+                                                    <Run Text="{DynamicResource Portfolio.Detail.EstimatedSellFee}" />
+                                                    <Run Text=":" />
+                                                    <Run Text="{Binding SelectedPositionRow.EstimatedSellFeeAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount, Mode=OneWay, FallbackValue=''}" />
+                                                </TextBlock>
                                             </StackPanel>
                                         </Border>
                                     </Grid>

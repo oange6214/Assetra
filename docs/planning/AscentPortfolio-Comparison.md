@@ -172,5 +172,5 @@ User 決定動 → 一個 phase 一個 commit + 這份 MD 標進度。
 | P4.1 | ✅ done | KPI 矩陣 ROI/XIRR × 1Y/3Y/累積；ViewModel inline 計算 + asset detail XAML 4×3 grid |
 | P4.2 | ✅ done | CapitalGain 實作（Sell.RealizedPnl 加總）+ Realized total / 資本利得 兩列改 signed + 依符號染色 |
 | P4.3 | ✅ done | 3/4 子項：#4 幣別 chip（TWD 灰 / USD 紫）、#7 市值 card accent 提升為 primary metric、#8 panel tab 改 pill style（新增 AppPillTab）。#6 CTA dropdown 跳過——既有 3 按鈕已 secondary 風格、Popup 化複雜度與價值不平衡 |
-| P4.4 | ⏳ pending | — |
+| P4.4 | ✅ done | Stats grid 從 2×4（7 張小卡 + 滿版 Pnl）重排為 2×2 thematic：① 持有數量 ② 現價/均價（含 成交均價 sub-sub）③ 市值/成本（primary accent，含 淨值 sub-muted）④ 總損益（% sub + 預估賣出費 muted）。每張 padding 16,14 比原本 14,12 略 bumped。原本各獨立 card 的 cross-currency / day-change / quote-stale 都保留為 sub-row 不丟資訊 |
 | P4.5 | ⏳ pending | — |
