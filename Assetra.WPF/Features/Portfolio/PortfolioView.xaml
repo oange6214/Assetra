@@ -273,8 +273,9 @@
                                 Click="OnQuickAddBtnClick"
                                 DockPanel.Dock="Right"
                                 Style="{StaticResource AppPrimaryButton}"
+                                TextElement.Foreground="{DynamicResource Brush.Text.OnAccent}"
                                 Visibility="{Binding SelectedPositionRow.IsStock, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" TextElement.Foreground="{DynamicResource Brush.Text.OnAccent}">
                                     <ds:AppIcon
                                         Margin="0,0,6,0"
                                         VerticalAlignment="Center"
@@ -284,6 +285,7 @@
                                     <TextBlock
                                         VerticalAlignment="Center"
                                         FontSize="{StaticResource Font.Size.Sm}"
+                                        Foreground="{DynamicResource Brush.Text.OnAccent}"
                                         Text="{DynamicResource Portfolio.Detail.AddRecord}" />
                                 </StackPanel>
                                 <Button.ContextMenu>
