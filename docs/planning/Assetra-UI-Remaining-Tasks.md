@@ -9,7 +9,7 @@
 
 - [x] **T01** — FIRE widget 4 metrics（FIRE 目標 / 預估自由年份 / 完成進度 / 累計投入）
   - 「成功率」 audit 提的需要 Monte Carlo 整合，本輪用 FIRE 目標金額替代
-- [ ] **T02** — Skeleton 擴展剩餘 Summary tier cards（總負債 / 淨資產 mini / 資產組成）
+- [x] **T02** — Skeleton 擴展剩餘 Summary tier cards（總負債 ✅ / 淨資產 mini ✅ / 資產組成 暫不加 — 它是分項列表複雜）
 - [ ] **T03** — Per-type TxForms label margin 4 → 6（Sell/CashDiv/StockDiv/CashFlow/Income/Loan/CreditCard/Transfer 共 8 forms）
 - [ ] **T04** — Keyboard shortcuts help dialog（Ctrl+/）— 列現有快捷鍵
 - [ ] **T05** — Tooltip 系統一致化（AppTooltip style）
@@ -40,3 +40,4 @@
 (每完成一項 append 一行：`✅ Txx — 簡述 (commit hash)`)
 
 ✅ T01 — FIRE widget 4 metrics (FIRE 目標 / 預估自由年份 / 完成進度 / 累計投入)
+✅ T02 — Skeleton 擴展到總負債 + 淨資產 mini cards

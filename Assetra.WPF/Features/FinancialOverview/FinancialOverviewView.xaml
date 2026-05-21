@@ -219,19 +219,25 @@
                                FontWeight="Bold"
                                Foreground="{DynamicResource AppTextMuted}"
                                Text="−" />
-                    <!--  總負債 — P2.14 migrated to AppCardSummary  -->
+                    <!--  總負債 — P2.14 migrated to AppCardSummary，T02 加 skeleton  -->
                     <Border Grid.Column="2" Style="{StaticResource AppCardSummary}">
                         <StackPanel>
                             <TextBlock FontSize="{StaticResource Font.Size.Xs}"
                                        Foreground="{DynamicResource AppTextMuted}"
                                        Text="{DynamicResource FinancialOverview.Header.Liabilities}" />
-                            <TextBlock Margin="0,4,0,0"
-                                       FontFamily="{StaticResource Font.Family.Base}"
-                                       FontSize="{StaticResource Font.Size.Lg}"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppDown}"
-                                       Text="{Binding TotalLiabilitiesDisplay}"
-                                       Typography.NumeralAlignment="Tabular" />
+                            <Grid Margin="0,4,0,0" Height="24">
+                                <Border Width="120" Height="18"
+                                        HorizontalAlignment="Left" VerticalAlignment="Center"
+                                        Style="{StaticResource AppSkeletonRect}"
+                                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <TextBlock FontFamily="{StaticResource Font.Family.Base}"
+                                           FontSize="{StaticResource Font.Size.Lg}"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppDown}"
+                                           Text="{Binding TotalLiabilitiesDisplay}"
+                                           Typography.NumeralAlignment="Tabular"
+                                           Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                            </Grid>
                         </StackPanel>
                     </Border>
                     <!--  = operator  -->
@@ -254,13 +260,19 @@
                             <TextBlock FontSize="{StaticResource Font.Size.Xs}"
                                        Foreground="{DynamicResource AppTextMuted}"
                                        Text="{DynamicResource FinancialOverview.Header.NetWorth}" />
-                            <TextBlock Margin="0,4,0,0"
-                                       FontFamily="{StaticResource Font.Family.Base}"
-                                       FontSize="{StaticResource Font.Size.Lg}"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppAccent}"
-                                       Text="{Binding BalanceSheetNetWorthDisplay}"
-                                       Typography.NumeralAlignment="Tabular" />
+                            <Grid Margin="0,4,0,0" Height="24">
+                                <Border Width="120" Height="18"
+                                        HorizontalAlignment="Left" VerticalAlignment="Center"
+                                        Style="{StaticResource AppSkeletonRect}"
+                                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <TextBlock FontFamily="{StaticResource Font.Family.Base}"
+                                           FontSize="{StaticResource Font.Size.Lg}"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppAccent}"
+                                           Text="{Binding BalanceSheetNetWorthDisplay}"
+                                           Typography.NumeralAlignment="Tabular"
+                                           Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                            </Grid>
                         </StackPanel>
                     </Border>
                 </Grid>
