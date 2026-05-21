@@ -83,7 +83,13 @@ public partial class PortfolioViewModel
         if (row is { IsLoan: true, IsScheduleLoaded: false })
             _ = Loan.LoadLoanScheduleAsync(row);
     }
-    partial void OnSelectedPositionRowChanged(PortfolioRowViewModel? _) => DetailTab = "overview";
+    partial void OnSelectedPositionRowChanged(PortfolioRowViewModel? row)
+    {
+        DetailTab = "overview";
+        // P4.5 — fire chart reload (fire-and-forget; the load handles its own
+        // cancellation so racing selections collapse cleanly).
+        _ = LoadAssetChartAsync();
+    }
 
     // Cash account stats + filtered trades
     public IEnumerable<TradeRowViewModel> SelectedCashTrades =>

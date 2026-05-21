@@ -419,6 +419,16 @@
     <sys:String x:Key="Portfolio.Detail.TotalRealized">總已實現 (股息+價差)</sys:String>
     <sys:String x:Key="Portfolio.Detail.CapitalGain">資本利得</sys:String>
     <sys:String x:Key="Portfolio.Detail.DividendIncome">股息收入</sys:String>
+    <!--  P4.5 Inline 價格圖  -->
+    <sys:String x:Key="Portfolio.Detail.PriceChart.Title">價格走勢</sys:String>
+    <sys:String x:Key="Portfolio.Detail.PriceChart.ModePrice">價格</sys:String>
+    <sys:String x:Key="Portfolio.Detail.PriceChart.ModeMyValue">我的價值</sys:String>
+    <sys:String x:Key="Portfolio.Detail.PriceChart.Period1Mo">1 月</sys:String>
+    <sys:String x:Key="Portfolio.Detail.PriceChart.Period3Mo">3 月</sys:String>
+    <sys:String x:Key="Portfolio.Detail.PriceChart.Period1Y">1 年</sys:String>
+    <sys:String x:Key="Portfolio.Detail.PriceChart.Period2Y">2 年</sys:String>
+    <sys:String x:Key="Portfolio.Detail.PriceChart.Loading">載入中...</sys:String>
+    <sys:String x:Key="Portfolio.Detail.PriceChart.Empty">沒有歷史價格資料</sys:String>
     <!--  P4.1 Asset KPI matrix — ROI / XIRR × 1Y / 3Y / 累積  -->
     <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.Title">報酬指標</sys:String>
     <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.Roi">投報率</sys:String>

@@ -6,6 +6,7 @@
     xmlns:conv="clr-namespace:Assetra.WPF.Infrastructure.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:Assetra.Core.Models;assembly=Assetra.Core"
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
@@ -605,6 +606,130 @@
                                             </StackPanel>
                                         </Border>
                                     </Grid>
+
+                                    <!--
+                                        P4.5 Inline price chart — close-price history line series + period chips
+                                        (1月/3月/1年/2年, 對應 ChartPeriod enum) + price/myvalue 模式 toggle。
+                                        Chart 跟既有 PortfolioHistoryViewModel 同套 LiveCharts；HasAssetChart
+                                        為 false 時整段折疊，避免 quote 還在抓的 row 顯示空 chart。
+                                    -->
+                                    <Border
+                                        Margin="0,16,0,0"
+                                        Background="{DynamicResource AppBackground}"
+                                        BorderBrush="{DynamicResource AppBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource Radius.Sm}">
+                                        <StackPanel>
+                                            <!--  Header + mode toggle (price / myvalue)  -->
+                                            <Border
+                                                Padding="14,10"
+                                                BorderBrush="{DynamicResource AppBorder}"
+                                                BorderThickness="0,0,0,1">
+                                                <DockPanel LastChildFill="True">
+                                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                                        <RadioButton
+                                                            Command="{Binding SetAssetChartModeCommand}"
+                                                            CommandParameter="price"
+                                                            Content="{DynamicResource Portfolio.Detail.PriceChart.ModePrice}"
+                                                            GroupName="AssetChartMode"
+                                                            IsChecked="{Binding IsAssetChartModePrice, Mode=OneWay}"
+                                                            Style="{StaticResource AppPillTab}" />
+                                                        <RadioButton
+                                                            Command="{Binding SetAssetChartModeCommand}"
+                                                            CommandParameter="myvalue"
+                                                            Content="{DynamicResource Portfolio.Detail.PriceChart.ModeMyValue}"
+                                                            GroupName="AssetChartMode"
+                                                            IsChecked="{Binding IsAssetChartModeMyValue, Mode=OneWay}"
+                                                            Style="{StaticResource AppPillTab}" />
+                                                    </StackPanel>
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        FontSize="{StaticResource Font.Size.Sm}"
+                                                        FontWeight="SemiBold"
+                                                        Foreground="{DynamicResource AppTextPrimary}"
+                                                        Text="{DynamicResource Portfolio.Detail.PriceChart.Title}" />
+                                                </DockPanel>
+                                            </Border>
+                                            <!--  Period chips  -->
+                                            <Border Padding="14,8,14,4">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <RadioButton
+                                                        Command="{Binding SetAssetChartPeriodCommand}"
+                                                        CommandParameter="1mo"
+                                                        Content="{DynamicResource Portfolio.Detail.PriceChart.Period1Mo}"
+                                                        GroupName="AssetChartPeriod"
+                                                        IsChecked="{Binding IsAssetChartPeriod1Mo, Mode=OneWay}"
+                                                        Style="{StaticResource AppPillTab}" />
+                                                    <RadioButton
+                                                        Command="{Binding SetAssetChartPeriodCommand}"
+                                                        CommandParameter="3mo"
+                                                        Content="{DynamicResource Portfolio.Detail.PriceChart.Period3Mo}"
+                                                        GroupName="AssetChartPeriod"
+                                                        IsChecked="{Binding IsAssetChartPeriod3Mo, Mode=OneWay}"
+                                                        Style="{StaticResource AppPillTab}" />
+                                                    <RadioButton
+                                                        Command="{Binding SetAssetChartPeriodCommand}"
+                                                        CommandParameter="1y"
+                                                        Content="{DynamicResource Portfolio.Detail.PriceChart.Period1Y}"
+                                                        GroupName="AssetChartPeriod"
+                                                        IsChecked="{Binding IsAssetChartPeriod1Y, Mode=OneWay}"
+                                                        Style="{StaticResource AppPillTab}" />
+                                                    <RadioButton
+                                                        Command="{Binding SetAssetChartPeriodCommand}"
+                                                        CommandParameter="2y"
+                                                        Content="{DynamicResource Portfolio.Detail.PriceChart.Period2Y}"
+                                                        GroupName="AssetChartPeriod"
+                                                        IsChecked="{Binding IsAssetChartPeriod2Y, Mode=OneWay}"
+                                                        Style="{StaticResource AppPillTab}" />
+                                                </StackPanel>
+                                            </Border>
+                                            <!--  Chart canvas + loading / empty states  -->
+                                            <Grid Height="200" Margin="6,0,6,10">
+                                                <lvc:CartesianChart
+                                                    Background="Transparent"
+                                                    Series="{Binding AssetChartSeries}"
+                                                    TooltipPosition="Top"
+                                                    TooltipTextSize="11"
+                                                    Visibility="{Binding HasAssetChart, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                    XAxes="{Binding AssetChartXAxes}"
+                                                    YAxes="{Binding AssetChartYAxes}" />
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Text="{DynamicResource Portfolio.Detail.PriceChart.Loading}"
+                                                    Visibility="{Binding IsAssetChartLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <StackPanel.Style>
+                                                        <Style TargetType="StackPanel">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                            <Style.Triggers>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding HasAssetChart}" Value="False" />
+                                                                        <Condition Binding="{Binding IsAssetChartLoading}" Value="False" />
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                </MultiDataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </StackPanel.Style>
+                                                    <ds:AppIcon
+                                                        HorizontalAlignment="Center"
+                                                        FontSize="22"
+                                                        Foreground="{DynamicResource AppTextMuted}"
+                                                        Symbol="DataTrending24" />
+                                                    <TextBlock
+                                                        Margin="0,8,0,0"
+                                                        HorizontalAlignment="Center"
+                                                        FontSize="{StaticResource Font.Size.Xs}"
+                                                        Foreground="{DynamicResource AppTextMuted}"
+                                                        Text="{DynamicResource Portfolio.Detail.PriceChart.Empty}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
 
                                     <!--  P4.1 Asset KPI matrix — ROI / XIRR × 1Y / 3Y / 累積 (2×3 grid + label row)  -->
                                     <Border
