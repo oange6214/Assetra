@@ -1,0 +1,164 @@
+# Assetra vs AscentPortfolio Asset Detail Panel 對比
+
+對比來源：2026-05-21 user 提供 AscentPortfolio 兩張截圖 + Assetra 現況截圖。
+場景：點 portfolio row 開啟的「資產 detail side panel」(滑出右側面板)。
+
+## TL;DR
+
+AscentPortfolio 在 **資訊深度** + **視覺一致性** 上贏，
+但 Assetra 在 **背後功能完整度**（多幣別、tx 結構、status bar、NavRail IA）贏。
+
+值得借的 8 項中：**前 3 項是真價值**（KPI 表 / 已實現拆解 / inline chart），
+後 5 項是視覺 polish。**從前 3 項開始**。
+
+不要為了模仿改 brand color（紫色 vs Navy/Gold）— 那是品牌決定不是改進方向。
+
+---
+
+## 對比矩陣
+
+### 資訊深度（功能性差距）
+
+| 元素 | AscentPortfolio | Assetra 現況 | gap |
+|------|-----------------|--------------|-----|
+| KPI 矩陣 | 投報率(ROI) + 年化(XIRR) × 1年/3年/累積 = 6 個數字 | ❌ 完全沒 | 🔴 大 |
+| 已實現損益拆解 | 總已實現 + 資本利得 + 股息收入 | ❌ 沒分項 | 🔴 大 |
+| Inline 價格圖 | 5D / 1MO / 6MO / 1Y / 5Y / MAX timeline + 「價格/我的價值」 toggle | ❌ asset 級沒 chart | 🟡 中 |
+| 資產屬性 tags | EQUITY (灰底) + USD (紫底) 並排 chip badges | 🟡 只有單個「股」 badge | 🟢 小 |
+
+### 視覺（風格差距）
+
+| 元素 | AscentPortfolio | Assetra 現況 | gap |
+|------|-----------------|--------------|-----|
+| 主 metrics layout | 2×2 = 4 張大卡（聚焦） | 2×4 = 7 張小卡（密度高失焦） | 🟡 中 |
+| Selected card 強調 | 點選的 card 紫底邊框 = 視覺主角 | 沒 selected state | 🟢 小 |
+| 主 CTA | 單顆「+ 新增紀錄」紫色 primary | 「+ 買入 / 賣出」並排兩顆 | 🟢 小 |
+| Tab style | pill bg (concept + bg colored) | underline tab | 🟢 小 |
+
+### Assetra 已勝出的（不要退化）
+
+| 元素 | Assetra | 別退化 |
+|------|---------|--------|
+| 後端 trade / 多幣別 / FX / cash account 整合度 | ✅ 完整 | 動 panel 不要砍 |
+| NavRail 4 大類資訊架構 | ✅ Wealth Management 級 | 不重排成 flat list |
+| Status bar 三重資訊（市場/同步/P&L） | ✅ 比 AscentPortfolio 強 | 維持 |
+| Brand 色（Navy/Gold） | ✅ 刻意品牌決定 | 不為模仿換紫色 |
+
+---
+
+## 8 個值得借的（按 CP 值排）
+
+### 🔴 1. KPI 矩陣（ROI / XIRR × 1Y / 3Y / 累積）
+**Effort**: 半天-1天
+**為什麼**: 這是 portfolio analytics 的核心數字。「我這檔到底賺多少%」是使用者每次回來看 portfolio 第一個問題。Assetra 現在連看都看不到。
+
+**實作**:
+- Asset-level KPI computed in domain service (從 trade history + close price)
+- Side panel 加一個小 grid (2 rows × 3 cols)
+- Cell color: positive = AppUp, negative = AppDown
+- 「累積」 = 從第一筆 buy 至今的 ROI / IRR
+
+### 🔴 2. 已實現損益 breakdown
+**Effort**: 半天
+**為什麼**: 股息 vs 價差是兩種不同的收益語意，混在「總損益試算」失去資訊。報稅 / 評估投資效率都需要分開看。
+
+**實作**:
+- 「總已實現 = 股息 + 價差」 三行
+- Asset-level realized PnL 服務（從 trade history sum）
+- 已有 Cash Dividend / Stock Dividend trade type → 資料來源齊全
+
+### 🟡 3. Inline 價格圖
+**Effort**: 1-2 天
+**為什麼**: 「最有 wow factor」widget。讓 panel 從「數字 dashboard」升級成「視覺分析」。
+
+**實作**:
+- LiveChartsCore line series (跟 PortfolioHistoryViewModel 同套)
+- Time selector chip (5D / 1MO / 6MO / 1Y / 5Y / MAX)
+- 「價格」(close price history) / 「我的價值」 (market_value = qty × price) toggle
+- 需要：history price API（Stock service）+ asset-level snapshot 整合
+
+### 🟢 4. 多 tag chip（asset class + currency）
+**Effort**: 30 min
+**為什麼**: 純視覺一階升級，工程量 trivial。
+
+**實作**:
+- side panel header 下方加 chip row
+- chip 1: asset class（股 / ETF / 基金 / 加密…）
+- chip 2: currency code（TWD / USD）— 用 currency-specific color
+- 既有 badge 樣式擴充即可
+
+### 🟢 5. 2×2 大卡 layout（從 2×4 收成 4 張）
+**Effort**: 1-2 hr
+**為什麼**: 焦點集中。當前 7 張小卡資訊密度高但「沒主角」。
+
+**實作**:
+- 重排 metrics 成 4 個 thematic：
+  - 現價 / 均價 (含「成交均價」副字)
+  - 持有數量
+  - 市值 / 成本
+  - 總損益（含 % + 絕對值）
+- 每張 card padding bump
+
+### 🟢 6. 主 CTA 集中
+**Effort**: 30 min
+**為什麼**: 一個明確的 primary action 比兩個並排按鈕更易掃描。
+
+**實作**:
+- 「+ 新增紀錄」 single button (primary color)
+- Click → dropdown：「買入 / 賣出 / 現金股利 / 股票股利 / …」
+- 等效於現在已有的 quick add menu，移到 panel 內
+
+### 🟢 7. Selected card 高亮
+**Effort**: 30 min
+**為什麼**: 互動感 + 讓 4 大 metric 之一變成「主視角」。
+
+**實作**:
+- Trigger on click → background = AppAccentSubtle, border = AppAccent
+- 預設選「市值 / 成本」（最常看的 metric）
+
+### 🟢 8. Pill tab style
+**Effort**: 30 min
+**為什麼**: 純視覺風格選擇。Pill 看起來更現代，underline 比較傳統。
+
+**實作**:
+- 修 panel 內 tab style: AppSubTab → 新加 AppPillTab variant
+- Active: filled bg + white text
+- Inactive: transparent bg + secondary text
+
+---
+
+## 不該做的（避免錯方向）
+
+| 項目 | 為什麼別做 |
+|------|------------|
+| 換 primary color 成紫色 | Brand Gold/Navy 已定，跟 mockup 一致；換紫色等於砍掉品牌 identity |
+| NavRail 改 flat | Assetra 4-group hierarchy 是 Wealth Management 思維，比 AscentPortfolio 強 |
+| 砍 status bar | Assetra 三重資訊比 AscentPortfolio 多，是價值點 |
+| 全套抄 AscentPortfolio | 它沒做的東西（多幣別、複委託、跨頁 integration）是 Assetra 的核心優勢 |
+| 把 panel layout 改成 100% AscentPortfolio | 對 7 個 metric 重排成 4 個會丟資訊；應該是「保留 7 個但分主從層次」而不是「砍掉 3 個」 |
+
+---
+
+## 建議執行順序
+
+如果要動工，推薦：
+
+| Phase | 內容 | 累積時間 |
+|-------|------|----------|
+| **P4.1** | #1 KPI 矩陣（ROI / XIRR）— 真正資訊價值 | 半天 |
+| **P4.2** | #2 已實現損益拆解（股息/價差）— 補資訊缺口 | 半天 |
+| **P4.3** | #4 + #7 + #8 + #6 純視覺 polish 一次做完 — 4 個小項 | 半天 |
+| **P4.4** | #5 layout 重排 2×4 → 2×2 視覺主從 | 1-2 hr |
+| **P4.5** | #3 Inline 價格圖（最有 wow but 工程量最大） | 1-2 天 |
+
+**Total**: 約 3-4 天 if 全部做。
+
+**最小可上**: P4.1 + P4.2 = 1 天 = 把 Assetra 從「能用」升到「跟 AscentPortfolio 同級資訊深度」。
+
+---
+
+## 觸發條件
+
+User 決定動 → 一個 phase 一個 commit + 這份 MD 標進度。
+
+不要 proactive 開始，等 user 明確說「動 P4.1」之類才動。
