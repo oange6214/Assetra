@@ -373,6 +373,9 @@ public partial class PortfolioViewModel
         OnPropertyChanged(nameof(SelectedPositionXirr1YIsPositive));
         OnPropertyChanged(nameof(SelectedPositionXirr3YIsPositive));
         OnPropertyChanged(nameof(SelectedPositionXirrCumIsPositive));
+
+        // P4.8 — myvalue mode 重播 trade journal，trade reload 後要刷新 chart。
+        _ = LoadAssetChartAsync();
     }
 
     [RelayCommand]

@@ -16,13 +16,13 @@ namespace Assetra.WPF.Features.Portfolio;
 /// P4.5 partial — asset detail panel 內聯價格圖。
 /// <para>
 /// 透過 <see cref="Assetra.Core.Interfaces.IStockHistoryProvider"/> 抓 close
-/// price OHLCV，繪成 LiveCharts line series。時間視窗對應既有
-/// <see cref="ChartPeriod"/> enum (1月 / 3月 / 1年 / 2年)。可切換顯示模式：
+/// price OHLCV，繪成 LiveCharts line series。可切換顯示模式：
 /// <list type="bullet">
 ///   <item><description><b>price</b>：純 close price 走勢</description></item>
-///   <item><description><b>myvalue</b>：close × <c>SelectedPositionRow.Quantity</c>，
-///     展示「我這部位的市值走勢」。注意：以**當前**持倉數量乘上歷史價，
-///     非歷史持倉重播（為 MVP 簡化；要精準回放需走 trade journal）。</description></item>
+///   <item><description><b>myvalue</b>：每日 close × <b>當天實際持倉</b>（P4.8 走 trade
+///     journal 重播：Buy / StockDividend +qty、Sell −qty），展示「我這部位的
+///     市值走勢」。第一筆 Buy 之前的 OHLCV 點 qty=0 會被濾掉，所以 chart
+///     起點 = 第一次買入日。</description></item>
 /// </list>
 /// </para>
 /// </summary>
@@ -164,10 +164,16 @@ public partial class PortfolioViewModel
             return;
         }
 
-        var multiplier = AssetChartMode == "myvalue" ? row.Quantity : 1m;
-        var points = new List<DateTimePoint>(filtered.Count);
-        foreach (var p in filtered)
-            points.Add(new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)(p.Close * multiplier)));
+        // P4.8 — myvalue 模式走 trade journal 重播得到歷史持倉；price 模式直接 close。
+        var points = AssetChartMode == "myvalue"
+            ? BuildMyValuePoints(filtered, row)
+            : BuildPricePoints(filtered);
+        if (points.Count < 2)
+        {
+            AssetChartSeries = [];
+            HasAssetChart = false;
+            return;
+        }
 
         var accent = GetAssetChartSkColor("AppAccent", "#0078D4");
         var fill = accent.WithAlpha(28);
@@ -210,6 +216,63 @@ public partial class PortfolioViewModel
             }
         ];
         HasAssetChart = true;
+    }
+
+    /// <summary>
+    /// price 模式：直接把每個 OHLCV close 轉成 (date, value) 點。
+    /// </summary>
+    private static List<DateTimePoint> BuildPricePoints(IReadOnlyList<OhlcvPoint> ohlcv)
+    {
+        var points = new List<DateTimePoint>(ohlcv.Count);
+        foreach (var p in ohlcv)
+            points.Add(new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.Close));
+        return points;
+    }
+
+    /// <summary>
+    /// P4.8 myvalue 模式：用 trade journal 重播該標的的歷史持倉，再乘上當天 close。
+    /// <list type="bullet">
+    ///   <item><description>Buy / StockDividend → qty += t.Quantity</description></item>
+    ///   <item><description>Sell → qty -= t.Quantity</description></item>
+    ///   <item><description>CashDividend / 其他 → 不變</description></item>
+    /// </list>
+    /// OHLCV 點 qty=0 時略過（第一筆買入之前，"我的價值" 尚未存在），所以
+    /// chart 起點自然落在第一次持有日。Trade event 與 OHLCV 都已排序，
+    /// 兩 pointer merge 一遍 = O(n+m)。
+    /// </summary>
+    private List<DateTimePoint> BuildMyValuePoints(IReadOnlyList<OhlcvPoint> ohlcv, PortfolioRowViewModel row)
+    {
+        var tradeEvents = Trades
+            .Where(t => string.Equals(t.Symbol, row.Symbol, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(t => t.TradeDate)
+            .Select(t => (
+                Date: DateOnly.FromDateTime(t.TradeDate),
+                DeltaQty: t.Type switch
+                {
+                    TradeType.Buy or TradeType.StockDividend => (decimal)t.Quantity,
+                    TradeType.Sell => -(decimal)t.Quantity,
+                    _ => 0m,
+                }))
+            .Where(e => e.DeltaQty != 0m)
+            .ToList();
+
+        if (tradeEvents.Count == 0) return [];
+
+        var points = new List<DateTimePoint>(ohlcv.Count);
+        decimal currentQty = 0m;
+        int tradeIdx = 0;
+        foreach (var p in ohlcv)
+        {
+            // 套用所有 trade date <= 本日的事件
+            while (tradeIdx < tradeEvents.Count && tradeEvents[tradeIdx].Date <= p.Date)
+            {
+                currentQty += tradeEvents[tradeIdx].DeltaQty;
+                tradeIdx++;
+            }
+            if (currentQty > 0m)
+                points.Add(new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)(p.Close * currentQty)));
+        }
+        return points;
     }
 
     /// <summary>
