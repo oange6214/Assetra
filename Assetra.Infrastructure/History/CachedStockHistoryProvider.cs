@@ -79,10 +79,14 @@ internal sealed class CachedStockHistoryProvider(
     {
         var start = period switch
         {
+            ChartPeriod.FiveDays => today.AddDays(-7),       // 7 日視窗涵蓋週末 → 約 5 個交易日
             ChartPeriod.OneMonth => today.AddMonths(-1),
             ChartPeriod.ThreeMonths => today.AddMonths(-3),
+            ChartPeriod.SixMonths => today.AddMonths(-6),
             ChartPeriod.OneYear => today.AddYears(-1),
             ChartPeriod.TwoYears => today.AddYears(-2),
+            ChartPeriod.FiveYears => today.AddYears(-5),
+            ChartPeriod.Max => today.AddYears(-10),          // 「實質無上限」近似 10Y
             _ => today.AddMonths(-3),
         };
 

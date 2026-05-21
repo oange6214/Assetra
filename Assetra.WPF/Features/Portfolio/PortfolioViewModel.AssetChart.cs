@@ -29,10 +29,14 @@ namespace Assetra.WPF.Features.Portfolio;
 public partial class PortfolioViewModel
 {
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsAssetChartPeriod5D))]
     [NotifyPropertyChangedFor(nameof(IsAssetChartPeriod1Mo))]
     [NotifyPropertyChangedFor(nameof(IsAssetChartPeriod3Mo))]
+    [NotifyPropertyChangedFor(nameof(IsAssetChartPeriod6Mo))]
     [NotifyPropertyChangedFor(nameof(IsAssetChartPeriod1Y))]
     [NotifyPropertyChangedFor(nameof(IsAssetChartPeriod2Y))]
+    [NotifyPropertyChangedFor(nameof(IsAssetChartPeriod5Y))]
+    [NotifyPropertyChangedFor(nameof(IsAssetChartPeriodMax))]
     private string _assetChartPeriod = "3mo";
 
     [ObservableProperty]
@@ -46,10 +50,14 @@ public partial class PortfolioViewModel
     [ObservableProperty] private bool _isAssetChartLoading;
     [ObservableProperty] private bool _hasAssetChart;
 
+    public bool IsAssetChartPeriod5D => AssetChartPeriod == "5d";
     public bool IsAssetChartPeriod1Mo => AssetChartPeriod == "1mo";
     public bool IsAssetChartPeriod3Mo => AssetChartPeriod == "3mo";
+    public bool IsAssetChartPeriod6Mo => AssetChartPeriod == "6mo";
     public bool IsAssetChartPeriod1Y => AssetChartPeriod == "1y";
     public bool IsAssetChartPeriod2Y => AssetChartPeriod == "2y";
+    public bool IsAssetChartPeriod5Y => AssetChartPeriod == "5y";
+    public bool IsAssetChartPeriodMax => AssetChartPeriod == "max";
     public bool IsAssetChartModePrice => AssetChartMode == "price";
     public bool IsAssetChartModeMyValue => AssetChartMode == "myvalue";
 
@@ -124,10 +132,14 @@ public partial class PortfolioViewModel
 
     private static ChartPeriod ToChartPeriod(string period) => period switch
     {
+        "5d" => ChartPeriod.FiveDays,
         "1mo" => ChartPeriod.OneMonth,
         "3mo" => ChartPeriod.ThreeMonths,
+        "6mo" => ChartPeriod.SixMonths,
         "1y" => ChartPeriod.OneYear,
         "2y" => ChartPeriod.TwoYears,
+        "5y" => ChartPeriod.FiveYears,
+        "max" => ChartPeriod.Max,
         _ => ChartPeriod.ThreeMonths,
     };
 
@@ -140,9 +152,21 @@ public partial class PortfolioViewModel
             return;
         }
 
+        // FinMind / Twse 不支援 5D 視窗（最小單位是月）→ provider 退回 1 個月份資料，
+        // 這裡用 client-side filter 砍到最近 7 個日曆日（≈ 5 交易日）讓 chip 標籤誠實。
+        var filtered = AssetChartPeriod == "5d"
+            ? ohlcv.Where(p => p.Date >= DateOnly.FromDateTime(DateTime.Today.AddDays(-7))).ToList()
+            : (IReadOnlyList<OhlcvPoint>)ohlcv;
+        if (filtered.Count < 2)
+        {
+            AssetChartSeries = [];
+            HasAssetChart = false;
+            return;
+        }
+
         var multiplier = AssetChartMode == "myvalue" ? row.Quantity : 1m;
-        var points = new List<DateTimePoint>(ohlcv.Count);
-        foreach (var p in ohlcv)
+        var points = new List<DateTimePoint>(filtered.Count);
+        foreach (var p in filtered)
             points.Add(new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)(p.Close * multiplier)));
 
         var accent = GetAssetChartSkColor("AppAccent", "#0078D4");

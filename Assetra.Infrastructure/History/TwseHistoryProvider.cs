@@ -24,12 +24,20 @@ internal sealed class TwseHistoryProvider : IStockHistoryProvider
         if (_cache.TryGetValue(key, out var cached) && DateTime.UtcNow < cached.Expiry)
             return cached.Data;
 
+        // Twse 走月份分頁 API；5Y / Max 視窗會發 60+ 個 parallel request，
+        // 容易撞 rate limit（公開 API 無 token、有單 IP 上限）。透過上游
+        // CachedStockHistoryProvider 一次性 hydrate 後落地 SQLite cache，
+        // 後續切視窗不會重打外網。
         var months = period switch
         {
+            ChartPeriod.FiveDays => 1,                  // Twse 不支援 5D 視窗，退回 1 個月後用 client filter
             ChartPeriod.OneMonth => 1,
             ChartPeriod.ThreeMonths => 3,
+            ChartPeriod.SixMonths => 6,
             ChartPeriod.OneYear => 12,
             ChartPeriod.TwoYears => 24,
+            ChartPeriod.FiveYears => 60,
+            ChartPeriod.Max => 120,                     // 10 年近似「max」
             _ => 3
         };
 

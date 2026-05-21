@@ -622,9 +622,16 @@
                                                         Text="{DynamicResource Portfolio.Detail.PriceChart.Title}" />
                                                 </DockPanel>
                                             </Border>
-                                            <!--  Period chips  -->
+                                            <!--  Period chips — P4.7 加入 5D / 6M / 5Y / MAX 對齊 AscentPortfolio  -->
                                             <Border Padding="14,8,14,4">
                                                 <StackPanel Orientation="Horizontal">
+                                                    <RadioButton
+                                                        Command="{Binding SetAssetChartPeriodCommand}"
+                                                        CommandParameter="5d"
+                                                        Content="{DynamicResource Portfolio.Detail.PriceChart.Period5D}"
+                                                        GroupName="AssetChartPeriod"
+                                                        IsChecked="{Binding IsAssetChartPeriod5D, Mode=OneWay}"
+                                                        Style="{StaticResource AppPillTab}" />
                                                     <RadioButton
                                                         Command="{Binding SetAssetChartPeriodCommand}"
                                                         CommandParameter="1mo"
@@ -641,6 +648,13 @@
                                                         Style="{StaticResource AppPillTab}" />
                                                     <RadioButton
                                                         Command="{Binding SetAssetChartPeriodCommand}"
+                                                        CommandParameter="6mo"
+                                                        Content="{DynamicResource Portfolio.Detail.PriceChart.Period6Mo}"
+                                                        GroupName="AssetChartPeriod"
+                                                        IsChecked="{Binding IsAssetChartPeriod6Mo, Mode=OneWay}"
+                                                        Style="{StaticResource AppPillTab}" />
+                                                    <RadioButton
+                                                        Command="{Binding SetAssetChartPeriodCommand}"
                                                         CommandParameter="1y"
                                                         Content="{DynamicResource Portfolio.Detail.PriceChart.Period1Y}"
                                                         GroupName="AssetChartPeriod"
@@ -648,10 +662,17 @@
                                                         Style="{StaticResource AppPillTab}" />
                                                     <RadioButton
                                                         Command="{Binding SetAssetChartPeriodCommand}"
-                                                        CommandParameter="2y"
-                                                        Content="{DynamicResource Portfolio.Detail.PriceChart.Period2Y}"
+                                                        CommandParameter="5y"
+                                                        Content="{DynamicResource Portfolio.Detail.PriceChart.Period5Y}"
                                                         GroupName="AssetChartPeriod"
-                                                        IsChecked="{Binding IsAssetChartPeriod2Y, Mode=OneWay}"
+                                                        IsChecked="{Binding IsAssetChartPeriod5Y, Mode=OneWay}"
+                                                        Style="{StaticResource AppPillTab}" />
+                                                    <RadioButton
+                                                        Command="{Binding SetAssetChartPeriodCommand}"
+                                                        CommandParameter="max"
+                                                        Content="{DynamicResource Portfolio.Detail.PriceChart.PeriodMax}"
+                                                        GroupName="AssetChartPeriod"
+                                                        IsChecked="{Binding IsAssetChartPeriodMax, Mode=OneWay}"
                                                         Style="{StaticResource AppPillTab}" />
                                                 </StackPanel>
                                             </Border>

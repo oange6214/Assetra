@@ -37,12 +37,19 @@ internal sealed class FinMindHistoryProvider : IStockHistoryProvider
             // Token is managed by FinMindService; use empty string for anonymous access
             // until WPF wires a token source via FinMindService.UpdateToken().
             var token = string.Empty;
+            // FinMind free tier 有每小時 50 次 request 上限；5Y / Max 視窗
+            // 透過 CachedStockHistoryProvider 一次性帶回後即落地 SQLite cache，
+            // 切視窗不會重打外網。
             var months = period switch
             {
+                ChartPeriod.FiveDays => 1,                  // FinMind 不支援 5D 視窗，退回 1 個月後用 client filter
                 ChartPeriod.OneMonth => 1,
                 ChartPeriod.ThreeMonths => 3,
+                ChartPeriod.SixMonths => 6,
                 ChartPeriod.OneYear => 12,
                 ChartPeriod.TwoYears => 24,
+                ChartPeriod.FiveYears => 60,
+                ChartPeriod.Max => 120,                     // 10 年近似「max」
                 _ => 3
             };
             var startDate = DateTime.Today.AddMonths(-months).ToString("yyyy-MM-dd");

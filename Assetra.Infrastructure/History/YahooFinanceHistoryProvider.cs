@@ -43,10 +43,14 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
             var yahooSymbol = YahooSymbolMapper.ToYahooSymbol(symbol, exchange);
             var range = period switch
             {
+                ChartPeriod.FiveDays => "5d",
                 ChartPeriod.OneMonth => "1mo",
                 ChartPeriod.ThreeMonths => "3mo",
+                ChartPeriod.SixMonths => "6mo",
                 ChartPeriod.OneYear => "1y",
                 ChartPeriod.TwoYears => "2y",
+                ChartPeriod.FiveYears => "5y",
+                ChartPeriod.Max => "max",
                 _ => "3mo"
             };
             var url = $"https://query1.finance.yahoo.com/v8/finance/chart/{yahooSymbol}?interval=1d&range={range}";
