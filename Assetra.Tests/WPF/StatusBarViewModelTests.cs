@@ -14,9 +14,19 @@ public class StatusBarViewModelTests
     public void Constructor_InitializesClockText()
     {
         var vm = CreateVm();
-        // ClockText should be in HH:mm:ss format (non-empty)
+        // ClockText is populated synchronously in the constructor (see
+        // StatusBarViewModel.UpdateStatus). Format is "yyyy-MM-dd HH:mm:ss"
+        // — multi-device awareness needs the date so a wrong-timezone client
+        // is visible at a glance. Verify the value parses back to a DateTime
+        // close to "now" rather than hard-coding the literal format length,
+        // so future format tweaks don't break the test.
         Assert.NotEmpty(vm.ClockText);
-        Assert.Equal(8, vm.ClockText.Length); // "HH:mm:ss" is 8 chars
+        Assert.True(
+            DateTime.TryParse(vm.ClockText, out var parsed),
+            $"ClockText '{vm.ClockText}' should parse as a DateTime.");
+        Assert.True(
+            Math.Abs((DateTime.Now - parsed).TotalSeconds) < 5,
+            $"ClockText '{vm.ClockText}' should be within 5s of DateTime.Now.");
     }
 
     [Fact]

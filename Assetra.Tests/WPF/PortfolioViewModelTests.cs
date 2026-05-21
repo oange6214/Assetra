@@ -816,10 +816,12 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
-    public async Task EditTrade_LoanRepay_MetaOnlyEdit_DoesNotChangeBalance()
+    public async Task EditTrade_LoanRepay_ChangingPrincipalAppliesViaImplicitRevision()
     {
-        // Edit mode in the TxDialog is metadata-only (date / note). Opening edit on an
-        // existing LoanRepay must not mutate the principal or the liability balance.
+        // Source-of-truth pass (commit 6836323): LoanRepay is non-meta-only, so editing the
+        // principal in the dialog promotes ConfirmTx to implicit revision. The projection
+        // re-derives the liability balance from the new principal (delete-old + create-new):
+        //   2_000_000 (original) - 50_000 (revised principal) = 1_950_000.
         var (vm, liabRepo, _, _) = await CreateVmWithLiabilityAsync(
             initialBalance: 2_000_000m, original: 2_000_000m);
 
@@ -829,13 +831,15 @@ public class PortfolioViewModelTests
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
         Assert.Equal(1_974_021m, vm.Liabilities[0].Balance);
 
-        // Open edit mode and attempt to change the principal — must have no effect on balance.
+        // Open edit mode and change the principal — applies via implicit revision.
         var trade = vm.Trades.First(t => t.IsLoanRepay);
         vm.Transaction.EditTradeCommand.Execute(trade);
+        Assert.True(vm.Transaction.AreEconomicFieldsEditable);
+        Assert.False(vm.Transaction.IsEditingMetaOnly);
         vm.Transaction.Loan.Principal = "50000";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        Assert.Equal(1_974_021m, vm.Liabilities[0].Balance);
+        Assert.Equal(1_950_000m, vm.Liabilities[0].Balance);
     }
 
     // Add liability (simplified): name only, zero balance
@@ -1379,15 +1383,15 @@ public class PortfolioViewModelTests
     // Plan B: full Buy/Sell/StockDividend edit
 
     /// <summary>
-    /// Validation-first refactor guard: a cash-flow edit whose new amount is invalid
-    /// must leave the original trade (and its cash-account effect) intact. Before the
-    /// refactor, old trade was deleted before the new one was validated → lost data.
+    /// Source-of-truth pass (commit 6836323): cash-flow edits are no longer meta-only.
+    /// Changing TxAmount in edit mode promotes to implicit revision (delete-old +
+    /// create-new under the hood), so the new amount projects into the balance and the
+    /// original trade Id is replaced. This guards the "trades are foundational raw data"
+    /// model: edit a row, the projection reconciles.
     /// </summary>
     [Fact]
-    public async Task EditTrade_MetaOnly_BalanceAndRecordPreserved()
+    public async Task EditTrade_Income_ChangingAmountAppliesViaImplicitRevision()
     {
-        // Edit mode is metadata-only (date / note). Changing TxAmount while in edit mode
-        // must not affect the cash balance or remove the original trade record.
         var (vm, cashRepo, tradeRepo) = await CreateVmWithCashAsync(0m);
         vm.AddAssetDialog.AddAssetType = "cash";
         vm.AddAssetDialog.AddAccountName = "現金";
@@ -1400,14 +1404,18 @@ public class PortfolioViewModelTests
         Assert.Equal(10_000m, vm.CashAccounts[0].Balance);
         var originalTrade = vm.Trades.Single(t => t.IsIncome);
 
-        // Open edit mode; TxAmount change must have no effect (metadata-only edit).
+        // Open edit mode; Income is non-meta-only, so economic fields are live and ConfirmTx
+        // promotes the save to implicit revision.
         vm.Transaction.EditTradeCommand.Execute(originalTrade);
+        Assert.True(vm.Transaction.AreEconomicFieldsEditable);
+        Assert.False(vm.Transaction.IsEditingMetaOnly);
         vm.Transaction.TxAmount = "99999";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
 
-        // Balance and original trade must be unchanged.
-        Assert.Equal(10_000m, vm.CashAccounts[0].Balance);
-        Assert.Contains(vm.Trades, t => t.Id == originalTrade.Id);
+        // Balance reflects the new amount; original trade Id is replaced by the revision.
+        Assert.Equal(99_999m, vm.CashAccounts[0].Balance);
+        Assert.DoesNotContain(vm.Trades, t => t.Id == originalTrade.Id);
+        Assert.Single(vm.Trades.Where(t => t.IsIncome));
     }
 
     [Fact]
@@ -1601,10 +1609,12 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
-    public async Task EditTrade_BuyWithLink_DialogOpensInSafeEditMode()
+    public async Task EditTrade_BuyWithLink_DialogOpensWithEditableEconomicFields()
     {
-        // Fresh Buy trades now open in safe edit mode: core fields are summarized
-        // and locked, while users can branch into Create Revision for full changes.
+        // Source-of-truth pass (commit 6836323): Buy is no longer meta-only. Clicking edit
+        // opens the dialog with the normal form fields live and pre-filled — ConfirmTx
+        // promotes the save to implicit revision (delete-old + create-new). The explicit
+        // 修訂 button is reserved for users who want to keep both records.
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(0m);
         var entryId = Guid.NewGuid();
         await tradeRepo.AddAsync(new Trade(
@@ -1620,9 +1630,10 @@ public class PortfolioViewModelTests
 
         Assert.Equal("buy", vm.Transaction.TxType);
         Assert.True(vm.Transaction.IsEditMode);
-        Assert.False(vm.Transaction.AreEconomicFieldsEditable);
-        Assert.True(vm.Transaction.ShowEditLockedSummary);
-        // Pre-fill still lands in the Add* properties so Create Revision can reuse them.
+        Assert.False(vm.Transaction.IsEditingMetaOnly);
+        Assert.True(vm.Transaction.AreEconomicFieldsEditable);
+        Assert.False(vm.Transaction.ShowEditLockedSummary);
+        // Economic fields are live and pre-filled from the existing trade.
         Assert.Equal("00982A", vm.AddAssetDialog.AddSymbol);
         Assert.Equal("18.0400", vm.AddAssetDialog.AddPrice);
         Assert.Equal("5000", vm.AddAssetDialog.AddQuantity);
@@ -1962,10 +1973,12 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
-    public async Task EditTrade_LegacyBuyWithoutLink_FallsBackToMetaOnly()
+    public async Task EditTrade_LegacyBuyWithoutLink_OpensWithEditableEconomicFields()
     {
-        // Legacy Buy trades (no PortfolioEntryId) degrade to meta-only edit so we don't
-        // accidentally orphan a lot we can't identify.
+        // Source-of-truth pass (commit 6836323): legacy Buy trades (no PortfolioEntryId
+        // from imports / older versions) are no longer meta-only. Cost basis re-projects
+        // from the journal on next reload, so a direct edit is safe — ConfirmTx promotes
+        // to implicit revision and the PortfolioEntry is rebuilt from the new Buy.
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(0m);
         await tradeRepo.AddAsync(new Trade(
             Id: Guid.NewGuid(), Symbol: "2330", Exchange: "TWSE", Name: "TSMC",
@@ -1978,8 +1991,8 @@ public class PortfolioViewModelTests
         var buyRow = vm.Trades.First(t => t.Type == TradeType.Buy);
         vm.Transaction.EditTradeCommand.Execute(buyRow);
 
-        Assert.True(vm.Transaction.IsEditingMetaOnly);
-        Assert.False(vm.Transaction.AreEconomicFieldsEditable);
+        Assert.False(vm.Transaction.IsEditingMetaOnly);
+        Assert.True(vm.Transaction.AreEconomicFieldsEditable);
     }
 
     // Simplified loan UX: full amount to Balance + cash account

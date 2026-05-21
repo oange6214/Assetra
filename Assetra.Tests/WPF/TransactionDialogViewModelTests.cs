@@ -263,13 +263,18 @@ public class TransactionDialogViewModelTests
     [Fact]
     public void IsEditMode_FollowsEditingTradeId()
     {
+        // Source-of-truth pass (commit 6836323): AreEconomicFieldsEditable now follows
+        // IsEditingMetaOnly, not just IsEditMode. With a Guid not backed by an actual
+        // TradeRowViewModel in the Trades collection, IsEditingMetaOnly is false (no
+        // matching row to classify), so economic fields stay editable. The meta-only
+        // lockdown lives in EditTrade_*-named integration tests that prime real rows.
         var vm = CreateVm();
         Assert.False(vm.IsEditMode);
         Assert.True(vm.AreEconomicFieldsEditable);
 
         vm.EditingTradeId = Guid.NewGuid();
         Assert.True(vm.IsEditMode);
-        Assert.False(vm.AreEconomicFieldsEditable);
+        Assert.True(vm.AreEconomicFieldsEditable);
 
         vm.EditingTradeId = null;
         Assert.False(vm.IsEditMode);
