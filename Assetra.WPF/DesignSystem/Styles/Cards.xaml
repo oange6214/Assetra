@@ -14,10 +14,15 @@
 
     <!--
         P3.6 — FormCard 對齊 P3.1 baseline。原本 BorderBrush=AppBorder + Radius.Lg
-        + 無 shadow，跟新的 AppCardSummary (BorderLight + Radius.2Xl + Shadow.Card)
-        並排時邊框粗細不齊、圓角大小不一造成「card 不一致」視覺破綻。
-        現在 FormCard 跟 AppCardSummary 視覺完全等價 — 70+ 使用點自動同步升級，
-        所有頁面 page-level cards 看起來像同一家公司做的。
+        + 無 shadow，跟新的 AppCardSummary (BorderLight + Radius.2Xl) 並排時邊框
+        粗細不齊、圓角大小不一造成「card 不一致」視覺破綻。
+        現在 FormCard 跟 AppCardSummary 視覺完全等價 — 70+ 使用點自動同步升級。
+
+        P3.7 — Shadow.Card 拿掉。CSS `box-shadow: 0 14px 36px` 在 mockup HTML
+        是 spread+falloff 自然浮起感，但 WPF DropShadowEffect 在 14px ShadowDepth
+        會渲染成 card 下方一條明顯「色塊」帶狀 — 視覺很詭異。
+        改用 border-only 區隔卡片即可（mockup「calm + minimal」設計感本來就靠
+        border + bg contrast 而非 shadow）。
     -->
     <Style x:Key="FormCard" TargetType="Border">
         <Setter Property="Padding" Value="20" />
@@ -25,7 +30,6 @@
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{StaticResource Radius.2Xl}" />
-        <Setter Property="Effect" Value="{StaticResource Shadow.Card}" />
     </Style>
 
     <Style x:Key="FormSectionTitle" TargetType="TextBlock">
@@ -58,10 +62,13 @@
 
     <!--
         P3.1 — 三層 AppCard* 全部對齊 mockup HTML 的 "Wealth Platform"
-        baseline：radius=18 (Radius.2Xl) + shadow=Shadow.Card (14/36/.06)
-        + 統一 padding 20。Hero / Summary / Subtle 差異現在只在 Padding +
-        Margin（hierarchy 用 padding 大小 + margin 區隔），其餘視覺一致 —
-        所有頁面看起來像同家公司做的核心 token。
+        baseline：radius=18 (Radius.2Xl) + 統一 padding 20。Hero / Summary /
+        Subtle 差異現在只在 Padding + Margin（hierarchy 用 padding 大小 + margin
+        區隔），其餘視覺一致 — 所有頁面看起來像同家公司做的核心 token。
+
+        P3.7 — Shadow.Card 拿掉（CSS box-shadow → WPF DropShadowEffect
+        渲染成下方「色塊」帶狀很詭異）。Calm + Minimal 設計感靠 border + bg
+        contrast 區分卡片就足夠，符合 mockup「Wealth Platform」 sophisticated 風格。
     -->
     <Style x:Key="AppCardHero" TargetType="Border">
         <Setter Property="Padding" Value="20" />
@@ -70,7 +77,6 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{StaticResource Radius.2Xl}" />
         <Setter Property="Margin" Value="0,0,0,16" />
-        <Setter Property="Effect" Value="{StaticResource Shadow.Card}" />
     </Style>
 
     <Style x:Key="AppCardSummary" TargetType="Border">
@@ -79,7 +85,6 @@
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{StaticResource Radius.2Xl}" />
-        <Setter Property="Effect" Value="{StaticResource Shadow.Card}" />
     </Style>
 
     <Style x:Key="AppCardSubtle" TargetType="Border">
@@ -89,7 +94,6 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{StaticResource Radius.2Xl}" />
         <Setter Property="Margin" Value="0,0,0,16" />
-        <Setter Property="Effect" Value="{StaticResource Shadow.Card}" />
     </Style>
 
     <Style x:Key="AppCardHeader" TargetType="TextBlock">
