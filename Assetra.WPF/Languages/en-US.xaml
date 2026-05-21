@@ -181,6 +181,7 @@
     <sys:String x:Key="Portfolio.Detail.Action.Buy">Buy</sys:String>
     <sys:String x:Key="Portfolio.Detail.Action.Sell">Sell</sys:String>
     <sys:String x:Key="Portfolio.Detail.Action.Dividend">Dividend</sys:String>
+    <sys:String x:Key="Portfolio.Detail.AddRecord">Add record</sys:String>
     <sys:String x:Key="Portfolio.Detail.Action.Edit">Edit</sys:String>
     <sys:String x:Key="Portfolio.NetVal.Tooltip">Net Value = Market Value − est. sell commission − securities tax&#x0a;Tax rate by asset: ETF 0.1% / Stock 0.3%&#x0a;Represents the actual cash received if sold at current price.</sys:String>
     <sys:String x:Key="Portfolio.Cancel">Cancel</sys:String>

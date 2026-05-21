@@ -1,4 +1,6 @@
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace Assetra.WPF.Features.Portfolio;
@@ -9,6 +11,19 @@ public partial class PortfolioView : UserControl
     {
         InitializeComponent();
         PreviewKeyDown += OnPreviewKeyDown;
+    }
+
+    /// <summary>
+    /// P4.6 #6 — open the QuickAdd ContextMenu programmatically when the
+    /// primary "+ 新增交易" button is clicked. ContextMenu auto-closes on item
+    /// click / outside click, so no further state management needed.
+    /// </summary>
+    private void OnQuickAddBtnClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || btn.ContextMenu is null) return;
+        btn.ContextMenu.PlacementTarget = btn;
+        btn.ContextMenu.Placement = PlacementMode.Bottom;
+        btn.ContextMenu.IsOpen = true;
     }
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
