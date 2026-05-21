@@ -1277,8 +1277,57 @@
                                     </StackPanel>
                                 </StackPanel>
 
+                                <!--
+                                    Cash trades tab — P4.9b 對齊 Position panel table-style：4 欄
+                                    (日期 / 類型 / 價值 / Edit)。Cash trade 沒有 Qty / Price 欄。
+                                    Note 不為空時當 row ToolTip。
+                                -->
                                 <Grid Margin="16,12" Visibility="{Binding IsDetailTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <!--  Column header  -->
+                                    <Border
+                                        Grid.Row="0"
+                                        Padding="0,0,0,8"
+                                        BorderBrush="{DynamicResource AppBorder}"
+                                        BorderThickness="0,0,0,1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="92" />
+                                                <ColumnDefinition Width="80" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="36" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock
+                                                Grid.Column="0"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.TradeHistory.Date}" />
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.TradeHistory.Type}" />
+                                            <TextBlock
+                                                Grid.Column="2"
+                                                HorizontalAlignment="Right"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
+                                            <TextBlock
+                                                Grid.Column="3"
+                                                HorizontalAlignment="Right"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.TradeHistory.Note}" />
+                                        </Grid>
+                                    </Border>
+
                                     <TextBlock
+                                        Grid.Row="1"
                                         Margin="0,24,0,0"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Top"
@@ -1296,84 +1345,87 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                    <ItemsControl ItemsSource="{Binding SelectedCashTrades}">
+
+                                    <ItemsControl Grid.Row="1" ItemsSource="{Binding SelectedCashTrades}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Border
-                                                    Margin="0,0,0,10"
-                                                    Padding="12"
-                                                    Style="{StaticResource FormCard}">
-                                                    <StackPanel>
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="Auto" />
-                                                                <ColumnDefinition Width="*" />
-                                                                <ColumnDefinition Width="Auto" />
-                                                            </Grid.ColumnDefinitions>
-                                                            <TextBlock
-                                                                Grid.Column="0"
-                                                                VerticalAlignment="Center"
-                                                                FontFamily="{StaticResource Font.Family.Base}"
-                                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                                Foreground="{DynamicResource AppTextSecondary}"
-                                                                Text="{Binding TradeDateLocal, StringFormat=yyyy/MM/dd}"
-                                                                Typography.NumeralAlignment="Tabular" />
-                                                            <Border
-                                                                Grid.Column="1"
-                                                                Margin="10,0,0,0"
-                                                                Padding="6,2"
-                                                                HorizontalAlignment="Left"
-                                                                VerticalAlignment="Center"
-                                                                Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
-                                                                CornerRadius="{StaticResource Radius.Sm}">
-                                                                <TextBlock
-                                                                    FontSize="{StaticResource Font.Size.Xs}"
-                                                                    FontWeight="SemiBold"
-                                                                    Foreground="{DynamicResource AppTextOnAccent}"
-                                                                    Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
-                                                            </Border>
-                                                            <Button
-                                                                Grid.Column="2"
-                                                                Width="32"
-                                                                Height="32"
-                                                                Padding="0"
-                                                                HorizontalAlignment="Right"
-                                                                VerticalAlignment="Center"
-                                                                Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                                CommandParameter="{Binding}"
-                                                                Style="{StaticResource AppIconButton}"
-                                                                ToolTip="{DynamicResource Common.Edit}">
-                                                                <ds:AppIcon
-                                                                    FontSize="11"
-                                                                    Foreground="{DynamicResource AppTextMuted}"
-                                                                    Symbol="Edit24" />
-                                                            </Button>
-                                                        </Grid>
-
-                                                        <WrapPanel Margin="0,8,0,0">
-                                                            <StackPanel MinWidth="160" Margin="0,0,20,4">
-                                                                <TextBlock
-                                                                    FontSize="{StaticResource Font.Size.Xs}"
-                                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                                    Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
-                                                                <TextBlock
-                                                                    Margin="0,2,0,0"
-                                                                    FontFamily="{StaticResource Font.Family.Base}"
-                                                                    FontSize="{StaticResource Font.Size.Sm}"
-                                                                    FontWeight="SemiBold"
-                                                                    Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}"
-                                                                    Typography.NumeralAlignment="Tabular" />
-                                                            </StackPanel>
-                                                        </WrapPanel>
-
+                                                    Padding="0,10"
+                                                    BorderBrush="{DynamicResource AppBorderLight}"
+                                                    BorderThickness="0,0,0,1"
+                                                    ToolTip="{Binding Note}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="92" />
+                                                            <ColumnDefinition Width="80" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="36" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <!--  日期  -->
                                                         <TextBlock
-                                                            Margin="0,2,0,0"
-                                                            FontSize="{StaticResource Font.Size.Xs}"
-                                                            Foreground="{DynamicResource AppTextMuted}"
-                                                            Text="{Binding Note}"
-                                                            TextWrapping="Wrap"
-                                                            Visibility="{Binding Note, Converter={StaticResource StringToVisibilityConverter}}" />
-                                                    </StackPanel>
+                                                            Grid.Column="0"
+                                                            VerticalAlignment="Center"
+                                                            FontFamily="{StaticResource Font.Family.Base}"
+                                                            FontSize="{StaticResource Font.Size.Sm}"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding TradeDateLocal, StringFormat=yyyy-MM-dd}"
+                                                            Typography.NumeralAlignment="Tabular" />
+                                                        <!--  類型 badge  -->
+                                                        <Border
+                                                            Grid.Column="1"
+                                                            Padding="6,2"
+                                                            HorizontalAlignment="Left"
+                                                            VerticalAlignment="Center"
+                                                            Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
+                                                            CornerRadius="{StaticResource Radius.Sm}">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextOnAccent}"
+                                                                Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
+                                                        </Border>
+                                                        <!--  價值 (TotalAmount 已含 sign)  -->
+                                                        <TextBlock
+                                                            Grid.Column="2"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center"
+                                                            FontFamily="{StaticResource Font.Family.Base}"
+                                                            FontSize="{StaticResource Font.Size.Sm}"
+                                                            FontWeight="SemiBold"
+                                                            Text="{Binding TotalAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}"
+                                                            Typography.NumeralAlignment="Tabular">
+                                                            <TextBlock.Style>
+                                                                <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsAmountPositive}" Value="True">
+                                                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding TotalAmount}" Value="0">
+                                                                            <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <!--  Edit btn  -->
+                                                        <Button
+                                                            Grid.Column="3"
+                                                            Width="28"
+                                                            Height="28"
+                                                            Padding="0"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center"
+                                                            Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource AppIconButton}"
+                                                            ToolTip="{DynamicResource Common.Edit}">
+                                                            <ds:AppIcon
+                                                                FontSize="11"
+                                                                Foreground="{DynamicResource AppTextMuted}"
+                                                                Symbol="Edit24" />
+                                                        </Button>
+                                                    </Grid>
                                                 </Border>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
@@ -1639,8 +1691,57 @@
                                     </StackPanel>
                                 </StackPanel>
 
+                                <!--
+                                    Liability trades tab — P4.9b 對齊 Position / Cash table-style：
+                                    4 欄 (日期 / 類型 / 價值 / Edit)。沿用 CashAmount + signed-dash
+                                    保留既有顯示語意（不換成 TotalAmount，避免 sign 變動需逐筆驗證）。
+                                -->
                                 <Grid Margin="16,12" Visibility="{Binding IsDetailTradesTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <!--  Column header  -->
+                                    <Border
+                                        Grid.Row="0"
+                                        Padding="0,0,0,8"
+                                        BorderBrush="{DynamicResource AppBorder}"
+                                        BorderThickness="0,0,0,1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="92" />
+                                                <ColumnDefinition Width="80" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="36" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock
+                                                Grid.Column="0"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.TradeHistory.Date}" />
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.TradeHistory.Type}" />
+                                            <TextBlock
+                                                Grid.Column="2"
+                                                HorizontalAlignment="Right"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
+                                            <TextBlock
+                                                Grid.Column="3"
+                                                HorizontalAlignment="Right"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{DynamicResource Portfolio.TradeHistory.Note}" />
+                                        </Grid>
+                                    </Border>
+
                                     <TextBlock
+                                        Grid.Row="1"
                                         Margin="0,24,0,0"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Top"
@@ -1658,84 +1759,74 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                    <ItemsControl ItemsSource="{Binding SelectedLiabilityTrades}">
+
+                                    <ItemsControl Grid.Row="1" ItemsSource="{Binding SelectedLiabilityTrades}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Border
-                                                    Margin="0,0,0,10"
-                                                    Padding="12"
-                                                    Style="{StaticResource FormCard}">
-                                                    <StackPanel>
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="Auto" />
-                                                                <ColumnDefinition Width="*" />
-                                                                <ColumnDefinition Width="Auto" />
-                                                            </Grid.ColumnDefinitions>
-                                                            <TextBlock
-                                                                Grid.Column="0"
-                                                                VerticalAlignment="Center"
-                                                                FontFamily="{StaticResource Font.Family.Base}"
-                                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                                Foreground="{DynamicResource AppTextSecondary}"
-                                                                Text="{Binding TradeDateLocal, StringFormat=yyyy/MM/dd}"
-                                                                Typography.NumeralAlignment="Tabular" />
-                                                            <Border
-                                                                Grid.Column="1"
-                                                                Margin="10,0,0,0"
-                                                                Padding="6,2"
-                                                                HorizontalAlignment="Left"
-                                                                VerticalAlignment="Center"
-                                                                Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
-                                                                CornerRadius="{StaticResource Radius.Sm}">
-                                                                <TextBlock
-                                                                    FontSize="{StaticResource Font.Size.Xs}"
-                                                                    FontWeight="SemiBold"
-                                                                    Foreground="{DynamicResource AppTextOnAccent}"
-                                                                    Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
-                                                            </Border>
-                                                            <Button
-                                                                Grid.Column="2"
-                                                                Width="32"
-                                                                Height="32"
-                                                                Padding="0"
-                                                                HorizontalAlignment="Right"
-                                                                VerticalAlignment="Center"
-                                                                Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                                CommandParameter="{Binding}"
-                                                                Style="{StaticResource AppIconButton}"
-                                                                ToolTip="{DynamicResource Common.Edit}">
-                                                                <ds:AppIcon
-                                                                    FontSize="11"
-                                                                    Foreground="{DynamicResource AppTextMuted}"
-                                                                    Symbol="Edit24" />
-                                                            </Button>
-                                                        </Grid>
-
-                                                        <WrapPanel Margin="0,8,0,0">
-                                                            <StackPanel MinWidth="160" Margin="0,0,20,4">
-                                                                <TextBlock
-                                                                    FontSize="{StaticResource Font.Size.Xs}"
-                                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                                    Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
-                                                                <TextBlock
-                                                                    Margin="0,2,0,0"
-                                                                    FontFamily="{StaticResource Font.Family.Base}"
-                                                                    FontSize="{StaticResource Font.Size.Sm}"
-                                                                    FontWeight="SemiBold"
-                                                                    Text="{Binding CashAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}"
-                                                                    Typography.NumeralAlignment="Tabular" />
-                                                            </StackPanel>
-                                                        </WrapPanel>
-
+                                                    Padding="0,10"
+                                                    BorderBrush="{DynamicResource AppBorderLight}"
+                                                    BorderThickness="0,0,0,1"
+                                                    ToolTip="{Binding Note}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="92" />
+                                                            <ColumnDefinition Width="80" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="36" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <!--  日期  -->
                                                         <TextBlock
-                                                            Margin="0,2,0,0"
-                                                            FontSize="{StaticResource Font.Size.Xs}"
-                                                            Foreground="{DynamicResource AppTextMuted}"
-                                                            Text="{Binding Note}"
-                                                            TextWrapping="Wrap"
-                                                            Visibility="{Binding Note, Converter={StaticResource StringToVisibilityConverter}}" />
-                                                    </StackPanel>
+                                                            Grid.Column="0"
+                                                            VerticalAlignment="Center"
+                                                            FontFamily="{StaticResource Font.Family.Base}"
+                                                            FontSize="{StaticResource Font.Size.Sm}"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding TradeDateLocal, StringFormat=yyyy-MM-dd}"
+                                                            Typography.NumeralAlignment="Tabular" />
+                                                        <!--  類型 badge  -->
+                                                        <Border
+                                                            Grid.Column="1"
+                                                            Padding="6,2"
+                                                            HorizontalAlignment="Left"
+                                                            VerticalAlignment="Center"
+                                                            Background="{Binding TypeBadgeColor, Converter={StaticResource HexToBrushConverter}}"
+                                                            CornerRadius="{StaticResource Radius.Sm}">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextOnAccent}"
+                                                                Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
+                                                        </Border>
+                                                        <!--  價值 (沿用 CashAmount + signed-dash 既有語意)  -->
+                                                        <TextBlock
+                                                            Grid.Column="2"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center"
+                                                            FontFamily="{StaticResource Font.Family.Base}"
+                                                            FontSize="{StaticResource Font.Size.Sm}"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding CashAmount, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed-dash}"
+                                                            Typography.NumeralAlignment="Tabular" />
+                                                        <!--  Edit btn  -->
+                                                        <Button
+                                                            Grid.Column="3"
+                                                            Width="28"
+                                                            Height="28"
+                                                            Padding="0"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center"
+                                                            Command="{Binding DataContext.Transaction.EditTradeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource AppIconButton}"
+                                                            ToolTip="{DynamicResource Common.Edit}">
+                                                            <ds:AppIcon
+                                                                FontSize="11"
+                                                                Foreground="{DynamicResource AppTextMuted}"
+                                                                Symbol="Edit24" />
+                                                        </Button>
+                                                    </Grid>
                                                 </Border>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
