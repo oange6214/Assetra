@@ -212,65 +212,86 @@
             減少進階指標對主視覺的視覺競爭。波動率 / Sharpe 對個人理財一般使用者是
             次要資訊；放這裡仍可看，但不會干擾主要「賺多少 / 報酬率」的訊息。
         -->
+        <!--
+            P3.3 — 4 個 KPI cards 升級成 mockup「Portfolio Analytics」風格：
+              - Style=AppCardSummary inherit P3.1 baseline (radius 2Xl /
+                Shadow.Card / BorderLight)
+              - Padding 16 (local override，比 Summary 預設 20 緊一階給 KPI grid)
+              - FontSize 升 Md→Xl (24px) tabular，數字成為真正 KPI 主視覺
+              - Label margin 統一 0,0,0,6 跟 form rhythm 對齊
+            UniformGrid Columns=4 + 每張獨立 Margin gap 製造 grid spacing。
+        -->
         <UniformGrid
             Grid.Row="2"
             Margin="0,8,0,12"
             Columns="4"
             Visibility="{Binding HasKpis, Converter={StaticResource BooleanToVisibilityConverter}}">
             <!--  最大回撤  -->
-            <Border Margin="0,0,4,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}"
+            <Border Margin="0,0,6,0" Padding="16"
+                    Style="{StaticResource AppCardSummary}"
                     Visibility="{Binding HasDrawdown, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel>
-                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                    <TextBlock Margin="0,0,0,6"
+                               FontSize="{StaticResource Font.Size.Xs}"
                                Foreground="{DynamicResource AppTextMuted}"
                                Text="{DynamicResource Trends.Kpi.MaxDrawdown}" />
-                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                    <TextBlock FontFamily="{StaticResource Font.Family.Numeric}"
+                               FontSize="{StaticResource Font.Size.Xl}"
+                               FontWeight="Bold"
                                Foreground="{DynamicResource AppDown}"
-                               Text="{Binding KpiMaxDrawdownPct, StringFormat='0.00%'}" />
+                               Text="{Binding KpiMaxDrawdownPct, StringFormat='0.00%'}"
+                               Typography.NumeralAlignment="Tabular" />
                 </StackPanel>
             </Border>
             <!--  年化波動率  -->
-            <Border Margin="2,0,2,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}"
+            <Border Margin="3,0,3,0" Padding="16"
+                    Style="{StaticResource AppCardSummary}"
                     Visibility="{Binding HasVolatility, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel>
-                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                    <TextBlock Margin="0,0,0,6"
+                               FontSize="{StaticResource Font.Size.Xs}"
                                Foreground="{DynamicResource AppTextMuted}"
                                Text="{DynamicResource Trends.Kpi.Volatility}" />
-                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                    <TextBlock FontFamily="{StaticResource Font.Family.Numeric}"
+                               FontSize="{StaticResource Font.Size.Xl}"
+                               FontWeight="Bold"
                                Foreground="{DynamicResource AppTextPrimary}"
-                               Text="{Binding KpiVolatilityPct, StringFormat='0.00%'}" />
+                               Text="{Binding KpiVolatilityPct, StringFormat='0.00%'}"
+                               Typography.NumeralAlignment="Tabular" />
                 </StackPanel>
             </Border>
             <!--  Sharpe  -->
-            <Border Margin="2,0,2,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}"
+            <Border Margin="3,0,3,0" Padding="16"
+                    Style="{StaticResource AppCardSummary}"
                     Visibility="{Binding HasSharpe, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel>
-                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                    <TextBlock Margin="0,0,0,6"
+                               FontSize="{StaticResource Font.Size.Xs}"
                                Foreground="{DynamicResource AppTextMuted}"
                                Text="{DynamicResource Trends.Kpi.Sharpe}" />
-                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                    <TextBlock FontFamily="{StaticResource Font.Family.Numeric}"
+                               FontSize="{StaticResource Font.Size.Xl}"
+                               FontWeight="Bold"
                                Foreground="{DynamicResource AppTextPrimary}"
-                               Text="{Binding KpiSharpeRatio, StringFormat='0.00'}" />
+                               Text="{Binding KpiSharpeRatio, StringFormat='0.00'}"
+                               Typography.NumeralAlignment="Tabular" />
                 </StackPanel>
             </Border>
             <!--  HHI 集中度  -->
-            <Border Margin="4,0,0,0" Padding="10,8" Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}"
+            <Border Margin="6,0,0,0" Padding="16"
+                    Style="{StaticResource AppCardSummary}"
                     Visibility="{Binding HasHhi, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel>
-                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                    <TextBlock Margin="0,0,0,6"
+                               FontSize="{StaticResource Font.Size.Xs}"
                                Foreground="{DynamicResource AppTextMuted}"
                                Text="{DynamicResource Trends.Kpi.Hhi}" />
-                    <TextBlock FontSize="{DynamicResource Font.Size.Md}" FontWeight="SemiBold"
+                    <TextBlock FontFamily="{StaticResource Font.Family.Numeric}"
+                               FontSize="{StaticResource Font.Size.Xl}"
+                               FontWeight="Bold"
                                Foreground="{DynamicResource AppTextPrimary}"
-                               Text="{Binding KpiHhi, StringFormat='0.000'}" />
+                               Text="{Binding KpiHhi, StringFormat='0.000'}"
+                               Typography.NumeralAlignment="Tabular" />
                 </StackPanel>
             </Border>
         </UniformGrid>
