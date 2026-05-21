@@ -13,7 +13,7 @@
     <!--  ======== 股票股利欄位 ========  -->
     <StackPanel Visibility="{Binding TxTypeIsStockDiv, Converter={StaticResource BooleanToVisibilityConverter}}">
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -41,7 +41,7 @@
         </ComboBox>
 
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"

@@ -12,7 +12,7 @@
     <!--  ======== 現金股利欄位 ========  -->
     <StackPanel Visibility="{Binding TxTypeIsCashDiv, Converter={StaticResource BooleanToVisibilityConverter}}">
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -40,7 +40,7 @@
 
         <!--  輸入模式 toggle: 每股股利 vs 總股息金額  -->
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -62,7 +62,7 @@
         <!--  每股股利模式  -->
         <StackPanel Visibility="{Binding Div.IsPerShareMode, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
-                Margin="0,0,0,4"
+                Margin="0,0,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
@@ -81,7 +81,7 @@
         <!--  總額模式  -->
         <StackPanel Visibility="{Binding Div.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
-                Margin="0,0,0,4"
+                Margin="0,0,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
@@ -157,7 +157,7 @@
 
         <!--  手續費 (e.g. 二代健保補充費 1.91%)  -->
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -181,7 +181,7 @@
             IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
         <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
-                Margin="0,0,0,4"
+                Margin="0,0,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"

@@ -13,7 +13,7 @@
     <!--  ======== 賣出欄位 ========  -->
     <StackPanel Visibility="{Binding TxTypeIsSell, Converter={StaticResource BooleanToVisibilityConverter}}">
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -41,7 +41,7 @@
         </ComboBox>
 
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -61,7 +61,7 @@
             賣出價 + instrument-currency badge — non-TWD 才渲染。
             MultiCurrency-Trade-Refactor P3.
         -->
-        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+        <StackPanel Margin="0,0,0,6" Orientation="Horizontal">
             <TextBlock
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
@@ -87,7 +87,7 @@
 
         <!--  手續費折扣 (和買入對稱)  -->
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -247,7 +247,7 @@
 
         <!--  手續費 (override; 留空 → 自動計算)  -->
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -276,7 +276,7 @@
             IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
         <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
-                Margin="0,0,0,4"
+                Margin="0,0,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"

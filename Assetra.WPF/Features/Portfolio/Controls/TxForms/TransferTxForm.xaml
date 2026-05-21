@@ -27,7 +27,7 @@
         </Border>
 
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -53,7 +53,7 @@
             Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -66,7 +66,7 @@
             Visibility="{Binding TxAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
 
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -92,7 +92,7 @@
             Visibility="{Binding IsNewTransferTarget, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -112,7 +112,7 @@
         </TextBlock>
 
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"

@@ -14,7 +14,7 @@
 
         <!--  金額  -->
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -28,7 +28,7 @@
 
         <!--  帳戶  -->
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -60,7 +60,7 @@
 
         <!--  手續費  -->
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -80,7 +80,7 @@
             該語義，Trade.Name 改寫帳戶名（見 RecordIncomeAsync）。
         -->
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"

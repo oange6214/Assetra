@@ -15,7 +15,7 @@
 
         <!--  貸款名稱（共用，先填）  -->
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -34,7 +34,7 @@
         <!--  借款：金額 + 選填攤還欄位  -->
         <StackPanel Visibility="{Binding TxTypeIsLoanBorrow, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
-                Margin="0,0,0,4"
+                Margin="0,0,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
@@ -60,7 +60,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <TextBlock
-                        Margin="0,0,0,4"
+                        Margin="0,0,0,6"
                         FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
@@ -73,7 +73,7 @@
                         Visibility="{Binding Loan.RateError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                     <TextBlock
-                        Margin="0,0,0,4"
+                        Margin="0,0,0,6"
                         FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
@@ -86,7 +86,7 @@
                 </StackPanel>
                 <StackPanel Grid.Column="2">
                     <TextBlock
-                        Margin="0,0,0,4"
+                        Margin="0,0,0,6"
                         FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
@@ -120,7 +120,7 @@
                     </MultiBinding>
                 </StackPanel.Visibility>
                 <TextBlock
-                    Margin="0,0,0,4"
+                    Margin="0,0,0,6"
                     FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
@@ -133,7 +133,7 @@
                     Visibility="{Binding Loan.RateError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <TextBlock
-                    Margin="0,0,0,4"
+                    Margin="0,0,0,6"
                     FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
@@ -146,7 +146,7 @@
                     Visibility="{Binding Loan.TermMonthsError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <TextBlock
-                    Margin="0,0,0,4"
+                    Margin="0,0,0,6"
                     FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
@@ -181,7 +181,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <TextBlock
-                        Margin="0,0,0,4"
+                        Margin="0,0,0,6"
                         FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
@@ -195,7 +195,7 @@
                 </StackPanel>
                 <StackPanel Grid.Column="2">
                     <TextBlock
-                        Margin="0,0,0,4"
+                        Margin="0,0,0,6"
                         FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
@@ -215,7 +215,7 @@
                     </MultiBinding>
                 </StackPanel.Visibility>
                 <TextBlock
-                    Margin="0,0,0,4"
+                    Margin="0,0,0,6"
                     FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
@@ -228,7 +228,7 @@
                     Visibility="{Binding Loan.PrincipalError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <TextBlock
-                    Margin="0,0,0,4"
+                    Margin="0,0,0,6"
                     FontSize="{StaticResource Font.Size.Xs}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
@@ -249,7 +249,7 @@
 
         <!--  手續費（選填）  -->
         <TextBlock
-            Margin="0,0,0,4"
+            Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextSecondary}"
@@ -271,7 +271,7 @@
 
         <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
-                Margin="0,0,0,4"
+                Margin="0,0,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
