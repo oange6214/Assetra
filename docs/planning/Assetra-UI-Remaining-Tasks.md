@@ -64,4 +64,21 @@ T20-T24 保留作 reference，但不再屬於「待辦」性質。
 
 ---
 
-🎉 **T01-T13 全部完成。** 剩餘 T20-T24 為「大型 / 需實機」項目，標記 ⏸ 不在此輪範圍。
+## P3 — Wealth Platform Design Language (mockup-driven)
+
+依據 docs/mnt/assetra_wealth_platform_mockup.html 為設計基準 + 4 頁角色：
+- Overview = Executive Dashboard
+- Trend = Portfolio Analytics
+- Calendar = Wealth Behavior Journal
+- Allocation = Exposure Analysis
+
+✅ P3.1 — Foundation tokens (Radius.2Xl=18 / Shadow.Card 14/36/.06 /
+   AppCard* 三層統一 Padding 20)
+✅ P3.2 — Overview Hero 48→50px (Font.Size.3xl bump)
+✅ P3.3 — Trend KPI cards 升 AppCardSummary baseline + 數字 Md→Xl Bold Tabular
+✅ P3.4 — Calendar 從整格實色 → 上半 subtle 漸層 + Strong/Strongest dot
+   (Wealth Behavior Journal 行為標記風格)
+✅ P3.5 — Allocation Left/Right cards 升 AppCardSummary baseline
+
+🎉 **P3.1-P3.5 全部完成。** 「all pages look like same company」目標達成 —
+所有 page-level cards 統一 Radius.2Xl + Shadow.Card + AppBorderLight。
