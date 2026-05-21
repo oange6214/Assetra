@@ -137,7 +137,12 @@ public sealed record PortfolioServices(
     /// Portfolio-Groups-Refactor P3 — 群組 (bucket) 目錄。為 null 時 trade dialog
     /// 的群組 ComboBox 隱藏，行為等同尚未啟用群組功能。
     /// </summary>
-    PortfolioGroupCatalog? GroupCatalog = null)
+    PortfolioGroupCatalog? GroupCatalog = null,
+    /// <summary>
+    /// P4.1 — Asset-level XIRR 年化報酬計算。用於 detail panel 的 KPI 矩陣
+    /// (XIRR × 1Y / 3Y / 累積)。為 null 時 XIRR 那列顯示「—」。
+    /// </summary>
+    Assetra.Core.Interfaces.Analysis.IXirrCalculator? Xirr = null)
 {
     /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。

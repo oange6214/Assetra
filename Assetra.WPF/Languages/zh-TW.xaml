@@ -419,6 +419,13 @@
     <sys:String x:Key="Portfolio.Detail.TotalRealized">總已實現 (股息+價差)</sys:String>
     <sys:String x:Key="Portfolio.Detail.CapitalGain">資本利得</sys:String>
     <sys:String x:Key="Portfolio.Detail.DividendIncome">股息收入</sys:String>
+    <!--  P4.1 Asset KPI matrix — ROI / XIRR × 1Y / 3Y / 累積  -->
+    <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.Title">報酬指標</sys:String>
+    <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.Roi">投報率</sys:String>
+    <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.Xirr">年化</sys:String>
+    <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.Window1Y">1 年</sys:String>
+    <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.Window3Y">3 年</sys:String>
+    <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.WindowCum">累積</sys:String>
     <sys:String x:Key="Portfolio.Detail.DeleteAsset">刪除資產</sys:String>
     <sys:String x:Key="Portfolio.Detail.DangerZone">危險區</sys:String>
     <sys:String x:Key="Portfolio.Detail.DeleteAccount">刪除帳戶</sys:String>

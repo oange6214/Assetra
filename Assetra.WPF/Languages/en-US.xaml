@@ -421,6 +421,13 @@
     <sys:String x:Key="Portfolio.Detail.TotalRealized">Total realized (Dividends + Capital)</sys:String>
     <sys:String x:Key="Portfolio.Detail.CapitalGain">Capital gain</sys:String>
     <sys:String x:Key="Portfolio.Detail.DividendIncome">Dividend income</sys:String>
+    <!--  P4.1 Asset KPI matrix — ROI / XIRR × 1Y / 3Y / cumulative  -->
+    <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.Title">Returns</sys:String>
+    <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.Roi">ROI</sys:String>
+    <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.Xirr">XIRR</sys:String>
+    <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.Window1Y">1Y</sys:String>
+    <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.Window3Y">3Y</sys:String>
+    <sys:String x:Key="Portfolio.Detail.ReturnsMatrix.WindowCum">All</sys:String>
     <sys:String x:Key="Portfolio.Detail.DeleteAsset">Delete asset</sys:String>
     <sys:String x:Key="Portfolio.Detail.DangerZone">Danger zone</sys:String>
     <sys:String x:Key="Portfolio.Detail.DeleteAccount">Delete account</sys:String>

@@ -37,6 +37,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     private Action? _onSettingsChanged;
     private readonly ICurrencyService? _currencyService;
     private readonly ICryptoService? _cryptoService;
+    // P4.1 — XIRR calculator for asset detail panel KPI matrix. Null when not registered.
+    private readonly Assetra.Core.Interfaces.Analysis.IXirrCalculator? _xirrCalculator;
     private readonly IPortfolioLoadService _loadService;
     private readonly ITransactionWorkflowService _transactionWorkflowService;
     private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
@@ -370,6 +372,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         _currencyService = services.Currency;
         // Portfolio-Groups-Refactor P4 — Positions tab chip row 用。null = 功能未啟用。
         GroupCatalog = services.GroupCatalog;
+        // P4.1 — Asset detail KPI 矩陣 XIRR 計算。null = XIRR row 顯示「—」。
+        _xirrCalculator = services.Xirr;
         _cryptoService = services.Crypto;
         _loadService = services.Load ?? new NullPortfolioLoadService();
         _transactionWorkflowService = services.TransactionWorkflow ?? new NullTransactionWorkflowService();

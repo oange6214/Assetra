@@ -34,6 +34,18 @@ public partial class PortfolioViewModel
     [NotifyPropertyChangedFor(nameof(SelectedPositionTradeAvgPrice))]
     [NotifyPropertyChangedFor(nameof(SelectedPositionTradeAvgPriceAsMoney))]
     [NotifyPropertyChangedFor(nameof(HasSelectedPositionRealized))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionRoi1YDisplay))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionRoi3YDisplay))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionRoiCumDisplay))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionXirr1YDisplay))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionXirr3YDisplay))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionXirrCumDisplay))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionRoi1YIsPositive))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionRoi3YIsPositive))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionRoiCumIsPositive))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionXirr1YIsPositive))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionXirr3YIsPositive))]
+    [NotifyPropertyChangedFor(nameof(SelectedPositionXirrCumIsPositive))]
     private PortfolioRowViewModel? _selectedPositionRow;
 
     /// <summary>
@@ -180,6 +192,136 @@ public partial class PortfolioViewModel
     public decimal SelectedPositionRealizedTotal =>
         SelectedPositionDividendIncome + SelectedPositionCapitalGain;
 
+    // ── P4.1 — Asset KPI matrix (ROI / XIRR × 1Y / 3Y / 累積) ─────────────
+    // 從 SelectedPositionTrades 重播交易，計算單一資產的視窗 ROI 與 XIRR。
+    //   windowStart = null → 累積（自第一筆 trade 至今）
+    //   windowStart 早於第一筆 trade → 視為無足夠歷史 (1Y/3Y 顯示 "—")
+    //   XIRR 透過 _xirrCalculator（null 或無法收斂時回傳 null → UI 顯示 "—"）
+    // 開倉成本基底 (openingCost) 透過 moving-average basis 重播，Sell 按比例
+    // 折減成本，StockDividend 增加股數但成本不變，CashDividend 不影響基底。
+
+    private (decimal? roi, decimal? xirr) ComputeAssetReturn(DateOnly? windowStart)
+    {
+        if (SelectedPositionRow is not { } row) return (null, null);
+
+        var ordered = Trades
+            .Where(t => string.Equals(t.Symbol, row.Symbol, StringComparison.OrdinalIgnoreCase) &&
+                        (t.Type == TradeType.Buy || t.Type == TradeType.Sell ||
+                         t.Type == TradeType.CashDividend || t.Type == TradeType.StockDividend))
+            .OrderBy(t => t.TradeDate)
+            .ToList();
+        if (ordered.Count == 0) return (null, null);
+
+        var firstTradeDate = DateOnly.FromDateTime(ordered[0].TradeDate);
+        // 1Y / 3Y 視窗：若第一筆交易晚於視窗起點，視為無足夠歷史 → "—"
+        if (windowStart is { } ws && ws < firstTradeDate) return (null, null);
+
+        var actualStart = windowStart ?? firstTradeDate;
+
+        // 重播視窗前的交易 → openingQty / openingCost（moving-average basis）
+        decimal openingQty = 0m, openingCost = 0m;
+        foreach (var t in ordered)
+        {
+            var date = DateOnly.FromDateTime(t.TradeDate);
+            if (date >= actualStart) break;
+            switch (t.Type)
+            {
+                case TradeType.Buy:
+                    openingQty += t.Quantity;
+                    openingCost += t.Price * t.Quantity + (t.Commission ?? 0m);
+                    break;
+                case TradeType.Sell when openingQty > 0:
+                    var sellQty = Math.Min((decimal)t.Quantity, openingQty);
+                    var perShare = openingCost / openingQty;
+                    openingCost -= perShare * sellQty;
+                    openingQty -= sellQty;
+                    break;
+                case TradeType.StockDividend:
+                    openingQty += t.Quantity;
+                    break;
+            }
+        }
+
+        var windowTrades = ordered.Where(t => DateOnly.FromDateTime(t.TradeDate) >= actualStart).ToList();
+        var currentValue = row.MarketValue;
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        // ROI = (currentValue + 視窗內收回 − 開倉基底 − 視窗內投入) / (開倉基底 + 視窗內投入)
+        decimal invested = openingCost;
+        decimal returned = currentValue;
+        foreach (var t in windowTrades)
+        {
+            switch (t.Type)
+            {
+                case TradeType.Buy:
+                    invested += t.Price * t.Quantity + (t.Commission ?? 0m);
+                    break;
+                case TradeType.Sell:
+                    returned += t.Price * t.Quantity - (t.Commission ?? 0m);
+                    break;
+                case TradeType.CashDividend:
+                    returned += t.CashAmount ?? 0m;
+                    break;
+            }
+        }
+        decimal? roi = invested > 0 ? (returned - invested) / invested : null;
+
+        // XIRR — 開倉視為一筆 −openingCost 的買入；視窗內 Buy/Sell/CashDividend 為實際現金流；
+        //        加上今天 +currentValue 作為合成「賣出」cash flow。
+        decimal? xirr = null;
+        if (_xirrCalculator is not null)
+        {
+            var flows = new List<Assetra.Core.Models.Analysis.CashFlow>();
+            if (openingQty > 0 && openingCost > 0)
+                flows.Add(new(actualStart, -openingCost));
+            foreach (var t in windowTrades)
+            {
+                var date = DateOnly.FromDateTime(t.TradeDate);
+                switch (t.Type)
+                {
+                    case TradeType.Buy:
+                        flows.Add(new(date, -(t.Price * t.Quantity + (t.Commission ?? 0m))));
+                        break;
+                    case TradeType.Sell:
+                        flows.Add(new(date, +(t.Price * t.Quantity - (t.Commission ?? 0m))));
+                        break;
+                    case TradeType.CashDividend:
+                        flows.Add(new(date, +(t.CashAmount ?? 0m)));
+                        break;
+                }
+            }
+            if (currentValue > 0)
+                flows.Add(new(today, +currentValue));
+            if (flows.Count >= 2 && flows.Any(f => f.Amount < 0) && flows.Any(f => f.Amount > 0))
+                xirr = _xirrCalculator.Compute(flows);
+        }
+        return (roi, xirr);
+    }
+
+    private (decimal? roi, decimal? xirr) Returns1Y =>
+        ComputeAssetReturn(DateOnly.FromDateTime(DateTime.Today.AddYears(-1)));
+    private (decimal? roi, decimal? xirr) Returns3Y =>
+        ComputeAssetReturn(DateOnly.FromDateTime(DateTime.Today.AddYears(-3)));
+    private (decimal? roi, decimal? xirr) ReturnsCum => ComputeAssetReturn(null);
+
+    public string SelectedPositionRoi1YDisplay => FormatReturnPercent(Returns1Y.roi);
+    public string SelectedPositionRoi3YDisplay => FormatReturnPercent(Returns3Y.roi);
+    public string SelectedPositionRoiCumDisplay => FormatReturnPercent(ReturnsCum.roi);
+    public string SelectedPositionXirr1YDisplay => FormatReturnPercent(Returns1Y.xirr);
+    public string SelectedPositionXirr3YDisplay => FormatReturnPercent(Returns3Y.xirr);
+    public string SelectedPositionXirrCumDisplay => FormatReturnPercent(ReturnsCum.xirr);
+
+    // IsPositive 預設 true（包括 null），UI 只用於上漲色；null 時顯示「—」自然中性。
+    public bool SelectedPositionRoi1YIsPositive => (Returns1Y.roi ?? 0m) >= 0m;
+    public bool SelectedPositionRoi3YIsPositive => (Returns3Y.roi ?? 0m) >= 0m;
+    public bool SelectedPositionRoiCumIsPositive => (ReturnsCum.roi ?? 0m) >= 0m;
+    public bool SelectedPositionXirr1YIsPositive => (Returns1Y.xirr ?? 0m) >= 0m;
+    public bool SelectedPositionXirr3YIsPositive => (Returns3Y.xirr ?? 0m) >= 0m;
+    public bool SelectedPositionXirrCumIsPositive => (ReturnsCum.xirr ?? 0m) >= 0m;
+
+    private static string FormatReturnPercent(decimal? value) =>
+        value is { } v ? (v >= 0m ? "+" : "") + (v * 100m).ToString("F1") + "%" : "—";
+
     private void NotifyTradeDependentDetailPropertiesChanged()
     {
         OnPropertyChanged(nameof(SelectedCashTrades));
@@ -194,6 +336,18 @@ public partial class PortfolioViewModel
         OnPropertyChanged(nameof(SelectedPositionTradeAvgPrice));
         OnPropertyChanged(nameof(SelectedPositionTradeAvgPriceAsMoney));
         OnPropertyChanged(nameof(HasSelectedPositionRealized));
+        OnPropertyChanged(nameof(SelectedPositionRoi1YDisplay));
+        OnPropertyChanged(nameof(SelectedPositionRoi3YDisplay));
+        OnPropertyChanged(nameof(SelectedPositionRoiCumDisplay));
+        OnPropertyChanged(nameof(SelectedPositionXirr1YDisplay));
+        OnPropertyChanged(nameof(SelectedPositionXirr3YDisplay));
+        OnPropertyChanged(nameof(SelectedPositionXirrCumDisplay));
+        OnPropertyChanged(nameof(SelectedPositionRoi1YIsPositive));
+        OnPropertyChanged(nameof(SelectedPositionRoi3YIsPositive));
+        OnPropertyChanged(nameof(SelectedPositionRoiCumIsPositive));
+        OnPropertyChanged(nameof(SelectedPositionXirr1YIsPositive));
+        OnPropertyChanged(nameof(SelectedPositionXirr3YIsPositive));
+        OnPropertyChanged(nameof(SelectedPositionXirrCumIsPositive));
     }
 
     [RelayCommand]

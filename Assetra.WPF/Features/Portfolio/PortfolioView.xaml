@@ -632,6 +632,217 @@
                                         </Border>
                                     </Grid>
 
+                                    <!--  P4.1 Asset KPI matrix — ROI / XIRR × 1Y / 3Y / 累積 (2×3 grid + label row)  -->
+                                    <Border
+                                        Margin="0,16,0,0"
+                                        Background="{DynamicResource AppBackground}"
+                                        BorderBrush="{DynamicResource AppBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource Radius.Sm}">
+                                        <StackPanel>
+                                            <Border
+                                                Padding="14,10"
+                                                BorderBrush="{DynamicResource AppBorder}"
+                                                BorderThickness="0,0,0,1">
+                                                <TextBlock
+                                                    FontSize="{StaticResource Font.Size.Sm}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{DynamicResource Portfolio.Detail.ReturnsMatrix.Title}" />
+                                            </Border>
+                                            <Grid Margin="14,10,14,12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <!--  Header row: window labels  -->
+                                                <TextBlock
+                                                    Grid.Row="0"
+                                                    Grid.Column="1"
+                                                    Margin="16,0,0,6"
+                                                    HorizontalAlignment="Right"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource Portfolio.Detail.ReturnsMatrix.Window1Y}" />
+                                                <TextBlock
+                                                    Grid.Row="0"
+                                                    Grid.Column="2"
+                                                    Margin="16,0,0,6"
+                                                    HorizontalAlignment="Right"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource Portfolio.Detail.ReturnsMatrix.Window3Y}" />
+                                                <TextBlock
+                                                    Grid.Row="0"
+                                                    Grid.Column="3"
+                                                    Margin="16,0,0,6"
+                                                    HorizontalAlignment="Right"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource Portfolio.Detail.ReturnsMatrix.WindowCum}" />
+                                                <!--  ROI row  -->
+                                                <TextBlock
+                                                    Grid.Row="1"
+                                                    Grid.Column="0"
+                                                    Margin="0,6,0,4"
+                                                    VerticalAlignment="Center"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{DynamicResource Portfolio.Detail.ReturnsMatrix.Roi}" />
+                                                <TextBlock
+                                                    Grid.Row="1"
+                                                    Grid.Column="1"
+                                                    Margin="16,6,0,4"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
+                                                    FontWeight="SemiBold"
+                                                    Text="{Binding SelectedPositionRoi1YDisplay, FallbackValue='—'}"
+                                                    Typography.NumeralAlignment="Tabular">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SelectedPositionRoi1YIsPositive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock
+                                                    Grid.Row="1"
+                                                    Grid.Column="2"
+                                                    Margin="16,6,0,4"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
+                                                    FontWeight="SemiBold"
+                                                    Text="{Binding SelectedPositionRoi3YDisplay, FallbackValue='—'}"
+                                                    Typography.NumeralAlignment="Tabular">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SelectedPositionRoi3YIsPositive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock
+                                                    Grid.Row="1"
+                                                    Grid.Column="3"
+                                                    Margin="16,6,0,4"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
+                                                    FontWeight="SemiBold"
+                                                    Text="{Binding SelectedPositionRoiCumDisplay, FallbackValue='—'}"
+                                                    Typography.NumeralAlignment="Tabular">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SelectedPositionRoiCumIsPositive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <!--  XIRR row  -->
+                                                <TextBlock
+                                                    Grid.Row="2"
+                                                    Grid.Column="0"
+                                                    Margin="0,4,0,0"
+                                                    VerticalAlignment="Center"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{DynamicResource Portfolio.Detail.ReturnsMatrix.Xirr}" />
+                                                <TextBlock
+                                                    Grid.Row="2"
+                                                    Grid.Column="1"
+                                                    Margin="16,4,0,0"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
+                                                    FontWeight="SemiBold"
+                                                    Text="{Binding SelectedPositionXirr1YDisplay, FallbackValue='—'}"
+                                                    Typography.NumeralAlignment="Tabular">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SelectedPositionXirr1YIsPositive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock
+                                                    Grid.Row="2"
+                                                    Grid.Column="2"
+                                                    Margin="16,4,0,0"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
+                                                    FontWeight="SemiBold"
+                                                    Text="{Binding SelectedPositionXirr3YDisplay, FallbackValue='—'}"
+                                                    Typography.NumeralAlignment="Tabular">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SelectedPositionXirr3YIsPositive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock
+                                                    Grid.Row="2"
+                                                    Grid.Column="3"
+                                                    Margin="16,4,0,0"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
+                                                    FontWeight="SemiBold"
+                                                    Text="{Binding SelectedPositionXirrCumDisplay, FallbackValue='—'}"
+                                                    Typography.NumeralAlignment="Tabular">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SelectedPositionXirrCumIsPositive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
                                     <!--  Realized P&L section — 只在有資料時顯示，避免 3 行 NT$0 雜訊  -->
                                     <Border
                                         Margin="0,16,0,0"
