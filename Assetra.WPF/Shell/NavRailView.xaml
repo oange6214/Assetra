@@ -403,7 +403,14 @@
             雙向同步，方便 deep link（例：NavSection.Trends 點擊跳到 Trends tab）。
         -->
         <DataTemplate x:Key="FinancialOverviewContentTemplate">
+            <!--
+                P3.8 — TabControl Margin 24,16,24,0：tab strip + content 都跟 NavRail
+                右邊框拉開 24px breathing。原本 0 margin 造成「總覽/資產趨勢/報酬日曆/
+                配置」 tab strip 跟 NavRail 完全貼在一起的 sidebar 跟內容疊在一起感。
+                top 16 給 tab strip 跟 title bar 下方留呼吸空間。
+            -->
             <TabControl
+                Margin="24,16,24,0"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
