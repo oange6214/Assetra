@@ -22,8 +22,8 @@
 
 - [x] **T10** — AppCard* migration（4 widgets 改用 AppCardSubtle，DashboardWidgetCard alias 刪除）
 - [x] **T11** — Empty state per-page check（TradesTabPanel migrated；10 個 view 早已用 AppEmptyState）
-- [ ] **T12** — Localization key 完整 audit（漏譯 / typo / en-US 漢字 fallback）
-- [ ] **T13** — Search popup ↔ Command Palette visual 統一
+- [x] **T12** — Localization key audit — 1700 zh-TW / 1700 en-US keys 對齊 (補 2 個漏譯：Categories.Rule.AddTitle / Categories.Budget.AddTitle)；en-US 內無 untranslated 漢字 leak
+- [x] **T13** — Search popup + Command Palette popup 兩者 border 都從 AppBorder 降到 AppBorderLight，視覺語言統一
 
 ## 🔴 大型（標記但不在這輪做）
 
@@ -50,3 +50,9 @@
 ✅ T09 — Hex 收編 (Reports + Calendar overlay → tokens)
 ✅ T10 — AppCard* migration (4 widgets → AppCardSubtle)
 ✅ T11 — TradesTabPanel empty state → AppEmptyState style
+✅ T12 — i18n audit + 2 missing en-US keys patched
+✅ T13 — Search + Command Palette popup borders unified (AppBorderLight)
+
+---
+
+🎉 **T01-T13 全部完成。** 剩餘 T20-T24 為「大型 / 需實機」項目，標記 ⏸ 不在此輪範圍。

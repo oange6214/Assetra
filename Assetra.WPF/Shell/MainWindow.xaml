@@ -515,11 +515,16 @@
             PlacementTarget="{Binding ElementName=MainShell}"
             PopupAnimation="Fade"
             StaysOpen="False">
+            <!--
+                P2.17 T13 — Search popup border lightened (AppBorder → AppBorderLight)
+                跟 Command Palette popup 一致；兩個 popup 共用同一個視覺語言 (modal
+                overlay shape + light edges + same backdrop opacity)。
+            -->
             <Border
                 MaxHeight="440"
                 Margin="12"
                 Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
+                BorderBrush="{DynamicResource AppBorderLight}"
                 BorderThickness="1"
                 CornerRadius="{StaticResource Radius.Lg}">
                 <Border.Width>
@@ -538,7 +543,7 @@
                     <Border
                         Grid.Row="0"
                         Padding="16,12"
-                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderBrush="{DynamicResource AppBorderLight}"
                         BorderThickness="0,0,0,1">
                         <DockPanel>
                             <ds:AppIcon
@@ -676,11 +681,12 @@
             PlacementTarget="{Binding ElementName=MainShell}"
             PopupAnimation="Fade"
             StaysOpen="False">
+            <!--  P2.17 T13 — Command Palette border lightened, matches Search popup.  -->
             <Border
                 MaxHeight="440"
                 Margin="12"
                 Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
+                BorderBrush="{DynamicResource AppBorderLight}"
                 BorderThickness="1"
                 CornerRadius="{StaticResource Radius.Lg}">
                 <Border.Width>
@@ -698,7 +704,7 @@
                     <Border
                         Grid.Row="0"
                         Padding="16,12"
-                        BorderBrush="{DynamicResource AppBorder}"
+                        BorderBrush="{DynamicResource AppBorderLight}"
                         BorderThickness="0,0,0,1">
                         <DockPanel>
                             <ds:AppIcon
