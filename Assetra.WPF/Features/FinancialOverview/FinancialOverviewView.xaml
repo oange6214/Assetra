@@ -193,14 +193,22 @@
                                 後者只是 asset_item 表的 cash + 手動 entry，會漏 Physical /
                                 RealEstate / Retirement。BalanceSheet 系列直接從各 widget
                                 VM 加總，跟資產組成 view 一致。
+                                P2.16 H — IsLoading=True 時 skeleton 取代，等資料載完才顯示
+                                真實數字 (跟 Hero card 一致的 loading 體驗)。
                             -->
-                            <TextBlock Margin="0,4,0,0"
-                                       FontFamily="{StaticResource Font.Family.Base}"
+                            <Grid Margin="0,4,0,0" Height="24">
+                                <Border Width="120" Height="18"
+                                        HorizontalAlignment="Left" VerticalAlignment="Center"
+                                        Style="{StaticResource AppSkeletonRect}"
+                                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <TextBlock FontFamily="{StaticResource Font.Family.Base}"
                                        FontSize="{StaticResource Font.Size.Lg}"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource AppTextPrimary}"
                                        Text="{Binding BalanceSheetTotalAssetsDisplay}"
-                                       Typography.NumeralAlignment="Tabular" />
+                                       Typography.NumeralAlignment="Tabular"
+                                       Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                            </Grid>
                         </StackPanel>
                     </Border>
                     <!--  − operator  -->
