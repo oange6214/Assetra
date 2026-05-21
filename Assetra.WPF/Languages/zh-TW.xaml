@@ -198,7 +198,8 @@
     <sys:String x:Key="Portfolio.TradeHistory.UnitPrice">單價</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Total">總額</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Commission">手續費</sys:String>
-    <sys:String x:Key="Portfolio.TradeHistory.GrossAmount">金額</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.GrossAmount">價值</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.Note">備註</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Empty">尚無交易紀錄</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Summary.Inflow">流入</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Summary.Outflow">流出</sys:String>

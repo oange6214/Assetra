@@ -1035,7 +1035,8 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1,0,0,0">
                     <Border.Width>
-                        <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.44|420|620">
+                        <!--  P4.9 — Position / Cash / Liability detail panel 統一寬度 `0.55/520/820`  -->
+                        <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.55|520|820">
                             <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Window}" />
                             <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                         </MultiBinding>
@@ -1451,7 +1452,8 @@
                     BorderBrush="{DynamicResource AppBorder}"
                     BorderThickness="1,0,0,0">
                     <Border.Width>
-                        <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.44|420|620">
+                        <!--  P4.9 — Position / Cash / Liability detail panel 統一寬度 `0.55/520/820`  -->
+                        <MultiBinding Converter="{StaticResource AdaptivePanelWidthConverter}" ConverterParameter="0.55|520|820">
                             <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Window}" />
                             <Binding Path="DataContext.Settings.UiScale" RelativeSource="{RelativeSource AncestorType=Window}" />
                         </MultiBinding>
