@@ -230,13 +230,35 @@
                                         Foreground="{DynamicResource AppTextOnAccent}"
                                         Text="{DynamicResource Portfolio.AssetType.BondEtf}" />
                                 </Border>
+                                <!--  P4.3 #4 — 幣別 chip：TWD = 中性 slate / USD = violet（外幣突出）  -->
+                                <Border
+                                    Margin="6,0,0,0"
+                                    Padding="8,2"
+                                    CornerRadius="{StaticResource Radius.Sm}">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="{DynamicResource Brush.Neutral}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedPositionRow.Currency, FallbackValue=''}" Value="USD">
+                                                    <Setter Property="Background" Value="{DynamicResource Brush.Special}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextOnAccent}"
+                                        Text="{Binding SelectedPositionRow.Currency, FallbackValue='TWD'}" />
+                                </Border>
                             </StackPanel>
                         </StackPanel>
                     </Border>
 
-                    <!--  ── Tab bar ──  -->
+                    <!--  ── Tab bar — P4.3 #8 pill style (replaces underline NavTabBtn)  -->
                     <Border
                         Grid.Row="1"
+                        Padding="14,8"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,0,0,1">
                         <StackPanel Orientation="Horizontal">
@@ -246,14 +268,14 @@
                                 Content="{DynamicResource Portfolio.Detail.Overview}"
                                 GroupName="PositionDetailTab"
                                 IsChecked="{Binding IsDetailOverviewTab, Mode=OneWay}"
-                                Style="{StaticResource NavTabBtn}" />
+                                Style="{StaticResource AppPillTab}" />
                             <RadioButton
                                 Command="{Binding SwitchDetailTabCommand}"
                                 CommandParameter="trades"
                                 Content="{DynamicResource Portfolio.Detail.Trades}"
                                 GroupName="PositionDetailTab"
                                 IsChecked="{Binding IsDetailTradesTab, Mode=OneWay}"
-                                Style="{StaticResource NavTabBtn}" />
+                                Style="{StaticResource AppPillTab}" />
                         </StackPanel>
                     </Border>
 
@@ -497,13 +519,13 @@
                                             </StackPanel>
                                         </Border>
 
-                                        <!--  Card: 市值  -->
+                                        <!--  Card: 市值 — P4.3 #7 selected/primary highlight：accent border + subtle accent bg  -->
                                         <Border
                                             Grid.Row="4"
                                             Grid.Column="0"
                                             Padding="14,12"
-                                            Background="{DynamicResource AppBackground}"
-                                            BorderBrush="{DynamicResource AppBorder}"
+                                            Background="{DynamicResource AppAccentSubtle}"
+                                            BorderBrush="{DynamicResource AppAccent}"
                                             BorderThickness="1"
                                             CornerRadius="{StaticResource Radius.Sm}">
                                             <StackPanel>

@@ -148,6 +148,61 @@
         BasedOn="{StaticResource SegmentBtn}"
         TargetType="{x:Type RadioButton}" />
 
+    <!--
+        ── AppPillTab — RadioButton tab in pill style (filled bg when checked) ──
+        P4.3 #8 — 給 side panel 內部 tab bar 用（detail panel 的 概覽 / 交易記錄）。
+        Active = AppAccent 填底 + 白字；Inactive = 透明底 + 次要字。視覺更現代，
+        跟 NavTabBtn 的 underline 風格區隔開（後者用於主導航 / 子分頁）。
+        Height 32 比 SegmentBtn (40) 矮一階，符合 panel 內密度需求。
+    -->
+    <Style x:Key="AppPillTab" TargetType="RadioButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="14,4" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Margin" Value="0,0,6,0" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border
+                        x:Name="Bd"
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="{StaticResource Radius.Lg}">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontFamily="{TemplateBinding FontFamily}"
+                            FontSize="{TemplateBinding FontSize}"
+                            FontWeight="{TemplateBinding FontWeight}"
+                            Foreground="{TemplateBinding Foreground}"
+                            Text="{TemplateBinding Content}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppAccent}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="IsChecked" Value="False" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHover}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!--  ── TabControl (implicit) ──  -->
     <Style TargetType="{x:Type TabControl}">
         <Setter Property="Background" Value="Transparent" />
