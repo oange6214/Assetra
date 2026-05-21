@@ -13,40 +13,136 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
+        <!--
+            P3.4 — DayCellBorder 從「整格實色」(GitHub heatmap 風) 改成
+            「上半 subtle 漸層」(Wealth Behavior Journal 風)：
+            每個 tone level 用 LinearGradientBrush 從頂端微透明色 fade 到
+            底部 transparent (offset 0.68)，視覺上像「這天有事件、淡淡標記
+            一下」而不是整格被色塊轟炸。Opacity 比之前少 ~30%（原 99→
+            new top alpha 33 max），跟 mockup `linear-gradient(180deg,
+            rgba(...,.09), transparent 68%)` 對齊風格。
+        -->
         <Style x:Key="DayCellBorder" TargetType="Border">
             <Setter Property="Margin" Value="2" />
             <Setter Property="Padding" Value="6,4" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
-            <Setter Property="CornerRadius" Value="{StaticResource Radius.Xs}" />
+            <Setter Property="CornerRadius" Value="{StaticResource Radius.Sm}" />
             <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsCurrentMonth}" Value="False">
                     <Setter Property="Opacity" Value="0.35" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Tone}" Value="UpWeak">
-                    <Setter Property="Background" Value="#1AEF4444" />
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Offset="0" Color="#14EF4444" />
+                                <GradientStop Offset="0.68" Color="#00EF4444" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Tone}" Value="UpMedium">
-                    <Setter Property="Background" Value="#33EF4444" />
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Offset="0" Color="#1FEF4444" />
+                                <GradientStop Offset="0.68" Color="#00EF4444" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Tone}" Value="UpStrong">
-                    <Setter Property="Background" Value="#66EF4444" />
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Offset="0" Color="#2EEF4444" />
+                                <GradientStop Offset="0.68" Color="#00EF4444" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Tone}" Value="UpStrongest">
-                    <Setter Property="Background" Value="#99EF4444" />
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Offset="0" Color="#3DEF4444" />
+                                <GradientStop Offset="0.68" Color="#00EF4444" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Tone}" Value="DownWeak">
-                    <Setter Property="Background" Value="#1A22C55E" />
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Offset="0" Color="#1422C55E" />
+                                <GradientStop Offset="0.68" Color="#0022C55E" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Tone}" Value="DownMedium">
-                    <Setter Property="Background" Value="#3322C55E" />
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Offset="0" Color="#1F22C55E" />
+                                <GradientStop Offset="0.68" Color="#0022C55E" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Tone}" Value="DownStrong">
-                    <Setter Property="Background" Value="#6622C55E" />
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Offset="0" Color="#2E22C55E" />
+                                <GradientStop Offset="0.68" Color="#0022C55E" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Tone}" Value="DownStrongest">
-                    <Setter Property="Background" Value="#9922C55E" />
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Offset="0" Color="#3D22C55E" />
+                                <GradientStop Offset="0.68" Color="#0022C55E" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--
+            P3.4 — 「極端日」dot indicator (8px circle at bottom-left of day cell)。
+            Strong / Strongest tone 時可見，顏色 = 漲跌色，讓使用者掃月曆能立刻
+            看出「這幾天波動大」— mockup 提的 Wealth Behavior Journal 行為標記。
+        -->
+        <Style x:Key="DayExtremeDot" TargetType="Ellipse">
+            <Setter Property="Width" Value="8" />
+            <Setter Property="Height" Value="8" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Tone}" Value="UpStrong">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Setter Property="Fill" Value="{DynamicResource AppUp}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tone}" Value="UpStrongest">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Setter Property="Fill" Value="{DynamicResource AppUp}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tone}" Value="DownStrong">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Setter Property="Fill" Value="{DynamicResource AppDown}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tone}" Value="DownStrongest">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Setter Property="Fill" Value="{DynamicResource AppDown}" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -299,19 +395,23 @@
                                                         CommandParameter="{Binding}"
                                                         MouseAction="LeftClick" />
                                                 </Border.InputBindings>
-                                                <StackPanel>
-                                                    <TextBlock
-                                                        FontSize="{StaticResource Font.Size.Sm}"
-                                                        FontWeight="SemiBold"
-                                                        Foreground="{DynamicResource AppTextPrimary}"
-                                                        Text="{Binding Day}" />
-                                                    <TextBlock
-                                                        FontSize="{StaticResource Font.Size.Xs}"
-                                                        Foreground="{DynamicResource AppTextSecondary}"
-                                                        Text="{Binding DeltaDisplay}"
-                                                        Typography.NumeralAlignment="Tabular"
-                                                        Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                                </StackPanel>
+                                                <Grid>
+                                                    <StackPanel>
+                                                        <TextBlock
+                                                            FontSize="{StaticResource Font.Size.Sm}"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding Day}" />
+                                                        <TextBlock
+                                                            FontSize="{StaticResource Font.Size.Xs}"
+                                                            Foreground="{DynamicResource AppTextSecondary}"
+                                                            Text="{Binding DeltaDisplay}"
+                                                            Typography.NumeralAlignment="Tabular"
+                                                            Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                    </StackPanel>
+                                                    <!--  P3.4 — 極端日 dot indicator (bottom-left)  -->
+                                                    <Ellipse Style="{StaticResource DayExtremeDot}" />
+                                                </Grid>
                                             </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
