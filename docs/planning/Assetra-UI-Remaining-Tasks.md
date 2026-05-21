@@ -1,7 +1,16 @@
 # Assetra UI — 剩餘 task list
 
-依序執行，每完成一項標 ✅ + commit。
-最後更新：2026-05-21 (P2.16 完工後盤點)
+最後更新：2026-05-21 (P2.17 T01-T13 完工)
+
+## 🛑 Project status: **CLOSED — user-driven mode**
+
+T01-T13 全部 ship 後，使用者選擇「user-driven only」mode：
+- **不再 proactive 列「未完成項目」** — 因為 UI polish 本質沒有底
+- **不再自我擴張 scope** — backlog 上的項目（T20-T24）除非真實 use case
+  觸發否則不主動推進
+- **下次動工 trigger**：使用者開 app 看到具體痛點 → 回報 → 修
+
+T20-T24 保留作 reference，但不再屬於「待辦」性質。
 
 ---
 
