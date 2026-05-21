@@ -662,7 +662,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var accentColor = GetSkColor("AppAccent", "#0078D4");
         var fillColor = accentColor.WithAlpha(32);
         var labelColor = GetSkColor("AppTextSecondary", "#787B86");
-        var separatorColor = GetSkColor("AppBorderLight", "#2E2E2E");
+        // P2.16 — Grid 進一步降透明度。AppBorderLight 本身已 muted，再乘 0.30 alpha
+        // 讓 separator 線在 dark / light 兩個 theme 都成 30% 強度可見但不搶 stroke。
+        // Audit「降低 grid 與 area fill 的存在感」對應這條。
+        var separatorColor = GetSkColor("AppBorderLight", "#2E2E2E").WithAlpha(76);
 
         // P2.13 — Stroke 從 2px 降到 1.5px、GeometrySize 從 4 降到 3、
         // GeometryStroke 取消（純 fill 圓點）— 整體更貼近現代金融儀表板的細

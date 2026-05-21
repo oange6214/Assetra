@@ -15,6 +15,7 @@
     <SolidColorBrush x:Key="AppSurface" Color="{StaticResource Color.Cis.Dark.Layer1}" />
     <SolidColorBrush x:Key="AppSurfaceAlt" Color="{StaticResource Color.Cis.Dark.Layer2}" />
     <SolidColorBrush x:Key="AppCardBackground" Color="{StaticResource Color.Cis.Dark.Layer1}" />
+    <SolidColorBrush x:Key="AppNavRailBackground" Color="{StaticResource Color.Cis.Dark.NavRail}" />
     <SolidColorBrush x:Key="AppHover" Color="{StaticResource Color.Cis.Dark.Layer3}" />
 
     <!--  Borders  -->

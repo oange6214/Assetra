@@ -192,7 +192,8 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
         var accentColor    = GetSkColor("AppAccent",        "#0078D4");
         var fillColor      = accentColor.WithAlpha(32);
         var labelColor     = GetSkColor("AppTextSecondary", "#9E9E9E");
-        var separatorColor = GetSkColor("AppBorderLight",   "#2E2E2E");
+        // P2.16 — Grid 降到 30% alpha (跟 PortfolioHistoryViewModel 一致)。
+        var separatorColor = GetSkColor("AppBorderLight",   "#2E2E2E").WithAlpha(76);
 
         // 若 snapshot 有 NW 三組件，使用 Cash + Equity − Liability；否則 fallback MV
         var points = snapshots

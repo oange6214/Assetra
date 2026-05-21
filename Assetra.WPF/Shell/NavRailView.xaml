@@ -37,9 +37,14 @@
 
     <UserControl.Resources>
 
-        <!--  ── Leaf-button visual style (shared by expanded list, popup, bottom items) ──  -->
+        <!--
+            ── Leaf-button visual style (shared by expanded list, popup, bottom items) ──
+            P2.16 — Height 40 → 44 (audit recommends 44-48 for premium financial nav；
+            原 40 跟一般 list item 太接近)。Margin 3,1 vertical keeps inter-item
+            breathing 不變。
+        -->
         <Style x:Key="NavRailItemButton" TargetType="{x:Type ToggleButton}">
-            <Setter Property="Height" Value="40" />
+            <Setter Property="Height" Value="44" />
             <Setter Property="Margin" Value="3,1" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="Background" Value="Transparent" />
@@ -546,10 +551,15 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
+        <!--
+            P2.16 — Background 從 AppSurface (#FFFFFF) 改 AppNavRailBackground (#FBFCFD)，
+            建立 app bg #F5F7FA → NavRail #FBFCFD → 內容 cards #FFFFFF 的三層 hierarchy，
+            audit「精準對比」原則：層級各有色階位置不是全部都灰白堆疊。
+        -->
         <Border
             x:Name="NavPane"
             Grid.Column="0"
-            Background="{DynamicResource AppSurface}"
+            Background="{DynamicResource AppNavRailBackground}"
             BorderBrush="{DynamicResource AppBorderLight}"
             BorderThickness="0,0,1,0">
             <Border.Style>

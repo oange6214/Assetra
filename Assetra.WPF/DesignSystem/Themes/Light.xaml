@@ -10,11 +10,12 @@
     -->
 
     <!--  Backgrounds — Asset Management CIS light theme  -->
-    <SolidColorBrush x:Key="AppBackground"     Color="{StaticResource Color.Cis.Light.Background}" />
-    <SolidColorBrush x:Key="AppSurface"        Color="{StaticResource Color.Cis.Light.Surface}" />
-    <SolidColorBrush x:Key="AppSurfaceAlt"     Color="{StaticResource Color.Brand.SoftWhite}" />
-    <SolidColorBrush x:Key="AppCardBackground" Color="{StaticResource Color.Cis.Light.Surface}" />
-    <SolidColorBrush x:Key="AppHover"          Color="{StaticResource Color.Brand.NavySubtle}" />
+    <SolidColorBrush x:Key="AppBackground"        Color="{StaticResource Color.Cis.Light.Background}" />
+    <SolidColorBrush x:Key="AppSurface"           Color="{StaticResource Color.Cis.Light.Surface}" />
+    <SolidColorBrush x:Key="AppSurfaceAlt"        Color="{StaticResource Color.Brand.SoftWhite}" />
+    <SolidColorBrush x:Key="AppCardBackground"    Color="{StaticResource Color.Cis.Light.Surface}" />
+    <SolidColorBrush x:Key="AppNavRailBackground" Color="{StaticResource Color.Cis.Light.NavRail}" />
+    <SolidColorBrush x:Key="AppHover"             Color="{StaticResource Color.Brand.NavySubtle}" />
 
     <!--  Borders  -->
     <SolidColorBrush x:Key="AppBorder"      Color="{StaticResource Color.Cis.Light.Border}" />
