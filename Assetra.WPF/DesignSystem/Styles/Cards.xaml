@@ -48,30 +48,40 @@
         而不是塞滿色塊（過工業）。
     -->
 
+    <!--
+        P3.1 — 三層 AppCard* 全部對齊 mockup HTML 的 "Wealth Platform"
+        baseline：radius=18 (Radius.2Xl) + shadow=Shadow.Card (14/36/.06)
+        + 統一 padding 20。Hero / Summary / Subtle 差異現在只在 Padding +
+        Margin（hierarchy 用 padding 大小 + margin 區隔），其餘視覺一致 —
+        所有頁面看起來像同家公司做的核心 token。
+    -->
     <Style x:Key="AppCardHero" TargetType="Border">
-        <Setter Property="Padding" Value="20,16" />
+        <Setter Property="Padding" Value="20" />
         <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource Radius.Md}" />
-        <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.2Xl}" />
+        <Setter Property="Margin" Value="0,0,0,16" />
+        <Setter Property="Effect" Value="{StaticResource Shadow.Card}" />
     </Style>
 
     <Style x:Key="AppCardSummary" TargetType="Border">
-        <Setter Property="Padding" Value="{StaticResource Padding.Card}" />
+        <Setter Property="Padding" Value="20" />
         <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource Radius.Sm}" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.2Xl}" />
+        <Setter Property="Effect" Value="{StaticResource Shadow.Card}" />
     </Style>
 
     <Style x:Key="AppCardSubtle" TargetType="Border">
-        <Setter Property="Padding" Value="16,14" />
+        <Setter Property="Padding" Value="20" />
         <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource Radius.Md}" />
-        <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.2Xl}" />
+        <Setter Property="Margin" Value="0,0,0,16" />
+        <Setter Property="Effect" Value="{StaticResource Shadow.Card}" />
     </Style>
 
     <Style x:Key="AppCardHeader" TargetType="TextBlock">

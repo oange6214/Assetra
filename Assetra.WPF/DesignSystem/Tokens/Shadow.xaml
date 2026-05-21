@@ -17,6 +17,21 @@
         ShadowDepth="4"
         Color="#0F172A" />
 
+    <!--
+        P3.1 — Shadow.Card：對應 mockup HTML 的
+        `box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06)`。
+        ShadowDepth=14 (Y offset)、BlurRadius=36、Opacity=0.06 = 非常 subtle。
+        所有 page-level card (AppCardHero / AppCardSummary / AppCardSubtle)
+        都 inherit 這層 elevation，建立「Wealth Platform」均一視覺重量。
+    -->
+    <DropShadowEffect
+        x:Key="Shadow.Card"
+        BlurRadius="36"
+        Direction="270"
+        Opacity="0.06"
+        ShadowDepth="14"
+        Color="#0F172A" />
+
     <DropShadowEffect
         x:Key="Shadow.Dialog"
         BlurRadius="28"

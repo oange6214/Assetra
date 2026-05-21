@@ -4,12 +4,16 @@
         ══════════════════════════════════════════════════════════
         Corner radius scale
         ══════════════════════════════════════════════════════════
-        Xs (2)  : indicator chips / pill dots / tiny color swatches
-        Sm (4)  : default for inputs, small badges
-        Md (6)  : compact cards
-        Lg (8)  : standard cards
-        Xl (12) : larger card shells / dialogs
-        Card.Radius (16, in DesignTokens.xaml) : page-level hero cards
+        Xs (2)   : indicator chips / pill dots / tiny color swatches
+        Sm (4)   : default for inputs, small badges
+        Md (6)   : compact cards
+        Lg (8)   : standard cards
+        Xl (12)  : larger card shells / dialogs
+        2Xl (18) : page-level「Wealth Platform」 cards (P3.1 — 對應
+                   mockup HTML 的 radius 18px，整個 Assetra 各頁 hero /
+                   summary / analytics cards 統一用這個，建立「all pages
+                   look like same company」 的 baseline)
+        Full     : pill / circular badge
     -->
 
     <CornerRadius x:Key="Radius.None">0</CornerRadius>
@@ -18,6 +22,7 @@
     <CornerRadius x:Key="Radius.Md">6</CornerRadius>
     <CornerRadius x:Key="Radius.Lg">8</CornerRadius>
     <CornerRadius x:Key="Radius.Xl">12</CornerRadius>
+    <CornerRadius x:Key="Radius.2Xl">18</CornerRadius>
     <CornerRadius x:Key="Radius.Full">999</CornerRadius>
 
 </ResourceDictionary>
