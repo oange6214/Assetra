@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -24,8 +25,11 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     private readonly PortfolioGroupCatalog? _groupCatalog;
     private readonly Dispatcher _dispatcher;
 
-    /// <summary>Portfolio-Groups-Refactor P4 — XAML 用：catalog 存在且有 group 才暴露 toggle。</summary>
-    public bool HasPortfolioGroups => _groupCatalog is { Groups.Count: > 0 };
+    /// <summary>
+    /// Portfolio-Groups-Refactor P4 — XAML 用：catalog 存在且有 user-created group 才暴露 toggle。
+    /// P3.9 — 排除 IsSystem default group (見 PortfolioViewModel.HasPortfolioGroups 的完整理由)。
+    /// </summary>
+    public bool HasPortfolioGroups => _groupCatalog?.Groups.Any(g => !g.IsSystem) == true;
 
     /// <summary>
     /// Allocation 分組維度 toggle。三模式：

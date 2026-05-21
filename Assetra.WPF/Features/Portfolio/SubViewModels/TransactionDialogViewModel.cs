@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive.Linq;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
@@ -106,8 +107,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// <summary>Portfolio-Groups-Refactor P3 — 共用群組目錄（從 DI 注入），可為 null。</summary>
     public PortfolioGroupCatalog? GroupCatalog { get; private set; }
 
-    /// <summary>True 當啟用群組功能（catalog 非 null 且有 row）— XAML 由此決定 ComboBox 可見性。</summary>
-    public bool IsGroupSelectorVisible => GroupCatalog is { Groups.Count: > 0 };
+    /// <summary>
+    /// True 當啟用群組功能（catalog 非 null 且至少一個 user-created group）— XAML 由此
+    /// 決定 ComboBox 可見性。P3.9 — 排除 IsSystem default group (見
+    /// PortfolioViewModel.HasPortfolioGroups 的完整理由)。
+    /// </summary>
+    public bool IsGroupSelectorVisible => GroupCatalog?.Groups.Any(g => !g.IsSystem) == true;
 
     /// <summary>使用者在 trade dialog 內選定的群組。null = 沿用 PortfolioGroup.DefaultId。</summary>
     [ObservableProperty]

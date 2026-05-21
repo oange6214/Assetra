@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
@@ -26,8 +27,11 @@ public sealed partial class GoalsViewModel : ObservableObject
     /// </summary>
     public PortfolioGroupCatalog? GroupCatalog { get; }
 
-    /// <summary>True 當啟用群組功能（catalog 非 null 且有 row）。</summary>
-    public bool IsGroupSelectorVisible => GroupCatalog is { Groups.Count: > 0 };
+    /// <summary>
+    /// True 當啟用群組功能（catalog 非 null 且至少一個 user-created group）。
+    /// P3.9 — 排除 IsSystem default group (見 PortfolioViewModel.HasPortfolioGroups)。
+    /// </summary>
+    public bool IsGroupSelectorVisible => GroupCatalog?.Groups.Any(g => !g.IsSystem) == true;
 
     /// <summary>Add/Edit form 內當前選擇的 group。null = 不連結（沿用 LinkedAssetClass）。</summary>
     [ObservableProperty] private PortfolioGroup? _addPortfolioGroup;

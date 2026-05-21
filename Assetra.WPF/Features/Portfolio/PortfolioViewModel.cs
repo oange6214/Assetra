@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Assetra.Application.Portfolio.Contracts;
@@ -83,7 +84,14 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     public Assetra.WPF.Features.PortfolioGroups.PortfolioGroupCatalog? GroupCatalog { get; private set; }
 
     /// <summary>XAML 用：是否暴露 group chip row。catalog 存在且至少 1 個 group 時 true。</summary>
-    public bool HasPortfolioGroups => GroupCatalog is { Groups.Count: > 0 };
+    /// <summary>
+    /// P3.9 — 排除 system 預設那一個 group。判定改成「user 主動建立過群組」才視為
+    /// 有群組功能。Default group (IsSystem=true) 是 schema migration 自動建的、所有
+    /// trade/position 預設掛上去，UI 上單獨顯示「預設群組」 chip 跟「全部群組」 等價
+    /// 沒功能。改成排除 IsSystem 後 — user 沒主動建群組 → 整條群組 UI 自動消失，
+    /// 真有建群組 → UI 出現可用。DB schema / Goals / FIRE 自動追蹤功能全保留。
+    /// </summary>
+    public bool HasPortfolioGroups => GroupCatalog?.Groups.Any(g => !g.IsSystem) == true;
 
     IReadOnlyList<PortfolioRowViewModel> Contracts.IPortfolioPositionFeed.Positions => Positions;
 

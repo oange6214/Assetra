@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Fire;
 using Assetra.Core.Models;
@@ -27,7 +28,8 @@ public sealed partial class FireViewModel : ObservableObject
     /// </summary>
     public PortfolioGroupCatalog? GroupCatalog { get; }
 
-    public bool HasPortfolioGroups => GroupCatalog is { Groups.Count: > 0 };
+    // P3.9 — 排除 IsSystem default group (見 PortfolioViewModel.HasPortfolioGroups 的完整理由)。
+    public bool HasPortfolioGroups => GroupCatalog?.Groups.Any(g => !g.IsSystem) == true;
 
     /// <summary>
     /// 使用者在 FIRE 頁選的 group。Set 時若 catalog 注入了 <see cref="IGroupBalanceQueryService"/>，
