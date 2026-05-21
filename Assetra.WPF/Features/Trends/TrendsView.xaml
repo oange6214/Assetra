@@ -106,8 +106,8 @@
             </StackPanel>
         </DockPanel>
 
-        <!--  ── Chart / empty state — wrapped in FormCard for visual consistency ──  -->
-        <Border Grid.Row="3" Style="{StaticResource FormCard}">
+        <!--  ── Chart / empty state — P3.6 migrated to AppCardSummary baseline ──  -->
+        <Border Grid.Row="3" Style="{StaticResource AppCardSummary}">
             <Grid Style="{StaticResource PageContentGrid}">
                 <lvc:CartesianChart
                     Background="Transparent"
@@ -137,10 +137,10 @@
             風險指標（最大回撤 / 波動率 / Sharpe / HHI）改放在圖表「下方」次要區，
             非高頻使用者不該被它們淹沒。
         -->
+        <!--  P3.6 Hero KPI summary card — migrated to AppCardSummary baseline  -->
         <Border Grid.Row="1"
                 Margin="0,12,0,0"
-                Padding="20,16"
-                Style="{StaticResource FormCard}"
+                Style="{StaticResource AppCardSummary}"
                 Visibility="{Binding HasKpis, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -296,15 +296,16 @@
             </Border>
         </UniformGrid>
 
-        <!--  ── Stage 1: 對標比較區（4 個固定 benchmark TWR）──  -->
+        <!--
+            ── Stage 1: 對標比較區（4 個固定 benchmark TWR）──
+            P3.6 — migrated to AppCardSummary baseline (Radius.2Xl + Shadow.Card +
+            BorderLight) — 跟頁面上方 Hero / Chart cards 同 design language。
+        -->
         <Border
             Grid.Row="4"
             Margin="0,8,0,0"
-            Padding="14,10"
-            Background="{DynamicResource AppCardBackground}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="1"
-            CornerRadius="{StaticResource Radius.Sm}"
+            Padding="16"
+            Style="{StaticResource AppCardSummary}"
             Visibility="{Binding HasBenchmark, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>
                 <DockPanel Margin="0,0,0,6" LastChildFill="False">

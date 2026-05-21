@@ -157,7 +157,11 @@
     </UserControl.Resources>
 
     <Grid Style="{StaticResource PageRootGrid}">
-        <Border Style="{StaticResource FormCard}">
+        <!--
+            P3.6 — Calendar outer wrapper migrated to AppCardSummary baseline
+            跟其他頁面 (Overview / Trend / Allocation) 同 design language。
+        -->
+        <Border Style="{StaticResource AppCardSummary}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />

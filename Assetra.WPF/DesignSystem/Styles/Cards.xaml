@@ -12,12 +12,20 @@
         inside a form.
     -->
 
+    <!--
+        P3.6 — FormCard 對齊 P3.1 baseline。原本 BorderBrush=AppBorder + Radius.Lg
+        + 無 shadow，跟新的 AppCardSummary (BorderLight + Radius.2Xl + Shadow.Card)
+        並排時邊框粗細不齊、圓角大小不一造成「card 不一致」視覺破綻。
+        現在 FormCard 跟 AppCardSummary 視覺完全等價 — 70+ 使用點自動同步升級，
+        所有頁面 page-level cards 看起來像同一家公司做的。
+    -->
     <Style x:Key="FormCard" TargetType="Border">
-        <Setter Property="Padding" Value="16" />
-        <Setter Property="Background" Value="{DynamicResource AppSurface}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderLight}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource Radius.Lg}" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.2Xl}" />
+        <Setter Property="Effect" Value="{StaticResource Shadow.Card}" />
     </Style>
 
     <Style x:Key="FormSectionTitle" TargetType="TextBlock">
