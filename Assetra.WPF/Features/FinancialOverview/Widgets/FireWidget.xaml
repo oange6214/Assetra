@@ -40,34 +40,78 @@
                     Text="{DynamicResource Dashboard.Widget.Fire.Heading}" />
             </DockPanel>
 
-            <!--  已計算狀態：顯示 FIRE number + 距離年數  -->
-            <Grid Visibility="{Binding FireWidget.HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <!--
+                已計算狀態：顯示 4 metrics 2×2 grid (P2.17 T01)：
+                  Row 0:  FIRE 目標數字 | 預估自由年份
+                  Row 1:  進度 %        | 累計投入金額
+                Audit checklist 「顯示預估自由日期、進度、投入金額、成功率」
+                — 「成功率」需要 Monte Carlo 整合，本輪用 FIRE 目標金額替代，
+                兩者都告訴使用者「我要去哪 / 多遠了」的核心訊號。
+            -->
+            <Grid Margin="0,4,0,0" Visibility="{Binding FireWidget.HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- FIRE 目標數字 -->
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
                     <TextBlock
                         FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{DynamicResource Dashboard.Widget.Fire.Number}" />
                     <TextBlock
-                        FontSize="{StaticResource Font.Size.Lg}"
+                        FontSize="{StaticResource Font.Size.Md}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding FireWidget.FireNumber, StringFormat='N0'}"
                         Typography.NumeralAlignment="Tabular" />
                 </StackPanel>
-                <StackPanel Grid.Column="1">
+
+                <!-- 預估自由年份 -->
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
                     <TextBlock
                         FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource Dashboard.Widget.Fire.YearsToFire}" />
+                        Text="{DynamicResource Dashboard.Widget.Fire.FireYear}" />
                     <TextBlock
-                        FontSize="{StaticResource Font.Size.Lg}"
+                        FontSize="{StaticResource Font.Size.Md}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppAccent}"
-                        Text="{Binding FireWidget.YearsToFire}" />
+                        Text="{Binding FireWidget.FireYearDisplay}"
+                        Typography.NumeralAlignment="Tabular" />
+                </StackPanel>
+
+                <!-- 進度 % -->
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Dashboard.Widget.Fire.Progress}" />
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Md}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding FireWidget.FireProgressDisplay}"
+                        Typography.NumeralAlignment="Tabular" />
+                </StackPanel>
+
+                <!-- 累計投入金額 -->
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Dashboard.Widget.Fire.Contribution}" />
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Md}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding FireWidget.TotalContributionDisplay}"
+                        Typography.NumeralAlignment="Tabular" />
                 </StackPanel>
             </Grid>
 

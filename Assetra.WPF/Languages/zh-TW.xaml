@@ -1322,6 +1322,9 @@
     <sys:String x:Key="Dashboard.Widget.Fire.Heading">FIRE 進度</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.Number">FIRE 目標數字</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.YearsToFire">距離財務自由</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.FireYear">預估自由年份</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.Progress">完成進度</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.Contribution">累計投入</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.OpenLink">→ 前往 FIRE 計算</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.Empty">預測你的財務自由時間 — 輸入儲蓄率與預期報酬，看看幾歲可以退休。</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.CalculateNow">開始退休模擬</sys:String>

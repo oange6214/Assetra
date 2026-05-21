@@ -7,9 +7,8 @@
 
 ## 🟢 High CP (1-2h each)
 
-- [ ] **T01** — FIRE widget 4 metrics（預估自由日期 / 進度 / 投入金額 / 成功率）
-  - FireViewModel 加 `FireDateDisplay` / `ProgressPercent` / `MonthlyContributionDisplay` / `SuccessRate` computed properties
-  - FireWidget.xaml 在 HasCalculatedResult=true 區塊展開 metrics rows
+- [x] **T01** — FIRE widget 4 metrics（FIRE 目標 / 預估自由年份 / 完成進度 / 累計投入）
+  - 「成功率」 audit 提的需要 Monte Carlo 整合，本輪用 FIRE 目標金額替代
 - [ ] **T02** — Skeleton 擴展剩餘 Summary tier cards（總負債 / 淨資產 mini / 資產組成）
 - [ ] **T03** — Per-type TxForms label margin 4 → 6（Sell/CashDiv/StockDiv/CashFlow/Income/Loan/CreditCard/Transfer 共 8 forms）
 - [ ] **T04** — Keyboard shortcuts help dialog（Ctrl+/）— 列現有快捷鍵
@@ -39,3 +38,5 @@
 ## 完成日誌
 
 (每完成一項 append 一行：`✅ Txx — 簡述 (commit hash)`)
+
+✅ T01 — FIRE widget 4 metrics (FIRE 目標 / 預估自由年份 / 完成進度 / 累計投入)

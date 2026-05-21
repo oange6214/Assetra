@@ -53,19 +53,83 @@ public sealed partial class FireViewModel : ObservableObject
         }
     }
 
-    [ObservableProperty] private string _currentNetWorth = "1,000,000";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FireProgressDisplay))]
+    [NotifyPropertyChangedFor(nameof(FireProgressValue))]
+    private string _currentNetWorth = "1,000,000";
     [ObservableProperty] private string _annualExpenses = "600,000";
-    [ObservableProperty] private string _annualSavings = "300,000";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TotalContributionDisplay))]
+    private string _annualSavings = "300,000";
     [ObservableProperty] private string _expectedAnnualReturn = "0.05";
     [ObservableProperty] private string _withdrawalRate = "0.04";
 
     [ObservableProperty] private string? _errorMessage;
-    [ObservableProperty] private decimal _fireNumber;
-    [ObservableProperty] private string _yearsToFire = string.Empty;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FireProgressDisplay))]
+    [NotifyPropertyChangedFor(nameof(FireProgressValue))]
+    private decimal _fireNumber;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FireYearDisplay))]
+    [NotifyPropertyChangedFor(nameof(TotalContributionDisplay))]
+    private string _yearsToFire = string.Empty;
+
     [ObservableProperty] private decimal _projectedNetWorthAtFire;
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveToGoalsCommand))]
     private bool _hasCalculatedResult;
+
+    /// <summary>
+    /// P2.17 T01 — 預估自由年份。從今天加 YearsToFire 年後的西元年份顯示。
+    /// YearsToFire 是 string ("—" or "N") — 沒有有效年數時回傳「—」。
+    /// </summary>
+    public string FireYearDisplay
+    {
+        get
+        {
+            if (!int.TryParse(YearsToFire, NumberStyles.Integer, CultureInfo.InvariantCulture, out var years) || years < 0)
+                return "—";
+            return DateTime.Today.AddYears(years).Year.ToString(CultureInfo.InvariantCulture);
+        }
+    }
+
+    /// <summary>
+    /// P2.17 T01 — 進度 = CurrentNetWorth / FireNumber, clamp 0-100。
+    /// FireNumber=0 或 CurrentNetWorth 不可 parse 時回 0。
+    /// </summary>
+    public decimal FireProgressValue
+    {
+        get
+        {
+            if (FireNumber <= 0m) return 0m;
+            if (!TryParseDecimal(CurrentNetWorth, out var nw)) return 0m;
+            var pct = nw / FireNumber * 100m;
+            return Math.Clamp(pct, 0m, 100m);
+        }
+    }
+
+    /// <summary>P2.17 T01 — 進度顯示字串「34%」格式。</summary>
+    public string FireProgressDisplay =>
+        HasCalculatedResult ? FireProgressValue.ToString("F0", CultureInfo.InvariantCulture) + "%" : "—";
+
+    /// <summary>
+    /// P2.17 T01 — 累計投入金額 = AnnualSavings × YearsToFire。
+    /// 給使用者「我大概要投入多少」的整體感。
+    /// </summary>
+    public string TotalContributionDisplay
+    {
+        get
+        {
+            if (!HasCalculatedResult) return "—";
+            if (!int.TryParse(YearsToFire, NumberStyles.Integer, CultureInfo.InvariantCulture, out var years) || years <= 0)
+                return "—";
+            if (!TryParseDecimal(AnnualSavings, out var sav) || sav <= 0m)
+                return "—";
+            var total = sav * years;
+            return total.ToString("N0", CultureInfo.InvariantCulture);
+        }
+    }
 
     private readonly ObservableCollection<FireWealthPoint> _wealthPath = [];
     public ReadOnlyObservableCollection<FireWealthPoint> WealthPath { get; }

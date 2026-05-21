@@ -1316,6 +1316,9 @@
     <sys:String x:Key="Dashboard.Widget.Fire.Heading">FIRE progress</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.Number">FIRE number</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.YearsToFire">Years to FI</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.FireYear">FI year</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.Progress">Progress</sys:String>
+    <sys:String x:Key="Dashboard.Widget.Fire.Contribution">Total saved</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.OpenLink">→ Open FIRE calculator</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.Empty">Project your financial freedom — enter savings rate and expected return to see your retirement timeline.</sys:String>
     <sys:String x:Key="Dashboard.Widget.Fire.CalculateNow">Start retirement simulation</sys:String>
