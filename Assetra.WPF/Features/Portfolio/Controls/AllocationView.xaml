@@ -70,12 +70,15 @@
                     <ColumnDefinition Width="1.2*" MinWidth="520" />
                 </Grid.ColumnDefinitions>
 
-                <!--  Left: ranked allocation list. Treemap hides tiny positions such as DRAM.  -->
+                <!--
+                    Left: Allocation Visualization (bars + symbol + %)。
+                    P3.5 — migrated to AppCardSummary baseline (Radius.2Xl /
+                    Shadow.Card / BorderLight)，跟 Overview / Trend 同 design language。
+                -->
                 <Border
                     Grid.Column="0"
                     Margin="0,0,8,0"
-                    Padding="16"
-                    Style="{StaticResource FormCard}">
+                    Style="{StaticResource AppCardSummary}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -250,12 +253,17 @@
                     </Grid>
                 </Border>
 
-                <!--  Right: precise asset table for sorting and numeric comparison.  -->
+                <!--
+                    Right: Holdings Table (現價/市值/實際比重/淨損益)。
+                    P3.5 — same AppCardSummary baseline but Padding=0 override
+                    給 DataGrid fill 整張 card。ClipToBounds=true 確保 DataGrid
+                    不溢出 card 圓角。
+                -->
                 <Border
                     Grid.Column="1"
                     Margin="8,0,0,0"
                     Padding="0"
-                    Style="{StaticResource FormCard}"
+                    Style="{StaticResource AppCardSummary}"
                     ClipToBounds="True">
                 <DataGrid
                     AutoGenerateColumns="False"
