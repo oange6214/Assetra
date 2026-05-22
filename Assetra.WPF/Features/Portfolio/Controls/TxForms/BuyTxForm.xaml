@@ -483,9 +483,10 @@
                     Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <!--
-                    跨幣別 banner — Buy.IsCrossCurrency=true (標的幣別 ≠ 帳戶幣別) 時顯示，
-                    白話告訴使用者「為什麼底下兩個額外欄位變必填」。
-                    MultiCurrency-Trade-Refactor P3。
+                    P5.7 — 跨幣別表單重排（複委託優化）：
+                    ① Banner 文案縮短，只給核心提示
+                    ② ActualCashAmount 升級為主欄位（直接抄券商實付 TWD）
+                    ③ FxRate 收進 Expander「進階」摺疊區，預設關（系統反推）
                 -->
                 <Border
                     Margin="0,12,0,0"
@@ -500,56 +501,40 @@
                             FontSize="{StaticResource Font.Size.Xs}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{DynamicResource Portfolio.Tx.CrossCurrency.Banner}" />
+                            Text="{DynamicResource Portfolio.Tx.CrossCurrency.Banner.Short}" />
                         <TextBlock
                             Margin="0,4,0,0"
                             FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextSecondary}"
-                            Text="{DynamicResource Portfolio.Tx.CrossCurrency.Hint}"
+                            Text="{DynamicResource Portfolio.Tx.CrossCurrency.Hint.Short}"
                             TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
 
-                <!--
-                    FX rate (跨幣別模式才顯示)。同幣別時隱藏 → Trade.FxRate = null = implicit 1.0。
-                -->
+                <!--  Primary：ActualCashAmount（複委託主欄位）  -->
                 <StackPanel Visibility="{Binding Buy.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock
-                        Margin="0,14,0,6"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Portfolio.Tx.FxRate}" />
-                    <TextBox
-                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                        Text="{Binding Buy.FxRate, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
-                        Style="{StaticResource FormFieldError}"
-                        Text="{Binding Buy.FxRateError}"
-                        Visibility="{Binding Buy.FxRateError, Converter={StaticResource StringToVisibilityConverter}}" />
-                    <TextBlock
-                        Margin="0,2,0,0"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource Portfolio.Tx.FxRate.Hint}"
-                        TextWrapping="Wrap" />
-                </StackPanel>
-
-                <!--
-                    P5.6 — 「券商實際扣款金額」欄位重新暴露（曾於 P3 暫時隱藏）。
-                    跨幣別模式（IsCrossCurrency=true）才顯示，輸入幣別 = 扣款
-                    帳戶幣別（例：複委託 USD 標的、TWD 帳戶 → 這格填 TWD 數字）。
-                    Validation 接受「FxRate 或 ActualCashAmount 擇一」，所以
-                    複委託 user 可直接抄券商交易明細的 TWD 扣款數字，不必自己
-                    算匯率（FxRate=ActualCashAmount/(Price×Qty) 系統反推）。
-                -->
-                <StackPanel Visibility="{Binding Buy.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock
-                        Margin="0,14,0,6"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Portfolio.Tx.ActualCashAmount}" />
+                    <DockPanel Margin="0,14,0,6" LastChildFill="False">
+                        <TextBlock
+                            DockPanel.Dock="Left"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Tx.ActualCashAmount}" />
+                        <Border
+                            Margin="8,0,0,0"
+                            Padding="6,2"
+                            DockPanel.Dock="Left"
+                            VerticalAlignment="Center"
+                            Background="{DynamicResource AppDangerSubtle}"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppDanger}"
+                                Text="{DynamicResource Portfolio.Tx.ActualCashAmount.RequiredBadge}" />
+                        </Border>
+                    </DockPanel>
                     <TextBox
                         behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                         Text="{Binding Buy.ActualCashAmount, UpdateSourceTrigger=PropertyChanged}" />
@@ -564,6 +549,36 @@
                         Text="{DynamicResource Portfolio.Tx.ActualCashAmountHint}"
                         TextWrapping="Wrap" />
                 </StackPanel>
+
+                <!--  Advanced：FxRate 摺疊區。系統會反推；只有 power user 想自填才展開。  -->
+                <Expander
+                    Margin="0,12,0,0"
+                    Header="{DynamicResource Portfolio.Tx.Advanced}"
+                    IsExpanded="False"
+                    Style="{StaticResource AppExpander}"
+                    Visibility="{Binding Buy.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel>
+                        <TextBlock
+                            Margin="0,4,0,6"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Tx.FxRate}" />
+                        <TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            Text="{Binding Buy.FxRate, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Style="{StaticResource FormFieldError}"
+                            Text="{Binding Buy.FxRateError}"
+                            Visibility="{Binding Buy.FxRateError, Converter={StaticResource StringToVisibilityConverter}}" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.Tx.FxRate.Hint}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Expander>
             </StackPanel>
         </StackPanel>
     </StackPanel>

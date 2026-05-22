@@ -695,6 +695,11 @@
     <sys:String x:Key="Portfolio.Tx.ActualCashAmountHint">For sub-brokerage or FX settlement, enter the broker's actual cash debit. Leave blank to estimate from price × shares + fee. Required for cross-currency debits.</sys:String>
     <!-- MultiCurrency-Trade-Refactor P3 -->
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.Banner">Cross-currency trade (instrument currency ≠ cash account currency)</sys:String>
+    <!--  P5.7 — shorter cross-currency banner; promotes ActualCashAmount as primary; FxRate goes 進階  -->
+    <sys:String x:Key="Portfolio.Tx.CrossCurrency.Banner.Short">Cross-currency trade (sub-brokerage)</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint.Short">Fill the "Actual cash amount" below (from your broker statement), or open "Advanced" to set the FX rate manually.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.ActualCashAmount.RequiredBadge">Required for sub-brokerage</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Advanced">Advanced</sys:String>
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint">Detected a cross-currency trade (e.g. US stock debited from a TWD account via sub-brokerage). To record cost basis and cash balance correctly, fill in the FX rate or the broker's actual cash debit — either one works; if both are provided, the actual cash debit takes precedence.</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate">FX rate (instrument currency → account currency)</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate.Hint">e.g. USD instrument + TWD account → enter the trade-day rate (such as 31.5). Optional — if left blank, the actual cash debit is used as the source of truth.</sys:String>

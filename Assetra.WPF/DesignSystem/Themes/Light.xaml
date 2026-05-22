@@ -45,6 +45,8 @@
 
     <!--  Semantic — destructive  -->
     <SolidColorBrush x:Key="AppDanger" Color="{StaticResource Color.Red.600}" />
+    <!--  P5.7 — soft red wash for "required for sub-brokerage" badges & danger-tinted backgrounds  -->
+    <SolidColorBrush x:Key="AppDangerSubtle" Color="{StaticResource Color.Red.50}" />
 
     <!--  Brand primary — Navy  -->
     <SolidColorBrush x:Key="AppAccent"       Color="{StaticResource Color.Brand.Navy}" />

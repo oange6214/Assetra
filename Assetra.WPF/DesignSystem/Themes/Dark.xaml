@@ -42,6 +42,8 @@
 
     <!--  Semantic — destructive  -->
     <SolidColorBrush x:Key="AppDanger" Color="{StaticResource Color.Red.500}" />
+    <!--  P5.7 — soft red wash for "required for sub-brokerage" badges & danger-tinted backgrounds. Dark mode uses Red.500 with low opacity via direct color.  -->
+    <SolidColorBrush x:Key="AppDangerSubtle" Color="#33EF4444" />
 
     <!--  Brand primary — Dark variant  -->
     <SolidColorBrush x:Key="AppAccent" Color="{StaticResource Color.Brand.Gold}" />

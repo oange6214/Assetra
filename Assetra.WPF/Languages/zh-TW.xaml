@@ -693,6 +693,11 @@
     <sys:String x:Key="Portfolio.Tx.ActualCashAmountHint">複委託或外幣換匯後，請填券商實際扣款；留空時以成交價 × 股數 + 手續費估算。跨幣別扣款時必填。</sys:String>
     <!--  MultiCurrency-Trade-Refactor P3 — 跨幣別 banner + FX rate  -->
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.Banner">跨幣別交易（標的幣別 ≠ 扣款帳戶幣別）</sys:String>
+    <!--  P5.7 — shorter cross-currency banner; promotes ActualCashAmount as primary; FxRate goes 進階  -->
+    <sys:String x:Key="Portfolio.Tx.CrossCurrency.Banner.Short">跨幣別交易（複委託）</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint.Short">請填寫下方「實際扣款金額」（直接抄券商交易明細），或展開「進階」自訂匯率。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.ActualCashAmount.RequiredBadge">複委託請填</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Advanced">進階</sys:String>
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint">系統偵測到此交易跨幣別（例：美股以台幣帳戶扣款的複委託）。為了正確記錄持倉成本與現金餘額，請填寫匯率或券商實際扣款金額；兩者擇一即可，皆填則以實際扣款為權威。</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate">匯率（標的幣別 → 帳戶幣別）</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate.Hint">例：標的為 USD、帳戶為 TWD，請填當日匯率（如 31.5）。可留空，僅以實際扣款金額為準。</sys:String>
