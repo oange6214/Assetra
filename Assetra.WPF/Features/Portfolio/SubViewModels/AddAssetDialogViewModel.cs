@@ -722,6 +722,12 @@ public partial class AddAssetDialogViewModel : ObservableObject
 
     private string ResolveInstrumentCurrencyForBuy()
     {
+        // P5.5 — 優先用 BuyContext.InstrumentCurrency（已被 TxCurrency 同步覆寫過），
+        // 這樣使用者透過 幣別 dropdown 手動改的選擇可以傳到 cross-currency validation。
+        // 沒同步到時 fallback 到 AddSymbolCurrency（資產原生幣別）。
+        if (!string.IsNullOrWhiteSpace(BuyContext.InstrumentCurrency))
+            return BuyContext.InstrumentCurrency.Trim().ToUpperInvariant();
+
         if (!string.IsNullOrWhiteSpace(AddSymbolCurrency))
             return AddSymbolCurrency.Trim().ToUpperInvariant();
 

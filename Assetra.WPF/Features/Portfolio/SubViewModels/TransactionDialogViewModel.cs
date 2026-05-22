@@ -364,6 +364,14 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     partial void OnTxCurrencyChanged(string value)
     {
         if (!_suppressCurrencyDirty) _userTouchedCurrency = true;
+
+        // P5.5 — 把 TxCurrency 同步到 Buy.InstrumentCurrency。原本 Buy.InstrumentCurrency
+        // 只跟 AddSymbolCurrency（資產原生幣別）綁，user 從 幣別 dropdown 手動改
+        // 不會傳遞到 Buy panel 的 IsCrossCurrency 判定 → 即使選了跟 cash account
+        // 同幣別也會誤觸發「跨幣別買入請填寫匯率…」提示。
+        // 同步後 Buy.IsCrossCurrency 會跟著 TxCurrency 走，validation 才會放行。
+        if (!string.IsNullOrWhiteSpace(value))
+            Buy.InstrumentCurrency = value.Trim().ToUpperInvariant();
     }
 
     /// <summary>
