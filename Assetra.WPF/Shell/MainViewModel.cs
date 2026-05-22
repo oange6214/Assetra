@@ -322,6 +322,19 @@ public partial class MainViewModel : ObservableObject, IDisposable
                 UpdateStatusBarTodayReturn();
         };
         UpdateStatusBarTodayReturn();
+
+        // P4.9h — Navrail 切換 section 時自動關閉所有 detail side panel。
+        // panel 是「當前 page context」的延伸，使用者切到別的 section 後，
+        // 還顯示舊 panel 是 leak（例：在投資資產開緯創 panel → 切到資金帳戶
+        // → 緯創 panel 還在）。HasSelectedXxxRow gate 走 SelectedXxxRow，把它
+        // null 掉 panel 就會自動隱藏 + 觸發 OnSelectedXxxRowChanged 清狀態。
+        NavRail.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName != nameof(NavRailViewModel.ActiveSection)) return;
+            Portfolio.SelectedPositionRow = null;
+            Portfolio.SelectedCashRow = null;
+            Portfolio.SelectedLiabilityRow = null;
+        };
     }
 
     /// <summary>
