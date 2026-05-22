@@ -1339,12 +1339,7 @@
     <sys:String x:Key="Trends.Period.All">全部</sys:String>
     <sys:String x:Key="Trends.Empty">尚無歷史快照</sys:String>
     <sys:String x:Key="Trends.Hint">資料來自每日投資組合快照（市值）</sys:String>
-    <sys:String x:Key="Trends.Repair.Label">修復可疑點：</sys:String>
-    <sys:String x:Key="Trends.Repair.Button">重算這天</sys:String>
-    <sys:String x:Key="Trends.Repair.Success">已重算 {0:yyyy-MM-dd} 的 snapshot</sys:String>
-    <sys:String x:Key="Trends.Repair.Failed">找不到該日的歷史價格或交易記錄</sys:String>
-    <sys:String x:Key="Trends.Repair.Error">修復失敗：{0}</sys:String>
-    <sys:String x:Key="Trends.Repair.Unavailable">本機未啟用快照修復服務</sys:String>
+    <!--  Trends.Repair.* keys removed P5.1 — 重算這天 button & UI removed (chart 改算真實淨值後 partial-price 假象不存在)  -->
     <sys:String x:Key="Trends.CustomRange">自訂範圍</sys:String>
     <!--  Stage 1 (Dashboard consolidation)：區間 KPI + 對標  -->
     <sys:String x:Key="Trends.Kpi.StartValue">期初</sys:String>

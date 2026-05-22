@@ -148,16 +148,6 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     private readonly System.Collections.ObjectModel.ObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow> _customBenchmarks = [];
     public System.Collections.ObjectModel.ReadOnlyObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow> CustomBenchmarks { get; }
 
-    // 修復可疑點（partial-price snapshot 假象）— 由「修復這天」按鈕綁定。
-    // 可選注入：給 unit test / 簡化情境留路。
-    private readonly IPortfolioHistoryMaintenanceService? _maintenance;
-
-    /// <summary>DatePicker 綁定的「要修復的日期」。預設今日，按鈕觸發 RepairDate 命令。</summary>
-    [ObservableProperty] private DateTime _repairTargetDate = DateTime.Today;
-
-    /// <summary>修復後顯示的訊息（success / failure），3 秒後自動清空。</summary>
-    [ObservableProperty] private string _repairStatusMessage = string.Empty;
-
     public PortfolioHistoryViewModel(
         IPortfolioHistoryQueryService historyQueryService,
         ILocalizationService? localization = null,
@@ -169,8 +159,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         ITradeRepository? trades = null,
         IVolatilityCalculator? volatility = null,
         ISharpeRatioCalculator? sharpe = null,
-        IConcentrationAnalyzer? concentration = null,
-        IPortfolioHistoryMaintenanceService? maintenance = null)
+        IConcentrationAnalyzer? concentration = null)
     {
         _historyQueryService = historyQueryService;
         _localization = localization ?? NullLocalizationService.Instance;
@@ -183,7 +172,6 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         _volatility = volatility;
         _sharpe = sharpe;
         _concentration = concentration;
-        _maintenance = maintenance;
         HasDrawdown = _drawdown is not null;
         HasBenchmark = _benchmark is not null;
         HasVolatility = _volatility is not null;
@@ -263,42 +251,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         }
     }
 
-    /// <summary>
-    /// 「修復這天」按鈕：用歷史收盤價重算 <see cref="RepairTargetDate"/> 那一日的 snapshot
-    /// 並 UPSERT，覆蓋既有可能是 partial-price 假象的那筆。重算後重新載入 chart。
-    /// </summary>
-    [RelayCommand]
-    private async Task RepairDate()
-    {
-        if (_maintenance is null)
-        {
-            RepairStatusMessage = _localization.Get(
-                "Trends.Repair.Unavailable", "本機未啟用快照修復服務");
-            return;
-        }
-        try
-        {
-            var date = DateOnly.FromDateTime(RepairTargetDate);
-            var ok = await _maintenance.RepairSnapshotAsync(date);
-            if (ok)
-            {
-                await LoadAsync();
-                RepairStatusMessage = string.Format(
-                    _localization.Get("Trends.Repair.Success", "已重算 {0:yyyy-MM-dd} 的 snapshot"),
-                    date.ToDateTime(TimeOnly.MinValue));
-            }
-            else
-            {
-                RepairStatusMessage = _localization.Get(
-                    "Trends.Repair.Failed", "找不到該日的歷史價格或交易記錄");
-            }
-        }
-        catch (Exception ex)
-        {
-            RepairStatusMessage = string.Format(
-                _localization.Get("Trends.Repair.Error", "修復失敗：{0}"), ex.Message);
-        }
-    }
+    // P5.1 — 「重算這天」/ partial-price 修復按鈕移除。原本是針對「曲線只算
+    // 投資 MarketValue 時某日缺價就跳水」的 workaround；現在曲線改用真實淨值
+    // (Cash + Equity − Liability fallback MarketValue) 後，假象問題消失，
+    // workaround 也跟著移除。
 
     // Chart building
 
@@ -624,20 +580,33 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         return points;
     }
 
+    /// <summary>
+    /// P5.1 — 每點數值改算真實淨值（跟總覽「投資焦點」widget 公式對齊）：
+    /// <list type="bullet">
+    ///   <item><description>v0.30+ snapshot（含 CashValue + EquityValue）：
+    ///     <c>Cash + Equity − Liability</c></description></item>
+    ///   <item><description>舊版 snapshot fallback：<c>MarketValue</c>（migration 期間混用）</description></item>
+    /// </list>
+    /// 再走 FX 換算到 base currency。原 partial-price snapshot 假象（某日 MV
+    /// 跳水）會被新公式自動覆蓋 — 因為 Cash + Liability 通常不跳，所以淨值
+    /// 即使遇到缺價也只小幅波動。「重算這天」修復按鈕也跟著移除。
+    /// </summary>
     private async Task<decimal?> ConvertMarketValueToBaseAsync(PortfolioDailySnapshot snapshot)
     {
+        var rawValue = ResolveNetWorthValue(snapshot);
+
         var baseCurrency = _settings?.Current.BaseCurrency;
         if (_fx is null || string.IsNullOrWhiteSpace(baseCurrency))
-            return snapshot.MarketValue;
+            return rawValue;
 
         var fromCurrency = string.IsNullOrWhiteSpace(snapshot.Currency) ? "TWD" : snapshot.Currency;
         if (string.Equals(fromCurrency, baseCurrency, StringComparison.OrdinalIgnoreCase))
-            return snapshot.MarketValue;
+            return rawValue;
 
         try
         {
             return await _fx.ConvertAsync(
-                snapshot.MarketValue,
+                rawValue,
                 fromCurrency,
                 baseCurrency,
                 snapshot.SnapshotDate);
@@ -646,6 +615,23 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// P5.1 — 跟 <c>DashboardViewModel.ResolveNetWorthValue</c> 同公式
+    /// （投資焦點 widget 也用這個）：CashValue + EquityValue − LiabilityValue；
+    /// 三欄缺值（v0.29 以前 snapshot）時 fallback 為 MarketValue。
+    /// </summary>
+    private static decimal ResolveNetWorthValue(PortfolioDailySnapshot s)
+    {
+        if (s.CashValue.HasValue && s.EquityValue.HasValue)
+        {
+            var equity = s.EquityValue.Value;
+            var cash = s.CashValue.Value;
+            var liab = s.LiabilityValue ?? 0m;
+            return cash + equity - liab;
+        }
+        return s.MarketValue;
     }
 
     private void BuildChart(IReadOnlyList<DateTimePoint> points)

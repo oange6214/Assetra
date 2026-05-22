@@ -107,7 +107,10 @@ public partial class NavRailViewModel : ObservableObject
             new NavGroupVm
             {
                 TitleResourceKey = "Nav.Planning",
-                GroupIconSymbol = "Compass24",
+                // P5.1 — Compass24 在 user 螢幕字型下視覺接近 Wrench24（剛好下面就是
+                // 工具群組用 Wrench24，兩個 icon 看起來會混淆）。換 Rocket24 強調
+                // 「規劃 / 前瞻」語意，跟工具的扳手清楚區隔。
+                GroupIconSymbol = "Rocket24",
                 Items = new[]
                 {
                     new NavLeafVm { Section = NavSection.Goals,      LabelResourceKey = "Nav.Goals",       IconSymbol = "Target24",     ToolTipResourceKey = "Nav.Goals" },

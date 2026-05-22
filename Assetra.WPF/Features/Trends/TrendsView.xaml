@@ -383,49 +383,13 @@
             </StackPanel>
         </Border>
 
-        <!--  ── Footer hint + 修復可疑點 ──  -->
-        <DockPanel Grid.Row="5" Margin="0,12,0,0" LastChildFill="False">
-            <!--
-                修復可疑點工具列：使用者察覺 chart 某日跳水 / 跳高為 partial-price
-                snapshot 假象時，挑那天 click「修復這天」用 history price 重建。
-                Status 訊息 inline 顯示，不彈 dialog 避免打斷使用者觀察 chart。
-            -->
-            <StackPanel
-                DockPanel.Dock="Right"
-                Orientation="Horizontal"
-                VerticalAlignment="Center">
-                <TextBlock
-                    Margin="0,0,8,0"
-                    VerticalAlignment="Center"
-                    FontSize="{DynamicResource Font.Size.Xs}"
-                    Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{DynamicResource Trends.Repair.Label}" />
-                <DatePicker
-                    MinWidth="132"
-                    VerticalAlignment="Center"
-                    SelectedDate="{Binding RepairTargetDate, Mode=TwoWay}"
-                    Style="{StaticResource AppDatePicker}" />
-                <Button
-                    Margin="8,0,12,0"
-                    Padding="12,4"
-                    VerticalAlignment="Center"
-                    Command="{Binding RepairDateCommand}"
-                    Content="{DynamicResource Trends.Repair.Button}"
-                    Style="{StaticResource AppSecondaryButton}" />
-                <TextBlock
-                    MaxWidth="280"
-                    VerticalAlignment="Center"
-                    FontSize="{DynamicResource Font.Size.Xs}"
-                    Foreground="{DynamicResource AppTextMuted}"
-                    Text="{Binding RepairStatusMessage}"
-                    TextTrimming="CharacterEllipsis" />
-            </StackPanel>
-
-            <TextBlock
-                VerticalAlignment="Center"
-                FontSize="{DynamicResource Font.Size.Xs}"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Trends.Hint}" />
-        </DockPanel>
+        <!--  ── Footer hint — P5.1 修復可疑點工具列已移除（曲線改算真實淨值後 partial-price 假象問題不存在）  -->
+        <TextBlock
+            Grid.Row="5"
+            Margin="0,12,0,0"
+            VerticalAlignment="Center"
+            FontSize="{DynamicResource Font.Size.Xs}"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Trends.Hint}" />
     </Grid>
 </UserControl>
