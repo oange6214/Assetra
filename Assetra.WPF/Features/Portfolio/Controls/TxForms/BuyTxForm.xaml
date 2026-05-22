@@ -536,11 +536,34 @@
                 </StackPanel>
 
                 <!--
-                    「實際扣款金額（選填）」欄位已移除。複委託 / 跨幣別匯差等情境之後
-                    會用「新增投資項目」的資產級設定（資產幣別、是否複委託等）處理，
-                    不再每筆交易手動填。Buy.ActualCashAmount 屬性仍保留在 VM 但
-                    從這個 dialog 不暴露輸入點。
+                    P5.6 — 「券商實際扣款金額」欄位重新暴露（曾於 P3 暫時隱藏）。
+                    跨幣別模式（IsCrossCurrency=true）才顯示，輸入幣別 = 扣款
+                    帳戶幣別（例：複委託 USD 標的、TWD 帳戶 → 這格填 TWD 數字）。
+                    Validation 接受「FxRate 或 ActualCashAmount 擇一」，所以
+                    複委託 user 可直接抄券商交易明細的 TWD 扣款數字，不必自己
+                    算匯率（FxRate=ActualCashAmount/(Price×Qty) 系統反推）。
                 -->
+                <StackPanel Visibility="{Binding Buy.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock
+                        Margin="0,14,0,6"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Tx.ActualCashAmount}" />
+                    <TextBox
+                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                        Text="{Binding Buy.ActualCashAmount, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock
+                        Style="{StaticResource FormFieldError}"
+                        Text="{Binding Buy.ActualCashAmountError}"
+                        Visibility="{Binding Buy.ActualCashAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    <TextBlock
+                        Margin="0,2,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Portfolio.Tx.ActualCashAmountHint}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
             </StackPanel>
         </StackPanel>
     </StackPanel>
