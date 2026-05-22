@@ -70,7 +70,7 @@
             Grid.RowSpan="2"
             Panel.ZIndex="180"
             Visibility="{Binding HasSelectedPositionRow, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <Border beh:BackdropClickToCloseBehavior.Command="{Binding ClosePositionDetailCommand}" Style="{StaticResource AppDialogOverlayBorder}" />
+            <Border beh:BackdropClickToCloseBehavior.Command="{Binding ClosePositionDetailCommand}" Style="{StaticResource AppSidePanelBackdropBorder}" />
             <Border
                 HorizontalAlignment="Right"
                 Background="{DynamicResource AppSurface}"

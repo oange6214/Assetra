@@ -1026,7 +1026,7 @@
             <!--  ── Cash / Liability detail overlays (floating side panel with backdrop) ──  -->
             <Grid Panel.ZIndex="180" Visibility="{Binding HasSelectedCashRow, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <!--  Click-to-close backdrop  -->
-                <Border beh:BackdropClickToCloseBehavior.Command="{Binding CloseCashDetailCommand}" Style="{StaticResource AppDialogOverlayBorder}" />
+                <Border beh:BackdropClickToCloseBehavior.Command="{Binding CloseCashDetailCommand}" Style="{StaticResource AppSidePanelBackdropBorder}" />
 
                 <!--  Floating panel anchored right  -->
                 <Border
@@ -1563,7 +1563,7 @@
         <Grid Grid.Row="1" DataContext="{Binding Portfolio}">
             <!--  Liability detail overlay  -->
             <Grid Panel.ZIndex="180" Visibility="{Binding HasSelectedLiabilityRow, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Border beh:BackdropClickToCloseBehavior.Command="{Binding CloseLiabilityDetailCommand}" Style="{StaticResource AppDialogOverlayBorder}" />
+                <Border beh:BackdropClickToCloseBehavior.Command="{Binding CloseLiabilityDetailCommand}" Style="{StaticResource AppSidePanelBackdropBorder}" />
                 <Border
                     HorizontalAlignment="Right"
                     Background="{DynamicResource AppSurface}"

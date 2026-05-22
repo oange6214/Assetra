@@ -12,6 +12,20 @@
         <Setter Property="VerticalAlignment" Value="Stretch" />
     </Style>
 
+    <!--
+        P4.9f — Side panel backdrop（Position / Cash / Liability 共用）。
+        跟 AppDialogOverlayBorder 一樣 stretch 全頁面當 click-to-close 區域，
+        但 Background=Transparent 不蓋色 — 使用者可以同時看到下層 list
+        作為對照參考（modern fintech master-detail pattern）。
+        其他真實 modal dialog (AddAsset、確認對話框等) 仍用
+        AppDialogOverlayBorder 帶 dim，視覺語意：dim = modal / 沒 dim = side panel。
+    -->
+    <Style x:Key="AppSidePanelBackdropBorder" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+    </Style>
+
     <Style x:Key="AppDialogShell" TargetType="{x:Type Border}">
         <Setter Property="Width" Value="{StaticResource DialogWidth}" />
         <Setter Property="MaxHeight" Value="{StaticResource DialogMaxHeight}" />
