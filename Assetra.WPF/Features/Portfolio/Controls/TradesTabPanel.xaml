@@ -475,13 +475,37 @@
         <!--  Trade history DataGrid  -->
         <Grid Grid.Row="2">
             <ListBox
-                Margin="12"
+                Margin="0,12,0,0"
                 Background="Transparent"
                 BorderThickness="0"
-                ItemContainerStyle="{x:Null}"
+                HorizontalContentAlignment="Stretch"
                 ItemsSource="{Binding TradeFilter.TradesView}"
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <!--
+                    P5.4 — ItemContainerStyle 真正 override：原本 `{x:Null}` 不夠，
+                    ListBoxItem 的 default selected/hover 邊框會穿透。完全自訂
+                    Template 只剩 ContentPresenter（無 selection 視覺、無邊框、
+                    無 padding）讓 DataTemplate 的 Border 直接吃滿寬度。
+                    HorizontalContentAlignment=Stretch 確保 item 橫向 fill listbox。
+                -->
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Focusable" Value="False" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <ContentPresenter />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
                 <ListBox.Style>
                     <Style TargetType="ListBox">
                         <Setter Property="Visibility" Value="Collapsed" />
