@@ -12,6 +12,37 @@ public partial class NavRailView : UserControl
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
+        // P4.9g — track NavPane.ActualWidth (animates between 200 expanded / 56 collapsed)
+        // so MainWindow shell-level overlays can align their dim backdrop to start
+        // right after the nav rail (so navrail stays visible / clickable while
+        // a side panel is open). NavPane is x:Name'd in NavRailView.xaml.
+        Loaded += (_, _) =>
+        {
+            if (NavPane is not null)
+            {
+                NavPaneWidth = NavPane.ActualWidth;
+                NavPane.SizeChanged += (_, ev) => NavPaneWidth = ev.NewSize.Width;
+            }
+        };
+    }
+
+    /// <summary>
+    /// P4.9g — Read-only DP reflecting current <c>NavPane</c> ActualWidth
+    /// (200 expanded / 56 collapsed, animates between). Used by MainWindow
+    /// to clip Cash / Liability detail-panel backdrops so navrail stays
+    /// uncovered.
+    /// </summary>
+    public static readonly DependencyProperty NavPaneWidthProperty =
+        DependencyProperty.Register(
+            nameof(NavPaneWidth),
+            typeof(double),
+            typeof(NavRailView),
+            new PropertyMetadata(0.0));
+
+    public double NavPaneWidth
+    {
+        get => (double)GetValue(NavPaneWidthProperty);
+        private set => SetValue(NavPaneWidthProperty, value);
     }
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)

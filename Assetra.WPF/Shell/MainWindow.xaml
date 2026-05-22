@@ -493,7 +493,7 @@
         </Border>
 
         <!--  ── Row 1: NavRailView pane + section content ──  -->
-        <shell:NavRailView Grid.Row="1" />
+        <shell:NavRailView x:Name="ShellNavRail" Grid.Row="1" />
 
         <!--  Search backdrop — sits above content, behind the popup HWnd  -->
         <Border
@@ -1022,9 +1022,19 @@
             backdrop covers the content area but leaves the title bar and
             status bar reachable.
         -->
+        <!--
+            P4.9g — outer Grid mirrors NavRailView's 2-column structure：Col 0 width 跟著
+            ShellNavRail.NavPaneWidth 動態變化（expanded=200 / collapsed=56，DoubleAnimation
+            驅動），Col 1 = star。所有 Cash/Liability overlay 都掛 Grid.Column="1"，dim
+            backdrop 因此只蓋頁面內容區、navrail 保留可見可點。
+        -->
         <Grid Grid.Row="1" DataContext="{Binding Portfolio}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding NavPaneWidth, ElementName=ShellNavRail, Converter={StaticResource DoubleToGridLengthConverter}}" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
             <!--  ── Cash / Liability detail overlays (floating side panel with backdrop) ──  -->
-            <Grid Panel.ZIndex="180" Visibility="{Binding HasSelectedCashRow, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Grid.Column="1" Panel.ZIndex="180" Visibility="{Binding HasSelectedCashRow, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <!--  Click-to-close backdrop  -->
                 <Border beh:BackdropClickToCloseBehavior.Command="{Binding CloseCashDetailCommand}" Style="{StaticResource AppDialogOverlayBorder}" />
 
@@ -1560,9 +1570,14 @@
             Cash overlay above so a Liability row click on any page
             (Portfolio, Liabilities, ...) opens the side panel.
         -->
+        <!--  P4.9g — Liability overlay 用同樣的 navrail-skipping 2-column wrapper（見上面 Cash overlay 註解）  -->
         <Grid Grid.Row="1" DataContext="{Binding Portfolio}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding NavPaneWidth, ElementName=ShellNavRail, Converter={StaticResource DoubleToGridLengthConverter}}" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
             <!--  Liability detail overlay  -->
-            <Grid Panel.ZIndex="180" Visibility="{Binding HasSelectedLiabilityRow, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Grid.Column="1" Panel.ZIndex="180" Visibility="{Binding HasSelectedLiabilityRow, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Border beh:BackdropClickToCloseBehavior.Command="{Binding CloseLiabilityDetailCommand}" Style="{StaticResource AppDialogOverlayBorder}" />
                 <Border
                     HorizontalAlignment="Right"
