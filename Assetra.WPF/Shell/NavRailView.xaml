@@ -404,13 +404,10 @@
         -->
         <DataTemplate x:Key="FinancialOverviewContentTemplate">
             <!--
-                P3.8 — TabControl Margin 24,16,24,0：tab strip + content 都跟 NavRail
-                右邊框拉開 24px breathing。原本 0 margin 造成「總覽/資產趨勢/報酬日曆/
-                配置」 tab strip 跟 NavRail 完全貼在一起的 sidebar 跟內容疊在一起感。
-                top 16 給 tab strip 跟 title bar 下方留呼吸空間。
+                P5.3 — 移除原 TabControl Margin="24,16,24,0"，改由外層 ContentControl
+                的 Padding 統一給；不然 padding 跟 margin 會疊成 48,32。
             -->
             <TabControl
-                Margin="24,16,24,0"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
@@ -712,8 +709,15 @@
             </Grid>
         </Border>
 
+        <!--
+            P5.3 — 全頁面 content 統一加 24,16,24,0 padding，讓 page 跟 navrail
+            右邊框、跟 titlebar 都有呼吸空間。原本只有 FinancialOverview 那條
+            TabControl 自己加，所以 投資資產 / 帳戶 / 負債 / 訂閱排程 / 警示 ...
+            都貼著 navrail 邊緣顯得擠。在 ContentControl 一處設定 = 全頁面一致。
+        -->
         <ContentControl
             Grid.Column="1"
+            Padding="24,16,24,0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             HorizontalContentAlignment="Stretch"
