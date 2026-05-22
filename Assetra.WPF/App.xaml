@@ -30,7 +30,6 @@
             <converters:InverseWidthScaleThresholdToVisibilityConverter x:Key="InverseWidthScaleThresholdToVisibilityConverter" />
             <converters:AdaptivePanelWidthConverter x:Key="AdaptivePanelWidthConverter" />
             <converters:SparklineSeriesConverter x:Key="SparklineSeriesConverter" />
-            <converters:DoubleToGridLengthConverter x:Key="DoubleToGridLengthConverter" />
 
             <ResourceDictionary.MergedDictionaries>
                 <!--  ── Design-system primitives (required by theme + styles) ──  -->
