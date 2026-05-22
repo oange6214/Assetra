@@ -178,6 +178,17 @@
     <sys:String x:Key="Portfolio.Detail.Action.Sell">賣出</sys:String>
     <sys:String x:Key="Portfolio.Detail.Action.Dividend">配息入帳</sys:String>
     <sys:String x:Key="Portfolio.Detail.AddRecord">新增交易</sys:String>
+    <!--  P4.9e — Cash / Liability detail panel subtitle + 快速動作 ContextMenu items  -->
+    <sys:String x:Key="Portfolio.Detail.Cash.Subtitle">查看餘額、交易紀錄，並管理您的帳戶細節。</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Liability.Subtitle">查看餘額、交易紀錄，並管理您的負債細節。</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Cash.Action.Income">收入</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Cash.Action.Deposit">存入</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Cash.Action.Withdrawal">提款</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Cash.Action.Transfer">轉帳</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Liability.Action.LoanBorrow">借款</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Liability.Action.LoanRepay">還款</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Liability.Action.CreditCardCharge">消費</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Liability.Action.CreditCardPayment">繳款</sys:String>
     <sys:String x:Key="Portfolio.Detail.Action.Edit">編輯</sys:String>
     <sys:String x:Key="Portfolio.NetVal.Tooltip">淨值 = 市值 − 預估賣出手續費 − 證交稅&#x0a;證交稅依資產類型：ETF 0.1% / 一般股票 0.3%&#x0a;反映「現在賣掉可實得」金額，便於快速評估離場淨收。</sys:String>
     <sys:String x:Key="Portfolio.Cancel">取消</sys:String>

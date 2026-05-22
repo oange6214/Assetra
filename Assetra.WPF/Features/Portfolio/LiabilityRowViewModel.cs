@@ -39,6 +39,12 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
     public Money BalanceAsMoney => new(Balance, _currency);
     public Money OriginalAmountAsMoney => new(OriginalAmount, _currency);
 
+    /// <summary>
+    /// P4.9e — 公開的 currency code（"TWD" / "USD" / …）供 detail panel header 的
+    /// 幣別 chip binding 使用。Backing field 仍為 readonly，settable only via ctor。
+    /// </summary>
+    public string Currency => _currency;
+
     private readonly string _currency;
 
     public double PaidPercent => OriginalAmount > 0

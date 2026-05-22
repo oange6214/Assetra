@@ -1202,6 +1202,36 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     [RelayCommand]
     private void AddRecord() => Transaction.OpenTxDialog();
 
+    /// <summary>
+    /// P4.9e — Cash detail panel「+ 新增交易」ContextMenu item 用：開啟 Tx 對話框並
+    /// 預先設定 TxType + 預填現金帳戶為當前選定列。`txType` 接受
+    /// "income" / "deposit" / "withdrawal" / "transfer"。
+    /// </summary>
+    [RelayCommand]
+    private void BeginTxForSelectedCash(string txType)
+    {
+        if (SelectedCashRow is null || string.IsNullOrEmpty(txType)) return;
+        Transaction.OpenTxDialog();
+        Transaction.TxType = txType;
+        Transaction.TxCashAccount = SelectedCashRow;
+    }
+
+    /// <summary>
+    /// P4.9e — Liability detail panel「+ 新增交易」ContextMenu item 用。
+    /// Loan 走 `loanBorrow` / `loanRepay`（預填 Loan.Label），CreditCard 走
+    /// `creditCardCharge` / `creditCardPayment`（無 Loan.Label，由 dialog 內部
+    /// 帶 LiabilityAssetId）。
+    /// </summary>
+    [RelayCommand]
+    private void BeginTxForSelectedLiability(string txType)
+    {
+        if (SelectedLiabilityRow is null || string.IsNullOrEmpty(txType)) return;
+        Transaction.OpenTxDialog();
+        Transaction.TxType = txType;
+        if (SelectedLiabilityRow.IsLoan)
+            Transaction.Loan.Label = SelectedLiabilityRow.Label;
+    }
+
     /// <summary>開啟新增現金帳戶對話框（由現金 tab 的「新增帳戶」按鈕呼叫）。</summary>
     [RelayCommand]
     private void OpenAddAccountDialog()

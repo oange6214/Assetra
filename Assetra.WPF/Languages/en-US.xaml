@@ -182,6 +182,17 @@
     <sys:String x:Key="Portfolio.Detail.Action.Sell">Sell</sys:String>
     <sys:String x:Key="Portfolio.Detail.Action.Dividend">Dividend</sys:String>
     <sys:String x:Key="Portfolio.Detail.AddRecord">Add record</sys:String>
+    <!--  P4.9e — Cash / Liability detail panel subtitle + action ContextMenu items  -->
+    <sys:String x:Key="Portfolio.Detail.Cash.Subtitle">Review balance, trade history and manage your account.</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Liability.Subtitle">Review balance, trade history and manage your liability.</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Cash.Action.Income">Income</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Cash.Action.Deposit">Deposit</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Cash.Action.Withdrawal">Withdraw</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Cash.Action.Transfer">Transfer</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Liability.Action.LoanBorrow">Borrow</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Liability.Action.LoanRepay">Repay</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Liability.Action.CreditCardCharge">Charge</sys:String>
+    <sys:String x:Key="Portfolio.Detail.Liability.Action.CreditCardPayment">Payment</sys:String>
     <sys:String x:Key="Portfolio.Detail.Action.Edit">Edit</sys:String>
     <sys:String x:Key="Portfolio.NetVal.Tooltip">Net Value = Market Value − est. sell commission − securities tax&#x0a;Tax rate by asset: ETF 0.1% / Stock 0.3%&#x0a;Represents the actual cash received if sold at current price.</sys:String>
     <sys:String x:Key="Portfolio.Cancel">Cancel</sys:String>
