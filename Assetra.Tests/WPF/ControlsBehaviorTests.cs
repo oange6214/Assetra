@@ -334,15 +334,22 @@ public sealed class ControlsBehaviorTests
     [Fact]
     public void CrossCurrencyTxForms_UseSharedSettlementBadgeStyle()
     {
+        // P5.8a — Sell + Dividend forms 已搬到跟 Buy 一樣的 settlement section
+        // 架構（SettlementInputMode statement-vs-fx 顯式 toggle），原本 P5.7 的
+        // "複委託請填" 紅徽章在新架構下被 mode toggle 取代，不再需要。
+        // 仍然保證：兩個 form 都不可有 danger 色系背景（避免 alarming 視覺）。
         var sell = File.ReadAllText(GetTxFormPath("SellTxForm.xaml"));
         var dividend = File.ReadAllText(GetTxFormPath("CashDividendTxForm.xaml"));
 
-        Assert.Contains("Style=\"{StaticResource StatusBadge.Info}\"", sell);
-        Assert.Contains("Style=\"{StaticResource StatusBadge.Info}\"", dividend);
         Assert.DoesNotContain("Background=\"{DynamicResource AppDangerSubtle}\"", sell);
         Assert.DoesNotContain("Foreground=\"{DynamicResource AppDanger}\"", sell);
         Assert.DoesNotContain("Background=\"{DynamicResource AppDangerSubtle}\"", dividend);
         Assert.DoesNotContain("Foreground=\"{DynamicResource AppDanger}\"", dividend);
+
+        // P5.8a 新增驗證：三個 form 都用 SettlementInputMode toggle（mode 顯式
+        // 取代「請填這個 vs 那個」的 badge 提示）
+        Assert.Contains("Sell.SettlementInputMode", sell);
+        Assert.Contains("Div.SettlementInputMode", dividend);
     }
 
     private static string GetBuyTxFormPath() => GetTxFormPath("BuyTxForm.xaml");
