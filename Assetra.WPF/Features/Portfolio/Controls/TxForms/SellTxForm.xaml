@@ -305,93 +305,160 @@
                 跨幣別賣出（標的幣別 ≠ 入帳帳戶幣別）時顯示 banner + 匯率 + 實際入帳金額。
                 同幣別（台股 + TWD 帳戶）UI 完全沒變化。
             -->
-            <!--  P5.7 — 跨幣別 banner 改短文案；FxRate 收進 Expander；ActualCashAmount label 加複委託紅徽章  -->
+            <!--
+                P5.8a — Settlement section（mirrored from BuyTxForm）：取代原 P5.7 banner +
+                Expander。SettlementInputMode toggle 顯式切 statement vs FX，Fetch 按鈕暫缺
+                （等 FetchSellFxRateCommand 接 TransactionFxRateResolver 後再加），UI 結構
+                跟 Buy 統一以利後續 P5.8b 抽 CrossCurrencyOverlay 共用 component。
+            -->
             <Border
-                Margin="0,12,0,0"
-                Padding="10,8"
-                Background="{DynamicResource AppAccentSubtle}"
-                BorderBrush="{DynamicResource AppAccent}"
+                Margin="0,14,0,0"
+                Padding="12"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorder}"
                 BorderThickness="1"
                 CornerRadius="{StaticResource Radius.Sm}"
                 Visibility="{Binding Sell.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="0"
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Portfolio.Tx.SettlementSection}" />
+                        <Border
+                            Grid.Column="1"
+                            Padding="8,3"
+                            Background="{DynamicResource AppSurfaceAlt}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{Binding Sell.SettlementPairDisplay, Mode=OneWay}" />
+                        </Border>
+                    </Grid>
+
                     <TextBlock
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{DynamicResource Portfolio.Tx.CrossCurrency.Banner.Short}" />
-                    <TextBlock
-                        Margin="0,4,0,0"
+                        Margin="0,4,0,12"
                         FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Tx.CrossCurrency.Hint.Short}"
                         TextWrapping="Wrap" />
-                </StackPanel>
-            </Border>
 
-            <!--  ActualCashAmount — 主欄位（保持永遠可見，cross-currency 時加紅色「複委託請填」徽章）  -->
-            <DockPanel Margin="0,12,0,4" LastChildFill="False">
-                <TextBlock
-                    DockPanel.Dock="Left"
-                    VerticalAlignment="Center"
-                    FontSize="{StaticResource Font.Size.Xs}"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{DynamicResource Portfolio.Tx.SellActualCashAmount}" />
-                <Border
-                    Margin="8,0,0,0"
-                    DockPanel.Dock="Left"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource StatusBadge.Info}"
-                    Visibility="{Binding Sell.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock
-                        Style="{StaticResource StatusBadge.Text}"
-                        Text="{DynamicResource Portfolio.Tx.ActualCashAmount.RequiredBadge}" />
-                </Border>
-            </DockPanel>
-            <TextBox
-                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                Text="{Binding Sell.ActualCashAmount, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Style="{StaticResource FormFieldError}"
-                Text="{Binding Sell.ActualCashAmountError}"
-                Visibility="{Binding Sell.ActualCashAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
-            <TextBlock
-                Margin="0,2,0,0"
-                FontSize="{StaticResource Font.Size.Xs}"
-                Foreground="{DynamicResource AppTextMuted}"
-                Text="{DynamicResource Portfolio.Tx.SellActualCashAmountHint}"
-                TextWrapping="Wrap" />
-
-            <!--  Advanced：FxRate 摺疊區，預設關  -->
-            <Expander
-                Margin="0,12,0,0"
-                Header="{DynamicResource Portfolio.Tx.Advanced}"
-                IsExpanded="False"
-                Style="{StaticResource AppExpander}"
-                Visibility="{Binding Sell.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel>
-                    <TextBlock
-                        Margin="0,4,0,4"
+                        Margin="0,0,0,6"
                         FontSize="{StaticResource Font.Size.Xs}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Portfolio.Tx.FxRate}" />
-                    <TextBox
-                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                        Text="{Binding Sell.FxRate, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
-                        Style="{StaticResource FormFieldError}"
-                        Text="{Binding Sell.FxRateError}"
-                        Visibility="{Binding Sell.FxRateError, Converter={StaticResource StringToVisibilityConverter}}" />
-                    <TextBlock
-                        Margin="0,2,0,0"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource Portfolio.Tx.FxRate.Hint}"
-                        TextWrapping="Wrap" />
+                        Text="{DynamicResource Portfolio.Tx.SettlementInputMode}" />
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <RadioButton
+                            Grid.Column="0"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Content="{DynamicResource Portfolio.Tx.SettlementMode.Statement}"
+                            GroupName="TxSellSettlementInputMode"
+                            IsChecked="{Binding Sell.SettlementInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=statement, Mode=TwoWay}"
+                            Style="{StaticResource SegmentBtn}" />
+                        <RadioButton
+                            Grid.Column="2"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Content="{DynamicResource Portfolio.Tx.SettlementMode.FxEstimate}"
+                            GroupName="TxSellSettlementInputMode"
+                            IsChecked="{Binding Sell.SettlementInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=fx, Mode=TwoWay}"
+                            Style="{StaticResource SegmentBtn}" />
+                    </Grid>
+
+                    <StackPanel Visibility="{Binding Sell.IsStatementSettlementMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock
+                            Margin="0,0,0,6"
+                            Style="{StaticResource FormFieldLabel}"
+                            Text="{DynamicResource Portfolio.Tx.SellActualCashAmount}" />
+                        <TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            Text="{Binding Sell.ActualCashAmount, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Style="{StaticResource FormFieldError}"
+                            Text="{Binding Sell.ActualCashAmountError}"
+                            Visibility="{Binding Sell.ActualCashAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.Tx.SellActualCashAmountHint}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel Visibility="{Binding Sell.IsFxSettlementMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock
+                            Margin="0,0,0,6"
+                            Style="{StaticResource FormFieldLabel}"
+                            Text="{DynamicResource Portfolio.Tx.FxRate}" />
+                        <TextBlock
+                            Margin="0,0,0,6"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.Tx.FxMode.Hint}"
+                            TextWrapping="Wrap" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox
+                                Grid.Column="0"
+                                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                                Text="{Binding Sell.FxRate, UpdateSourceTrigger=PropertyChanged}" />
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Portfolio.Tx.FxRateDate}" />
+                                <Border
+                                    MinHeight="{StaticResource Control.Height.Md}"
+                                    Padding="10,0"
+                                    Background="{DynamicResource AppSurfaceAlt}"
+                                    BorderBrush="{DynamicResource AppBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource Radius.Sm}">
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontSize="{StaticResource Font.Size.Sm}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{Binding Sell.FxRateDateDisplay, Mode=OneWay}" />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock
+                            Style="{StaticResource FormFieldError}"
+                            Text="{Binding Sell.FxRateError}"
+                            Visibility="{Binding Sell.FxRateError, Converter={StaticResource StringToVisibilityConverter}}" />
+                        <TextBlock
+                            Style="{StaticResource FormFieldError}"
+                            Text="{Binding Sell.FxFetchError}"
+                            Visibility="{Binding Sell.FxFetchError, Converter={StaticResource StringToVisibilityConverter}}" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}">
+                            <Run Text="{DynamicResource Portfolio.Tx.FxSource}" />
+                            <Run Text=": " />
+                            <Run Text="{Binding Sell.FxSourceDisplay, Mode=OneWay}" />
+                        </TextBlock>
+                    </StackPanel>
                 </StackPanel>
-            </Expander>
+            </Border>
         </StackPanel>
     </StackPanel>
 </UserControl>
