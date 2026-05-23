@@ -1187,6 +1187,41 @@ public class PortfolioViewModelTests
         Assert.Equal("0050", row.DisplayAsset);
     }
 
+    [Fact]
+    public void FxSettlementSummary_CrossCurrency_ShowsAuditContext()
+    {
+        var row = new TradeRowViewModel(new Trade(
+            Id: Guid.NewGuid(), Symbol: "DRAM", Exchange: "NASDAQ",
+            Name: "Roundhill Memory ETF",
+            Type: TradeType.Buy, TradeDate: DateTime.UtcNow,
+            Price: 50m, Quantity: 20,
+            RealizedPnl: null, RealizedPnlPct: null,
+            InstrumentCurrency: "USD",
+            SettlementCurrency: "TWD",
+            FxRate: 31.25m,
+            FxRateDate: new DateOnly(2026, 5, 8),
+            FxSource: "Frankfurter"));
+
+        Assert.True(row.HasFxSettlementMetadata);
+        Assert.Equal("USD → TWD · 31.2500 · 2026-05-08 · Frankfurter", row.FxSettlementSummary);
+    }
+
+    [Fact]
+    public void FxSettlementSummary_SameCurrency_StaysHidden()
+    {
+        var row = new TradeRowViewModel(new Trade(
+            Id: Guid.NewGuid(), Symbol: "0050", Exchange: "TWSE",
+            Name: "元大台灣50",
+            Type: TradeType.Buy, TradeDate: DateTime.UtcNow,
+            Price: 140m, Quantity: 1000,
+            RealizedPnl: null, RealizedPnlPct: null,
+            InstrumentCurrency: "TWD",
+            SettlementCurrency: "TWD"));
+
+        Assert.False(row.HasFxSettlementMetadata);
+        Assert.Equal(string.Empty, row.FxSettlementSummary);
+    }
+
     // IsTransferLeg: Transfer-created Deposit/Withdrawal locked to meta-only
 
     [Fact]

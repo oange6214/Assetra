@@ -1,5 +1,7 @@
 namespace Assetra.Core.Interfaces;
 
+using Assetra.Core.Models;
+
 /// <summary>
 /// Application-layer FX history accessor. Wraps <see cref="IFxRateHistoryRepository"/>
 /// with caching + nearest-date fallback semantics so callers (reports / snapshot
@@ -17,5 +19,13 @@ public interface IFxRateHistoryService
     /// fallback window.
     /// </summary>
     Task<decimal?> GetRateAsync(
+        DateOnly date, string fromCurrency, string toCurrency, CancellationToken ct = default);
+
+    /// <summary>
+    /// Get the FX history row used for <paramref name="date"/>. Same-currency
+    /// lookups return a synthetic rate-1 row. Returns null if no rate is
+    /// available within the fallback window.
+    /// </summary>
+    Task<FxRateHistoryEntry?> GetEntryAsync(
         DateOnly date, string fromCurrency, string toCurrency, CancellationToken ct = default);
 }

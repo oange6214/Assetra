@@ -244,16 +244,12 @@
                     Text="{DynamicResource Portfolio.Tx.DivActualCashAmount}" />
                 <Border
                     Margin="8,0,0,0"
-                    Padding="6,2"
                     DockPanel.Dock="Left"
                     VerticalAlignment="Center"
-                    Background="{DynamicResource AppDangerSubtle}"
-                    CornerRadius="{StaticResource Radius.Sm}"
+                    Style="{StaticResource StatusBadge.Info}"
                     Visibility="{Binding Div.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppDanger}"
+                        Style="{StaticResource StatusBadge.Text}"
                         Text="{DynamicResource Portfolio.Tx.ActualCashAmount.RequiredBadge}" />
                 </Border>
             </DockPanel>

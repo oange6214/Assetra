@@ -1,4 +1,5 @@
 using System.Reactive.Concurrency;
+using Assetra.Application.Fx;
 using Assetra.Application.Loans.Contracts;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.DomainServices;
@@ -81,7 +82,8 @@ internal sealed class PortfolioViewModelFactory
             // Portfolio-Groups-Refactor P3 — 共用群組目錄注入。
             GroupCatalog: sp.GetService<PortfolioGroupCatalog>(),
             // P4.1 — Asset-level XIRR 年化報酬計算（detail panel KPI 矩陣使用）。
-            Xirr: sp.GetService<IXirrCalculator>())
+            Xirr: sp.GetService<IXirrCalculator>(),
+            TransactionFxRateResolver: sp.GetService<TransactionFxRateResolver>())
         {
             Summary = sp.GetRequiredService<IPortfolioSummaryService>(),
         };

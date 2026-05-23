@@ -1249,6 +1249,15 @@
                                                             <Run Text="{Binding CommissionDisplay, Mode=OneWay}" />
                                                             <Run Text=")" />
                                                         </TextBlock>
+                                                        <TextBlock
+                                                            Margin="0,2,0,0"
+                                                            HorizontalAlignment="Right"
+                                                            FontFamily="{StaticResource Font.Family.Base}"
+                                                            FontSize="{StaticResource Font.Size.Xs}"
+                                                            Foreground="{DynamicResource AppTextMuted}"
+                                                            Text="{Binding FxSettlementSummary}"
+                                                            Typography.NumeralAlignment="Tabular"
+                                                            Visibility="{Binding HasFxSettlementMetadata, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                                     </StackPanel>
                                                 </Grid>
                                             </Border>

@@ -39,7 +39,10 @@ internal sealed class PortfolioTradeDialogController
                 AddBuyDate: row.TradeDate.ToLocalTime(),
                 TxActualCashAmount: row.CashAmount?.ToString("0.####") ?? string.Empty,
                 TxFxRate: row.FxRate?.ToString("0.######") ?? string.Empty,
-                TxInstrumentCurrency: row.InstrumentCurrency),
+                TxInstrumentCurrency: row.InstrumentCurrency,
+                TxSettlementCurrency: row.SettlementCurrency,
+                TxFxRateDate: row.FxRateDate,
+                TxFxSource: row.FxSource),
 
             TradeType.Sell => new TradeDialogEditState(
                 row.Id, row.TradeDate.ToLocalTime(), txType, row.Note ?? string.Empty,
@@ -52,7 +55,10 @@ internal sealed class PortfolioTradeDialogController
                 SellPriceInput: row.Price.ToString("F4"),
                 TxActualCashAmount: row.CashAmount?.ToString("0.####") ?? string.Empty,
                 TxFxRate: row.FxRate?.ToString("0.######") ?? string.Empty,
-                TxInstrumentCurrency: row.InstrumentCurrency),
+                TxInstrumentCurrency: row.InstrumentCurrency,
+                TxSettlementCurrency: row.SettlementCurrency,
+                TxFxRateDate: row.FxRateDate,
+                TxFxSource: row.FxSource),
 
             TradeType.CashDividend => new TradeDialogEditState(
                 row.Id, row.TradeDate.ToLocalTime(), txType, row.Note ?? string.Empty,
@@ -62,7 +68,10 @@ internal sealed class PortfolioTradeDialogController
                 TxDivPerShare: row.Price > 0 ? row.Price.ToString("F4") : string.Empty,
                 TxActualCashAmount: row.CashAmount?.ToString("0.####") ?? string.Empty,
                 TxFxRate: row.FxRate?.ToString("0.######") ?? string.Empty,
-                TxInstrumentCurrency: row.InstrumentCurrency),
+                TxInstrumentCurrency: row.InstrumentCurrency,
+                TxSettlementCurrency: row.SettlementCurrency,
+                TxFxRateDate: row.FxRateDate,
+                TxFxSource: row.FxSource),
 
             TradeType.StockDividend => new TradeDialogEditState(
                 row.Id, row.TradeDate.ToLocalTime(), txType, row.Note ?? string.Empty,
@@ -166,4 +175,7 @@ internal sealed record TradeDialogEditState(
     string TxFxRate = "",
     // P3 — restore Trade.InstrumentCurrency directly so Buy.IsCrossCurrency works on
     // edit-reopen without depending on the autocomplete pipeline re-populating it.
-    string TxInstrumentCurrency = "");
+    string TxInstrumentCurrency = "",
+    string TxSettlementCurrency = "",
+    DateOnly? TxFxRateDate = null,
+    string? TxFxSource = null);

@@ -145,4 +145,38 @@ public class TradeSqliteRepositoryTests : IDisposable
         Assert.Single(result);
         Assert.Equal(t.Id, result[0].Id);
     }
+
+    [Fact]
+    public async Task AddAsync_ForeignSettlementMetadata_RoundTrips()
+    {
+        var repo = new TradeSqliteRepository(_dbPath);
+        var trade = new Trade(
+            Guid.NewGuid(),
+            "DRAM",
+            "NASDAQ",
+            "Roundhill Memory ETF",
+            TradeType.Buy,
+            new DateTime(2026, 5, 8, 0, 0, 0, DateTimeKind.Utc),
+            51.23m,
+            20,
+            null,
+            null,
+            CashAmount: 33_128m,
+            InstrumentCurrency: "USD",
+            SettlementCurrency: "TWD",
+            FxRate: 32.335m,
+            FxRateDate: new DateOnly(2026, 5, 8),
+            FxSource: "Frankfurter");
+
+        await repo.AddAsync(trade);
+
+        var saved = await repo.GetByIdAsync(trade.Id);
+
+        Assert.NotNull(saved);
+        Assert.Equal("USD", saved!.InstrumentCurrency);
+        Assert.Equal("TWD", saved.SettlementCurrency);
+        Assert.Equal(32.335m, saved.FxRate);
+        Assert.Equal(new DateOnly(2026, 5, 8), saved.FxRateDate);
+        Assert.Equal("Frankfurter", saved.FxSource);
+    }
 }

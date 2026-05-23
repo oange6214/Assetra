@@ -515,7 +515,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 GetRecentAssetIds: () =>
                     (IReadOnlyList<Guid>?)_settingsService?.Current?.RecentlyUsedAssetIds
                         ?? Array.Empty<Guid>(),
-                RecordRecentAsset: id => _ = RecordRecentAssetAsync(id)));
+                RecordRecentAsset: id => _ = RecordRecentAssetAsync(id),
+                TransactionFxRateResolver: services.TransactionFxRateResolver));
         Transaction.TransactionCompleted += OnTransactionCompleted;
         Transaction.TradeDeleted += OnTradeDeleted;
 

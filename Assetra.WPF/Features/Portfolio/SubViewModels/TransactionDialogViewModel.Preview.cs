@@ -334,8 +334,11 @@ public partial class TransactionDialogViewModel
         // toggle the FX-rate field via *.IsCrossCurrency.
         var ccy = value?.Currency ?? string.Empty;
         Buy.CashAccountCurrency = ccy;
+        Buy.SettlementCurrency = ccy;
         Sell.CashAccountCurrency = ccy;
         Div.CashAccountCurrency = ccy;
+        FetchBuyFxRateCommand.NotifyCanExecuteChanged();
+        QueueBuyFxRateRefresh();
     }
 
     // OnTxCreditCardChanged retired — CreditCard sub-VM PropertyChanged is wired

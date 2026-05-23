@@ -49,6 +49,9 @@ public sealed record StockBuyRequest(
     // 若兩者皆填，ActualCashAmount 為權威（直接寫入 Trade.CashAmount），FxRate 僅供
     // 報表時還原成本基礎使用。
     decimal? FxRate = null,
+    string? SettlementCurrency = null,
+    DateOnly? FxRateDate = null,
+    string? FxSource = null,
     // Portfolio-Groups-Refactor P3 — 此筆交易所屬群組（bucket）。
     // null = 沿用 PortfolioGroup.DefaultId（Trade 寫入時 fallback）。
     Guid? PortfolioGroupId = null);

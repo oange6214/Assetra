@@ -66,6 +66,9 @@ public static class TradeSyncMapper
             trade.InstrumentCurrency,
             trade.CommissionCurrency,
             trade.FxRate?.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            trade.SettlementCurrency,
+            trade.FxRateDate?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
+            trade.FxSource,
             // Portfolio-Groups-Refactor P1
             trade.PortfolioGroupId,
             // MultiCurrency-Reporting P4.5b — realized PnL market/FX split
@@ -122,6 +125,9 @@ public static class TradeSyncMapper
             InstrumentCurrency: string.IsNullOrWhiteSpace(dto.InstrumentCurrency) ? "TWD" : dto.InstrumentCurrency!,
             CommissionCurrency: dto.CommissionCurrency,
             FxRate: dto.FxRate is null ? null : decimal.Parse(dto.FxRate, inv),
+            SettlementCurrency: string.IsNullOrWhiteSpace(dto.SettlementCurrency) ? "TWD" : dto.SettlementCurrency!,
+            FxRateDate: dto.FxRateDate is null ? null : DateOnly.Parse(dto.FxRateDate, inv),
+            FxSource: dto.FxSource,
             // Portfolio-Groups-Refactor P1 — 舊 payload 缺欄位時走 null，repo 寫入時 fallback DefaultId
             PortfolioGroupId: dto.PortfolioGroupId,
             // MultiCurrency-Reporting P4.5b — 舊 payload 缺欄位走 null
@@ -158,6 +164,9 @@ public static class TradeSyncMapper
         [property: JsonPropertyName("instrument_currency")] string? InstrumentCurrency = null,
         [property: JsonPropertyName("commission_currency")] string? CommissionCurrency = null,
         [property: JsonPropertyName("fx_rate")] string? FxRate = null,
+        [property: JsonPropertyName("settlement_currency")] string? SettlementCurrency = null,
+        [property: JsonPropertyName("fx_rate_date")] string? FxRateDate = null,
+        [property: JsonPropertyName("fx_source")] string? FxSource = null,
         // Portfolio-Groups-Refactor P1
         [property: JsonPropertyName("portfolio_group_id")] Guid? PortfolioGroupId = null,
         // MultiCurrency-Reporting P4.5b — realized PnL market/FX split (decimals as strings to avoid drift)

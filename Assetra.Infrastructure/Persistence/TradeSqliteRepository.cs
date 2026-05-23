@@ -68,8 +68,9 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
         "commission_discount, loan_label, principal, interest_paid, " +
         "to_cash_account_id, liability_asset_id, parent_trade_id, " +
         "category_id, recurring_source_id, " +
-        // MultiCurrency-Trade-Refactor P1 — 三個新欄位，跟其他 optional 欄位一樣 append on end
+        // MultiCurrency fields append on end to keep legacy schema migration simple.
         "instrument_currency, commission_currency, fx_rate, " +
+        "settlement_currency, fx_rate_date, fx_source, " +
         // Portfolio-Groups-Refactor P1
         "portfolio_group_id, " +
         // MultiCurrency-Reporting P4.5b — realized PnL market/FX split
@@ -115,14 +116,17 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
         InstrumentCurrency: r.IsDBNull(24) ? "TWD" : r.GetString(24),
         CommissionCurrency: r.IsDBNull(25) ? null : r.GetString(25),
         FxRate: r.IsDBNull(26) ? null : (decimal)r.GetDouble(26),
+        SettlementCurrency: r.IsDBNull(27) || string.IsNullOrWhiteSpace(r.GetString(27)) ? "TWD" : r.GetString(27),
+        FxRateDate: r.IsDBNull(28) ? null : DateOnly.Parse(r.GetString(28), CultureInfo.InvariantCulture),
+        FxSource: r.IsDBNull(29) ? null : r.GetString(29),
         // Portfolio-Groups-Refactor P1 — 既有 row 由 schema migration backfill 補上 DefaultId；
         // 萬一遇到 race，從 NULL 讀到的話也保留 null 由上層處理（之後 backfill 會再補一次）。
-        PortfolioGroupId: r.IsDBNull(27) ? null : Guid.Parse(r.GetString(27)),
+        PortfolioGroupId: r.IsDBNull(30) ? null : Guid.Parse(r.GetString(30)),
         // MultiCurrency-Reporting P4.5b — realized PnL market/FX split.
         // Populated by SellWorkflowService at sell time when FX history is available.
         // Existing rows / same-currency / pre-FX-history trades → NULL → UI "—".
-        RealizedMarketPnl: r.IsDBNull(28) ? null : (decimal)r.GetDouble(28),
-        RealizedFxPnl: r.IsDBNull(29) ? null : (decimal)r.GetDouble(29));
+        RealizedMarketPnl: r.IsDBNull(31) ? null : (decimal)r.GetDouble(31),
+        RealizedFxPnl: r.IsDBNull(32) ? null : (decimal)r.GetDouble(32));
 
     private static void BindTradeParams(SqliteCommand cmd, Trade t)
     {
@@ -157,6 +161,12 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
             t.CommissionCurrency is not null ? (object)t.CommissionCurrency : DBNull.Value);
         cmd.Parameters.AddWithValue("$fx_rate",
             t.FxRate.HasValue ? (object)(double)t.FxRate.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$settlement_ccy",
+            string.IsNullOrWhiteSpace(t.SettlementCurrency) ? (object)"TWD" : t.SettlementCurrency.Trim().ToUpperInvariant());
+        cmd.Parameters.AddWithValue("$fx_rate_date",
+            t.FxRateDate.HasValue ? (object)t.FxRateDate.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : DBNull.Value);
+        cmd.Parameters.AddWithValue("$fx_source",
+            t.FxSource is not null ? (object)t.FxSource : DBNull.Value);
         // Portfolio-Groups-Refactor P1 — null 時自動 fallback 到 DefaultId，避免新 row 寫入 NULL
         // 而需要等下次 schema migration backfill 才會補上。
         cmd.Parameters.AddWithValue("$portfolio_group_id",
@@ -323,6 +333,9 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
                 instrument_currency = $instr_ccy,
                 commission_currency = $comm_ccy,
                 fx_rate = $fx_rate,
+                settlement_currency = $settlement_ccy,
+                fx_rate_date = $fx_rate_date,
+                fx_source = $fx_source,
                 portfolio_group_id = $portfolio_group_id,
                 realized_market_pnl = $rm_pnl,
                 realized_fx_pnl = $rfx_pnl,
@@ -556,6 +569,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
              liability_asset_id,
              parent_trade_id, category_id, recurring_source_id,
              instrument_currency, commission_currency, fx_rate,
+             settlement_currency, fx_rate_date, fx_source,
              portfolio_group_id,
              realized_market_pnl, realized_fx_pnl,
              created_at, updated_at,
@@ -568,6 +582,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
              $liability_asset_id,
              $parent_id, $category_id, $recurring_source_id,
              $instr_ccy, $comm_ccy, $fx_rate,
+             $settlement_ccy, $fx_rate_date, $fx_source,
              $portfolio_group_id,
              $rm_pnl, $rfx_pnl,
              $now, $now,
@@ -588,13 +603,13 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
         {
             var trade = MapTrade(reader);
             // ⚠ Ordinals here track the tail of SyncSelectClause = SelectClause + sync cols.
-            // SelectClause now has 30 cols (24 base + 3 MultiCurrency P1 + 1 PortfolioGroup + 2 P4.5b breakdown).
+            // SelectClause now has 33 cols (24 base + 6 MultiCurrency + 1 PortfolioGroup + 2 P4.5b breakdown).
             // Keep these ordinals in lock-step with SelectClause column count.
             var version = new EntityVersion(
-                Version: reader.GetInt64(30),
-                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(31)),
-                LastModifiedByDevice: reader.GetString(32));
-            var isDeleted = reader.GetInt32(33) != 0;
+                Version: reader.GetInt64(33),
+                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(34)),
+                LastModifiedByDevice: reader.GetString(35));
+            var isDeleted = reader.GetInt32(36) != 0;
             results.Add(TradeSyncMapper.ToEnvelope(trade, version, isDeleted));
         }
         return results;
@@ -684,6 +699,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
                      liability_asset_id,
                      parent_trade_id, category_id, recurring_source_id,
                      instrument_currency, commission_currency, fx_rate,
+                     settlement_currency, fx_rate_date, fx_source,
                      portfolio_group_id,
                      realized_market_pnl, realized_fx_pnl,
                      created_at, updated_at,
@@ -696,6 +712,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
                      $liability_asset_id,
                      $parent_id, $category_id, $recurring_source_id,
                      $instr_ccy, $comm_ccy, $fx_rate,
+                     $settlement_ccy, $fx_rate_date, $fx_source,
                      $portfolio_group_id,
                      $rm_pnl, $rfx_pnl,
                      $now, $now,
@@ -727,6 +744,9 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
                     instrument_currency = excluded.instrument_currency,
                     commission_currency = excluded.commission_currency,
                     fx_rate = excluded.fx_rate,
+                    settlement_currency = excluded.settlement_currency,
+                    fx_rate_date = excluded.fx_rate_date,
+                    fx_source = excluded.fx_source,
                     portfolio_group_id = excluded.portfolio_group_id,
                     realized_market_pnl = excluded.realized_market_pnl,
                     realized_fx_pnl = excluded.realized_fx_pnl,

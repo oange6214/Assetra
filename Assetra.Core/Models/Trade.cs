@@ -137,6 +137,19 @@ public sealed record Trade(
     /// 跨幣別交易（複委託、外幣標的）必須填，否則
     /// <see cref="CashAmount"/> 無法跟 <see cref="Price"/> × <see cref="Quantity"/> 對得起來。</summary>
     decimal? FxRate = null,
+    /// <summary>
+    /// 實際扣款 / 入帳的現金幣別（ISO 4217）。通常等於現金帳戶幣別。
+    /// 與 <see cref="InstrumentCurrency"/> 不同時，<see cref="FxRate"/> 描述兩者換算關係。
+    /// </summary>
+    string SettlementCurrency = "TWD",
+    /// <summary>
+    /// <see cref="FxRate"/> 對應的有效日期。null 代表同幣別或使用者尚未提供可稽核日期。
+    /// </summary>
+    DateOnly? FxRateDate = null,
+    /// <summary>
+    /// <see cref="FxRate"/> 的來源，例如 Frankfurter、broker statement 或 manual。
+    /// </summary>
+    string? FxSource = null,
     // ── Portfolio-Groups-Refactor P1 ─────────────────────────────────
     /// <summary>
     /// 所屬投資組合群組（bucket，如「退休帳戶」「買房儲蓄」）。

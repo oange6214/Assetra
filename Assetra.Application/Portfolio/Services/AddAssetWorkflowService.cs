@@ -173,6 +173,10 @@ public sealed class AddAssetWorkflowService : IAddAssetWorkflowService
         var tradeDate = request.BuyDate.Kind == DateTimeKind.Unspecified
             ? DateTime.SpecifyKind(request.BuyDate, DateTimeKind.Local).ToUniversalTime()
             : request.BuyDate.ToUniversalTime();
+        var instrumentCurrency = StockExchangeRegistry.ResolveDefaultCurrency(exchange);
+        var settlementCurrency = string.IsNullOrWhiteSpace(request.SettlementCurrency)
+            ? "TWD"
+            : request.SettlementCurrency.Trim().ToUpperInvariant();
 
         var trade = new Trade(
             Id: Guid.NewGuid(),
@@ -194,9 +198,12 @@ public sealed class AddAssetWorkflowService : IAddAssetWorkflowService
             // MultiCurrency-Trade-Refactor P2 — 從 exchange 自動推導標的計價幣別。
             // 用 Core 既有的 StockExchangeRegistry（同份 TWSE/TPEX/NYSE/... → currency 對照表，
             // 跟 IsCrossCurrencyCashDebit 走同一個 source of truth，避免兩份 mapping 漂移）。
-            InstrumentCurrency: Assetra.Core.Models.StockExchangeRegistry.ResolveDefaultCurrency(exchange),
+            InstrumentCurrency: instrumentCurrency,
             // P3 — 跨幣別交易時帶入 FX rate。同幣別 (null) 保持 implicit 1.0 寫法。
             FxRate: request.FxRate,
+            SettlementCurrency: settlementCurrency,
+            FxRateDate: request.FxRateDate,
+            FxSource: request.FxSource,
             // Portfolio-Groups-Refactor P3 — 群組（bucket）。null 由 repo fallback 成 DefaultId。
             PortfolioGroupId: request.PortfolioGroupId);
         await _transactionService!.RecordAsync(trade).ConfigureAwait(false);

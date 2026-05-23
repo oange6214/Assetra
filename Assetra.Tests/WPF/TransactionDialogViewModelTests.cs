@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Moq;
+using Assetra.Application.Fx;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
@@ -28,10 +29,15 @@ public class TransactionDialogViewModelTests
         ObservableCollection<CashAccountRowViewModel>? cashAccounts = null,
         ObservableCollection<LiabilityRowViewModel>? liabilities = null,
         ICategoryRepository? categoryRepository = null,
-        IAutoCategorizationRuleRepository? ruleRepository = null)
+        IAutoCategorizationRuleRepository? ruleRepository = null,
+        TransactionFxRateResolver? fxResolver = null)
     {
+        var addWorkflow = new Mock<IAddAssetWorkflowService>();
+        addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
+            .Returns(new BuyPreviewResult(0m, 0m, 0m, 0m));
+
         var addAsset = new AddAssetDialogViewModel(
-            Mock.Of<IAddAssetWorkflowService>(),
+            addWorkflow.Object,
             Mock.Of<IAccountUpsertWorkflowService>(),
             Mock.Of<ITransactionWorkflowService>(),
             Mock.Of<ICreditCardMutationWorkflowService>());
@@ -64,10 +70,21 @@ public class TransactionDialogViewModelTests
             RebuildTotals: () => { },
             Localize: (_, fallback) => fallback,
             CategoryRepository: categoryRepository,
-            AutoCategorizationRuleRepository: ruleRepository);
+            AutoCategorizationRuleRepository: ruleRepository,
+            TransactionFxRateResolver: fxResolver);
 
         return new TransactionDialogViewModel(deps);
     }
+
+    private static CashAccountRowViewModel MakeCashAccount(string name, string currency) =>
+        new(new AssetItem(
+            Guid.NewGuid(),
+            name,
+            FinancialType.Asset,
+            null,
+            currency,
+            DateOnly.FromDateTime(DateTime.Today)),
+            projectedBalance: 100_000m);
 
     // ── Mode flags (TxType change) ───────────────────────────────────────────
 
@@ -118,6 +135,125 @@ public class TransactionDialogViewModelTests
 
         Assert.Equal(future, vm.TxDate);
         Assert.Equal(future, vm.AddAssetDialog.AddBuyDate);
+    }
+
+    [Fact]
+    public async Task FetchBuyFxRate_CrossCurrencyBuy_FillsRateMetadata()
+    {
+        var tradeDate = new DateOnly(2026, 5, 8);
+        var history = new Mock<IFxRateHistoryService>();
+        history
+            .Setup(h => h.GetEntryAsync(
+                tradeDate,
+                "USD",
+                "TWD",
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new FxRateHistoryEntry(
+                tradeDate,
+                "USD",
+                "TWD",
+                32.335m,
+                "Frankfurter",
+                DateTimeOffset.UtcNow));
+
+        var vm = CreateVm(fxResolver: new TransactionFxRateResolver(history.Object));
+        vm.TxType = "buy";
+        vm.TxDate = tradeDate.ToDateTime(TimeOnly.MinValue);
+        vm.Buy.InstrumentCurrency = "USD";
+        vm.Buy.SettlementCurrency = "TWD";
+
+        await vm.FetchBuyFxRateCommand.ExecuteAsync(null);
+
+        Assert.Equal("32.335", vm.Buy.FxRate);
+        Assert.Equal(tradeDate, vm.Buy.FxRateDate);
+        Assert.Equal("Frankfurter", vm.Buy.FxSourceLabel);
+        Assert.False(vm.Buy.IsFxManual);
+        Assert.Equal(string.Empty, vm.Buy.FxFetchError);
+    }
+
+    [Fact]
+    public void EditTrade_CrossCurrencyBuy_RestoresFxSettlementMetadata()
+    {
+        var tradeId = Guid.NewGuid();
+        var tradeDate = new DateOnly(2026, 5, 8);
+        var row = new TradeRowViewModel(new Trade(
+            Id: tradeId,
+            Symbol: "DRAM",
+            Exchange: "NASDAQ",
+            Name: "Roundhill Memory ETF",
+            Type: TradeType.Buy,
+            TradeDate: tradeDate.ToDateTime(TimeOnly.MinValue),
+            Price: 50m,
+            Quantity: 20,
+            RealizedPnl: null,
+            RealizedPnlPct: null,
+            CashAmount: 32_250m,
+            Commission: 0m,
+            CommissionDiscount: 1m,
+            PortfolioEntryId: Guid.NewGuid(),
+            InstrumentCurrency: "USD",
+            SettlementCurrency: "TWD",
+            FxRate: 32.25m,
+            FxRateDate: tradeDate,
+            FxSource: "manual"));
+
+        var trades = new ObservableCollection<TradeRowViewModel> { row };
+        var vm = CreateVm(trades: trades);
+
+        vm.EditTradeCommand.Execute(row);
+
+        Assert.Equal(tradeId, vm.EditingTradeId);
+        Assert.Equal("buy", vm.TxType);
+        Assert.Equal("32.25", vm.Buy.FxRate);
+        Assert.Equal("USD", vm.Buy.InstrumentCurrency);
+        Assert.Equal("TWD", vm.Buy.SettlementCurrency);
+        Assert.Equal(tradeDate, vm.Buy.FxRateDate);
+        Assert.Equal("manual", vm.Buy.FxSourceLabel);
+        Assert.True(vm.Buy.IsFxManual);
+        Assert.Equal("32250", vm.Buy.ActualCashAmount);
+    }
+
+    [Fact]
+    public void BuyCashSettlement_UsesSelectedCashAccountCurrencyNotTradeCurrencyAssumption()
+    {
+        var usd = MakeCashAccount("IB", "USD");
+        var twd = MakeCashAccount("台新", "TWD");
+        var vm = CreateVm(cashAccounts: new ObservableCollection<CashAccountRowViewModel> { usd, twd });
+
+        vm.TxType = "buy";
+        vm.TxCurrency = "USD";
+        vm.TxUseCashAccount = true;
+
+        vm.TxCashAccount = usd;
+
+        Assert.Equal("USD", vm.Buy.InstrumentCurrency);
+        Assert.Equal("USD", vm.Buy.CashAccountCurrency);
+        Assert.Equal("USD", vm.Buy.SettlementCurrency);
+        Assert.False(vm.Buy.IsCrossCurrency);
+        Assert.False(vm.CanFetchBuyFxRate);
+
+        vm.TxCashAccount = twd;
+
+        Assert.Equal("USD", vm.Buy.InstrumentCurrency);
+        Assert.Equal("TWD", vm.Buy.CashAccountCurrency);
+        Assert.Equal("TWD", vm.Buy.SettlementCurrency);
+        Assert.True(vm.Buy.IsCrossCurrency);
+        Assert.Equal("USD → TWD", vm.Buy.SettlementPairDisplay);
+    }
+
+    [Fact]
+    public void BuySettlementInputMode_DefaultsToStatementAndCanSwitchToFxEstimate()
+    {
+        var vm = CreateVm();
+
+        Assert.Equal("statement", vm.Buy.SettlementInputMode);
+        Assert.True(vm.Buy.IsStatementSettlementMode);
+        Assert.False(vm.Buy.IsFxSettlementMode);
+
+        vm.Buy.SettlementInputMode = "fx";
+
+        Assert.False(vm.Buy.IsStatementSettlementMode);
+        Assert.True(vm.Buy.IsFxSettlementMode);
     }
 
     [Fact]
@@ -471,7 +607,7 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
-    public async Task ConfirmAdd_Stock_CrossCurrencyCashAccountRequiresActualCashAmount()
+    public async Task ConfirmAdd_Stock_CrossCurrencyStatementModeRequiresActualCashAmount()
     {
         var addWorkflow = new Mock<IAddAssetWorkflowService>();
         addWorkflow.Setup(w => w.SearchSymbols(It.IsAny<string>(), It.IsAny<int>()))
@@ -487,7 +623,9 @@ public class TransactionDialogViewModelTests
             BuyContext = new StaticBuyContext(
                 cashAccountId: Guid.NewGuid(),
                 cashAccountCurrency: "TWD",
-                useCashAccount: true),
+                useCashAccount: true,
+                settlementInputMode: "statement",
+                fxRate: "32.5"),
         };
 
         vm.AddAssetType = "stock";
@@ -498,10 +636,57 @@ public class TransactionDialogViewModelTests
 
         await vm.ConfirmAddCommand.ExecuteAsync(null);
 
-        Assert.Contains("跨幣別", vm.AddError);
+        Assert.Contains("實際扣款", vm.AddError);
         addWorkflow.Verify(w => w.ExecuteStockBuyAsync(
             It.IsAny<StockBuyRequest>(),
             It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ConfirmAdd_Stock_CrossCurrencyFxModeAcceptsFxWithoutActualCashAmount()
+    {
+        StockBuyRequest? captured = null;
+        var addWorkflow = new Mock<IAddAssetWorkflowService>();
+        addWorkflow.Setup(w => w.SearchSymbols(It.IsAny<string>(), It.IsAny<int>()))
+            .Returns([]);
+        addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
+            .Returns(new BuyPreviewResult(1000m, 0m, 1000m, 10m));
+        addWorkflow
+            .Setup(w => w.ExecuteStockBuyAsync(It.IsAny<StockBuyRequest>(), It.IsAny<CancellationToken>()))
+            .Callback<StockBuyRequest, CancellationToken>((request, _) => captured = request)
+            .ReturnsAsync(new StockBuyResult(
+                new PortfolioEntry(Guid.NewGuid(), "AAPL", "NASDAQ", Currency: "USD"),
+                Commission: 0m,
+                CommissionDiscountUsed: 1m,
+                CostPerShare: 100m));
+
+        var vm = new AddAssetDialogViewModel(
+            addWorkflow.Object,
+            Mock.Of<IAccountUpsertWorkflowService>(),
+            Mock.Of<ITransactionWorkflowService>(),
+            Mock.Of<ICreditCardMutationWorkflowService>())
+        {
+            BuyContext = new StaticBuyContext(
+                cashAccountId: Guid.NewGuid(),
+                cashAccountCurrency: "TWD",
+                useCashAccount: true,
+                settlementInputMode: "fx",
+                fxRate: "32.5"),
+        };
+
+        vm.AddAssetType = "stock";
+        vm.AddSymbol = "AAPL";
+        vm.AddSymbolCurrency = "USD";
+        vm.AddPrice = "100";
+        vm.AddQuantity = "10";
+
+        await vm.ConfirmAddCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.AddError);
+        Assert.NotNull(captured);
+        Assert.Equal(32.5m, captured!.FxRate);
+        Assert.Equal(32_500m, captured.ActualCashAmount);
+        Assert.Equal("TWD", captured.SettlementCurrency);
     }
 
     [Fact]

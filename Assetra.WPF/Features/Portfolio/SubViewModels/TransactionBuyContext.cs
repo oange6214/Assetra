@@ -16,6 +16,7 @@ public sealed class TransactionBuyContext(TransactionDialogViewModel vm) : IBuyE
     public decimal CommissionDiscount => vm.TxCommissionDiscountValue;
     public string TxFee => vm.TxFee;
     public string ActualCashAmount => vm.Buy.ActualCashAmount;
+    public string SettlementInputMode => vm.Buy.SettlementInputMode;
     public bool BuyMetaOnly => vm.Buy.MetaOnly;
     public Guid? CashAccountId => vm.TxCashAccount?.Id;
     public string? CashAccountCurrency => vm.TxCashAccount?.Currency;
@@ -26,4 +27,8 @@ public sealed class TransactionBuyContext(TransactionDialogViewModel vm) : IBuyE
     // P5.5 — expose Buy.InstrumentCurrency (which TransactionDialogViewModel
     // now keeps in sync with TxCurrency on user override).
     public string InstrumentCurrency => vm.Buy.InstrumentCurrency;
+    public string SettlementCurrency => vm.Buy.SettlementCurrency;
+    public DateOnly? FxRateDate => vm.Buy.FxRateDate;
+    public string? FxSource => vm.Buy.FxSourceLabel;
+    public bool IsFxManual => vm.Buy.IsFxManual;
 }

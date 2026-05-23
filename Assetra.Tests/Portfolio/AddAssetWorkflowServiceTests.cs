@@ -186,6 +186,67 @@ public sealed class AddAssetWorkflowServiceTests
     }
 
     [Fact]
+    public async Task ExecuteStockBuyAsync_RecordsSettlementFxAuditMetadata()
+    {
+        var search = new Mock<IStockSearchService>();
+        var portfolioRepo = new Mock<IPortfolioRepository>();
+        var logRepo = new Mock<IPortfolioPositionLogRepository>();
+        var txService = new Mock<ITransactionService>();
+        var directory = new FakeSymbolDirectory([
+            new StockSearchResult("DRAM", "Roundhill Memory ETF", "NASDAQ", Currency: "USD"),
+        ]);
+        var entryId = Guid.NewGuid();
+        Trade? recorded = null;
+
+        portfolioRepo
+            .Setup(r => r.FindOrCreatePortfolioEntryAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>(),
+                It.IsAny<AssetType>(),
+                It.IsAny<string?>(),
+                It.IsAny<bool>(),
+                It.IsAny<Guid?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(entryId);
+        portfolioRepo.Setup(r => r.UnarchiveAsync(entryId, It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        logRepo.Setup(r => r.LogAsync(It.IsAny<PortfolioPositionLog>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        txService.Setup(s => s.RecordAsync(It.IsAny<Trade>()))
+            .Callback<Trade>(t => recorded = t)
+            .Returns(Task.CompletedTask);
+
+        var service = new AddAssetWorkflowService(
+            search.Object,
+            portfolioRepository: portfolioRepo.Object,
+            positionLogRepository: logRepo.Object,
+            transactionService: txService.Object,
+            symbolDirectory: directory);
+
+        await service.ExecuteStockBuyAsync(new StockBuyRequest(
+            Symbol: "DRAM",
+            Price: 51.23m,
+            Quantity: 20,
+            BuyDate: new DateTime(2026, 5, 8),
+            CashAccountId: Guid.NewGuid(),
+            CommissionDiscount: 1m,
+            ManualFee: null,
+            ActualCashAmount: 33_128m,
+            FxRate: 32.335m,
+            SettlementCurrency: "TWD",
+            FxRateDate: new DateOnly(2026, 5, 8),
+            FxSource: "Frankfurter"));
+
+        Assert.NotNull(recorded);
+        Assert.Equal("USD", recorded!.InstrumentCurrency);
+        Assert.Equal("TWD", recorded.SettlementCurrency);
+        Assert.Equal(32.335m, recorded.FxRate);
+        Assert.Equal(new DateOnly(2026, 5, 8), recorded.FxRateDate);
+        Assert.Equal("Frankfurter", recorded.FxSource);
+    }
+
+    [Fact]
     public async Task CreateManualAssetAsync_PersistsEntry_AndReturnsSnapshot()
     {
         var search = new Mock<IStockSearchService>();

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Models;
 
 namespace Assetra.Application.Fx;
 
@@ -18,7 +19,7 @@ public sealed class FxRateHistoryService : IFxRateHistoryService
     private readonly IFxRateHistoryRepository _repo;
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
 
-    private sealed record CacheEntry(decimal? Rate, DateTimeOffset CachedAt);
+    private sealed record CacheEntry(FxRateHistoryEntry? Entry, DateTimeOffset CachedAt);
 
     private readonly ConcurrentDictionary<string, CacheEntry> _cache = new(StringComparer.Ordinal);
 
@@ -29,30 +30,37 @@ public sealed class FxRateHistoryService : IFxRateHistoryService
 
     public async Task<decimal?> GetRateAsync(
         DateOnly date, string fromCurrency, string toCurrency, CancellationToken ct = default)
+        => (await GetEntryAsync(date, fromCurrency, toCurrency, ct).ConfigureAwait(false))?.Rate;
+
+    public async Task<FxRateHistoryEntry?> GetEntryAsync(
+        DateOnly date, string fromCurrency, string toCurrency, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(fromCurrency) || string.IsNullOrWhiteSpace(toCurrency))
             return null;
         if (string.Equals(fromCurrency, toCurrency, StringComparison.OrdinalIgnoreCase))
-            return 1m;
+        {
+            var currency = fromCurrency.Trim().ToUpperInvariant();
+            return new FxRateHistoryEntry(date, currency, currency, 1m, "same-currency", DateTimeOffset.UtcNow);
+        }
 
         var key = CacheKey(date, fromCurrency, toCurrency);
         if (_cache.TryGetValue(key, out var cached)
             && DateTimeOffset.UtcNow - cached.CachedAt < CacheTtl)
         {
-            return cached.Rate;
+            return cached.Entry;
         }
 
         // Try exact match first, then fall back to nearest preceding business day.
         var exact = await _repo.GetAsync(date, fromCurrency, toCurrency, ct).ConfigureAwait(false);
-        decimal? rate = exact?.Rate;
-        if (rate is null)
+        var entry = exact;
+        if (entry is null)
         {
             var nearest = await _repo.GetNearestAsync(date, fromCurrency, toCurrency, lookbackDays: 7, ct).ConfigureAwait(false);
-            rate = nearest?.Rate;
+            entry = nearest;
         }
 
-        _cache[key] = new CacheEntry(rate, DateTimeOffset.UtcNow);
-        return rate;
+        _cache[key] = new CacheEntry(entry, DateTimeOffset.UtcNow);
+        return entry;
     }
 
     private static string CacheKey(DateOnly date, string from, string to)

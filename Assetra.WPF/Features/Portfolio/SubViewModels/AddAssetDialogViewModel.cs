@@ -560,8 +560,13 @@ public partial class AddAssetDialogViewModel : ObservableObject
 
         // MultiCurrency-Trade-Refactor P3 Mode C — 成交價現在是「optional 如果 ActualCash 有填」。
         // 先 try-parse；若空但 ActualCashAmount + Qty 已知 (+ FxRate 對跨幣別)，下方會反推一個。
+        var settlementMode = string.Equals(BuyContext.SettlementInputMode, "fx", StringComparison.OrdinalIgnoreCase)
+            ? "fx"
+            : "statement";
+        var isCrossCurrencyCash = BuyContext.UseCashAccount && IsCrossCurrencyCashDebit();
+
         var hasPrice = ParseHelpers.TryParseDecimal(AddPrice, out var price) && price > 0;
-        if (!hasPrice && string.IsNullOrWhiteSpace(BuyContext.ActualCashAmount))
+        if (!hasPrice && (!isCrossCurrencyCash || settlementMode != "statement" || string.IsNullOrWhiteSpace(BuyContext.ActualCashAmount)))
         {
             AddError = "成交價無效（或請改填實際扣款金額讓系統反推）";
             return;
@@ -585,7 +590,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
             { AddError = "手續費無效"; return; }
         }
 
-        decimal? actualCashAmount = null;
+        decimal? parsedActualCashAmount = null;
         if (!string.IsNullOrWhiteSpace(BuyContext.ActualCashAmount))
         {
             if (!ParseHelpers.TryParseDecimal(BuyContext.ActualCashAmount, out var parsedActual) ||
@@ -595,11 +600,11 @@ public partial class AddAssetDialogViewModel : ObservableObject
                 return;
             }
 
-            actualCashAmount = parsedActual;
+            parsedActualCashAmount = parsedActual;
         }
 
         // P3 — 跨幣別交易解析 FX rate。空字串視為 null（同幣別或使用者沒填）。
-        decimal? fxRate = null;
+        decimal? parsedFxRate = null;
         if (!string.IsNullOrWhiteSpace(BuyContext.FxRate))
         {
             if (!ParseHelpers.TryParseDecimal(BuyContext.FxRate, out var parsedFx) || parsedFx <= 0)
@@ -607,17 +612,27 @@ public partial class AddAssetDialogViewModel : ObservableObject
                 AddError = "匯率無效";
                 return;
             }
-            fxRate = parsedFx;
+            parsedFxRate = parsedFx;
         }
 
-        // P3 — 跨幣別交易：FxRate 或 ActualCashAmount 至少要有一個；皆空才報錯。
-        // 之前邏輯硬性要求 ActualCashAmount，這裡放寬：使用者只填 FxRate 也能完成交易，
-        // 因為系統可以反推 CashAmount = Price × Qty × FxRate + Commission。
-        if (BuyContext.UseCashAccount &&
-            actualCashAmount is null && fxRate is null &&
-            IsCrossCurrencyCashDebit())
+        var actualCashAmount = isCrossCurrencyCash && settlementMode == "statement"
+            ? parsedActualCashAmount
+            : null;
+        var fxRate = isCrossCurrencyCash && settlementMode == "fx"
+            ? parsedFxRate
+            : null;
+
+        // 跨幣別現金連動時，只有目前使用者選定的結算輸入模式是權威。
+        // statement mode: 帳戶/券商明細上的實際扣款是權威，匯率只可由系統反推。
+        // fx mode: 匯率是權威，實際扣款由成交資料估算。
+        if (isCrossCurrencyCash && settlementMode == "statement" && actualCashAmount is null)
         {
-            AddError = "跨幣別買入請填寫匯率或券商實際扣款金額（擇一）";
+            AddError = "跨幣別買入請填寫券商或帳戶明細上的實際扣款金額，或改用匯率估算";
+            return;
+        }
+        if (isCrossCurrencyCash && settlementMode == "fx" && fxRate is null)
+        {
+            AddError = "跨幣別買入請填寫或取得匯率，或改用明細金額";
             return;
         }
 
@@ -627,6 +642,11 @@ public partial class AddAssetDialogViewModel : ObservableObject
         // （適用券商實際扣款已含手續費的多數情境，跟「金額已含手續費」的精神一致）。
         if (!hasPrice && actualCashAmount is { } cash && qty > 0)
         {
+            if (isCrossCurrencyCash && fxRate is null)
+            {
+                AddError = "跨幣別反推單價需要匯率";
+                return;
+            }
             var feeForPrice = manualFee ?? 0m;
             var grossNative = cash - feeForPrice;
             if (grossNative <= 0)
@@ -666,20 +686,33 @@ public partial class AddAssetDialogViewModel : ObservableObject
         }
 
         var cashAccId = BuyContext.UseCashAccount ? BuyContext.CashAccountId : null;
+        var settlementCurrency = BuyContext.UseCashAccount && !string.IsNullOrWhiteSpace(BuyContext.SettlementCurrency)
+            ? BuyContext.SettlementCurrency.Trim().ToUpperInvariant()
+            : BuyContext.UseCashAccount && !string.IsNullOrWhiteSpace(BuyContext.CashAccountCurrency)
+                ? BuyContext.CashAccountCurrency.Trim().ToUpperInvariant()
+                : null;
+        var fxSource = BuyContext.IsFxManual
+            ? "manual"
+            : string.IsNullOrWhiteSpace(BuyContext.FxSource)
+                ? null
+                : BuyContext.FxSource.Trim();
 
         await _addAssetWorkflow.ExecuteStockBuyAsync(new StockBuyRequest(
-            symbol,
-            price,
-            qty,
-            AddBuyDate,
-            cashAccId,
-            BuyContext.CommissionDiscount,
-            manualFee,
-            EmptyToNull(AddExchange),
-            EmptyToNull(AddSymbolName),
-            actualCashAmount,
-            fxRate,
-            SelectedPortfolioGroupId));
+            Symbol: symbol,
+            Price: price,
+            Quantity: qty,
+            BuyDate: AddBuyDate,
+            CashAccountId: cashAccId,
+            CommissionDiscount: BuyContext.CommissionDiscount,
+            ManualFee: manualFee,
+            Exchange: EmptyToNull(AddExchange),
+            Name: EmptyToNull(AddSymbolName),
+            ActualCashAmount: actualCashAmount,
+            FxRate: fxRate,
+            SettlementCurrency: settlementCurrency,
+            FxRateDate: BuyContext.FxRateDate,
+            FxSource: fxSource,
+            PortfolioGroupId: SelectedPortfolioGroupId));
 
         // Cash balance reflects the Buy trade written above via the projection service;
         // no manual AdjustCashAccountAsync needed (single-truth architecture).

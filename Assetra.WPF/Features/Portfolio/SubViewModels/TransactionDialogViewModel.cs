@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Reactive.Linq;
+using Assetra.Application.Fx;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.DomainServices;
@@ -75,7 +77,9 @@ internal sealed record TransactionDialogDependencies(
     // Record 在使用者確認交易後寫（PortfolioViewModel 接到 AppSettings.RecentlyUsedAssetIds）。
     // null 時最近使用分組不會出現。
     Func<IReadOnlyList<Guid>>? GetRecentAssetIds = null,
-    Action<Guid>? RecordRecentAsset = null);
+    Action<Guid>? RecordRecentAsset = null,
+    // Transaction FX settlement — optional so tests and lightweight hosts can omit it.
+    TransactionFxRateResolver? TransactionFxRateResolver = null);
 
 /// <summary>
 /// 交易類型 ComboBox 的一個選項。Key 對齊 <see cref="TransactionDialogViewModel.TxType"/>
@@ -144,6 +148,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private readonly Action? _openAddNewAsset;
     private readonly Func<IReadOnlyList<Guid>>? _getRecentAssetIds;
     private readonly Action<Guid>? _recordRecentAsset;
+    private readonly TransactionFxRateResolver? _transactionFxRateResolver;
+    private bool _suppressBuyFxManualTracking;
     private readonly Action _rebuildTotals;
     private readonly Func<string, string, string> _localize;
 
@@ -251,6 +257,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _openAddNewAsset = deps.OpenAddNewAsset;
         _getRecentAssetIds = deps.GetRecentAssetIds;
         _recordRecentAsset = deps.RecordRecentAsset;
+        _transactionFxRateResolver = deps.TransactionFxRateResolver;
 
         ExpenseCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_expenseCategories);
         IncomeCategories = new ReadOnlyObservableCollection<CategoryRowViewModel>(_incomeCategories);
@@ -760,6 +767,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         }
 
         AddAssetDialog.AddBuyDate = value;
+        QueueBuyFxRateRefresh();
     }
     [ObservableProperty] private DateTime _txDate = DateTime.Today;
     [ObservableProperty] private string _txError = string.Empty;
@@ -1314,6 +1322,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         NotifyImpactPreviewChanged();
         if (TxTypeIsLoanRepay)
             _ = AutoFillLoanRepayAsync(Loan.Label);
+        FetchBuyFxRateCommand.NotifyCanExecuteChanged();
+        QueueBuyFxRateRefresh();
     }
 
     /// <summary>
@@ -1388,6 +1398,81 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         }
     }
 
+    public bool CanFetchBuyFxRate => _transactionFxRateResolver is not null && Buy.IsCrossCurrency;
+
+    [RelayCommand(CanExecute = nameof(CanFetchBuyFxRate))]
+    private async Task FetchBuyFxRateAsync() => await RefreshBuyFxRateAsync(force: true).ConfigureAwait(true);
+
+    private void QueueBuyFxRateRefresh()
+    {
+        _ = RefreshBuyFxRateAsync(force: false);
+    }
+
+    private async Task RefreshBuyFxRateAsync(bool force)
+    {
+        if (_transactionFxRateResolver is null || !TxTypeIsBuy)
+            return;
+
+        var instrumentCurrency = NormalizeCurrency(Buy.InstrumentCurrency);
+        var settlementCurrency = NormalizeCurrency(Buy.SettlementCurrency, NormalizeCurrency(Buy.CashAccountCurrency));
+
+        if (string.Equals(instrumentCurrency, settlementCurrency, StringComparison.OrdinalIgnoreCase))
+        {
+            SetResolvedBuyFx(string.Empty, null, string.Empty, isManual: false);
+            Buy.FxFetchError = string.Empty;
+            return;
+        }
+
+        if (Buy.IsFxManual && !force)
+            return;
+
+        Buy.FxFetchError = string.Empty;
+
+        try
+        {
+            var quote = await _transactionFxRateResolver
+                .ResolveAsync(DateOnly.FromDateTime(TxDate.Date), instrumentCurrency, settlementCurrency)
+                .ConfigureAwait(true);
+
+            if (!quote.IsAvailable || quote.Rate is not { } rate)
+            {
+                Buy.FxFetchError = L("Portfolio.Tx.FxRate.Unavailable", "查無此日期匯率，請手動輸入匯率或實際扣款金額。");
+                return;
+            }
+
+            SetResolvedBuyFx(
+                rate.ToString("0.########", CultureInfo.InvariantCulture),
+                quote.RateDate,
+                quote.Source ?? string.Empty,
+                isManual: false);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to resolve transaction FX rate: {From}->{To} on {Date}",
+                instrumentCurrency, settlementCurrency, TxDate.Date);
+            Buy.FxFetchError = L("Portfolio.Tx.FxRate.Unavailable", "查無此日期匯率，請手動輸入匯率或實際扣款金額。");
+        }
+    }
+
+    private void SetResolvedBuyFx(string rate, DateOnly? rateDate, string source, bool isManual)
+    {
+        _suppressBuyFxManualTracking = true;
+        try
+        {
+            Buy.FxRate = rate;
+            Buy.FxRateDate = rateDate;
+            Buy.FxSourceLabel = source;
+            Buy.IsFxManual = isManual;
+        }
+        finally
+        {
+            _suppressBuyFxManualTracking = false;
+        }
+    }
+
+    private static string NormalizeCurrency(string? value, string fallback = "TWD") =>
+        string.IsNullOrWhiteSpace(value) ? fallback : value.Trim().ToUpperInvariant();
+
     /// <summary>
     /// React to Buy.X changes — runs side effects that the old <c>partial OnTxBuy*Changed</c>
     /// handlers performed (UpdateBuyPreview, write-back AddPrice in total mode, validation).
@@ -1424,6 +1509,25 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             case nameof(BuyTxViewModel.FxRate):
                 // P3 — same validation pattern as ActualCashAmount; empty allowed (= implicit 1.0).
                 Buy.FxRateError = ValidatePositiveDecimalOrEmpty(Buy.FxRate);
+                if (!_suppressBuyFxManualTracking)
+                {
+                    Buy.IsFxManual = !string.IsNullOrWhiteSpace(Buy.FxRate);
+                    if (Buy.IsFxManual)
+                    {
+                        Buy.FxSourceLabel = "manual";
+                        Buy.FxRateDate ??= DateOnly.FromDateTime(TxDate.Date);
+                    }
+                }
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(BuyTxViewModel.InstrumentCurrency):
+            case nameof(BuyTxViewModel.CashAccountCurrency):
+            case nameof(BuyTxViewModel.SettlementCurrency):
+                FetchBuyFxRateCommand.NotifyCanExecuteChanged();
+                QueueBuyFxRateRefresh();
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(BuyTxViewModel.SettlementInputMode):
                 NotifyImpactPreviewChanged();
                 break;
         }
@@ -1528,6 +1632,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Buy.TotalCost = string.Empty;
         Buy.TotalIncludesFee = true;  // Reset to default — most broker totals include fee.
         Buy.ActualCashAmount = string.Empty;
+        Buy.FxRate = string.Empty;
+        Buy.FxRateDate = null;
+        Buy.FxSourceLabel = string.Empty;
+        Buy.IsFxManual = false;
+        Buy.FxFetchError = string.Empty;
+        Buy.CashAccountCurrency = TxCashAccount?.Currency ?? string.Empty;
+        Buy.SettlementCurrency = TxCashAccount?.Currency ?? string.Empty;
         Buy.MetaOnly = false;
         Div.InputMode = state.TxDivInputMode;
         Div.TotalInput = string.Empty;
@@ -1703,9 +1814,23 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 // InstrumentCurrency must be set explicitly because the autocomplete chain
                 // clears AddSymbolCurrency on AddSymbol set, and TxCashAccount push wires the
                 // funding side only.
-                Buy.FxRate = editState.TxFxRate;
+                _suppressBuyFxManualTracking = true;
+                try
+                {
+                    Buy.FxRate = editState.TxFxRate;
+                }
+                finally
+                {
+                    _suppressBuyFxManualTracking = false;
+                }
                 if (!string.IsNullOrWhiteSpace(editState.TxInstrumentCurrency))
                     Buy.InstrumentCurrency = editState.TxInstrumentCurrency;
+                Buy.SettlementCurrency = !string.IsNullOrWhiteSpace(editState.TxSettlementCurrency)
+                    ? editState.TxSettlementCurrency
+                    : editState.TxCashAccount?.Currency ?? string.Empty;
+                Buy.FxRateDate = editState.TxFxRateDate;
+                Buy.FxSourceLabel = editState.TxFxSource ?? string.Empty;
+                Buy.IsFxManual = string.Equals(editState.TxFxSource, "manual", StringComparison.OrdinalIgnoreCase);
                 // Infer the original "金額已含手續費" state from the recorded
                 // Commission. A trade saved via the new total-mode-with-fee
                 // path has Commission == 0 (or null); a trade that went through

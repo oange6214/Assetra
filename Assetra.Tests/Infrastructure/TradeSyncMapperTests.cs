@@ -112,6 +112,31 @@ public class TradeSyncMapperTests
     }
 
     [Fact]
+    public void RoundTrip_PreservesSettlementFxAuditFields()
+    {
+        var t = Sample() with
+        {
+            Symbol = "DRAM",
+            Exchange = "NASDAQ",
+            InstrumentCurrency = "USD",
+            SettlementCurrency = "TWD",
+            FxRate = 32.335m,
+            FxRateDate = new DateOnly(2026, 5, 8),
+            FxSource = "Frankfurter",
+        };
+
+        var env = TradeSyncMapper.ToEnvelope(
+            t,
+            new EntityVersion(1, DateTimeOffset.UtcNow, "dev"),
+            isDeleted: false);
+        var back = TradeSyncMapper.FromPayload(env);
+
+        Assert.Equal("TWD", back.SettlementCurrency);
+        Assert.Equal(new DateOnly(2026, 5, 8), back.FxRateDate);
+        Assert.Equal("Frankfurter", back.FxSource);
+    }
+
+    [Fact]
     public void FromPayload_BackCompat_OldPayloadWithoutMultiCurrencyFields()
     {
         // 舊 cloud payload（未含 instrument_currency / commission_currency / fx_rate）
@@ -153,8 +178,11 @@ public class TradeSyncMapperTests
         var back = TradeSyncMapper.FromPayload(env);
 
         Assert.Equal("TWD", back.InstrumentCurrency);
+        Assert.Equal("TWD", back.SettlementCurrency);
         Assert.Null(back.CommissionCurrency);
         Assert.Null(back.FxRate);
+        Assert.Null(back.FxRateDate);
+        Assert.Null(back.FxSource);
         Assert.Equal(800.5m, back.Price);
     }
 

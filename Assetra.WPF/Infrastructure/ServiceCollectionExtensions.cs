@@ -50,6 +50,7 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<IFxRateHistoryService>(sp =>
             new Assetra.Application.Fx.FxRateHistoryService(
                 sp.GetRequiredService<IFxRateHistoryRepository>()));
+        services.AddSingleton<Assetra.Application.Fx.TransactionFxRateResolver>();
         // P4.1b — Yahoo fetcher to populate the history store. Manual trigger
         // for now; P4.1c will add a background poll + settings UI button.
         services.AddSingleton<IFxRateHistoryFetcher>(sp =>

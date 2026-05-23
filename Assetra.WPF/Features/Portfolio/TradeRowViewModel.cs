@@ -71,10 +71,48 @@ public sealed class TradeRowViewModel : ObservableObject
     /// </summary>
     public string InstrumentCurrency { get; }
 
+    /// <summary>Actual cash settlement currency for this trade (ISO 4217).</summary>
+    public string SettlementCurrency { get; }
+
     /// <summary>
     /// P3 — 跨幣別交易匯率（標的 → 帳戶幣別）。null = 同幣別 / implicit 1.0。
     /// </summary>
     public decimal? FxRate { get; }
+
+    /// <summary>Historical FX rate date used when the trade was recorded.</summary>
+    public DateOnly? FxRateDate { get; }
+
+    /// <summary>FX provider or manual source label used when the trade was recorded.</summary>
+    public string? FxSource { get; }
+
+    /// <summary>True when the trade settlement currency differs from the instrument currency.</summary>
+    public bool HasFxSettlementMetadata =>
+        !string.IsNullOrWhiteSpace(InstrumentCurrency) &&
+        !string.IsNullOrWhiteSpace(SettlementCurrency) &&
+        !string.Equals(InstrumentCurrency, SettlementCurrency, StringComparison.OrdinalIgnoreCase);
+
+    public string FxSettlementSummary
+    {
+        get
+        {
+            if (!HasFxSettlementMetadata)
+                return string.Empty;
+
+            var parts = new List<string>
+            {
+                $"{InstrumentCurrency.Trim().ToUpperInvariant()} → {SettlementCurrency.Trim().ToUpperInvariant()}"
+            };
+
+            if (FxRate is > 0m)
+                parts.Add(FxRate.Value.ToString("N4"));
+            if (FxRateDate is { } rateDate)
+                parts.Add(rateDate.ToString("yyyy-MM-dd"));
+            if (!string.IsNullOrWhiteSpace(FxSource))
+                parts.Add(FxSource.Trim());
+
+            return string.Join(" · ", parts);
+        }
+    }
 
     /// <summary>
     /// Portfolio-Groups-Refactor P3 — 此筆交易所屬群組（bucket）。
@@ -311,7 +349,10 @@ public sealed class TradeRowViewModel : ObservableObject
         ToCashAccountId = t.ToCashAccountId;
         LiabilityAssetId = t.LiabilityAssetId;
         InstrumentCurrency = t.InstrumentCurrency;
+        SettlementCurrency = t.SettlementCurrency;
         FxRate = t.FxRate;
+        FxRateDate = t.FxRateDate;
+        FxSource = t.FxSource;
         PortfolioGroupId = t.PortfolioGroupId;
     }
 }

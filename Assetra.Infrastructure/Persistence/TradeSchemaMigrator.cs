@@ -14,6 +14,7 @@ internal static class TradeSchemaMigrator
         "version", "last_modified_at", "last_modified_by_device", "is_deleted", "is_pending_push",
         // MultiCurrency-Trade-Refactor P1
         "instrument_currency", "commission_currency", "fx_rate",
+        "settlement_currency", "fx_rate_date", "fx_source",
         // Portfolio-Groups-Refactor P1
         "portfolio_group_id",
         // MultiCurrency-Reporting P4.5b — realized PnL split into market vs FX
@@ -83,6 +84,9 @@ internal static class TradeSchemaMigrator
             MigrateAddColumn(conn, tx, "instrument_currency", "TEXT NOT NULL DEFAULT 'TWD'");
             MigrateAddColumn(conn, tx, "commission_currency", "TEXT");
             MigrateAddColumn(conn, tx, "fx_rate", "REAL");
+            MigrateAddColumn(conn, tx, "settlement_currency", "TEXT NOT NULL DEFAULT 'TWD'");
+            MigrateAddColumn(conn, tx, "fx_rate_date", "TEXT");
+            MigrateAddColumn(conn, tx, "fx_source", "TEXT");
 
             // Portfolio-Groups-Refactor P1 — 每筆 trade 屬於一個 portfolio_group。
             // nullable，既有 row 預設 NULL，下方 backfill 把它們設成 DefaultGroupId。

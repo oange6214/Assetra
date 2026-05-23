@@ -1,5 +1,6 @@
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Globalization;
 
 namespace Assetra.WPF.Features.Portfolio.SubViewModels.Tx;
 
@@ -65,6 +66,16 @@ public sealed partial class BuyTxViewModel : ObservableObject
     [ObservableProperty] private string _actualCashAmountError = string.Empty;
 
     /// <summary>
+    /// Cross-currency settlement input authority:
+    /// "statement" means the broker/account statement cash amount is authoritative;
+    /// "fx" means the FX rate is authoritative and cash amount is estimated.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsStatementSettlementMode))]
+    [NotifyPropertyChangedFor(nameof(IsFxSettlementMode))]
+    private string _settlementInputMode = "statement";
+
+    /// <summary>
     /// 跨幣別交易的匯率（標的幣別 → 扣款帳戶幣別）。
     /// 例：標的 USD、帳戶 TWD，FxRate = 31.5 表示 1 USD = 31.5 TWD。
     /// 同幣別交易留空字串（後續由 <see cref="ActualCashAmount"/> 反推或保持 implicit 1.0）。
@@ -87,6 +98,28 @@ public sealed partial class BuyTxViewModel : ObservableObject
     /// </summary>
     [ObservableProperty] private string _cashAccountCurrency = string.Empty;
 
+    /// <summary>實際扣款 / 入帳的現金幣別，預設跟現金帳戶幣別一致。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SettlementCurrencyDisplay))]
+    [NotifyPropertyChangedFor(nameof(SettlementPairDisplay))]
+    private string _settlementCurrency = string.Empty;
+
+    /// <summary>匯率實際採用的日期；可能是交易日，也可能是最近可用的歷史匯率日。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FxRateDateDisplay))]
+    private DateOnly? _fxRateDate;
+
+    /// <summary>匯率來源名稱，例如 Frankfurter；空字串代表尚未查得或使用者手動輸入。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FxSourceDisplay))]
+    private string _fxSourceLabel = string.Empty;
+
+    /// <summary>True 代表使用者手動覆寫匯率，日期/幣別變動時不自動蓋掉。</summary>
+    [ObservableProperty] private bool _isFxManual;
+
+    /// <summary>匯率查詢失敗或缺資料的可見錯誤訊息。</summary>
+    [ObservableProperty] private string _fxFetchError = string.Empty;
+
     /// <summary>
     /// True 當 <see cref="InstrumentCurrency"/> 與 <see cref="CashAccountCurrency"/> 不同。
     /// XAML 用此屬性決定要不要顯示 FX rate 欄位與「跨幣別」hint。
@@ -97,7 +130,7 @@ public sealed partial class BuyTxViewModel : ObservableObject
         get
         {
             var instr = string.IsNullOrWhiteSpace(InstrumentCurrency) ? "TWD" : InstrumentCurrency.Trim().ToUpperInvariant();
-            var cash = string.IsNullOrWhiteSpace(CashAccountCurrency) ? "TWD" : CashAccountCurrency.Trim().ToUpperInvariant();
+            var cash = NormalizeSettlementCurrency();
             return !string.Equals(instr, cash, StringComparison.OrdinalIgnoreCase);
         }
     }
@@ -106,8 +139,39 @@ public sealed partial class BuyTxViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(InstrumentCurrencyBadge));
+        OnPropertyChanged(nameof(SettlementPairDisplay));
     }
-    partial void OnCashAccountCurrencyChanged(string value) => OnPropertyChanged(nameof(IsCrossCurrency));
+
+    partial void OnCashAccountCurrencyChanged(string value)
+    {
+        SettlementCurrency = string.IsNullOrWhiteSpace(value)
+            ? string.Empty
+            : value.Trim().ToUpperInvariant();
+        OnPropertyChanged(nameof(IsCrossCurrency));
+        OnPropertyChanged(nameof(SettlementPairDisplay));
+    }
+
+    partial void OnSettlementInputModeChanged(string value)
+    {
+        var normalized = string.Equals(value, "fx", StringComparison.OrdinalIgnoreCase)
+            ? "fx"
+            : "statement";
+        if (!string.Equals(value, normalized, StringComparison.Ordinal))
+            SettlementInputMode = normalized;
+    }
+
+    partial void OnSettlementCurrencyChanged(string value)
+    {
+        OnPropertyChanged(nameof(IsCrossCurrency));
+        OnPropertyChanged(nameof(SettlementPairDisplay));
+    }
+
+    private string NormalizeSettlementCurrency() =>
+        !string.IsNullOrWhiteSpace(SettlementCurrency)
+            ? SettlementCurrency.Trim().ToUpperInvariant()
+            : !string.IsNullOrWhiteSpace(CashAccountCurrency)
+                ? CashAccountCurrency.Trim().ToUpperInvariant()
+                : "TWD";
 
     /// <summary>
     /// 顯示在「成交價」label 旁的小幣別 badge。
@@ -126,12 +190,33 @@ public sealed partial class BuyTxViewModel : ObservableObject
         }
     }
 
+    public string SettlementCurrencyDisplay => NormalizeSettlementCurrency();
+
+    public string SettlementPairDisplay
+    {
+        get
+        {
+            var instr = string.IsNullOrWhiteSpace(InstrumentCurrency)
+                ? "TWD"
+                : InstrumentCurrency.Trim().ToUpperInvariant();
+            return $"{instr} → {NormalizeSettlementCurrency()}";
+        }
+    }
+
+    public string FxRateDateDisplay =>
+        FxRateDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "—";
+
+    public string FxSourceDisplay =>
+        string.IsNullOrWhiteSpace(FxSourceLabel) ? "—" : FxSourceLabel;
+
     public bool IsStock => AssetType == "stock";
     public bool IsNonStock => AssetType is "fund" or "metal" or "bond";
     public bool IsCrypto => AssetType == "crypto";
 
     public bool IsUnitMode => PriceMode == "unit";
     public bool IsTotalMode => PriceMode == "total";
+    public bool IsStatementSettlementMode => SettlementInputMode == "statement";
+    public bool IsFxSettlementMode => SettlementInputMode == "fx";
 
     /// <summary>
     /// 總計顯示文字。
@@ -160,10 +245,16 @@ public sealed partial class BuyTxViewModel : ObservableObject
         TotalCostError = string.Empty;
         ActualCashAmount = string.Empty;
         ActualCashAmountError = string.Empty;
+        SettlementInputMode = "statement";
         // P3
         FxRate = string.Empty;
         FxRateError = string.Empty;
         InstrumentCurrency = string.Empty;
         CashAccountCurrency = string.Empty;
+        SettlementCurrency = string.Empty;
+        FxRateDate = null;
+        FxSourceLabel = string.Empty;
+        IsFxManual = false;
+        FxFetchError = string.Empty;
     }
 }

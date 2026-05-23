@@ -30,6 +30,13 @@ public interface IBuyExecutionContext
     /// </summary>
     string ActualCashAmount { get; }
 
+    /// <summary>
+    /// Cross-currency settlement input authority. "statement" means
+    /// <see cref="ActualCashAmount"/> is authoritative; "fx" means
+    /// <see cref="FxRate"/> is authoritative and cash amount is estimated.
+    /// </summary>
+    string SettlementInputMode { get => "statement"; }
+
     /// <summary>True when the buy is "metadata only" (no Trade record written).</summary>
     bool BuyMetaOnly { get; }
 
@@ -69,6 +76,18 @@ public interface IBuyExecutionContext
     /// "請填寫匯率…" hint.
     /// </summary>
     string InstrumentCurrency { get => string.Empty; }
+
+    /// <summary>Currency of the cash settlement movement. Defaults to cash-account currency.</summary>
+    string SettlementCurrency { get => string.Empty; }
+
+    /// <summary>Effective historical FX rate date, when the rate was fetched or chosen.</summary>
+    DateOnly? FxRateDate { get => null; }
+
+    /// <summary>FX source/audit label, for example Frankfurter. Null for same-currency/manual-empty trades.</summary>
+    string? FxSource { get => null; }
+
+    /// <summary>True when the FX rate came from a user override instead of the resolver.</summary>
+    bool IsFxManual { get => false; }
 }
 
 /// <summary>
@@ -82,6 +101,7 @@ public sealed class NullBuyContext : IBuyExecutionContext
     public decimal CommissionDiscount => 1m;
     public string TxFee => string.Empty;
     public string ActualCashAmount => string.Empty;
+    public string SettlementInputMode => "statement";
     public bool BuyMetaOnly => false;
     public Guid? CashAccountId => null;
     public string? CashAccountCurrency => null;
@@ -98,21 +118,35 @@ public sealed class StaticBuyContext(
     decimal commissionDiscount = 1m,
     string txFee = "",
     string actualCashAmount = "",
+    string settlementInputMode = "statement",
     bool buyMetaOnly = false,
     Guid? cashAccountId = null,
     string? cashAccountCurrency = null,
     bool useCashAccount = false,
     bool buyIsTotalMode = false,
-    bool buyTotalIncludesFee = true)
+    bool buyTotalIncludesFee = true,
+    string fxRate = "",
+    string instrumentCurrency = "",
+    string settlementCurrency = "",
+    DateOnly? fxRateDate = null,
+    string? fxSource = null,
+    bool isFxManual = false)
     : IBuyExecutionContext
 {
     public decimal CommissionDiscount { get; } = commissionDiscount;
     public string TxFee { get; } = txFee;
     public string ActualCashAmount { get; } = actualCashAmount;
+    public string SettlementInputMode { get; } = settlementInputMode;
     public bool BuyMetaOnly { get; } = buyMetaOnly;
     public Guid? CashAccountId { get; } = cashAccountId;
     public string? CashAccountCurrency { get; } = cashAccountCurrency;
     public bool UseCashAccount { get; } = useCashAccount;
     public bool BuyIsTotalMode { get; } = buyIsTotalMode;
     public bool BuyTotalIncludesFee { get; } = buyTotalIncludesFee;
+    public string FxRate { get; } = fxRate;
+    public string InstrumentCurrency { get; } = instrumentCurrency;
+    public string SettlementCurrency { get; } = settlementCurrency;
+    public DateOnly? FxRateDate { get; } = fxRateDate;
+    public string? FxSource { get; } = fxSource;
+    public bool IsFxManual { get; } = isFxManual;
 }

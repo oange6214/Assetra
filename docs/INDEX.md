@@ -55,6 +55,8 @@
   - 目前的分層原則與依賴方向。
 - [Portfolio Module Map](architecture/Portfolio-Module-Map.md)
   - `Portfolio` 主模組的服務與責任分布。
+- [Transaction FX Settlement](architecture/Transaction-FX-Settlement.md)
+  - 外股交易的成交幣別、扣款幣別、實際扣款金額與匯率 metadata 保存規則。
 - [Technical Architecture Blueprint](architecture/Technical-Architecture-Blueprint.md)
   - 偏中長期的技術架構藍圖。
 - [Bounded Contexts](architecture/Bounded-Contexts.md)

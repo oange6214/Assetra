@@ -1,4 +1,5 @@
 using System.Reactive.Concurrency;
+using Assetra.Application.Fx;
 using Assetra.Application.Loans.Contracts;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.DomainServices;
@@ -142,7 +143,12 @@ public sealed record PortfolioServices(
     /// P4.1 — Asset-level XIRR 年化報酬計算。用於 detail panel 的 KPI 矩陣
     /// (XIRR × 1Y / 3Y / 累積)。為 null 時 XIRR 那列顯示「—」。
     /// </summary>
-    Assetra.Core.Interfaces.Analysis.IXirrCalculator? Xirr = null)
+    Assetra.Core.Interfaces.Analysis.IXirrCalculator? Xirr = null,
+    /// <summary>
+    /// Transaction buy flow FX resolver. Optional so tests can omit it and same-currency
+    /// flows continue without an FX history dependency.
+    /// </summary>
+    TransactionFxRateResolver? TransactionFxRateResolver = null)
 {
     /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。
