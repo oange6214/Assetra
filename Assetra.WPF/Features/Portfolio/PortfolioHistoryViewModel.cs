@@ -64,23 +64,29 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     // Period selection
     [ObservableProperty] private int _selectedDays = 30;
 
+    /// <summary>
+    /// P5.9 — explicit chip key, separate from SelectedDays. Needed because YTD
+    /// computes a variable day count (e.g., 146 on May 26) but the chip should
+    /// stay highlighted as "YTD" not "146". Set by <c>ChangePeriod</c>; default
+    /// "30" matches initial SelectedDays = 30.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ActivePeriod))]
+    private string _activePeriodKey = "30";
+
     // Custom range (overrides SelectedDays when both ends are set)
     [ObservableProperty] private DateTime? _customStartDate;
     [ObservableProperty] private DateTime? _customEndDate;
 
     /// <summary>
-    /// Tag of the currently-active preset ("30"/"90"/"180"/"365"/"All"), or
-    /// "Custom" when both ends of the custom range are set. Drives the active
-    /// state of the Trends preset buttons.
+    /// Tag of the currently-active chip ("5"/"30"/"180"/"YTD"/"365"/"1825"/"All"),
+    /// or "Custom" when both ends of the custom range are set. Drives chip
+    /// IsChecked binding.
     /// </summary>
     public string ActivePeriod =>
         (CustomStartDate, CustomEndDate) is ({ }, { })
             ? "Custom"
-            : SelectedDays == AllPeriodDays
-                ? "All"
-                : SelectedDays.ToString(CultureInfo.InvariantCulture);
-
-    partial void OnSelectedDaysChanged(int value) => OnPropertyChanged(nameof(ActivePeriod));
+            : ActivePeriodKey;
 
     partial void OnCustomStartDateChanged(DateTime? value)
     {
@@ -232,20 +238,34 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     [RelayCommand]
     private async Task ChangePeriod(string? period)
     {
+        if (string.IsNullOrWhiteSpace(period)) return;
+
+        // 任何 preset 都先清掉 custom range
+        CustomStartDate = null;
+        CustomEndDate = null;
+
         if (string.Equals(period, "All", StringComparison.OrdinalIgnoreCase))
         {
-            CustomStartDate = null;
-            CustomEndDate = null;
+            ActivePeriodKey = "All";
             SelectedDays = AllPeriodDays;
+            await RefreshChartAsync();
+            return;
+        }
+
+        // P5.9 — YTD: 從今年 1/1 算到今天，動態天數但 chip 顯示為 "YTD" key
+        if (string.Equals(period, "YTD", StringComparison.OrdinalIgnoreCase))
+        {
+            var today = DateTime.Today;
+            var jan1 = new DateTime(today.Year, 1, 1);
+            ActivePeriodKey = "YTD";
+            SelectedDays = Math.Max(1, (today - jan1).Days + 1);
             await RefreshChartAsync();
             return;
         }
 
         if (int.TryParse(period, out var days) && days > 0)
         {
-            // Selecting a preset clears any custom range.
-            CustomStartDate = null;
-            CustomEndDate = null;
+            ActivePeriodKey = period;
             SelectedDays = days;
             await RefreshChartAsync();
         }

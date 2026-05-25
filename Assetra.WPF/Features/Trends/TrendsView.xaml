@@ -55,20 +55,21 @@
                 button blocks (~90 lines) with a single visual treatment
                 aligned with the rest of the app.
             -->
+            <!--  P5.9 — 7 chips: 5 天 / 1 個月 / 6 個月 / 本年迄今 / 1 年 / 5 年 / 全部  -->
             <StackPanel Orientation="Horizontal">
+                <RadioButton
+                    Command="{Binding ChangePeriodCommand}"
+                    CommandParameter="5"
+                    Content="{DynamicResource Trends.Period.5}"
+                    GroupName="TrendsPeriod"
+                    IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=5}"
+                    Style="{StaticResource NavTabBtn}" />
                 <RadioButton
                     Command="{Binding ChangePeriodCommand}"
                     CommandParameter="30"
                     Content="{DynamicResource Trends.Period.30}"
                     GroupName="TrendsPeriod"
                     IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=30}"
-                    Style="{StaticResource NavTabBtn}" />
-                <RadioButton
-                    Command="{Binding ChangePeriodCommand}"
-                    CommandParameter="90"
-                    Content="{DynamicResource Trends.Period.90}"
-                    GroupName="TrendsPeriod"
-                    IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=90}"
                     Style="{StaticResource NavTabBtn}" />
                 <RadioButton
                     Command="{Binding ChangePeriodCommand}"
@@ -79,10 +80,24 @@
                     Style="{StaticResource NavTabBtn}" />
                 <RadioButton
                     Command="{Binding ChangePeriodCommand}"
+                    CommandParameter="YTD"
+                    Content="{DynamicResource Trends.Period.YTD}"
+                    GroupName="TrendsPeriod"
+                    IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=YTD}"
+                    Style="{StaticResource NavTabBtn}" />
+                <RadioButton
+                    Command="{Binding ChangePeriodCommand}"
                     CommandParameter="365"
                     Content="{DynamicResource Trends.Period.365}"
                     GroupName="TrendsPeriod"
                     IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=365}"
+                    Style="{StaticResource NavTabBtn}" />
+                <RadioButton
+                    Command="{Binding ChangePeriodCommand}"
+                    CommandParameter="1825"
+                    Content="{DynamicResource Trends.Period.1825}"
+                    GroupName="TrendsPeriod"
+                    IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=1825}"
                     Style="{StaticResource NavTabBtn}" />
                 <RadioButton
                     Command="{Binding ChangePeriodCommand}"
