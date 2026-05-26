@@ -330,6 +330,7 @@ public partial class TransactionDialogViewModel
     partial void OnTxCashAccountChanged(CashAccountRowViewModel? value)
     {
         NotifyImpactPreviewChanged();
+        SyncTxCashAccountNameFromSelection(value);
         // P3 — push selected cash account's currency into Buy / Sell / Div VMs so XAML can
         // toggle the FX-rate field via *.IsCrossCurrency.
         var ccy = value?.Currency ?? string.Empty;

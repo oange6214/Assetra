@@ -283,5 +283,6 @@ public partial class PortfolioViewModel
     private sealed class NullPositionMetadataWorkflowService : IPositionMetadataWorkflowService
     {
         public Task UpdateAsync(PositionMetadataUpdateRequest request, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UpdateGroupAsync(PositionGroupUpdateRequest request, CancellationToken ct = default) => Task.CompletedTask;
     }
 }

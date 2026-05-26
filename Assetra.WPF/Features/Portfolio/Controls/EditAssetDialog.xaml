@@ -58,12 +58,12 @@
                                 FontSize="{StaticResource Font.Size.Sm}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{DynamicResource Portfolio.EditAsset.Title}" />
+                                Text="{Binding EditAssetDialogTitle}" />
                             <TextBlock
                                 Margin="0,2,0,0"
                                 FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
-                                Text="{DynamicResource Portfolio.EditAsset.Subtitle}" />
+                                Text="{Binding EditAssetDialogSubtitle}" />
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -128,6 +128,58 @@
                                 Text="{Binding EditAssetSymbol}"
                                 Typography.NumeralAlignment="Tabular" />
                         </Border>
+                    </StackPanel>
+
+                    <!--  Investment group (positions only)  -->
+                    <StackPanel Visibility="{Binding CanEditPositionGroup, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock
+                            Margin="0,14,0,6"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Tx.Group}" />
+                        <Border
+                            Margin="0,0,0,8"
+                            Padding="10,8"
+                            Background="{DynamicResource AppWarningSubtle}"
+                            BorderBrush="{DynamicResource AppWarning}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Md}"
+                            Visibility="{Binding EditAssetHasPortfolioGroupConflict, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <DockPanel>
+                                <ds:AppIcon
+                                    Margin="0,1,8,0"
+                                    DockPanel.Dock="Left"
+                                    FontSize="14"
+                                    Foreground="{DynamicResource AppWarning}"
+                                    Symbol="Warning24" />
+                                <StackPanel>
+                                    <TextBlock
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{DynamicResource Portfolio.EditAsset.GroupConflictTitle}" />
+                                    <TextBlock
+                                        Margin="0,2,0,0"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{DynamicResource Portfolio.EditAsset.GroupConflictDescription}"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                        <ComboBox
+                            DisplayMemberPath="Name"
+                            ItemsSource="{Binding PortfolioGroupOptions}"
+                            SelectedValue="{Binding EditAssetPortfolioGroupId}"
+                            SelectedValuePath="Id"
+                            Style="{StaticResource FormComboBox}" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.EditAsset.GroupHint}"
+                            TextWrapping="Wrap" />
                     </StackPanel>
 
                     <!--  Name  -->

@@ -51,6 +51,10 @@ public partial class PortfolioViewModel
     [NotifyPropertyChangedFor(nameof(SelectedPositionXirrCumIsPositive))]
     private PortfolioRowViewModel? _selectedPositionRow;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedPortfolioGroupDetail))]
+    private PortfolioGroupDetailViewModel? _selectedPortfolioGroupDetail;
+
     /// <summary>
     /// 是否有任何已實現損益資料（賣出價差或股息收入）。
     /// </summary>
@@ -60,6 +64,7 @@ public partial class PortfolioViewModel
     public bool HasSelectedCashRow => SelectedCashRow is not null;
     public bool HasSelectedLiabilityRow => SelectedLiabilityRow is not null;
     public bool HasSelectedPositionRow => SelectedPositionRow is not null;
+    public bool HasSelectedPortfolioGroupDetail => SelectedPortfolioGroupDetail is not null;
 
     /// <summary>
     /// Detail-panel active tab ("overview" or "trades"). Shared between the Cash and
@@ -86,9 +91,78 @@ public partial class PortfolioViewModel
     partial void OnSelectedPositionRowChanged(PortfolioRowViewModel? row)
     {
         DetailTab = "overview";
+        OpenSelectedPositionGroupDetailCommand.NotifyCanExecuteChanged();
         // P4.5 — fire chart reload (fire-and-forget; the load handles its own
         // cancellation so racing selections collapse cleanly).
         _ = LoadAssetChartAsync();
+    }
+
+    private PortfolioGroupDetailViewModel BuildPortfolioGroupDetail(Guid groupId)
+    {
+        var holdings = Positions
+            .Where(row => !row.HasPortfolioGroupConflict &&
+                          (row.PortfolioGroupId ?? PortfolioGroup.DefaultId) == groupId)
+            .OrderByDescending(row => row.MarketValueBase != 0m ? row.MarketValueBase : row.MarketValue)
+            .ThenBy(row => row.Symbol, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var groupName = GroupCatalog?.FindById(groupId)?.Name
+            ?? (groupId == PortfolioGroup.DefaultId
+                ? L("Portfolio.Group.Ungrouped", "未分組")
+                : L("Portfolio.Group.Unknown", "未知群組"));
+
+        var trades = BuildPortfolioGroupTrades(groupId, holdings);
+
+        return new PortfolioGroupDetailViewModel(groupId, groupName, ResolveBaseCurrency(), holdings, trades);
+    }
+
+    private IReadOnlyList<TradeRowViewModel> BuildPortfolioGroupTrades(
+        Guid groupId,
+        IReadOnlyList<PortfolioRowViewModel> holdings)
+    {
+        if (holdings.Count == 0)
+            return [];
+
+        var entryIds = holdings
+            .SelectMany(row => row.AllEntryIds)
+            .ToHashSet();
+        var symbols = holdings
+            .Select(row => row.Symbol)
+            .Where(symbol => !string.IsNullOrWhiteSpace(symbol))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        return Trades
+            .Where(trade => IsInvestmentTrade(trade) &&
+                            IsCurrentGroupMemberTrade(trade, groupId, entryIds, symbols))
+            .GroupBy(trade => trade.Id)
+            .Select(group => group.First())
+            .OrderByDescending(trade => trade.TradeDate)
+            .ThenBy(trade => trade.Symbol, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static bool IsCurrentGroupMemberTrade(
+        TradeRowViewModel trade,
+        Guid groupId,
+        ISet<Guid> entryIds,
+        ISet<string> symbols)
+    {
+        if (trade.PortfolioEntryId is { } entryId && entryIds.Contains(entryId))
+            return true;
+
+        if (!symbols.Contains(trade.Symbol))
+            return false;
+
+        return (trade.PortfolioGroupId ?? PortfolioGroup.DefaultId) == groupId ||
+               trade.PortfolioEntryId is null;
+    }
+
+    private static bool IsInvestmentTrade(TradeRowViewModel trade) =>
+        trade.Type is TradeType.Buy or TradeType.Sell or TradeType.CashDividend or TradeType.StockDividend;
+
+    private void RefreshSelectedPortfolioGroupDetail()
+    {
+        if (SelectedPortfolioGroupDetail is { } detail)
+            SelectedPortfolioGroupDetail = BuildPortfolioGroupDetail(detail.GroupId);
     }
 
     // Cash account stats + filtered trades
@@ -373,6 +447,7 @@ public partial class PortfolioViewModel
         OnPropertyChanged(nameof(SelectedPositionXirr1YIsPositive));
         OnPropertyChanged(nameof(SelectedPositionXirr3YIsPositive));
         OnPropertyChanged(nameof(SelectedPositionXirrCumIsPositive));
+        RefreshSelectedPortfolioGroupDetail();
 
         // P4.8 — myvalue mode 重播 trade journal，trade reload 後要刷新 chart。
         _ = LoadAssetChartAsync();
@@ -385,7 +460,26 @@ public partial class PortfolioViewModel
     private void CloseLiabilityDetail() => SelectedLiabilityRow = null;
 
     [RelayCommand]
-    private void ClosePositionDetail() => SelectedPositionRow = null;
+    private void ClosePositionDetail()
+    {
+        SelectedPortfolioGroupDetail = null;
+        SelectedPositionRow = null;
+    }
+
+    private bool CanOpenSelectedPositionGroupDetail() =>
+        SelectedPositionRow is { HasPortfolioGroupConflict: false };
+
+    [RelayCommand(CanExecute = nameof(CanOpenSelectedPositionGroupDetail))]
+    private void OpenSelectedPositionGroupDetail()
+    {
+        if (SelectedPositionRow is not { } row || row.HasPortfolioGroupConflict)
+            return;
+
+        SelectedPortfolioGroupDetail = BuildPortfolioGroupDetail(row.PortfolioGroupId ?? PortfolioGroup.DefaultId);
+    }
+
+    [RelayCommand]
+    private void ClosePortfolioGroupDetail() => SelectedPortfolioGroupDetail = null;
 
     /// <summary>
     /// Permanently removes a position and all its associated Buy / StockDividend trade

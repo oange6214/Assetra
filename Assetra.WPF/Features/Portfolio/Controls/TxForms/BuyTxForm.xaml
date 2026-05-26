@@ -49,6 +49,18 @@
                     （沒有 lift 到 parent VM 的 facade，因為 sub-VM 已是同一個 dialog DataContext 可訪問），
                     所以下游 ConfirmBuyAsync 邏輯不受影響。
                 -->
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontSize="{StaticResource Font.Size.Sm}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    Text="{DynamicResource Portfolio.Tx.TradeDetailsSection}" />
+                <TextBlock
+                    Margin="0,0,0,12"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppTextMuted}"
+                    Text="{DynamicResource Portfolio.Tx.TradeDetailsHint}"
+                    TextWrapping="Wrap" />
 
                 <!--  Row 1：數量 + 價格輸入模式 toggle  -->
                 <Grid Margin="0,0,0,14">
@@ -532,32 +544,73 @@
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="8" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <RadioButton
+                            <Border
                                 Grid.Column="0"
-                                HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Center"
-                                Content="{DynamicResource Portfolio.Tx.SettlementMode.Statement}"
-                                GroupName="TxBuySettlementInputMode"
-                                IsChecked="{Binding Buy.SettlementInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=statement, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
-                            <RadioButton
+                                Padding="10,9"
+                                Background="{DynamicResource AppBackground}"
+                                BorderBrush="{DynamicResource AppBorderLight}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Sm}">
+                                <StackPanel>
+                                    <RadioButton
+                                        Content="{DynamicResource Portfolio.Tx.SettlementMode.Statement}"
+                                        GroupName="TxBuySettlementInputMode"
+                                        IsChecked="{Binding Buy.SettlementInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=statement, Mode=TwoWay}"
+                                        Style="{StaticResource AppRadioButton}" />
+                                    <TextBlock
+                                        Margin="24,4,0,0"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{DynamicResource Portfolio.Tx.SettlementMode.StatementHint}"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                            <Border
                                 Grid.Column="2"
-                                HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Center"
-                                Content="{DynamicResource Portfolio.Tx.SettlementMode.FxEstimate}"
-                                GroupName="TxBuySettlementInputMode"
-                                IsChecked="{Binding Buy.SettlementInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=fx, Mode=TwoWay}"
-                                Style="{StaticResource SegmentBtn}" />
+                                Padding="10,9"
+                                Background="{DynamicResource AppBackground}"
+                                BorderBrush="{DynamicResource AppBorderLight}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Sm}">
+                                <StackPanel>
+                                    <RadioButton
+                                        Content="{DynamicResource Portfolio.Tx.SettlementMode.FxEstimate}"
+                                        GroupName="TxBuySettlementInputMode"
+                                        IsChecked="{Binding Buy.SettlementInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=fx, Mode=TwoWay}"
+                                        Style="{StaticResource AppRadioButton}" />
+                                    <TextBlock
+                                        Margin="24,4,0,0"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{DynamicResource Portfolio.Tx.SettlementMode.FxEstimateHint}"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
                         </Grid>
 
                         <StackPanel Visibility="{Binding Buy.IsStatementSettlementMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock
-                                Margin="0,0,0,6"
-                                Style="{StaticResource FormFieldLabel}"
-                                Text="{DynamicResource Portfolio.Tx.ActualCashAmount}" />
+                            <StackPanel Margin="0,0,0,6" Orientation="Horizontal">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource FormFieldLabel}"
+                                    Text="{DynamicResource Portfolio.Tx.ActualCashAmount}" />
+                                <Border
+                                    Margin="6,0,0,0"
+                                    Padding="6,2"
+                                    VerticalAlignment="Center"
+                                    Background="{DynamicResource AppSurfaceAlt}"
+                                    BorderBrush="{DynamicResource AppBorderLight}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource Radius.Sm}">
+                                    <TextBlock
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{Binding Buy.SettlementCurrencyDisplay, Mode=OneWay}" />
+                                </Border>
+                            </StackPanel>
                             <TextBox
                                 behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                                 Text="{Binding Buy.ActualCashAmount, UpdateSourceTrigger=PropertyChanged}" />

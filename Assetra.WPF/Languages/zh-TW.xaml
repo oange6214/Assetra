@@ -344,6 +344,8 @@
     <sys:String x:Key="Portfolio.Liability.NextDue">下次到期</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.All">全部</sys:String>
     <sys:String x:Key="Portfolio.Filter.Group.All">全部群組</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Group.Add">新增群組</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Group.Manage">管理群組</sys:String>
     <sys:String x:Key="Portfolio.ViewMode.All">全部</sys:String>
     <sys:String x:Key="Portfolio.ViewMode.Group">依群組</sys:String>
     <sys:String x:Key="Portfolio.ViewMode.Market">依市場</sys:String>
@@ -363,6 +365,7 @@
     <sys:String x:Key="Portfolio.Group.Kpi.Cost">付出成本</sys:String>
     <sys:String x:Key="Portfolio.Group.Kpi.Pnl">淨損益試算</sys:String>
     <sys:String x:Key="Portfolio.Group.Kpi.TodayChange">今日漲跌</sys:String>
+    <sys:String x:Key="Portfolio.Group.MoveToGroup">移至群組</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Stock">個股</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Etf">ETF</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Fund">基金</sys:String>
@@ -480,6 +483,7 @@
     <sys:String x:Key="Portfolio.Detail.EditLiability">編輯</sys:String>
     <sys:String x:Key="Portfolio.Detail.EditLiability.Tooltip">編輯此負債的基本資料（貸款利率/期數、信用卡額度等）。</sys:String>
     <sys:String x:Key="Portfolio.EditLiability.Title">編輯負債</sys:String>
+    <sys:String x:Key="Portfolio.EditLiability.Subtitle">更新負債名稱、發行機構與還款參數。</sys:String>
     <sys:String x:Key="Portfolio.EditLiability.Name">名稱</sys:String>
     <sys:String x:Key="Portfolio.EditLiability.Issuer">發行機構（選填）</sys:String>
     <sys:String x:Key="Portfolio.EditLiability.LoanSection">貸款參數</sys:String>
@@ -768,6 +772,10 @@
     <sys:String x:Key="Portfolio.Tx.SellPrice">賣出價格</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Title">編輯資金帳戶</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Subtitle">更新帳戶詳細資訊。</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.CashTitle">編輯資金帳戶</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.CashSubtitle">更新帳戶詳細資訊。</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.PositionTitle">編輯資產</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.PositionSubtitle">更新投資資產名稱、幣別與群組。</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.TypeLabel">類型</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.SubtypeLabel">細分類</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.SubtypeHint">調整細分類後，此帳戶在財務總覽的分組會自動更新（例：銀行活存 → 銀行類；證券交割戶 → 證券交割款）。</sys:String>

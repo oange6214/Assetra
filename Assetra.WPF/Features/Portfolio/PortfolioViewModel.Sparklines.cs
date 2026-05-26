@@ -67,12 +67,14 @@ public partial class PortfolioViewModel
                     {
                         row.SparklinePoints = points;
                         row.SparklineState = 1; // Loaded
+                        RefreshSelectedPortfolioGroupDetail();
                     });
                 }
                 else
                 {
                     row.SparklinePoints = points;
                     row.SparklineState = 1;
+                    RefreshSelectedPortfolioGroupDetail();
                 }
             }
         }

@@ -568,7 +568,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
         var hasPrice = ParseHelpers.TryParseDecimal(AddPrice, out var price) && price > 0;
         if (!hasPrice && (!isCrossCurrencyCash || settlementMode != "statement" || string.IsNullOrWhiteSpace(BuyContext.ActualCashAmount)))
         {
-            AddError = "成交價無效（或請改填實際扣款金額讓系統反推）";
+            AddError = "成交價無效（或請填帳戶扣款金額讓系統反推）";
             return;
         }
 
@@ -596,7 +596,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
             if (!ParseHelpers.TryParseDecimal(BuyContext.ActualCashAmount, out var parsedActual) ||
                 parsedActual <= 0)
             {
-                AddError = "實際扣款金額無效";
+                AddError = "帳戶扣款金額（實際扣款）無效";
                 return;
             }
 
@@ -623,11 +623,11 @@ public partial class AddAssetDialogViewModel : ObservableObject
             : null;
 
         // 跨幣別現金連動時，只有目前使用者選定的結算輸入模式是權威。
-        // statement mode: 帳戶/券商明細上的實際扣款是權威，匯率只可由系統反推。
-        // fx mode: 匯率是權威，實際扣款由成交資料估算。
+        // statement mode: 帳戶/券商明細上的扣款金額是權威，匯率只可由系統反推。
+        // fx mode: 匯率是權威，帳戶扣款由成交資料估算。
         if (isCrossCurrencyCash && settlementMode == "statement" && actualCashAmount is null)
         {
-            AddError = "跨幣別買入請填寫券商或帳戶明細上的實際扣款金額，或改用匯率估算";
+            AddError = "跨幣別買入請填寫帳戶扣款金額（實際扣款），或改用匯率估算";
             return;
         }
         if (isCrossCurrencyCash && settlementMode == "fx" && fxRate is null)
@@ -639,7 +639,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
         // P3 Mode C — 「只知道扣款金額 + 股數」快速輸入：當 Price 為空 + ActualCash 有填時，
         // 從現金反推 Price。對同幣別交易直接除；對跨幣別則需要 FxRate（用 1.0 fallback
         // 若兩個都沒填，避免靜默用錯匯率產生荒謬成本均價）。手續費粗估：留空時當 0
-        // （適用券商實際扣款已含手續費的多數情境，跟「金額已含手續費」的精神一致）。
+        // （適用券商帳戶扣款已含手續費的多數情境，跟「金額已含手續費」的精神一致）。
         if (!hasPrice && actualCashAmount is { } cash && qty > 0)
         {
             if (isCrossCurrencyCash && fxRate is null)
@@ -651,7 +651,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
             var grossNative = cash - feeForPrice;
             if (grossNative <= 0)
             {
-                AddError = "實際扣款金額不足以扣除手續費，請檢查";
+                AddError = "帳戶扣款金額（實際扣款）不足以扣除手續費，請檢查";
                 return;
             }
             var rateForPrice = fxRate ?? 1m;
@@ -755,14 +755,14 @@ public partial class AddAssetDialogViewModel : ObservableObject
 
     private string ResolveInstrumentCurrencyForBuy()
     {
-        // P5.5 — 優先用 BuyContext.InstrumentCurrency（已被 TxCurrency 同步覆寫過），
-        // 這樣使用者透過 幣別 dropdown 手動改的選擇可以傳到 cross-currency validation。
-        // 沒同步到時 fallback 到 AddSymbolCurrency（資產原生幣別）。
-        if (!string.IsNullOrWhiteSpace(BuyContext.InstrumentCurrency))
-            return BuyContext.InstrumentCurrency.Trim().ToUpperInvariant();
-
         if (!string.IsNullOrWhiteSpace(AddSymbolCurrency))
             return AddSymbolCurrency.Trim().ToUpperInvariant();
+
+        // BuyContext.InstrumentCurrency is written from the selected asset/symbol,
+        // not from the funding account currency. Keep it below AddSymbolCurrency
+        // so symbol-directory data remains the strongest source.
+        if (!string.IsNullOrWhiteSpace(BuyContext.InstrumentCurrency))
+            return BuyContext.InstrumentCurrency.Trim().ToUpperInvariant();
 
         var exchange = EmptyToNull(AddExchange);
         if (string.IsNullOrWhiteSpace(exchange))

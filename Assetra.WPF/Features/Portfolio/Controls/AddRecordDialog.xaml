@@ -104,6 +104,27 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
+                            <Border
+                                Margin="0,8,0,0"
+                                Padding="8,5"
+                                Background="{DynamicResource AppSurfaceAlt}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Sm}"
+                                Visibility="{Binding IsAssetContextLocked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding SelectedAsset.PrimaryName}" />
+                                    <TextBlock
+                                        Margin="8,0,0,0"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{Binding SelectedAsset.SecondaryLine}" />
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                         <Button
                             Width="28"
@@ -230,7 +251,7 @@
                                     -->
                                     <StackPanel
                                         Margin="0,0,0,14"
-                                        Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                        Visibility="{Binding ShowAssetSelector, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <TextBlock
                                             Margin="0,0,0,6"
                                             FontSize="{StaticResource Font.Size.Xs}"
@@ -324,12 +345,42 @@
                                         <StackPanel
                                             Grid.Column="0"
                                             Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                            <TextBlock
-                                                Margin="0,0,0,6"
-                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                FontWeight="SemiBold"
-                                                Foreground="{DynamicResource AppTextSecondary}"
-                                                Text="{DynamicResource Portfolio.TradeHistory.Type}" />
+                                            <StackPanel Margin="0,0,0,6" Orientation="Horizontal">
+                                                <TextBlock
+                                                    VerticalAlignment="Center"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource Portfolio.TradeHistory.Type}" />
+                                                <ds:AppIcon
+                                                    Margin="6,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    AutomationProperties.Name="{DynamicResource Portfolio.Record.Destination.Hint}"
+                                                    FontSize="12"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Symbol="Info24"
+                                                    ToolTipService.InitialShowDelay="250"
+                                                    ToolTipService.ShowDuration="20000"
+                                                    Visibility="{Binding HasTxDestination, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <ds:AppIcon.ToolTip>
+                                                        <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                            <StackPanel>
+                                                                <TextBlock
+                                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                                    Text="{DynamicResource Portfolio.Record.Destination.Hint}" />
+                                                                <TextBlock
+                                                                    Margin="0,2,0,0"
+                                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                                    FontWeight="SemiBold"
+                                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                                    Text="{Binding TxDestinationKey, Converter={StaticResource ResourceKeyToStringConverter}}"
+                                                                    TextWrapping="Wrap" />
+                                                            </StackPanel>
+                                                        </ToolTip>
+                                                    </ds:AppIcon.ToolTip>
+                                                </ds:AppIcon>
+                                            </StackPanel>
                                             <!--
                                                 DisplayMemberPath 跟 ItemTemplate 互斥 (WPF 限制：
                                                 同時設會丟 InvalidOperationException at runtime)。
@@ -385,48 +436,20 @@
                                             Text="{DynamicResource Portfolio.Tx.Currency}" />
                                         <ComboBox
                                             HorizontalAlignment="Left"
+                                            IsEnabled="{Binding IsTxCurrencyEditable}"
                                             MinWidth="120"
                                             ItemsSource="{Binding SupportedCurrencies}"
                                             SelectedItem="{Binding TxCurrency, Mode=TwoWay}"
                                             Style="{StaticResource FormComboBox}" />
+                                        <TextBlock
+                                            Margin="0,6,0,0"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{DynamicResource Portfolio.Tx.CurrencyInstrumentLockedHint}"
+                                            TextWrapping="Wrap"
+                                            Visibility="{Binding IsTxCurrencyEditable, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                                     </StackPanel>
 
-                                    <!--
-                                        顯示位置提示 — 選類型後告訴使用者這筆交易會出現在哪幾頁。
-                                        解決「新增的資料去哪了」first-time 困惑。
-                                        HasTxDestination 為 false（未選類型）時隱藏。
-                                        Margin Top=0 因為 currency 區塊已有 14px bottom margin，不需重複。
-                                    -->
-                                    <Border
-                                        Margin="0,0,0,0"
-                                        Padding="10,8"
-                                        Background="{DynamicResource AppAccentSubtle}"
-                                        BorderBrush="{DynamicResource AppAccent}"
-                                        BorderThickness="1"
-                                        CornerRadius="{StaticResource Radius.Sm}"
-                                        Visibility="{Binding HasTxDestination, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ds:AppIcon
-                                                Margin="0,1,8,0"
-                                                VerticalAlignment="Top"
-                                                FontSize="12"
-                                                Foreground="{DynamicResource AppAccent}"
-                                                Symbol="Info24" />
-                                            <StackPanel>
-                                                <TextBlock
-                                                    FontSize="{StaticResource Font.Size.Xs}"
-                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                    Text="{DynamicResource Portfolio.Record.Destination.Hint}" />
-                                                <TextBlock
-                                                    Margin="0,2,0,0"
-                                                    FontSize="{StaticResource Font.Size.Xs}"
-                                                    FontWeight="SemiBold"
-                                                    Foreground="{DynamicResource AppAccent}"
-                                                    Text="{Binding TxDestinationKey, Converter={StaticResource ResourceKeyToStringConverter}}"
-                                                    TextWrapping="Wrap" />
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Border>
                                 </StackPanel>
                             </StackPanel>
 

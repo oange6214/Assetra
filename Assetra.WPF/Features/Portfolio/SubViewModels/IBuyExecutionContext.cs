@@ -67,13 +67,9 @@ public interface IBuyExecutionContext
     string FxRate { get => string.Empty; }
 
     /// <summary>
-    /// P5.5 — Effective instrument (input) currency, kept in sync with the
-    /// dialog's <c>TxCurrency</c> dropdown. When the user manually picks a
-    /// currency that matches the cash account, the cross-currency cash debit
-    /// safeguard in <c>AddAssetDialogViewModel</c> uses this value rather than
-    /// the asset's native (<c>AddSymbolCurrency</c>) currency — so picking
-    /// 幣別=TWD on a USD asset with a TWD cash account no longer trips the
-    /// "請填寫匯率…" hint.
+    /// Effective instrument (input) currency. For investment trades this comes
+    /// from the selected asset/symbol and remains separate from the cash-account
+    /// debit currency used by settlement.
     /// </summary>
     string InstrumentCurrency { get => string.Empty; }
 

@@ -335,7 +335,7 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
             var row = new AllocationRowViewModel(
                 item.Symbol, item.Name, item.Cat,
                 item.Value, item.Price, item.Pnl, item.PnlPct, Palette[idx % Palette.Length]);
-            row.ActualPercent = denominator > 0 ? Math.Round(item.Value / denominator * 100m, 1) : 0m;
+            row.ActualPercent = denominator > 0 ? item.Value / denominator * 100m : 0m;
             row.TargetPercent = targets.TryGetValue(item.Symbol, out var t) ? t : 0m;
             row.EditTargetText = row.TargetPercent.ToString("G");
             allRows.Add(row);

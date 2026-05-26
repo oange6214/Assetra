@@ -103,6 +103,21 @@ public sealed class AllocationViewModelTests
     }
 
     [Fact]
+    public void Constructor_WithTinyHolding_DoesNotRoundAllocationToZero()
+    {
+        var feed = new StubFeed();
+        feed.PositionsList.Add(Position("CORE", 10_000_000m));
+        feed.PositionsList.Add(Position("DRAM", 3_000m));
+
+        var vm = new AllocationViewModel(feed);
+
+        var tiny = Assert.Single(vm.AllocationRows, r => r.Symbol == "DRAM");
+        Assert.True(tiny.ActualPercent > 0m);
+        Assert.Equal("<0.1%", tiny.ActualPercentDisplay);
+        Assert.Equal(3d, tiny.AllocationBarMinWidth);
+    }
+
+    [Fact]
     public void TotalCashChanged_DoesNotAffectInvestmentAllocation()
     {
         var feed = new StubFeed { TotalCash = 0m };

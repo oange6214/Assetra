@@ -24,8 +24,8 @@ public sealed class TransactionBuyContext(TransactionDialogViewModel vm) : IBuyE
     public bool BuyIsTotalMode => vm.Buy.IsTotalMode;
     public bool BuyTotalIncludesFee => vm.Buy.TotalIncludesFee;
     public string FxRate => vm.Buy.FxRate;
-    // P5.5 — expose Buy.InstrumentCurrency (which TransactionDialogViewModel
-    // now keeps in sync with TxCurrency on user override).
+    // Expose the selected asset/symbol currency. This is intentionally separate
+    // from TxCurrency and the funding account currency.
     public string InstrumentCurrency => vm.Buy.InstrumentCurrency;
     public string SettlementCurrency => vm.Buy.SettlementCurrency;
     public DateOnly? FxRateDate => vm.Buy.FxRateDate;

@@ -360,6 +360,16 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     // Phase 2.1 — asset selector state. P2.2 adds the cascade below.
     [ObservableProperty] private TxAssetSubject? _selectedAsset;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowAssetSelector))]
+    [NotifyPropertyChangedFor(nameof(ShowInvestmentPositionPicker))]
+    [NotifyPropertyChangedFor(nameof(ShowDividendPositionPicker))]
+    private bool _isAssetContextLocked;
+
+    public bool ShowAssetSelector => !ShowEditLockedSummary && !IsAssetContextLocked;
+    public bool ShowInvestmentPositionPicker => !IsAssetContextLocked;
+    public bool ShowDividendPositionPicker => ShowInvestmentPositionPicker;
+
     // Phase 2.2 — currency dropdown is now a first-class field. When a user picks an
     // asset, OnSelectedAssetChanged copies asset.Currency here unless the user has
     // already manually changed the currency (tracked by _userTouchedCurrency).
@@ -368,18 +378,51 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private bool _userTouchedCurrency;
     private bool _suppressCurrencyDirty;  // set when we (the VM) write TxCurrency programmatically
 
+    public bool IsTxCurrencyEditable =>
+        SelectedAsset is null || !IsInvestmentAssetKind(SelectedAsset.Kind);
+
     partial void OnTxCurrencyChanged(string value)
     {
+        if (!_suppressCurrencyDirty &&
+            TryGetSelectedInvestmentCurrency(out var selectedCurrency) &&
+            !string.Equals(value, selectedCurrency, StringComparison.OrdinalIgnoreCase))
+        {
+            _suppressCurrencyDirty = true;
+            try { TxCurrency = selectedCurrency; }
+            finally { _suppressCurrencyDirty = false; }
+            return;
+        }
+
         if (!_suppressCurrencyDirty) _userTouchedCurrency = true;
 
-        // P5.5 — 把 TxCurrency 同步到 Buy.InstrumentCurrency。原本 Buy.InstrumentCurrency
-        // 只跟 AddSymbolCurrency（資產原生幣別）綁，user 從 幣別 dropdown 手動改
-        // 不會傳遞到 Buy panel 的 IsCrossCurrency 判定 → 即使選了跟 cash account
-        // 同幣別也會誤觸發「跨幣別買入請填寫匯率…」提示。
-        // 同步後 Buy.IsCrossCurrency 會跟著 TxCurrency 走，validation 才會放行。
-        if (!string.IsNullOrWhiteSpace(value))
+        // Buy.InstrumentCurrency is the selected instrument's currency, not the
+        // cash-account debit currency. Only use TxCurrency as a fallback before an
+        // investment asset/symbol has established its own currency.
+        if (SelectedAsset is null &&
+            string.IsNullOrWhiteSpace(Buy.InstrumentCurrency) &&
+            !string.IsNullOrWhiteSpace(value))
+        {
             Buy.InstrumentCurrency = value.Trim().ToUpperInvariant();
+        }
     }
+
+    private bool TryGetSelectedInvestmentCurrency(out string currency)
+    {
+        currency = string.Empty;
+        if (SelectedAsset is null ||
+            !IsInvestmentAssetKind(SelectedAsset.Kind) ||
+            string.IsNullOrWhiteSpace(SelectedAsset.Currency))
+        {
+            return false;
+        }
+
+        currency = SelectedAsset.Currency.Trim().ToUpperInvariant();
+        return true;
+    }
+
+    private static bool IsInvestmentAssetKind(TxAssetKind kind) =>
+        kind is TxAssetKind.Stock or TxAssetKind.Fund or TxAssetKind.Crypto or TxAssetKind.Metal or TxAssetKind.Bond;
+
 
     /// <summary>
     /// 供 XAML ComboBox 用的支援幣別清單。優先用 DI 注入的 callback (跟 Settings 共用)；
@@ -414,6 +457,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(AvailableTradeTypes));
         OnPropertyChanged(nameof(CanSelectTxType));
         OnPropertyChanged(nameof(TxTypePickerHintKey));
+        OnPropertyChanged(nameof(IsTxCurrencyEditable));
 
         if (value is null) return;
 
@@ -426,8 +470,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             return;
         }
 
-        // 1. 幣別 — 只在使用者沒手動改過時 cascade
-        if (!_userTouchedCurrency && !string.IsNullOrWhiteSpace(value.Currency))
+        // 1. 幣別 — 投資標的的成交幣別由資產決定；非投資資產仍保留舊的使用者覆寫規則。
+        if ((IsInvestmentAssetKind(value.Kind) || !_userTouchedCurrency) &&
+            !string.IsNullOrWhiteSpace(value.Currency))
         {
             _suppressCurrencyDirty = true;
             try { TxCurrency = value.Currency.ToUpperInvariant(); }
@@ -475,6 +520,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         };
         if (Buy.AssetType != nextAssetType)
             Buy.AssetType = nextAssetType;
+
+        if (!string.IsNullOrWhiteSpace(asset.Currency))
+        {
+            var instrumentCurrency = asset.Currency.Trim().ToUpperInvariant();
+            Buy.InstrumentCurrency = instrumentCurrency;
+            AddAssetDialog.AddSymbolCurrency = instrumentCurrency;
+        }
 
         // Symbol → AddAssetDialog.AddSymbol。Stock / Fund / Bond 等才有 Symbol；
         // crypto / metal 不一定有；CashAccount / Liability 一定 null。
@@ -690,6 +742,26 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         return null;
     }
 
+    private TxAssetSubject? ResolveAssetSubjectForPosition(PortfolioRowViewModel row)
+    {
+        var assets = AvailableAssets;
+        var hit = assets.FirstOrDefault(a =>
+            IsInvestmentAssetKind(a.Kind) &&
+            a.GroupKey != "Portfolio.Tx.Asset.Group.Recent" &&
+            a.Id == row.Id);
+        if (hit is not null) return hit;
+
+        if (string.IsNullOrWhiteSpace(row.Symbol))
+            return null;
+
+        return assets.FirstOrDefault(a =>
+            IsInvestmentAssetKind(a.Kind) &&
+            a.GroupKey != "Portfolio.Tx.Asset.Group.Recent" &&
+            string.Equals(a.Symbol, row.Symbol, StringComparison.OrdinalIgnoreCase) &&
+            (string.IsNullOrWhiteSpace(row.Currency) ||
+             string.Equals(a.Currency, row.Currency, StringComparison.OrdinalIgnoreCase)));
+    }
+
     private static TxAssetKind MapAssetType(Core.Models.AssetType t) => t switch
     {
         Core.Models.AssetType.Stock => TxAssetKind.Stock,
@@ -737,6 +809,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(IsEditingMetaOnly));
         OnPropertyChanged(nameof(AreEconomicFieldsEditable));
         OnPropertyChanged(nameof(ShowEditLockedSummary));
+        OnPropertyChanged(nameof(ShowAssetSelector));
         // Edit-mode toggle changes the preview baseline (original delta is now
         // either applicable or zeroed).
         NotifyImpactPreviewChanged();
@@ -1131,6 +1204,15 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         && !CashAccountSuggestions.Any(s =>
             string.Equals(s, TxCashAccountName, StringComparison.OrdinalIgnoreCase));
 
+    private void SyncTxCashAccountNameFromSelection(CashAccountRowViewModel? account)
+    {
+        if (account is null)
+            return;
+
+        if (!string.Equals(TxCashAccountName, account.Name, StringComparison.Ordinal))
+            TxCashAccountName = account.Name;
+    }
+
     private readonly ObservableCollection<string> _cashAccountSuggestions = new();
     public ReadOnlyObservableCollection<string> CashAccountSuggestions { get; }
 
@@ -1217,6 +1299,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         if (!string.IsNullOrWhiteSpace(AddAssetDialog.AddSymbolCurrency))
             return AddAssetDialog.AddSymbolCurrency.Trim().ToUpperInvariant();
+        if (!string.IsNullOrWhiteSpace(Buy.InstrumentCurrency))
+            return Buy.InstrumentCurrency.Trim().ToUpperInvariant();
         if (!string.IsNullOrWhiteSpace(AddAssetDialog.AddExchange))
             return Assetra.Core.Models.StockExchangeRegistry
                 .ResolveDefaultCurrency(AddAssetDialog.AddExchange.Trim());
@@ -1279,11 +1363,18 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     partial void OnTxUseCashAccountChanged(bool value)
     {
         if (!value)
+        {
             TxCashAccount = null;
+            TxCashAccountName = string.Empty;
+        }
         else if (TxCashAccount is null)
+        {
             // 優先使用使用者設定的預設帳戶，其次才是列表第一筆
             TxCashAccount = _getDefaultCashAccount()
                             ?? (CashAccounts.Count > 0 ? CashAccounts[0] : null);
+        }
+
+        SyncTxCashAccountNameFromSelection(TxCashAccount);
     }
 
     partial void OnTxTypeChanged(string value)
@@ -1579,9 +1670,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     // ── 新增紀錄 Dialog commands ──────────────────────────────────────────────────────
 
-    internal void OpenTxDialog()
+    internal void OpenTxDialog(Guid? preferredGroupId = null)
     {
         IsRevisionMode = false;
+        IsAssetContextLocked = false;
         var state = _tradeDialogController.CreateOpenState(_getDefaultCashAccount());
         EditingTradeId = null;
         TxType = "buy";
@@ -1622,7 +1714,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Loan.Label = string.Empty;
         TxFee = string.Empty;
         TxUseCashAccount = state.TxUseCashAccount;
-        TxCashAccountName = string.Empty;
+        SyncTxCashAccountNameFromSelection(TxCashAccount);
         Transfer.Target = null;
         Transfer.TargetName = string.Empty;
         Transfer.TargetAmount = string.Empty;
@@ -1681,8 +1773,49 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         AddAssetDialog.AddCryptoQtyError = string.Empty;
         AddAssetDialog.AddCryptoPriceError = string.Empty;
         // Portfolio-Groups-Refactor P3 — 開新交易時刷新 catalog 並預設選 DefaultGroup。
-        _ = EnsureGroupsLoadedAsync(restoreFromEditTradeId: null);
+        _ = EnsureGroupsLoadedAsync(restoreFromEditTradeId: null, preferredGroupId);
         IsTxDialogOpen = true;
+    }
+
+    internal void OpenTxDialogForPosition(PortfolioRowViewModel row, string txType)
+    {
+        OpenTxDialog(row.PortfolioGroupId);
+
+        var asset = ResolveAssetSubjectForPosition(row);
+        if (asset is not null)
+        {
+            SelectedAsset = asset;
+            IsAssetContextLocked = true;
+        }
+
+        TxType = string.IsNullOrWhiteSpace(txType) ? "buy" : txType;
+
+        switch (TxType)
+        {
+            case "sell":
+                Sell.Position = row;
+                Sell.Quantity = ((int)row.Quantity).ToString();
+                break;
+            case "cashDiv":
+                Div.Position = row;
+                break;
+            case "stockDiv":
+                Div.StockPosition = row;
+                break;
+            case "buy":
+                Buy.AssetType = row.AssetType switch
+                {
+                    Core.Models.AssetType.Fund => "fund",
+                    Core.Models.AssetType.Crypto => "crypto",
+                    Core.Models.AssetType.PreciousMetal => "metal",
+                    Core.Models.AssetType.Bond => "bond",
+                    _ => "stock",
+                };
+                AddAssetDialog.AddSymbol = row.Symbol;
+                AddAssetDialog.AddPrice = string.Empty;
+                AddAssetDialog.AddQuantity = string.Empty;
+                break;
+        }
     }
 
     /// <summary>
@@ -1690,7 +1823,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// <see cref="SelectedPortfolioGroup"/>。restoreFromEditTradeId 指定時試圖
     /// 從 trade row 還原；否則預設為 DefaultGroup。
     /// </summary>
-    private async Task EnsureGroupsLoadedAsync(Guid? restoreFromEditTradeId)
+    private async Task EnsureGroupsLoadedAsync(Guid? restoreFromEditTradeId, Guid? preferredGroupId = null)
     {
         if (GroupCatalog is null) return;
         try
@@ -1699,11 +1832,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             OnPropertyChanged(nameof(IsGroupSelectorVisible));
             OnPropertyChanged(nameof(ShouldShowGroupSelector));
 
-            Guid? targetId = null;
+            Guid? targetId = preferredGroupId;
             if (restoreFromEditTradeId is { } editId)
             {
                 var trade = Trades.FirstOrDefault(t => t.Id == editId);
-                targetId = trade?.PortfolioGroupId;
+                targetId = trade?.PortfolioGroupId ?? preferredGroupId;
             }
             SelectedPortfolioGroup = GroupCatalog.FindById(targetId) ?? GroupCatalog.Default;
         }
@@ -1717,6 +1850,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private void EditTrade(TradeRowViewModel row)
     {
         IsRevisionMode = false;
+        IsAssetContextLocked = false;
         // P2.7 — 編輯模式不需要殘留的搜尋字串干擾 picker。
         AssetSearchText = string.Empty;
         // 資產清單可能在 dialog 上次關閉後有變動 — 進編輯模式前也重建 cache 一次，

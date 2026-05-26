@@ -378,6 +378,7 @@
                                 <Grid Height="3" Margin="0,3,0,0">
                                     <Border Background="{DynamicResource AppBorder}" CornerRadius="1.5" />
                                     <Border
+                                        MinWidth="{Binding AllocationBarMinWidth}"
                                         HorizontalAlignment="Left"
                                         Background="{Binding ColorBrush}"
                                         CornerRadius="1.5">

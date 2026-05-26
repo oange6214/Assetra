@@ -346,6 +346,8 @@
     <sys:String x:Key="Portfolio.Liability.NextDue">Next due</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.All">All</sys:String>
     <sys:String x:Key="Portfolio.Filter.Group.All">All Groups</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Group.Add">New Group</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Group.Manage">Manage Groups</sys:String>
     <sys:String x:Key="Portfolio.ViewMode.All">All</sys:String>
     <sys:String x:Key="Portfolio.ViewMode.Group">By Group</sys:String>
     <sys:String x:Key="Portfolio.ViewMode.Market">By Market</sys:String>
@@ -365,6 +367,7 @@
     <sys:String x:Key="Portfolio.Group.Kpi.Cost">Cost</sys:String>
     <sys:String x:Key="Portfolio.Group.Kpi.Pnl">Estimated P&amp;L</sys:String>
     <sys:String x:Key="Portfolio.Group.Kpi.TodayChange">Today</sys:String>
+    <sys:String x:Key="Portfolio.Group.MoveToGroup">Move to Group</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Stock">Stocks</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Etf">ETFs</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Fund">Funds</sys:String>
@@ -482,6 +485,7 @@
     <sys:String x:Key="Portfolio.Detail.EditLiability">Edit</sys:String>
     <sys:String x:Key="Portfolio.Detail.EditLiability.Tooltip">Edit this liability's metadata (loan rate/term, credit limit, …).</sys:String>
     <sys:String x:Key="Portfolio.EditLiability.Title">Edit liability</sys:String>
+    <sys:String x:Key="Portfolio.EditLiability.Subtitle">Update liability name, issuer, and repayment parameters.</sys:String>
     <sys:String x:Key="Portfolio.EditLiability.Name">Name</sys:String>
     <sys:String x:Key="Portfolio.EditLiability.Issuer">Issuer (optional)</sys:String>
     <sys:String x:Key="Portfolio.EditLiability.LoanSection">Loan parameters</sys:String>
@@ -769,6 +773,10 @@
     <sys:String x:Key="Portfolio.Tx.SellPrice">Sell price</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Title">Edit Funds Account</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Subtitle">Update account details.</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.CashTitle">Edit Funds Account</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.CashSubtitle">Update account details.</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.PositionTitle">Edit Asset</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.PositionSubtitle">Update investment asset name, currency, and group.</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.TypeLabel">Type</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.SubtypeLabel">Sub-category</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.SubtypeHint">Changing the sub-category automatically updates which group this account appears under in the financial overview (e.g. Bank savings → Banking; Brokerage settlement → Settlement).</sys:String>

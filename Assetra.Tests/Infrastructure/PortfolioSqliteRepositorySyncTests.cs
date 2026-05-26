@@ -68,6 +68,23 @@ public sealed class PortfolioSqliteRepositorySyncTests : IDisposable
     }
 
     [Fact]
+    public async Task Update_PersistsPortfolioGroupId()
+    {
+        var repo = New();
+        var e = SampleEntry();
+        var groupId = Guid.NewGuid();
+        await repo.AddAsync(e);
+
+        await repo.UpdateAsync(e with { PortfolioGroupId = groupId });
+
+        var stored = Assert.Single(await repo.GetEntriesAsync());
+        Assert.Equal(groupId, stored.PortfolioGroupId);
+        var pending = await repo.GetPendingPushAsync();
+        var env = Assert.Single(pending);
+        Assert.Contains(groupId.ToString(), env.PayloadJson);
+    }
+
+    [Fact]
     public async Task UpdateMetadata_BumpsVersion()
     {
         var repo = New();

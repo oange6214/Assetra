@@ -17,6 +17,100 @@
     <UserControl.Resources>
         <conv:PercentToWidthConverter x:Key="PercentToWidthConverter" />
 
+        <DataTemplate x:Key="PositionGroupHeaderTemplate">
+            <Border
+                Margin="0,8,0,6"
+                Padding="12,8"
+                Background="{DynamicResource AppSurface}"
+                BorderBrush="{DynamicResource AppBorderLight}"
+                BorderThickness="1"
+                CornerRadius="8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppText}"
+                        Text="{Binding Name}" />
+
+                    <StackPanel
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <StackPanel Margin="16,0,0,0" Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Portfolio.Filter.Summary.Count}" />
+                            <TextBlock
+                                Margin="4,0,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{Binding Items[0].PositionViewGroupItemCount, StringFormat={}{0:N0}}" />
+                        </StackPanel>
+
+                        <StackPanel Margin="16,0,0,0" Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Portfolio.Filter.Summary.MarketValue}" />
+                            <TextBlock
+                                Margin="4,0,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{Binding Items[0].PositionViewGroupMarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                        </StackPanel>
+
+                        <StackPanel Margin="16,0,0,0" Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Portfolio.Filter.Summary.Cost}" />
+                            <TextBlock
+                                Margin="4,0,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{Binding Items[0].PositionViewGroupCost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
+                        </StackPanel>
+
+                        <StackPanel Margin="16,0,0,0" Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Portfolio.Filter.Summary.Pnl}" />
+                            <TextBlock
+                                Margin="4,0,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                FontWeight="SemiBold"
+                                Text="{Binding Items[0].PositionViewGroupPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Items[0].IsPositionViewGroupPnlPositive}" Value="True">
+                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Items[0].PositionViewGroupPnl}" Value="0">
+                                                <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
 
         <!--
             KPI 展開面板的關閉鈕 — 24×24 圓形、無框、hover 變淡背景。
@@ -740,57 +834,82 @@
         </Border>
 
         <!--
-            ═══ Row 3: Filter chips ═══
-            兩段：上方 = AssetType 全部/股/ETF/基金…，下方 = Portfolio-Groups-Refactor P4
-            的 Group chip row（catalog 載入後才顯示）。
+            ═══ Row 3: View mode + filters ═══
+            上方是投資持倉的觀看方式（平面 / 群組 / 市場 / 類型），下方保留資產類型作為
+            次要篩選。群組不再用可無限延展的 chip row，避免使用者建立多個策略群組後擠爆工具列。
         -->
         <StackPanel Grid.Row="3" Margin="12,14,12,6">
-            <!--
-                Portfolio-Groups-Refactor P4 — Group filter chips。「全部群組」+ catalog 每個 group。
-                ItemsSource 直接綁 GroupCatalog.Groups；selected 切 AppAccent 色。
-            -->
-            <StackPanel Margin="0,0,0,6" Orientation="Horizontal"
-                Visibility="{Binding HasPortfolioGroups, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
-                <Button
-                    Command="{Binding SetPortfolioGroupFilterCommand}"
-                    CommandParameter="{x:Null}"
-                    Content="{DynamicResource Portfolio.Filter.Group.All}">
-                    <Button.Style>
-                        <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
+            <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+                <RadioButton Command="{Binding SetPositionViewModeCommand}"
+                             CommandParameter="{x:Static vm:InvestmentPositionViewMode.All}"
+                             Content="{DynamicResource Portfolio.ViewMode.All}">
+                    <RadioButton.Style>
+                        <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding PortfolioGroupFilter}" Value="{x:Null}">
-                                    <Setter Property="Background" Value="{DynamicResource AppAccent}" />
-                                    <Setter Property="Foreground" Value="White" />
-                                    <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                                <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.All}">
+                                    <Setter Property="IsChecked" Value="True" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </Button.Style>
-                </Button>
-                <ItemsControl ItemsSource="{Binding GroupCatalog.Groups}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button
-                                Command="{Binding DataContext.SetPortfolioGroupFilterCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                CommandParameter="{Binding Id}"
-                                Content="{Binding Name}"
-                                Style="{StaticResource AssetTypeFilterChipBase}" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                    </RadioButton.Style>
+                </RadioButton>
+                <RadioButton Command="{Binding SetPositionViewModeCommand}"
+                             CommandParameter="{x:Static vm:InvestmentPositionViewMode.Group}"
+                             Content="{DynamicResource Portfolio.ViewMode.Group}">
+                    <RadioButton.Style>
+                        <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.Group}">
+                                    <Setter Property="IsChecked" Value="True" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </RadioButton.Style>
+                </RadioButton>
+                <RadioButton Command="{Binding SetPositionViewModeCommand}"
+                             CommandParameter="{x:Static vm:InvestmentPositionViewMode.Market}"
+                             Content="{DynamicResource Portfolio.ViewMode.Market}">
+                    <RadioButton.Style>
+                        <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.Market}">
+                                    <Setter Property="IsChecked" Value="True" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </RadioButton.Style>
+                </RadioButton>
+                <RadioButton Command="{Binding SetPositionViewModeCommand}"
+                             CommandParameter="{x:Static vm:InvestmentPositionViewMode.Type}"
+                             Content="{DynamicResource Portfolio.ViewMode.Type}">
+                    <RadioButton.Style>
+                        <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.Type}">
+                                    <Setter Property="IsChecked" Value="True" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </RadioButton.Style>
+                </RadioButton>
             </StackPanel>
 
             <ItemsControl>
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+                <ItemsControl.Style>
+                    <Style TargetType="ItemsControl">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsAssetTypeFilterRowVisible}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ItemsControl.Style>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
 
             <Button Command="{Binding SetAssetTypeFilterCommand}" CommandParameter=""
                     Content="{DynamicResource Portfolio.Filter.AssetType.All}">
@@ -897,6 +1016,85 @@
                 </Button.Style>
             </Button>
             </ItemsControl>
+
+            <Grid>
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsGroupViewMode}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <ItemsControl ItemsSource="{Binding PortfolioGroupFilterChips}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:PortfolioGroupFilterChipViewModel}">
+                            <Button
+                                Margin="0,0,8,6"
+                                Command="{Binding DataContext.SetPortfolioGroupFilterCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                CommandParameter="{Binding Id}"
+                                Content="{Binding Name}">
+                                <Button.Style>
+                                    <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                                                <Setter Property="Foreground" Value="White" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <StackPanel
+                    Grid.Column="1"
+                    Margin="12,0,0,0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <Button
+                        Height="32"
+                        Margin="0,0,8,6"
+                        Padding="12,0"
+                        Command="{Binding AddPortfolioGroupCommand}"
+                        Style="{StaticResource AppPrimaryButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <ds:AppIcon
+                                Margin="0,0,6,0"
+                                VerticalAlignment="Center"
+                                FontSize="10"
+                                Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                Symbol="Add24" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                Text="{DynamicResource Portfolio.Filter.Group.Add}" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Height="32"
+                        Margin="0,0,0,6"
+                        Padding="12,0"
+                        Command="{Binding OpenPortfolioGroupsCommand}"
+                        Content="{DynamicResource Portfolio.Filter.Group.Manage}"
+                        Style="{StaticResource AppSecondaryButton}" />
+                </StackPanel>
+            </Grid>
         </StackPanel>
 
         <!--  ═══ Row 4: Text search ═══  -->
@@ -994,6 +1192,13 @@
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 SelectedItem="{Binding SelectedPositionRow, Mode=TwoWay}">
+                <ListBox.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <StaticResource ResourceKey="PositionGroupHeaderTemplate" />
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                </ListBox.GroupStyle>
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Padding" Value="0" />
@@ -1062,6 +1267,7 @@
                                         <ColumnDefinition Width="72" />
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock
@@ -1093,6 +1299,19 @@
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="{Binding Name}"
                                         TextTrimming="CharacterEllipsis" />
+                                    <Button
+                                        Grid.Row="0"
+                                        Grid.RowSpan="2"
+                                        Grid.Column="3"
+                                        Height="28"
+                                        MinWidth="0"
+                                        Padding="10,0"
+                                        Command="{Binding DataContext.Account.OpenEditPositionCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"
+                                        Content="{DynamicResource Portfolio.Group.MoveToGroup}"
+                                        Style="{StaticResource AppSecondaryButton}"
+                                        ToolTip="{DynamicResource Portfolio.Group.MoveToGroup}"
+                                        Visibility="{Binding DataContext.HasPortfolioGroups, RelativeSource={RelativeSource AncestorType=ListBox}, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                                 </Grid>
 
                                 <Border
@@ -1282,6 +1501,13 @@
                 <DataGrid.RowStyle>
                     <Style BasedOn="{StaticResource AppDataGridRowSelectable}" TargetType="DataGridRow" />
                 </DataGrid.RowStyle>
+                <DataGrid.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <StaticResource ResourceKey="PositionGroupHeaderTemplate" />
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                </DataGrid.GroupStyle>
 
                 <DataGrid.Columns>
                     <!--  資產 — 合併代號 + 類型 badge + 名稱 (以 badge 為對齊錨點)  -->
@@ -1299,6 +1525,7 @@
                                         <ColumnDefinition Width="72" />
                                         <ColumnDefinition Width="42" />
                                         <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
                                         Grid.Column="0"
@@ -1325,6 +1552,17 @@
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Name}"
                                         TextTrimming="CharacterEllipsis" />
+                                    <Button
+                                        Grid.Column="3"
+                                        Height="28"
+                                        MinWidth="0"
+                                        Padding="10,0"
+                                        Command="{Binding DataContext.Account.OpenEditPositionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}"
+                                        Content="{DynamicResource Portfolio.Group.MoveToGroup}"
+                                        Style="{StaticResource AppSecondaryButton}"
+                                        ToolTip="{DynamicResource Portfolio.Group.MoveToGroup}"
+                                        Visibility="{Binding DataContext.HasPortfolioGroups, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                                 </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

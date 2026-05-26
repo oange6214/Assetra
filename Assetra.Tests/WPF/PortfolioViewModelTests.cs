@@ -1,6 +1,7 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Windows.Data;
 using Moq;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
@@ -11,6 +12,7 @@ using Assetra.Infrastructure;
 using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Portfolio.Controls;
 using Assetra.WPF.Features.Portfolio;
+using Assetra.WPF.Features.PortfolioGroups;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Infrastructure;
 using Xunit;
@@ -89,7 +91,9 @@ public class PortfolioViewModelTests
 
     private (PortfolioViewModel vm, Mock<IPortfolioRepository> repo) CreateVm(
         IReadOnlyList<PortfolioEntry>? entries = null,
-        IPositionQueryService? positionQuery = null)
+        IPositionQueryService? positionQuery = null,
+        PortfolioGroupCatalog? groupCatalog = null,
+        IReadOnlyList<Trade>? trades = null)
     {
         var mutableEntries = (entries ?? [MakeEntry()]).ToList();
         var repo = new Mock<IPortfolioRepository>();
@@ -111,13 +115,26 @@ public class PortfolioViewModelTests
         var (logRepo, backfill) = BackfillStubs(snapshotRepo);
 
         var fakeTradeRepo = new FakeTradeRepo();
+        if (trades is not null)
+            fakeTradeRepo.Store.AddRange(trades);
         var vm = new PortfolioViewModel(
             new PortfolioRepositories(repo.Object, snapshotRepo.Object, logRepo.Object, Trade: fakeTradeRepo),
             new PortfolioServices(SilentStockService().Object, search.Object,
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
-                PositionQuery: positionQuery),
+                PositionQuery: positionQuery,
+                GroupCatalog: groupCatalog),
             new PortfolioUiServices(ImmediateScheduler.Instance));
         return (vm, repo);
+    }
+
+    private sealed class FakePortfolioGroupRepo(IReadOnlyList<PortfolioGroup> groups) : IPortfolioGroupRepository
+    {
+        public Task<IReadOnlyList<PortfolioGroup>> GetAllAsync(CancellationToken ct = default) => Task.FromResult(groups);
+        public Task<PortfolioGroup?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+            Task.FromResult(groups.FirstOrDefault(g => g.Id == id));
+        public Task AddAsync(PortfolioGroup group, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UpdateAsync(PortfolioGroup group, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
     }
 
     // LoadAsync
@@ -130,6 +147,457 @@ public class PortfolioViewModelTests
         Assert.Equal(2, vm.Positions.Count);
         Assert.Contains(vm.Positions, p => p.Symbol == "2330");
         Assert.Contains(vm.Positions, p => p.Symbol == "2317");
+    }
+
+    [Fact]
+    public async Task LoadAsync_UsesPortfolioEntryGroupForPositionRow()
+    {
+        var groupId = Guid.NewGuid();
+        var entry = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE", PortfolioGroupId: groupId);
+        var snapshots = SnapshotsFor([(entry, 35m, 1000)]);
+        var (vm, _) = CreateVm([entry], PositionQueryMock(snapshots).Object);
+
+        await vm.LoadAsync();
+
+        var row = Assert.Single(vm.Positions);
+        Assert.Equal(groupId, row.PortfolioGroupId);
+        Assert.False(row.HasPortfolioGroupConflict);
+    }
+
+    [Fact]
+    public async Task LoadAsync_MarksAggregatedPositionWhenEntryGroupsConflict()
+    {
+        var firstGroup = Guid.NewGuid();
+        var secondGroup = Guid.NewGuid();
+        var first = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE", AssetType.Stock, "元大高股息", PortfolioGroupId: firstGroup);
+        var second = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE", AssetType.Stock, "元大高股息", PortfolioGroupId: secondGroup);
+        var snapshots = SnapshotsFor([(first, 35m, 1000), (second, 36m, 1000)]);
+        var (vm, _) = CreateVm([first, second], PositionQueryMock(snapshots).Object);
+
+        await vm.LoadAsync();
+
+        var row = Assert.Single(vm.Positions);
+        Assert.Null(row.PortfolioGroupId);
+        Assert.True(row.HasPortfolioGroupConflict);
+    }
+
+    [Fact]
+    public async Task SaveEditAsset_WithGroupConflict_ReassignsEveryLotToSelectedGroup()
+    {
+        var firstGroup = Guid.NewGuid();
+        var secondGroup = Guid.NewGuid();
+        var targetGroup = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(firstGroup, "長期投資"),
+            new PortfolioGroup(secondGroup, "短線"),
+            new PortfolioGroup(targetGroup, "現金流"),
+        ]));
+        var first = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE", AssetType.Stock, "元大高股息", PortfolioGroupId: firstGroup);
+        var second = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE", AssetType.Stock, "元大高股息", PortfolioGroupId: secondGroup);
+        var snapshots = SnapshotsFor([(first, 30m, 10), (second, 30m, 20)]);
+        var updated = new List<PortfolioEntry>();
+        var (vm, repo) = CreateVm([first, second], PositionQueryMock(snapshots).Object, catalog);
+        repo.Setup(r => r.UpdateMetadataAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        repo.Setup(r => r.UpdateAsync(It.IsAny<PortfolioEntry>(), It.IsAny<CancellationToken>()))
+            .Callback<PortfolioEntry, CancellationToken>((entry, _) => updated.Add(entry))
+            .Returns(Task.CompletedTask);
+
+        await vm.LoadAsync();
+        var row = Assert.Single(vm.Positions);
+
+        vm.Account.OpenEditPositionCommand.Execute(row);
+        Assert.True(vm.Account.EditAssetHasPortfolioGroupConflict);
+        Assert.True(vm.Account.CanEditPositionGroup);
+        Assert.Equal(PortfolioGroup.DefaultId, vm.Account.EditAssetPortfolioGroupId);
+        Assert.Equal("元大高股息", vm.Account.EditAssetName);
+
+        vm.Account.EditAssetPortfolioGroupId = targetGroup;
+        await vm.Account.SaveEditAssetCommand.ExecuteAsync(null);
+
+        Assert.Empty(vm.Account.EditAssetError);
+        Assert.False(vm.Account.IsEditAssetDialogOpen);
+        Assert.False(vm.Account.EditAssetHasPortfolioGroupConflict);
+        Assert.NotEmpty(updated);
+        Assert.False(row.HasPortfolioGroupConflict);
+        Assert.Equal(targetGroup, row.PortfolioGroupId);
+        Assert.Equal("現金流", row.PortfolioGroupDisplay);
+        Assert.Equal(new[] { first.Id, second.Id }, updated.Select(entry => entry.Id));
+        Assert.All(updated, entry => Assert.Equal(targetGroup, entry.PortfolioGroupId));
+    }
+
+    [Fact]
+    public async Task SetPositionViewMode_GroupsPositionsViewBySelectedDimension()
+    {
+        var twse = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE");
+        var nasdaq = new PortfolioEntry(Guid.NewGuid(), "AAPL", "NASDAQ", Currency: "USD");
+        var snapshots = SnapshotsFor([(twse, 35m, 1000), (nasdaq, 190m, 10)]);
+        var (vm, _) = CreateVm([twse, nasdaq], PositionQueryMock(snapshots).Object);
+        await vm.LoadAsync();
+
+        vm.SetPositionViewModeCommand.Execute(InvestmentPositionViewMode.Market);
+
+        var group = Assert.Single(vm.PositionsView.GroupDescriptions);
+        var propertyGroup = Assert.IsType<PropertyGroupDescription>(group);
+        Assert.Equal(nameof(PortfolioRowViewModel.MarketDisplay), propertyGroup.PropertyName);
+    }
+
+    [Fact]
+    public async Task SetPositionViewMode_Group_UpdatesVisibleGroupSummaries()
+    {
+        var longTermId = Guid.NewGuid();
+        var incomeId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(longTermId, "長期投資"),
+            new PortfolioGroup(incomeId, "現金流"),
+        ]));
+        var longFund = new PortfolioEntry(Guid.NewGuid(), "LONGF", "", AssetType.Fund, PortfolioGroupId: longTermId);
+        var longBond = new PortfolioEntry(Guid.NewGuid(), "LONGB", "", AssetType.Bond, PortfolioGroupId: longTermId);
+        var incomeFund = new PortfolioEntry(Guid.NewGuid(), "INCF", "", AssetType.Fund, PortfolioGroupId: incomeId);
+        var snapshots = SnapshotsFor([
+            (longFund, 100m, 10),
+            (longBond, 200m, 5),
+            (incomeFund, 50m, 4),
+        ]);
+        var (vm, _) = CreateVm(
+            [longFund, longBond, incomeFund],
+            PositionQueryMock(snapshots).Object,
+            catalog);
+        await vm.LoadAsync();
+
+        vm.SetAssetTypeFilterCommand.Execute("Fund");
+        vm.SetPositionViewModeCommand.Execute(InvestmentPositionViewMode.Group);
+
+        var longFundRow = vm.Positions.Single(p => p.Symbol == "LONGF");
+        var incomeFundRow = vm.Positions.Single(p => p.Symbol == "INCF");
+        Assert.Equal(1, longFundRow.PositionViewGroupItemCount);
+        Assert.Equal(1_000m, longFundRow.PositionViewGroupMarketValue);
+        Assert.Equal(1_000m, longFundRow.PositionViewGroupCost);
+        Assert.Equal(0m, longFundRow.PositionViewGroupPnl);
+        Assert.Equal(1, incomeFundRow.PositionViewGroupItemCount);
+        Assert.Equal(200m, incomeFundRow.PositionViewGroupMarketValue);
+    }
+
+    [Fact]
+    public async Task LoadAsync_DefaultsToGroupViewWhenCustomGroupsExist()
+    {
+        var groupId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(groupId, "長期投資"),
+        ]));
+        var entry = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE", PortfolioGroupId: groupId);
+        var snapshots = SnapshotsFor([(entry, 35m, 1000)]);
+        var (vm, _) = CreateVm([entry], PositionQueryMock(snapshots).Object, catalog);
+
+        await vm.LoadAsync();
+
+        Assert.Equal(InvestmentPositionViewMode.Group, vm.PositionViewMode);
+        var group = Assert.Single(vm.PositionsView.GroupDescriptions);
+        var propertyGroup = Assert.IsType<PropertyGroupDescription>(group);
+        Assert.Equal(nameof(PortfolioRowViewModel.PortfolioGroupDisplay), propertyGroup.PropertyName);
+    }
+
+    [Fact]
+    public async Task LoadAsync_KeepsFlatViewWhenOnlySystemGroupExists()
+    {
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+        ]));
+        var entry = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE");
+        var snapshots = SnapshotsFor([(entry, 35m, 1000)]);
+        var (vm, _) = CreateVm([entry], PositionQueryMock(snapshots).Object, catalog);
+
+        await vm.LoadAsync();
+
+        Assert.Equal(InvestmentPositionViewMode.All, vm.PositionViewMode);
+        Assert.Empty(vm.PositionsView.GroupDescriptions);
+    }
+
+    [Fact]
+    public async Task OpenEditPosition_UsesAssetDialogCopyAndKeepsGroupSelection()
+    {
+        var groupId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(groupId, "長期投資"),
+        ]));
+        var entry = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE", AssetType.Stock, "元大高股息", PortfolioGroupId: groupId);
+        var snapshots = SnapshotsFor([(entry, 35m, 1000)]);
+        var (vm, _) = CreateVm([entry], PositionQueryMock(snapshots).Object, catalog);
+
+        await vm.LoadAsync();
+        vm.Account.OpenEditPositionCommand.Execute(Assert.Single(vm.Positions));
+
+        Assert.Equal("編輯資產", vm.Account.EditAssetDialogTitle);
+        Assert.Equal("更新投資資產名稱、幣別與群組。", vm.Account.EditAssetDialogSubtitle);
+        Assert.True(vm.Account.CanEditPositionGroup);
+        Assert.Equal(groupId, vm.Account.EditAssetPortfolioGroupId);
+    }
+
+    [Fact]
+    public async Task LoadAsync_BuildsDynamicPortfolioGroupFilterChips()
+    {
+        var longTermId = Guid.NewGuid();
+        var incomeId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(longTermId, "長期投資"),
+            new PortfolioGroup(incomeId, "現金流"),
+        ]));
+        var entry = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE", PortfolioGroupId: longTermId);
+        var snapshots = SnapshotsFor([(entry, 35m, 1000)]);
+        var (vm, _) = CreateVm([entry], PositionQueryMock(snapshots).Object, catalog);
+
+        await vm.LoadAsync();
+
+        Assert.Equal(
+            ["全部群組", "未分組", "長期投資", "現金流"],
+            vm.PortfolioGroupFilterChips.Select(chip => chip.Name));
+        Assert.True(vm.PortfolioGroupFilterChips.Single(chip => chip.Id is null).IsSelected);
+    }
+
+    [Fact]
+    public async Task SetPortfolioGroupFilter_FiltersPositionsToSelectedGroup()
+    {
+        var longTermId = Guid.NewGuid();
+        var incomeId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(longTermId, "長期投資"),
+            new PortfolioGroup(incomeId, "現金流"),
+        ]));
+        var longFund = new PortfolioEntry(Guid.NewGuid(), "LONGF", "", AssetType.Fund, PortfolioGroupId: longTermId);
+        var incomeFund = new PortfolioEntry(Guid.NewGuid(), "INCF", "", AssetType.Fund, PortfolioGroupId: incomeId);
+        var snapshots = SnapshotsFor([
+            (longFund, 100m, 10),
+            (incomeFund, 50m, 4),
+        ]);
+        var (vm, _) = CreateVm(
+            [longFund, incomeFund],
+            PositionQueryMock(snapshots).Object,
+            catalog);
+
+        await vm.LoadAsync();
+        vm.SetPositionViewModeCommand.Execute(InvestmentPositionViewMode.Group);
+        vm.SetPortfolioGroupFilterCommand.Execute(incomeId);
+
+        Assert.Equal(["INCF"], vm.PositionsView.Cast<PortfolioRowViewModel>().Select(row => row.Symbol));
+        Assert.True(vm.PortfolioGroupFilterChips.Single(chip => chip.Id == incomeId).IsSelected);
+        Assert.False(vm.PortfolioGroupFilterChips.Single(chip => chip.Id == longTermId).IsSelected);
+    }
+
+    [Fact]
+    public async Task OpenSelectedPositionGroupDetail_BuildsCurrentMembershipSummary()
+    {
+        var longTermId = Guid.NewGuid();
+        var incomeId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(longTermId, "長期投資"),
+            new PortfolioGroup(incomeId, "現金流"),
+        ]));
+        var first = new PortfolioEntry(Guid.NewGuid(), "FUND-A", "", AssetType.Fund, PortfolioGroupId: longTermId);
+        var second = new PortfolioEntry(Guid.NewGuid(), "BOND-B", "", AssetType.Bond, PortfolioGroupId: longTermId);
+        var other = new PortfolioEntry(Guid.NewGuid(), "INCOME", "", AssetType.Fund, PortfolioGroupId: incomeId);
+        var snapshots = SnapshotsFor([
+            (first, 100m, 10),
+            (second, 50m, 4),
+            (other, 80m, 2),
+        ]);
+        var (vm, _) = CreateVm(
+            [first, second, other],
+            PositionQueryMock(snapshots).Object,
+            catalog);
+        await vm.LoadAsync();
+        var firstRow = vm.Positions.Single(p => p.Symbol == "FUND-A");
+        var secondRow = vm.Positions.Single(p => p.Symbol == "BOND-B");
+        firstRow.CurrentPrice = 120m;
+        firstRow.Refresh();
+        firstRow.ApplyBaseValuation("TWD", null);
+        secondRow.CurrentPrice = 55m;
+        secondRow.Refresh();
+        secondRow.ApplyBaseValuation("TWD", null);
+        vm.SelectedPositionRow = firstRow;
+
+        var commandProperty = typeof(PortfolioViewModel)
+            .GetProperty("OpenSelectedPositionGroupDetailCommand");
+        Assert.NotNull(commandProperty);
+        var command = Assert.IsAssignableFrom<System.Windows.Input.ICommand>(
+            commandProperty!.GetValue(vm));
+
+        command.Execute(null);
+
+        var detailProperty = typeof(PortfolioViewModel).GetProperty("SelectedPortfolioGroupDetail");
+        Assert.NotNull(detailProperty);
+        var detail = detailProperty!.GetValue(vm);
+        Assert.NotNull(detail);
+        Assert.Equal(longTermId, detail.GetType().GetProperty("GroupId")?.GetValue(detail));
+        Assert.Equal("長期投資", detail.GetType().GetProperty("Name")?.GetValue(detail));
+        Assert.Equal(2, detail.GetType().GetProperty("HoldingCount")?.GetValue(detail));
+        Assert.Equal(1_420m, detail.GetType().GetProperty("MarketValue")?.GetValue(detail));
+        Assert.Equal(1_200m, detail.GetType().GetProperty("Cost")?.GetValue(detail));
+        Assert.Equal(220m, detail.GetType().GetProperty("Pnl")?.GetValue(detail));
+    }
+
+    [Fact]
+    public async Task OpenSelectedPositionGroupDetail_IncludesCurrentMembershipTrades()
+    {
+        var longTermId = Guid.NewGuid();
+        var incomeId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(longTermId, "長期投資"),
+            new PortfolioGroup(incomeId, "現金流"),
+        ]));
+        var first = new PortfolioEntry(Guid.NewGuid(), "FUND-A", "", AssetType.Fund, PortfolioGroupId: longTermId);
+        var second = new PortfolioEntry(Guid.NewGuid(), "BOND-B", "", AssetType.Bond, PortfolioGroupId: longTermId);
+        var other = new PortfolioEntry(Guid.NewGuid(), "INCOME", "", AssetType.Fund, PortfolioGroupId: incomeId);
+        var trades = new[]
+        {
+            new Trade(
+                Guid.NewGuid(), "FUND-A", "", "Fund A", TradeType.Buy,
+                new DateTime(2026, 5, 10, 0, 0, 0, DateTimeKind.Utc),
+                100m, 10, RealizedPnl: null, RealizedPnlPct: null,
+                PortfolioEntryId: first.Id, PortfolioGroupId: longTermId),
+            new Trade(
+                Guid.NewGuid(), "BOND-B", "", "Bond B", TradeType.CashDividend,
+                new DateTime(2026, 5, 12, 0, 0, 0, DateTimeKind.Utc),
+                Price: 0m, Quantity: 0, RealizedPnl: null, RealizedPnlPct: null,
+                CashAmount: 20m, PortfolioEntryId: second.Id, PortfolioGroupId: longTermId),
+            new Trade(
+                Guid.NewGuid(), "INCOME", "", "Income Fund", TradeType.Buy,
+                new DateTime(2026, 5, 11, 0, 0, 0, DateTimeKind.Utc),
+                80m, 2, RealizedPnl: null, RealizedPnlPct: null,
+                PortfolioEntryId: other.Id, PortfolioGroupId: incomeId),
+        };
+        var snapshots = SnapshotsFor([
+            (first, 100m, 10),
+            (second, 50m, 4),
+            (other, 80m, 2),
+        ]);
+        var (vm, _) = CreateVm(
+            [first, second, other],
+            PositionQueryMock(snapshots).Object,
+            catalog,
+            trades);
+        await vm.LoadAsync();
+        vm.SelectedPositionRow = vm.Positions.Single(p => p.Symbol == "FUND-A");
+
+        var commandProperty = typeof(PortfolioViewModel)
+            .GetProperty("OpenSelectedPositionGroupDetailCommand");
+        Assert.NotNull(commandProperty);
+        var command = Assert.IsAssignableFrom<System.Windows.Input.ICommand>(
+            commandProperty!.GetValue(vm));
+
+        command.Execute(null);
+
+        var detailProperty = typeof(PortfolioViewModel).GetProperty("SelectedPortfolioGroupDetail");
+        var detail = detailProperty!.GetValue(vm);
+        Assert.NotNull(detail);
+        var tradesProperty = detail.GetType().GetProperty("Trades");
+        Assert.NotNull(tradesProperty);
+        var detailTrades = Assert.IsAssignableFrom<IReadOnlyList<TradeRowViewModel>>(
+            tradesProperty!.GetValue(detail));
+        Assert.Equal(["BOND-B", "FUND-A"], detailTrades.Select(t => t.Symbol));
+    }
+
+    [Fact]
+    public async Task OpenSelectedPositionGroupDetail_BuildsCurrentMembershipTrend()
+    {
+        var longTermId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(longTermId, "長期投資"),
+        ]));
+        var first = new PortfolioEntry(Guid.NewGuid(), "FUND-A", "", AssetType.Fund, PortfolioGroupId: longTermId);
+        var second = new PortfolioEntry(Guid.NewGuid(), "BOND-B", "", AssetType.Bond, PortfolioGroupId: longTermId);
+        var snapshots = SnapshotsFor([
+            (first, 10m, 10),
+            (second, 20m, 5),
+        ]);
+        var (vm, _) = CreateVm(
+            [first, second],
+            PositionQueryMock(snapshots).Object,
+            catalog);
+        await vm.LoadAsync();
+        var firstRow = vm.Positions.Single(p => p.Symbol == "FUND-A");
+        var secondRow = vm.Positions.Single(p => p.Symbol == "BOND-B");
+        firstRow.SparklinePoints = [10d, 12d, 14d];
+        firstRow.SparklineState = 1;
+        secondRow.SparklinePoints = [20d, 22d, 24d];
+        secondRow.SparklineState = 1;
+        vm.SelectedPositionRow = firstRow;
+
+        var commandProperty = typeof(PortfolioViewModel)
+            .GetProperty("OpenSelectedPositionGroupDetailCommand");
+        Assert.NotNull(commandProperty);
+        var command = Assert.IsAssignableFrom<System.Windows.Input.ICommand>(
+            commandProperty!.GetValue(vm));
+
+        command.Execute(null);
+
+        var detailProperty = typeof(PortfolioViewModel).GetProperty("SelectedPortfolioGroupDetail");
+        var detail = detailProperty!.GetValue(vm);
+        Assert.NotNull(detail);
+        var trendProperty = detail.GetType().GetProperty("MarketValueTrendValues");
+        Assert.NotNull(trendProperty);
+        var values = Assert.IsAssignableFrom<IReadOnlyList<double>>(trendProperty!.GetValue(detail));
+        Assert.Equal([200d, 230d, 260d], values);
+        Assert.Equal(true, detail.GetType().GetProperty("HasMarketValueTrend")?.GetValue(detail));
+    }
+
+    [Fact]
+    public async Task OpenSelectedPositionGroupDetail_BuildsPerformanceTrendFromCurrentMembership()
+    {
+        var longTermId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(longTermId, "長期投資"),
+        ]));
+        var first = new PortfolioEntry(Guid.NewGuid(), "FUND-A", "", AssetType.Fund, PortfolioGroupId: longTermId);
+        var second = new PortfolioEntry(Guid.NewGuid(), "BOND-B", "", AssetType.Bond, PortfolioGroupId: longTermId);
+        var snapshots = SnapshotsFor([
+            (first, 10m, 10),
+            (second, 20m, 5),
+        ]);
+        var (vm, _) = CreateVm(
+            [first, second],
+            PositionQueryMock(snapshots).Object,
+            catalog);
+        await vm.LoadAsync();
+        var firstRow = vm.Positions.Single(p => p.Symbol == "FUND-A");
+        var secondRow = vm.Positions.Single(p => p.Symbol == "BOND-B");
+        firstRow.SparklinePoints = [10d, 12d, 14d];
+        firstRow.SparklineState = 1;
+        secondRow.SparklinePoints = [20d, 22d, 24d];
+        secondRow.SparklineState = 1;
+        vm.SelectedPositionRow = firstRow;
+
+        var commandProperty = typeof(PortfolioViewModel)
+            .GetProperty("OpenSelectedPositionGroupDetailCommand");
+        Assert.NotNull(commandProperty);
+        var command = Assert.IsAssignableFrom<System.Windows.Input.ICommand>(
+            commandProperty!.GetValue(vm));
+
+        command.Execute(null);
+
+        var detailProperty = typeof(PortfolioViewModel).GetProperty("SelectedPortfolioGroupDetail");
+        var detail = detailProperty!.GetValue(vm);
+        Assert.NotNull(detail);
+        var costTrendProperty = detail.GetType().GetProperty("CostTrendValues");
+        var pnlTrendProperty = detail.GetType().GetProperty("PnlTrendValues");
+        var hasPerformanceTrendProperty = detail.GetType().GetProperty("HasPerformanceTrend");
+        Assert.NotNull(costTrendProperty);
+        Assert.NotNull(pnlTrendProperty);
+        Assert.NotNull(hasPerformanceTrendProperty);
+        var costTrend = Assert.IsAssignableFrom<IReadOnlyList<double>>(costTrendProperty!.GetValue(detail));
+        var pnlTrend = Assert.IsAssignableFrom<IReadOnlyList<double>>(pnlTrendProperty!.GetValue(detail));
+        Assert.Equal([200d, 200d, 200d], costTrend);
+        Assert.Equal([0d, 30d, 60d], pnlTrend);
+        Assert.Equal(true, hasPerformanceTrendProperty!.GetValue(detail));
     }
 
     [Fact]

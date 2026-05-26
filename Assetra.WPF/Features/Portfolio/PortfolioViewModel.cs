@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -84,6 +85,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     /// null = 功能未啟用，XAML 隱藏 chip row。
     /// </summary>
     public Assetra.WPF.Features.PortfolioGroups.PortfolioGroupCatalog? GroupCatalog { get; private set; }
+
+    private bool _hasAppliedInitialPositionViewMode;
 
     /// <summary>XAML 用：是否暴露 group chip row。catalog 存在且至少 1 個 group 時 true。</summary>
     /// <summary>
@@ -372,6 +375,20 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         _currencyService = services.Currency;
         // Portfolio-Groups-Refactor P4 — Positions tab chip row 用。null = 功能未啟用。
         GroupCatalog = services.GroupCatalog;
+        if (GroupCatalog?.Groups is INotifyCollectionChanged groupChanges)
+        {
+            Observable
+                .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+                    handler => groupChanges.CollectionChanged += handler,
+                    handler => groupChanges.CollectionChanged -= handler)
+                .ObserveOn(ui.Scheduler)
+                .Subscribe(_ =>
+                {
+                    RefreshPortfolioGroupFilterChips();
+                    OnPropertyChanged(nameof(HasPortfolioGroups));
+                })
+                .DisposeWith(_disposables);
+        }
         // P4.1 — Asset detail KPI 矩陣 XIRR 計算。null = XIRR row 顯示「—」。
         _xirrCalculator = services.Xirr;
         _cryptoService = services.Crypto;
@@ -458,6 +475,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 AccountUpsert: accountUpsertWorkflow,
                 AccountMutation: accountMutationWorkflow,
                 PositionMetadata: positionMetadataWorkflowService,
+                GroupCatalog: services.GroupCatalog,
                 Snackbar: _snackbar,
                 CashAccounts: CashAccounts,
                 LoadCashAccountsAsync: LoadCashAccountsAsync,
@@ -682,15 +700,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 g => g.OrderByDescending(t => t.TradeDate).First().CommissionDiscount!.Value,
                 StringComparer.OrdinalIgnoreCase);
 
-        // Portfolio-Groups-Refactor P4 — 同上，以 Symbol 分組取最新 Buy 的 PortfolioGroupId。
-        var latestGroup = Trades
-            .Where(t => t.Type == TradeType.Buy)
-            .GroupBy(t => t.Symbol, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(
-                g => g.Key,
-                g => g.OrderByDescending(t => t.TradeDate).First().PortfolioGroupId,
-                StringComparer.OrdinalIgnoreCase);
-
         foreach (var row in Positions)
         {
             if (latestDiscount.TryGetValue(row.Symbol, out var disc) && row.CommissionDiscount != disc)
@@ -698,8 +707,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 row.CommissionDiscount = disc;
                 row.Refresh();
             }
-            if (latestGroup.TryGetValue(row.Symbol, out var grp))
-                row.PortfolioGroupId = grp;
         }
     }
 
@@ -723,6 +730,17 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         {
             var lots = g.ToList();
             var primary = lots[0];
+            var groupSource = lots.Any(l => l.IsActive)
+                ? lots.Where(l => l.IsActive)
+                : lots;
+            var groupIds = groupSource
+                .Select(l => l.PortfolioGroupId ?? PortfolioGroup.DefaultId)
+                .Distinct()
+                .ToList();
+            var hasGroupConflict = groupIds.Count > 1;
+            Guid? rowGroupId = hasGroupConflict
+                ? null
+                : groupIds.Count == 0 ? PortfolioGroup.DefaultId : groupIds[0];
 
             // Archive filter: hide when all lots are archived and ShowArchivedPositions is off.
             if (!ShowArchivedPositions && lots.All(l => !l.IsActive))
@@ -768,6 +786,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                     row.AllEntryIds.Add(extra.Id);
             }
 
+            row.PortfolioGroupId = rowGroupId;
+            row.HasPortfolioGroupConflict = hasGroupConflict;
+            row.PortfolioGroupDisplay = ResolvePositionGroupDisplay(row.PortfolioGroupId, hasGroupConflict);
             newRows[(g.Key.Symbol, g.Key.Exchange, g.Key.AssetType)] = row;
         }
 
@@ -795,6 +816,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 existing.Quantity = newRow.Quantity;
                 existing.BuyPrice = newRow.BuyPrice;
                 existing.IsActive = newRow.IsActive;
+                existing.PortfolioGroupId = newRow.PortfolioGroupId;
+                existing.HasPortfolioGroupConflict = newRow.HasPortfolioGroupConflict;
+                existing.PortfolioGroupDisplay = newRow.PortfolioGroupDisplay;
                 existing.AllEntryIds.Clear();
                 foreach (var id in newRow.AllEntryIds)
                     existing.AllEntryIds.Add(id);
@@ -825,6 +849,25 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         }
     }
 
+    private string ResolvePositionGroupDisplay(Guid? groupId, bool hasGroupConflict)
+    {
+        if (hasGroupConflict)
+            return L("Portfolio.Group.NeedsResolution", "群組待整理");
+
+        return GroupCatalog?.FindById(groupId)?.Name
+            ?? L("Portfolio.Group.Ungrouped", "未分組");
+    }
+
+    private void ApplyInitialPositionViewMode()
+    {
+        if (_hasAppliedInitialPositionViewMode)
+            return;
+
+        _hasAppliedInitialPositionViewMode = true;
+        if (HasPortfolioGroups)
+            PositionViewMode = InvestmentPositionViewMode.Group;
+    }
+
     private void RaiseSetupNoticeChanged()
         => SetupNotice.Refresh(HasNoCashAccounts, HasNoTrades);
 
@@ -832,15 +875,20 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     {
         // Portfolio-Groups-Refactor P4 — 先把 group catalog 灌好，PositionsTabPanel 的 chip
         // row 才能在初次顯示就有資料。失敗不阻斷 portfolio 載入。
+        var groupCatalogLoaded = GroupCatalog is null;
         if (GroupCatalog is not null)
         {
             try
             {
                 await GroupCatalog.EnsureLoadedAsync().ConfigureAwait(true);
+                RefreshPortfolioGroupFilterChips();
                 OnPropertyChanged(nameof(HasPortfolioGroups));
+                groupCatalogLoaded = true;
             }
             catch { /* ignored */ }
         }
+        if (groupCatalogLoaded)
+            ApplyInitialPositionViewMode();
 
         // Bypass OnMonthlyExpenseChanged (avoids premature save); RebuildTotals() below reads MonthlyExpense.
         Financial.InitializeMonthlyExpense(_settingsService?.Current?.MonthlyExpense ?? 0m);
@@ -1000,6 +1048,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
 
         // Footer 統計：positions / cash / liability 都依 collection view 即時加總，
         // 但 collection 內容變了不自動 raise PropertyChanged，這裡統一推一次。
+        RefreshPositionViewGroupSummaries();
+        RefreshSelectedPortfolioGroupDetail();
         RaisePositionsFilterStatsChanged();
         RaiseCashFilterStatsChanged();
         RaiseLiabilityFilterStatsChanged();
@@ -1156,11 +1206,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     [RelayCommand]
     private void BeginSell(PortfolioRowViewModel row)
     {
-        // Open Tx dialog in Sell mode with this position pre-selected
-        Transaction.OpenTxDialog();
-        Transaction.TxType = "sell";
-        Transaction.Sell.Position = row;
-        Transaction.Sell.Quantity = ((int)row.Quantity).ToString();
+        Transaction.OpenTxDialogForPosition(row, "sell");
     }
 
     /// <summary>側面板「買入」快速動作 — 打開 Tx 對話框，預填當前股票代號。</summary>
@@ -1169,13 +1215,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     {
         if (SelectedPositionRow is null)
             return;
-        var row = SelectedPositionRow;
-        Transaction.OpenTxDialog();
-        Transaction.TxType = "buy";
-        Transaction.Buy.AssetType = "stock";
-        AddAssetDialog.AddSymbol = row.Symbol;
-        AddAssetDialog.AddPrice = string.Empty;
-        AddAssetDialog.AddQuantity = string.Empty;
+        Transaction.OpenTxDialogForPosition(SelectedPositionRow, "buy");
     }
 
     /// <summary>側面板「配息入帳」快速動作 — 打開 Tx 對話框並預選此持倉。</summary>
@@ -1184,9 +1224,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     {
         if (SelectedPositionRow is null)
             return;
-        Transaction.OpenTxDialog();
-        Transaction.TxType = "cashDiv";
-        Transaction.Div.Position = SelectedPositionRow;
+        Transaction.OpenTxDialogForPosition(SelectedPositionRow, "cashDiv");
     }
 
     /// <summary>側面板「賣出」快速動作 — 呼叫既有 BeginSell，但以 SelectedPositionRow 為目標。</summary>

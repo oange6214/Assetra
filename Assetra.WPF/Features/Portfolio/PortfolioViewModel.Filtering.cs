@@ -1,10 +1,20 @@
 using System.ComponentModel;
+using System.Collections.ObjectModel;
 using System.Windows.Data;
 using Assetra.Core.Models;
+using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Assetra.WPF.Features.Portfolio;
+
+public enum InvestmentPositionViewMode
+{
+    All,
+    Group,
+    Market,
+    Type,
+}
 
 /// <summary>
 /// PortfolioViewModel partial — collection-view filters for Positions, Cash, and Liability tabs.
@@ -12,6 +22,12 @@ namespace Assetra.WPF.Features.Portfolio;
 public partial class PortfolioViewModel
 {
     [ObservableProperty] private string _filterText = string.Empty;
+
+    public ObservableCollection<PortfolioGroupFilterChipViewModel> PortfolioGroupFilterChips { get; } = [];
+
+    public bool IsGroupViewMode => PositionViewMode == InvestmentPositionViewMode.Group;
+    public bool IsAssetTypeFilterRowVisible => PositionViewMode != InvestmentPositionViewMode.Group;
+    public bool HasPortfolioGroupFilterChips => PortfolioGroupFilterChips.Count > 0;
 
     /// <summary>
     /// When true, archived (soft-deleted) positions are shown in the Positions list.
@@ -34,6 +50,7 @@ public partial class PortfolioViewModel
     partial void OnAssetTypeFilterChanged(AssetType? value)
     {
         PositionsView.Refresh();
+        RefreshPositionViewGroupSummaries();
         RaisePositionsFilterStatsChanged();
     }
 
@@ -45,7 +62,9 @@ public partial class PortfolioViewModel
 
     partial void OnPortfolioGroupFilterChanged(Guid? value)
     {
+        RefreshPortfolioGroupFilterChipSelection();
         PositionsView.Refresh();
+        RefreshPositionViewGroupSummaries();
         RaisePositionsFilterStatsChanged();
     }
 
@@ -54,6 +73,68 @@ public partial class PortfolioViewModel
     /// </summary>
     [RelayCommand]
     private void SetPortfolioGroupFilter(Guid? id) => PortfolioGroupFilter = id;
+
+    [ObservableProperty] private InvestmentPositionViewMode _positionViewMode = InvestmentPositionViewMode.All;
+
+    partial void OnPositionViewModeChanged(InvestmentPositionViewMode value)
+    {
+        OnPropertyChanged(nameof(IsGroupViewMode));
+        OnPropertyChanged(nameof(IsAssetTypeFilterRowVisible));
+        if (value != InvestmentPositionViewMode.Group && PortfolioGroupFilter.HasValue)
+            PortfolioGroupFilter = null;
+
+        ApplyPositionViewGrouping();
+        PositionsView.Refresh();
+        RefreshPositionViewGroupSummaries();
+        RaisePositionsFilterStatsChanged();
+    }
+
+    [RelayCommand]
+    private void SetPositionViewMode(InvestmentPositionViewMode mode) => PositionViewMode = mode;
+
+    [RelayCommand]
+    private void OpenPortfolioGroups() =>
+        ShellNavigationEvents.RequestNavigateTo("PortfolioGroups");
+
+    [RelayCommand]
+    private void AddPortfolioGroup() =>
+        ShellNavigationEvents.RequestNavigateTo("PortfolioGroups");
+
+    private void RefreshPortfolioGroupFilterChips()
+    {
+        PortfolioGroupFilterChips.Clear();
+        PortfolioGroupFilterChips.Add(new PortfolioGroupFilterChipViewModel(
+            null,
+            L("Portfolio.Filter.Group.All", "全部群組"),
+            isSystem: true));
+
+        var groups = GroupCatalog?.Groups ?? Enumerable.Empty<PortfolioGroup>();
+        var defaultGroup = groups.FirstOrDefault(group => group.Id == PortfolioGroup.DefaultId);
+        PortfolioGroupFilterChips.Add(new PortfolioGroupFilterChipViewModel(
+            PortfolioGroup.DefaultId,
+            L("Portfolio.Group.Ungrouped", "未分組"),
+            isSystem: true));
+
+        foreach (var group in groups.Where(group => !group.IsSystem))
+        {
+            PortfolioGroupFilterChips.Add(new PortfolioGroupFilterChipViewModel(
+                group.Id,
+                group.Name,
+                isSystem: false));
+        }
+
+        if (defaultGroup is null && PortfolioGroupFilter == PortfolioGroup.DefaultId)
+            PortfolioGroupFilter = null;
+
+        RefreshPortfolioGroupFilterChipSelection();
+        OnPropertyChanged(nameof(HasPortfolioGroupFilterChips));
+    }
+
+    private void RefreshPortfolioGroupFilterChipSelection()
+    {
+        foreach (var chip in PortfolioGroupFilterChips)
+            chip.IsSelected = chip.Id == PortfolioGroupFilter;
+    }
 
     /// <summary>
     /// 接收 "" / "Stock" / "Etf" / "Fund" / "Bond" / "Crypto" / "PreciousMetal" 字串。
@@ -84,14 +165,85 @@ public partial class PortfolioViewModel
             {
                 _positionsView = CollectionViewSource.GetDefaultView(Positions);
                 _positionsView.Filter = FilterPosition;
+                ApplyPositionViewGrouping();
+                RefreshPositionViewGroupSummaries();
             }
             return _positionsView;
         }
     }
 
+    private void ApplyPositionViewGrouping()
+    {
+        if (_positionsView is null)
+            return;
+
+        using (_positionsView.DeferRefresh())
+        {
+            _positionsView.GroupDescriptions.Clear();
+            var propertyName = PositionViewMode switch
+            {
+                InvestmentPositionViewMode.Group => nameof(PortfolioRowViewModel.PortfolioGroupDisplay),
+                InvestmentPositionViewMode.Market => nameof(PortfolioRowViewModel.MarketDisplay),
+                InvestmentPositionViewMode.Type => nameof(PortfolioRowViewModel.AssetTypeDisplay),
+                _ => null,
+            };
+
+            if (propertyName is not null)
+                _positionsView.GroupDescriptions.Add(new PropertyGroupDescription(propertyName));
+        }
+    }
+
+    private void RefreshPositionViewGroupSummaries()
+    {
+        if (_positionsView is null)
+            return;
+
+        var visibleRows = _positionsView.Cast<PortfolioRowViewModel>().ToList();
+        var visibleSet = visibleRows.ToHashSet();
+        var summaries = visibleRows
+            .GroupBy(row => GetPositionViewGroupKey(row))
+            .Select(group => new
+            {
+                Key = group.Key,
+                Count = group.Count(),
+                MarketValue = group.Sum(row => row.MarketValue),
+                Cost = group.Sum(row => row.Cost),
+                Pnl = group.Sum(row => row.Pnl),
+            })
+            .ToDictionary(summary => summary.Key, StringComparer.Ordinal);
+
+        foreach (var row in Positions)
+        {
+            if (!visibleSet.Contains(row) || !summaries.TryGetValue(GetPositionViewGroupKey(row), out var summary))
+            {
+                row.PositionViewGroupItemCount = 0;
+                row.PositionViewGroupMarketValue = 0m;
+                row.PositionViewGroupCost = 0m;
+                row.PositionViewGroupPnl = 0m;
+                row.IsPositionViewGroupPnlPositive = true;
+                continue;
+            }
+
+            row.PositionViewGroupItemCount = summary.Count;
+            row.PositionViewGroupMarketValue = summary.MarketValue;
+            row.PositionViewGroupCost = summary.Cost;
+            row.PositionViewGroupPnl = summary.Pnl;
+            row.IsPositionViewGroupPnlPositive = summary.Pnl >= 0m;
+        }
+    }
+
+    private string GetPositionViewGroupKey(PortfolioRowViewModel row) => PositionViewMode switch
+    {
+        InvestmentPositionViewMode.Group => row.PortfolioGroupDisplay,
+        InvestmentPositionViewMode.Market => row.MarketDisplay,
+        InvestmentPositionViewMode.Type => row.AssetTypeDisplay,
+        _ => string.Empty,
+    };
+
     partial void OnFilterTextChanged(string value)
     {
         PositionsView.Refresh();
+        RefreshPositionViewGroupSummaries();
         RaisePositionsFilterStatsChanged();
     }
 

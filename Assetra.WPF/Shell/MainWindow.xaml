@@ -1181,8 +1181,8 @@
             Style="{StaticResource AppDialogOverlay}"
             Visibility="{Binding IsOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border
-                Width="480"
-                MaxHeight="640"
+                Width="{StaticResource DialogWidth}"
+                MaxHeight="720"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 beh:EscapeKeyCommandBehavior.Command="{Binding CancelCommand}"
@@ -1197,14 +1197,37 @@
                     <!--  Header  -->
                     <Border
                         Grid.Row="0"
-                        Padding="20,16"
+                        Padding="20,14"
                         BorderBrush="{DynamicResource AppBorder}"
                         BorderThickness="0,0,0,1">
-                        <TextBlock
-                            FontSize="{StaticResource Font.Size.Lg}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{DynamicResource Portfolio.EditLiability.Title}" />
+                        <DockPanel>
+                            <Button
+                                Width="28"
+                                Height="28"
+                                Padding="0"
+                                HorizontalAlignment="Right"
+                                Command="{Binding CancelCommand}"
+                                DockPanel.Dock="Right"
+                                Style="{StaticResource AppIconButton}"
+                                ToolTip="{DynamicResource Common.Close}">
+                                <ds:AppIcon
+                                    FontSize="12"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Symbol="Dismiss24" />
+                            </Button>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Portfolio.EditLiability.Title}" />
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{DynamicResource Portfolio.EditLiability.Subtitle}" />
+                            </StackPanel>
+                        </DockPanel>
                     </Border>
 
                     <!--  Body  -->
@@ -1379,14 +1402,14 @@
                         BorderThickness="0,1,0,0">
                         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
                             <Button
-                                Height="36"
+                                Height="30"
                                 Margin="0,0,8,0"
                                 Padding="14,0"
                                 Command="{Binding CancelCommand}"
                                 Content="{DynamicResource Common.Cancel}"
                                 Style="{StaticResource AppSecondaryButton}" />
                             <Button
-                                Height="36"
+                                Height="30"
                                 Padding="14,0"
                                 Command="{Binding SaveCommand}"
                                 Content="{DynamicResource Common.Save}"

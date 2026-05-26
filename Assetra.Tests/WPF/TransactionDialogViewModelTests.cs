@@ -8,6 +8,7 @@ using Assetra.Core.Models;
 using Assetra.Infrastructure;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
+using Assetra.WPF.Features.PortfolioGroups;
 using Xunit;
 
 namespace Assetra.Tests.WPF;
@@ -30,7 +31,9 @@ public class TransactionDialogViewModelTests
         ObservableCollection<LiabilityRowViewModel>? liabilities = null,
         ICategoryRepository? categoryRepository = null,
         IAutoCategorizationRuleRepository? ruleRepository = null,
-        TransactionFxRateResolver? fxResolver = null)
+        PortfolioGroupCatalog? groupCatalog = null,
+        TransactionFxRateResolver? fxResolver = null,
+        Func<CashAccountRowViewModel?>? getDefaultCashAccount = null)
     {
         var addWorkflow = new Mock<IAddAssetWorkflowService>();
         addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
@@ -61,7 +64,7 @@ public class TransactionDialogViewModelTests
             Liabilities: new ReadOnlyObservableCollection<LiabilityRowViewModel>(liabilities ?? new()),
             AddAssetDialog: addAsset,
             SellPanel: sellPanel,
-            GetDefaultCashAccount: () => null,
+            GetDefaultCashAccount: getDefaultCashAccount ?? (() => null),
             LoadLoanScheduleAsync: _ => Task.CompletedTask,
             LoadLiabilitiesAsync: () => Task.CompletedTask,
             LoadPositionsAsync: () => Task.CompletedTask,
@@ -71,9 +74,28 @@ public class TransactionDialogViewModelTests
             Localize: (_, fallback) => fallback,
             CategoryRepository: categoryRepository,
             AutoCategorizationRuleRepository: ruleRepository,
+            GroupCatalog: groupCatalog,
             TransactionFxRateResolver: fxResolver);
 
         return new TransactionDialogViewModel(deps);
+    }
+
+    private sealed class FakePortfolioGroupRepo(IReadOnlyList<PortfolioGroup> groups) : IPortfolioGroupRepository
+    {
+        public Task<IReadOnlyList<PortfolioGroup>> GetAllAsync(CancellationToken ct = default) =>
+            Task.FromResult(groups);
+
+        public Task<PortfolioGroup?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+            Task.FromResult(groups.FirstOrDefault(g => g.Id == id));
+
+        public Task AddAsync(PortfolioGroup group, CancellationToken ct = default) =>
+            Task.CompletedTask;
+
+        public Task UpdateAsync(PortfolioGroup group, CancellationToken ct = default) =>
+            Task.CompletedTask;
+
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) =>
+            Task.CompletedTask;
     }
 
     private static CashAccountRowViewModel MakeCashAccount(string name, string currency) =>
@@ -85,6 +107,116 @@ public class TransactionDialogViewModelTests
             currency,
             DateOnly.FromDateTime(DateTime.Today)),
             projectedBalance: 100_000m);
+
+    private static PortfolioRowViewModel MakePosition(
+        string symbol = "0056",
+        string name = "元大高股息",
+        string currency = "TWD") =>
+        new()
+        {
+            Id = Guid.NewGuid(),
+            Symbol = symbol,
+            Exchange = currency == "TWD" ? "TWSE" : "NASDAQ",
+            Name = name,
+            Currency = currency,
+            BuyPrice = 35m,
+            Quantity = 15_000m,
+            CurrentPrice = 46m,
+        };
+
+    [Fact]
+    public void OpenTxDialog_ShowsDefaultCashAccountNameWhenDefaultAccountExists()
+    {
+        var defaultAccount = MakeCashAccount("富邦", "TWD");
+        var cashAccounts = new ObservableCollection<CashAccountRowViewModel>
+        {
+            defaultAccount,
+            MakeCashAccount("台新 Richart", "TWD"),
+        };
+        var vm = CreateVm(
+            cashAccounts: cashAccounts,
+            getDefaultCashAccount: () => defaultAccount);
+
+        vm.OpenTxDialog();
+
+        Assert.True(vm.TxUseCashAccount);
+        Assert.Same(defaultAccount, vm.TxCashAccount);
+        Assert.Equal("富邦", vm.TxCashAccountName);
+        Assert.Equal("TWD", vm.Buy.CashAccountCurrency);
+        Assert.Equal("TWD", vm.Buy.SettlementCurrency);
+    }
+
+    [Fact]
+    public void OpenTxDialogForPosition_BuyPreselectsAssetAndLocksAssetSelector()
+    {
+        var position = MakePosition();
+        var vm = CreateVm(positions: new ObservableCollection<PortfolioRowViewModel> { position });
+
+        vm.OpenTxDialogForPosition(position, "buy");
+
+        Assert.True(vm.IsTxDialogOpen);
+        Assert.True(vm.IsAssetContextLocked);
+        Assert.False(vm.ShowAssetSelector);
+        Assert.Equal("buy", vm.TxType);
+        Assert.NotNull(vm.SelectedAsset);
+        Assert.Equal(position.Id, vm.SelectedAsset.Id);
+        Assert.Equal("0056", vm.SelectedAsset.Symbol);
+        Assert.Equal("0056", vm.AddAssetDialog.AddSymbol);
+        Assert.Equal("TWD", vm.TxCurrency);
+    }
+
+    [Fact]
+    public async Task OpenTxDialogForPosition_UsesPositionGroupWhenCatalogIsLoaded()
+    {
+        var groupId = Guid.NewGuid();
+        var group = new PortfolioGroup(groupId, "長期投資");
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            group,
+        ]));
+        await catalog.RefreshAsync();
+        var position = MakePosition();
+        position.PortfolioGroupId = groupId;
+        var vm = CreateVm(
+            positions: new ObservableCollection<PortfolioRowViewModel> { position },
+            groupCatalog: catalog);
+
+        vm.OpenTxDialogForPosition(position, "buy");
+
+        Assert.Equal(groupId, vm.SelectedPortfolioGroup?.Id);
+    }
+
+    [Fact]
+    public void OpenTxDialogForPosition_CashDividendPreselectsDividendPositionAndHidesStockPicker()
+    {
+        var position = MakePosition();
+        var vm = CreateVm(positions: new ObservableCollection<PortfolioRowViewModel> { position });
+
+        vm.OpenTxDialogForPosition(position, "cashDiv");
+
+        Assert.True(vm.IsAssetContextLocked);
+        Assert.False(vm.ShowAssetSelector);
+        Assert.False(vm.ShowDividendPositionPicker);
+        Assert.Equal("cashDiv", vm.TxType);
+        Assert.Same(position, vm.Div.Position);
+        Assert.NotNull(vm.SelectedAsset);
+        Assert.Equal(position.Id, vm.SelectedAsset.Id);
+    }
+
+    [Fact]
+    public void OpenTxDialog_GlobalEntryClearsPositionContext()
+    {
+        var position = MakePosition();
+        var vm = CreateVm(positions: new ObservableCollection<PortfolioRowViewModel> { position });
+
+        vm.OpenTxDialogForPosition(position, "buy");
+        vm.OpenTxDialog();
+
+        Assert.False(vm.IsAssetContextLocked);
+        Assert.True(vm.ShowAssetSelector);
+        Assert.True(vm.ShowDividendPositionPicker);
+        Assert.Null(vm.SelectedAsset);
+    }
 
     // ── Mode flags (TxType change) ───────────────────────────────────────────
 
@@ -237,6 +369,42 @@ public class TransactionDialogViewModelTests
         Assert.Equal("USD", vm.Buy.InstrumentCurrency);
         Assert.Equal("TWD", vm.Buy.CashAccountCurrency);
         Assert.Equal("TWD", vm.Buy.SettlementCurrency);
+        Assert.True(vm.Buy.IsCrossCurrency);
+        Assert.Equal("USD → TWD", vm.Buy.SettlementPairDisplay);
+    }
+
+    [Fact]
+    public void BuySelectedUsdAsset_KeepsInstrumentCurrencySeparateFromDebitCurrency()
+    {
+        var twd = MakeCashAccount("富邦", "TWD");
+        var position = new PortfolioRowViewModel
+        {
+            Id = Guid.NewGuid(),
+            Symbol = "DRAM",
+            Exchange = "NASDAQ",
+            Name = "Roundhill Memory ETF",
+            Currency = "USD",
+            BuyPrice = 50m,
+            Quantity = 20,
+            CurrentPrice = 51m,
+        };
+        var vm = CreateVm(
+            positions: new ObservableCollection<PortfolioRowViewModel> { position },
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { twd });
+
+        vm.TxType = "buy";
+        vm.SelectedAsset = vm.AvailableAssets.Single(a => a.Symbol == "DRAM");
+        vm.TxCashAccount = twd;
+
+        Assert.Equal("USD", vm.Buy.InstrumentCurrency);
+        Assert.Equal("TWD", vm.Buy.CashAccountCurrency);
+        Assert.Equal("USD → TWD", vm.Buy.SettlementPairDisplay);
+
+        vm.TxCurrency = "TWD";
+
+        Assert.Equal("USD", vm.TxCurrency);
+        Assert.Equal("USD", vm.Buy.InstrumentCurrency);
+        Assert.Equal("TWD", vm.Buy.CashAccountCurrency);
         Assert.True(vm.Buy.IsCrossCurrency);
         Assert.Equal("USD → TWD", vm.Buy.SettlementPairDisplay);
     }

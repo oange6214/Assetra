@@ -96,6 +96,11 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
         cmd.CommandText = """
             UPDATE portfolio SET
                 asset_type=$at,
+                display_name=$dn,
+                currency=$cur,
+                is_active=$active,
+                is_etf=$is_etf,
+                portfolio_group_id=$portfolio_group_id,
                 updated_at=$now,
                 version = version + 1,
                 last_modified_at = $now,
@@ -105,6 +110,13 @@ public sealed class PortfolioSqliteRepository : IPortfolioRepository, IPortfolio
             """;
         cmd.Parameters.AddWithValue("$id", entry.Id.ToString());
         cmd.Parameters.AddWithValue("$at", entry.AssetType.ToString());
+        cmd.Parameters.AddWithValue("$dn", entry.DisplayName);
+        cmd.Parameters.AddWithValue("$cur", string.IsNullOrWhiteSpace(entry.Currency) ? "TWD" : entry.Currency);
+        cmd.Parameters.AddWithValue("$active", entry.IsActive ? 1 : 0);
+        cmd.Parameters.AddWithValue("$is_etf", entry.IsEtf ? 1 : 0);
+        cmd.Parameters.AddWithValue(
+            "$portfolio_group_id",
+            (entry.PortfolioGroupId ?? PortfolioGroup.DefaultId).ToString());
         StampSyncParams(cmd);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
         RaiseLocalChange();

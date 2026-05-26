@@ -49,6 +49,8 @@ public sealed partial class AllocationRowViewModel : ObservableObject
     partial void OnActualPercentChanged(decimal _)
     {
         RebuildDerived();
+        OnPropertyChanged(nameof(ActualPercentDisplay));
+        OnPropertyChanged(nameof(AllocationBarMinWidth));
         OnPropertyChanged(nameof(ActualPercentWeight));
     }
 
@@ -91,7 +93,12 @@ public sealed partial class AllocationRowViewModel : ObservableObject
 
     // Visual
     public SolidColorBrush ColorBrush { get; }
-    public string ActualPercentDisplay => $"{ActualPercent:F1}%";
+    public string ActualPercentDisplay => ActualPercent switch
+    {
+        > 0m and < 0.1m => "<0.1%",
+        _ => $"{ActualPercent:F1}%",
+    };
+    public double AllocationBarMinWidth => ActualPercent > 0m ? 3d : 0d;
     public string PnlDisplay => Pnl == 0 && AssetCategory == "cash"
         ? "-"
         : (IsPnlPositive ? "+" : "") + $"NT${Pnl:N0}";

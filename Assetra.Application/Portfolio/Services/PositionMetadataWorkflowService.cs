@@ -27,4 +27,25 @@ public sealed class PositionMetadataWorkflowService : IPositionMetadataWorkflowS
                 .ConfigureAwait(false);
         }
     }
+
+    public async Task UpdateGroupAsync(
+        PositionGroupUpdateRequest request,
+        CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+
+        var entries = await _portfolioRepository.GetEntriesAsync(ct).ConfigureAwait(false);
+        var byId = entries.ToDictionary(entry => entry.Id);
+
+        foreach (var entryId in request.EntryIds)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (!byId.TryGetValue(entryId, out var entry))
+                throw new InvalidOperationException($"Portfolio entry '{entryId}' was not found.");
+
+            await _portfolioRepository
+                .UpdateAsync(entry with { PortfolioGroupId = request.PortfolioGroupId }, ct)
+                .ConfigureAwait(false);
+        }
+    }
 }
