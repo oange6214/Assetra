@@ -1,0 +1,58 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Portfolio.Controls.DonutPercentBadge"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="Root"
+    Width="44"
+    Height="44"
+    mc:Ignorable="d">
+
+    <!--
+        P5.10 — Compact donut indicator: shows percentage as filled arc + text in center.
+        Used at the front of Allocation list rows (replaces the per-row horizontal bar)
+        so users can read「magnitude + asset identity + percent text」 in a single 44px
+        glance.
+
+        Implementation: two stroked Ellipses overlay.
+          - Background ring = AppBorderLight, full stroke (visible portion + invisible gap)
+          - Foreground arc = FillBrush, StrokeDashArray driven by Percent via converter
+            (filled-dash + gap-dash = full circumference)
+          - RotateTransform −90° rotates start point from 3 o'clock to 12 o'clock
+          - StrokeDashCap=Round makes the arc's leading edge a smooth rounded tip
+          - Inner radius 18 (size 36), stroke 4 → circumference ≈ 113 pixels =
+            28.3 stroke-dash units (parameter "28.3")
+    -->
+    <Grid>
+        <!--  Background ring  -->
+        <Ellipse
+            Margin="2"
+            Stroke="{DynamicResource AppBorderLight}"
+            StrokeThickness="4" />
+
+        <!--  Foreground arc  -->
+        <Ellipse
+            Margin="2"
+            RenderTransformOrigin="0.5,0.5"
+            Stroke="{Binding FillBrush, ElementName=Root}"
+            StrokeDashArray="{Binding Percent, ElementName=Root, Converter={StaticResource PercentToDashArrayConverter}, ConverterParameter=28.3}"
+            StrokeDashCap="Round"
+            StrokeThickness="4">
+            <Ellipse.RenderTransform>
+                <RotateTransform Angle="-90" />
+            </Ellipse.RenderTransform>
+        </Ellipse>
+
+        <!--  Center text  -->
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            FontFamily="{StaticResource Font.Family.Base}"
+            FontSize="{StaticResource Font.Size.Xs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextPrimary}"
+            Text="{Binding PercentText, ElementName=Root}"
+            Typography.NumeralAlignment="Tabular" />
+    </Grid>
+</UserControl>
