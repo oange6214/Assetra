@@ -42,6 +42,18 @@ public partial class TransactionDialogViewModel
         if (feeError is not null)
         { TxError = feeError; return; }
 
+        // P5.8b prereq — mode-aware settlement validation mirrors Buy + Sell.
+        // The "雙保險自動反推" path below still runs (so the saved trade has
+        // both fields when only one is user-entered), but the mode toggle now
+        // decides which input is *required* on cross-currency dividends.
+        if (Div.IsCrossCurrency)
+        {
+            if (Div.IsStatementSettlementMode && string.IsNullOrWhiteSpace(Div.ActualCashAmount))
+            { TxError = "跨幣別股息請填寫實際入帳金額（明細模式），或切換為匯率估算"; return; }
+            if (Div.IsFxSettlementMode && string.IsNullOrWhiteSpace(Div.FxRate))
+            { TxError = "跨幣別股息請填寫或取得匯率（估算模式），或切換為明細金額"; return; }
+        }
+
         // MultiCurrency-Trade-Refactor P3 — parse optional cross-currency fields.
         // 同幣別股息（如台股配 TWD 股息入 TWD 帳戶）兩者皆空。
         decimal? divActualCash = null;

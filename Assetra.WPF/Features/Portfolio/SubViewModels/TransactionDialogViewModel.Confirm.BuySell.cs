@@ -47,6 +47,18 @@ public partial class TransactionDialogViewModel
         if (!ParseHelpers.TryParseDecimal(TxAmount, out var sellPrice) || sellPrice <= 0)
         { TxError = "賣出價格無效"; return; }
 
+        // P5.8b prereq — mode-aware settlement validation mirrors Buy's
+        // AddAssetDialogViewModel L628-637. SellPanel still walks the existing
+        // ActualCashAmount-or-FxRate auto-derive logic; this gate makes the
+        // user's explicit mode choice authoritative when cross-currency.
+        if (Sell.IsCrossCurrency)
+        {
+            if (Sell.IsStatementSettlementMode && string.IsNullOrWhiteSpace(Sell.ActualCashAmount))
+            { TxError = "跨幣別賣出請填寫實際入帳金額（明細模式），或切換為匯率估算"; return; }
+            if (Sell.IsFxSettlementMode && string.IsNullOrWhiteSpace(Sell.FxRate))
+            { TxError = "跨幣別賣出請填寫或取得匯率（估算模式），或切換為明細金額"; return; }
+        }
+
         var error = await SellPanel.ExecuteSellFromTxDialogAsync(
             row: Sell.Position,
             sellPrice: sellPrice.ToString(),
