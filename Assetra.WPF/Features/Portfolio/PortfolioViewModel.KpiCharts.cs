@@ -133,14 +133,22 @@ public partial class PortfolioViewModel
 
     private void RebuildPositionPieChartsCore()
     {
+        // P5.12 — Cross-currency fix. Previously used Cost / MarketValue / Pnl
+        // (each in 原幣) directly, so a USD position's value (e.g. 12,806 USD ≈
+        // 410K TWD ≈ 5.8% of portfolio) was treated as 12,806 in a sum that
+        // included 4M+ TWD values, making the USD slice round to ~0.2% and
+        // visually disappear. Use the *Base properties (CostBase / MarketValueBase
+        // / PnlBase, populated by ApplyPositionBaseValuations earlier in
+        // RebuildTotals) so all rows compare in the same base currency.
+
         // ── 1. 持股佔比（依 MarketValue 排序，由大到小）  ──
         var byMv = Positions
-            .Where(p => p.MarketValue > 0m)
-            .OrderByDescending(p => p.MarketValue)
+            .Where(p => p.MarketValueBase > 0m)
+            .OrderByDescending(p => p.MarketValueBase)
             .ToList();
-        var totalMv = byMv.Sum(p => p.MarketValue);
+        var totalMv = byMv.Sum(p => p.MarketValueBase);
         PopulatePieSlices(PositionAllocationSlices, byMv,
-            p => p.MarketValue,
+            p => p.MarketValueBase,
             p => $"{p.Symbol} {p.Name}",
             totalMv,
             out var mvSeries);
@@ -148,25 +156,27 @@ public partial class PortfolioViewModel
 
         // ── 2. 付出成本分布（依 Cost 排序）  ──
         var byCost = Positions
-            .Where(p => p.Cost > 0m)
-            .OrderByDescending(p => p.Cost)
+            .Where(p => p.CostBase > 0m)
+            .OrderByDescending(p => p.CostBase)
             .ToList();
-        var totalCost = byCost.Sum(p => p.Cost);
+        var totalCost = byCost.Sum(p => p.CostBase);
         PopulatePieSlices(PositionCostSlices, byCost,
-            p => p.Cost,
+            p => p.CostBase,
             p => $"{p.Symbol} {p.Name}",
             totalCost,
             out var costSeries);
         PositionCostSeries = costSeries;
 
         // ── 3. 盈虧檔數（賺 / 賠 / 平 三色，size 用市值加總）  ──
-        var winners = Positions.Where(p => p.Pnl > 0m).ToList();
-        var losers = Positions.Where(p => p.Pnl < 0m).ToList();
-        var flats = Positions.Where(p => p.Pnl == 0m && p.MarketValue > 0m).ToList();
+        // Pnl > / < / == 0 sign comparison is currency-agnostic, but the magnitude
+        // sum used for slice size needs MarketValueBase (cross-currency comparable).
+        var winners = Positions.Where(p => p.PnlBase > 0m).ToList();
+        var losers = Positions.Where(p => p.PnlBase < 0m).ToList();
+        var flats = Positions.Where(p => p.PnlBase == 0m && p.MarketValueBase > 0m).ToList();
 
-        var winSum = winners.Sum(p => p.MarketValue);
-        var lossSum = losers.Sum(p => p.MarketValue);
-        var flatSum = flats.Sum(p => p.MarketValue);
+        var winSum = winners.Sum(p => p.MarketValueBase);
+        var lossSum = losers.Sum(p => p.MarketValueBase);
+        var flatSum = flats.Sum(p => p.MarketValueBase);
         var grandTotal = winSum + lossSum + flatSum;
 
         PnlBreakdownSlices.Clear();
