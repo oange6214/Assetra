@@ -32,10 +32,20 @@
                         Padding="12,0"
                         Command="{Binding StartAddCommand}"
                         Style="{StaticResource AppPrimaryButton}">
+                    <!--
+                        P5.13 (C3) — AppPrimaryButton 背景為 Accent 色，內層 StackPanel 不繼承
+                        Button.Foreground，需在 AppIcon + TextBlock 顯式指定 Brush.Text.OnAccent
+                        否則文字會吃 AppTextPrimary（深色）→ 主色塊上低對比看不清。
+                        同款修正已在 PositionsTabPanel.xaml 的 + 新增群組 button 套過。
+                    -->
                     <StackPanel Orientation="Horizontal">
                         <ds:AppIcon Margin="0,0,6,0" VerticalAlignment="Center"
-                                    FontSize="{StaticResource Font.Size.Xs}" Symbol="Add24" />
-                        <TextBlock VerticalAlignment="Center" Text="{DynamicResource PortfolioGroups.Add}" />
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                    Symbol="Add24" />
+                        <TextBlock VerticalAlignment="Center"
+                                   Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                   Text="{DynamicResource PortfolioGroups.Add}" />
                     </StackPanel>
                 </Button>
                 <StackPanel>

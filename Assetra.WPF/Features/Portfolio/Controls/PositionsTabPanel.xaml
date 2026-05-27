@@ -839,7 +839,41 @@
             次要篩選。群組不再用可無限延展的 chip row，避免使用者建立多個策略群組後擠爆工具列。
         -->
         <StackPanel Grid.Row="3" Margin="12,14,12,6">
-            <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+            <!--
+                P5.13 (C2) — DockPanel：左側 view mode tabs / 右側群組管理 action buttons。
+                舊版把「+新增群組」「管理群組」放在 IsGroupViewMode-gated Grid 內，使用者
+                只能在依群組 mode 才能新建群組 — 不合理。Pull out 兩顆按鈕到 Row 1 右側，
+                所有 view mode 下都可建立 / 管理群組。
+            -->
+            <DockPanel Margin="0,0,0,8">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button
+                        Height="32"
+                        Margin="0,0,8,0"
+                        Padding="12,0"
+                        Command="{Binding AddPortfolioGroupCommand}"
+                        Style="{StaticResource AppPrimaryButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <ds:AppIcon
+                                Margin="0,0,6,0"
+                                VerticalAlignment="Center"
+                                FontSize="10"
+                                Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                Symbol="Add24" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                Text="{DynamicResource Portfolio.Filter.Group.Add}" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Height="32"
+                        Padding="12,0"
+                        Command="{Binding OpenPortfolioGroupsCommand}"
+                        Content="{DynamicResource Portfolio.Filter.Group.Manage}"
+                        Style="{StaticResource AppSecondaryButton}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
                 <RadioButton Command="{Binding SetPositionViewModeCommand}"
                              CommandParameter="{x:Static vm:InvestmentPositionViewMode.All}"
                              Content="{DynamicResource Portfolio.ViewMode.All}">
@@ -892,7 +926,8 @@
                         </Style>
                     </RadioButton.Style>
                 </RadioButton>
-            </StackPanel>
+                </StackPanel>
+            </DockPanel>
 
             <ItemsControl>
                 <ItemsControl.Style>
@@ -1017,9 +1052,14 @@
             </Button>
             </ItemsControl>
 
-            <Grid>
-                <Grid.Style>
-                    <Style TargetType="Grid">
+            <!--
+                P5.13 (C2) — 群組 filter chips：只在依群組 mode 顯示（與 view mode 同義）。
+                舊版同時擺了「+新增群組」「管理群組」action buttons 在這裡，被一起 hide；
+                action buttons 已搬到 Row 1 右側永久可見。這裡留 chips 即可。
+            -->
+            <ItemsControl ItemsSource="{Binding PortfolioGroupFilterChips}">
+                <ItemsControl.Style>
+                    <Style TargetType="ItemsControl">
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsGroupViewMode}" Value="True">
@@ -1027,74 +1067,34 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </Grid.Style>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <ItemsControl ItemsSource="{Binding PortfolioGroupFilterChips}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type vm:PortfolioGroupFilterChipViewModel}">
-                            <Button
-                                Margin="0,0,8,6"
-                                Command="{Binding DataContext.SetPortfolioGroupFilterCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                CommandParameter="{Binding Id}"
-                                Content="{Binding Name}">
-                                <Button.Style>
-                                    <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource AppAccent}" />
-                                                <Setter Property="Foreground" Value="White" />
-                                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <StackPanel
-                    Grid.Column="1"
-                    Margin="12,0,0,0"
-                    HorizontalAlignment="Right"
-                    Orientation="Horizontal">
-                    <Button
-                        Height="32"
-                        Margin="0,0,8,6"
-                        Padding="12,0"
-                        Command="{Binding AddPortfolioGroupCommand}"
-                        Style="{StaticResource AppPrimaryButton}">
-                        <StackPanel Orientation="Horizontal">
-                            <ds:AppIcon
-                                Margin="0,0,6,0"
-                                VerticalAlignment="Center"
-                                FontSize="10"
-                                Foreground="{DynamicResource Brush.Text.OnAccent}"
-                                Symbol="Add24" />
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Foreground="{DynamicResource Brush.Text.OnAccent}"
-                                Text="{DynamicResource Portfolio.Filter.Group.Add}" />
-                        </StackPanel>
-                    </Button>
-                    <Button
-                        Height="32"
-                        Margin="0,0,0,6"
-                        Padding="12,0"
-                        Command="{Binding OpenPortfolioGroupsCommand}"
-                        Content="{DynamicResource Portfolio.Filter.Group.Manage}"
-                        Style="{StaticResource AppSecondaryButton}" />
-                </StackPanel>
-            </Grid>
+                </ItemsControl.Style>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:PortfolioGroupFilterChipViewModel}">
+                        <Button
+                            Margin="0,0,8,6"
+                            Command="{Binding DataContext.SetPortfolioGroupFilterCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                            CommandParameter="{Binding Id}"
+                            Content="{Binding Name}">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                                            <Setter Property="Foreground" Value="White" />
+                                            <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </StackPanel>
 
         <!--  ═══ Row 4: Text search ═══  -->
