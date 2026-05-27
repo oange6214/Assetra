@@ -1290,13 +1290,20 @@
                                         <TextBlock Style="{StaticResource PortfolioBadgeText}" Text="{Binding AssetTypeBadgeLabel}" />
                                     </Border>
 
-                                    <Border
+                                    <!--
+                                        P5.11 — card view 也拿掉 chip 背景，只剩純文字。
+                                        用 AppTextSecondary 弱化讓視覺主軸落在 Symbol + Name 而非幣別代碼。
+                                    -->
+                                    <TextBlock
                                         Grid.Row="0"
                                         Grid.Column="2"
                                         Margin="0,0,10,0"
-                                        Style="{StaticResource StatusBadge.Neutral}">
-                                        <TextBlock Style="{StaticResource StatusBadge.Text}" Text="{Binding CurrencyDisplay}" />
-                                    </Border>
+                                        VerticalAlignment="Center"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{Binding CurrencyDisplay}"
+                                        Typography.NumeralAlignment="Tabular" />
 
                                     <TextBlock
                                         Grid.Row="1"
@@ -1518,10 +1525,10 @@
                 </DataGrid.GroupStyle>
 
                 <DataGrid.Columns>
-                    <!--  資產 — 合併代號 + 類型 badge + 名稱 (以 badge 為對齊錨點)  -->
+                    <!--  資產 — 代號 + 類型 badge + 名稱（P5.11：幣別已拆到下一欄，這裡不再 inline）  -->
                     <DataGridTemplateColumn
                         Width="*"
-                        MinWidth="220"
+                        MinWidth="200"
                         SortMemberPath="Symbol">
                         <DataGridTemplateColumn.Header>
                             <TextBlock Text="{DynamicResource Portfolio.AssetWithCurrency}" />
@@ -1552,28 +1559,14 @@
                                         Style="{StaticResource PortfolioAssetTypeBadge}">
                                         <TextBlock Style="{StaticResource PortfolioBadgeText}" Text="{Binding AssetTypeBadgeLabel}" />
                                     </Border>
-                                    <Grid
+                                    <TextBlock
                                         Grid.Column="2"
-                                        VerticalAlignment="Center">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock
-                                            Grid.Column="0"
-                                            VerticalAlignment="Center"
-                                            FontFamily="{StaticResource Font.Family.Base}"
-                                            FontSize="{StaticResource Font.Size.Sm}"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding Name}"
-                                            TextTrimming="CharacterEllipsis" />
-                                        <Border
-                                            Grid.Column="1"
-                                            Margin="8,0,0,0"
-                                            Style="{StaticResource StatusBadge.Neutral}">
-                                            <TextBlock Style="{StaticResource StatusBadge.Text}" Text="{Binding CurrencyDisplay}" />
-                                        </Border>
-                                    </Grid>
+                                        VerticalAlignment="Center"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontSize="{StaticResource Font.Size.Sm}"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding Name}"
+                                        TextTrimming="CharacterEllipsis" />
                                     <Button
                                         Grid.Column="3"
                                         Height="28"
@@ -1586,6 +1579,29 @@
                                         ToolTip="{DynamicResource Portfolio.Group.MoveToGroup}"
                                         Visibility="{Binding DataContext.HasPortfolioGroups, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                                 </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!--
+                        幣別 — P5.11 新獨立欄。原本 chip-style inline 在 Asset col 內，
+                        現拆出純文字欄位（無背景無 chip border），用 AppTextSecondary 弱化
+                        顏色不搶資料主視覺。固定窄寬 70px 對 3-char 幣別代碼足夠。
+                    -->
+                    <DataGridTemplateColumn Width="70" SortMemberPath="CurrencyDisplay">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="{DynamicResource Portfolio.Currency}" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{Binding CurrencyDisplay}"
+                                    Typography.NumeralAlignment="Tabular" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
