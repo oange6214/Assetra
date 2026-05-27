@@ -172,11 +172,14 @@
     <sys:String x:Key="Portfolio.Symbol">Symbol</sys:String>
     <sys:String x:Key="Portfolio.Shares">Qty</sys:String>
     <sys:String x:Key="Portfolio.CostPerShare">Avg Cost</sys:String>
+    <sys:String x:Key="Portfolio.CostPerShare.Native">Avg Cost (native)</sys:String>
     <sys:String x:Key="Portfolio.EditCostPerShareHint">Cost per unit including buy commission. For averaged positions, enter the weighted average cost.</sys:String>
     <sys:String x:Key="Portfolio.Price">Price</sys:String>
+    <sys:String x:Key="Portfolio.Price.Native">Price (native)</sys:String>
     <sys:String x:Key="Portfolio.PnLPct">Est. net P&amp;L %</sys:String>
     <sys:String x:Key="Portfolio.MarketVal">Mkt val</sys:String>
     <sys:String x:Key="Portfolio.NetVal">Net val</sys:String>
+    <sys:String x:Key="Portfolio.NetVal.Native">Net val (native)</sys:String>
     <sys:String x:Key="Portfolio.PercentOfPortfolio">Weight</sys:String>
     <sys:String x:Key="Portfolio.Detail.Action.Buy">Buy</sys:String>
     <sys:String x:Key="Portfolio.Detail.Action.Sell">Sell</sys:String>
@@ -204,7 +207,11 @@
     <sys:String x:Key="Portfolio.Filter.SearchLiabilities">Search liabilities…</sys:String>
     <sys:String x:Key="Portfolio.Filter.SearchTrades">Search trades…</sys:String>
     <sys:String x:Key="Portfolio.TotalCostPaid">Total Cost</sys:String>
+    <sys:String x:Key="Portfolio.TotalCostPaid.Native">Total Cost (native)</sys:String>
     <sys:String x:Key="Portfolio.TotalCostPaid.Hint">Includes buy-side commission; used for estimated net P&amp;L.</sys:String>
+    <sys:String x:Key="Portfolio.PnL.Native">Est. net P&amp;L (native)</sys:String>
+    <sys:String x:Key="Portfolio.MarketValue.Native">Market value (native)</sys:String>
+    <sys:String x:Key="Portfolio.AssetWithCurrency">Asset / Currency</sys:String>
     <sys:String x:Key="Portfolio.SellConfirmLabel">Sell price</sys:String>
     <sys:String x:Key="Portfolio.SellConfirm">Confirm Sell</sys:String>
     <!--  Portfolio.TradeHistory.RealizedPnL / PnLPct removed — see zh-TW for note.  -->
@@ -925,6 +932,7 @@
     <sys:String x:Key="Allocation.Tab.Overview">Overview</sys:String>
     <sys:String x:Key="Allocation.Tab.Rebalance">Rebalance</sys:String>
     <sys:String x:Key="Allocation.Overview.Title">Allocation Overview</sys:String>
+    <sys:String x:Key="Allocation.Insights.Title">Allocation Insights</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Symbol">By Symbol</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Group">By Group</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Currency">By Currency</sys:String>
@@ -936,7 +944,7 @@
     <sys:String x:Key="Allocation.Col.Price">Price</sys:String>
     <sys:String x:Key="Allocation.Col.Value">Value</sys:String>
     <sys:String x:Key="Allocation.Col.ValueTwd">Value (TWD)</sys:String>
-    <sys:String x:Key="Allocation.Col.ActualPct">Actual %</sys:String>
+    <sys:String x:Key="Allocation.Col.ActualPct">Weight</sys:String>
     <sys:String x:Key="Allocation.Col.TargetPct">Target %</sys:String>
     <sys:String x:Key="Allocation.Col.Deviation">Deviation</sys:String>
     <sys:String x:Key="Allocation.Col.Suggestion">Action</sys:String>

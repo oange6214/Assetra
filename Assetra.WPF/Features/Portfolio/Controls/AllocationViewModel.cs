@@ -78,7 +78,9 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
 
     // Observable collections
     private readonly ObservableCollection<AllocationRowViewModel> _allocationRows = new();
+    private readonly ObservableCollection<AllocationInsightCardViewModel> _allocationInsightCards = new();
     public ReadOnlyObservableCollection<AllocationRowViewModel> AllocationRows { get; }
+    public ReadOnlyObservableCollection<AllocationInsightCardViewModel> AllocationInsightCards { get; }
 
     // Tab state
     [ObservableProperty] private bool _isOverviewTab = true;
@@ -205,6 +207,7 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         _groupCatalog = groupCatalog;
         _dispatcher = Dispatcher.CurrentDispatcher;
         AllocationRows = new ReadOnlyObservableCollection<AllocationRowViewModel>(_allocationRows);
+        AllocationInsightCards = new ReadOnlyObservableCollection<AllocationInsightCardViewModel>(_allocationInsightCards);
 
         _positionsObservable = portfolio.Positions as INotifyCollectionChanged;
         if (_positionsObservable is not null)
@@ -348,8 +351,60 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         foreach (var row in allRows)
             _allocationRows.Add(row);
 
+        RebuildInsightCards(allRows);
+
         RebuildBuySell();
     }
+
+    private void RebuildInsightCards(IReadOnlyList<AllocationRowViewModel> rows)
+    {
+        _allocationInsightCards.Clear();
+        if (rows.Count == 0)
+            return;
+
+        var largest = rows[0];
+        var topThree = rows.Take(3).ToList();
+        var tail = rows.Where(r => r.ActualPercent is > 0m and <= 1m).ToList();
+        var averagePercent = rows.Count > 0 ? 100m / rows.Count : 0m;
+
+        _allocationInsightCards.Add(new AllocationInsightCardViewModel(
+            "最大配置",
+            largest.Symbol,
+            largest.ActualPercentDisplay,
+            $"{largest.Name} · {FormatTwd(largest.MarketValue)}",
+            largest.ColorBrush));
+
+        _allocationInsightCards.Add(new AllocationInsightCardViewModel(
+            "集中度",
+            "前 3 大",
+            FormatPercent(topThree.Sum(r => r.ActualPercent)),
+            $"合計 {FormatTwd(topThree.Sum(r => r.MarketValue))}",
+            Palette[0]));
+
+        _allocationInsightCards.Add(new AllocationInsightCardViewModel(
+            "長尾配置",
+            "≤ 1% 持倉",
+            tail.Count.ToString("N0"),
+            tail.Count == 0
+                ? "沒有極小配置"
+                : $"合計 {FormatPercent(tail.Sum(r => r.ActualPercent))} · {FormatTwd(tail.Sum(r => r.MarketValue))}",
+            Palette[4]));
+
+        _allocationInsightCards.Add(new AllocationInsightCardViewModel(
+            "分散度",
+            "持倉數",
+            rows.Count.ToString("N0"),
+            $"平均佔比 {FormatPercent(averagePercent)}",
+            Palette[7]));
+    }
+
+    private static string FormatPercent(decimal value) => value switch
+    {
+        > 0m and < 0.1m => "<0.1%",
+        _ => $"{value:F1}%",
+    };
+
+    private static string FormatTwd(decimal value) => $"NT${value:N0}";
 
     private void RebuildBuySell()
     {

@@ -1290,6 +1290,14 @@
                                         <TextBlock Style="{StaticResource PortfolioBadgeText}" Text="{Binding AssetTypeBadgeLabel}" />
                                     </Border>
 
+                                    <Border
+                                        Grid.Row="0"
+                                        Grid.Column="2"
+                                        Margin="0,0,10,0"
+                                        Style="{StaticResource StatusBadge.Neutral}">
+                                        <TextBlock Style="{StaticResource StatusBadge.Text}" Text="{Binding CurrencyDisplay}" />
+                                    </Border>
+
                                     <TextBlock
                                         Grid.Row="1"
                                         Grid.Column="0"
@@ -1516,7 +1524,7 @@
                         MinWidth="220"
                         SortMemberPath="Symbol">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Common.Target}" />
+                            <TextBlock Text="{DynamicResource Portfolio.AssetWithCurrency}" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -1544,14 +1552,28 @@
                                         Style="{StaticResource PortfolioAssetTypeBadge}">
                                         <TextBlock Style="{StaticResource PortfolioBadgeText}" Text="{Binding AssetTypeBadgeLabel}" />
                                     </Border>
-                                    <TextBlock
+                                    <Grid
                                         Grid.Column="2"
-                                        VerticalAlignment="Center"
-                                        FontFamily="{StaticResource Font.Family.Base}"
-                                        FontSize="{StaticResource Font.Size.Sm}"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding Name}"
-                                        TextTrimming="CharacterEllipsis" />
+                                        VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding Name}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <Border
+                                            Grid.Column="1"
+                                            Margin="8,0,0,0"
+                                            Style="{StaticResource StatusBadge.Neutral}">
+                                            <TextBlock Style="{StaticResource StatusBadge.Text}" Text="{Binding CurrencyDisplay}" />
+                                        </Border>
+                                    </Grid>
                                     <Button
                                         Grid.Column="3"
                                         Height="28"
@@ -1599,7 +1621,7 @@
                             </Style>
                         </DataGridTemplateColumn.HeaderStyle>
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Portfolio.CostPerShare}" />
+                            <TextBlock Text="{DynamicResource Portfolio.CostPerShare.Native}" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -1631,7 +1653,7 @@
                             </Style>
                         </DataGridTemplateColumn.HeaderStyle>
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Portfolio.TotalCostPaid}" />
+                            <TextBlock Text="{DynamicResource Portfolio.TotalCostPaid.Native}" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -1664,7 +1686,7 @@
                             </Style>
                         </DataGridTemplateColumn.HeaderStyle>
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Portfolio.Price}" />
+                            <TextBlock Text="{DynamicResource Portfolio.Price.Native}" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -1753,7 +1775,7 @@
                         </DataGridTemplateColumn.HeaderStyle>
                         <DataGridTemplateColumn.Header>
                             <TextBlock
-                                Text="{DynamicResource Portfolio.NetVal}"
+                                Text="{DynamicResource Portfolio.NetVal.Native}"
                                 ToolTip="{DynamicResource Portfolio.NetVal.Tooltip}"
                                 ToolTipService.InitialShowDelay="300"
                                 ToolTipService.ShowDuration="20000" />
@@ -1802,7 +1824,7 @@
                         </DataGridTemplateColumn.HeaderStyle>
                         <DataGridTemplateColumn.Header>
                             <TextBlock
-                                Text="{DynamicResource Portfolio.PnL}"
+                                Text="{DynamicResource Portfolio.PnL.Native}"
                                 ToolTip="{DynamicResource Portfolio.PnL.NetTooltip}"
                                 ToolTipService.InitialShowDelay="300"
                                 ToolTipService.ShowDuration="20000" />
@@ -1888,7 +1910,7 @@
                             </Style>
                         </DataGridTemplateColumn.HeaderStyle>
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Common.MarketValue}" />
+                            <TextBlock Text="{DynamicResource Portfolio.MarketValue.Native}" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Reflection;
 using Assetra.Core.Models;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.Contracts;
@@ -118,6 +119,33 @@ public sealed class AllocationViewModelTests
     }
 
     [Fact]
+    public void OverviewInsightCards_SurfaceAllocationQuestionsInsteadOfDuplicatingRows()
+    {
+        var feed = new StubFeed();
+        feed.PositionsList.Add(Position("CORE", 7_000m));
+        feed.PositionsList.Add(Position("MID", 2_000m));
+        feed.PositionsList.Add(Position("SMALL", 900m));
+        feed.PositionsList.Add(Position("DRAM", 100m));
+
+        var vm = new AllocationViewModel(feed);
+
+        var insightsProperty = typeof(AllocationViewModel).GetProperty("AllocationInsightCards");
+        Assert.NotNull(insightsProperty);
+
+        var cards = Assert.IsAssignableFrom<IEnumerable<object>>(insightsProperty.GetValue(vm)).ToList();
+        Assert.Equal(4, cards.Count);
+
+        Assert.Equal("CORE", GetStringProperty(cards[0], "Primary"));
+        Assert.Equal("70.0%", GetStringProperty(cards[0], "Metric"));
+        Assert.Equal("前 3 大", GetStringProperty(cards[1], "Primary"));
+        Assert.Equal("99.0%", GetStringProperty(cards[1], "Metric"));
+        Assert.Equal("≤ 1% 持倉", GetStringProperty(cards[2], "Primary"));
+        Assert.Equal("1", GetStringProperty(cards[2], "Metric"));
+        Assert.Equal("持倉數", GetStringProperty(cards[3], "Primary"));
+        Assert.Equal("4", GetStringProperty(cards[3], "Metric"));
+    }
+
+    [Fact]
     public void TotalCashChanged_DoesNotAffectInvestmentAllocation()
     {
         var feed = new StubFeed { TotalCash = 0m };
@@ -186,5 +214,12 @@ public sealed class AllocationViewModelTests
 
         Assert.Equal(30m, vm.TotalPnl);
         Assert.True(vm.IsTotalPnlPositive);
+    }
+
+    private static string GetStringProperty(object row, string name)
+    {
+        var property = row.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
+        Assert.NotNull(property);
+        return Assert.IsType<string>(property.GetValue(row));
     }
 }

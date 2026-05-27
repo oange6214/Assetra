@@ -104,14 +104,14 @@ public class CurrencyServiceTests
     public void FormatSigned_Negative_USD_PrependsMinusBeforeCurrency()
     {
         var svc = Create("USD", rates: DefaultRates);
-        Assert.Equal("-$1,000", svc.FormatSigned(-32_000m));
+        Assert.Equal("-US$1,000", svc.FormatSigned(-32_000m));
     }
 
     [Fact]
     public void FormatSigned_Positive_USD_PrependsPlusBeforeCurrency()
     {
         var svc = Create("USD", rates: DefaultRates);
-        Assert.Equal("+$1,000", svc.FormatSigned(32_000m));
+        Assert.Equal("+US$1,000", svc.FormatSigned(32_000m));
     }
 
     [Fact]

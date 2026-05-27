@@ -168,11 +168,14 @@
     <sys:String x:Key="Portfolio.Symbol">代號</sys:String>
     <sys:String x:Key="Portfolio.Shares">數量</sys:String>
     <sys:String x:Key="Portfolio.CostPerShare">成本均價</sys:String>
+    <sys:String x:Key="Portfolio.CostPerShare.Native">成本均價（原幣）</sys:String>
     <sys:String x:Key="Portfolio.EditCostPerShareHint">每單位均攤成本（股票已含買入手續費）。多次買入請自行計算加權平均後輸入。</sys:String>
     <sys:String x:Key="Portfolio.Price">現價</sys:String>
+    <sys:String x:Key="Portfolio.Price.Native">現價（原幣）</sys:String>
     <sys:String x:Key="Portfolio.PnLPct">淨損益試算%</sys:String>
     <sys:String x:Key="Portfolio.MarketVal">市值</sys:String>
     <sys:String x:Key="Portfolio.NetVal">淨值</sys:String>
+    <sys:String x:Key="Portfolio.NetVal.Native">淨值（原幣）</sys:String>
     <sys:String x:Key="Portfolio.PercentOfPortfolio">佔比</sys:String>
     <sys:String x:Key="Portfolio.Detail.Action.Buy">買入</sys:String>
     <sys:String x:Key="Portfolio.Detail.Action.Sell">賣出</sys:String>
@@ -200,7 +203,11 @@
     <sys:String x:Key="Portfolio.Filter.SearchLiabilities">搜尋負債…</sys:String>
     <sys:String x:Key="Portfolio.Filter.SearchTrades">搜尋交易…</sys:String>
     <sys:String x:Key="Portfolio.TotalCostPaid">付出成本</sys:String>
+    <sys:String x:Key="Portfolio.TotalCostPaid.Native">付出成本（原幣）</sys:String>
     <sys:String x:Key="Portfolio.TotalCostPaid.Hint">含買入手續費，用於淨損益試算。</sys:String>
+    <sys:String x:Key="Portfolio.PnL.Native">淨損益試算（原幣）</sys:String>
+    <sys:String x:Key="Portfolio.MarketValue.Native">市值（原幣）</sys:String>
+    <sys:String x:Key="Portfolio.AssetWithCurrency">資產 / 幣別</sys:String>
     <sys:String x:Key="Portfolio.SellConfirmLabel">賣出成交價</sys:String>
     <sys:String x:Key="Portfolio.SellConfirm">確認賣出</sys:String>
     <!--  Portfolio.TradeHistory.RealizedPnL / PnLPct removed — trade history table no longer shows P&L columns after the AscentPortfolio-style simplification. Sell trades' RealizedPnl is still stored, just not displayed in the list.  -->
@@ -927,6 +934,7 @@
     <sys:String x:Key="Allocation.Tab.Overview">配置概覽</sys:String>
     <sys:String x:Key="Allocation.Tab.Rebalance">再平衡</sys:String>
     <sys:String x:Key="Allocation.Overview.Title">配置概覽</sys:String>
+    <sys:String x:Key="Allocation.Insights.Title">配置洞察</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Symbol">依 Symbol</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Group">依群組</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Currency">依幣別</sys:String>
@@ -938,7 +946,7 @@
     <sys:String x:Key="Allocation.Col.Price">現價</sys:String>
     <sys:String x:Key="Allocation.Col.Value">市值</sys:String>
     <sys:String x:Key="Allocation.Col.ValueTwd">市值 (TWD)</sys:String>
-    <sys:String x:Key="Allocation.Col.ActualPct">實際比例 %</sys:String>
+    <sys:String x:Key="Allocation.Col.ActualPct">佔比</sys:String>
     <sys:String x:Key="Allocation.Col.TargetPct">目標比例 %</sys:String>
     <sys:String x:Key="Allocation.Col.Deviation">偏離度</sys:String>
     <sys:String x:Key="Allocation.Col.Suggestion">建議操作</sys:String>

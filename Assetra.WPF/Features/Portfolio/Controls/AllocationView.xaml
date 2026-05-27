@@ -123,126 +123,83 @@
                                 FontSize="{StaticResource Font.Size.Md}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{DynamicResource Allocation.Overview.Title}" />
+                                Text="{DynamicResource Allocation.Insights.Title}" />
                         </DockPanel>
 
-                        <ScrollViewer
+                        <ItemsControl
                             Grid.Row="1"
-                            HorizontalScrollBarVisibility="Disabled"
-                            VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding AllocationRows}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                                        <!--
-                                            P5.10 — Row layout 重排：每列前面放 DonutPercentBadge
-                                            （視覺 + % 文字一體），右邊是 symbol/name + value，下面是
-                                            損益 sub-row。原本中間那條進度條移除（donut 已負責視覺強度）。
-                                        -->
-                                        <Border
-                                            Margin="0,0,0,10"
-                                            Padding="0,0,0,10"
-                                            BorderBrush="{DynamicResource AppBorderLight}"
-                                            BorderThickness="0,0,0,1">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
+                            ItemsSource="{Binding AllocationInsightCards}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Margin" Value="0,0,10,10" />
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:AllocationInsightCardViewModel}">
+                                    <Border
+                                        MinHeight="120"
+                                        Padding="12"
+                                        Background="{DynamicResource AppSurfaceAlt}"
+                                        BorderBrush="{DynamicResource AppBorderLight}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource Radius.Xl}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
 
-                                                <!--  Donut badge 在前  -->
-                                                <alloccontrols:DonutPercentBadge
-                                                    Grid.Column="0"
-                                                    Margin="0,2,12,0"
-                                                    VerticalAlignment="Top"
-                                                    FillBrush="{Binding ColorBrush}"
-                                                    Percent="{Binding ActualPercentWeight}"
-                                                    PercentText="{Binding ActualPercentDisplay}" />
+                                            <Border
+                                                Width="36"
+                                                Height="3"
+                                                HorizontalAlignment="Left"
+                                                Background="{Binding AccentBrush}"
+                                                CornerRadius="{StaticResource Radius.Full}" />
 
-                                                <Grid Grid.Column="1">
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                    </Grid.RowDefinitions>
+                                            <StackPanel Grid.Row="1" Margin="0,10,0,8">
+                                                <TextBlock
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextMuted}"
+                                                    Text="{Binding Label}" />
+                                                <TextBlock
+                                                    Margin="0,4,0,0"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontSize="{StaticResource Font.Size.Xl}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding Metric}"
+                                                    Typography.NumeralAlignment="Tabular" />
+                                                <TextBlock
+                                                    Margin="0,2,0,0"
+                                                    FontSize="{StaticResource Font.Size.Sm}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding Primary}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
 
-                                                    <!--  Row 0: symbol/name (left) + market value (right)  -->
-                                                    <Grid Grid.Row="0">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="Auto" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <StackPanel Grid.Column="0">
-                                                            <TextBlock
-                                                                FontFamily="{StaticResource Font.Family.Base}"
-                                                                FontSize="{StaticResource Font.Size.Sm}"
-                                                                FontWeight="SemiBold"
-                                                                Foreground="{DynamicResource AppTextPrimary}"
-                                                                Text="{Binding Symbol}"
-                                                                Typography.NumeralAlignment="Tabular" />
-                                                            <TextBlock
-                                                                Margin="0,1,8,0"
-                                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                                Foreground="{DynamicResource AppTextMuted}"
-                                                                Text="{Binding Name}"
-                                                                TextTrimming="CharacterEllipsis" />
-                                                        </StackPanel>
-                                                        <TextBlock
-                                                            Grid.Column="1"
-                                                            HorizontalAlignment="Right"
-                                                            VerticalAlignment="Top"
-                                                            FontFamily="{StaticResource Font.Family.Base}"
-                                                            FontSize="{StaticResource Font.Size.Sm}"
-                                                            FontWeight="SemiBold"
-                                                            Foreground="{DynamicResource AppTextPrimary}"
-                                                            Text="{Binding MarketValue, StringFormat='NT\${0:N0}'}"
-                                                            Typography.NumeralAlignment="Tabular" />
-                                                    </Grid>
-
-                                                    <!--  Row 1: PnL sub-row（原 Row 2，現在中間 bar 拿掉所以序號往前）  -->
-                                                    <DockPanel Grid.Row="1" Margin="0,6,0,0" LastChildFill="False">
-                                                        <TextBlock
-                                                            DockPanel.Dock="Left"
-                                                            FontSize="{StaticResource Font.Size.Xs}"
-                                                            Foreground="{DynamicResource AppTextMuted}"
-                                                            Text="{DynamicResource Portfolio.Allocation.Header.Pnl}" />
-                                                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                                                            <TextBlock
-                                                                FontFamily="{StaticResource Font.Family.Base}"
-                                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                                FontWeight="SemiBold"
-                                                                Text="{Binding PnlDisplay}"
-                                                                Typography.NumeralAlignment="Tabular">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding IsPnlPositive}" Value="True">
-                                                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                            <TextBlock
-                                                                Margin="4,0,0,0"
-                                                                FontFamily="{StaticResource Font.Family.Base}"
-                                                                FontSize="{StaticResource Font.Size.Xs}"
-                                                                Foreground="{DynamicResource AppTextSecondary}"
-                                                                Text="{Binding PnlPercentDisplay}"
-                                                                Typography.NumeralAlignment="Tabular" />
-                                                        </StackPanel>
-                                                    </DockPanel>
-                                                </Grid>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                                            <TextBlock
+                                                Grid.Row="2"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextMuted}"
+                                                Text="{Binding Secondary}"
+                                                TextWrapping="Wrap" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </Grid>
                 </Border>
 
                 <!--
-                    Right: Holdings Table (現價/市值/實際比重/淨損益)。
+                    Right: Holdings Table (現價/市值/佔比/淨損益)。
                     P3.5 — same AppCardSummary baseline but Padding=0 override
                     給 DataGrid fill 整張 card。ClipToBounds=true 確保 DataGrid
                     不溢出 card 圓角。
@@ -376,8 +333,8 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <!--  實際比例%  -->
-                        <DataGridTemplateColumn Width="72" SortMemberPath="ActualPercent">
+                        <!--  佔比  -->
+                        <DataGridTemplateColumn Width="88" SortMemberPath="ActualPercent">
                             <DataGridTemplateColumn.HeaderStyle>
                                 <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
                                     <Setter Property="HorizontalContentAlignment" Value="Right" />

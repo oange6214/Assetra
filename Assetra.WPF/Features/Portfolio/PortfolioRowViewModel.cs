@@ -103,6 +103,7 @@ public partial class PortfolioRowViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsCrossCurrency))]
+    [NotifyPropertyChangedFor(nameof(CurrencyDisplay))]
     [NotifyPropertyChangedFor(nameof(BuyPriceAsMoney))]
     [NotifyPropertyChangedFor(nameof(CurrentPriceAsMoney))]
     [NotifyPropertyChangedFor(nameof(MarketValueAsMoney))]
@@ -206,8 +207,10 @@ public partial class PortfolioRowViewModel : ObservableObject
     public bool IsCrossCurrency =>
         !string.Equals(NormalizedCurrency, NormalizedBaseCurrency, StringComparison.OrdinalIgnoreCase);
 
-    private string NormalizedCurrency => string.IsNullOrWhiteSpace(Currency) ? "TWD" : Currency;
-    private string NormalizedBaseCurrency => string.IsNullOrWhiteSpace(BaseCurrency) ? "TWD" : BaseCurrency;
+    public string CurrencyDisplay => NormalizedCurrency;
+
+    private string NormalizedCurrency => string.IsNullOrWhiteSpace(Currency) ? "TWD" : Currency.Trim().ToUpperInvariant();
+    private string NormalizedBaseCurrency => string.IsNullOrWhiteSpace(BaseCurrency) ? "TWD" : BaseCurrency.Trim().ToUpperInvariant();
 
     public bool HasQuoteProviderStateMessage => !string.IsNullOrWhiteSpace(QuoteProviderStateMessage);
     public bool ShowQuoteProviderState => IsQuoteStale || HasQuoteProviderStateMessage;
@@ -297,6 +300,7 @@ public partial class PortfolioRowViewModel : ObservableObject
         OnPropertyChanged(nameof(PnlBaseAsMoney));
         OnPropertyChanged(nameof(EstimatedSellFeeBaseAsMoney));
         OnPropertyChanged(nameof(IsCrossCurrency));
+        OnPropertyChanged(nameof(CurrencyDisplay));
     }
 
     // NetValue 是 MarketValue - EstimatedSellFee 的 computed 屬性，

@@ -24,13 +24,13 @@ public interface ICurrencyService
     /// <summary>貨幣或匯率變更時觸發（UI 需監聽此事件以重新整理顯示）。</summary>
     event Action? CurrencyChanged;
 
-    /// <summary>格式化整數金額（N0），例如 NT$1,234,567 或 $38,580 或 ¥4,210,000。</summary>
+    /// <summary>格式化整數金額（N0），例如 NT$1,234,567 或 US$38,580 或 ¥4,210,000。</summary>
     string FormatAmount(decimal twdValue);
 
-    /// <summary>格式化單價（N2），例如 NT$185.50 或 $5.80。</summary>
+    /// <summary>格式化單價（N2），例如 NT$185.50 或 US$5.80。</summary>
     string FormatPrice(decimal twdValue);
 
-    /// <summary>格式化帶正負號的損益（+/-#,0），例如 +NT$1,000 或 -$31。</summary>
+    /// <summary>格式化帶正負號的損益（+/-#,0），例如 +NT$1,000 或 -US$31。</summary>
     string FormatSigned(decimal twdValue);
 
     /// <summary>套用新顯示貨幣並觸發 CurrencyChanged（匯率本身透過 RefreshRatesAsync 更新）。</summary>

@@ -149,7 +149,7 @@ public sealed class CurrencyService : ICurrencyService
 
     public string FormatSigned(decimal twdValue)
     {
-        // 符號提前：sign → currency symbol → magnitude（例：-NT$30,000、+$1,000）
+        // 符號提前：sign → currency symbol → magnitude（例：-NT$30,000、+US$1,000）
         var value = Convert(twdValue);
         var sign = value >= 0 ? "+" : "-";
         var magnit = Math.Abs(value);
@@ -170,7 +170,7 @@ public sealed class CurrencyService : ICurrencyService
 
     private static string GetSymbol(string currency) => currency switch
     {
-        "USD" => "$",
+        "USD" => "US$",
         "JPY" => "¥",
         "EUR" => "€",
         "HKD" => "HK$",

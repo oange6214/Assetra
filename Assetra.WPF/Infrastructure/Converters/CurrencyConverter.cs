@@ -89,7 +89,7 @@ public sealed class CurrencyConverter : IValueConverter
 
     private static string GetSymbol(string currency) => currency.Trim().ToUpperInvariant() switch
     {
-        "USD" => "$",
+        "USD" => "US$",
         "JPY" => "¥",
         "EUR" => "€",
         "HKD" => "HK$",

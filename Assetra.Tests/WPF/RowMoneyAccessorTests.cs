@@ -100,9 +100,19 @@ public class RowMoneyAccessorTests
     {
         var converter = new CurrencyConverter();
 
-        Assert.Equal("$1,234", converter.Convert(new Money(1234m, "USD"), typeof(string), "amount", CultureInfo.InvariantCulture));
-        Assert.Equal("+$1,234", converter.Convert(new Money(1234m, "USD"), typeof(string), "signed", CultureInfo.InvariantCulture));
-        Assert.Equal("≈ $1,234.56", converter.Convert(new Money(1234.56m, "USD"), typeof(string), "price-approx", CultureInfo.InvariantCulture));
+        Assert.Equal("US$1,234", converter.Convert(new Money(1234m, "USD"), typeof(string), "amount", CultureInfo.InvariantCulture));
+        Assert.Equal("+US$1,234", converter.Convert(new Money(1234m, "USD"), typeof(string), "signed", CultureInfo.InvariantCulture));
+        Assert.Equal("≈ US$1,234.56", converter.Convert(new Money(1234.56m, "USD"), typeof(string), "price-approx", CultureInfo.InvariantCulture));
+    }
+
+    [Theory]
+    [InlineData("usd", "USD")]
+    [InlineData("", "TWD")]
+    public void PortfolioRow_CurrencyDisplay_NormalizesForMixedCurrencyTables(string currency, string expected)
+    {
+        var row = new PortfolioRowViewModel { Currency = currency };
+
+        Assert.Equal(expected, row.CurrencyDisplay);
     }
 
     [Fact]
