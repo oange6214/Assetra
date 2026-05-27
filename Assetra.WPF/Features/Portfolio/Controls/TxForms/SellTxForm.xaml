@@ -405,10 +405,29 @@
                     </StackPanel>
 
                     <StackPanel Visibility="{Binding Sell.IsFxSettlementMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <TextBlock
-                            Margin="0,0,0,6"
-                            Style="{StaticResource FormFieldLabel}"
-                            Text="{DynamicResource Portfolio.Tx.FxRate}" />
+                        <!--
+                            P5.8b prereq — Fetch button mirrors Buy form (BuyTxForm.xaml line ~636).
+                            Clicking calls TransactionFxRateResolver, writes back FxRate +
+                            FxRateDate + FxSource label under suppress flag so IsFxManual
+                            stays false.
+                        -->
+                        <DockPanel Margin="0,0,0,6" LastChildFill="False">
+                            <TextBlock
+                                DockPanel.Dock="Left"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource FormFieldLabel}"
+                                Text="{DynamicResource Portfolio.Tx.FxRate}" />
+                            <Button
+                                DockPanel.Dock="Right"
+                                MinWidth="0"
+                                MinHeight="28"
+                                Padding="8,0"
+                                VerticalAlignment="Center"
+                                Command="{Binding FetchSellFxRateCommand}"
+                                Content="{DynamicResource Portfolio.Tx.FetchFxRate}"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Style="{StaticResource AppGhostButton}" />
+                        </DockPanel>
                         <TextBlock
                             Margin="0,0,0,6"
                             FontSize="{StaticResource Font.Size.Xs}"

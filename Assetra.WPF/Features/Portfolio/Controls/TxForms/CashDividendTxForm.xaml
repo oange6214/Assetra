@@ -305,10 +305,27 @@
                     </StackPanel>
 
                     <StackPanel Visibility="{Binding Div.IsFxSettlementMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <TextBlock
-                            Margin="0,0,0,6"
-                            Style="{StaticResource FormFieldLabel}"
-                            Text="{DynamicResource Portfolio.Tx.FxRate}" />
+                        <!--
+                            P5.8b prereq — Fetch button mirrors Buy form. See SellTxForm
+                            for comment; semantics are identical (Div side resolver).
+                        -->
+                        <DockPanel Margin="0,0,0,6" LastChildFill="False">
+                            <TextBlock
+                                DockPanel.Dock="Left"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource FormFieldLabel}"
+                                Text="{DynamicResource Portfolio.Tx.FxRate}" />
+                            <Button
+                                DockPanel.Dock="Right"
+                                MinWidth="0"
+                                MinHeight="28"
+                                Padding="8,0"
+                                VerticalAlignment="Center"
+                                Command="{Binding FetchDividendFxRateCommand}"
+                                Content="{DynamicResource Portfolio.Tx.FetchFxRate}"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Style="{StaticResource AppGhostButton}" />
+                        </DockPanel>
                         <TextBlock
                             Margin="0,0,0,6"
                             FontSize="{StaticResource Font.Size.Xs}"

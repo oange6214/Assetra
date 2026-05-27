@@ -150,6 +150,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private readonly Action<Guid>? _recordRecentAsset;
     private readonly TransactionFxRateResolver? _transactionFxRateResolver;
     private bool _suppressBuyFxManualTracking;
+    // P5.8b prereq — Sell + Dividend mirror Buy's suppress flag for programmatic
+    // FxRate writes (EditTrade restore + SetResolvedXxxFx). Without this the
+    // FxRate PropertyChanged handler would falsely flip IsFxManual=true and
+    // overwrite FxSourceLabel = "manual" during automated fills.
+    private bool _suppressSellFxManualTracking;
+    private bool _suppressDividendFxManualTracking;
     private readonly Action _rebuildTotals;
     private readonly Func<string, string, string> _localize;
 
@@ -841,6 +847,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
         AddAssetDialog.AddBuyDate = value;
         QueueBuyFxRateRefresh();
+        // P5.8b prereq — mirror Buy: date change invalidates auto-resolved FX
+        // for Sell + Dividend too.
+        QueueSellFxRateRefresh();
+        QueueDividendFxRateRefresh();
     }
     [ObservableProperty] private DateTime _txDate = DateTime.Today;
     [ObservableProperty] private string _txError = string.Empty;
@@ -976,7 +986,29 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 NotifyImpactPreviewChanged();
                 break;
             case nameof(SellTxViewModel.FxRate):
+                // P5.8b prereq — mirror Buy: empty allowed (= implicit 1.0). Track
+                // manual override so subsequent QueueSellFxRateRefresh() skips the
+                // user's value unless they hit Fetch explicitly.
                 Sell.FxRateError = ValidatePositiveDecimalOrEmpty(Sell.FxRate);
+                if (!_suppressSellFxManualTracking)
+                {
+                    Sell.IsFxManual = !string.IsNullOrWhiteSpace(Sell.FxRate);
+                    if (Sell.IsFxManual)
+                    {
+                        Sell.FxSourceLabel = "manual";
+                        Sell.FxRateDate ??= DateOnly.FromDateTime(TxDate.Date);
+                    }
+                }
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(SellTxViewModel.InstrumentCurrency):
+            case nameof(SellTxViewModel.CashAccountCurrency):
+            case nameof(SellTxViewModel.SettlementCurrency):
+                FetchSellFxRateCommand.NotifyCanExecuteChanged();
+                QueueSellFxRateRefresh();
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(SellTxViewModel.SettlementInputMode):
                 NotifyImpactPreviewChanged();
                 break;
         }
@@ -1415,6 +1447,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             _ = AutoFillLoanRepayAsync(Loan.Label);
         FetchBuyFxRateCommand.NotifyCanExecuteChanged();
         QueueBuyFxRateRefresh();
+        // P5.8b prereq — type switch invalidates fetch ability for both Sell + Div too.
+        FetchSellFxRateCommand.NotifyCanExecuteChanged();
+        FetchDividendFxRateCommand.NotifyCanExecuteChanged();
+        QueueSellFxRateRefresh();
+        QueueDividendFxRateRefresh();
     }
 
     /// <summary>
@@ -1452,7 +1489,29 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 NotifyImpactPreviewChanged();
                 break;
             case nameof(DividendTxViewModel.FxRate):
+                // P5.8b prereq — mirror Buy / Sell: track manual override so
+                // QueueDividendFxRateRefresh skips the user's value unless they
+                // hit Fetch explicitly.
                 Div.FxRateError = ValidatePositiveDecimalOrEmpty(Div.FxRate);
+                if (!_suppressDividendFxManualTracking)
+                {
+                    Div.IsFxManual = !string.IsNullOrWhiteSpace(Div.FxRate);
+                    if (Div.IsFxManual)
+                    {
+                        Div.FxSourceLabel = "manual";
+                        Div.FxRateDate ??= DateOnly.FromDateTime(TxDate.Date);
+                    }
+                }
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(DividendTxViewModel.InstrumentCurrency):
+            case nameof(DividendTxViewModel.CashAccountCurrency):
+            case nameof(DividendTxViewModel.SettlementCurrency):
+                FetchDividendFxRateCommand.NotifyCanExecuteChanged();
+                QueueDividendFxRateRefresh();
+                NotifyImpactPreviewChanged();
+                break;
+            case nameof(DividendTxViewModel.SettlementInputMode):
                 NotifyImpactPreviewChanged();
                 break;
         }
@@ -1563,6 +1622,163 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     private static string NormalizeCurrency(string? value, string fallback = "TWD") =>
         string.IsNullOrWhiteSpace(value) ? fallback : value.Trim().ToUpperInvariant();
+
+    // ───────────────────────────────────────────────────────────────────
+    // P5.8b prereq — Sell-side mirror of Buy's FX fetch infrastructure.
+    // Same shape as Buy (lines 1492-1567):
+    //   CanFetch / [RelayCommand] FetchAsync → forced refresh
+    //   QueueXxxRefresh → fire-and-forget non-forced refresh used by handlers
+    //   RefreshXxxFxRateAsync → real work, honors IsFxManual (skip unless force)
+    //   SetResolvedXxxFx → write-back under suppress flag so PropertyChanged
+    //     handler doesn't flip IsFxManual / FxSourceLabel during automated fills.
+    // ───────────────────────────────────────────────────────────────────
+    public bool CanFetchSellFxRate => _transactionFxRateResolver is not null && Sell.IsCrossCurrency;
+
+    [RelayCommand(CanExecute = nameof(CanFetchSellFxRate))]
+    private async Task FetchSellFxRateAsync() => await RefreshSellFxRateAsync(force: true).ConfigureAwait(true);
+
+    private void QueueSellFxRateRefresh()
+    {
+        _ = RefreshSellFxRateAsync(force: false);
+    }
+
+    private async Task RefreshSellFxRateAsync(bool force)
+    {
+        if (_transactionFxRateResolver is null || !TxTypeIsSell)
+            return;
+
+        var instrumentCurrency = NormalizeCurrency(Sell.InstrumentCurrency);
+        var settlementCurrency = NormalizeCurrency(Sell.SettlementCurrency, NormalizeCurrency(Sell.CashAccountCurrency));
+
+        if (string.Equals(instrumentCurrency, settlementCurrency, StringComparison.OrdinalIgnoreCase))
+        {
+            SetResolvedSellFx(string.Empty, null, string.Empty, isManual: false);
+            Sell.FxFetchError = string.Empty;
+            return;
+        }
+
+        if (Sell.IsFxManual && !force)
+            return;
+
+        Sell.FxFetchError = string.Empty;
+
+        try
+        {
+            var quote = await _transactionFxRateResolver
+                .ResolveAsync(DateOnly.FromDateTime(TxDate.Date), instrumentCurrency, settlementCurrency)
+                .ConfigureAwait(true);
+
+            if (!quote.IsAvailable || quote.Rate is not { } rate)
+            {
+                Sell.FxFetchError = L("Portfolio.Tx.FxRate.Unavailable", "查無此日期匯率，請手動輸入匯率或實際扣款金額。");
+                return;
+            }
+
+            SetResolvedSellFx(
+                rate.ToString("0.########", CultureInfo.InvariantCulture),
+                quote.RateDate,
+                quote.Source ?? string.Empty,
+                isManual: false);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to resolve transaction FX rate: {From}->{To} on {Date}",
+                instrumentCurrency, settlementCurrency, TxDate.Date);
+            Sell.FxFetchError = L("Portfolio.Tx.FxRate.Unavailable", "查無此日期匯率，請手動輸入匯率或實際扣款金額。");
+        }
+    }
+
+    private void SetResolvedSellFx(string rate, DateOnly? rateDate, string source, bool isManual)
+    {
+        _suppressSellFxManualTracking = true;
+        try
+        {
+            Sell.FxRate = rate;
+            Sell.FxRateDate = rateDate;
+            Sell.FxSourceLabel = source;
+            Sell.IsFxManual = isManual;
+        }
+        finally
+        {
+            _suppressSellFxManualTracking = false;
+        }
+    }
+
+    // ───────────────────────────────────────────────────────────────────
+    // P5.8b prereq — Dividend-side mirror (same pattern as Sell + Buy).
+    // Note gate: TxTypeIsCashDiv — stock dividends have no cash flow so no FX.
+    // ───────────────────────────────────────────────────────────────────
+    public bool CanFetchDividendFxRate => _transactionFxRateResolver is not null && Div.IsCrossCurrency;
+
+    [RelayCommand(CanExecute = nameof(CanFetchDividendFxRate))]
+    private async Task FetchDividendFxRateAsync() => await RefreshDividendFxRateAsync(force: true).ConfigureAwait(true);
+
+    private void QueueDividendFxRateRefresh()
+    {
+        _ = RefreshDividendFxRateAsync(force: false);
+    }
+
+    private async Task RefreshDividendFxRateAsync(bool force)
+    {
+        if (_transactionFxRateResolver is null || !TxTypeIsCashDiv)
+            return;
+
+        var instrumentCurrency = NormalizeCurrency(Div.InstrumentCurrency);
+        var settlementCurrency = NormalizeCurrency(Div.SettlementCurrency, NormalizeCurrency(Div.CashAccountCurrency));
+
+        if (string.Equals(instrumentCurrency, settlementCurrency, StringComparison.OrdinalIgnoreCase))
+        {
+            SetResolvedDividendFx(string.Empty, null, string.Empty, isManual: false);
+            Div.FxFetchError = string.Empty;
+            return;
+        }
+
+        if (Div.IsFxManual && !force)
+            return;
+
+        Div.FxFetchError = string.Empty;
+
+        try
+        {
+            var quote = await _transactionFxRateResolver
+                .ResolveAsync(DateOnly.FromDateTime(TxDate.Date), instrumentCurrency, settlementCurrency)
+                .ConfigureAwait(true);
+
+            if (!quote.IsAvailable || quote.Rate is not { } rate)
+            {
+                Div.FxFetchError = L("Portfolio.Tx.FxRate.Unavailable", "查無此日期匯率，請手動輸入匯率或實際扣款金額。");
+                return;
+            }
+
+            SetResolvedDividendFx(
+                rate.ToString("0.########", CultureInfo.InvariantCulture),
+                quote.RateDate,
+                quote.Source ?? string.Empty,
+                isManual: false);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to resolve transaction FX rate: {From}->{To} on {Date}",
+                instrumentCurrency, settlementCurrency, TxDate.Date);
+            Div.FxFetchError = L("Portfolio.Tx.FxRate.Unavailable", "查無此日期匯率，請手動輸入匯率或實際扣款金額。");
+        }
+    }
+
+    private void SetResolvedDividendFx(string rate, DateOnly? rateDate, string source, bool isManual)
+    {
+        _suppressDividendFxManualTracking = true;
+        try
+        {
+            Div.FxRate = rate;
+            Div.FxRateDate = rateDate;
+            Div.FxSourceLabel = source;
+            Div.IsFxManual = isManual;
+        }
+        finally
+        {
+            _suppressDividendFxManualTracking = false;
+        }
+    }
 
     /// <summary>
     /// React to Buy.X changes — runs side effects that the old <c>partial OnTxBuy*Changed</c>
@@ -2009,7 +2225,24 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 if (sellIsCrossCcy)
                 {
                     Sell.ActualCashAmount = editState.TxActualCashAmount;
-                    Sell.FxRate = editState.TxFxRate;
+                    // P5.8b prereq — wrap with suppress flag so OnSellTxChanged's
+                    // FxRate handler doesn't falsely flip IsFxManual when
+                    // restoring a previously-fetched (non-manual) FX rate.
+                    _suppressSellFxManualTracking = true;
+                    try
+                    {
+                        Sell.FxRate = editState.TxFxRate;
+                    }
+                    finally
+                    {
+                        _suppressSellFxManualTracking = false;
+                    }
+                    Sell.SettlementCurrency = !string.IsNullOrWhiteSpace(editState.TxSettlementCurrency)
+                        ? editState.TxSettlementCurrency
+                        : sellCashCcy ?? string.Empty;
+                    Sell.FxRateDate = editState.TxFxRateDate;
+                    Sell.FxSourceLabel = editState.TxFxSource ?? string.Empty;
+                    Sell.IsFxManual = string.Equals(editState.TxFxSource, "manual", StringComparison.OrdinalIgnoreCase);
                 }
                 RestoreCommissionFields(row);
                 UpdateSellTxPreview();
@@ -2037,7 +2270,22 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 if (divIsCrossCcy)
                 {
                     Div.ActualCashAmount = editState.TxActualCashAmount;
-                    Div.FxRate = editState.TxFxRate;
+                    // P5.8b prereq — same suppress-wrap as Sell.
+                    _suppressDividendFxManualTracking = true;
+                    try
+                    {
+                        Div.FxRate = editState.TxFxRate;
+                    }
+                    finally
+                    {
+                        _suppressDividendFxManualTracking = false;
+                    }
+                    Div.SettlementCurrency = !string.IsNullOrWhiteSpace(editState.TxSettlementCurrency)
+                        ? editState.TxSettlementCurrency
+                        : divCashCcy ?? string.Empty;
+                    Div.FxRateDate = editState.TxFxRateDate;
+                    Div.FxSourceLabel = editState.TxFxSource ?? string.Empty;
+                    Div.IsFxManual = string.Equals(editState.TxFxSource, "manual", StringComparison.OrdinalIgnoreCase);
                 }
                 break;
 
