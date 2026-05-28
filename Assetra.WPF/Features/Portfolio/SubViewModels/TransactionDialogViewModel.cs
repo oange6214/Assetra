@@ -743,17 +743,31 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             var hit = assets.FirstOrDefault(a => a.Kind == TxAssetKind.CashAccount && a.Id == cashId);
             if (hit is not null) return hit;
         }
-        // 4. Loan / CreditCard → Liability by LiabilityAssetId
-        // P5.16 — TradeRowViewModel.LiabilityAssetId 早就存在了，舊註解誤導。
-        // CreditCardCharge / CreditCardPayment / LoanBorrow / LoanRepay 都會記錄
-        // 對應的負債 AssetId，picker 應該帶入該負債作 SelectedAsset 提示使用者
-        // 「這筆是哪張卡 / 哪筆貸款」。
+        // 4. Loan / CreditCard → Liability
+        // P5.16 — 雙路徑 lookup：先嘗試 LiabilityAssetId (GUID) 精確比對，
+        // 找不到再 fallback 走 Label 字串配對（兼容 legacy 資料：早期 trade 沒
+        // 寫 LiabilityAssetId 或 liability 的 AssetId 為 null，AvailableAssets 線
+        // 上的 liability 用 Guid.Empty 哨兵代位，直接 GUID 比對就漏接）。
         if (row.Type is TradeType.CreditCardCharge or TradeType.CreditCardPayment
-                or TradeType.LoanBorrow or TradeType.LoanRepay
-            && row.LiabilityAssetId is { } liabId)
+                or TradeType.LoanBorrow or TradeType.LoanRepay)
         {
-            var hit = assets.FirstOrDefault(a => a.Kind == TxAssetKind.Liability && a.Id == liabId);
-            if (hit is not null) return hit;
+            // 4a. 精確：以 GUID 比對
+            if (row.LiabilityAssetId is { } liabId)
+            {
+                var hit = assets.FirstOrDefault(a =>
+                    a.Kind == TxAssetKind.Liability && a.Id == liabId);
+                if (hit is not null) return hit;
+            }
+
+            // 4b. Fallback：以 Label 字串比對（Loan 走 LoanLabel，CreditCard 走 row.Name）
+            var label = row.LoanLabel ?? row.Name;
+            if (!string.IsNullOrWhiteSpace(label))
+            {
+                var hit = assets.FirstOrDefault(a =>
+                    a.Kind == TxAssetKind.Liability
+                    && string.Equals(a.PrimaryName, label, StringComparison.OrdinalIgnoreCase));
+                if (hit is not null) return hit;
+            }
         }
         return null;
     }
