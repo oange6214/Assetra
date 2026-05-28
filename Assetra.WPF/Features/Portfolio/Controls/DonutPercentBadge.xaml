@@ -27,13 +27,18 @@
           ② 拿掉 TextBlock Margin="10,0"：原本想當 stroke buffer，但 TextBlock 在
              Grid HorizontalAlignment=Center 已自動依文字寬度置中，Margin 反而把
              BBox 強制縮成 36px 跟 35px 寬的文字 conflict。
-          ③ ConverterParameter 重算：stroke 3 + 新 radius → 47.1
+          ③ ConverterParameter 重算（P5.15e 修正算錯）
+
+        P5.15e bug fix — 之前 P5.15c 算錯 ConverterParameter 用 47.1。實際
+        circumference / strokeThickness = 153.94 / 3 = 51.3，不是 47.1。pattern
+        比圓周短 → WPF 把 dash 在圓周 REPEAT → 低百分比（如 4.6% / 0.2%）看到
+        「兩個短弧」分裂在不同位置（user 截圖確認）。改回正確 51.3。
 
         Geometry (current 56 / margin=2 / stroke=3):
           - Ring outer diameter = 56 - 2*2 = 52
-          - Ring centerline radius = 52/2 - 3/2 = 24.5
-          - Circumference = 2π * 24.5 ≈ 153.9 px
-          - StrokeDashArray param = 153.9 / 3 ≈ 47.1
+          - Ring centerline radius = (52 - 3) / 2 = 24.5
+          - Circumference = 2π * 24.5 ≈ 153.94 px
+          - StrokeDashArray param = 153.94 / 3 ≈ 51.3 ✓
           - 中央可放字直徑 = 56 - 2*2 (margin) - 2*3 (stroke) = 46 px
             「61.9%」at Font.Size.Sm (12) SemiBold ≈ 35px wide → ~5.5px 兩邊呼吸
     -->
@@ -53,7 +58,7 @@
             Margin="2"
             RenderTransformOrigin="0.5,0.5"
             Stroke="{Binding FillBrush, ElementName=Root}"
-            StrokeDashArray="{Binding Percent, ElementName=Root, Converter={StaticResource PercentToDashArrayConverter}, ConverterParameter=47.1}"
+            StrokeDashArray="{Binding Percent, ElementName=Root, Converter={StaticResource PercentToDashArrayConverter}, ConverterParameter=51.3}"
             StrokeDashCap="Round"
             StrokeThickness="3">
             <Ellipse.RenderTransform>
