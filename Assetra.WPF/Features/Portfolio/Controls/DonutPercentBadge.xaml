@@ -38,10 +38,14 @@
             「61.9%」at Font.Size.Sm (12) SemiBold ≈ 35px wide → ~5.5px 兩邊呼吸
     -->
     <Grid>
-        <!--  Background ring  -->
+        <!--
+            Background ring — P5.15d: AppBorderLight 在 dark theme 跟 cell bg 太接近
+            幾乎隱形，user 看起來像 donut「分裂」。改用 AppBorder（darker, contrast 較高），
+            背景環明顯可見、整個 donut 一眼就是完整圓形。
+        -->
         <Ellipse
             Margin="2"
-            Stroke="{DynamicResource AppBorderLight}"
+            Stroke="{DynamicResource AppBorder}"
             StrokeThickness="3" />
 
         <!--  Foreground arc  -->
