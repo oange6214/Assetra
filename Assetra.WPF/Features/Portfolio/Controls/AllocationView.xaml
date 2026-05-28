@@ -229,7 +229,7 @@
                     HorizontalScrollBarVisibility="Auto"
                     IsReadOnly="True"
                     ItemsSource="{Binding AllocationRows}"
-                    RowHeight="{StaticResource DataGrid.RowHeight}"
+                    RowHeight="64"
                     SelectionMode="Single"
                     VirtualizingPanel.IsVirtualizing="True"
                     VirtualizingPanel.VirtualizationMode="Recycling">
@@ -250,15 +250,16 @@
                             P5.14 — 佔比 col 移到最前面，並用 P5.10 同款 DonutPercentBadge
                             （圓圈視覺 + 中央 % 文字）取代純數字。一眼可讀 magnitude + 識別色，
                             跟「投資資產」表格的視覺語言一致。
+                            P5.15 — Width 60→80 容納 DonutPercentBadge 升到 56px（從 44px）。
                         -->
-                        <DataGridTemplateColumn Width="60" SortMemberPath="ActualPercent">
+                        <DataGridTemplateColumn Width="80" SortMemberPath="ActualPercent">
                             <DataGridTemplateColumn.Header>
                                 <TextBlock Text="{DynamicResource Allocation.Col.ActualPct}" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
                                     <alloccontrols:DonutPercentBadge
-                                        Margin="8,2"
+                                        Margin="8,4"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         FillBrush="{Binding ColorBrush}"

@@ -5,24 +5,30 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="Root"
-    Width="44"
-    Height="44"
+    Width="56"
+    Height="56"
     mc:Ignorable="d">
 
     <!--
         P5.10 — Compact donut indicator: shows percentage as filled arc + text in center.
-        Used at the front of Allocation list rows (replaces the per-row horizontal bar)
-        so users can read「magnitude + asset identity + percent text」 in a single 44px
-        glance.
+        P5.15 — Resized 44→56 to give "51.5%" 等 5-char text 足夠呼吸空間。
+
+        Used at the front of Allocation list rows so users read
+        「magnitude + asset identity + percent text」in a single glance.
 
         Implementation: two stroked Ellipses overlay.
           - Background ring = AppBorderLight, full stroke (visible portion + invisible gap)
           - Foreground arc = FillBrush, StrokeDashArray driven by Percent via converter
-            (filled-dash + gap-dash = full circumference)
           - RotateTransform −90° rotates start point from 3 o'clock to 12 o'clock
           - StrokeDashCap=Round makes the arc's leading edge a smooth rounded tip
-          - Inner radius 18 (size 36), stroke 4 → circumference ≈ 113 pixels =
-            28.3 stroke-dash units (parameter "28.3")
+
+        Geometry (current 56 / margin=2 / stroke=4):
+          - Ring outer diameter = 56 - 2*2 = 52
+          - Ring centerline radius = 52/2 - 4/2 = 24
+          - Circumference = 2π * 24 ≈ 150.8 px
+          - StrokeDashArray param 是「圓周總長 / StrokeThickness」= 150.8 / 4 ≈ 37.7
+          - 中央可放字直徑 = 56 - 2*2 (margin) - 2*4 (stroke) − 4 (text breathing) = 40
+            「51.5%」at Font.Size.Sm (12) SemiBold ≈ 30px wide → 約 5px 兩邊呼吸
     -->
     <Grid>
         <!--  Background ring  -->
@@ -36,7 +42,7 @@
             Margin="2"
             RenderTransformOrigin="0.5,0.5"
             Stroke="{Binding FillBrush, ElementName=Root}"
-            StrokeDashArray="{Binding Percent, ElementName=Root, Converter={StaticResource PercentToDashArrayConverter}, ConverterParameter=28.3}"
+            StrokeDashArray="{Binding Percent, ElementName=Root, Converter={StaticResource PercentToDashArrayConverter}, ConverterParameter=37.7}"
             StrokeDashCap="Round"
             StrokeThickness="4">
             <Ellipse.RenderTransform>
@@ -44,12 +50,16 @@
             </Ellipse.RenderTransform>
         </Ellipse>
 
-        <!--  Center text  -->
+        <!--
+            Center text — 用 Sm 比原本 Xs 大一階，跟新尺寸對齊。
+            Margin 預留 stroke 內側 4px 緩衝，避免文字壓到圓弧邊緣。
+        -->
         <TextBlock
+            Margin="10,0"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             FontFamily="{StaticResource Font.Family.Base}"
-            FontSize="{StaticResource Font.Size.Xs}"
+            FontSize="{StaticResource Font.Size.Sm}"
             FontWeight="SemiBold"
             Foreground="{DynamicResource AppTextPrimary}"
             Text="{Binding PercentText, ElementName=Root}"
