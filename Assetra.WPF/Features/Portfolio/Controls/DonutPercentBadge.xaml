@@ -22,40 +22,43 @@
           - RotateTransform −90° rotates start point from 3 o'clock to 12 o'clock
           - StrokeDashCap=Round makes the arc's leading edge a smooth rounded tip
 
-        Geometry (current 56 / margin=2 / stroke=4):
+        P5.15c — User 反映 5-char (e.g. "61.9%") 文字仍貼 ring 邊。修法：
+          ① stroke 4→3：環細一點，內部可用空間 +2px 各邊（共 +4px）
+          ② 拿掉 TextBlock Margin="10,0"：原本想當 stroke buffer，但 TextBlock 在
+             Grid HorizontalAlignment=Center 已自動依文字寬度置中，Margin 反而把
+             BBox 強制縮成 36px 跟 35px 寬的文字 conflict。
+          ③ ConverterParameter 重算：stroke 3 + 新 radius → 47.1
+
+        Geometry (current 56 / margin=2 / stroke=3):
           - Ring outer diameter = 56 - 2*2 = 52
-          - Ring centerline radius = 52/2 - 4/2 = 24
-          - Circumference = 2π * 24 ≈ 150.8 px
-          - StrokeDashArray param 是「圓周總長 / StrokeThickness」= 150.8 / 4 ≈ 37.7
-          - 中央可放字直徑 = 56 - 2*2 (margin) - 2*4 (stroke) − 4 (text breathing) = 40
-            「51.5%」at Font.Size.Sm (12) SemiBold ≈ 30px wide → 約 5px 兩邊呼吸
+          - Ring centerline radius = 52/2 - 3/2 = 24.5
+          - Circumference = 2π * 24.5 ≈ 153.9 px
+          - StrokeDashArray param = 153.9 / 3 ≈ 47.1
+          - 中央可放字直徑 = 56 - 2*2 (margin) - 2*3 (stroke) = 46 px
+            「61.9%」at Font.Size.Sm (12) SemiBold ≈ 35px wide → ~5.5px 兩邊呼吸
     -->
     <Grid>
         <!--  Background ring  -->
         <Ellipse
             Margin="2"
             Stroke="{DynamicResource AppBorderLight}"
-            StrokeThickness="4" />
+            StrokeThickness="3" />
 
         <!--  Foreground arc  -->
         <Ellipse
             Margin="2"
             RenderTransformOrigin="0.5,0.5"
             Stroke="{Binding FillBrush, ElementName=Root}"
-            StrokeDashArray="{Binding Percent, ElementName=Root, Converter={StaticResource PercentToDashArrayConverter}, ConverterParameter=37.7}"
+            StrokeDashArray="{Binding Percent, ElementName=Root, Converter={StaticResource PercentToDashArrayConverter}, ConverterParameter=47.1}"
             StrokeDashCap="Round"
-            StrokeThickness="4">
+            StrokeThickness="3">
             <Ellipse.RenderTransform>
                 <RotateTransform Angle="-90" />
             </Ellipse.RenderTransform>
         </Ellipse>
 
-        <!--
-            Center text — 用 Sm 比原本 Xs 大一階，跟新尺寸對齊。
-            Margin 預留 stroke 內側 4px 緩衝，避免文字壓到圓弧邊緣。
-        -->
+        <!--  Center text — 無 Margin：TextBlock 在 Grid 內 HorizontalAlignment=Center 已用文字自然寬度置中  -->
         <TextBlock
-            Margin="10,0"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             FontFamily="{StaticResource Font.Family.Base}"
