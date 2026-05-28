@@ -1,4 +1,5 @@
 using System.Windows.Media;
+using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -13,12 +14,37 @@ public sealed partial class AllocationRowViewModel : ObservableObject
     public string AssetCategory { get; }  // "stock" | "fund" | "crypto" | "bond" | "metal" | "cash"
     public bool IsCashRow => AssetCategory == "cash";
 
-    // Market data (updated live via Refresh)
-    [ObservableProperty] private decimal _marketValue;   // TWD
-    [ObservableProperty] private decimal _currentPrice;  // per share/unit; 0 for cash
-    [ObservableProperty] private decimal _pnl;
+    /// <summary>
+    /// P5.17 — 列的原幣 currency code (NormalizedCurrency: "TWD" / "USD" / "JPY" / ...).
+    /// 用於 *AsMoney 屬性產生 currency-aware 顯示（例：US$60.51 / NT$108.87）。
+    /// </summary>
+    public string Currency { get; }
+
+    // Market data (updated live via Refresh) — NATIVE currency
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MarketValueAsMoney))]
+    private decimal _marketValue;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentPriceAsMoney))]
+    private decimal _currentPrice;  // per share/unit; 0 for cash
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PnlAsMoney))]
+    [NotifyPropertyChangedFor(nameof(PnlDisplay))]
+    private decimal _pnl;
     [ObservableProperty] private decimal _pnlPercent;
     [ObservableProperty] private bool _isPnlPositive;
+
+    /// <summary>
+    /// P5.17 — Base-currency 換算值（TWD）。用於跨幣別比例計算 + insight cards 聚合。
+    /// AllocationViewModel 用此值算 ActualPercent 與全 portfolio total，避免直接 sum
+    /// native MarketValue 混合 USD / TWD 算出失真的百分比。
+    /// </summary>
+    [ObservableProperty] private decimal _marketValueBase;
+
+    /// <summary>P5.17 — 列的市值用 Money 包裝，給 CurrencyConverter 渲染對應幣別符號。</summary>
+    public Money MarketValueAsMoney => new(MarketValue, Currency);
+    public Money CurrentPriceAsMoney => new(CurrentPrice, Currency);
+    public Money PnlAsMoney => new(Pnl, Currency);
 
     partial void OnMarketValueChanged(decimal _) => RebuildDerived();
     partial void OnPnlPercentChanged(decimal _)
@@ -87,6 +113,7 @@ public sealed partial class AllocationRowViewModel : ObservableObject
                 return "無動作";
             var abs = Math.Abs(BuySellAmount);
             var label = IsBuy ? "買入" : "賣出";
+            // P5.17 — BuySellAmount 是 base TWD（VM 用 base 算 target gap），用 NT$ 標示符合語意。
             return $"{label} NT${abs:N0}";
         }
     }
@@ -99,12 +126,31 @@ public sealed partial class AllocationRowViewModel : ObservableObject
         _ => $"{ActualPercent:F1}%",
     };
     public double AllocationBarMinWidth => ActualPercent > 0m ? 3d : 0d;
+    /// <summary>
+    /// P5.17 — Pnl 顯示帶 currency-aware 符號（NT$ / US$ / ...）。0 + cash 顯示「-」。
+    /// 原本 hardcoded "NT$" 對 USD 標的會顯示成 "NT$+XX" 跟列其他欄位幣別不一致。
+    /// </summary>
     public string PnlDisplay => Pnl == 0 && AssetCategory == "cash"
         ? "-"
-        : (IsPnlPositive ? "+" : "") + $"NT${Pnl:N0}";
+        : (IsPnlPositive ? "+" : "-") + $"{ResolveSymbol(Currency)}{Math.Abs(Pnl):N0}";
     public string PnlPercentDisplay => Pnl == 0 && AssetCategory == "cash"
         ? ""
         : $"({(IsPnlPositive ? "+" : "")}{PnlPercent:F2}%)";
+
+    /// <summary>
+    /// P5.17 — 取得 currency 對應符號。跟 CurrencyConverter.GetSymbol 邏輯一致
+    /// （TWD 預設 / USD=US$ / JPY=¥ / EUR=€ / HKD=HK$）；那邊是 private，這裡複製
+    /// 為了 VM-side display string 也能套用同樣規則。
+    /// </summary>
+    private static string ResolveSymbol(string currency) =>
+        currency?.Trim().ToUpperInvariant() switch
+        {
+            "USD" => "US$",
+            "JPY" => "¥",
+            "EUR" => "€",
+            "HKD" => "HK$",
+            _ => "NT$",
+        };
 
     /// <summary>Treemap-style gain display without parens, e.g. "+3.40%" or "-1.20%".</summary>
     public string PnlPercentTreemap => AssetCategory == "cash"
@@ -119,7 +165,10 @@ public sealed partial class AllocationRowViewModel : ObservableObject
         string symbol, string name, string assetCategory,
         decimal marketValue, decimal currentPrice,
         decimal pnl, decimal pnlPercent,
-        SolidColorBrush colorBrush)
+        SolidColorBrush colorBrush,
+        // P5.17 — currency-aware 顯示用：marketValueBase 給比例 / native + currency 給渲染。
+        decimal marketValueBase = 0m,
+        string currency = "TWD")
     {
         Symbol = symbol;
         Name = name;
@@ -130,6 +179,8 @@ public sealed partial class AllocationRowViewModel : ObservableObject
         _pnlPercent = pnlPercent;
         _isPnlPositive = pnl >= 0;
         ColorBrush = colorBrush;
+        _marketValueBase = marketValueBase > 0 ? marketValueBase : marketValue;
+        Currency = string.IsNullOrWhiteSpace(currency) ? "TWD" : currency.Trim().ToUpperInvariant();
     }
 
     /// <summary>Called by AllocationViewModel after computing buy/sell amounts.</summary>

@@ -245,9 +245,13 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
 
     private void OnRowPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        // P5.17 — 加 MarketValueBase / PnlBase：之前只聽 native 屬性，但 AllocationVM 改用
+        // *Base 跑跨幣別聚合後，base 屬性變動也要觸發 Rebuild（否則 FX 重算後 % 不刷）。
         if (e.PropertyName is nameof(PortfolioRowViewModel.MarketValue)
+                           or nameof(PortfolioRowViewModel.MarketValueBase)
                            or nameof(PortfolioRowViewModel.CurrentPrice)
-                           or nameof(PortfolioRowViewModel.Pnl))
+                           or nameof(PortfolioRowViewModel.Pnl)
+                           or nameof(PortfolioRowViewModel.PnlBase))
             Rebuild();
     }
 
@@ -275,6 +279,12 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         // Currency 模式用 MarketValue (native) 加總，跨幣別不混淆；
         // 但每幣別 bucket 的占比仍以 native 加總 ÷ 全 portfolio MarketValue 計算——
         // 這個近似在 base-currency 單一時等價於 base 換算，UI 上不會誤導。
+        // P5.17 — 加 ValueBase + Currency 給 currency-aware 顯示 + 跨幣別正確比例計算。
+        //   - Symbol grouping: g 同 symbol = 同幣別，native sum 跟 base sum 分別記錄；
+        //     ValueBase 給 ActualPercent 跟 insight cards 聚合（跨幣別可比較）；
+        //     Value 給 row display（原幣保留）。
+        //   - Group / Currency grouping：group 內可能混幣別 → Value 用 base aggregate，
+        //     Currency 設 "TWD"（aggregate base unit）。
         var investItems = GroupingMode switch
         {
             AllocationGroupingMode.Group => _portfolio.Positions
@@ -283,12 +293,14 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
                     Symbol: ResolveGroupLabel(g.Key),
                     Name: ResolveGroupLabel(g.Key),
                     Cat: "Group",
-                    Value: g.Sum(p => p.MarketValue),
+                    Value: g.Sum(p => p.MarketValueBase),
+                    ValueBase: g.Sum(p => p.MarketValueBase),
                     Price: 0m,
-                    Pnl: g.Sum(p => p.Pnl),
-                    PnlPct: g.Sum(p => p.MarketValue) > 0m
-                        ? g.Sum(p => p.Pnl) / g.Sum(p => p.MarketValue) * 100m
-                        : 0m))
+                    Pnl: g.Sum(p => p.PnlBase),
+                    PnlPct: g.Sum(p => p.MarketValueBase) > 0m
+                        ? g.Sum(p => p.PnlBase) / g.Sum(p => p.MarketValueBase) * 100m
+                        : 0m,
+                    Currency: "TWD"))
                 .OrderByDescending(i => i.Value)
                 .ToList(),
             AllocationGroupingMode.Currency => _portfolio.Positions
@@ -298,12 +310,14 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
                     Name: g.Key,
                     Cat: "Currency",
                     Value: g.Sum(p => p.MarketValue),
+                    ValueBase: g.Sum(p => p.MarketValueBase),
                     Price: 0m,
                     Pnl: g.Sum(p => p.Pnl),
-                    PnlPct: g.Sum(p => p.MarketValue) > 0m
-                        ? g.Sum(p => p.Pnl) / g.Sum(p => p.MarketValue) * 100m
-                        : 0m))
-                .OrderByDescending(i => i.Value)
+                    PnlPct: g.Sum(p => p.MarketValueBase) > 0m
+                        ? g.Sum(p => p.PnlBase) / g.Sum(p => p.MarketValueBase) * 100m
+                        : 0m,
+                    Currency: g.Key))
+                .OrderByDescending(i => i.ValueBase)
                 .ToList(),
             _ => _portfolio.Positions
                 .GroupBy(p => p.Symbol)
@@ -312,14 +326,19 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
                     Name: g.First().Name,
                     Cat: CategoryOf(g.First()),
                     Value: g.Sum(p => p.MarketValue),
+                    ValueBase: g.Sum(p => p.MarketValueBase),
                     Price: g.First().CurrentPrice,
                     Pnl: g.Sum(p => p.Pnl),
-                    PnlPct: g.Average(p => p.PnlPercent)))
-                .OrderByDescending(i => i.Value)
+                    PnlPct: g.Average(p => p.PnlPercent),
+                    Currency: string.IsNullOrWhiteSpace(g.First().Currency)
+                        ? "TWD"
+                        : g.First().Currency.Trim().ToUpperInvariant()))
+                .OrderByDescending(i => i.ValueBase)
                 .ToList(),
         };
 
-        var investTotal = investItems.Sum(i => i.Value);
+        // P5.17 — total 用 base aggregate（跨幣別正確比較）。
+        var investTotal = investItems.Sum(i => i.ValueBase);
 
         // 投資資產頁的配置分析只呈現投資商品本身，不混入現金帳戶。
         // 全域現金與總資產由「財務儀表板」負責，避免兩個頁面說不同故事。
@@ -327,7 +346,10 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         TotalValue = investTotal;
         TotalInvestment = investTotal;
         TotalCash = 0m;
-        TotalPnl = investItems.Sum(i => i.Pnl);
+        // P5.17 — TotalPnl 走 base aggregate（跨幣別 sum 才正確）。對 Symbol grouping
+        // 用 g.Sum(PnlBase) 比較對；目前 tuple 的 i.Pnl 對 Symbol 模式還是 native，
+        // 改用 base 同步。
+        TotalPnl = _portfolio.Positions.Sum(p => p.PnlBase);
         AssetCount = investItems.Count;
 
         // Build investment rows (palette colors assigned by investment rank)
@@ -337,15 +359,19 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
             var item = investItems[idx];
             var row = new AllocationRowViewModel(
                 item.Symbol, item.Name, item.Cat,
-                item.Value, item.Price, item.Pnl, item.PnlPct, Palette[idx % Palette.Length]);
-            row.ActualPercent = denominator > 0 ? item.Value / denominator * 100m : 0m;
+                item.Value, item.Price, item.Pnl, item.PnlPct, Palette[idx % Palette.Length],
+                // P5.17 — 傳 base value + 原幣 currency 給 row display 用。
+                marketValueBase: item.ValueBase,
+                currency: item.Currency);
+            // P5.17 — ActualPercent 用 base sum 才有跨幣別意義（denominator 已是 base）。
+            row.ActualPercent = denominator > 0 ? item.ValueBase / denominator * 100m : 0m;
             row.TargetPercent = targets.TryGetValue(item.Symbol, out var t) ? t : 0m;
             row.EditTargetText = row.TargetPercent.ToString("G");
             allRows.Add(row);
         }
 
-        // Final sort
-        allRows.Sort((a, b) => b.MarketValue.CompareTo(a.MarketValue));
+        // Final sort — 用 base 比較（跨幣別 native sort 會誤把 USD 數字當小數）。
+        allRows.Sort((a, b) => b.MarketValueBase.CompareTo(a.MarketValueBase));
 
         _allocationRows.Clear();
         foreach (var row in allRows)
@@ -367,18 +393,22 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         var tail = rows.Where(r => r.ActualPercent is > 0m and <= 1m).ToList();
         var averagePercent = rows.Count > 0 ? 100m / rows.Count : 0m;
 
+        // P5.17 — 「最大配置」subtitle 用 native (row.MarketValue + Currency) 顯示
+        //   個別資產原幣，例：「Roundhill Memory ETF · US$13,917」、
+        //   「緯創 · NT$5,780,000」。其他 cards 是 mixed-currency aggregate sum，
+        //   必須走 base TWD（FormatTwd）才有意義。
         _allocationInsightCards.Add(new AllocationInsightCardViewModel(
             "最大配置",
             largest.Symbol,
             largest.ActualPercentDisplay,
-            $"{largest.Name} · {FormatTwd(largest.MarketValue)}",
+            $"{largest.Name} · {FormatNative(largest.MarketValue, largest.Currency)}",
             largest.ColorBrush));
 
         _allocationInsightCards.Add(new AllocationInsightCardViewModel(
             "集中度",
             "前 3 大",
             FormatPercent(topThree.Sum(r => r.ActualPercent)),
-            $"合計 {FormatTwd(topThree.Sum(r => r.MarketValue))}",
+            $"合計 {FormatTwd(topThree.Sum(r => r.MarketValueBase))}",
             Palette[0]));
 
         _allocationInsightCards.Add(new AllocationInsightCardViewModel(
@@ -387,7 +417,7 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
             tail.Count.ToString("N0"),
             tail.Count == 0
                 ? "沒有極小配置"
-                : $"合計 {FormatPercent(tail.Sum(r => r.ActualPercent))} · {FormatTwd(tail.Sum(r => r.MarketValue))}",
+                : $"合計 {FormatPercent(tail.Sum(r => r.ActualPercent))} · {FormatTwd(tail.Sum(r => r.MarketValueBase))}",
             Palette[4]));
 
         _allocationInsightCards.Add(new AllocationInsightCardViewModel(
@@ -405,6 +435,24 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     };
 
     private static string FormatTwd(decimal value) => $"NT${value:N0}";
+
+    /// <summary>
+    /// P5.17 — Currency-aware 顯示：給 "最大配置" insight subtitle 用單一 row 的
+    /// native value + currency 渲染（例：DRAM 是「US$13,917」、緯創是「NT$5,780,000」）。
+    /// 跟 AllocationRowViewModel.ResolveSymbol 對齊 CurrencyConverter.GetSymbol。
+    /// </summary>
+    private static string FormatNative(decimal value, string currency)
+    {
+        var symbol = currency?.Trim().ToUpperInvariant() switch
+        {
+            "USD" => "US$",
+            "JPY" => "¥",
+            "EUR" => "€",
+            "HKD" => "HK$",
+            _ => "NT$",
+        };
+        return $"{symbol}{value:N0}";
+    }
 
     private void RebuildBuySell()
     {

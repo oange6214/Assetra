@@ -50,7 +50,12 @@ public sealed class AllocationViewModelTests
             Quantity = 100m,
             CurrentPrice = marketValue / 100m,
             MarketValue = marketValue,
+            // P5.17 — AllocationViewModel 改用 MarketValueBase 跑跨幣別聚合 /
+            // ActualPercent denominator。Fixture 都是 TWD（單幣別）所以 base == native。
+            // 不設的話 base = 0，導致 TotalInvestment = 0、ActualPercent = 0 等 test 全 fail。
+            MarketValueBase = marketValue,
             Pnl = pnl,
+            PnlBase = pnl,
             Currency = "TWD",
         };
 
@@ -182,6 +187,11 @@ public sealed class AllocationViewModelTests
         var vm = new AllocationViewModel(feed);
         Assert.Equal(500m, vm.TotalInvestment);
 
+        // P5.17 — Production: 價格變動會跑 RebuildTotals → ApplyPositionBaseValuations，
+        // 同步寫 MarketValue + MarketValueBase；test 需要 mirror 同樣的寫法（AllocationVM
+        // 現在用 MarketValueBase 做聚合）。先設 base 再設 native，第二次 PropertyChanged
+        // 觸發 Rebuild 時 base 已是新值。
+        a.MarketValueBase = 1500m;
         a.MarketValue = 1500m;
 
         Assert.Equal(1500m, vm.TotalInvestment);

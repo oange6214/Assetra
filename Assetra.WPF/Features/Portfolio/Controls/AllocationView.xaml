@@ -327,7 +327,7 @@
                                         FontFamily="{StaticResource Font.Family.Base}"
                                         FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextSecondary}"
-                                        Text="{Binding CurrentPrice, StringFormat='NT\${0:N0}'}"
+                                        Text="{Binding CurrentPriceAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}"
                                         Typography.NumeralAlignment="Tabular" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -353,7 +353,7 @@
                                         FontSize="{StaticResource Font.Size.Sm}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding MarketValue, StringFormat='NT\${0:N0}'}"
+                                        Text="{Binding MarketValueAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
                                         Typography.NumeralAlignment="Tabular" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
