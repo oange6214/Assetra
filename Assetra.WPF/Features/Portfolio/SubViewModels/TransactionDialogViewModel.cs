@@ -2333,6 +2333,20 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 Transfer.Target = row.ToCashAccountId is { } txDstAcc
                     ? CashAccounts.FirstOrDefault(c => c.Id == txDstAcc) : null;
                 break;
+
+            // P5.16 — 補上信用卡兩個 type 的 restore case。原本 switch 漏這兩個 case
+            // → 編輯紀錄 modal 開起來欄位全空白（CreditCard.Card 是 switch 之外設定的
+            // 所以信用卡 picker 還有值，但 TxAmount / TxCashAccount 維持 reset 後的空字串
+            // 跟 null）。Controller 已在 editState 把 TxAmount / TxCashAccount 帶好。
+            //   Charge:  conform 用 TxAmount + CreditCard.Card + TxNote (不用 cash 帳戶)
+            //   Payment: conform 用 TxAmount + CreditCard.Card + TxCashAccount + TxNote
+            // 兩個 type 統一 restore，多塞的 TxCashAccount 對 Charge confirm 無影響。
+            case TradeType.CreditCardCharge:
+            case TradeType.CreditCardPayment:
+                TxAmount = editState.TxAmount;
+                TxCashAccount = editState.TxCashAccount;
+                TxUseCashAccount = editState.TxUseCashAccount;
+                break;
         }
 
         // Portfolio-Groups-Refactor P3 — 還原 SelectedPortfolioGroup 自編輯目標 trade 的 PortfolioGroupId。
