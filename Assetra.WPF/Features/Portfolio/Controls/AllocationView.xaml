@@ -150,19 +150,19 @@
                                         CornerRadius="{StaticResource Radius.Xl}">
                                         <Grid>
                                             <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="*" />
                                                 <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
 
-                                            <Border
-                                                Width="36"
-                                                Height="3"
-                                                HorizontalAlignment="Left"
-                                                Background="{Binding AccentBrush}"
-                                                CornerRadius="{StaticResource Radius.Full}" />
+                                            <!--
+                                                P5.14 — 拿掉頂部 36x3 AccentBrush 色塊。
+                                                User 反映「色塊很多餘」+ 視覺很醜；卡片內已有 Metric
+                                                大數字 + Label + Primary 三層資訊，識別已足夠不需要
+                                                pre-attentive 顏色帶子。AccentBrush DP 留在 VM（可能
+                                                之後另外用）但 XAML 不再渲染。
+                                            -->
 
-                                            <StackPanel Grid.Row="1" Margin="0,10,0,8">
+                                            <StackPanel Grid.Row="0" Margin="0,2,0,8">
                                                 <TextBlock
                                                     FontSize="{StaticResource Font.Size.Xs}"
                                                     Foreground="{DynamicResource AppTextMuted}"
@@ -185,7 +185,7 @@
                                             </StackPanel>
 
                                             <TextBlock
-                                                Grid.Row="2"
+                                                Grid.Row="1"
                                                 FontSize="{StaticResource Font.Size.Xs}"
                                                 Foreground="{DynamicResource AppTextMuted}"
                                                 Text="{Binding Secondary}"
@@ -246,7 +246,32 @@
 
                     <DataGrid.Columns>
 
-                        <!--  資產 (Symbol + Name)  -->
+                        <!--
+                            P5.14 — 佔比 col 移到最前面，並用 P5.10 同款 DonutPercentBadge
+                            （圓圈視覺 + 中央 % 文字）取代純數字。一眼可讀 magnitude + 識別色，
+                            跟「投資資產」表格的視覺語言一致。
+                        -->
+                        <DataGridTemplateColumn Width="60" SortMemberPath="ActualPercent">
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock Text="{DynamicResource Allocation.Col.ActualPct}" />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
+                                    <alloccontrols:DonutPercentBadge
+                                        Margin="8,2"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        FillBrush="{Binding ColorBrush}"
+                                        Percent="{Binding ActualPercentWeight}"
+                                        PercentText="{Binding ActualPercentDisplay}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!--
+                            資產 (Symbol + Name) — P5.14 拿掉 10x10 色塊：donut badge 已帶識別色，
+                            這裡再放色塊重複。
+                        -->
                         <DataGridTemplateColumn
                             Width="*"
                             MinWidth="100"
@@ -257,22 +282,13 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
                                     <StackPanel Margin="8,0" VerticalAlignment="Center">
-                                        <DockPanel>
-                                            <Border
-                                                Width="10"
-                                                Height="10"
-                                                Margin="0,0,6,0"
-                                                VerticalAlignment="Center"
-                                                Background="{Binding ColorBrush}"
-                                                CornerRadius="{StaticResource Radius.Xs}" />
-                                            <TextBlock
-                                                FontSize="{StaticResource Font.Size.Sm}"
-                                                FontWeight="SemiBold"
-                                                Foreground="{DynamicResource AppTextPrimary}"
-                                                Text="{Binding Symbol}" />
-                                        </DockPanel>
                                         <TextBlock
-                                            Margin="16,1,0,0"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding Symbol}" />
+                                        <TextBlock
+                                            Margin="0,1,0,0"
                                             FontSize="{StaticResource Font.Size.Xs}"
                                             Foreground="{DynamicResource AppTextMuted}"
                                             Text="{Binding Name}"
@@ -333,31 +349,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <!--  佔比  -->
-                        <DataGridTemplateColumn Width="88" SortMemberPath="ActualPercent">
-                            <DataGridTemplateColumn.HeaderStyle>
-                                <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Right" />
-                                </Style>
-                            </DataGridTemplateColumn.HeaderStyle>
-                            <DataGridTemplateColumn.Header>
-                                <TextBlock Text="{DynamicResource Allocation.Col.ActualPct}" />
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
-                                    <TextBlock
-                                        Margin="0,0,8,0"
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Center"
-                                        FontFamily="{StaticResource Font.Family.Base}"
-                                        FontSize="{StaticResource Font.Size.Sm}"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding ActualPercentDisplay}"
-                                        Typography.NumeralAlignment="Tabular" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                        <!--  P5.14 — 舊的純數字「佔比」col 已被 donut col 取代（移到最前面）。 -->
 
                         <!--  淨損益  -->
                         <DataGridTemplateColumn Width="130" SortMemberPath="Pnl">
