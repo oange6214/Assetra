@@ -248,18 +248,27 @@
 
                         <!--
                             P5.14 — 佔比 col 移到最前面，並用 P5.10 同款 DonutPercentBadge
-                            （圓圈視覺 + 中央 % 文字）取代純數字。一眼可讀 magnitude + 識別色，
-                            跟「投資資產」表格的視覺語言一致。
+                            （圓圈視覺 + 中央 % 文字）取代純數字。一眼可讀 magnitude + 識別色。
                             P5.15 — Width 60→80 容納 DonutPercentBadge 升到 56px（從 44px）。
+                            P5.15b — User 反映 80 仍偏窄會切到 donut；改用 Width=100 多留 20px
+                            空間（badge 56 + margin 12 = 68 px 需求，100 留 32 px 餘裕，
+                            即使 DataGridCell template 內部還有 padding 也不會切到）。
+                            HeaderStyle 加 HorizontalContentAlignment=Center 讓 header 文字
+                            跟下面 donut 視覺對齊（原本 default Left 看起來頭尾不齊）。
                         -->
-                        <DataGridTemplateColumn Width="80" SortMemberPath="ActualPercent">
+                        <DataGridTemplateColumn Width="100" SortMemberPath="ActualPercent">
+                            <DataGridTemplateColumn.HeaderStyle>
+                                <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTemplateColumn.HeaderStyle>
                             <DataGridTemplateColumn.Header>
                                 <TextBlock Text="{DynamicResource Allocation.Col.ActualPct}" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate DataType="{x:Type vm:AllocationRowViewModel}">
                                     <alloccontrols:DonutPercentBadge
-                                        Margin="8,4"
+                                        Margin="6,4"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         FillBrush="{Binding ColorBrush}"
