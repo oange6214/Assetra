@@ -743,8 +743,18 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             var hit = assets.FirstOrDefault(a => a.Kind == TxAssetKind.CashAccount && a.Id == cashId);
             if (hit is not null) return hit;
         }
-        // 4. Loan / CreditCard → Liability by AssetId
-        // (Trade row 沒有直接的 LiabilityId — 留給 P2.3+ 進一步串連)
+        // 4. Loan / CreditCard → Liability by LiabilityAssetId
+        // P5.16 — TradeRowViewModel.LiabilityAssetId 早就存在了，舊註解誤導。
+        // CreditCardCharge / CreditCardPayment / LoanBorrow / LoanRepay 都會記錄
+        // 對應的負債 AssetId，picker 應該帶入該負債作 SelectedAsset 提示使用者
+        // 「這筆是哪張卡 / 哪筆貸款」。
+        if (row.Type is TradeType.CreditCardCharge or TradeType.CreditCardPayment
+                or TradeType.LoanBorrow or TradeType.LoanRepay
+            && row.LiabilityAssetId is { } liabId)
+        {
+            var hit = assets.FirstOrDefault(a => a.Kind == TxAssetKind.Liability && a.Id == liabId);
+            if (hit is not null) return hit;
+        }
         return null;
     }
 
@@ -2131,14 +2141,20 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Div.InputMode = "perShare";
         Div.TotalInput = string.Empty;
 
-        TxType = editState.TxType;
-        CreditCard.Card = editState.TxCreditCard;
-
-        // P2.2 — 編輯既有 trade 時嘗試還原 SelectedAsset 給 picker 顯示。寬鬆模式：找不到
-        // 對應的 Position / CashAccount / Liability 時保留 null（picker 顯示空白），不阻擋編輯。
-        // _userTouchedCurrency 設為 true 以避免下方的 cascade 把使用者原本記錄的 currency 蓋掉。
+        // P5.16 — Reorder: SelectedAsset BEFORE TxType。
+        //   AvailableTradeTypes 是依 SelectedAsset.Kind 過濾的（line 309-317）。
+        //   若先 TxType = "creditCardCharge"，此時 SelectedAsset=null →
+        //   AvailableTradeTypes=[] → ComboBox 找不到 "creditCardCharge" 對應 item →
+        //   類型 picker 顯示「請選擇類型」placeholder（即使 TxType 值已正確）。
+        //   反過來：先 SelectedAsset = liability → AvailableTradeTypes 含 4 個信用卡/貸款
+        //   type → 再設 TxType ComboBox 能正確 match。
+        //   OnSelectedAssetChanged 第 3 步會做 type 合法性 fallback，但我們緊接著 override，
+        //   不影響最終值。
+        //   _userTouchedCurrency 設為 true 以避免下方的 cascade 把使用者原本記錄的 currency 蓋掉。
         _userTouchedCurrency = true;
         SelectedAsset = ResolveAssetSubjectForTrade(row);
+        TxType = editState.TxType;
+        CreditCard.Card = editState.TxCreditCard;
 
         switch (row.Type)
         {
