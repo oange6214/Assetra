@@ -57,7 +57,7 @@
                                         FontSize="{StaticResource Font.Size.Sm}"
                                         FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding MarketValue, StringFormat='NT\${0:N0}'}"
+                                        Text="{Binding MarketValueBase, StringFormat='NT\${0:N0}'}"
                                         Typography.NumeralAlignment="Tabular" />
                                     <StackPanel>
                                         <TextBlock
@@ -373,7 +373,7 @@
                                     FontSize="{StaticResource Font.Size.Sm}"
                                     FontWeight="SemiBold"
                                     Foreground="{DynamicResource AppTextPrimary}"
-                                    Text="{Binding MarketValue, StringFormat='NT\${0:N0}'}"
+                                    Text="{Binding MarketValueBase, StringFormat='NT\${0:N0}'}"
                                     Typography.NumeralAlignment="Tabular" />
                                 <Grid Height="3" Margin="0,3,0,0">
                                     <Border Background="{DynamicResource AppBorder}" CornerRadius="1.5" />

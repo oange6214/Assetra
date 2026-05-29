@@ -1685,7 +1685,7 @@
     <sys:String x:Key="AuditLog.Detail.RawJson">原始 JSON（debug）</sys:String>
     <sys:String x:Key="Settings.Fx.Title">匯率（Frankfurter 即時來源）</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">上次更新：</sys:String>
-    <sys:String x:Key="Settings.Fx.NeverRefreshed">尚未更新</sys:String>
+    <sys:String x:Key="Settings.Fx.NeverRefreshed">尚未更新（使用預設匯率，請點下方「刷新」拉最新值）</sys:String>
     <sys:String x:Key="Settings.Fx.Refresh">立即刷新</sys:String>
     <sys:String x:Key="Settings.Fx.Source">資料來源 https://api.frankfurter.app；應用程式啟動時亦會自動嘗試刷新一次。</sys:String>
     <sys:String x:Key="Import.PdfPreview.Title">PDF 頁面文字預覽（檢查 OCR 結果）</sys:String>

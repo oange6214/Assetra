@@ -1680,7 +1680,7 @@
     <sys:String x:Key="AuditLog.Detail.RawJson">Raw JSON (debug)</sys:String>
     <sys:String x:Key="Settings.Fx.Title">Exchange rates (Frankfurter live source)</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">Last refreshed:</sys:String>
-    <sys:String x:Key="Settings.Fx.NeverRefreshed">Never refreshed</sys:String>
+    <sys:String x:Key="Settings.Fx.NeverRefreshed">Never refreshed (using default rates — click Refresh below)</sys:String>
     <sys:String x:Key="Settings.Fx.Refresh">Refresh now</sys:String>
     <sys:String x:Key="Settings.Fx.Source">Source: https://api.frankfurter.app; the app also tries to refresh once at startup.</sys:String>
     <sys:String x:Key="Import.PdfPreview.Title">PDF page text preview (verify OCR output)</sys:String>
