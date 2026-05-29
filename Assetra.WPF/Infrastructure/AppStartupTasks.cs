@@ -20,15 +20,46 @@ internal static class AppStartupTasks
 
     public static void StartBackgroundWarmups(IServiceProvider provider, string assetsDir)
     {
+        // P5.17c — startup FX refresh：失敗時 surface snackbar 帶 retry。原本
+        // exception 只進 Log，user 沒法知道 rates 退到 hardcoded defaults，
+        // 看到 Allocation 顯示舊值會疑惑「為什麼匯率沒生效」(實際是初始 fetch
+        // 失敗、用 defaults)。
         _ = Task.Run(async () =>
         {
+            var currency = provider.GetRequiredService<ICurrencyService>();
             try
             {
-                await provider.GetRequiredService<ICurrencyService>().RefreshRatesAsync().ConfigureAwait(false);
+                await currency.RefreshRatesAsync().ConfigureAwait(false);
+                // 成功就靜默；user 之後用 Allocation/Trends 自動會看到正確的 rate
+                // （CurrencyChanged 已 cascade 到 PortfolioViewModel.OnCurrencyChanged
+                // → RebuildTotals → ApplyPositionBaseValuations）。
             }
             catch (Exception ex)
             {
                 Log.Warning(ex, "Background task {Task} failed at startup", nameof(ICurrencyService.RefreshRatesAsync));
+                // 推 snackbar 到 UI thread 帶「重試」action — 一鍵重試直接呼叫
+                // RefreshRatesAsync，成功就觸發 CurrencyChanged 整條鏈刷新。
+                var snackbar = provider.GetService<ISnackbarService>();
+                var localization = provider.GetService<ILocalizationService>();
+                if (snackbar is not null)
+                {
+                    var msg = localization?.Get(
+                        "Settings.Fx.StartupFailed",
+                        "匯率自動更新失敗，目前使用預設值。") ?? "匯率自動更新失敗，目前使用預設值。";
+                    var retryLabel = localization?.Get("Common.Retry", "重試") ?? "重試";
+                    System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+                        snackbar.Show(msg, retryLabel, () =>
+                        {
+                            _ = Task.Run(async () =>
+                            {
+                                try { await currency.RefreshRatesAsync().ConfigureAwait(false); }
+                                catch (Exception retryEx)
+                                {
+                                    Log.Warning(retryEx, "User-triggered FX refresh retry failed");
+                                }
+                            });
+                        }, SnackbarKind.Warning));
+                }
             }
         });
 

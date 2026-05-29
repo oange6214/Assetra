@@ -112,6 +112,8 @@
     <sys:String x:Key="Common.Target">Asset</sys:String>
     <sys:String x:Key="Common.Price">Price</sys:String>
     <sys:String x:Key="Common.Cancel">Cancel</sys:String>
+    <sys:String x:Key="Common.Retry">Retry</sys:String>
+    <sys:String x:Key="Settings.Fx.StartupFailed">FX rates couldn't be refreshed — using defaults. Allocation / Trends conversions may be off.</sys:String>
     <sys:String x:Key="Common.Save">Save</sys:String>
     <sys:String x:Key="Common.Edit">Edit</sys:String>
     <sys:String x:Key="Common.Search.Placeholder">Search...</sys:String>
