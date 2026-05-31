@@ -36,7 +36,8 @@ internal sealed class FakeTradeRepo : ITradeRepository
     public Task UpdateAsync(Trade t, CancellationToken ct = default)
     {
         var i = Store.FindIndex(x => x.Id == t.Id);
-        if (i >= 0) Store[i] = t;
+        if (i >= 0)
+            Store[i] = t;
         return Task.CompletedTask;
     }
 
@@ -72,8 +73,12 @@ internal sealed class FakeTradeRepo : ITradeRepository
         {
             switch (m)
             {
-                case AddTradeMutation add: Store.Add(add.Trade); break;
-                case RemoveTradeMutation rem: Store.RemoveAll(t => t.Id == rem.Id); break;
+                case AddTradeMutation add:
+                    Store.Add(add.Trade);
+                    break;
+                case RemoveTradeMutation rem:
+                    Store.RemoveAll(t => t.Id == rem.Id);
+                    break;
             }
         }
         return Task.CompletedTask;

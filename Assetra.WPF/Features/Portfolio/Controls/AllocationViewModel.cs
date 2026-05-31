@@ -1,12 +1,9 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
-using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Assetra.Core.Interfaces;
-using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.Contracts;
 using Assetra.WPF.Features.PortfolioGroups;
 using Assetra.WPF.Infrastructure;
@@ -94,7 +91,8 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
         // Portfolio-Groups-Refactor P4 — Rebalance 用 per-symbol target 比例，by-group
         // 或 by-currency 模式下 row.Symbol = group/ccy 名稱，會跟 targets dict 完全錯位。
         // 離開 Overview 時強制切回 by-symbol，避免 Rebalance buy/sell 數字錯亂。
-        if (GroupingMode != AllocationGroupingMode.Symbol) GroupingMode = AllocationGroupingMode.Symbol;
+        if (GroupingMode != AllocationGroupingMode.Symbol)
+            GroupingMode = AllocationGroupingMode.Symbol;
         IsRebalanceTab = true;
         IsOverviewTab = false;
     }
@@ -530,8 +528,10 @@ public sealed partial class AllocationViewModel : ObservableObject, IDisposable
     private string ResolveGroupLabel(Guid groupId)
     {
         var found = _groupCatalog?.Groups.FirstOrDefault(g => g.Id == groupId);
-        if (found is not null) return found.Name;
-        if (groupId == Assetra.Core.Models.PortfolioGroup.DefaultId) return "預設群組";
+        if (found is not null)
+            return found.Name;
+        if (groupId == Assetra.Core.Models.PortfolioGroup.DefaultId)
+            return "預設群組";
         return $"未指派 ({groupId.ToString()[..8]})";
     }
 

@@ -1,5 +1,3 @@
-using Assetra.Core.Models;
-
 namespace Assetra.Core.Interfaces;
 
 public interface IRefreshableSymbolDirectory : ISymbolDirectory

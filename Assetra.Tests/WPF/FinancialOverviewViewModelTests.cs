@@ -30,7 +30,8 @@ public sealed class FinancialOverviewViewModelTests
             get => _totalCash;
             set
             {
-                if (_totalCash == value) return;
+                if (_totalCash == value)
+                    return;
                 _totalCash = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TotalCash)));
             }
@@ -42,7 +43,8 @@ public sealed class FinancialOverviewViewModelTests
             get => _totalMarketValue;
             set
             {
-                if (_totalMarketValue == value) return;
+                if (_totalMarketValue == value)
+                    return;
                 _totalMarketValue = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TotalMarketValue)));
             }
@@ -54,7 +56,8 @@ public sealed class FinancialOverviewViewModelTests
             get => _totalCost;
             set
             {
-                if (_totalCost == value) return;
+                if (_totalCost == value)
+                    return;
                 _totalCost = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TotalCost)));
             }

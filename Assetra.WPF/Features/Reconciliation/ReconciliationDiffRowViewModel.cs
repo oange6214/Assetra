@@ -83,7 +83,8 @@ public partial class ReconciliationDiffRowViewModel : ObservableObject
     {
         statementValue = Normalize(statementValue);
         tradeValue = Normalize(tradeValue);
-        if (statementValue is null) return tradeValue ?? string.Empty;
+        if (statementValue is null)
+            return tradeValue ?? string.Empty;
         if (tradeValue is null || string.Equals(statementValue, tradeValue, StringComparison.Ordinal))
             return statementValue;
         return $"{statementValue} / {tradeValue}";

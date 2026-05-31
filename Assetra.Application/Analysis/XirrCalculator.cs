@@ -11,11 +11,13 @@ public sealed class XirrCalculator : IXirrCalculator
     public decimal? Compute(IReadOnlyList<CashFlow> flows, double guess = 0.1)
     {
         ArgumentNullException.ThrowIfNull(flows);
-        if (flows.Count < 2) return null;
+        if (flows.Count < 2)
+            return null;
 
         var positives = flows.Any(f => f.Amount > 0);
         var negatives = flows.Any(f => f.Amount < 0);
-        if (!positives || !negatives) return null;
+        if (!positives || !negatives)
+            return null;
 
         var d0 = flows.Min(f => f.Date);
         var pts = flows.Select(f => (
@@ -23,7 +25,8 @@ public sealed class XirrCalculator : IXirrCalculator
             a: (double)f.Amount)).ToArray();
 
         var newton = NewtonRaphson(pts, guess);
-        if (newton is not null) return (decimal)newton.Value;
+        if (newton is not null)
+            return (decimal)newton.Value;
 
         var bisect = Bisection(pts);
         return bisect is null ? null : (decimal)bisect.Value;
@@ -34,7 +37,8 @@ public sealed class XirrCalculator : IXirrCalculator
         var r = guess;
         for (var i = 0; i < MaxIterations; i++)
         {
-            if (1 + r <= 0) return null;
+            if (1 + r <= 0)
+                return null;
             var npv = 0.0;
             var dnpv = 0.0;
             foreach (var (t, a) in pts)
@@ -43,9 +47,11 @@ public sealed class XirrCalculator : IXirrCalculator
                 npv += a * disc;
                 dnpv += -t * a * disc / (1 + r);
             }
-            if (Math.Abs(dnpv) < 1e-15) return null;
+            if (Math.Abs(dnpv) < 1e-15)
+                return null;
             var next = r - npv / dnpv;
-            if (Math.Abs(next - r) < Tolerance) return next;
+            if (Math.Abs(next - r) < Tolerance)
+                return next;
             r = next;
         }
         return null;
@@ -57,15 +63,20 @@ public sealed class XirrCalculator : IXirrCalculator
         var hi = 10.0;
         var fLo = Npv(pts, lo);
         var fHi = Npv(pts, hi);
-        if (fLo * fHi > 0) return null;
+        if (fLo * fHi > 0)
+            return null;
 
         for (var i = 0; i < 200; i++)
         {
             var mid = (lo + hi) / 2;
             var fMid = Npv(pts, mid);
-            if (Math.Abs(fMid) < Tolerance || (hi - lo) / 2 < Tolerance) return mid;
-            if (fMid * fLo < 0) { hi = mid; fHi = fMid; }
-            else { lo = mid; fLo = fMid; }
+            if (Math.Abs(fMid) < Tolerance || (hi - lo) / 2 < Tolerance)
+                return mid;
+            if (fMid * fLo < 0)
+            { hi = mid;
+            }
+            else
+            { lo = mid; fLo = fMid; }
         }
         return (lo + hi) / 2;
     }
@@ -73,7 +84,8 @@ public sealed class XirrCalculator : IXirrCalculator
     private static double Npv((double t, double a)[] pts, double r)
     {
         var sum = 0.0;
-        foreach (var (t, a) in pts) sum += a * Math.Pow(1 + r, -t);
+        foreach (var (t, a) in pts)
+            sum += a * Math.Pow(1 + r, -t);
         return sum;
     }
 }

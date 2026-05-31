@@ -11,24 +11,24 @@
 
     <!--
         P5.8b — Cross-currency settlement section 抽出來的共用 UserControl。
-
+        
         前置：P5.8a 把 Buy / Sell / Div 三個 sub-VM 的 settlement 屬性鏡像對齊
         （SettlementInputMode / SettlementCurrency / FxRateDate / FxSourceLabel /
         IsFxManual / FxFetchError），P5.8b-prereq 把 Sell + Div 也接上
         FetchXxxFxRateCommand。3 個 form 結構此時完全對稱 → 可抽 UserControl。
-
+        
         DataContext 期待是 Buy / Sell / Div sub-VM（不是 TransactionDialogViewModel
         本身）— 內層 binding 用未加前綴的屬性名稱（SettlementInputMode 等）。
-
+        
         DPs（由呼叫方 XAML 設定）：
-          - GroupName               — RadioButton GroupName，避免跨表單 group 串組
-                                       e.g. "TxBuySettlementInputMode"
-          - FetchFxRateCommand      — 父 VM 的一鍵抓匯率 command
-                                       e.g. FetchBuyFxRateCommand
-          - ActualCashAmountLabel   — 「實際扣款/入帳金額」label 文字
-                                       Buy: 實際扣款金額 / Sell: 實際入帳金額 / Div: 實際入帳金額
-          - ActualCashAmountHint    — label 下方說明文字
-
+        - GroupName               — RadioButton GroupName，避免跨表單 group 串組
+        e.g. "TxBuySettlementInputMode"
+        - FetchFxRateCommand      — 父 VM 的一鍵抓匯率 command
+        e.g. FetchBuyFxRateCommand
+        - ActualCashAmountLabel   — 「實際扣款/入帳金額」label 文字
+        Buy: 實際扣款金額 / Sell: 實際入帳金額 / Div: 實際入帳金額
+        - ActualCashAmountHint    — label 下方說明文字
+        
         Visibility 由內層 Binding 自己讀 sub-VM 的 IsCrossCurrency 控制；
         非跨幣別時整個 UserControl collapse 不占空間。
     -->
@@ -155,9 +155,7 @@
                             Text="{Binding SettlementCurrencyDisplay, Mode=OneWay}" />
                     </Border>
                 </StackPanel>
-                <TextBox
-                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                    Text="{Binding ActualCashAmount, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding ActualCashAmount, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Style="{StaticResource FormFieldError}"
                     Text="{Binding ActualCashAmountError}"
@@ -174,18 +172,18 @@
             <StackPanel Visibility="{Binding IsFxSettlementMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <DockPanel Margin="0,0,0,6" LastChildFill="False">
                     <TextBlock
-                        DockPanel.Dock="Left"
                         VerticalAlignment="Center"
+                        DockPanel.Dock="Left"
                         Style="{StaticResource FormFieldLabel}"
                         Text="{DynamicResource Portfolio.Tx.FxRate}" />
                     <Button
-                        DockPanel.Dock="Right"
                         MinWidth="0"
                         MinHeight="28"
                         Padding="8,0"
                         VerticalAlignment="Center"
                         Command="{Binding FetchFxRateCommand, ElementName=Root}"
                         Content="{DynamicResource Portfolio.Tx.FetchFxRate}"
+                        DockPanel.Dock="Right"
                         FontSize="{StaticResource Font.Size.Xs}"
                         Style="{StaticResource AppGhostButton}" />
                 </DockPanel>

@@ -69,7 +69,7 @@ public static class PnlColorPalette
         if (Math.Abs(percent) < 0.25)
             return Neutral;
 
-        bool taiwan       = ColorSchemeService.TaiwanConvention;
+        bool taiwan = ColorSchemeService.TaiwanConvention;
         bool isPositivePnl = percent >= 0;
 
         // ── Color anchors (dark → vivid within the same hue family) ─────────
@@ -78,20 +78,20 @@ public static class PnlColorPalette
         Color gainDark, gainVivid, lossDark, lossVivid;
         if (taiwan)
         {
-            gainDark  = Color.FromRgb(0x7A, 0x20, 0x20);  // deep maroon
+            gainDark = Color.FromRgb(0x7A, 0x20, 0x20);  // deep maroon
             gainVivid = Color.FromRgb(0xF4, 0x43, 0x36);  // Material Red 500
-            lossDark  = Color.FromRgb(0x1A, 0x4D, 0x2E);  // deep forest green
+            lossDark = Color.FromRgb(0x1A, 0x4D, 0x2E);  // deep forest green
             lossVivid = Color.FromRgb(0x4C, 0xAF, 0x50);  // Material Green 500
         }
         else
         {
-            gainDark  = Color.FromRgb(0x1A, 0x4D, 0x2E);  // deep forest green
+            gainDark = Color.FromRgb(0x1A, 0x4D, 0x2E);  // deep forest green
             gainVivid = Color.FromRgb(0x4C, 0xAF, 0x50);  // Material Green 500
-            lossDark  = Color.FromRgb(0x7A, 0x20, 0x20);  // deep maroon
+            lossDark = Color.FromRgb(0x7A, 0x20, 0x20);  // deep maroon
             lossVivid = Color.FromRgb(0xF4, 0x43, 0x36);  // Material Red 500
         }
 
-        Color dark  = isPositivePnl ? gainDark  : lossDark;
+        Color dark = isPositivePnl ? gainDark : lossDark;
         Color vivid = isPositivePnl ? gainVivid : lossVivid;
 
         // ── Normalise magnitude ──────────────────────────────────────────────

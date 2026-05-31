@@ -1,5 +1,5 @@
-using Assetra.Core.Models;
 using System.Collections.ObjectModel;
+using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.Categories;
@@ -90,7 +90,8 @@ public partial class CategoryRowViewModel : ObservableObject
     {
         get
         {
-            if (BudgetAmount <= 0) return string.Empty;
+            if (BudgetAmount <= 0)
+                return string.Empty;
             var pct = BudgetAmount <= 0 ? 0 : (double)(MonthlyAmount / BudgetAmount * 100m);
             return $"${MonthlyAmount:N0} / ${BudgetAmount:N0} ({pct:F0}%)";
         }

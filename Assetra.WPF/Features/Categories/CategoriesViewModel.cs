@@ -70,24 +70,30 @@ public partial class CategoriesViewModel : ObservableObject
     [RelayCommand]
     private async Task MoveCategoryUp(CategoryRowViewModel? row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         var view = ResolveSiblingView(row);
         var siblings = view?.Cast<CategoryRowViewModel>().ToList();
-        if (siblings is null) return;
+        if (siblings is null)
+            return;
         var idx = siblings.IndexOf(row);
-        if (idx <= 0) return;
+        if (idx <= 0)
+            return;
         await SwapSortOrderAsync(row, siblings[idx - 1]);
     }
 
     [RelayCommand]
     private async Task MoveCategoryDown(CategoryRowViewModel? row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         var view = ResolveSiblingView(row);
         var siblings = view?.Cast<CategoryRowViewModel>().ToList();
-        if (siblings is null) return;
+        if (siblings is null)
+            return;
         var idx = siblings.IndexOf(row);
-        if (idx < 0 || idx >= siblings.Count - 1) return;
+        if (idx < 0 || idx >= siblings.Count - 1)
+            return;
         await SwapSortOrderAsync(row, siblings[idx + 1]);
     }
 
@@ -180,13 +186,14 @@ public partial class CategoriesViewModel : ObservableObject
 
     // Empty-state predicates per tab
     public bool HasNoExpense => Categories.Count(c => c.Kind == CategoryKind.Expense && (ShowArchived || !c.IsArchived)) == 0;
-    public bool HasNoIncome  => Categories.Count(c => c.Kind == CategoryKind.Income  && (ShowArchived || !c.IsArchived)) == 0;
-    public bool HasNoRules   => Rules.Count == 0;
-    public bool HasRules     => Rules.Count > 0;
+    public bool HasNoIncome => Categories.Count(c => c.Kind == CategoryKind.Income && (ShowArchived || !c.IsArchived)) == 0;
+    public bool HasNoRules => Rules.Count == 0;
+    public bool HasRules => Rules.Count > 0;
     public bool HasNoBudgets => Budgets.Count == 0;
-    public bool HasBudgets   => Budgets.Count > 0;
+    public bool HasBudgets => Budgets.Count > 0;
 
-    [RelayCommand] private void OpenAddCategory()
+    [RelayCommand]
+    private void OpenAddCategory()
     {
         AddError = string.Empty;
         RefreshAddParentOptions();
@@ -200,21 +207,24 @@ public partial class CategoriesViewModel : ObservableObject
     [RelayCommand]
     private void RequestDelete(CategoryRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         OpenDeleteConfirm(row.Name, () => DeleteAsync(row));
     }
 
     [RelayCommand]
     private void RequestDeleteRule(AutoCategorizationRuleRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         OpenDeleteConfirm(row.KeywordPattern, () => DeleteRuleAsync(row));
     }
 
     [RelayCommand]
     private void RequestDeleteBudget(BudgetRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         OpenDeleteConfirm(row.CategoryDisplay, () => DeleteBudgetAsync(row));
     }
 
@@ -321,8 +331,8 @@ public partial class CategoriesViewModel : ObservableObject
         ApplyAddDefaults(AddKind);
 
         _categories.CollectionChanged += (_, _) => NotifyEmptyStatesChanged();
-        _rules.CollectionChanged       += (_, _) => NotifyEmptyStatesChanged();
-        _budgets.CollectionChanged     += (_, _) => NotifyEmptyStatesChanged();
+        _rules.CollectionChanged += (_, _) => NotifyEmptyStatesChanged();
+        _budgets.CollectionChanged += (_, _) => NotifyEmptyStatesChanged();
 
         // External trade mutations (new income / expense entered via the
         // shell's "新增紀錄" dialog) bump BudgetChanged → recompute Spent so
@@ -424,7 +434,8 @@ public partial class CategoriesViewModel : ObservableObject
     private void RebuildHierarchy()
     {
         // 先清空所有 children — 避免重複加入
-        foreach (var c in _categories) c.Children.Clear();
+        foreach (var c in _categories)
+            c.Children.Clear();
 
         var byId = _categories.ToDictionary(c => c.Id);
         var grouped = _categories
@@ -432,7 +443,8 @@ public partial class CategoriesViewModel : ObservableObject
             .GroupBy(c => c.ParentId!.Value);
         foreach (var g in grouped)
         {
-            if (!byId.TryGetValue(g.Key, out var parent)) continue;
+            if (!byId.TryGetValue(g.Key, out var parent))
+                continue;
             foreach (var child in g.OrderBy(x => x.SortOrder))
                 parent.Children.Add(child);
         }
@@ -491,7 +503,8 @@ public partial class CategoriesViewModel : ObservableObject
     /// </summary>
     private async Task RefreshMonthlyUsageAsync()
     {
-        if (_categories.Count == 0) return;
+        if (_categories.Count == 0)
+            return;
 
         var today = DateTime.Today;
         var monthStartLocal = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Local);
@@ -628,7 +641,8 @@ public partial class CategoriesViewModel : ObservableObject
     private string LookupCategoryDisplay(Guid id)
     {
         var c = Categories.FirstOrDefault(x => x.Id == id);
-        if (c is null) return GetString("Categories.Rule.UnknownCategory", "（未知分類）");
+        if (c is null)
+            return GetString("Categories.Rule.UnknownCategory", "（未知分類）");
         // Icon 欄存的是 Fluent symbol 名稱（"Home24" / "Briefcase24" ...），不是 emoji。
         // 直接拼進顯示字串會渲染成「Home24 居住」的怪畫面 — 只取 Name；icon 由
         // 上層 row template 用 ds:AppIcon Symbol="{Binding Icon}" 渲染。
@@ -701,7 +715,8 @@ public partial class CategoriesViewModel : ObservableObject
     [RelayCommand]
     private async Task SaveEditAsync(CategoryRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
 
         var name = row.EditName.Trim();
         if (string.IsNullOrEmpty(name))
@@ -734,7 +749,8 @@ public partial class CategoriesViewModel : ObservableObject
     [RelayCommand]
     private async Task ToggleArchiveAsync(CategoryRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         if (row.IsArchived && HasActiveDuplicateName(row.Id, row.Kind, row.Name))
         {
             _snackbar.Warning(GetString("Categories.Error.NameDuplicate", "已存在同名分類"));
@@ -753,7 +769,8 @@ public partial class CategoriesViewModel : ObservableObject
     [RelayCommand]
     private async Task DeleteAsync(CategoryRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         // M2: previously did N×O(rows) full scans of three repositories then
         // counted in-memory via LINQ — for a long-running user with thousands
         // of trades that's a real cost on every delete attempt. The new
@@ -839,7 +856,8 @@ public partial class CategoriesViewModel : ObservableObject
     [RelayCommand]
     private async Task SaveEditRuleAsync(AutoCategorizationRuleRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
 
         var keyword = row.EditKeyword.Trim();
         if (string.IsNullOrEmpty(keyword))
@@ -872,7 +890,8 @@ public partial class CategoriesViewModel : ObservableObject
     [RelayCommand]
     private async Task ToggleRuleEnabledAsync(AutoCategorizationRuleRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         row.IsEnabled = !row.IsEnabled;
         await _ruleRepository.UpdateAsync(row.ToModel()).ConfigureAwait(true);
     }
@@ -880,7 +899,8 @@ public partial class CategoriesViewModel : ObservableObject
     [RelayCommand]
     private async Task DeleteRuleAsync(AutoCategorizationRuleRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         await _ruleRepository.RemoveAsync(row.Id).ConfigureAwait(true);
         _rules.Remove(row);
         _snackbar.Success(string.Format(
@@ -890,8 +910,10 @@ public partial class CategoriesViewModel : ObservableObject
     private AutoCategorizationScope ResolveAddRuleScope()
     {
         var scope = AutoCategorizationScope.None;
-        if (AddRuleAppliesToManual) scope |= AutoCategorizationScope.Manual;
-        if (AddRuleAppliesToImport) scope |= AutoCategorizationScope.Import;
+        if (AddRuleAppliesToManual)
+            scope |= AutoCategorizationScope.Manual;
+        if (AddRuleAppliesToImport)
+            scope |= AutoCategorizationScope.Import;
         return scope == AutoCategorizationScope.None ? AutoCategorizationScope.Both : scope;
     }
 
@@ -978,7 +1000,8 @@ public partial class CategoriesViewModel : ObservableObject
     [RelayCommand]
     private async Task SaveEditBudgetAsync(BudgetRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         if (row.EditAmount <= 0m)
         {
             row.EditError = GetString("Categories.Budget.Error.AmountRequired", "請輸入大於 0 的金額");
@@ -998,7 +1021,8 @@ public partial class CategoriesViewModel : ObservableObject
     [RelayCommand]
     private async Task DeleteBudgetAsync(BudgetRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         await _budgetRepository.RemoveAsync(row.Id).ConfigureAwait(true);
         _budgets.Remove(row);
         _budgetRefreshNotifier.NotifyChanged();

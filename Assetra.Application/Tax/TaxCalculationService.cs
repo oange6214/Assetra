@@ -34,7 +34,8 @@ public static class TaxCalculationService
 
         foreach (var t in trades)
         {
-            if (t.TradeDate.Year != year) continue;
+            if (t.TradeDate.Year != year)
+                continue;
 
             if (t.Type == TradeType.CashDividend)
             {

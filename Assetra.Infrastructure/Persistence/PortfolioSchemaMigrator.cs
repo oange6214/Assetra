@@ -240,7 +240,8 @@ internal static class PortfolioSchemaMigrator
             count.Transaction = tx;
             count.CommandText = "SELECT COUNT(*) FROM portfolio WHERE buy_price IS NOT NULL";
             var n = (long)count.ExecuteScalar()!;
-            if (n == 0) return;
+            if (n == 0)
+                return;
         }
 
         var entries = new List<(Guid Id, decimal StoredPrice, decimal StoredQty)>();
@@ -275,21 +276,25 @@ internal static class PortfolioSchemaMigrator
                     var price = (decimal)r.GetDouble(1);
                     var qty = (decimal)r.GetInt64(2);
                     var commission = r.IsDBNull(3) ? 0m : (decimal)r.GetDouble(3);
-                    if (type == "Buy") { totalCost += price * qty + commission; totalQty += qty; }
+                    if (type == "Buy")
+                    { totalCost += price * qty + commission; totalQty += qty; }
                     else if (type == "Sell" && totalQty > 0m)
                     {
                         totalCost -= totalCost * (qty / totalQty);
                         totalQty -= qty;
                     }
-                    else if (type == "StockDividend") { totalQty += qty; }
+                    else if (type == "StockDividend")
+                    { totalQty += qty; }
                 }
             }
 
             var projectedAvg = totalQty > 0m ? totalCost / totalQty : 0m;
             var qtyDiff = Math.Abs(totalQty - storedQty) / Math.Max(Math.Abs(storedQty), 1m);
             var costDiff = Math.Abs(projectedAvg - storedPrice) / Math.Max(Math.Abs(storedPrice), 1m);
-            if (qtyDiff > 0.0001m || costDiff > 0.0001m) mismatches++;
-            else matches++;
+            if (qtyDiff > 0.0001m || costDiff > 0.0001m)
+                mismatches++;
+            else
+                matches++;
         }
 
         System.Diagnostics.Debug.WriteLine(

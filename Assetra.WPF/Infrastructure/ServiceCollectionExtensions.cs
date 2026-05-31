@@ -2,7 +2,6 @@ using System.IO;
 using System.Net.Http;
 using System.Reactive.Concurrency;
 using Assetra.Application.MarketData;
-using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Sync;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Sync;

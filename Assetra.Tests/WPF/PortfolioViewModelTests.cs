@@ -2,7 +2,6 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Data;
-using Moq;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Application.Portfolio.Services;
@@ -10,11 +9,12 @@ using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure;
 using Assetra.Infrastructure.Persistence;
-using Assetra.WPF.Features.Portfolio.Controls;
 using Assetra.WPF.Features.Portfolio;
-using Assetra.WPF.Features.PortfolioGroups;
+using Assetra.WPF.Features.Portfolio.Controls;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
+using Assetra.WPF.Features.PortfolioGroups;
 using Assetra.WPF.Infrastructure;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.WPF;
@@ -684,7 +684,7 @@ public class PortfolioViewModelTests
     public async Task LoadAsync_MultiplePositions_SumsTotalCost()
     {
         var entry1 = MakeEntry("2330", price: 100m, qty: 1000);
-        var entry2 = MakeEntry("2317", price:  50m, qty:  500);
+        var entry2 = MakeEntry("2317", price: 50m, qty: 500);
         var snapshots = SnapshotsFor([(entry1, 100m, 1000), (entry2, 50m, 500)]);
         var (vm, _) = CreateVm([entry1, entry2], PositionQueryMock(snapshots).Object);
         await vm.LoadAsync();
@@ -1033,8 +1033,12 @@ public class PortfolioViewModelTests
             {
                 switch (m)
                 {
-                    case AddTradeMutation add: Store.Add(add.Trade); break;
-                    case RemoveTradeMutation rem: Store.RemoveAll(t => t.Id == rem.Id); break;
+                    case AddTradeMutation add:
+                        Store.Add(add.Trade);
+                        break;
+                    case RemoveTradeMutation rem:
+                        Store.RemoveAll(t => t.Id == rem.Id);
+                        break;
                 }
             }
             return Task.CompletedTask;
@@ -1102,6 +1106,26 @@ public class PortfolioViewModelTests
                 CashAmount: principalRepaid, LoanLabel: liabilityName,
                 Principal: principalRepaid, Note: "seed"));
         }
+    }
+
+    [Fact]
+    public async Task BeginTxForSelectedLiability_PrefillsSelectedLiabilityInTransactionDialog()
+    {
+        var (vm, _, _, _) = await CreateVmWithLiabilityAsync(
+            initialBalance: 2_000_000m, original: 2_000_000m);
+        var liability = vm.Liabilities.First();
+
+        vm.SelectedLiabilityRow = liability;
+        vm.BeginTxForSelectedLiabilityCommand.Execute("loanRepay");
+
+        Assert.True(vm.Transaction.IsTxDialogOpen);
+        Assert.True(vm.Transaction.IsAssetContextLocked);
+        Assert.False(vm.Transaction.ShowAssetSelector);
+        Assert.Equal("loanRepay", vm.Transaction.TxType);
+        Assert.NotNull(vm.Transaction.SelectedAsset);
+        Assert.Equal(TxAssetKind.Liability, vm.Transaction.SelectedAsset.Kind);
+        Assert.Equal(liability.Label, vm.Transaction.SelectedAsset.PrimaryName);
+        Assert.Equal(liability.Label, vm.Transaction.Loan.Label);
     }
 
     [Fact]
@@ -1205,6 +1229,46 @@ public class PortfolioViewModelTests
         Assert.Equal(8_000m, cardRow.Balance);
         Assert.Equal(12_000m, cardRow.OriginalAmount);
         Assert.Equal(46_000m, vm.CashAccounts.Single(a => a.Id == cashId).Balance);
+    }
+
+    /// <summary>
+    /// Regression (user report 2026-05): once a payment fully clears a card, the card's
+    /// Balance is 0. Editing that payment — even just its date — must NOT resurface the
+    /// "this card has no outstanding balance" guard, which is only meaningful for a
+    /// brand-new payment. The bug: <c>ConfirmTx</c> nulls <c>EditingTradeId</c> before
+    /// dispatching (it promotes the edit to an implicit revision), so the guard's old
+    /// <c>!IsEditMode</c> condition was always true and fired against the now-zero balance.
+    /// The guard must key off <c>!IsRevisionMode</c> instead — the edit signal that
+    /// actually survives the dispatch. This test drives the real edit→implicit-revision
+    /// path and would fail on the pre-fix code (TxError = "...沒有未繳金額...").
+    /// </summary>
+    [Fact]
+    public async Task EditTrade_CreditCardPayment_DateOnlyChange_OnPaidOffCard_DoesNotTriggerNoBalanceGuard()
+    {
+        var (vm, assetRepo, _, card) = await CreateVmWithCreditCardAndCashAsync(
+            initialCardBalance: 4_000m, initialCash: 50_000m);
+        var cashId = assetRepo.Store.First(a => a.Type == FinancialType.Asset).Id;
+
+        // Pay the card off in full → Balance becomes 0.
+        vm.Transaction.TxType = "creditCardPayment";
+        vm.Transaction.CreditCard.Card = vm.Liabilities.Single(l => l.AssetId == card.Id);
+        vm.Transaction.TxCashAccount = vm.CashAccounts.Single(a => a.Id == cashId);
+        vm.Transaction.TxAmount = "4000";
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
+        Assert.Equal(0m, vm.Liabilities.Single(l => l.AssetId == card.Id).Balance);
+
+        // Edit that payment and change ONLY the date (the user's exact action).
+        var paymentRow = vm.Trades.Single(t => t.Type == TradeType.CreditCardPayment);
+        vm.Transaction.EditTradeCommand.Execute(paymentRow);
+        vm.Transaction.TxDate = vm.Transaction.TxDate.AddDays(-3);
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
+
+        // Edit must succeed silently: no false "no balance" warning, card still paid off,
+        // and exactly one payment trade remains (the original replaced by the revision).
+        Assert.True(string.IsNullOrEmpty(vm.Transaction.TxError),
+            $"Editing a paid-off card's payment must not trigger the new-payment balance guard, but TxError was: {vm.Transaction.TxError}");
+        Assert.Equal(0m, vm.Liabilities.Single(l => l.AssetId == card.Id).Balance);
+        Assert.Single(vm.Trades.Where(t => t.Type == TradeType.CreditCardPayment));
     }
 
     [Fact]
@@ -2433,6 +2497,27 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task ClosePriceLookup_DoesNotReplaceUserTypedUnitPrice()
+    {
+        // Regression: the asynchronous close-price lookup can finish after the
+        // user has typed the broker-confirmed unit price. The lookup is only a
+        // convenience default; once the field has user input it must not win.
+        var delayedWorkflow = new DelayedClosePriceWorkflow(delayMs: 50, lookupPrice: 60.5m);
+        var vm = new AddAssetDialogViewModel(
+            delayedWorkflow,
+            new NoopAccountUpsertWorkflow(),
+            new NoopCreditCardMutationWorkflow());
+
+        vm.AddAssetType = "stock";
+        vm.AddSymbol = "DRAM";
+        vm.AddPrice = "60";
+
+        await Task.Delay(120);
+
+        Assert.Equal("60", vm.AddPrice);
+    }
+
+    [Fact]
     public async Task EditTrade_BuyWithLink_DoesNotReplaceStoredPriceWithHistoricalLookup()
     {
         // Regression: edit prefill used to trigger async close-price lookup via AddBuyDate,
@@ -2551,7 +2636,7 @@ public class PortfolioViewModelTests
         var trade = tradeRepo.Store.Single(t => t.Type == TradeType.LoanRepay);
         Assert.Equal(25_978m, trade.CashAmount);   // 合計
         Assert.Equal(25_000m, trade.Principal);    // 本金
-        Assert.Equal(978m,    trade.InterestPaid); // 利息
+        Assert.Equal(978m, trade.InterestPaid); // 利息
     }
 
     [Fact]
@@ -2905,6 +2990,23 @@ public class PortfolioViewModelTests
         Assert.Equal(30_000m, transfer.CashAmount);
         Assert.Equal(src.Id, transfer.CashAccountId);
         Assert.Equal(dst.Id, transfer.ToCashAccountId);
+    }
+
+    [Fact]
+    public async Task Transfer_SameCurrency_TypingSourceAmount_AutoFillsTargetAmount()
+    {
+        // WHY: 同幣別轉帳金額一致，使用者只需輸入一次轉出金額，轉入金額應自動帶入（end-to-end 連動）。
+        var (vm, _, _) = await CreateVmWithCashAsync(50_000m);   // 基準帳戶為 TWD
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "TWD Second";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);   // 第二個帳戶亦為 TWD
+
+        vm.Transaction.TxType = "transfer";
+        vm.Transaction.TxCashAccount = vm.CashAccounts.First();
+        vm.Transaction.Transfer.Target = vm.CashAccounts.Last();
+        vm.Transaction.TxAmount = "200000";
+
+        Assert.Equal("200000", vm.Transaction.Transfer.TargetAmount);
     }
 
     [Fact]

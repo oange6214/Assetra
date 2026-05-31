@@ -44,7 +44,8 @@ public sealed class YahooFxRateHistoryFetcher : IFxRateHistoryFetcher
             return Array.Empty<FxRateHistoryEntry>();
 
         // Normalize date range: swap if reversed; both inclusive.
-        if (from > to) (from, to) = (to, from);
+        if (from > to)
+            (from, to) = (to, from);
 
         try
         {
@@ -58,7 +59,8 @@ public sealed class YahooFxRateHistoryFetcher : IFxRateHistoryFetcher
             using var req = new HttpRequestMessage(HttpMethod.Get, url);
             req.Headers.TryAddWithoutValidation("Accept", "application/json");
             using var resp = await _http.SendAsync(req, HttpCompletionOption.ResponseContentRead, ct).ConfigureAwait(false);
-            if (!resp.IsSuccessStatusCode) return Array.Empty<FxRateHistoryEntry>();
+            if (!resp.IsSuccessStatusCode)
+                return Array.Empty<FxRateHistoryEntry>();
 
             await using var stream = await resp.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
             using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false);
@@ -89,14 +91,18 @@ public sealed class YahooFxRateHistoryFetcher : IFxRateHistoryFetcher
     private List<FxRateHistoryEntry> ParseEntries(JsonElement root, string from, string to)
     {
         var entries = new List<FxRateHistoryEntry>();
-        if (!root.TryGetProperty("chart", out var chart)) return entries;
-        if (!chart.TryGetProperty("result", out var result) || result.ValueKind != JsonValueKind.Array) return entries;
-        if (result.GetArrayLength() == 0) return entries;
+        if (!root.TryGetProperty("chart", out var chart))
+            return entries;
+        if (!chart.TryGetProperty("result", out var result) || result.ValueKind != JsonValueKind.Array)
+            return entries;
+        if (result.GetArrayLength() == 0)
+            return entries;
         var first = result[0];
 
         if (!first.TryGetProperty("timestamp", out var timestamps) || timestamps.ValueKind != JsonValueKind.Array)
             return entries;
-        if (!first.TryGetProperty("indicators", out var indicators)) return entries;
+        if (!first.TryGetProperty("indicators", out var indicators))
+            return entries;
         if (!indicators.TryGetProperty("quote", out var quotes) || quotes.ValueKind != JsonValueKind.Array || quotes.GetArrayLength() == 0)
             return entries;
         if (!quotes[0].TryGetProperty("close", out var closes) || closes.ValueKind != JsonValueKind.Array)
@@ -108,11 +114,14 @@ public sealed class YahooFxRateHistoryFetcher : IFxRateHistoryFetcher
         {
             var tsEl = timestamps[i];
             var closeEl = closes[i];
-            if (tsEl.ValueKind != JsonValueKind.Number) continue;
-            if (closeEl.ValueKind != JsonValueKind.Number) continue; // null / gap day
+            if (tsEl.ValueKind != JsonValueKind.Number)
+                continue;
+            if (closeEl.ValueKind != JsonValueKind.Number)
+                continue; // null / gap day
             var unixSec = tsEl.GetInt64();
             var rate = closeEl.GetDouble();
-            if (rate <= 0 || double.IsNaN(rate) || double.IsInfinity(rate)) continue;
+            if (rate <= 0 || double.IsNaN(rate) || double.IsInfinity(rate))
+                continue;
 
             var date = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(unixSec).UtcDateTime);
             entries.Add(new FxRateHistoryEntry(date, from, to, (decimal)rate, SourceName, now));

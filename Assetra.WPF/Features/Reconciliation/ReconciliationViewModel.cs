@@ -165,7 +165,10 @@ public partial class ReconciliationViewModel : ObservableObject
             int pending = 0, resolved = 0;
             foreach (var d in Diffs)
             {
-                if (d.IsPending) pending++; else resolved++;
+                if (d.IsPending)
+                    pending++;
+                else
+                    resolved++;
             }
             return string.Format(
                 GetString("Reconciliation.Summary", "待處理：{0} / 已處理：{1} / 總數：{2}"),
@@ -246,7 +249,8 @@ public partial class ReconciliationViewModel : ObservableObject
 
     private async Task RecomputeBalancePanelAsync(ReconciliationSession? session, int version)
     {
-        if (session is null) { BalancePanelDisplay = string.Empty; return; }
+        if (session is null)
+        { BalancePanelDisplay = string.Empty; return; }
         try
         {
             var rows = await _sessions.GetStatementRowsAsync(session.Id).ConfigureAwait(true);
@@ -294,7 +298,8 @@ public partial class ReconciliationViewModel : ObservableObject
     [RelayCommand]
     public async Task RecomputeAsync()
     {
-        if (SelectedSession is null) return;
+        if (SelectedSession is null)
+            return;
         IsBusy = true;
         try
         {
@@ -315,7 +320,8 @@ public partial class ReconciliationViewModel : ObservableObject
     [RelayCommand]
     public async Task SignOffAsync()
     {
-        if (SelectedSession is null) return;
+        if (SelectedSession is null)
+            return;
         try
         {
             await _service.SignOffAsync(SelectedSession.Id, note: null).ConfigureAwait(true);
@@ -377,8 +383,10 @@ public partial class ReconciliationViewModel : ObservableObject
     [RelayCommand]
     public async Task CreateTradeAsync(ReconciliationDiffRowViewModel? row)
     {
-        if (row is null || row.Kind != ReconciliationDiffKind.Missing) return;
-        if (SelectedSession is null) return;
+        if (row is null || row.Kind != ReconciliationDiffKind.Missing)
+            return;
+        if (SelectedSession is null)
+            return;
         try
         {
             var options = new ImportApplyOptions(CashAccountId: SelectedSession.AccountId);
@@ -397,8 +405,10 @@ public partial class ReconciliationViewModel : ObservableObject
     [RelayCommand]
     public async Task OverwriteFromStatementAsync(ReconciliationDiffRowViewModel? row)
     {
-        if (row is null || row.Kind != ReconciliationDiffKind.AmountMismatch) return;
-        if (SelectedSession is null) return;
+        if (row is null || row.Kind != ReconciliationDiffKind.AmountMismatch)
+            return;
+        if (SelectedSession is null)
+            return;
         try
         {
             var options = new ImportApplyOptions(CashAccountId: SelectedSession.AccountId);

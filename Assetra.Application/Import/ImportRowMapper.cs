@@ -48,7 +48,8 @@ public sealed class ImportRowMapper : IImportRowMapper
                 Memo: row.Memo,
                 Source: AutoCategorizationScope.Import);
             var matched = AutoCategorizationEngine.Match(ctx, eligibleRules);
-            if (matched is not null) trade = trade with { CategoryId = matched };
+            if (matched is not null)
+                trade = trade with { CategoryId = matched };
         }
         return trade;
     }
@@ -115,7 +116,8 @@ public sealed class ImportRowMapper : IImportRowMapper
             ? row.Amount + commission
             : row.Amount - commission;
 
-        if (quantity <= 0) return 0m;
+        if (quantity <= 0)
+            return 0m;
         return grossTradeAmount / quantity;
     }
 
@@ -126,8 +128,10 @@ public sealed class ImportRowMapper : IImportRowMapper
     private static string ComposeNote(ImportPreviewRow row, ImportSourceKind kind, ImportApplyOptions options)
     {
         var parts = new List<string>();
-        if (!string.IsNullOrWhiteSpace(row.Counterparty)) parts.Add(row.Counterparty!.Trim());
-        if (!string.IsNullOrWhiteSpace(row.Memo)) parts.Add(row.Memo!.Trim());
+        if (!string.IsNullOrWhiteSpace(row.Counterparty))
+            parts.Add(row.Counterparty!.Trim());
+        if (!string.IsNullOrWhiteSpace(row.Memo))
+            parts.Add(row.Memo!.Trim());
         if (parts.Count == 0)
         {
             parts.Add(kind == ImportSourceKind.BankStatement

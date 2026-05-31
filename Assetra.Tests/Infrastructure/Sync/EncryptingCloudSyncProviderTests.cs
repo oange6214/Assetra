@@ -10,7 +10,8 @@ public sealed class EncryptingCloudSyncProviderTests
     private static byte[] DeterministicKey()
     {
         var key = new byte[32];
-        for (int i = 0; i < key.Length; i++) key[i] = (byte)(i + 1);
+        for (int i = 0; i < key.Length; i++)
+            key[i] = (byte)(i + 1);
         return key;
     }
 

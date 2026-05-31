@@ -230,7 +230,8 @@ public sealed class RecurringTransactionSqliteRepository
     public async Task MarkPushedAsync(IReadOnlyList<Guid> ids, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
-        if (ids.Count == 0) return;
+        if (ids.Count == 0)
+            return;
 
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
@@ -252,7 +253,8 @@ public sealed class RecurringTransactionSqliteRepository
     public async Task ApplyRemoteAsync(IReadOnlyList<SyncEnvelope> envelopes, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(envelopes);
-        if (envelopes.Count == 0) return;
+        if (envelopes.Count == 0)
+            return;
 
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
@@ -260,7 +262,8 @@ public sealed class RecurringTransactionSqliteRepository
 
         foreach (var env in envelopes)
         {
-            if (env.EntityType != RecurringTransactionSyncMapper.EntityType) continue;
+            if (env.EntityType != RecurringTransactionSyncMapper.EntityType)
+                continue;
 
             long localVersion = -1;
             await using (var probe = conn.CreateCommand())
@@ -269,10 +272,12 @@ public sealed class RecurringTransactionSqliteRepository
                 probe.CommandText = "SELECT version FROM recurring_transaction WHERE id = $id;";
                 probe.Parameters.AddWithValue("$id", env.EntityId.ToString());
                 var existing = await probe.ExecuteScalarAsync(ct).ConfigureAwait(false);
-                if (existing is not null and not DBNull) localVersion = Convert.ToInt64(existing, CultureInfo.InvariantCulture);
+                if (existing is not null and not DBNull)
+                    localVersion = Convert.ToInt64(existing, CultureInfo.InvariantCulture);
             }
 
-            if (localVersion >= env.Version.Version) continue;
+            if (localVersion >= env.Version.Version)
+                continue;
 
             if (env.Deleted)
             {

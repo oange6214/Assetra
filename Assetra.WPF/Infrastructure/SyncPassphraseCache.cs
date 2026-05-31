@@ -19,7 +19,8 @@ public sealed class SyncPassphraseCache
     public void Set(string passphrase)
     {
         ArgumentException.ThrowIfNullOrEmpty(passphrase);
-        lock (_lock) _value = passphrase;
+        lock (_lock)
+            _value = passphrase;
     }
 
     public bool TryGet(out string passphrase)
@@ -33,6 +34,7 @@ public sealed class SyncPassphraseCache
 
     public void Clear()
     {
-        lock (_lock) _value = null;
+        lock (_lock)
+            _value = null;
     }
 }

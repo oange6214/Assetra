@@ -61,7 +61,8 @@ public sealed class MonteCarloSimulator : IMonteCarloSimulator
                 path[y] = balance;
             }
             paths[s] = path;
-            if (!depleted) successCount++;
+            if (!depleted)
+                successCount++;
         }
 
         var endings = paths.Select(p => p[inputs.Years]).OrderBy(v => v).ToArray();
@@ -113,7 +114,8 @@ public sealed class MonteCarloSimulator : IMonteCarloSimulator
 
     private static double Percentile(double[] sorted, double p)
     {
-        if (sorted.Length == 0) return 0;
+        if (sorted.Length == 0)
+            return 0;
         var idx = (int)Math.Clamp(Math.Round(p * (sorted.Length - 1)), 0, sorted.Length - 1);
         return sorted[idx];
     }

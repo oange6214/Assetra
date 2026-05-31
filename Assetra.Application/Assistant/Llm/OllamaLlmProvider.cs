@@ -1,6 +1,4 @@
-using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Assetra.Core.Interfaces;
 
@@ -34,7 +32,8 @@ public sealed class OllamaLlmProvider : ILlmProvider
 
     public async Task<string?> CompleteAsync(string systemPrompt, string userPrompt, CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(userPrompt)) return null;
+        if (string.IsNullOrWhiteSpace(userPrompt))
+            return null;
 
         var combined = string.IsNullOrWhiteSpace(systemPrompt)
             ? userPrompt

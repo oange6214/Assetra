@@ -11,7 +11,8 @@ public sealed class AesGcmEncryptionServiceTests
     private static byte[] DeterministicKey()
     {
         var key = new byte[32];
-        for (int i = 0; i < key.Length; i++) key[i] = (byte)i;
+        for (int i = 0; i < key.Length; i++)
+            key[i] = (byte)i;
         return key;
     }
 

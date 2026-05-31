@@ -6,10 +6,10 @@ namespace Assetra.Core.Models;
 /// IsSystem groups cannot be deleted.
 /// </summary>
 public sealed record AssetGroup(
-    Guid          Id,
-    string        Name,
+    Guid Id,
+    string Name,
     FinancialType Type,
-    string?       Icon,
-    int           SortOrder,
-    bool          IsSystem,
-    DateOnly      CreatedDate);
+    string? Icon,
+    int SortOrder,
+    bool IsSystem,
+    DateOnly CreatedDate);

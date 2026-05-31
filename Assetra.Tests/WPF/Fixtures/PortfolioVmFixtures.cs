@@ -1,10 +1,8 @@
 using System.Reactive.Linq;
-using Moq;
-using Assetra.Application.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
-using Assetra.Infrastructure;
 using Assetra.Infrastructure.Persistence;
+using Moq;
 
 namespace Assetra.Tests.WPF.Fixtures;
 

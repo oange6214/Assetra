@@ -56,11 +56,11 @@ public partial class StatusBarViewModel : ObservableObject, IDisposable
             var baseLabel = _syncSnapshot.State switch
             {
                 GlobalSyncState.Disabled => _localization.Get("StatusBar.Sync.Disabled", "同步未開啟"),
-                GlobalSyncState.Idle     => _localization.Get("StatusBar.Sync.Synced", "已同步"),
-                GlobalSyncState.Syncing  => _localization.Get("StatusBar.Sync.Syncing", "同步中…"),
-                GlobalSyncState.Failed   => _localization.Get("StatusBar.Sync.Failed", "同步未成功"),
-                GlobalSyncState.Offline  => _localization.Get("StatusBar.Sync.Offline", "離線模式"),
-                GlobalSyncState.Pending  => string.Format(
+                GlobalSyncState.Idle => _localization.Get("StatusBar.Sync.Synced", "已同步"),
+                GlobalSyncState.Syncing => _localization.Get("StatusBar.Sync.Syncing", "同步中…"),
+                GlobalSyncState.Failed => _localization.Get("StatusBar.Sync.Failed", "同步未成功"),
+                GlobalSyncState.Offline => _localization.Get("StatusBar.Sync.Offline", "離線模式"),
+                GlobalSyncState.Pending => string.Format(
                     _localization.Get("StatusBar.Sync.PendingFormat", "{0} 筆待同步"),
                     _syncSnapshot.TotalPending),
                 _ => string.Empty,
@@ -91,11 +91,11 @@ public partial class StatusBarViewModel : ObservableObject, IDisposable
 
     public Brush SyncStatusBrush => _syncSnapshot.State switch
     {
-        GlobalSyncState.Idle     => Freeze(new SolidColorBrush(Color.FromRgb(34, 197, 94))),  // green-500
-        GlobalSyncState.Pending  => Freeze(new SolidColorBrush(Color.FromRgb(249, 115, 22))), // orange-500
-        GlobalSyncState.Syncing  => Freeze(new SolidColorBrush(Color.FromRgb(59, 130, 246))), // blue-500
-        GlobalSyncState.Failed   => Freeze(new SolidColorBrush(Color.FromRgb(239, 68, 68))),  // red-500
-        _                        => Freeze(new SolidColorBrush(Color.FromRgb(148, 163, 184))), // slate-400
+        GlobalSyncState.Idle => Freeze(new SolidColorBrush(Color.FromRgb(34, 197, 94))),  // green-500
+        GlobalSyncState.Pending => Freeze(new SolidColorBrush(Color.FromRgb(249, 115, 22))), // orange-500
+        GlobalSyncState.Syncing => Freeze(new SolidColorBrush(Color.FromRgb(59, 130, 246))), // blue-500
+        GlobalSyncState.Failed => Freeze(new SolidColorBrush(Color.FromRgb(239, 68, 68))),  // red-500
+        _ => Freeze(new SolidColorBrush(Color.FromRgb(148, 163, 184))), // slate-400
     };
 
     private static Brush Freeze(SolidColorBrush b) { b.Freeze(); return b; }
@@ -178,7 +178,8 @@ public partial class StatusBarViewModel : ObservableObject, IDisposable
     public void Dispose()
     {
         _localization.LanguageChanged -= OnLanguageChanged;
-        if (_sync is not null) _sync.Changed -= OnSyncChanged;
+        if (_sync is not null)
+            _sync.Changed -= OnSyncChanged;
         _disposables.Dispose();
     }
 }

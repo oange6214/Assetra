@@ -130,7 +130,8 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
     {
         get
         {
-            if (!IsLoan || !LoanTermMonths.HasValue) return string.Empty;
+            if (!IsLoan || !LoanTermMonths.HasValue)
+                return string.Empty;
             var paid = ScheduleEntries.Count(e => e.IsPaid);
             var remaining = LoanTermMonths.Value - paid;
             return remaining > 0 ? $"剩 {remaining} 期 / {LoanTermMonths.Value}" : $"已結清 / {LoanTermMonths.Value}";
@@ -142,7 +143,8 @@ public sealed partial class LiabilityRowViewModel : ObservableObject
     {
         get
         {
-            if (!IsCreditCard) return string.Empty;
+            if (!IsCreditCard)
+                return string.Empty;
             var bill = BillingDay.HasValue ? $"結帳 {BillingDay.Value}" : null;
             var due = DueDay.HasValue ? $"到期 {DueDay.Value}" : null;
             return string.Join(" / ", new[] { bill, due }.Where(s => s is not null));

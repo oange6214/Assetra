@@ -1,6 +1,6 @@
+using Assetra.Infrastructure.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 using RichardSzalay.MockHttp;
-using Assetra.Infrastructure.Http;
 using Xunit;
 
 namespace Assetra.Tests.Infrastructure;

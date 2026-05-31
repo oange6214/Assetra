@@ -78,7 +78,7 @@ public sealed class MoneyTests
     public void Abs_AlwaysNonNegative()
     {
         Assert.Equal(new Money(50m, "TWD"), new Money(-50m, "TWD").Abs());
-        Assert.Equal(new Money(50m, "TWD"), new Money( 50m, "TWD").Abs());
+        Assert.Equal(new Money(50m, "TWD"), new Money(50m, "TWD").Abs());
     }
 
     [Fact]
@@ -101,8 +101,8 @@ public sealed class MoneyTests
     }
 
     [Theory]
-    [InlineData(0,  true,  false, false)]
-    [InlineData(1,  false, true,  false)]
+    [InlineData(0, true, false, false)]
+    [InlineData(1, false, true, false)]
     [InlineData(-1, false, false, true)]
     public void Sign_Predicates(int amount, bool isZero, bool isPositive, bool isNegative)
     {

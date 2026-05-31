@@ -1,6 +1,6 @@
-using Assetra.Core.Interfaces.MultiAsset;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Analysis;
+using Assetra.Core.Interfaces.MultiAsset;
 using Assetra.Core.Models.MultiAsset;
 
 namespace Assetra.Application.MultiAsset;

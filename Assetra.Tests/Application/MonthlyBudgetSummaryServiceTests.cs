@@ -184,8 +184,12 @@ public class MonthlyBudgetSummaryServiceTests
             {
                 switch (m)
                 {
-                    case AddTradeMutation add: Store.Add(add.Trade); break;
-                    case RemoveTradeMutation rem: Store.RemoveAll(t => t.Id == rem.Id); break;
+                    case AddTradeMutation add:
+                        Store.Add(add.Trade);
+                        break;
+                    case RemoveTradeMutation rem:
+                        Store.RemoveAll(t => t.Id == rem.Id);
+                        break;
                 }
             }
             return Task.CompletedTask;

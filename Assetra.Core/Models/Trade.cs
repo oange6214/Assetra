@@ -103,21 +103,21 @@ public sealed record Trade(
     string? LoanLabel = null,            // 借款/還款的貸款名稱（例如 "國泰信貸"）
     decimal? Principal = null,           // LoanRepay：本金部分（減少負債餘額）
     decimal? InterestPaid = null,        // LoanRepay：利息部分（費用，不減餘額）
-    // ── 轉帳欄位（Transfer）──────────────────────────────────────
+                                         // ── 轉帳欄位（Transfer）──────────────────────────────────────
     Guid? ToCashAccountId = null,        // Transfer：目標現金帳戶
-    // ── 負債資產連結──────────────────────────────────────────────
+                                         // ── 負債資產連結──────────────────────────────────────────────
     Guid? LiabilityAssetId = null,       // 信用卡等負債資產 Id
-    // ── 子記錄連結──────────────────────────────────────────────
+                                         // ── 子記錄連結──────────────────────────────────────────────
     /// <summary>
     /// 若本筆是另一筆主交易的附屬費用子記錄（例如手續費 Withdrawal），
     /// 此欄位指向主交易的 <see cref="Id"/>。主交易刪除時應連帶刪除所有子記錄。
     /// 一般交易為 null。
     /// </summary>
     Guid? ParentTradeId = null,          // 主交易 Id（費用子記錄使用）
-    // ── 收支分類 / 週期交易來源（P1 收支管理）────────────────────
+                                         // ── 收支分類 / 週期交易來源（P1 收支管理）────────────────────
     Guid? CategoryId = null,             // 收支分類（ExpenseCategory.Id）
     Guid? RecurringSourceId = null,      // 來源訂閱 / 週期交易（RecurringTransaction.Id）
-    // ── 多幣別交易支援（MultiCurrency-Trade-Refactor P1）────────────
+                                         // ── 多幣別交易支援（MultiCurrency-Trade-Refactor P1）────────────
     /// <summary>
     /// 標的計價幣別（ISO 4217）。<see cref="Price"/> 與 <see cref="Commission"/>
     /// (when <see cref="CommissionCurrency"/> is null) 都以此幣別計價。

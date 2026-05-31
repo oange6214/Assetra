@@ -10,9 +10,9 @@
         Lg (8)   : standard cards
         Xl (12)  : larger card shells / dialogs
         2Xl (18) : page-level「Wealth Platform」 cards (P3.1 — 對應
-                   mockup HTML 的 radius 18px，整個 Assetra 各頁 hero /
-                   summary / analytics cards 統一用這個，建立「all pages
-                   look like same company」 的 baseline)
+        mockup HTML 的 radius 18px，整個 Assetra 各頁 hero /
+        summary / analytics cards 統一用這個，建立「all pages
+        look like same company」 的 baseline)
         Full     : pill / circular badge
     -->
 

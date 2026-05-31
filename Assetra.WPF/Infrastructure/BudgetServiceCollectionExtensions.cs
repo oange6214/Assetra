@@ -3,7 +3,6 @@ using Assetra.Core.Interfaces.Sync;
 using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Categories;
 using Assetra.WPF.Features.Portfolio;
-using Assetra.WPF.Features.Snackbar;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Assetra.WPF.Infrastructure;

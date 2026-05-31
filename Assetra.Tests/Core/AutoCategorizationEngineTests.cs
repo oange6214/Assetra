@@ -6,9 +6,9 @@ namespace Assetra.Tests.Core;
 
 public sealed class AutoCategorizationEngineTests
 {
-    private static readonly Guid CatFood    = Guid.NewGuid();
+    private static readonly Guid CatFood = Guid.NewGuid();
     private static readonly Guid CatTransit = Guid.NewGuid();
-    private static readonly Guid CatRent    = Guid.NewGuid();
+    private static readonly Guid CatRent = Guid.NewGuid();
 
     private static AutoCategorizationRule Rule(
         string keyword, Guid catId, int priority = 0,

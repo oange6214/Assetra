@@ -32,7 +32,8 @@ public sealed class InsurancePolicyLocalChangeQueue : ILocalChangeQueue, IManual
     {
         ArgumentNullException.ThrowIfNull(conflicts);
         ct.ThrowIfCancellationRequested();
-        lock (_lock) _manual.AddRange(conflicts);
+        lock (_lock)
+            _manual.AddRange(conflicts);
         return Task.CompletedTask;
     }
 

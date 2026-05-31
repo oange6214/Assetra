@@ -64,7 +64,7 @@ public sealed class DividendCalendarViewModelTests
 
         Assert.Equal(2000m, vm.Cells.Single(c => c.Month == 3).Total);
         Assert.Equal(9999m, vm.Cells.Single(c => c.Month == 8).Total);
-        Assert.Equal(0m,    vm.Cells.Single(c => c.Month == 1).Total);
+        Assert.Equal(0m, vm.Cells.Single(c => c.Month == 1).Total);
     }
 
     [Fact]

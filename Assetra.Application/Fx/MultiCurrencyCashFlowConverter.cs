@@ -33,7 +33,8 @@ public static class MultiCurrencyCashFlowConverter
             }
 
             var converted = await fx.ConvertAsync(f.Amount, f.Currency, baseCurrency, f.Date, ct).ConfigureAwait(false);
-            if (converted is null) return null;
+            if (converted is null)
+                return null;
 
             result.Add(f with { Amount = converted.Value, Currency = baseCurrency });
         }

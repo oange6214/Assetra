@@ -87,8 +87,10 @@
                             FontSize="{StaticResource Font.Size.Sm}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}">
-                            <!--  ⚠ 不可在這加 Text="..." 屬性 — 會 override 下方 Style 的 DataTrigger，
-                                  導致無論 mode 是 account / liability 永遠顯示 Account.Title。  -->
+                            <!--
+                                ⚠ 不可在這加 Text="..." 屬性 — 會 override 下方 Style 的 DataTrigger，
+                                導致無論 mode 是 account / liability 永遠顯示 Account.Title。
+                            -->
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Text" Value="{DynamicResource Portfolio.Account.Title}" />

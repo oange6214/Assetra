@@ -39,10 +39,10 @@ public sealed class RetirementViewModelTests
     }
 
     [Theory]
-    [InlineData("FormBalance",            "abc", "餘額格式錯誤")]
-    [InlineData("FormEmployeeRate",       "abc", "員工提撥率格式錯誤")]
-    [InlineData("FormEmployerRate",       "abc", "雇主提撥率格式錯誤")]
-    [InlineData("FormYearsOfService",     "abc", "年資格式錯誤")]
+    [InlineData("FormBalance", "abc", "餘額格式錯誤")]
+    [InlineData("FormEmployeeRate", "abc", "員工提撥率格式錯誤")]
+    [InlineData("FormEmployerRate", "abc", "雇主提撥率格式錯誤")]
+    [InlineData("FormYearsOfService", "abc", "年資格式錯誤")]
     [InlineData("FormLegalWithdrawalAge", "abc", "法定提領年齡格式錯誤")]
     public async Task SaveAsync_InvalidNumber_SetsFormError(string fieldName, string badValue, string expectedError)
     {
@@ -119,9 +119,9 @@ public sealed class RetirementViewModelTests
     }
 
     [Theory]
-    [InlineData("ProjCurrentAge",        "abc", "目前年齡格式錯誤")]
-    [InlineData("ProjAnnualReturnRate",  "abc", "年化報酬率格式錯誤")]
-    [InlineData("ProjAnnualContribution","abc", "年提撥金額格式錯誤")]
+    [InlineData("ProjCurrentAge", "abc", "目前年齡格式錯誤")]
+    [InlineData("ProjAnnualReturnRate", "abc", "年化報酬率格式錯誤")]
+    [InlineData("ProjAnnualContribution", "abc", "年提撥金額格式錯誤")]
     public async Task ProjectAsync_InvalidInput_SetsProjResult(string fieldName, string badValue, string expectedResult)
     {
         var vm = CreateVm();

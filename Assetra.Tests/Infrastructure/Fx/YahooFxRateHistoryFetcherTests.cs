@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using Assetra.Core.Models;
 using Assetra.Infrastructure.Fx;
 using Xunit;
 
@@ -22,7 +21,8 @@ public sealed class YahooFxRateHistoryFetcherTests
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             LastRequest = request;
-            if (Throw is not null) throw Throw;
+            if (Throw is not null)
+                throw Throw;
             return Task.FromResult(Response ?? new HttpResponseMessage(HttpStatusCode.OK));
         }
     }

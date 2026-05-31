@@ -35,7 +35,8 @@ public static class BackdropClickToCloseBehavior
 
     private static void OnCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is not UIElement ui) return;
+        if (d is not UIElement ui)
+            return;
         ui.MouseLeftButtonDown -= OnMouseLeftButtonDown;
         if (e.NewValue is ICommand)
             ui.MouseLeftButtonDown += OnMouseLeftButtonDown;
@@ -43,10 +44,13 @@ public static class BackdropClickToCloseBehavior
 
     private static void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (sender is not UIElement ui) return;
-        if (!ReferenceEquals(e.OriginalSource, sender)) return;
+        if (sender is not UIElement ui)
+            return;
+        if (!ReferenceEquals(e.OriginalSource, sender))
+            return;
         var cmd = GetCommand(ui);
-        if (cmd is null || !cmd.CanExecute(null)) return;
+        if (cmd is null || !cmd.CanExecute(null))
+            return;
         cmd.Execute(null);
         e.Handled = true;
     }

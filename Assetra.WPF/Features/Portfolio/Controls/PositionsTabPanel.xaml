@@ -128,9 +128,10 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="12">
+                        <Border
+                            x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="12">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
@@ -162,11 +163,11 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border
+                            Padding="{TemplateBinding Padding}"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="13"
-                            Padding="{TemplateBinding Padding}"
                             SnapsToDevicePixels="True">
                             <!--
                                 直接用 TextBlock + TemplateBinding Foreground 取代 ContentPresenter +
@@ -256,8 +257,11 @@
                         </StackPanel>
                         <!--  右上展開鈕 — 點擊切換到「持股佔比」donut 面板  -->
                         <Button
-                            Width="22" Height="22" Padding="0"
-                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Width="22"
+                            Height="22"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
                             Command="{Binding ToggleKpiPanelCommand}"
                             CommandParameter="marketvalue"
                             Style="{StaticResource AppIconButton}"
@@ -302,12 +306,16 @@
                                 Text="{Binding TotalCost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
                                 Typography.NumeralAlignment="Tabular" />
                         </StackPanel>
-                        <Button Width="22" Height="22" Padding="0"
-                                HorizontalAlignment="Right" VerticalAlignment="Top"
-                                Command="{Binding ToggleKpiPanelCommand}"
-                                CommandParameter="cost"
-                                Style="{StaticResource AppIconButton}"
-                                ToolTip="{DynamicResource Portfolio.Kpi.ShowCost}">
+                        <Button
+                            Width="22"
+                            Height="22"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Command="{Binding ToggleKpiPanelCommand}"
+                            CommandParameter="cost"
+                            Style="{StaticResource AppIconButton}"
+                            ToolTip="{DynamicResource Portfolio.Kpi.ShowCost}">
                             <ds:AppIcon FontSize="13" Symbol="DataPie24">
                                 <ds:AppIcon.Style>
                                     <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
@@ -334,68 +342,72 @@
                     BorderThickness="1"
                     CornerRadius="{StaticResource Radius.Sm}">
                     <Grid>
-                    <StackPanel>
-                        <TextBlock
-                            FontSize="{StaticResource Font.Size.Xs}"
-                            Foreground="{DynamicResource AppTextSecondary}"
-                            Text="{DynamicResource Portfolio.Position.Summary.Pnl}" />
-                        <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                        <StackPanel>
                             <TextBlock
-                                FontFamily="{StaticResource Font.Family.Base}"
-                                FontSize="{StaticResource Font.Size.Lg}"
-                                FontWeight="SemiBold"
-                                Text="{Binding TotalPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
-                                Typography.NumeralAlignment="Tabular">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsTotalPositive}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                            <TextBlock
-                                Margin="6,0,0,0"
-                                VerticalAlignment="Bottom"
-                                FontFamily="{StaticResource Font.Family.Base}"
                                 FontSize="{StaticResource Font.Size.Xs}"
-                                Text="{Binding TotalPnlPercent, StringFormat={}{0:+0.00;-0.00}%}"
-                                Typography.NumeralAlignment="Tabular">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsTotalPositive}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Portfolio.Position.Summary.Pnl}" />
+                            <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                                <TextBlock
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Lg}"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding TotalPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
+                                    Typography.NumeralAlignment="Tabular">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsTotalPositive}" Value="True">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock
+                                    Margin="6,0,0,0"
+                                    VerticalAlignment="Bottom"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Text="{Binding TotalPnlPercent, StringFormat={}{0:+0.00;-0.00}%}"
+                                    Typography.NumeralAlignment="Tabular">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsTotalPositive}" Value="True">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
-                    <Button Width="22" Height="22" Padding="0"
-                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                        <Button
+                            Width="22"
+                            Height="22"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
                             Command="{Binding ToggleKpiPanelCommand}"
                             CommandParameter="pnl"
                             Style="{StaticResource AppIconButton}"
                             ToolTip="{DynamicResource Portfolio.Kpi.ShowPnlBreakdown}">
-                        <ds:AppIcon FontSize="13" Symbol="DataPie24">
-                            <ds:AppIcon.Style>
-                                <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
-                                    <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsKpiPnlExpanded}" Value="True">
-                                            <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ds:AppIcon.Style>
-                        </ds:AppIcon>
-                    </Button>
+                            <ds:AppIcon FontSize="13" Symbol="DataPie24">
+                                <ds:AppIcon.Style>
+                                    <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsKpiPnlExpanded}" Value="True">
+                                                <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ds:AppIcon.Style>
+                            </ds:AppIcon>
+                        </Button>
                     </Grid>
                 </Border>
 
@@ -409,81 +421,84 @@
                     BorderThickness="1"
                     CornerRadius="{StaticResource Radius.Sm}">
                     <Grid>
-                    <StackPanel>
-                        <TextBlock
-                            FontSize="{StaticResource Font.Size.Xs}"
-                            Foreground="{DynamicResource AppTextSecondary}"
-                            Text="{DynamicResource Portfolio.Position.Summary.DayChange}" />
-                        <!--  Shown only when quotes have loaded (HasDayPnl = true)  -->
-                        <StackPanel
-                            Margin="0,4,0,0"
-                            Orientation="Horizontal"
-                            Visibility="{Binding HasDayPnl, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel>
                             <TextBlock
-                                FontFamily="{StaticResource Font.Family.Base}"
-                                FontSize="{StaticResource Font.Size.Lg}"
-                                FontWeight="SemiBold"
-                                Text="{Binding DayPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
-                                Typography.NumeralAlignment="Tabular">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                            <TextBlock
-                                Margin="6,0,0,0"
-                                VerticalAlignment="Bottom"
-                                FontFamily="{StaticResource Font.Family.Base}"
                                 FontSize="{StaticResource Font.Size.Xs}"
-                                Text="{Binding DayPnlPercentDisplay}"
-                                Typography.NumeralAlignment="Tabular">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Portfolio.Position.Summary.DayChange}" />
+                            <!--  Shown only when quotes have loaded (HasDayPnl = true)  -->
+                            <StackPanel
+                                Margin="0,4,0,0"
+                                Orientation="Horizontal"
+                                Visibility="{Binding HasDayPnl, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Lg}"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding DayPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
+                                    Typography.NumeralAlignment="Tabular">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock
+                                    Margin="6,0,0,0"
+                                    VerticalAlignment="Bottom"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Text="{Binding DayPnlPercentDisplay}"
+                                    Typography.NumeralAlignment="Tabular">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                            <!--  Placeholder while quotes are loading  -->
+                            <TextBlock
+                                Margin="0,6,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Portfolio.Position.Summary.Loading}"
+                                Visibility="{Binding HasDayPnl, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                        </StackPanel>
+                        <!--  右上展開鈕 — 點擊切換到「每日損益」柱狀圖面板  -->
+                        <Button
+                            Width="22"
+                            Height="22"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Command="{Binding ToggleKpiPanelCommand}"
+                            CommandParameter="daychange"
+                            Style="{StaticResource AppIconButton}"
+                            ToolTip="{DynamicResource Portfolio.Kpi.ShowDailyPnl}">
+                            <ds:AppIcon FontSize="13" Symbol="DataBarVertical24">
+                                <ds:AppIcon.Style>
+                                    <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                            <DataTrigger Binding="{Binding IsKpiDayChangeExpanded}" Value="True">
+                                                <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </StackPanel>
-                        <!--  Placeholder while quotes are loading  -->
-                        <TextBlock
-                            Margin="0,6,0,0"
-                            FontSize="{StaticResource Font.Size.Xs}"
-                            Foreground="{DynamicResource AppTextMuted}"
-                            Text="{DynamicResource Portfolio.Position.Summary.Loading}"
-                            Visibility="{Binding HasDayPnl, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                    </StackPanel>
-                    <!--  右上展開鈕 — 點擊切換到「每日損益」柱狀圖面板  -->
-                    <Button
-                        Width="22" Height="22" Padding="0"
-                        HorizontalAlignment="Right" VerticalAlignment="Top"
-                        Command="{Binding ToggleKpiPanelCommand}"
-                        CommandParameter="daychange"
-                        Style="{StaticResource AppIconButton}"
-                        ToolTip="{DynamicResource Portfolio.Kpi.ShowDailyPnl}">
-                        <ds:AppIcon FontSize="13" Symbol="DataBarVertical24">
-                            <ds:AppIcon.Style>
-                                <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
-                                    <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsKpiDayChangeExpanded}" Value="True">
-                                            <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ds:AppIcon.Style>
-                        </ds:AppIcon>
-                    </Button>
+                                </ds:AppIcon.Style>
+                            </ds:AppIcon>
+                        </Button>
                     </Grid>
                 </Border>
 
@@ -498,14 +513,15 @@
             - 都未展開 → Visibility=Collapsed，row 高度為 0
             一次只能展開一個，由 ExpandedKpiPanel 單一 state 控制。
         -->
-        <Border Grid.Row="1"
-                Margin="12,10,12,0"
-                Padding="14,12"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource Radius.Sm}"
-                Visibility="{Binding IsAnyKpiPanelExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Border
+            Grid.Row="1"
+            Margin="12,10,12,0"
+            Padding="14,12"
+            Background="{DynamicResource AppSurface}"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="1"
+            CornerRadius="{StaticResource Radius.Sm}"
+            Visibility="{Binding IsAnyKpiPanelExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid>
                 <!--  持股佔比 donut + legend  -->
                 <Grid Visibility="{Binding IsKpiMarketValueExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -513,18 +529,25 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="False">
+                    <DockPanel
+                        Grid.Row="0"
+                        Margin="0,0,0,8"
+                        LastChildFill="False">
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Sm}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{DynamicResource Portfolio.Kpi.AllocationTitle}" />
-                        <Button DockPanel.Dock="Right"
-                                Command="{Binding ToggleKpiPanelCommand}"
-                                CommandParameter="marketvalue"
-                                Style="{StaticResource PanelCloseButton}"
-                                ToolTip="{DynamicResource Common.Close}">
-                            <ds:AppIcon FontSize="11" Foreground="{DynamicResource AppTextMuted}" Symbol="Dismiss24" />
+                        <Button
+                            Command="{Binding ToggleKpiPanelCommand}"
+                            CommandParameter="marketvalue"
+                            DockPanel.Dock="Right"
+                            Style="{StaticResource PanelCloseButton}"
+                            ToolTip="{DynamicResource Common.Close}">
+                            <ds:AppIcon
+                                FontSize="11"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Symbol="Dismiss24" />
                         </Button>
                     </DockPanel>
                     <Grid Grid.Row="1" Height="160">
@@ -532,18 +555,20 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <lvc:PieChart Grid.Column="0"
-                                      Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                                      Background="Transparent"
-                                      InitialRotation="-90"
-                                      LegendPosition="Hidden"
-                                      Series="{Binding PositionAllocationSeries}"
-                                      TooltipPosition="Center"
-                                      TooltipTextSize="11" />
-                        <ItemsControl Grid.Column="1"
-                                      Margin="16,4,0,0"
-                                      VerticalAlignment="Center"
-                                      ItemsSource="{Binding PositionAllocationSlices}">
+                        <lvc:PieChart
+                            Grid.Column="0"
+                            Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                            Background="Transparent"
+                            InitialRotation="-90"
+                            LegendPosition="Hidden"
+                            Series="{Binding PositionAllocationSeries}"
+                            TooltipPosition="Center"
+                            TooltipTextSize="11" />
+                        <ItemsControl
+                            Grid.Column="1"
+                            Margin="16,4,0,0"
+                            VerticalAlignment="Center"
+                            ItemsSource="{Binding PositionAllocationSlices}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="0,2">
@@ -553,28 +578,40 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Ellipse Grid.Column="0" Width="10" Height="10" VerticalAlignment="Center">
+                                        <Ellipse
+                                            Grid.Column="0"
+                                            Width="10"
+                                            Height="10"
+                                            VerticalAlignment="Center">
                                             <Ellipse.Fill>
                                                 <SolidColorBrush Color="{Binding ColorHex}" />
                                             </Ellipse.Fill>
                                         </Ellipse>
-                                        <TextBlock Grid.Column="1" Margin="8,0,12,0" VerticalAlignment="Center"
-                                                   FontSize="{StaticResource Font.Size.Sm}"
-                                                   Foreground="{DynamicResource AppTextSecondary}"
-                                                   Text="{Binding Label}" />
-                                        <TextBlock Grid.Column="2" Margin="0,0,8,0" VerticalAlignment="Center"
-                                                   FontFamily="{StaticResource Font.Family.Base}"
-                                                   FontSize="{StaticResource Font.Size.Sm}"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource AppTextPrimary}"
-                                                   Text="{Binding Percent, StringFormat={}{0:F1}%}"
-                                                   Typography.NumeralAlignment="Tabular" />
-                                        <TextBlock Grid.Column="3" VerticalAlignment="Center"
-                                                   FontFamily="{StaticResource Font.Family.Base}"
-                                                   FontSize="{StaticResource Font.Size.Xs}"
-                                                   Foreground="{DynamicResource AppTextMuted}"
-                                                   Text="{Binding Value, StringFormat='NT\${0:N0}'}"
-                                                   Typography.NumeralAlignment="Tabular" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="8,0,12,0"
+                                            VerticalAlignment="Center"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{Binding Label}" />
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            Margin="0,0,8,0"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding Percent, StringFormat={}{0:F1}%}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{Binding Value, StringFormat='NT\${0:N0}'}"
+                                            Typography.NumeralAlignment="Tabular" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -588,16 +625,25 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="False">
-                        <TextBlock FontSize="{StaticResource Font.Size.Sm}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{DynamicResource Portfolio.Kpi.CostTitle}" />
-                        <Button DockPanel.Dock="Right"
-                                Command="{Binding ToggleKpiPanelCommand}"
-                                CommandParameter="cost"
-                                Style="{StaticResource PanelCloseButton}"
-                                ToolTip="{DynamicResource Common.Close}">
-                            <ds:AppIcon FontSize="11" Foreground="{DynamicResource AppTextMuted}" Symbol="Dismiss24" />
+                    <DockPanel
+                        Grid.Row="0"
+                        Margin="0,0,0,8"
+                        LastChildFill="False">
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Portfolio.Kpi.CostTitle}" />
+                        <Button
+                            Command="{Binding ToggleKpiPanelCommand}"
+                            CommandParameter="cost"
+                            DockPanel.Dock="Right"
+                            Style="{StaticResource PanelCloseButton}"
+                            ToolTip="{DynamicResource Common.Close}">
+                            <ds:AppIcon
+                                FontSize="11"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Symbol="Dismiss24" />
                         </Button>
                     </DockPanel>
                     <Grid Grid.Row="1" Height="160">
@@ -605,16 +651,20 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <lvc:PieChart Grid.Column="0"
-                                      Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                                      Background="Transparent"
-                                      InitialRotation="-90"
-                                      LegendPosition="Hidden"
-                                      Series="{Binding PositionCostSeries}"
-                                      TooltipPosition="Center"
-                                      TooltipTextSize="11" />
-                        <ItemsControl Grid.Column="1" Margin="16,4,0,0" VerticalAlignment="Center"
-                                      ItemsSource="{Binding PositionCostSlices}">
+                        <lvc:PieChart
+                            Grid.Column="0"
+                            Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                            Background="Transparent"
+                            InitialRotation="-90"
+                            LegendPosition="Hidden"
+                            Series="{Binding PositionCostSeries}"
+                            TooltipPosition="Center"
+                            TooltipTextSize="11" />
+                        <ItemsControl
+                            Grid.Column="1"
+                            Margin="16,4,0,0"
+                            VerticalAlignment="Center"
+                            ItemsSource="{Binding PositionCostSlices}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="0,2">
@@ -624,27 +674,41 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Ellipse Grid.Column="0" Width="10" Height="10" VerticalAlignment="Center">
+                                        <Ellipse
+                                            Grid.Column="0"
+                                            Width="10"
+                                            Height="10"
+                                            VerticalAlignment="Center">
                                             <Ellipse.Fill>
                                                 <SolidColorBrush Color="{Binding ColorHex}" />
                                             </Ellipse.Fill>
                                         </Ellipse>
-                                        <TextBlock Grid.Column="1" Margin="8,0,12,0" VerticalAlignment="Center"
-                                                   FontSize="{StaticResource Font.Size.Sm}"
-                                                   Foreground="{DynamicResource AppTextSecondary}"
-                                                   Text="{Binding Label}" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="2" Margin="0,0,8,0" VerticalAlignment="Center"
-                                                   FontFamily="{StaticResource Font.Family.Base}"
-                                                   FontSize="{StaticResource Font.Size.Sm}" FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource AppTextPrimary}"
-                                                   Text="{Binding Percent, StringFormat={}{0:F1}%}"
-                                                   Typography.NumeralAlignment="Tabular" />
-                                        <TextBlock Grid.Column="3" VerticalAlignment="Center"
-                                                   FontFamily="{StaticResource Font.Family.Base}"
-                                                   FontSize="{StaticResource Font.Size.Xs}"
-                                                   Foreground="{DynamicResource AppTextMuted}"
-                                                   Text="{Binding Value, StringFormat='NT\${0:N0}'}"
-                                                   Typography.NumeralAlignment="Tabular" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="8,0,12,0"
+                                            VerticalAlignment="Center"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{Binding Label}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            Margin="0,0,8,0"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding Percent, StringFormat={}{0:F1}%}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{Binding Value, StringFormat='NT\${0:N0}'}"
+                                            Typography.NumeralAlignment="Tabular" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -658,16 +722,25 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="False">
-                        <TextBlock FontSize="{StaticResource Font.Size.Sm}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{DynamicResource Portfolio.Kpi.PnlBreakdownTitle}" />
-                        <Button DockPanel.Dock="Right"
-                                Command="{Binding ToggleKpiPanelCommand}"
-                                CommandParameter="pnl"
-                                Style="{StaticResource PanelCloseButton}"
-                                ToolTip="{DynamicResource Common.Close}">
-                            <ds:AppIcon FontSize="11" Foreground="{DynamicResource AppTextMuted}" Symbol="Dismiss24" />
+                    <DockPanel
+                        Grid.Row="0"
+                        Margin="0,0,0,8"
+                        LastChildFill="False">
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Portfolio.Kpi.PnlBreakdownTitle}" />
+                        <Button
+                            Command="{Binding ToggleKpiPanelCommand}"
+                            CommandParameter="pnl"
+                            DockPanel.Dock="Right"
+                            Style="{StaticResource PanelCloseButton}"
+                            ToolTip="{DynamicResource Common.Close}">
+                            <ds:AppIcon
+                                FontSize="11"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Symbol="Dismiss24" />
                         </Button>
                     </DockPanel>
                     <Grid Grid.Row="1" Height="160">
@@ -675,16 +748,20 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <lvc:PieChart Grid.Column="0"
-                                      Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                                      Background="Transparent"
-                                      InitialRotation="-90"
-                                      LegendPosition="Hidden"
-                                      Series="{Binding PnlBreakdownSeries}"
-                                      TooltipPosition="Center"
-                                      TooltipTextSize="11" />
-                        <ItemsControl Grid.Column="1" Margin="16,4,0,0" VerticalAlignment="Center"
-                                      ItemsSource="{Binding PnlBreakdownSlices}">
+                        <lvc:PieChart
+                            Grid.Column="0"
+                            Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                            Background="Transparent"
+                            InitialRotation="-90"
+                            LegendPosition="Hidden"
+                            Series="{Binding PnlBreakdownSeries}"
+                            TooltipPosition="Center"
+                            TooltipTextSize="11" />
+                        <ItemsControl
+                            Grid.Column="1"
+                            Margin="16,4,0,0"
+                            VerticalAlignment="Center"
+                            ItemsSource="{Binding PnlBreakdownSlices}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="0,2">
@@ -694,27 +771,40 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Ellipse Grid.Column="0" Width="10" Height="10" VerticalAlignment="Center">
+                                        <Ellipse
+                                            Grid.Column="0"
+                                            Width="10"
+                                            Height="10"
+                                            VerticalAlignment="Center">
                                             <Ellipse.Fill>
                                                 <SolidColorBrush Color="{Binding ColorHex}" />
                                             </Ellipse.Fill>
                                         </Ellipse>
-                                        <TextBlock Grid.Column="1" Margin="8,0,12,0" VerticalAlignment="Center"
-                                                   FontSize="{StaticResource Font.Size.Sm}"
-                                                   Foreground="{DynamicResource AppTextSecondary}"
-                                                   Text="{Binding Label}" />
-                                        <TextBlock Grid.Column="2" Margin="0,0,8,0" VerticalAlignment="Center"
-                                                   FontFamily="{StaticResource Font.Family.Base}"
-                                                   FontSize="{StaticResource Font.Size.Sm}" FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource AppTextPrimary}"
-                                                   Text="{Binding Percent, StringFormat={}{0:F1}%}"
-                                                   Typography.NumeralAlignment="Tabular" />
-                                        <TextBlock Grid.Column="3" VerticalAlignment="Center"
-                                                   FontFamily="{StaticResource Font.Family.Base}"
-                                                   FontSize="{StaticResource Font.Size.Xs}"
-                                                   Foreground="{DynamicResource AppTextMuted}"
-                                                   Text="{Binding Value, StringFormat='NT\${0:N0}'}"
-                                                   Typography.NumeralAlignment="Tabular" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="8,0,12,0"
+                                            VerticalAlignment="Center"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{Binding Label}" />
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            Margin="0,0,8,0"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding Percent, StringFormat={}{0:F1}%}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{Binding Value, StringFormat='NT\${0:N0}'}"
+                                            Typography.NumeralAlignment="Tabular" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -729,24 +819,36 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="False">
+                    <DockPanel
+                        Grid.Row="0"
+                        Margin="0,0,0,8"
+                        LastChildFill="False">
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Sm}"
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource AppTextPrimary}"
                             Text="{DynamicResource Portfolio.Kpi.DailyPnlTitle}" />
-                        <Button DockPanel.Dock="Right"
-                                Command="{Binding ToggleKpiPanelCommand}"
-                                CommandParameter="daychange"
-                                Style="{StaticResource PanelCloseButton}"
-                                ToolTip="{DynamicResource Common.Close}">
-                            <ds:AppIcon FontSize="11" Foreground="{DynamicResource AppTextMuted}" Symbol="Dismiss24" />
+                        <Button
+                            Command="{Binding ToggleKpiPanelCommand}"
+                            CommandParameter="daychange"
+                            DockPanel.Dock="Right"
+                            Style="{StaticResource PanelCloseButton}"
+                            ToolTip="{DynamicResource Common.Close}">
+                            <ds:AppIcon
+                                FontSize="11"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Symbol="Dismiss24" />
                         </Button>
                     </DockPanel>
                     <!--  週期切換 chip row：7 / 30 / 90 天  -->
-                    <StackPanel Grid.Row="1" Margin="0,0,0,6" Orientation="Horizontal">
-                        <Button Command="{Binding SetDailyPnlPeriodCommand}" CommandParameter="7"
-                                Content="7 天">
+                    <StackPanel
+                        Grid.Row="1"
+                        Margin="0,0,0,6"
+                        Orientation="Horizontal">
+                        <Button
+                            Command="{Binding SetDailyPnlPeriodCommand}"
+                            CommandParameter="7"
+                            Content="7 天">
                             <Button.Style>
                                 <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
                                     <Style.Triggers>
@@ -759,8 +861,10 @@
                                 </Style>
                             </Button.Style>
                         </Button>
-                        <Button Command="{Binding SetDailyPnlPeriodCommand}" CommandParameter="30"
-                                Content="30 天">
+                        <Button
+                            Command="{Binding SetDailyPnlPeriodCommand}"
+                            CommandParameter="30"
+                            Content="30 天">
                             <Button.Style>
                                 <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
                                     <Style.Triggers>
@@ -773,8 +877,10 @@
                                 </Style>
                             </Button.Style>
                         </Button>
-                        <Button Command="{Binding SetDailyPnlPeriodCommand}" CommandParameter="90"
-                                Content="90 天">
+                        <Button
+                            Command="{Binding SetDailyPnlPeriodCommand}"
+                            CommandParameter="90"
+                            Content="90 天">
                             <Button.Style>
                                 <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
                                     <Style.Triggers>
@@ -788,14 +894,15 @@
                             </Button.Style>
                         </Button>
                     </StackPanel>
-                    <lvc:CartesianChart Grid.Row="2"
-                                        Height="140"
-                                        Background="Transparent"
-                                        Series="{Binding DailyPnlSeries}"
-                                        XAxes="{Binding DailyPnlXAxes}"
-                                        YAxes="{Binding DailyPnlYAxes}"
-                                        TooltipPosition="Top"
-                                        TooltipTextSize="10" />
+                    <lvc:CartesianChart
+                        Grid.Row="2"
+                        Height="140"
+                        Background="Transparent"
+                        Series="{Binding DailyPnlSeries}"
+                        TooltipPosition="Top"
+                        TooltipTextSize="10"
+                        XAxes="{Binding DailyPnlXAxes}"
+                        YAxes="{Binding DailyPnlYAxes}" />
                 </Grid>
             </Grid>
         </Border>
@@ -874,58 +981,62 @@
                         Style="{StaticResource AppSecondaryButton}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                <RadioButton Command="{Binding SetPositionViewModeCommand}"
-                             CommandParameter="{x:Static vm:InvestmentPositionViewMode.All}"
-                             Content="{DynamicResource Portfolio.ViewMode.All}">
-                    <RadioButton.Style>
-                        <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.All}">
-                                    <Setter Property="IsChecked" Value="True" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RadioButton.Style>
-                </RadioButton>
-                <RadioButton Command="{Binding SetPositionViewModeCommand}"
-                             CommandParameter="{x:Static vm:InvestmentPositionViewMode.Group}"
-                             Content="{DynamicResource Portfolio.ViewMode.Group}">
-                    <RadioButton.Style>
-                        <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.Group}">
-                                    <Setter Property="IsChecked" Value="True" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RadioButton.Style>
-                </RadioButton>
-                <RadioButton Command="{Binding SetPositionViewModeCommand}"
-                             CommandParameter="{x:Static vm:InvestmentPositionViewMode.Market}"
-                             Content="{DynamicResource Portfolio.ViewMode.Market}">
-                    <RadioButton.Style>
-                        <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.Market}">
-                                    <Setter Property="IsChecked" Value="True" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RadioButton.Style>
-                </RadioButton>
-                <RadioButton Command="{Binding SetPositionViewModeCommand}"
-                             CommandParameter="{x:Static vm:InvestmentPositionViewMode.Type}"
-                             Content="{DynamicResource Portfolio.ViewMode.Type}">
-                    <RadioButton.Style>
-                        <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.Type}">
-                                    <Setter Property="IsChecked" Value="True" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RadioButton.Style>
-                </RadioButton>
+                    <RadioButton
+                        Command="{Binding SetPositionViewModeCommand}"
+                        CommandParameter="{x:Static vm:InvestmentPositionViewMode.All}"
+                        Content="{DynamicResource Portfolio.ViewMode.All}">
+                        <RadioButton.Style>
+                            <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.All}">
+                                        <Setter Property="IsChecked" Value="True" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </RadioButton.Style>
+                    </RadioButton>
+                    <RadioButton
+                        Command="{Binding SetPositionViewModeCommand}"
+                        CommandParameter="{x:Static vm:InvestmentPositionViewMode.Group}"
+                        Content="{DynamicResource Portfolio.ViewMode.Group}">
+                        <RadioButton.Style>
+                            <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.Group}">
+                                        <Setter Property="IsChecked" Value="True" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </RadioButton.Style>
+                    </RadioButton>
+                    <RadioButton
+                        Command="{Binding SetPositionViewModeCommand}"
+                        CommandParameter="{x:Static vm:InvestmentPositionViewMode.Market}"
+                        Content="{DynamicResource Portfolio.ViewMode.Market}">
+                        <RadioButton.Style>
+                            <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.Market}">
+                                        <Setter Property="IsChecked" Value="True" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </RadioButton.Style>
+                    </RadioButton>
+                    <RadioButton
+                        Command="{Binding SetPositionViewModeCommand}"
+                        CommandParameter="{x:Static vm:InvestmentPositionViewMode.Type}"
+                        Content="{DynamicResource Portfolio.ViewMode.Type}">
+                        <RadioButton.Style>
+                            <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.Type}">
+                                        <Setter Property="IsChecked" Value="True" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </RadioButton.Style>
+                    </RadioButton>
                 </StackPanel>
             </DockPanel>
 
@@ -934,12 +1045,12 @@
                 舊版 row 2 在「全部 / 依市場 / 依類型」mode 顯示資產類型 chips，
                 「依群組」mode 改顯示群組 chips。對使用者來說兩列都像「歸類」，
                 概念上看不出 row 1 是「視圖」、row 2 是「篩選」。
-
+                
                 改法：刪掉 row 2 chips 整列。
-                  - 想看 ETF / 個股 / 基金：切到「依類型」view mode 自動分組
-                  - 想看某個策略群組：切到「依群組」view mode 自動分組
-                  - 想找特定資產：用 Row 4 搜尋框（符號 / 名稱 contains 比對）
-
+                - 想看 ETF / 個股 / 基金：切到「依類型」view mode 自動分組
+                - 想看某個策略群組：切到「依群組」view mode 自動分組
+                - 想找特定資產：用 Row 4 搜尋框（符號 / 名稱 contains 比對）
+                
                 VM 端 SetAssetTypeFilterCommand / SetPortfolioGroupFilterCommand /
                 PortfolioGroupFilterChips collection 保留（unit test 覆蓋）— 只是
                 沒 UI 入口。FilterPosition 的 AssetTypeFilter / PortfolioGroupFilter
@@ -1861,62 +1972,75 @@
             Footer 永遠顯示 — 「全部」也是篩選的一種（無條件全留），看見整體合計
             跟切資產類型後的子集合計一樣有用，不該只在 chip 不是全部時才顯示。
         -->
-        <Border Grid.Row="6"
-                Padding="12,6"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorder}"
-                BorderThickness="0,1,0,0">
+        <Border
+            Grid.Row="6"
+            Padding="12,6"
+            Background="{DynamicResource AppSurface}"
+            BorderBrush="{DynamicResource AppBorder}"
+            BorderThickness="0,1,0,0">
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Margin="0,0,24,0" Orientation="Horizontal">
-                        <TextBlock Margin="0,0,6,0" VerticalAlignment="Center"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{DynamicResource Portfolio.Filter.Summary.Count}" />
-                        <TextBlock VerticalAlignment="Center"
-                                   FontFamily="{StaticResource Font.Family.Base}"
-                                   FontSize="{StaticResource Font.Size.Sm}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding PositionsFilteredCount, StringFormat={}{0:N0}}"
-                                   Typography.NumeralAlignment="Tabular" />
+                        <TextBlock
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.Filter.Summary.Count}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{Binding PositionsFilteredCount, StringFormat={}{0:N0}}"
+                            Typography.NumeralAlignment="Tabular" />
                     </StackPanel>
                     <StackPanel Margin="0,0,24,0" Orientation="Horizontal">
-                        <TextBlock Margin="0,0,6,0" VerticalAlignment="Center"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{DynamicResource Portfolio.Filter.Summary.MarketValue}" />
-                        <TextBlock VerticalAlignment="Center"
-                                   FontFamily="{StaticResource Font.Family.Base}"
-                                   FontSize="{StaticResource Font.Size.Sm}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding PositionsFilteredMarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
-                                   Typography.NumeralAlignment="Tabular" />
+                        <TextBlock
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.Filter.Summary.MarketValue}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{Binding PositionsFilteredMarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                            Typography.NumeralAlignment="Tabular" />
                     </StackPanel>
                     <StackPanel Margin="0,0,24,0" Orientation="Horizontal">
-                        <TextBlock Margin="0,0,6,0" VerticalAlignment="Center"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{DynamicResource Portfolio.Filter.Summary.Cost}" />
-                        <TextBlock VerticalAlignment="Center"
-                                   FontFamily="{StaticResource Font.Family.Base}"
-                                   FontSize="{StaticResource Font.Size.Sm}"
-                                   Foreground="{DynamicResource AppTextSecondary}"
-                                   Text="{Binding PositionsFilteredCost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
-                                   Typography.NumeralAlignment="Tabular" />
+                        <TextBlock
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.Filter.Summary.Cost}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{Binding PositionsFilteredCost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                            Typography.NumeralAlignment="Tabular" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Margin="0,0,6,0" VerticalAlignment="Center"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{DynamicResource Portfolio.Filter.Summary.Pnl}" />
-                        <TextBlock VerticalAlignment="Center"
-                                   FontFamily="{StaticResource Font.Family.Base}"
-                                   FontSize="{StaticResource Font.Size.Sm}"
-                                   FontWeight="SemiBold"
-                                   Text="{Binding PositionsFilteredPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
-                                   Typography.NumeralAlignment="Tabular">
+                        <TextBlock
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.Filter.Summary.Pnl}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            FontWeight="SemiBold"
+                            Text="{Binding PositionsFilteredPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
+                            Typography.NumeralAlignment="Tabular">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="{DynamicResource AppDown}" />

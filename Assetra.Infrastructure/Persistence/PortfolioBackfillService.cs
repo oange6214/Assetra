@@ -162,7 +162,8 @@ public sealed class PortfolioBackfillService
         var prices = new Dictionary<string, decimal>();
         foreach (var (symbol, exchange) in symbols)
         {
-            if (ct.IsCancellationRequested) break;
+            if (ct.IsCancellationRequested)
+                break;
             try
             {
                 var history = await _historyProvider.GetHistoryAsync(

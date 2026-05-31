@@ -18,7 +18,8 @@ public class RecurringTransactionSqliteRepositoryTests : IDisposable
     public void Dispose()
     {
         SqliteConnection.ClearAllPools();
-        if (File.Exists(_dbPath)) File.Delete(_dbPath);
+        if (File.Exists(_dbPath))
+            File.Delete(_dbPath);
     }
 
     private static RecurringTransaction Sample(string name = "Netflix") => new(

@@ -3,8 +3,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="Root"
     mc:Ignorable="d">
 
@@ -52,7 +52,10 @@
             </Setter>
         </Style>
 
-        <Style x:Key="HexPickerSecondaryButton" BasedOn="{StaticResource HexPickerButtonBase}" TargetType="Button">
+        <Style
+            x:Key="HexPickerSecondaryButton"
+            BasedOn="{StaticResource HexPickerButtonBase}"
+            TargetType="Button">
             <Setter Property="Background" Value="{DynamicResource AppSurface}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorder}" />
             <Style.Triggers>
@@ -62,7 +65,10 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="HexPickerPrimaryButton" BasedOn="{StaticResource HexPickerButtonBase}" TargetType="Button">
+        <Style
+            x:Key="HexPickerPrimaryButton"
+            BasedOn="{StaticResource HexPickerButtonBase}"
+            TargetType="Button">
             <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
             <Setter Property="Background" Value="{DynamicResource AppAccent}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />

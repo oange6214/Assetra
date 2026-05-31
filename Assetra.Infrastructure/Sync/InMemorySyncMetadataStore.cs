@@ -20,14 +20,16 @@ public sealed class InMemorySyncMetadataStore : ISyncMetadataStore
     public Task<SyncMetadata> GetAsync(CancellationToken ct = default)
     {
         ct.ThrowIfCancellationRequested();
-        lock (_lock) return Task.FromResult(_metadata);
+        lock (_lock)
+            return Task.FromResult(_metadata);
     }
 
     public Task SaveAsync(SyncMetadata metadata, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(metadata);
         ct.ThrowIfCancellationRequested();
-        lock (_lock) _metadata = metadata;
+        lock (_lock)
+            _metadata = metadata;
         return Task.CompletedTask;
     }
 }

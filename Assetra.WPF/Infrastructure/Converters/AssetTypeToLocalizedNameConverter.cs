@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Windows;
 using System.Windows.Data;
 using Assetra.Core.Models;
 
@@ -15,7 +14,8 @@ public sealed class AssetTypeToLocalizedNameConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is not AssetType at) return string.Empty;
+        if (value is not AssetType at)
+            return string.Empty;
         var key = $"Portfolio.Filter.AssetType.{at}";
         return System.Windows.Application.Current?.TryFindResource(key) as string ?? at.ToString();
     }

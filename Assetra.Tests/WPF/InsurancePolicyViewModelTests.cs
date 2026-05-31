@@ -43,8 +43,8 @@ public sealed class InsurancePolicyViewModelTests
     }
 
     [Theory]
-    [InlineData("FormAnnualPremium",    "abc", "年繳保費格式錯誤")]
-    [InlineData("FormFaceValue",        "abc", "保額格式錯誤")]
+    [InlineData("FormAnnualPremium", "abc", "年繳保費格式錯誤")]
+    [InlineData("FormFaceValue", "abc", "保額格式錯誤")]
     [InlineData("FormCurrentCashValue", "abc", "現金價值格式錯誤")]
     public async Task SaveAsync_InvalidNumber_SetsFormError(string fieldName, string badValue, string expectedError)
     {

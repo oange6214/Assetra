@@ -43,7 +43,8 @@ internal static class PortfolioSnapshotSchemaMigrator
 
     private static void EnsureColumn(SqliteConnection conn, string table, string column, string typeDecl)
     {
-        if (ColumnExists(conn, table, column)) return;
+        if (ColumnExists(conn, table, column))
+            return;
         using var alter = conn.CreateCommand();
         alter.CommandText = $"ALTER TABLE {table} ADD COLUMN {column} {typeDecl};";
         alter.ExecuteNonQuery();

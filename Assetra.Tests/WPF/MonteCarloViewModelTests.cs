@@ -32,8 +32,8 @@ public sealed class MonteCarloViewModelTests
     }
 
     [Theory]
-    [InlineData("-1.5",  "平均報酬率必須 > -100%")]   // mu <= -1
-    [InlineData("-2",    "平均報酬率必須 > -100%")]
+    [InlineData("-1.5", "平均報酬率必須 > -100%")]   // mu <= -1
+    [InlineData("-2", "平均報酬率必須 > -100%")]
     public async Task Run_InvalidMeanReturn_SetsError(string meanReturn, string expected)
     {
         var vm = CreateVm();

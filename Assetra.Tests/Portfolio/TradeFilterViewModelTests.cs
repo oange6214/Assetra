@@ -39,7 +39,8 @@ public sealed class TradeFilterViewModelTests
         Exception? caught = null;
         var thread = new Thread(() =>
         {
-            try { action(); }
+            try
+            { action(); }
             catch (Exception ex) { caught = ex; }
         });
         thread.SetApartmentState(ApartmentState.STA);
@@ -145,7 +146,7 @@ public sealed class TradeFilterViewModelTests
             };
             var (vm, _) = CreateAttached(rows);
 
-            vm.TradeTypeFilters.Add(new TradeTypeFilterItem("Buy",  "買入") { IsChecked = true });
+            vm.TradeTypeFilters.Add(new TradeTypeFilterItem("Buy", "買入") { IsChecked = true });
             vm.TradeTypeFilters.Add(new TradeTypeFilterItem("Sell", "賣出") { IsChecked = true });
 
             vm.RefreshTradesView();
@@ -251,7 +252,7 @@ public sealed class TradeFilterViewModelTests
         StaRun(() =>
         {
             var early = MakeRow(tradeDate: new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc));
-            var late  = MakeRow(tradeDate: new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc));
+            var late = MakeRow(tradeDate: new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc));
             var (vm, _) = CreateAttached([early, late]);
 
             vm.TradeDateFrom = new DateTime(2025, 1, 1);
@@ -267,7 +268,7 @@ public sealed class TradeFilterViewModelTests
         StaRun(() =>
         {
             var early = MakeRow(tradeDate: new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc));
-            var late  = MakeRow(tradeDate: new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc));
+            var late = MakeRow(tradeDate: new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc));
             var (vm, _) = CreateAttached([early, late]);
 
             vm.TradeDateTo = new DateTime(2025, 1, 1);
@@ -285,12 +286,12 @@ public sealed class TradeFilterViewModelTests
             // Trade falls on exactly the cutoff date — must be included (TradeDateTo is inclusive).
             // Production predicate: t.TradeDate > TradeDateTo.Value.Date.AddDays(1).ToUniversalTime()
             // 2024-06-15 UTC is NOT > 2024-06-16 UTC, so it passes the filter.
-            var cutoff    = new DateTime(2024, 6, 15);
+            var cutoff = new DateTime(2024, 6, 15);
             var tradeDate = new DateTime(2024, 6, 15, 0, 0, 0, DateTimeKind.Utc);
-            var (vm, _)   = CreateAttached([MakeRow(tradeDate: tradeDate)]);
+            var (vm, _) = CreateAttached([MakeRow(tradeDate: tradeDate)]);
 
             vm.TradeDateFrom = null;
-            vm.TradeDateTo   = cutoff;
+            vm.TradeDateTo = cutoff;
             vm.RefreshTradesView();
 
             Assert.Equal(1, vm.TradeTotalCount);
@@ -308,12 +309,12 @@ public sealed class TradeFilterViewModelTests
             // A trade at exactly 2024-06-16 00:00:00 UTC is NOT > 2024-06-16 00:00:00 UTC,
             // so it would still pass. Use 2024-06-16 00:00:01 UTC (one second past midnight)
             // or simply move the trade to 2024-06-17 UTC to be clearly after the boundary.
-            var cutoff    = new DateTime(2024, 6, 15);
+            var cutoff = new DateTime(2024, 6, 15);
             var tradeDate = new DateTime(2024, 6, 17, 0, 0, 0, DateTimeKind.Utc);
-            var (vm, _)   = CreateAttached([MakeRow(tradeDate: tradeDate)]);
+            var (vm, _) = CreateAttached([MakeRow(tradeDate: tradeDate)]);
 
             vm.TradeDateFrom = null;
-            vm.TradeDateTo   = cutoff;
+            vm.TradeDateTo = cutoff;
             vm.RefreshTradesView();
 
             Assert.Equal(0, vm.TradeTotalCount);
@@ -415,8 +416,8 @@ public sealed class TradeFilterViewModelTests
             // Provide a real trade row so RebuildTradeAssetFilters has data to work with.
             var row = MakeRow(symbol: "2330", type: TradeType.Buy);
             var rows = new List<TradeRowViewModel> { row };
-            var col  = new ObservableCollection<TradeRowViewModel>(rows);
-            var vm   = new TradeFilterViewModel(() => rows, _nullLocalization);
+            var col = new ObservableCollection<TradeRowViewModel>(rows);
+            var vm = new TradeFilterViewModel(() => rows, _nullLocalization);
             vm.AttachTradesCollection(new ReadOnlyObservableCollection<TradeRowViewModel>(col));
 
             // Wire type filters with real PropertyChanged subscriptions (as production does).
@@ -431,8 +432,8 @@ public sealed class TradeFilterViewModelTests
 
             // Activate some filter state.
             vm.TradeSearchText = "2330";
-            vm.TradeDateFrom   = new DateTime(2025, 1, 1);
-            vm.TradeDateTo     = new DateTime(2025, 12, 31);
+            vm.TradeDateFrom = new DateTime(2025, 1, 1);
+            vm.TradeDateTo = new DateTime(2025, 12, 31);
 
             // Check the first type filter (e.g. "Buy") and the asset filter for "2330".
             vm.TradeTypeFilters[0].IsChecked = true;

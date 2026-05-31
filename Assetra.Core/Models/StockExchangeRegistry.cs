@@ -38,7 +38,8 @@ public static class StockExchangeRegistry
     /// <summary>Look up an exchange by code (case-insensitive). Returns null if unknown.</summary>
     public static StockExchange? TryGet(string? code)
     {
-        if (string.IsNullOrWhiteSpace(code)) return null;
+        if (string.IsNullOrWhiteSpace(code))
+            return null;
         return Map.TryGetValue(code.Trim(), out var ex) ? ex : null;
     }
 

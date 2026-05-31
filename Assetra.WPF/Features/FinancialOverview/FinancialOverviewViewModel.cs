@@ -1,11 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
-using Assetra.WPF.Features.Portfolio.Contracts;
-using Assetra.WPF.Infrastructure;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Assetra.WPF.Features.Portfolio.Contracts;
+using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -79,7 +79,8 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     {
         get
         {
-            if (GoalsWidget is null || GoalsWidget.Goals.Count == 0) return null;
+            if (GoalsWidget is null || GoalsWidget.Goals.Count == 0)
+                return null;
             // 未達成的優先；deadline 最近的優先（無 deadline 視為 MaxValue 排後）
             var primary = GoalsWidget.Goals
                 .Where(g => !g.IsAchieved)
@@ -100,7 +101,8 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     {
         get
         {
-            if (PrimaryGoal is null) return string.Empty;
+            if (PrimaryGoal is null)
+                return string.Empty;
             var name = string.IsNullOrWhiteSpace(PrimaryGoal.Name) ? "" : PrimaryGoal.Name + " · ";
             return name + PrimaryGoal.TargetDisplay;
         }
@@ -116,7 +118,8 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         get
         {
             var g = PrimaryGoal;
-            if (g is null || g.Goal.TargetAmount <= 0m) return 0m;
+            if (g is null || g.Goal.TargetAmount <= 0m)
+                return 0m;
 
             // Portfolio-Groups-Refactor P5 — group 連結優先：用該 group cached 淨值算進度。
             // cache 未命中時退到 LinkedAssetClass / manual fallback，下一輪 refresh 命中後生效。
@@ -146,14 +149,14 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     private decimal ResolveAssetClassValue(string linkedAssetClass) =>
         linkedAssetClass switch
         {
-            "NetWorth"    => BalanceSheetNetWorth,
+            "NetWorth" => BalanceSheetNetWorth,
             "TotalAssets" => BalanceSheetTotalAssets,
             "Investments" => TotalInvestments,
-            "Cash"        => PortfolioRef?.TotalCash ?? 0m,
-            "RealEstate"  => RealEstateFocusWidget?.TotalCurrentValue ?? 0m,
-            "Retirement"  => RetirementFocusWidget?.TotalBalance ?? 0m,
-            "Physical"    => PhysicalAssetFocusWidget?.TotalCurrentValue ?? 0m,
-            _             => 0m,
+            "Cash" => PortfolioRef?.TotalCash ?? 0m,
+            "RealEstate" => RealEstateFocusWidget?.TotalCurrentValue ?? 0m,
+            "Retirement" => RetirementFocusWidget?.TotalBalance ?? 0m,
+            "Physical" => PhysicalAssetFocusWidget?.TotalCurrentValue ?? 0m,
+            _ => 0m,
         };
 
     /// <summary>
@@ -163,14 +166,16 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     /// </summary>
     public async Task RefreshGroupNetValuesAsync(CancellationToken ct = default)
     {
-        if (_groupBalanceService is null || GoalsWidget is null) return;
+        if (_groupBalanceService is null || GoalsWidget is null)
+            return;
         var groupIds = GoalsWidget.Goals
             .Select(g => g.Goal.PortfolioGroupId)
             .Where(id => id.HasValue)
             .Select(id => id!.Value)
             .Distinct()
             .ToList();
-        if (groupIds.Count == 0) return;
+        if (groupIds.Count == 0)
+            return;
 
         var changed = false;
         foreach (var id in groupIds)
@@ -264,7 +269,8 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         get
         {
             var assets = TotalAssets + TotalInvestments;
-            if (assets <= 0m) return "0%";
+            if (assets <= 0m)
+                return "0%";
             return (TotalLiabilities / assets * 100m).ToString("F1", CultureInfo.InvariantCulture) + "%";
         }
     }
@@ -497,7 +503,8 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     private bool IsAssetClassVisible(string key)
     {
         var map = _settings?.Current.AssetClassFocusVisibility;
-        if (map is null) return true;
+        if (map is null)
+            return true;
         return map.TryGetValue(key, out var v) ? v : true;
     }
 
@@ -608,11 +615,13 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
             && PortfolioRef.Positions is System.Collections.Specialized.INotifyCollectionChanged posNcc)
         {
             posNcc.CollectionChanged += (_, _) => RefreshTodaysMovers();
-            foreach (var row in PortfolioRef.Positions) HookRowPnl(row);
+            foreach (var row in PortfolioRef.Positions)
+                HookRowPnl(row);
             // 補上未來新增的 row（CollectionChanged.NewItems 也 hook）
             posNcc.CollectionChanged += (_, e) =>
             {
-                if (e.NewItems is null) return;
+                if (e.NewItems is null)
+                    return;
                 foreach (Assetra.WPF.Features.Portfolio.PortfolioRowViewModel r in e.NewItems)
                     HookRowPnl(r);
             };
@@ -692,9 +701,11 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     [CommunityToolkit.Mvvm.Input.RelayCommand]
     private void MoveKpiUp(KpiSelectionItemVm? item)
     {
-        if (item is null) return;
+        if (item is null)
+            return;
         var idx = _kpiEditorItems.IndexOf(item);
-        if (idx <= 0) return;
+        if (idx <= 0)
+            return;
         _kpiEditorItems.Move(idx, idx - 1);
         RecomputeKpiEditorState();
     }
@@ -702,9 +713,11 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     [CommunityToolkit.Mvvm.Input.RelayCommand]
     private void MoveKpiDown(KpiSelectionItemVm? item)
     {
-        if (item is null) return;
+        if (item is null)
+            return;
         var idx = _kpiEditorItems.IndexOf(item);
-        if (idx < 0 || idx >= _kpiEditorItems.Count - 1) return;
+        if (idx < 0 || idx >= _kpiEditorItems.Count - 1)
+            return;
         _kpiEditorItems.Move(idx, idx + 1);
         RecomputeKpiEditorState();
     }
@@ -906,12 +919,12 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
                 // 槓桿 = 總資產 / 淨資產；淨資產 ≤ 0 時無意義，副值留空。
                 Ratio(id, info.LabelKey, TotalLiabilities, TotalAssets + TotalInvestments, KpiTone.Neutral)
                     with
-                    {
-                        SecondaryLabelKey = "Portfolio.Liability.LeverageRatio",
-                        SecondaryValueDisplay = TotalNetWorth > 0m
+                {
+                    SecondaryLabelKey = "Portfolio.Liability.LeverageRatio",
+                    SecondaryValueDisplay = TotalNetWorth > 0m
                             ? ((TotalAssets + TotalInvestments) / TotalNetWorth).ToString("F2", CultureInfo.InvariantCulture)
                             : string.Empty,
-                    },
+                },
             KpiMetric.InvestmentPnl =>
                 Money(id, info.LabelKey,
                     _portfolio.TotalMarketValue - _portfolio.TotalCost,
@@ -983,7 +996,8 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanSaveKpiSelection))]
     private async Task SaveKpiSelectionAsync()
     {
-        if (_settings is null) return;
+        if (_settings is null)
+            return;
 
         var selected = KpiEditorItems.Where(i => i.IsSelected).Select(i => i.Id).ToList();
         var serialised = KpiMetricCatalog.Serialize(selected);

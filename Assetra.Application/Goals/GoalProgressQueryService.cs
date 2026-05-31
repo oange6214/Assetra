@@ -22,10 +22,14 @@ public sealed class GoalProgressQueryService
         var accumulated = 0m;
         foreach (var rule in fundingRules)
         {
-            if (!rule.IsEnabled) continue;
-            if (rule.GoalId != goal.Id) continue;
-            if (rule.Amount <= 0m) continue;
-            if (rule.StartDate > asOf) continue;
+            if (!rule.IsEnabled)
+                continue;
+            if (rule.GoalId != goal.Id)
+                continue;
+            if (rule.Amount <= 0m)
+                continue;
+            if (rule.StartDate > asOf)
+                continue;
             var until = rule.EndDate is { } ed && ed < asOf ? ed : asOf;
             var occurrences = CountOccurrences(rule.StartDate, until, rule.Frequency);
             accumulated += rule.Amount * occurrences;
@@ -42,7 +46,8 @@ public sealed class GoalProgressQueryService
 
     internal static int CountOccurrences(DateOnly start, DateOnly until, RecurrenceFrequency frequency)
     {
-        if (until < start) return 0;
+        if (until < start)
+            return 0;
         return frequency switch
         {
             RecurrenceFrequency.Daily => until.DayNumber - start.DayNumber + 1,
@@ -58,8 +63,10 @@ public sealed class GoalProgressQueryService
     private static int MonthsBetweenInclusive(DateOnly start, DateOnly until, int step = 1)
     {
         var months = (until.Year - start.Year) * 12 + (until.Month - start.Month);
-        if (until.Day < start.Day) months--;
-        if (months < 0) return 0;
+        if (until.Day < start.Day)
+            months--;
+        if (months < 0)
+            return 0;
         return months / step + 1;
     }
 
@@ -68,7 +75,8 @@ public sealed class GoalProgressQueryService
         var years = until.Year - start.Year;
         if (until.Month < start.Month || (until.Month == start.Month && until.Day < start.Day))
             years--;
-        if (years < 0) return 0;
+        if (years < 0)
+            return 0;
         return years + 1;
     }
 }

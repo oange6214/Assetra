@@ -1,5 +1,5 @@
-using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Data;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
@@ -290,19 +290,21 @@ public partial class PortfolioViewModel
             var f = AssetTypeFilter.Value;
             var matches = f switch
             {
-                AssetType.Etf   => row.AssetType == AssetType.Etf
+                AssetType.Etf => row.AssetType == AssetType.Etf
                                    || (row.AssetType == AssetType.Stock && row.IsEtf),
                 AssetType.Stock => row.AssetType == AssetType.Stock && !row.IsEtf,
-                _               => row.AssetType == f,
+                _ => row.AssetType == f,
             };
-            if (!matches) return false;
+            if (!matches)
+                return false;
         }
 
         // Portfolio-Groups-Refactor P4 — Group chip 篩選；null row group 視為 DefaultId。
         if (PortfolioGroupFilter is { } gf)
         {
             var rowGroup = row.PortfolioGroupId ?? PortfolioGroup.DefaultId;
-            if (rowGroup != gf) return false;
+            if (rowGroup != gf)
+                return false;
         }
 
         if (string.IsNullOrWhiteSpace(FilterText))

@@ -149,7 +149,8 @@ public sealed partial class TradeDetailViewModel : ObservableObject
     {
         var hasCurrent = !string.IsNullOrWhiteSpace(value) && value != "—";
         var hasPrev = !string.IsNullOrWhiteSpace(previousValue) && previousValue != "—";
-        if (!hasCurrent && !hasPrev) return;
+        if (!hasCurrent && !hasPrev)
+            return;
         Add(label, value ?? "—", previousValue);
     }
 
@@ -158,7 +159,8 @@ public sealed partial class TradeDetailViewModel : ObservableObject
     /// <summary>Pretty-prints raw JSON with 2-space indent for the Raw view.</summary>
     private static string PrettyPrintJson(string raw)
     {
-        if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
+        if (string.IsNullOrWhiteSpace(raw))
+            return string.Empty;
         try
         {
             using var doc = System.Text.Json.JsonDocument.Parse(raw);

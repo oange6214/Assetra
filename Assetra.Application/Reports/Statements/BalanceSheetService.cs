@@ -104,7 +104,8 @@ public sealed class BalanceSheetService : IBalanceSheetService
         foreach (var item in cashAssets.Where(a => a.IsActive))
         {
             var bal = ComputeCashBalance(item.Id, tradesUntil);
-            if (bal == 0m) continue;
+            if (bal == 0m)
+                continue;
             assetRows.Add(new StatementRow(item.Name, ConvertWithCache(bal, item.Currency, baseCurrency, fxFactors), "Cash"));
         }
 
@@ -128,7 +129,8 @@ public sealed class BalanceSheetService : IBalanceSheetService
         foreach (var item in liabilityAssets.Where(a => a.IsActive))
         {
             var bal = ComputeLiabilityBalance(item, tradesUntil);
-            if (bal == 0m) continue;
+            if (bal == 0m)
+                continue;
             liabilityRows.Add(new StatementRow(item.Name, ConvertWithCache(bal, item.Currency, baseCurrency, fxFactors), item.IsCreditCard ? "Credit Card" : "Loan"));
         }
         var liabilityTotal = liabilityRows.Sum(r => r.Amount);
@@ -154,13 +156,15 @@ public sealed class BalanceSheetService : IBalanceSheetService
     private static IReadOnlyList<string>? BuildFxWarnings(
         Dictionary<string, decimal?> fxFactors, string? baseCurrency)
     {
-        if (fxFactors.Count == 0 || string.IsNullOrWhiteSpace(baseCurrency)) return null;
+        if (fxFactors.Count == 0 || string.IsNullOrWhiteSpace(baseCurrency))
+            return null;
         var missing = fxFactors
             .Where(kv => kv.Value is null)
             .Select(kv => kv.Key)
             .OrderBy(c => c, StringComparer.OrdinalIgnoreCase)
             .ToList();
-        if (missing.Count == 0) return null;
+        if (missing.Count == 0)
+            return null;
         return new[]
         {
             $"匯率資料缺失：{string.Join(", ", missing)} — 部分數值未換算到 {baseCurrency}",
@@ -177,7 +181,8 @@ public sealed class BalanceSheetService : IBalanceSheetService
         foreach (var prop in properties.Where(p => p.Status == RealEstateStatus.Active && p.PurchaseDate <= asOf))
         {
             var equity = prop.Equity;
-            if (equity == 0m) continue;
+            if (equity == 0m)
+                continue;
             rows.Add(new StatementRow(
                 prop.Name,
                 ConvertWithCache(equity, prop.Currency, baseCurrency, fxFactors),
@@ -193,7 +198,8 @@ public sealed class BalanceSheetService : IBalanceSheetService
     {
         foreach (var account in accounts.Where(a => a.Status == RetirementAccountStatus.Active))
         {
-            if (account.Balance == 0m) continue;
+            if (account.Balance == 0m)
+                continue;
             rows.Add(new StatementRow(
                 account.Name,
                 ConvertWithCache(account.Balance, account.Currency, baseCurrency, fxFactors),
@@ -209,7 +215,8 @@ public sealed class BalanceSheetService : IBalanceSheetService
     {
         foreach (var asset in assets.Where(a => a.Status == PhysicalAssetStatus.Active))
         {
-            if (asset.CurrentValue == 0m) continue;
+            if (asset.CurrentValue == 0m)
+                continue;
             rows.Add(new StatementRow(
                 asset.Name,
                 ConvertWithCache(asset.CurrentValue, asset.Currency, baseCurrency, fxFactors),
@@ -225,7 +232,8 @@ public sealed class BalanceSheetService : IBalanceSheetService
     {
         foreach (var policy in policies.Where(p => p.Status == InsurancePolicyStatus.Active))
         {
-            if (policy.CurrentCashValue == 0m) continue;
+            if (policy.CurrentCashValue == 0m)
+                continue;
             rows.Add(new StatementRow(
                 policy.Name,
                 ConvertWithCache(policy.CurrentCashValue, policy.Currency, baseCurrency, fxFactors),
@@ -241,7 +249,8 @@ public sealed class BalanceSheetService : IBalanceSheetService
         IEnumerable<string> currencies, DateOnly asOf, string? baseCurrency, CancellationToken ct)
     {
         var result = new Dictionary<string, decimal?>(StringComparer.OrdinalIgnoreCase);
-        if (_fx is null || baseCurrency is null) return result;
+        if (_fx is null || baseCurrency is null)
+            return result;
 
         var distinct = currencies
             .Where(c => !string.IsNullOrWhiteSpace(c)
@@ -259,9 +268,12 @@ public sealed class BalanceSheetService : IBalanceSheetService
 
     private decimal ConvertWithCache(decimal amount, string fromCcy, string? baseCurrency, Dictionary<string, decimal?> factors)
     {
-        if (_fx is null || baseCurrency is null) return amount;
-        if (string.IsNullOrWhiteSpace(fromCcy)) return amount;
-        if (string.Equals(fromCcy, baseCurrency, StringComparison.OrdinalIgnoreCase)) return amount;
+        if (_fx is null || baseCurrency is null)
+            return amount;
+        if (string.IsNullOrWhiteSpace(fromCcy))
+            return amount;
+        if (string.Equals(fromCcy, baseCurrency, StringComparison.OrdinalIgnoreCase))
+            return amount;
         return factors.TryGetValue(fromCcy, out var factor) && factor is { } f ? amount * f : amount;
     }
 

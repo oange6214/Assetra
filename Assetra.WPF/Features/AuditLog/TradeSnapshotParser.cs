@@ -12,7 +12,8 @@ internal static class TradeSnapshotParser
 {
     public static Trade? TryParse(string? json)
     {
-        if (string.IsNullOrWhiteSpace(json)) return null;
+        if (string.IsNullOrWhiteSpace(json))
+            return null;
         try
         {
             return JsonSerializer.Deserialize<Trade>(json);
@@ -30,7 +31,8 @@ internal static class TradeSnapshotParser
     /// </summary>
     public static string Summarize(Trade? trade)
     {
-        if (trade is null) return "(無法解析)";
+        if (trade is null)
+            return "(無法解析)";
 
         var head = string.IsNullOrWhiteSpace(trade.Symbol) ? trade.Type.ToString() : $"{trade.Symbol} {trade.Type}";
 

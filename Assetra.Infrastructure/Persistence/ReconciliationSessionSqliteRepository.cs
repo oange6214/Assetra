@@ -93,7 +93,8 @@ public sealed class ReconciliationSessionSqliteRepository : IReconciliationSessi
         cmd.CommandText = "SELECT statement_rows_json FROM reconciliation_session WHERE id = $id;";
         cmd.Parameters.AddWithValue("$id", sessionId.ToString());
         var json = await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false) as string;
-        if (string.IsNullOrEmpty(json)) return Array.Empty<ImportPreviewRow>();
+        if (string.IsNullOrEmpty(json))
+            return Array.Empty<ImportPreviewRow>();
         return JsonSerializer.Deserialize<List<ImportPreviewRow>>(json, JsonOptions) ?? new List<ImportPreviewRow>();
     }
 
@@ -158,7 +159,8 @@ public sealed class ReconciliationSessionSqliteRepository : IReconciliationSessi
             """;
         cmd.Parameters.AddWithValue("$id", diffId.ToString());
         await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
-        if (!await reader.ReadAsync(ct).ConfigureAwait(false)) return null;
+        if (!await reader.ReadAsync(ct).ConfigureAwait(false))
+            return null;
         return ReadDiff(reader);
     }
 

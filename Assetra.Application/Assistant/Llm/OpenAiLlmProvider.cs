@@ -1,4 +1,3 @@
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
@@ -33,8 +32,10 @@ public sealed class OpenAiLlmProvider : ILlmProvider
 
     public async Task<string?> CompleteAsync(string systemPrompt, string userPrompt, CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(userPrompt)) return null;
-        if (!IsConfigured) throw new LlmProviderException("OpenAI API key not configured");
+        if (string.IsNullOrWhiteSpace(userPrompt))
+            return null;
+        if (!IsConfigured)
+            throw new LlmProviderException("OpenAI API key not configured");
 
         var req = new OpenAiRequest(
             _model,

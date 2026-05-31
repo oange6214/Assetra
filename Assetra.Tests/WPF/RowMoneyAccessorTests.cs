@@ -1,8 +1,8 @@
+using System.Globalization;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Infrastructure.Converters;
-using System.Globalization;
 using Xunit;
 
 namespace Assetra.Tests.WPF;

@@ -1,5 +1,3 @@
-using Assetra.WPF.Infrastructure;
-
 namespace Assetra.WPF.Features.FinancialOverview;
 
 /// <summary>

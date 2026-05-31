@@ -1,4 +1,3 @@
-using Assetra.Core.Dtos;
 using Assetra.Core.Models;
 using Serilog;
 
@@ -193,7 +192,8 @@ public partial class PortfolioViewModel
     {
         foreach (var p in Positions)
         {
-            if (p.Quantity <= 0) continue;
+            if (p.Quantity <= 0)
+                continue;
             // 只認需要 live quote 才會有 price 的 type：Stock / Fund。
             // Crypto / Bond / PreciousMetal 等 type 即使 CurrentPrice=0 也可能是手動估值 fallback。
             if (p.AssetType is not (Core.Models.AssetType.Stock or Core.Models.AssetType.Fund))

@@ -91,10 +91,12 @@ public sealed class IncomeStatementService : IIncomeStatementService
     private async Task<IReadOnlyList<StatementRow>> BuildRentalRowsAsync(
         ReportPeriod period, CancellationToken ct)
     {
-        if (_rentalRecords is null) return Array.Empty<StatementRow>();
+        if (_rentalRecords is null)
+            return Array.Empty<StatementRow>();
         var records = await _rentalRecords
             .GetByPeriodAsync(period.Start, period.End, ct).ConfigureAwait(false);
-        if (records.Count == 0) return Array.Empty<StatementRow>();
+        if (records.Count == 0)
+            return Array.Empty<StatementRow>();
         var total = records.Sum(r => r.NetIncome);
         return new[] { new StatementRow("Rental Income", Math.Max(total, 0m), "Real Estate") };
     }
@@ -102,10 +104,12 @@ public sealed class IncomeStatementService : IIncomeStatementService
     private async Task<IReadOnlyList<StatementRow>> BuildPremiumRowsAsync(
         ReportPeriod period, CancellationToken ct)
     {
-        if (_premiumRecords is null) return Array.Empty<StatementRow>();
+        if (_premiumRecords is null)
+            return Array.Empty<StatementRow>();
         var records = await _premiumRecords
             .GetByPeriodAsync(period.Start, period.End, ct).ConfigureAwait(false);
-        if (records.Count == 0) return Array.Empty<StatementRow>();
+        if (records.Count == 0)
+            return Array.Empty<StatementRow>();
         var total = records.Sum(r => r.Amount);
         return new[] { new StatementRow("Insurance Premiums", total, "Insurance") };
     }

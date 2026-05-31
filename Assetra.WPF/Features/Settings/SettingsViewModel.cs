@@ -214,12 +214,12 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
     // 注意：partial-changed handler 內部用 `_ = SaveAsync()` 做 discard，所以
     // 參數不能命名 `_`（會跟內部 discard 名稱衝突）。用 `value` 即可。
-    partial void OnIsCashFocusEnabledChanged(bool value)       { if (!_isLoading) _ = SaveAsync(); }
-    partial void OnIsLiabilityFocusEnabledChanged(bool value)  { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnIsCashFocusEnabledChanged(bool value) { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnIsLiabilityFocusEnabledChanged(bool value) { if (!_isLoading) _ = SaveAsync(); }
     partial void OnIsRealEstateFocusEnabledChanged(bool value) { if (!_isLoading) _ = SaveAsync(); }
-    partial void OnIsInsuranceFocusEnabledChanged(bool value)  { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnIsInsuranceFocusEnabledChanged(bool value) { if (!_isLoading) _ = SaveAsync(); }
     partial void OnIsRetirementFocusEnabledChanged(bool value) { if (!_isLoading) _ = SaveAsync(); }
-    partial void OnIsPhysicalFocusEnabledChanged(bool value)   { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnIsPhysicalFocusEnabledChanged(bool value) { if (!_isLoading) _ = SaveAsync(); }
 
     // ── 多幣別匯率即時換算 ─────────────────────────────────────────
     // 來源：Frankfurter（CurrencyService.RefreshRatesAsync）。
@@ -331,7 +331,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             BaseCurrency = string.IsNullOrWhiteSpace(s.BaseCurrency) ? "TWD" : s.BaseCurrency;
             // 預設手續費折扣 — 0.1~1.0 範圍外回 1.0；TextBox 顯示為 "0.6" / "1.0" 等格式。
             var disc = s.DefaultCommissionDiscount;
-            if (disc <= 0m || disc > 1m) disc = 1.0m;
+            if (disc <= 0m || disc > 1m)
+                disc = 1.0m;
             DefaultCommissionDiscount = disc.ToString("0.##");
             QuoteProvider = NormalizeTaiwanQuoteProvider(s.QuoteProvider);
             HistoryProvider = string.IsNullOrWhiteSpace(s.HistoryProvider) ? "twse" : s.HistoryProvider;
@@ -372,14 +373,15 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             // v2 — 自訂對標 + 焦點卡顯示偏好
             CustomBenchmarkSymbols.Clear();
             if (s.CustomBenchmarkSymbols is not null)
-                foreach (var sym in s.CustomBenchmarkSymbols) CustomBenchmarkSymbols.Add(sym);
+                foreach (var sym in s.CustomBenchmarkSymbols)
+                    CustomBenchmarkSymbols.Add(sym);
             var vis = s.AssetClassFocusVisibility;
-            IsCashFocusEnabled       = vis?.GetValueOrDefault("Cash",       true) ?? true;
-            IsLiabilityFocusEnabled  = vis?.GetValueOrDefault("Liability",  true) ?? true;
+            IsCashFocusEnabled = vis?.GetValueOrDefault("Cash", true) ?? true;
+            IsLiabilityFocusEnabled = vis?.GetValueOrDefault("Liability", true) ?? true;
             IsRealEstateFocusEnabled = vis?.GetValueOrDefault("RealEstate", true) ?? true;
-            IsInsuranceFocusEnabled  = vis?.GetValueOrDefault("Insurance",  true) ?? true;
+            IsInsuranceFocusEnabled = vis?.GetValueOrDefault("Insurance", true) ?? true;
             IsRetirementFocusEnabled = vis?.GetValueOrDefault("Retirement", true) ?? true;
-            IsPhysicalFocusEnabled   = vis?.GetValueOrDefault("Physical",   true) ?? true;
+            IsPhysicalFocusEnabled = vis?.GetValueOrDefault("Physical", true) ?? true;
 
             DataSourceSaveStatus = string.Empty;
             TwelveDataTestStatus = string.Empty;
@@ -652,28 +654,32 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void AddCustomBenchmark()
     {
-        if (!CanAddCustomBenchmark) return;
+        if (!CanAddCustomBenchmark)
+            return;
         CustomBenchmarkSymbols.Add(CustomBenchmarkInput.Trim());
         CustomBenchmarkInput = string.Empty;
         OnPropertyChanged(nameof(CanAddCustomBenchmark));
-        if (!_isLoading) _ = SaveAsync();
+        if (!_isLoading)
+            _ = SaveAsync();
     }
 
     [RelayCommand]
     private void RemoveCustomBenchmark(string? symbol)
     {
-        if (string.IsNullOrEmpty(symbol)) return;
+        if (string.IsNullOrEmpty(symbol))
+            return;
         if (CustomBenchmarkSymbols.Remove(symbol))
         {
             OnPropertyChanged(nameof(CanAddCustomBenchmark));
-            if (!_isLoading) _ = SaveAsync();
+            if (!_isLoading)
+                _ = SaveAsync();
         }
     }
 
-    partial void OnLlmProviderChanged(string value)  { if (!_isLoading) _ = SaveAsync(); }
-    partial void OnLlmApiKeyChanged(string value)    { if (!_isLoading) _ = SaveAsync(); }
-    partial void OnLlmModelChanged(string value)     { if (!_isLoading) _ = SaveAsync(); }
-    partial void OnLlmEndpointChanged(string value)  { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnLlmProviderChanged(string value) { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnLlmApiKeyChanged(string value) { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnLlmModelChanged(string value) { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnLlmEndpointChanged(string value) { if (!_isLoading) _ = SaveAsync(); }
 
     public static IReadOnlyList<ProviderOption> SupportedLlmProviders { get; } =
     [
@@ -685,31 +691,32 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     // ── AMT 彙整 / 個人稅務 — 全部走 SaveOnChange 模式 ───────────────────
     // Negative-clamp + autosave；簡單一致。
 
-    partial void OnAmtRegularTaxableIncomeChanged(decimal v)  { if (v < 0m) { AmtRegularTaxableIncome = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnAmtRegularIncomeTaxChanged(decimal v)      { if (v < 0m) { AmtRegularIncomeTax = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnAmtInsuranceDeathProceedsChanged(decimal v)    { if (v < 0m) { AmtInsuranceDeathProceeds = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtRegularTaxableIncomeChanged(decimal v) { if (v < 0m) { AmtRegularTaxableIncome = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtRegularIncomeTaxChanged(decimal v) { if (v < 0m) { AmtRegularIncomeTax = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtInsuranceDeathProceedsChanged(decimal v) { if (v < 0m) { AmtInsuranceDeathProceeds = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
     partial void OnAmtInsuranceNonDeathProceedsChanged(decimal v) { if (v < 0m) { AmtInsuranceNonDeathProceeds = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
     partial void OnAmtUnlistedSecurityGainsChanged(decimal v) { if (v < 0m) { AmtUnlistedSecurityGains = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnAmtNonCashDonationChanged(decimal v)       { if (v < 0m) { AmtNonCashDonation = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnAmtPrivateFundGainsChanged(decimal v)      { if (v < 0m) { AmtPrivateFundGains = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnAmtOverseasTaxCreditChanged(decimal v)     { if (v < 0m) { AmtOverseasTaxCredit = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtNonCashDonationChanged(decimal v) { if (v < 0m) { AmtNonCashDonation = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtPrivateFundGainsChanged(decimal v) { if (v < 0m) { AmtPrivateFundGains = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnAmtOverseasTaxCreditChanged(decimal v) { if (v < 0m) { AmtOverseasTaxCredit = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
 
-    partial void OnTaxIsMarriedChanged(bool v)                { if (!_isLoading) _ = SaveAsync(); }
-    partial void OnTaxDependentCountChanged(int v)            { if (v < 0) { TaxDependentCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnTaxPreschoolCountChanged(int v)            { if (v < 0) { TaxPreschoolCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnTaxCollegeStudentCountChanged(int v)       { if (v < 0) { TaxCollegeStudentCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnTaxLongCareCountChanged(int v)             { if (v < 0) { TaxLongCareCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnTaxDisabilityCountChanged(int v)           { if (v < 0) { TaxDisabilityCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnTaxSalaryIncomeChanged(decimal v)          { if (v < 0m) { TaxSalaryIncome = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnTaxInterestIncomeChanged(decimal v)        { if (v < 0m) { TaxInterestIncome = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnTaxRentalExpenseChanged(decimal v)         { if (v < 0m) { TaxRentalExpense = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnTaxUseItemizedDeductionChanged(bool v)     { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxIsMarriedChanged(bool v) { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxDependentCountChanged(int v) { if (v < 0) { TaxDependentCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxPreschoolCountChanged(int v) { if (v < 0) { TaxPreschoolCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxCollegeStudentCountChanged(int v) { if (v < 0) { TaxCollegeStudentCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxLongCareCountChanged(int v) { if (v < 0) { TaxLongCareCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxDisabilityCountChanged(int v) { if (v < 0) { TaxDisabilityCount = 0; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxSalaryIncomeChanged(decimal v) { if (v < 0m) { TaxSalaryIncome = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxInterestIncomeChanged(decimal v) { if (v < 0m) { TaxInterestIncome = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxRentalExpenseChanged(decimal v) { if (v < 0m) { TaxRentalExpense = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxUseItemizedDeductionChanged(bool v) { if (!_isLoading) _ = SaveAsync(); }
     partial void OnTaxItemizedDeductionAmountChanged(decimal v) { if (v < 0m) { TaxItemizedDeductionAmount = 0m; return; } if (!_isLoading) _ = SaveAsync(); }
-    partial void OnTaxDividendSeparateChanged(bool v)         { if (!_isLoading) _ = SaveAsync(); }
+    partial void OnTaxDividendSeparateChanged(bool v) { if (!_isLoading) _ = SaveAsync(); }
 
     partial void OnDefaultHomeSectionChanged(string value)
     {
-        if (_isLoading) return;
+        if (_isLoading)
+            return;
         _ = SaveAsync();
     }
 
@@ -791,7 +798,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private async Task RefreshFxRatesAsync()
     {
-        if (IsRefreshingFxRates) return;
+        if (IsRefreshingFxRates)
+            return;
         IsRefreshingFxRates = true;
         try
         {
@@ -853,7 +861,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
     private async Task RunFxRefreshAsync(int daysBack)
     {
-        if (_fxRefresher is null || IsRefreshingFxHistory) return;
+        if (_fxRefresher is null || IsRefreshingFxHistory)
+            return;
 
         IsRefreshingFxHistory = true;
         try
@@ -887,10 +896,12 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     {
         _fxRateRows.Clear();
         var rates = _currencyService.ExchangeRates;
-        if (rates is null) return;
+        if (rates is null)
+            return;
         foreach (var kv in rates.OrderBy(k => k.Key))
         {
-            if (string.Equals(kv.Key, "TWD", StringComparison.OrdinalIgnoreCase)) continue;
+            if (string.Equals(kv.Key, "TWD", StringComparison.OrdinalIgnoreCase))
+                continue;
             _fxRateRows.Add(new FxRateRow(kv.Key, kv.Value));
         }
 
@@ -990,11 +1001,13 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     /// </summary>
     private static decimal ParseCommissionDiscount(string? input)
     {
-        if (string.IsNullOrWhiteSpace(input)) return 1.0m;
+        if (string.IsNullOrWhiteSpace(input))
+            return 1.0m;
         if (!decimal.TryParse(input.Trim(), System.Globalization.NumberStyles.Number,
                 System.Globalization.CultureInfo.InvariantCulture, out var v))
             return 1.0m;
-        if (v <= 0m || v > 1m) return 1.0m;
+        if (v <= 0m || v > 1m)
+            return 1.0m;
         return v;
     }
 

@@ -16,7 +16,8 @@ public partial class PortfolioGroupsView : UserControl
 
     private void OnVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        if (e.NewValue is true) RequestLoadIfReady();
+        if (e.NewValue is true)
+            RequestLoadIfReady();
     }
 
     private void RequestLoadIfReady()

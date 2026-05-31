@@ -11,7 +11,8 @@ public sealed class TimeWeightedReturnCalculator : ITimeWeightedReturnCalculator
     {
         ArgumentNullException.ThrowIfNull(valuations);
         ArgumentNullException.ThrowIfNull(flows);
-        if (valuations.Count < 2) return null;
+        if (valuations.Count < 2)
+            return null;
 
         var v = valuations.OrderBy(x => x.Date).ToArray();
         var flowByDate = flows
@@ -25,7 +26,8 @@ public sealed class TimeWeightedReturnCalculator : ITimeWeightedReturnCalculator
             var endV = v[i].Value;
             // Flow occurring on segment end date is treated as end-of-day (subtracted from end value).
             flowByDate.TryGetValue(v[i].Date, out var flow);
-            if (startV == 0) continue;
+            if (startV == 0)
+                continue;
             var segReturn = (endV - flow - startV) / startV;
             compound *= 1m + segReturn;
         }

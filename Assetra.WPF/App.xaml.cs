@@ -19,8 +19,8 @@ using LiveChartsCore.SkiaSharpView;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SkiaSharp;
+
 using Velopack;
-using Velopack.Sources;
 
 namespace Assetra.WPF;
 

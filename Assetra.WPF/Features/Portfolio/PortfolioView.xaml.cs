@@ -20,7 +20,8 @@ public partial class PortfolioView : UserControl
     /// </summary>
     private void OnQuickAddBtnClick(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button btn || btn.ContextMenu is null) return;
+        if (sender is not Button btn || btn.ContextMenu is null)
+            return;
         btn.ContextMenu.PlacementTarget = btn;
         btn.ContextMenu.Placement = PlacementMode.Bottom;
         btn.ContextMenu.IsOpen = true;

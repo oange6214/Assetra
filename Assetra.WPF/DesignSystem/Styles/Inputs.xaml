@@ -43,11 +43,11 @@
     -->
     <!--
         P2.17 T05 — Tooltip refresh：
-          FontSize Sm → Xs (12px) 縮小不搶 main content
-          BorderBrush AppBorder → AppBorderLight 跟 card lightening convention 對齊
-          Padding 8,4 → 8,5 略寬一點呼吸
-          Template 加 CornerRadius=Radius.Sm 跟其他卡片一致
-          MaxWidth=320 避免長文 tooltip 拉成單行
+        FontSize Sm → Xs (12px) 縮小不搶 main content
+        BorderBrush AppBorder → AppBorderLight 跟 card lightening convention 對齊
+        Padding 8,4 → 8,5 略寬一點呼吸
+        Template 加 CornerRadius=Radius.Sm 跟其他卡片一致
+        MaxWidth=320 避免長文 tooltip 拉成單行
     -->
     <Style TargetType="ToolTip">
         <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
@@ -103,10 +103,10 @@
                             把 placeholder Visibility 設成 Collapsed。Tag 為 null/空字串時 TextBlock
                             渲染空白，沒有視覺干擾。HorizontalAlignment / VerticalAlignment 跟著
                             HorizontalContentAlignment / VerticalContentAlignment — 這樣：
-                              - right-aligned 數字 textbox placeholder 靠右
-                              - multiline 備註 (VerticalContentAlignment=Top) placeholder 也靠頂，
-                                跟使用者點擊後的 cursor 位置一致，避免「placeholder 在中間、cursor
-                                跳到上方」的詭異斷層。
+                            - right-aligned 數字 textbox placeholder 靠右
+                            - multiline 備註 (VerticalContentAlignment=Top) placeholder 也靠頂，
+                            跟使用者點擊後的 cursor 位置一致，避免「placeholder 在中間、cursor
+                            跳到上方」的詭異斷層。
                         -->
                         <Grid>
                             <TextBlock
@@ -135,9 +135,9 @@
                             時才出現。原本只看 Text=="" 觸發，造成 user 點進 textbox 時
                             placeholder 跟 caret 同位置疊在一起、視覺上 caret 跟 placeholder
                             重疊「奇怪位置」。改成 multi-trigger 後：
-                              - 未 focus + 空：顯示 placeholder 提示
-                              - 一點進去 (focus)：placeholder 立刻消失，caret 獨立可見
-                              - 有 text 任何狀態：placeholder 永遠隱藏
+                            - 未 focus + 空：顯示 placeholder 提示
+                            - 一點進去 (focus)：placeholder 立刻消失，caret 獨立可見
+                            - 有 text 任何狀態：placeholder 永遠隱藏
                         -->
                         <MultiTrigger>
                             <MultiTrigger.Conditions>

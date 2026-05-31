@@ -1,8 +1,8 @@
-using Microsoft.Reactive.Testing;
-using Moq;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure.Scheduling;
+using Microsoft.Reactive.Testing;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.Infrastructure;

@@ -23,7 +23,7 @@ internal static class FxServiceCollectionExtensions
         services.AddSingleton<IFxRateProvider>(sp =>
             new HybridFxRateProvider(
                 history: sp.GetRequiredService<IFxRateHistoryService>(),
-                legacy:  sp.GetRequiredService<StaticFxRateProvider>()));
+                legacy: sp.GetRequiredService<StaticFxRateProvider>()));
 
         services.AddSingleton<IMultiCurrencyValuationService, MultiCurrencyValuationService>();
         return services;

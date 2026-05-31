@@ -17,13 +17,16 @@ public partial class PortfolioViewModel
     /// </summary>
     private void QueueSparklineLoadIfNeeded()
     {
-        if (_stockHistory is null) return;
-        if (_sparklinesQueued) return;
+        if (_stockHistory is null)
+            return;
+        if (_sparklinesQueued)
+            return;
 
         var rows = Positions
             .Where(p => p.IsStock && !string.IsNullOrEmpty(p.Symbol))
             .ToList();
-        if (rows.Count == 0) return;
+        if (rows.Count == 0)
+            return;
 
         _sparklinesQueued = true;
         _ = LoadSparklinesAsync(rows);

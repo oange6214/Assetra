@@ -93,9 +93,12 @@ public sealed partial class EditLiabilityDialogViewModel : ObservableObject
     {
         get
         {
-            if (!EditingLoan) return false;
-            if (!decimal.TryParse(AnnualRatePercent, out var rate)) return false;
-            if (!int.TryParse(TermMonths, out var term)) return false;
+            if (!EditingLoan)
+                return false;
+            if (!decimal.TryParse(AnnualRatePercent, out var rate))
+                return false;
+            if (!int.TryParse(TermMonths, out var term))
+                return false;
             return rate / 100m != _initialAnnualRate || term != _initialTermMonths;
         }
     }
@@ -160,7 +163,8 @@ public sealed partial class EditLiabilityDialogViewModel : ObservableObject
     [RelayCommand]
     private async Task SaveAsync()
     {
-        if (_editingRow is null) return;
+        if (_editingRow is null)
+            return;
         if (_editingRow.AssetId is not { } assetId)
         {
             ErrorMessage = "此負債沒有對應的資產 (legacy label-only)，無法編輯。";
@@ -240,17 +244,17 @@ public sealed partial class EditLiabilityDialogViewModel : ObservableObject
         try
         {
             var request = new LiabilityUpdateRequest(
-                AssetId:          assetId,
-                NewName:          Name.Trim(),
-                NewIssuerName:    string.IsNullOrWhiteSpace(IssuerName) ? null : IssuerName.Trim(),
-                NewAnnualRate:    newAnnualRate,
-                NewTermMonths:    newTermMonths,
-                NewHandlingFee:   newHandlingFee,
+                AssetId: assetId,
+                NewName: Name.Trim(),
+                NewIssuerName: string.IsNullOrWhiteSpace(IssuerName) ? null : IssuerName.Trim(),
+                NewAnnualRate: newAnnualRate,
+                NewTermMonths: newTermMonths,
+                NewHandlingFee: newHandlingFee,
                 RecomputeSchedule: EditingLoan && RecomputeSchedule && LoanRateOrTermChanged,
                 OriginalPrincipal: EditingLoan ? _capturedOriginalPrincipal : null,
-                NewCreditLimit:   newCreditLimit,
-                NewBillingDay:    newBillingDay,
-                NewDueDay:        newDueDay);
+                NewCreditLimit: newCreditLimit,
+                NewBillingDay: newBillingDay,
+                NewDueDay: newDueDay);
 
             var result = await _liability.UpdateAsync(request).ConfigureAwait(true);
 

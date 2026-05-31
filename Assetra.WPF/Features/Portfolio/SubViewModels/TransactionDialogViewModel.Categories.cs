@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using Assetra.Core.DomainServices;
 using Assetra.Core.Models;
-using Assetra.Core.Trading;
 using Assetra.WPF.Features.Categories;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog;
@@ -49,8 +48,10 @@ public partial class TransactionDialogViewModel
                 foreach (var c in cats)
                 {
                     var row = CategoryRowViewModel.FromModel(c);
-                    if (c.Kind == CategoryKind.Expense) _expenseCategories.Add(row);
-                    else _incomeCategories.Add(row);
+                    if (c.Kind == CategoryKind.Expense)
+                        _expenseCategories.Add(row);
+                    else
+                        _incomeCategories.Add(row);
                 }
             }
             if (_ruleRepository is not null)
@@ -73,8 +74,10 @@ public partial class TransactionDialogViewModel
     private void ApplyAutoCategoryFromNote()
     {
         // 僅當使用者尚未手動指定分類，或上次是被自動匹配的，才重新自動匹配
-        if (!_txCategoryAutoMatched && TxCategoryId.HasValue) return;
-        if (_autoRulesCache.Count == 0) return;
+        if (!_txCategoryAutoMatched && TxCategoryId.HasValue)
+            return;
+        if (_autoRulesCache.Count == 0)
+            return;
 
         var rules = FilterAutoRulesForCurrentTxType();
         var match = rules.Count > 0

@@ -1,7 +1,4 @@
 using System.IO;
-using System.Linq;
-using System.Threading;
-using Microsoft.Data.Sqlite;
 using Assetra.Core.Models;
 using Assetra.Infrastructure.Persistence;
 using Xunit;

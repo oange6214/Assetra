@@ -211,7 +211,8 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
                 cursor = cursor.AddMonths(1);
             }
             list.Reverse();
-            foreach (var m in list) _availableMonths.Add(ToOption(m));
+            foreach (var m in list)
+                _availableMonths.Add(ToOption(m));
         }
         else
         {
@@ -244,7 +245,8 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     [RelayCommand]
     private void GoPrev()
     {
-        if (!CanGoPrev) return;
+        if (!CanGoPrev)
+            return;
         var prev = CurrentMonth.AddMonths(-1);
         CurrentMonth = new DateOnly(prev.Year, prev.Month, 1);
     }
@@ -252,7 +254,8 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     [RelayCommand]
     private void GoNext()
     {
-        if (!CanGoNext) return;
+        if (!CanGoNext)
+            return;
         var next = CurrentMonth.AddMonths(1);
         CurrentMonth = new DateOnly(next.Year, next.Month, 1);
     }
@@ -265,7 +268,8 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     [RelayCommand]
     private void SelectCell(DailyCellVm? cell)
     {
-        if (cell is null || !cell.HasData || !cell.IsCurrentMonth) return;
+        if (cell is null || !cell.HasData || !cell.IsCurrentMonth)
+            return;
         SelectedCell = cell;
     }
 
@@ -280,7 +284,8 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     [RelayCommand]
     private void OpenDayTransactions()
     {
-        if (SelectedCell is null) return;
+        if (SelectedCell is null)
+            return;
         var date = SelectedCell.Date;
         SelectedCell = null;
         Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestTransactionsForDate(date);
@@ -416,9 +421,12 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
         {
             var cell = _cells.FirstOrDefault(c => c.IsCurrentMonth && c.Day == day);
             var v = cell?.Delta is decimal d ? (double)d : 0d;
-            if (v > 0)        { ups.Add(v); downs.Add(null); }
-            else if (v < 0)   { ups.Add(null); downs.Add(v); }
-            else              { ups.Add(null); downs.Add(null); }
+            if (v > 0)
+            { ups.Add(v); downs.Add(null); }
+            else if (v < 0)
+            { ups.Add(null); downs.Add(v); }
+            else
+            { ups.Add(null); downs.Add(null); }
         }
 
         var tooltipFormatter = (LiveChartsCore.Kernel.ChartPoint chartPoint) =>
@@ -534,7 +542,8 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
                 delta = snap!.MarketValue - prev.Value + cashFlowAdjustment;
                 deltaPct = delta / prev.Value;
             }
-            if (has) prev = snap!.MarketValue;
+            if (has)
+                prev = snap!.MarketValue;
 
             cells.Add(new DailyCellVm(
                 Date: date,
@@ -584,8 +593,10 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
             for (var k = 0; k < 7; k++)
             {
                 var d = cursor.AddDays(k);
-                if (d.Year != year) continue;            // 跨年 cell 留 null
-                if (!byDate.TryGetValue(d, out var cell)) continue;
+                if (d.Year != year)
+                    continue;            // 跨年 cell 留 null
+                if (!byDate.TryGetValue(d, out var cell))
+                    continue;
                 days[k] = cell;
                 // 把月份標籤標在「該週包含的第一個月份首日所在 row 0」
                 if (lastMonth != d.Month && k == 0)
@@ -779,7 +790,8 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
 
     private static string FormatDelta(decimal? delta)
     {
-        if (delta is null) return string.Empty;
+        if (delta is null)
+            return string.Empty;
         var v = delta.Value;
         // 用 K / 萬 縮短顯示：台灣慣例「萬」較合適
         var abs = Math.Abs(v);
@@ -796,9 +808,11 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     /// </summary>
     private static CellTone ResolveToneByAbsolute(decimal? delta)
     {
-        if (delta is null) return CellTone.None;
+        if (delta is null)
+            return CellTone.None;
         var sign = Math.Sign(delta.Value);
-        if (sign == 0) return CellTone.None;
+        if (sign == 0)
+            return CellTone.None;
         var abs = Math.Abs(delta.Value);
         var bucket = abs switch
         {
@@ -818,17 +832,19 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     /// </summary>
     private static CellTone ResolveTone(decimal? delta, decimal? pct)
     {
-        if (delta is null || !pct.HasValue) return CellTone.None;
+        if (delta is null || !pct.HasValue)
+            return CellTone.None;
         var abs = Math.Abs(pct.Value);
         var sign = Math.Sign(delta.Value);
-        if (sign == 0) return CellTone.None;
+        if (sign == 0)
+            return CellTone.None;
 
         var bucket = abs switch
         {
             < 0.005m => 1,   // < 0.5%
             < 0.015m => 2,   // 0.5–1.5%
-            < 0.03m  => 3,   // 1.5–3%
-            _        => 4,   // ≥ 3%
+            < 0.03m => 3,   // 1.5–3%
+            _ => 4,   // ≥ 3%
         };
         return sign > 0
             ? bucket switch { 1 => CellTone.UpWeak, 2 => CellTone.UpMedium, 3 => CellTone.UpStrong, _ => CellTone.UpStrongest, }

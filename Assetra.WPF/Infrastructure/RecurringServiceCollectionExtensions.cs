@@ -2,7 +2,6 @@ using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.Recurring;
-using Assetra.WPF.Features.Snackbar;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Assetra.WPF.Infrastructure;

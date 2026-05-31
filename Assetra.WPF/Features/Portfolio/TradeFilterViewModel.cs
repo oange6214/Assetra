@@ -383,8 +383,10 @@ public partial class TradeFilterViewModel : ObservableObject, IDisposable
         foreach (var t in filtered)
         {
             var amt = t.TotalAmount;
-            if (amt > 0) inflow += amt;
-            else if (amt < 0) outflow += amt;
+            if (amt > 0)
+                inflow += amt;
+            else if (amt < 0)
+                outflow += amt;
             if (t.Commission is { } com && com > 0)
                 commission += com;
         }

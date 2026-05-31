@@ -1,9 +1,9 @@
-using Microsoft.Data.Sqlite;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Sync;
 using Assetra.Infrastructure.Sync;
+using Microsoft.Data.Sqlite;
 
 namespace Assetra.Infrastructure.Persistence;
 
@@ -193,7 +193,8 @@ public sealed class CategorySqliteRepository : ICategoryRepository, ICategorySyn
     public async Task MarkPushedAsync(IReadOnlyList<Guid> ids, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
-        if (ids.Count == 0) return;
+        if (ids.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
@@ -212,14 +213,16 @@ public sealed class CategorySqliteRepository : ICategoryRepository, ICategorySyn
     public async Task ApplyRemoteAsync(IReadOnlyList<SyncEnvelope> envelopes, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(envelopes);
-        if (envelopes.Count == 0) return;
+        if (envelopes.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
 
         foreach (var env in envelopes)
         {
-            if (env.EntityType != CategorySyncMapper.EntityType) continue;
+            if (env.EntityType != CategorySyncMapper.EntityType)
+                continue;
 
             await using (var probe = conn.CreateCommand())
             {

@@ -1,7 +1,7 @@
-using Moq;
 using Assetra.Application.Assistant;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.Application.Assistant;

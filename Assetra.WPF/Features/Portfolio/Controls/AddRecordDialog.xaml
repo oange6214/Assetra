@@ -249,9 +249,7 @@
                                         → 自動帶幣別 + 推薦現金帳戶；P2.3 → 過濾 AvailableTradeTypes。
                                         編輯模式下擬作 read-only label，這版先讓它跟新增模式長一樣。
                                     -->
-                                    <StackPanel
-                                        Margin="0,0,0,14"
-                                        Visibility="{Binding ShowAssetSelector, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <StackPanel Margin="0,0,0,14" Visibility="{Binding ShowAssetSelector, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <TextBlock
                                             Margin="0,0,0,6"
                                             FontSize="{StaticResource Font.Size.Xs}"
@@ -342,9 +340,7 @@
                                             Type picker — meta-only 編輯時隱藏（鎖定卡裡已顯示
                                             type；改類型對 meta-only 沒意義）。
                                         -->
-                                        <StackPanel
-                                            Grid.Column="0"
-                                            Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                        <StackPanel Grid.Column="0" Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                             <StackPanel Margin="0,0,0,6" Orientation="Horizontal">
                                                 <TextBlock
                                                     VerticalAlignment="Center"
@@ -391,8 +387,8 @@
                                             <ComboBox
                                                 IsEnabled="{Binding CanSelectTxType}"
                                                 ItemsSource="{Binding AvailableTradeTypes}"
-                                                SelectedValuePath="Key"
                                                 SelectedValue="{Binding TxType, Mode=TwoWay}"
+                                                SelectedValuePath="Key"
                                                 Style="{StaticResource FormComboBox}"
                                                 Tag="{DynamicResource Portfolio.Tx.TypePicker.Placeholder}"
                                                 ToolTip="{Binding TxTypePickerHintKey, Converter={StaticResource ResourceKeyToStringConverter}}"
@@ -425,9 +421,7 @@
                                         (覆寫後 _userTouchedCurrency = true，後續切換資產不會被自動蓋掉)。
                                         SupportedCurrencies 走 ICurrencyService（跟 Settings 共用清單）。
                                     -->
-                                    <StackPanel
-                                        Margin="0,0,0,14"
-                                        Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                    <StackPanel Margin="0,0,0,14" Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                         <TextBlock
                                             Margin="0,0,0,6"
                                             FontSize="{StaticResource Font.Size.Xs}"
@@ -435,9 +429,9 @@
                                             Foreground="{DynamicResource AppTextSecondary}"
                                             Text="{DynamicResource Portfolio.Tx.Currency}" />
                                         <ComboBox
+                                            MinWidth="120"
                                             HorizontalAlignment="Left"
                                             IsEnabled="{Binding IsTxCurrencyEditable}"
-                                            MinWidth="120"
                                             ItemsSource="{Binding SupportedCurrencies}"
                                             SelectedItem="{Binding TxCurrency, Mode=TwoWay}"
                                             Style="{StaticResource FormComboBox}" />
@@ -556,12 +550,12 @@
                                             Text="{DynamicResource Portfolio.Tx.Note}" />
                                         <TextBox
                                             MinHeight="64"
+                                            VerticalContentAlignment="Top"
                                             AcceptsReturn="True"
                                             Style="{StaticResource AppTextBox}"
                                             Tag="{DynamicResource Portfolio.Tx.Note.Placeholder}"
                                             Text="{Binding TxNote, UpdateSourceTrigger=PropertyChanged}"
-                                            TextWrapping="Wrap"
-                                            VerticalContentAlignment="Top" />
+                                            TextWrapping="Wrap" />
                                     </StackPanel>
 
                                     <!--  Error  -->

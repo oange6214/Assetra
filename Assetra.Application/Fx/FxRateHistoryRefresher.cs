@@ -51,8 +51,10 @@ public sealed class FxRateHistoryRefresher
         int daysBack = 7,
         CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(baseCurrency)) return;
-        if (foreignCurrencies is null || foreignCurrencies.Count == 0) return;
+        if (string.IsNullOrWhiteSpace(baseCurrency))
+            return;
+        if (foreignCurrencies is null || foreignCurrencies.Count == 0)
+            return;
 
         var to = DateOnly.FromDateTime(DateTime.UtcNow);
         var from = to.AddDays(-Math.Max(1, daysBack));
@@ -61,15 +63,19 @@ public sealed class FxRateHistoryRefresher
         var collected = new List<FxRateHistoryEntry>();
         foreach (var raw in foreignCurrencies)
         {
-            if (ct.IsCancellationRequested) break;
-            if (string.IsNullOrWhiteSpace(raw)) continue;
+            if (ct.IsCancellationRequested)
+                break;
+            if (string.IsNullOrWhiteSpace(raw))
+                continue;
             var foreign = raw.Trim().ToUpperInvariant();
-            if (string.Equals(foreign, baseUpper, StringComparison.Ordinal)) continue;
+            if (string.Equals(foreign, baseUpper, StringComparison.Ordinal))
+                continue;
 
             try
             {
                 var entries = await _fetcher.FetchAsync(foreign, baseUpper, from, to, ct).ConfigureAwait(false);
-                if (entries.Count > 0) collected.AddRange(entries);
+                if (entries.Count > 0)
+                    collected.AddRange(entries);
             }
             catch
             {
@@ -99,7 +105,8 @@ public sealed class FxRateHistoryRefresher
     /// </summary>
     private async Task UpdateLastRefreshTimestampAsync()
     {
-        if (_settings is null) return;
+        if (_settings is null)
+            return;
         try
         {
             var current = _settings.Current ?? new AppSettings();

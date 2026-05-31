@@ -54,7 +54,8 @@ internal sealed class InMemoryAssetRepo : IAssetRepository
     {
         var match = Items.Values.FirstOrDefault(
             i => i.Type == FinancialType.Asset && i.Name == name && i.Currency == currency);
-        if (match is not null) return Task.FromResult(match.Id);
+        if (match is not null)
+            return Task.FromResult(match.Id);
         var id = Guid.NewGuid();
         Items[id] = new AssetItem(id, name, FinancialType.Asset, null, currency,
             DateOnly.FromDateTime(DateTime.UtcNow), true, DateTime.UtcNow);

@@ -1,11 +1,11 @@
 using System.Reflection;
-using Moq;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Import;
 using Assetra.Core.Models.Import;
 using Assetra.Infrastructure.Import;
 using Assetra.WPF.Features.Import;
 using Assetra.WPF.Infrastructure;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.WPF;

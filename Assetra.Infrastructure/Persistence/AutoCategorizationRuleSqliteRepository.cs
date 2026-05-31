@@ -1,9 +1,9 @@
-using Microsoft.Data.Sqlite;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Sync;
 using Assetra.Infrastructure.Sync;
+using Microsoft.Data.Sqlite;
 
 namespace Assetra.Infrastructure.Persistence;
 
@@ -176,7 +176,8 @@ public sealed class AutoCategorizationRuleSqliteRepository : IAutoCategorization
     public async Task MarkPushedAsync(IReadOnlyList<Guid> ids, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
-        if (ids.Count == 0) return;
+        if (ids.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
@@ -195,14 +196,16 @@ public sealed class AutoCategorizationRuleSqliteRepository : IAutoCategorization
     public async Task ApplyRemoteAsync(IReadOnlyList<SyncEnvelope> envelopes, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(envelopes);
-        if (envelopes.Count == 0) return;
+        if (envelopes.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
 
         foreach (var env in envelopes)
         {
-            if (env.EntityType != AutoCategorizationRuleSyncMapper.EntityType) continue;
+            if (env.EntityType != AutoCategorizationRuleSyncMapper.EntityType)
+                continue;
 
             await using (var probe = conn.CreateCommand())
             {
@@ -210,7 +213,8 @@ public sealed class AutoCategorizationRuleSqliteRepository : IAutoCategorization
                 probe.CommandText = "SELECT version FROM auto_categorization_rule WHERE id = $id;";
                 probe.Parameters.AddWithValue("$id", env.EntityId.ToString());
                 var existing = await probe.ExecuteScalarAsync(ct).ConfigureAwait(false);
-                if (existing is not null && Convert.ToInt64(existing) >= env.Version.Version) continue;
+                if (existing is not null && Convert.ToInt64(existing) >= env.Version.Version)
+                    continue;
             }
 
             if (env.Deleted)

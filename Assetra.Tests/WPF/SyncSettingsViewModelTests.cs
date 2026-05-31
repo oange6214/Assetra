@@ -1,11 +1,11 @@
 using System.IO;
-using Moq;
 using Assetra.Application.Sync;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models;
 using Assetra.WPF.Features.Settings;
 using Assetra.WPF.Infrastructure;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.WPF;

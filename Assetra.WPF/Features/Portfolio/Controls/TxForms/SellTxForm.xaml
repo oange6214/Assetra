@@ -311,9 +311,9 @@
                 自動解到 sub-VM 屬性。
             -->
             <txforms:CrossCurrencyOverlay
-                DataContext="{Binding Sell}"
                 ActualCashAmountHint="{DynamicResource Portfolio.Tx.SellActualCashAmountHint}"
                 ActualCashAmountLabel="{DynamicResource Portfolio.Tx.SellActualCashAmount}"
+                DataContext="{Binding Sell}"
                 FetchFxRateCommand="{Binding DataContext.FetchSellFxRateCommand, ElementName=Root}"
                 GroupName="TxSellSettlementInputMode" />
         </StackPanel>

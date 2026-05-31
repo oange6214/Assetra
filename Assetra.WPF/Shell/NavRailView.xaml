@@ -5,23 +5,23 @@
     xmlns:alerts="clr-namespace:Assetra.WPF.Features.Alerts"
     xmlns:assistant="clr-namespace:Assetra.WPF.Features.Assistant"
     xmlns:auditlog="clr-namespace:Assetra.WPF.Features.AuditLog"
+    xmlns:cal="clr-namespace:Assetra.WPF.Features.FinancialOverview.Calendar"
     xmlns:cashaccts="clr-namespace:Assetra.WPF.Features.CashAccounts"
     xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:financialoverview="clr-namespace:Assetra.WPF.Features.FinancialOverview"
-    xmlns:cal="clr-namespace:Assetra.WPF.Features.FinancialOverview.Calendar"
     xmlns:fire="clr-namespace:Assetra.WPF.Features.Fire"
     xmlns:goals="clr-namespace:Assetra.WPF.Features.Goals"
-    xmlns:portfoliogroups="clr-namespace:Assetra.WPF.Features.PortfolioGroups"
     xmlns:import="clr-namespace:Assetra.WPF.Features.Import"
     xmlns:insurance="clr-namespace:Assetra.WPF.Features.Insurance"
     xmlns:liabs="clr-namespace:Assetra.WPF.Features.Liabilities"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:montecarlo="clr-namespace:Assetra.WPF.Features.MonteCarlo"
+    xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:physicalasset="clr-namespace:Assetra.WPF.Features.PhysicalAsset"
     xmlns:portfolio="clr-namespace:Assetra.WPF.Features.Portfolio"
-    xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
+    xmlns:portfoliogroups="clr-namespace:Assetra.WPF.Features.PortfolioGroups"
     xmlns:realestate="clr-namespace:Assetra.WPF.Features.RealEstate"
     xmlns:reconciliation="clr-namespace:Assetra.WPF.Features.Reconciliation"
     xmlns:recurring="clr-namespace:Assetra.WPF.Features.Recurring"
@@ -140,7 +140,10 @@
         </Style>
 
         <!--  Group icon (collapsed mode): like a leaf button but uses the group icon and opens a flyout.  -->
-        <Style x:Key="NavRailGroupIconButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource NavRailItemButton}">
+        <Style
+            x:Key="NavRailGroupIconButton"
+            BasedOn="{StaticResource NavRailItemButton}"
+            TargetType="{x:Type ToggleButton}">
             <!--  The base style already paints a hover/focus chrome; isChecked here means "flyout open".  -->
         </Style>
 
@@ -185,9 +188,7 @@
             template free of badge-specific bindings.
         -->
         <DataTemplate x:Key="NavLeafBadgeRecurringTemplate">
-            <Border
-                Style="{StaticResource NavRailBadge}"
-                Visibility="{Binding DataContext.Recurring.HasPending, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Style="{StaticResource NavRailBadge}" Visibility="{Binding DataContext.Recurring.HasPending, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <TextBlock
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
@@ -198,9 +199,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="NavLeafBadgeAlertsTemplate">
-            <Border
-                Style="{StaticResource NavRailBadge}"
-                Visibility="{Binding DataContext.Alerts.HasTriggeredAlerts, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Style="{StaticResource NavRailBadge}" Visibility="{Binding DataContext.Alerts.HasTriggeredAlerts, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <TextBlock
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
@@ -423,23 +422,19 @@
                     </Style>
                 </TabControl.ItemContainerStyle>
                 <!--  總覽：原 FinancialOverviewView（KPI bar + accordion + Stage 2.5 widget）  -->
-                <TabItem Header="{DynamicResource Dashboard.Tab.Overview}"
-                         Tag="{x:Static financialoverview:DashboardTab.Overview}">
+                <TabItem Header="{DynamicResource Dashboard.Tab.Overview}" Tag="{x:Static financialoverview:DashboardTab.Overview}">
                     <financialoverview:FinancialOverviewView DataContext="{Binding FinancialOverview}" />
                 </TabItem>
                 <!--  資產趨勢：原 Trends 頁，bind 到 Portfolio.History  -->
-                <TabItem Header="{DynamicResource Dashboard.Tab.Trends}"
-                         Tag="{x:Static financialoverview:DashboardTab.Trends}">
+                <TabItem Header="{DynamicResource Dashboard.Tab.Trends}" Tag="{x:Static financialoverview:DashboardTab.Trends}">
                     <trends:TrendsView DataContext="{Binding Portfolio.History}" />
                 </TabItem>
                 <!--  報酬日曆：Stage 4 — bind 到 PortfolioHistory 子 VM  -->
-                <TabItem Header="{DynamicResource Dashboard.Tab.Calendar}"
-                         Tag="{x:Static financialoverview:DashboardTab.Calendar}">
+                <TabItem Header="{DynamicResource Dashboard.Tab.Calendar}" Tag="{x:Static financialoverview:DashboardTab.Calendar}">
                     <cal:ReturnCalendarView DataContext="{Binding Portfolio.History.ReturnCalendar}" />
                 </TabItem>
                 <!--  配置：從 Portfolio 內 tab 搬入  -->
-                <TabItem Header="{DynamicResource Dashboard.Tab.Allocation}"
-                         Tag="{x:Static financialoverview:DashboardTab.Allocation}">
+                <TabItem Header="{DynamicResource Dashboard.Tab.Allocation}" Tag="{x:Static financialoverview:DashboardTab.Allocation}">
                     <pcontrols:AllocationView DataContext="{Binding Portfolio.AllocationAnalysis}" />
                 </TabItem>
             </TabControl>

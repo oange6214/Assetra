@@ -63,6 +63,7 @@ public sealed class InMemoryLocalChangeQueue : ILocalChangeQueue
     public void EnqueuePending(SyncEnvelope envelope)
     {
         ArgumentNullException.ThrowIfNull(envelope);
-        lock (_lock) _pending.Add(envelope);
+        lock (_lock)
+            _pending.Add(envelope);
     }
 }

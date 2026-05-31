@@ -17,7 +17,8 @@ public partial class NavRailView : UserControl
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         _navRail = (e.NewValue as MainViewModel)?.NavRail;
-        if (_navRail is null) return;
+        if (_navRail is null)
+            return;
         Dispatcher.BeginInvoke(() => UpdateLayout());
     }
 
@@ -29,8 +30,10 @@ public partial class NavRailView : UserControl
     /// </summary>
     private void NavLeaf_Click(object sender, RoutedEventArgs e)
     {
-        if (_navRail is null) return;
-        if (sender is not ToggleButton { Tag: NavLeafVm leaf } button) return;
+        if (_navRail is null)
+            return;
+        if (sender is not ToggleButton { Tag: NavLeafVm leaf } button)
+            return;
 
         _navRail.NavigateTo(leaf.Section);
         button.SetCurrentValue(ToggleButton.IsCheckedProperty, leaf.IsActive);
@@ -44,7 +47,8 @@ public partial class NavRailView : UserControl
     /// </summary>
     private void NavGroupIcon_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not ToggleButton { Tag: NavGroupVm group } button) return;
+        if (sender is not ToggleButton { Tag: NavGroupVm group } button)
+            return;
 
         group.IsFlyoutOpen = !group.IsFlyoutOpen;
         // Reset the IsChecked visual back to whatever HasActiveChild is —

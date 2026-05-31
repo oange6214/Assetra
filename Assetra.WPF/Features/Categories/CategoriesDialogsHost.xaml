@@ -8,23 +8,22 @@
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Categories"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:CategoriesViewModel}, IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:CategoriesViewModel},
+                                     IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
     <!--
         外提到 MainWindow 的 Categories dialog host — 包含 4 個 modal：
         新增分類 / 新增規則 / 新增預算 / 刪除確認。每個 modal 用 Grid 包住，
         overlay + card 共用同一個 Visibility 綁定。
-
+        
         Root Grid 不設 Background：modal 沒開時 host 對 NavRail / title bar /
         status bar 點擊完全透明（避免吞 hit-test）。
     -->
     <Grid>
 
         <!--  分類 — 新增分類  -->
-        <Grid
-            Style="{StaticResource AppDialogOverlay}"
-            Visibility="{Binding IsAddCategoryOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Style="{StaticResource AppDialogOverlay}" Visibility="{Binding IsAddCategoryOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border
                 Width="640"
                 MaxWidth="720"
@@ -44,9 +43,7 @@
 
                     <Grid Margin="0,0,0,16">
                         <StackPanel Margin="0,4,40,0">
-                            <TextBlock
-                                Style="{StaticResource AppDialogTitle}"
-                                Text="{DynamicResource Categories.AddForm.Title}" />
+                            <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Categories.AddForm.Title}" />
                             <TextBlock
                                 Style="{StaticResource AppDialogSubtitle}"
                                 Text="{DynamicResource Categories.AddForm.Hint}"
@@ -66,9 +63,7 @@
                         </Button>
                     </Grid>
 
-                    <Border
-                        Grid.Row="1"
-                        Style="{StaticResource FormSection}">
+                    <Border Grid.Row="1" Style="{StaticResource FormSection}">
                         <Grid>
                             <Grid.Resources>
                                 <Style x:Key="SheetFieldLabel" TargetType="TextBlock">
@@ -98,7 +93,10 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,14">
+                            <StackPanel
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Margin="0,0,0,14">
                                 <TextBlock Style="{StaticResource SheetFieldLabel}" Text="{DynamicResource Categories.Field.Kind}" />
                                 <ComboBox
                                     ItemsSource="{Binding KindOptions}"
@@ -123,7 +121,10 @@
                                 </ComboBox>
                             </StackPanel>
 
-                            <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,14">
+                            <StackPanel
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Margin="0,0,0,14">
                                 <TextBlock Style="{StaticResource SheetFieldLabel}" Text="{DynamicResource Categories.Field.Icon}" />
                                 <ComboBox
                                     ItemsSource="{Binding IconOptions}"
@@ -153,9 +154,7 @@
 
                             <StackPanel Grid.Row="1" Grid.Column="0">
                                 <TextBlock Style="{StaticResource SheetFieldLabel}" Text="{DynamicResource Categories.Field.Name}" />
-                                <TextBox
-                                    Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}"
-                                    ToolTip="{DynamicResource Categories.NameHint}" />
+                                <TextBox Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}" ToolTip="{DynamicResource Categories.NameHint}" />
                             </StackPanel>
 
                             <StackPanel Grid.Row="1" Grid.Column="2">
@@ -167,7 +166,11 @@
                                     ToolTip="{DynamicResource Categories.ColorHint}" />
                             </StackPanel>
 
-                            <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,8,0,0">
+                            <StackPanel
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="3"
+                                Margin="0,8,0,0">
                                 <TextBlock Style="{StaticResource SheetFieldLabel}" Text="{DynamicResource Categories.Field.Parent}" />
                                 <ComboBox
                                     DisplayMemberPath="Display"
@@ -209,9 +212,7 @@
         </Grid>
 
         <!--  分類 — 新增規則  -->
-        <Grid
-            Style="{StaticResource AppDialogOverlay}"
-            Visibility="{Binding IsAddRuleOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Style="{StaticResource AppDialogOverlay}" Visibility="{Binding IsAddRuleOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border
                 Width="760"
                 MaxWidth="820"
@@ -231,9 +232,7 @@
 
                     <Grid Margin="0,0,0,16">
                         <StackPanel Margin="0,4,40,0">
-                            <TextBlock
-                                Style="{StaticResource AppDialogTitle}"
-                                Text="{DynamicResource Categories.Rule.AddForm.Title}" />
+                            <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Categories.Rule.AddForm.Title}" />
                             <TextBlock
                                 Style="{StaticResource AppDialogSubtitle}"
                                 Text="{DynamicResource Categories.Rule.AddForm.Hint}"
@@ -273,7 +272,10 @@
                                         <ColumnDefinition Width="120" />
                                     </Grid.ColumnDefinitions>
 
-                                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,14">
+                                    <StackPanel
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Margin="0,0,0,14">
                                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Keyword}" />
                                         <TextBox
                                             Style="{StaticResource AppTextBox}"
@@ -281,7 +283,10 @@
                                             ToolTip="{DynamicResource Categories.Rule.KeywordHint}" />
                                     </StackPanel>
 
-                                    <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,14">
+                                    <StackPanel
+                                        Grid.Row="0"
+                                        Grid.Column="2"
+                                        Margin="0,0,0,14">
                                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Category}" />
                                         <ComboBox
                                             ItemsSource="{Binding AvailableCategories}"
@@ -296,7 +301,10 @@
                                         </ComboBox>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Row="0" Grid.Column="4" Margin="0,0,0,14">
+                                    <StackPanel
+                                        Grid.Row="0"
+                                        Grid.Column="4"
+                                        Margin="0,0,0,14">
                                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Priority}" />
                                         <TextBox
                                             Style="{StaticResource AppNumberTextBox}"
@@ -318,15 +326,11 @@
                                 Margin="0,12,0,0"
                                 Header="{DynamicResource Categories.Rule.Advanced}"
                                 Style="{StaticResource AppExpander}">
-                                <Border
-                                    Margin="0,10,0,0"
-                                    Style="{StaticResource FormSection}">
+                                <Border Margin="0,10,0,0" Style="{StaticResource FormSection}">
                                     <StackPanel>
                                         <StackPanel Margin="0,0,0,14">
                                             <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Rule.Name}" />
-                                            <TextBox
-                                                Style="{StaticResource AppTextBox}"
-                                                Text="{Binding AddRuleName, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBox Style="{StaticResource AppTextBox}" Text="{Binding AddRuleName, UpdateSourceTrigger=PropertyChanged}" />
                                         </StackPanel>
 
                                         <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Rule.MatchField}" />
@@ -391,9 +395,7 @@
                                                 Margin="0,0,12,0"
                                                 Content="{DynamicResource Categories.Rule.AppliesTo.Manual}"
                                                 IsChecked="{Binding AddRuleAppliesToManual}" />
-                                            <CheckBox
-                                                Content="{DynamicResource Categories.Rule.AppliesTo.Import}"
-                                                IsChecked="{Binding AddRuleAppliesToImport}" />
+                                            <CheckBox Content="{DynamicResource Categories.Rule.AppliesTo.Import}" IsChecked="{Binding AddRuleAppliesToImport}" />
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
@@ -424,9 +426,7 @@
         </Grid>
 
         <!--  分類 — 新增預算  -->
-        <Grid
-            Style="{StaticResource AppDialogOverlay}"
-            Visibility="{Binding IsAddBudgetOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Style="{StaticResource AppDialogOverlay}" Visibility="{Binding IsAddBudgetOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border
                 Width="720"
                 MaxWidth="780"
@@ -446,9 +446,7 @@
 
                     <Grid Margin="0,0,0,16">
                         <StackPanel Margin="0,4,40,0">
-                            <TextBlock
-                                Style="{StaticResource AppDialogTitle}"
-                                Text="{DynamicResource Categories.Budget.AddForm.Title}" />
+                            <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Categories.Budget.AddForm.Title}" />
                             <TextBlock
                                 Style="{StaticResource AppDialogSubtitle}"
                                 Text="{DynamicResource Categories.Budget.AddForm.Hint}"
@@ -468,9 +466,7 @@
                         </Button>
                     </Grid>
 
-                    <Border
-                        Grid.Row="1"
-                        Style="{StaticResource FormSection}">
+                    <Border Grid.Row="1" Style="{StaticResource FormSection}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -485,7 +481,10 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,14">
+                            <StackPanel
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Margin="0,0,0,14">
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.BudgetMode}" />
                                 <ComboBox
                                     ItemsSource="{Binding BudgetModeOptions}"
@@ -510,7 +509,10 @@
                                 </ComboBox>
                             </StackPanel>
 
-                            <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,14">
+                            <StackPanel
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Margin="0,0,0,14">
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Year}" />
                                 <TextBox
                                     Style="{StaticResource AppNumberTextBox}"
@@ -518,7 +520,10 @@
                                     ToolTip="{DynamicResource Categories.Budget.YearHint}" />
                             </StackPanel>
 
-                            <StackPanel Grid.Row="0" Grid.Column="4" Margin="0,0,0,14">
+                            <StackPanel
+                                Grid.Row="0"
+                                Grid.Column="4"
+                                Margin="0,0,0,14">
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Month}" />
                                 <TextBox
                                     Style="{StaticResource AppNumberTextBox}"
@@ -526,7 +531,11 @@
                                     ToolTip="{DynamicResource Categories.Budget.MonthHint}" />
                             </StackPanel>
 
-                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,14">
+                            <StackPanel
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="3"
+                                Margin="0,0,0,14">
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Category}" />
                                 <ComboBox
                                     ItemsSource="{Binding AvailableCategories}"
@@ -541,7 +550,10 @@
                                 </ComboBox>
                             </StackPanel>
 
-                            <StackPanel Grid.Row="1" Grid.Column="4" Margin="0,0,0,14">
+                            <StackPanel
+                                Grid.Row="1"
+                                Grid.Column="4"
+                                Margin="0,0,0,14">
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Amount}" />
                                 <TextBox
                                     Style="{StaticResource AppMoneyTextBox}"
@@ -549,7 +561,10 @@
                                     ToolTip="{DynamicResource Categories.Budget.AmountHint}" />
                             </StackPanel>
 
-                            <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5">
+                            <StackPanel
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="5">
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Categories.Field.Note}" />
                                 <TextBox
                                     Style="{StaticResource AppTextBox}"
@@ -582,9 +597,7 @@
         </Grid>
 
         <!--  分類 — 刪除確認  -->
-        <Grid
-            Style="{StaticResource AppDialogOverlay}"
-            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Style="{StaticResource AppDialogOverlay}" Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
@@ -598,9 +611,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
-                    <TextBlock
-                        Grid.Row="1"
-                        Style="{StaticResource AppDialogSubtitle}">
+                    <TextBlock Grid.Row="1" Style="{StaticResource AppDialogSubtitle}">
                         <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
                         <Run Text="{Binding DeleteTargetName}" />
                         <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />

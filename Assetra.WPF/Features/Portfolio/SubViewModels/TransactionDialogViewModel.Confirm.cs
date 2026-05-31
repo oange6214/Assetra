@@ -1,4 +1,3 @@
-using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
@@ -22,18 +21,18 @@ public partial class TransactionDialogViewModel
     private static readonly IReadOnlyDictionary<string, Func<TransactionDialogViewModel, Task>>
         _confirmDispatch = new Dictionary<string, Func<TransactionDialogViewModel, Task>>(StringComparer.Ordinal)
         {
-            ["income"]             = vm => vm.ConfirmIncomeAsync(),
-            ["cashDiv"]            = vm => vm.ConfirmCashDivAsync(),
-            ["stockDiv"]           = vm => vm.ConfirmStockDivAsync(),
-            ["deposit"]            = vm => vm.ConfirmCashFlowAsync(TradeType.Deposit),
-            ["withdrawal"]         = vm => vm.ConfirmCashFlowAsync(TradeType.Withdrawal),
-            ["loanBorrow"]         = vm => vm.ConfirmLoanAsync(TradeType.LoanBorrow),
-            ["loanRepay"]          = vm => vm.ConfirmLoanAsync(TradeType.LoanRepay),
-            ["creditCardCharge"]   = vm => vm.ConfirmCreditCardChargeAsync(),
-            ["creditCardPayment"]  = vm => vm.ConfirmCreditCardPaymentAsync(),
-            ["transfer"]           = vm => vm.ConfirmTransferAsync(),
-            ["buy"]                = vm => vm.ConfirmBuyAsync(),
-            ["sell"]               = vm => vm.ConfirmSellTxAsync(),
+            ["income"] = vm => vm.ConfirmIncomeAsync(),
+            ["cashDiv"] = vm => vm.ConfirmCashDivAsync(),
+            ["stockDiv"] = vm => vm.ConfirmStockDivAsync(),
+            ["deposit"] = vm => vm.ConfirmCashFlowAsync(TradeType.Deposit),
+            ["withdrawal"] = vm => vm.ConfirmCashFlowAsync(TradeType.Withdrawal),
+            ["loanBorrow"] = vm => vm.ConfirmLoanAsync(TradeType.LoanBorrow),
+            ["loanRepay"] = vm => vm.ConfirmLoanAsync(TradeType.LoanRepay),
+            ["creditCardCharge"] = vm => vm.ConfirmCreditCardChargeAsync(),
+            ["creditCardPayment"] = vm => vm.ConfirmCreditCardPaymentAsync(),
+            ["transfer"] = vm => vm.ConfirmTransferAsync(),
+            ["buy"] = vm => vm.ConfirmBuyAsync(),
+            ["sell"] = vm => vm.ConfirmSellTxAsync(),
         };
 
     [RelayCommand]
@@ -238,7 +237,8 @@ public partial class TransactionDialogViewModel
     /// </summary>
     private void ShowCreatedSnackbar()
     {
-        if (_snackbar is null) return;
+        if (_snackbar is null)
+            return;
         var typeLabel = TxType switch
         {
             "buy" => L("Portfolio.Tx.Buy", "買入"),

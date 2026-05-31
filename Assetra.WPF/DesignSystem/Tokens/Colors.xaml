@@ -70,11 +70,11 @@
     <Color x:Key="Color.Cis.Dark.TextSecondary">#98A2B3</Color>
     <!--
         P2.16 — Light palette 微調對齊 UI redesign checklist：
-          Background  F7F8FA → F5F7FA (audit 推薦，更冷一點)
-          Border      E4E7EC → E2E5ED (rgba(15,23,42,0.08) ≈ #E2E5ED)
-          NavRail     新加 #FBFCFD — 比 app bg 稍微亮一階、比 Surface 稍暗，
-                      讓 NavRail / 主內容區 / 卡片三層 hierarchy 各有自己的
-                      色階位置 (audit「精準對比」原則)
+        Background  F7F8FA → F5F7FA (audit 推薦，更冷一點)
+        Border      E4E7EC → E2E5ED (rgba(15,23,42,0.08) ≈ #E2E5ED)
+        NavRail     新加 #FBFCFD — 比 app bg 稍微亮一階、比 Surface 稍暗，
+        讓 NavRail / 主內容區 / 卡片三層 hierarchy 各有自己的
+        色階位置 (audit「精準對比」原則)
     -->
     <Color x:Key="Color.Cis.Light.Background">#F5F7FA</Color>
     <Color x:Key="Color.Cis.Light.Surface">#FFFFFF</Color>

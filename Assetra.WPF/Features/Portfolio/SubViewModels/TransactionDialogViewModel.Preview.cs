@@ -338,6 +338,8 @@ public partial class TransactionDialogViewModel
         Buy.SettlementCurrency = ccy;
         Sell.CashAccountCurrency = ccy;
         Div.CashAccountCurrency = ccy;
+        // 轉帳來源幣別：供畫面顯示與「同幣別自動帶入」判斷。未選帳戶時退回 TWD（與 Transfer VM 預設一致）。
+        Transfer.SourceCurrency = string.IsNullOrEmpty(ccy) ? "TWD" : ccy;
         FetchBuyFxRateCommand.NotifyCanExecuteChanged();
         QueueBuyFxRateRefresh();
     }

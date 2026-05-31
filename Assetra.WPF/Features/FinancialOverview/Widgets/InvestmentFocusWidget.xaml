@@ -5,8 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
-    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel},
                                      IsDesignTimeCreatable=False}"
     Visibility="{Binding InvestmentFocusWidget, Converter={StaticResource NullToVisibilityConverter}}"
@@ -32,26 +32,29 @@
                         <ColumnDefinition Width="64" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{Binding Symbol}" />
-                        <TextBlock Margin="6,0,0,0"
-                                   VerticalAlignment="Center"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextSecondary}"
-                                   Text="{Binding Name}"
-                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{Binding Symbol}" />
+                        <TextBlock
+                            Margin="6,0,0,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{Binding Name}"
+                            TextTrimming="CharacterEllipsis" />
                     </StackPanel>
-                    <TextBlock Grid.Column="1"
-                               Margin="8,0,8,0"
-                               VerticalAlignment="Center"
-                               FontFamily="{StaticResource Font.Family.Base}"
-                               FontSize="{StaticResource Font.Size.Sm}"
-                               FontWeight="SemiBold"
-                               Text="{Binding DayChange, StringFormat='+#\,##0;-#\,##0;0'}"
-                               Typography.NumeralAlignment="Tabular">
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="8,0,8,0"
+                        VerticalAlignment="Center"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        FontWeight="SemiBold"
+                        Text="{Binding DayChange, StringFormat='+#\,##0;-#\,##0;0'}"
+                        Typography.NumeralAlignment="Tabular">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
@@ -66,13 +69,14 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
-                    <TextBlock Grid.Column="2"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Right"
-                               FontFamily="{StaticResource Font.Family.Base}"
-                               FontSize="{StaticResource Font.Size.Xs}"
-                               Text="{Binding DayChangePercent, StringFormat={}{0:+0.00;-0.00;0.00}%}"
-                               Typography.NumeralAlignment="Tabular">
+                    <TextBlock
+                        Grid.Column="2"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        FontFamily="{StaticResource Font.Family.Base}"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Text="{Binding DayChangePercent, StringFormat={}{0:+0.00;-0.00;0.00}%}"
+                        Typography.NumeralAlignment="Tabular">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
@@ -189,10 +193,10 @@
             <!--
                 v2 redesign (2026-05-13)：從 48px 無軸 sparkline 升級為精緻趨勢圖。
                 - Series 沒變：DashboardViewModel.TenDaySeries 已經是 ResolveNetWorthValue()
-                  算出的淨值（Cash + Equity − Liability，舊資料 fallback MV），所以
-                  標題「近 30 日 淨值走勢」實打實對應資料
+                算出的淨值（Cash + Equity − Liability，舊資料 fallback MV），所以
+                標題「近 30 日 淨值走勢」實打實對應資料
                 - 軸從 SparklineXAxes/YAxes（IsVisible=false）改綁 TenDayXAxes/YAxes
-                  （已含 MM/dd 日期 + NT$X.XM 金額 labeler）
+                （已含 MM/dd 日期 + NT$X.XM 金額 labeler）
                 - 高度 48 → 180，配上 section 副標題，視覺權重升級
                 - 漸層 fill 已在 LineSeries 內定義（accentColor.WithAlpha(32)）
             -->
@@ -207,10 +211,10 @@
                     <lvc:CartesianChart
                         Background="Transparent"
                         Series="{Binding InvestmentFocusWidget.TenDaySeries}"
-                        XAxes="{Binding InvestmentFocusWidget.TenDayXAxes}"
-                        YAxes="{Binding InvestmentFocusWidget.TenDayYAxes}"
                         TooltipPosition="Top"
-                        TooltipTextSize="11" />
+                        TooltipTextSize="11"
+                        XAxes="{Binding InvestmentFocusWidget.TenDayXAxes}"
+                        YAxes="{Binding InvestmentFocusWidget.TenDayYAxes}" />
                 </Border>
             </StackPanel>
 
@@ -220,13 +224,13 @@
                 成本 / 總損益是同一個 narrative。獨立 card 反而把 narrative 切碎。
                 HasTodaysMovers=false (未開盤 / 無持倉) 時整段隱藏。
             -->
-            <StackPanel Margin="0,16,0,0"
-                        Visibility="{Binding HasTodaysMovers, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock Margin="0,0,0,6"
-                           FontSize="{StaticResource Font.Size.Xs}"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource AppTextSecondary}"
-                           Text="{DynamicResource Dashboard.Widget.TodaysMovers.Heading}" />
+            <StackPanel Margin="0,16,0,0" Visibility="{Binding HasTodaysMovers, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock
+                    Margin="0,0,0,6"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Dashboard.Widget.TodaysMovers.Heading}" />
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -236,30 +240,29 @@
 
                     <!--  Gainers 欄  -->
                     <StackPanel Grid.Column="0">
-                        <TextBlock Margin="0,0,0,4"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppUp}"
-                                   Text="{DynamicResource Dashboard.Widget.TodaysMovers.Gainers}" />
-                        <ItemsControl ItemsSource="{Binding TopGainersToday}"
-                                      ItemTemplate="{StaticResource MoverRow}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppUp}"
+                            Text="{DynamicResource Dashboard.Widget.TodaysMovers.Gainers}" />
+                        <ItemsControl ItemTemplate="{StaticResource MoverRow}" ItemsSource="{Binding TopGainersToday}" />
                     </StackPanel>
 
                     <!--  Losers 欄  -->
                     <StackPanel Grid.Column="2">
-                        <TextBlock Margin="0,0,0,4"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppDown}"
-                                   Text="{DynamicResource Dashboard.Widget.TodaysMovers.Losers}" />
-                        <ItemsControl ItemsSource="{Binding TopLosersToday}"
-                                      ItemTemplate="{StaticResource MoverRow}" />
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppDown}"
+                            Text="{DynamicResource Dashboard.Widget.TodaysMovers.Losers}" />
+                        <ItemsControl ItemTemplate="{StaticResource MoverRow}" ItemsSource="{Binding TopLosersToday}" />
                     </StackPanel>
                 </Grid>
             </StackPanel>
 
-            <TextBlock Style="{StaticResource DashboardWidgetFooter}"
-                       Text="{DynamicResource Dashboard.Widget.Investment.OpenLink}">
+            <TextBlock Style="{StaticResource DashboardWidgetFooter}" Text="{DynamicResource Dashboard.Widget.Investment.OpenLink}">
                 <TextBlock.InputBindings>
                     <MouseBinding Command="{Binding NavigateToPortfolioCommand}" MouseAction="LeftClick" />
                 </TextBlock.InputBindings>

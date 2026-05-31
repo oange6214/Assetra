@@ -35,9 +35,12 @@ public static class AutoCategorizationEngine
 
         foreach (var rule in rules.Where(r => r.IsEnabled).OrderBy(r => r.Priority))
         {
-            if (string.IsNullOrEmpty(rule.KeywordPattern)) continue;
-            if ((rule.AppliesTo & context.Source) == 0) continue;
-            if (TryMatch(rule, context)) return rule.CategoryId;
+            if (string.IsNullOrEmpty(rule.KeywordPattern))
+                continue;
+            if ((rule.AppliesTo & context.Source) == 0)
+                continue;
+            if (TryMatch(rule, context))
+                return rule.CategoryId;
         }
 
         return null;
@@ -58,16 +61,20 @@ public static class AutoCategorizationEngine
 
     private static string? ResolveAnyText(AutoCategorizationContext ctx)
     {
-        if (!string.IsNullOrEmpty(ctx.Note)) return ctx.Note;
+        if (!string.IsNullOrEmpty(ctx.Note))
+            return ctx.Note;
         var parts = new List<string>(2);
-        if (!string.IsNullOrWhiteSpace(ctx.Counterparty)) parts.Add(ctx.Counterparty!);
-        if (!string.IsNullOrWhiteSpace(ctx.Memo)) parts.Add(ctx.Memo!);
+        if (!string.IsNullOrWhiteSpace(ctx.Counterparty))
+            parts.Add(ctx.Counterparty!);
+        if (!string.IsNullOrWhiteSpace(ctx.Memo))
+            parts.Add(ctx.Memo!);
         return parts.Count == 0 ? null : string.Join(" / ", parts);
     }
 
     private static bool MatchOne(AutoCategorizationRule rule, string? value)
     {
-        if (string.IsNullOrEmpty(value)) return false;
+        if (string.IsNullOrEmpty(value))
+            return false;
         var comparison = rule.MatchCaseSensitive
             ? StringComparison.Ordinal
             : StringComparison.OrdinalIgnoreCase;
@@ -86,7 +93,8 @@ public static class AutoCategorizationEngine
         try
         {
             var options = RegexOptions.CultureInvariant;
-            if (!rule.MatchCaseSensitive) options |= RegexOptions.IgnoreCase;
+            if (!rule.MatchCaseSensitive)
+                options |= RegexOptions.IgnoreCase;
             return Regex.IsMatch(value, rule.KeywordPattern, options, TimeSpan.FromMilliseconds(200));
         }
         catch (ArgumentException)

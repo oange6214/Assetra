@@ -60,7 +60,8 @@ internal static class SqliteSchemaHelper
             throw new ArgumentException($"Unknown table '{table}' — add it to SqliteSchemaHelper.KnownTables first.");
 
         using var cmd = conn.CreateCommand();
-        if (tx is not null) cmd.Transaction = tx;
+        if (tx is not null)
+            cmd.Transaction = tx;
         // Table name is allowlist-validated above; column name is parameterized.
         cmd.CommandText = $"SELECT COUNT(*) FROM pragma_table_info('{table}') WHERE name = $col;";
         cmd.Parameters.AddWithValue("$col", column);

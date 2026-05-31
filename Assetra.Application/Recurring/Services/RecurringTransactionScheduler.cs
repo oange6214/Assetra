@@ -118,7 +118,8 @@ public sealed class RecurringTransactionScheduler
     {
         var entry = await _pendingRepo.GetByIdAsync(pendingId, ct).ConfigureAwait(false)
             ?? throw new InvalidOperationException($"Pending entry {pendingId} not found.");
-        if (entry.Status != PendingStatus.Pending) return;
+        if (entry.Status != PendingStatus.Pending)
+            return;
         var resolved = entry with
         {
             Status = PendingStatus.Skipped,
@@ -160,12 +161,12 @@ public sealed class RecurringTransactionScheduler
         var step = Math.Max(1, interval);
         return freq switch
         {
-            RecurrenceFrequency.Daily     => current.AddDays(step),
-            RecurrenceFrequency.Weekly    => current.AddDays(7 * step),
-            RecurrenceFrequency.BiWeekly  => current.AddDays(14 * step),
-            RecurrenceFrequency.Monthly   => current.AddMonths(step),
+            RecurrenceFrequency.Daily => current.AddDays(step),
+            RecurrenceFrequency.Weekly => current.AddDays(7 * step),
+            RecurrenceFrequency.BiWeekly => current.AddDays(14 * step),
+            RecurrenceFrequency.Monthly => current.AddMonths(step),
             RecurrenceFrequency.Quarterly => current.AddMonths(3 * step),
-            RecurrenceFrequency.Yearly    => current.AddYears(step),
+            RecurrenceFrequency.Yearly => current.AddYears(step),
             _ => current.AddDays(step),
         };
     }

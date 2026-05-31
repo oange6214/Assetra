@@ -7,13 +7,14 @@
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Alerts"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:AlertsViewModel}, IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:AlertsViewModel},
+                                     IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
     <!--
         外提到 MainWindow 的 Alerts dialog host — 包含新增 / 編輯規則表單與
         刪除確認 modal。
-
+        
         Root Grid 故意**不**設 Background：WPF 只有設了背景 (含 Transparent)
         的 Panel 才會吞 hit-test。預設 null background 讓 host 在 modal 沒開
         時對 NavRail / title bar / status bar 點擊完全透明。內層 modal Grid
@@ -23,9 +24,7 @@
     <Grid>
 
         <!--  警示 — 新增 / 編輯表單  -->
-        <Grid
-            Style="{StaticResource AppDialogOverlay}"
-            Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Style="{StaticResource AppDialogOverlay}" Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border
                 Width="720"
                 MaxHeight="520"
@@ -64,13 +63,14 @@
                         </Button>
                     </Grid>
 
-                    <UniformGrid Grid.Row="1" Columns="2" Rows="2">
+                    <UniformGrid
+                        Grid.Row="1"
+                        Columns="2"
+                        Rows="2">
                         <StackPanel Margin="0,0,12,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Alerts.Symbol}" />
                             <Grid>
-                                <TextBox
-                                    x:Name="AddAlertSymbolBox"
-                                    Text="{Binding AddSymbol, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBox x:Name="AddAlertSymbolBox" Text="{Binding AddSymbol, UpdateSourceTrigger=PropertyChanged}" />
                                 <Popup
                                     Width="{Binding ActualWidth, ElementName=AddAlertSymbolBox}"
                                     AllowsTransparency="True"
@@ -124,9 +124,7 @@
 
                         <StackPanel Margin="0,0,12,0">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Alerts.TargetPrice}" />
-                            <TextBox
-                                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                                Text="{Binding AddTargetPrice, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding AddTargetPrice, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                     </UniformGrid>
 
@@ -148,9 +146,7 @@
                             Content="{DynamicResource Common.Cancel}"
                             Style="{StaticResource AppSecondaryButton}" />
                         <Button Command="{Binding AddRuleCommand}" Style="{StaticResource AppPrimaryButton}">
-                            <TextBlock
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Text="{DynamicResource Alerts.AddAlert}" />
+                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Alerts.AddAlert}" />
                         </Button>
                     </StackPanel>
                 </Grid>
@@ -158,9 +154,7 @@
         </Grid>
 
         <!--  警示 — 刪除確認  -->
-        <Grid
-            Style="{StaticResource AppDialogOverlay}"
-            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Style="{StaticResource AppDialogOverlay}" Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
@@ -174,9 +168,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
-                    <TextBlock
-                        Grid.Row="1"
-                        Style="{StaticResource AppDialogSubtitle}">
+                    <TextBlock Grid.Row="1" Style="{StaticResource AppDialogSubtitle}">
                         <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
                         <Run Text="{Binding DeleteTargetName}" />
                         <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />

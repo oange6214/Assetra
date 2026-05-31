@@ -1,5 +1,3 @@
-using System.Reactive.Concurrency;
-using Assetra.Application.Loans.Contracts;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Services;
 using Assetra.Core.DomainServices;
@@ -12,8 +10,6 @@ using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Features.FinancialOverview;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.Controls;
-using Assetra.WPF.Features.Portfolio.SubViewModels;
-using Assetra.WPF.Features.Snackbar;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Assetra.WPF.Infrastructure;

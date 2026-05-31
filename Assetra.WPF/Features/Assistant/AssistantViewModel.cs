@@ -68,7 +68,8 @@ public sealed partial class AssistantViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadInsightsAsync()
     {
-        if (_insights is null) return;
+        if (_insights is null)
+            return;
         try
         {
             var snapshot = await _insights.GetCurrentInsightsAsync().ConfigureAwait(true);
@@ -97,10 +98,12 @@ public sealed partial class AssistantViewModel : ObservableObject
     [RelayCommand]
     private async Task DismissInsight(AssistantInsight? insight)
     {
-        if (insight is null) return;
+        if (insight is null)
+            return;
         _insightCards.Remove(insight);
 
-        if (_settings is null) return;
+        if (_settings is null)
+            return;
         try
         {
             var current = _settings.Current;
@@ -111,7 +114,8 @@ public sealed partial class AssistantViewModel : ObservableObject
             // 順手清掉 7 天前的舊紀錄，避免無限增長。
             var cutoff = DateTime.UtcNow.AddDays(-7);
             foreach (var k in map.Keys.ToList())
-                if (map[k] < cutoff) map.Remove(k);
+                if (map[k] < cutoff)
+                    map.Remove(k);
 
             await _settings.SaveAsync(current with { DismissedAssistantInsights = map }).ConfigureAwait(false);
         }
@@ -132,14 +136,16 @@ public sealed partial class AssistantViewModel : ObservableObject
     [RelayCommand]
     private async Task ExportHistoryAsync()
     {
-        if (_history is null) return;
+        if (_history is null)
+            return;
         var dlg = new Microsoft.Win32.SaveFileDialog
         {
             Title = "Export assistant history",
             Filter = "Markdown (*.md)|*.md|Plain text (*.txt)|*.txt",
             FileName = $"assistant-history-{DateTime.Now:yyyy-MM-dd-HHmm}.md",
         };
-        if (dlg.ShowDialog() != true) return;
+        if (dlg.ShowDialog() != true)
+            return;
 
         try
         {
@@ -175,7 +181,8 @@ public sealed partial class AssistantViewModel : ObservableObject
     private async Task SendAsync()
     {
         var text = InputText.Trim();
-        if (text.Length == 0) return;
+        if (text.Length == 0)
+            return;
 
         var locale = _localization?.CurrentLanguage ?? "zh-TW";
         _messages.Add(new AssistantMessage(IsUser: true, Text: text, Source: string.Empty));
@@ -221,7 +228,8 @@ public sealed partial class AssistantViewModel : ObservableObject
     [RelayCommand]
     private void UseSuggestion(string? suggestion)
     {
-        if (string.IsNullOrWhiteSpace(suggestion)) return;
+        if (string.IsNullOrWhiteSpace(suggestion))
+            return;
         InputText = suggestion;
     }
 
@@ -231,7 +239,8 @@ public sealed partial class AssistantViewModel : ObservableObject
         _messages.Clear();
         if (_history is not null)
         {
-            try { await _history.ClearAsync(); }
+            try
+            { await _history.ClearAsync(); }
             catch { /* swallow */ }
         }
     }
@@ -243,7 +252,8 @@ public sealed partial class AssistantViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadHistoryAsync()
     {
-        if (_history is null || _messages.Count > 0) return;
+        if (_history is null || _messages.Count > 0)
+            return;
         try
         {
             var entries = await _history.GetRecentAsync(limit: 30).ConfigureAwait(true);

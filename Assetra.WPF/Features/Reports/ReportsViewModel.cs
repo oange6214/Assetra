@@ -1,13 +1,10 @@
 using System.Collections.ObjectModel;
-using System.Net.Http;
-using Assetra.Application.Fx;
 using Assetra.Application.Reports.Services;
 using Assetra.Application.Tax;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Interfaces.Reports;
 using Assetra.Core.Models;
-using Assetra.Core.Models.Analysis;
 using Assetra.Core.Models.Reports;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -120,8 +117,8 @@ public sealed partial class ReportsViewModel : ObservableObject
     [ObservableProperty] private bool _isTaxLoading;
 
     /// <summary>True when neither loading nor data — show "目前沒有可顯示的報表資料".</summary>
-    public bool ShouldShowIncomeEmpty   => !IsIncomeLoading   && IncomeStatement   is null;
-    public bool ShouldShowBalanceEmpty  => !IsBalanceLoading  && BalanceSheet      is null;
+    public bool ShouldShowIncomeEmpty => !IsIncomeLoading && IncomeStatement is null;
+    public bool ShouldShowBalanceEmpty => !IsBalanceLoading && BalanceSheet is null;
     public bool ShouldShowCashFlowEmpty => !IsCashFlowLoading && CashFlowStatement is null;
 
     /// <summary>
@@ -218,18 +215,20 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     partial void OnYearChanged(int value)
     {
-        if (_suppressAutoLoad) return;
+        if (_suppressAutoLoad)
+            return;
         _ = LoadAsync();
     }
 
     partial void OnMonthChanged(int value)
     {
-        if (_suppressAutoLoad) return;
+        if (_suppressAutoLoad)
+            return;
         _ = LoadAsync();
     }
 
     public string MonthHeader => $"{Year}-{Month:D2}";
-    public bool   HasReport   => Report is not null;
+    public bool HasReport => Report is not null;
     public bool HasIncomeStatement => IncomeStatement is not null;
 
     public bool HasTaxSummary => TaxSummary is not null
@@ -237,23 +236,23 @@ public sealed partial class ReportsViewModel : ObservableObject
     public bool HasBalanceSheet => BalanceSheet is not null;
     public bool HasCashFlowStatement => CashFlowStatement is not null;
 
-    public string IncomeDisplay  => Report is null ? "—" : FormatAmount(Report.Current.TotalIncome);
+    public string IncomeDisplay => Report is null ? "—" : FormatAmount(Report.Current.TotalIncome);
     public string ExpenseDisplay => Report is null ? "—" : FormatAmount(Report.Current.TotalExpense);
-    public string NetDisplay     => Report is null ? "—" : FormatAmount(Report.Current.NetCashFlow);
+    public string NetDisplay => Report is null ? "—" : FormatAmount(Report.Current.NetCashFlow);
 
-    public string IncomeDeltaDisplay  => FormatDeltaInstance(Report?.IncomeDelta);
+    public string IncomeDeltaDisplay => FormatDeltaInstance(Report?.IncomeDelta);
     public string ExpenseDeltaDisplay => FormatDeltaInstance(Report?.ExpenseDelta);
-    public string NetDeltaDisplay     => FormatDeltaInstance(Report?.NetDelta);
+    public string NetDeltaDisplay => FormatDeltaInstance(Report?.NetDelta);
 
-    public bool IsIncomeUp  => (Report?.IncomeDelta  ?? 0m) >= 0m;
+    public bool IsIncomeUp => (Report?.IncomeDelta ?? 0m) >= 0m;
     public bool IsExpenseUp => (Report?.ExpenseDelta ?? 0m) >= 0m;
-    public bool IsNetUp     => (Report?.NetDelta     ?? 0m) >= 0m;
+    public bool IsNetUp => (Report?.NetDelta ?? 0m) >= 0m;
 
     public string SavingsRateDisplay =>
         Report is null ? "—" : $"{Report.SavingsRate * 100m:F1}%";
 
     public bool HasOverBudget => Report is { OverBudgetCategories.Count: > 0 };
-    public bool HasUpcoming   => Report is { Upcoming.Count: > 0 };
+    public bool HasUpcoming => Report is { Upcoming.Count: > 0 };
 
     public IReadOnlyList<CategorySpendSummary> OverBudgetCategories =>
         Report?.OverBudgetCategories ?? [];
@@ -283,7 +282,8 @@ public sealed partial class ReportsViewModel : ObservableObject
     [RelayCommand]
     private async Task LoadAsync()
     {
-        if (IsLoading) return;
+        if (IsLoading)
+            return;
         IsLoading = true;
         IsSlowLoad = false;
         ErrorMessage = null;
@@ -421,7 +421,8 @@ public sealed partial class ReportsViewModel : ObservableObject
                 {
                     var c = _annualTaxComputer!.Compute(y, allTrades, filing, amtInputs);
                     _multiYearTaxRows.Add(TaxYearRowViewModel.FromComputation(c));
-                    if (y == Year) focalComputation = c;
+                    if (y == Year)
+                        focalComputation = c;
                 }
                 OnPropertyChanged(nameof(HasMultiYearTax));
 
@@ -467,10 +468,12 @@ public sealed partial class ReportsViewModel : ObservableObject
     /// </summary>
     private void CollectStatementWarnings(IReadOnlyList<string>? warnings)
     {
-        if (warnings is null || warnings.Count == 0) return;
+        if (warnings is null || warnings.Count == 0)
+            return;
         foreach (var w in warnings)
         {
-            if (string.IsNullOrWhiteSpace(w)) continue;
+            if (string.IsNullOrWhiteSpace(w))
+                continue;
             if (!StatementWarnings.Contains(w))
                 StatementWarnings.Add(w);
         }
@@ -522,7 +525,8 @@ public sealed partial class ReportsViewModel : ObservableObject
             DefaultExt = ext,
             Filter = format == ExportFormat.Pdf ? "PDF (*.pdf)|*.pdf" : "CSV (*.csv)|*.csv",
         };
-        if (dlg.ShowDialog() != true) return;
+        if (dlg.ShowDialog() != true)
+            return;
         try
         {
             switch (target)
@@ -561,8 +565,10 @@ public sealed partial class ReportsViewModel : ObservableObject
         _suppressAutoLoad = true;
         try
         {
-            if (Month == 1) { Year--; Month = 12; }
-            else            { Month--; }
+            if (Month == 1)
+            { Year--; Month = 12; }
+            else
+            { Month--; }
         }
         finally { _suppressAutoLoad = false; }
         await LoadAsync().ConfigureAwait(true);
@@ -574,8 +580,10 @@ public sealed partial class ReportsViewModel : ObservableObject
         _suppressAutoLoad = true;
         try
         {
-            if (Month == 12) { Year++; Month = 1; }
-            else             { Month++; }
+            if (Month == 12)
+            { Year++; Month = 1; }
+            else
+            { Month++; }
         }
         finally { _suppressAutoLoad = false; }
         await LoadAsync().ConfigureAwait(true);
@@ -583,7 +591,8 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     private string FormatDeltaInstance(decimal? value)
     {
-        if (value is not { } v) return "—";
+        if (value is not { } v)
+            return "—";
         return _currency?.FormatSigned(v)
                ?? (v >= 0 ? $"+NT${Math.Abs(v):N0}" : $"-NT${Math.Abs(v):N0}");
     }
@@ -626,10 +635,6 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     private string FormatAmount(decimal value) =>
         _currency?.FormatAmount(value) ?? $"NT${value:N0}";
-
-    private string FormatSignedAmount(decimal value) =>
-        _currency?.FormatSigned(value)
-        ?? (value >= 0 ? $"+NT${Math.Abs(value):N0}" : $"-NT${Math.Abs(value):N0}");
 
     private void OnCurrencyChanged() => RaiseDisplayStrings();
 

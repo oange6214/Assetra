@@ -41,7 +41,8 @@ internal sealed class AssistantInsightHostedService : BackgroundService
     {
         // Don't fire immediately on startup — give the rest of the app time
         // to load data so insights have something to look at.
-        try { await Task.Delay(StartupDelay, stoppingToken).ConfigureAwait(false); }
+        try
+        { await Task.Delay(StartupDelay, stoppingToken).ConfigureAwait(false); }
         catch (OperationCanceledException) { return; }
 
         while (!stoppingToken.IsCancellationRequested)
@@ -56,7 +57,8 @@ internal sealed class AssistantInsightHostedService : BackgroundService
                 // Insight loading is best-effort — never crash the host.
             }
 
-            try { await Task.Delay(PollInterval, stoppingToken).ConfigureAwait(false); }
+            try
+            { await Task.Delay(PollInterval, stoppingToken).ConfigureAwait(false); }
             catch (OperationCanceledException) { return; }
         }
     }
@@ -64,14 +66,17 @@ internal sealed class AssistantInsightHostedService : BackgroundService
     private async Task PollOnceAsync(CancellationToken ct)
     {
         var insights = _sp.GetService<IAssistantInsightService>();
-        if (insights is null || _snackbar is null) return;
+        if (insights is null || _snackbar is null)
+            return;
 
         var snapshot = await insights.GetCurrentInsightsAsync(ct).ConfigureAwait(false);
         foreach (var insight in snapshot)
         {
-            if (insight.Severity == AssistantInsightSeverity.Info) continue;
+            if (insight.Severity == AssistantInsightSeverity.Info)
+                continue;
             var key = $"{insight.Source}:{insight.Title}";
-            if (!_alreadyShown.Add(key)) continue;
+            if (!_alreadyShown.Add(key))
+                continue;
             switch (insight.Severity)
             {
                 case AssistantInsightSeverity.Critical:

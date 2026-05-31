@@ -99,10 +99,14 @@ public sealed partial class RealEstateViewModel : ObservableObject
     private async Task SaveAsync()
     {
         FormError = null;
-        if (string.IsNullOrWhiteSpace(FormName))    { FormError = "請輸入名稱"; return; }
-        if (!ParseHelpers.TryParseDecimal(FormPurchasePrice, out var purchasePrice)) { FormError = "購入金額格式錯誤"; return; }
-        if (!ParseHelpers.TryParseDecimal(FormCurrentValue, out var currentValue))  { FormError = "目前市值格式錯誤"; return; }
-        if (!ParseHelpers.TryParseDecimal(FormMortgageBalance, out var mortgage))   { FormError = "房貸餘額格式錯誤"; return; }
+        if (string.IsNullOrWhiteSpace(FormName))
+        { FormError = "請輸入名稱"; return; }
+        if (!ParseHelpers.TryParseDecimal(FormPurchasePrice, out var purchasePrice))
+        { FormError = "購入金額格式錯誤"; return; }
+        if (!ParseHelpers.TryParseDecimal(FormCurrentValue, out var currentValue))
+        { FormError = "目前市值格式錯誤"; return; }
+        if (!ParseHelpers.TryParseDecimal(FormMortgageBalance, out var mortgage))
+        { FormError = "房貸餘額格式錯誤"; return; }
 
         var entity = new Core.Models.MultiAsset.RealEstate(
             Id: EditingId ?? Guid.NewGuid(),

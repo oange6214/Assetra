@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -66,7 +64,8 @@ public partial class PortfolioViewModel
     [RelayCommand]
     private async Task SetAssetChartPeriodAsync(string period)
     {
-        if (string.IsNullOrEmpty(period) || period == AssetChartPeriod) return;
+        if (string.IsNullOrEmpty(period) || period == AssetChartPeriod)
+            return;
         AssetChartPeriod = period;
         await LoadAssetChartAsync();
     }
@@ -74,7 +73,8 @@ public partial class PortfolioViewModel
     [RelayCommand]
     private async Task SetAssetChartModeAsync(string mode)
     {
-        if (string.IsNullOrEmpty(mode) || mode == AssetChartMode) return;
+        if (string.IsNullOrEmpty(mode) || mode == AssetChartMode)
+            return;
         AssetChartMode = mode;
         await LoadAssetChartAsync();
     }
@@ -109,7 +109,8 @@ public partial class PortfolioViewModel
         {
             var period = ToChartPeriod(AssetChartPeriod);
             var ohlcv = await _stockHistory.GetHistoryAsync(row.Symbol, row.Exchange ?? string.Empty, period, ct);
-            if (ct.IsCancellationRequested) return;
+            if (ct.IsCancellationRequested)
+                return;
             BuildAssetChart(row, ohlcv);
         }
         catch (OperationCanceledException)
@@ -256,7 +257,8 @@ public partial class PortfolioViewModel
             .Where(e => e.DeltaQty != 0m)
             .ToList();
 
-        if (tradeEvents.Count == 0) return [];
+        if (tradeEvents.Count == 0)
+            return [];
 
         var points = new List<DateTimePoint>(ohlcv.Count);
         decimal currentQty = 0m;

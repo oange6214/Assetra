@@ -33,21 +33,21 @@
 
         <!--
             ── Row 1: Positions panel（直接渲染，不再包 TabControl）──
-
+            
             Long-term refactor 後 Portfolio 頁只剩單一工作面 = 持倉明細：
             - Dashboard tab 搬到「投資焦點卡」（全域財務儀表板總覽）
             - Allocation tab 搬到「配置」tab（全域財務儀表板）
             - Cash / Liability / Trades 早期已搬到各自的 navrail leaf
             單一 TabControl + 單一 TabItem 是 anti-pattern，直接展開 PositionsTabPanel
             節省 ~32px tab bar 並消除「為什麼只有一個 tab」的疑惑。
-
+            
             保留的事：
             - PortfolioTab enum / SelectedTab observable property 仍存在，
-              避免破壞舊持久化與 OpenAddAccountFromTab 等內部呼叫。
+            避免破壞舊持久化與 OpenAddAccountFromTab 等內部呼叫。
             - DashboardViewModel / AllocationViewModel 子 VM 仍存活於 PortfolioVM，
-              供全域儀表板「投資焦點卡」與「配置 tab」綁定使用。
+            供全域儀表板「投資焦點卡」與「配置 tab」綁定使用。
             - 未來如要加投資專屬的次要 view（例：配息日曆／績效歸因），
-              再回頭包 TabControl 即可。
+            再回頭包 TabControl 即可。
         -->
         <pcontrols:PositionsTabPanel Grid.Row="1" />
 
@@ -255,10 +255,10 @@
                                 </Border>
                                 <!--  投資群組 chip：只有使用者已建立群組時顯示；跨群組彙總時用 warning 提醒整理。  -->
                                 <Button
-                                    Margin="6,0,0,0"
                                     Height="24"
                                     MinWidth="0"
                                     MinHeight="0"
+                                    Margin="6,0,0,0"
                                     Padding="0"
                                     Command="{Binding OpenSelectedPositionGroupDetailCommand}"
                                     Style="{StaticResource AppGhostButton}"
@@ -288,8 +288,8 @@
                                 </Button>
                                 <Button
                                     Height="24"
-                                    Margin="6,0,0,0"
                                     MinWidth="0"
+                                    Margin="6,0,0,0"
                                     Padding="8,0"
                                     Command="{Binding Account.OpenEditPositionCommand}"
                                     CommandParameter="{Binding SelectedPositionRow}"
@@ -1429,7 +1429,7 @@
 
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="20,16,20,20">
-                            <UniformGrid Columns="2" Margin="0,0,0,14">
+                            <UniformGrid Margin="0,0,0,14" Columns="2">
                                 <Border
                                     Margin="0,0,6,8"
                                     Padding="12"
@@ -1665,9 +1665,7 @@
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Portfolio.Group.NoTransactions}"
                                 Visibility="{Binding SelectedPortfolioGroupDetail.HasTrades, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                            <ItemsControl
-                                ItemsSource="{Binding SelectedPortfolioGroupDetail.Trades}"
-                                Visibility="{Binding SelectedPortfolioGroupDetail.HasTrades, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ItemsControl ItemsSource="{Binding SelectedPortfolioGroupDetail.Trades}" Visibility="{Binding SelectedPortfolioGroupDetail.HasTrades, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border

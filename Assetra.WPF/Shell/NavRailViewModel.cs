@@ -146,12 +146,14 @@ public partial class NavRailViewModel : ObservableObject
             {
                 var isActive = leaf.Section == _activeSection;
                 leaf.IsActive = isActive;
-                if (isActive) anyActive = true;
+                if (isActive)
+                    anyActive = true;
             }
             g.HasActiveChild = anyActive;
             // Auto-expand the group containing the active section so the
             // current page stays visible after navigation.
-            if (anyActive) g.IsExpanded = true;
+            if (anyActive)
+                g.IsExpanded = true;
         }
         foreach (var leaf in BottomItems)
             leaf.IsActive = leaf.Section == _activeSection;
@@ -205,13 +207,14 @@ public partial class NavRailViewModel : ObservableObject
         set => NavigateTo(value);
     }
 
-    public bool CanGoBack    => _backStack.Count > 0;
+    public bool CanGoBack => _backStack.Count > 0;
     public bool CanGoForward => _forwardStack.Count > 0;
 
     [RelayCommand(CanExecute = nameof(CanGoBack))]
     private void GoBack()
     {
-        if (!_backStack.TryPop(out var prev)) return;
+        if (!_backStack.TryPop(out var prev))
+            return;
         _forwardStack.Push(_activeSection);
         _isHistoryNavigation = true;
         try
@@ -227,7 +230,8 @@ public partial class NavRailViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanGoForward))]
     private void GoForward()
     {
-        if (!_forwardStack.TryPop(out var next)) return;
+        if (!_forwardStack.TryPop(out var next))
+            return;
         _backStack.Push(_activeSection);
         _isHistoryNavigation = true;
         try
@@ -248,7 +252,8 @@ public partial class NavRailViewModel : ObservableObject
     [CommunityToolkit.Mvvm.Input.RelayCommand]
     private void NavigateToByName(string? name)
     {
-        if (string.IsNullOrWhiteSpace(name)) return;
+        if (string.IsNullOrWhiteSpace(name))
+            return;
         if (Enum.TryParse<NavSection>(name, ignoreCase: true, out var section))
             NavigateTo(section);
     }
@@ -269,7 +274,8 @@ public partial class NavRailViewModel : ObservableObject
                 nameof(Assetra.WPF.Features.FinancialOverview.DashboardTab.Trends));
         }
 
-        if (section == _activeSection) return;
+        if (section == _activeSection)
+            return;
 
         if (!_isHistoryNavigation)
         {
@@ -280,7 +286,8 @@ public partial class NavRailViewModel : ObservableObject
         SetProperty(ref _activeSection, section, nameof(ActiveSection));
         // Also close any open flyout once a leaf is selected.
         if (Groups is not null)
-            foreach (var g in Groups) g.IsFlyoutOpen = false;
+            foreach (var g in Groups)
+                g.IsFlyoutOpen = false;
         SyncActiveLeaf();
         OnPropertyChanged(nameof(CanGoBack));
         OnPropertyChanged(nameof(CanGoForward));

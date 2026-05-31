@@ -104,7 +104,8 @@ public sealed class GlobalSyncStatusService : IGlobalSyncStatusService
                 _totalPending = total;
                 _perDomain = perDomain;
             }
-            if (changed) Emit();
+            if (changed)
+                Emit();
         }
         catch
         {
@@ -114,23 +115,28 @@ public sealed class GlobalSyncStatusService : IGlobalSyncStatusService
 
     private bool PerDomainEqualsLocked(IReadOnlyList<DomainSyncStatus> next)
     {
-        if (_perDomain.Count != next.Count) return false;
+        if (_perDomain.Count != next.Count)
+            return false;
         for (int i = 0; i < next.Count; i++)
         {
-            if (_perDomain[i].DomainKey != next[i].DomainKey) return false;
-            if (_perDomain[i].PendingCount != next[i].PendingCount) return false;
+            if (_perDomain[i].DomainKey != next[i].DomainKey)
+                return false;
+            if (_perDomain[i].PendingCount != next[i].PendingCount)
+                return false;
         }
         return true;
     }
 
     public IReadOnlyList<DomainSyncStatus> GetPerDomain()
     {
-        lock (_gate) return _perDomain;
+        lock (_gate)
+            return _perDomain;
     }
 
     private void OnSyncStarted(object? sender, EventArgs e)
     {
-        lock (_gate) { _state = GlobalSyncState.Syncing; }
+        lock (_gate)
+        { _state = GlobalSyncState.Syncing; }
         Emit();
     }
 
@@ -151,20 +157,23 @@ public sealed class GlobalSyncStatusService : IGlobalSyncStatusService
 
     private void OnSyncFailed(object? sender, string message)
     {
-        lock (_gate) { _lastError = message; }
+        lock (_gate)
+        { _lastError = message; }
         Emit();
     }
 
     private void OnEnabledChanged(object? sender, bool enabled)
     {
-        lock (_gate) { _enabled = enabled; }
+        lock (_gate)
+        { _enabled = enabled; }
         Emit();
     }
 
     private void Emit()
     {
         GlobalSyncSnapshot snap;
-        lock (_gate) { snap = BuildSnapshotLocked(); }
+        lock (_gate)
+        { snap = BuildSnapshotLocked(); }
         Changed?.Invoke(this, snap);
     }
 
@@ -172,18 +181,19 @@ public sealed class GlobalSyncStatusService : IGlobalSyncStatusService
     {
         var state = (_enabled, _lastError, _state, _totalPending) switch
         {
-            (false, _, _, _)            => GlobalSyncState.Disabled,
-            (true, not null, _, _)      => GlobalSyncState.Failed,
+            (false, _, _, _) => GlobalSyncState.Disabled,
+            (true, not null, _, _) => GlobalSyncState.Failed,
             (true, null, GlobalSyncState.Syncing, _) => GlobalSyncState.Syncing,
-            (true, null, _, 0)          => GlobalSyncState.Idle,
-            (true, null, _, _)          => GlobalSyncState.Pending,
+            (true, null, _, 0) => GlobalSyncState.Idle,
+            (true, null, _, _) => GlobalSyncState.Pending,
         };
         return new GlobalSyncSnapshot(state, _totalPending, _lastSyncedAt, _lastError, _lastPushedCount);
     }
 
     public void Dispose()
     {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         _disposed = true;
         _signals.SyncStarted -= OnSyncStarted;
         _signals.SyncCompleted -= OnSyncCompleted;

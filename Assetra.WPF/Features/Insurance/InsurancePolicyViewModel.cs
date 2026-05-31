@@ -119,10 +119,14 @@ public sealed partial class InsurancePolicyViewModel : ObservableObject
     private async Task SaveAsync()
     {
         FormError = null;
-        if (string.IsNullOrWhiteSpace(FormName))        { FormError = "請輸入保單名稱"; return; }
-        if (!ParseHelpers.TryParseDecimal(FormAnnualPremium, out var premium))   { FormError = "年繳保費格式錯誤"; return; }
-        if (!ParseHelpers.TryParseDecimal(FormFaceValue, out var faceValue))     { FormError = "保額格式錯誤"; return; }
-        if (!ParseHelpers.TryParseDecimal(FormCurrentCashValue, out var cashVal)) { FormError = "現金價值格式錯誤"; return; }
+        if (string.IsNullOrWhiteSpace(FormName))
+        { FormError = "請輸入保單名稱"; return; }
+        if (!ParseHelpers.TryParseDecimal(FormAnnualPremium, out var premium))
+        { FormError = "年繳保費格式錯誤"; return; }
+        if (!ParseHelpers.TryParseDecimal(FormFaceValue, out var faceValue))
+        { FormError = "保額格式錯誤"; return; }
+        if (!ParseHelpers.TryParseDecimal(FormCurrentCashValue, out var cashVal))
+        { FormError = "現金價值格式錯誤"; return; }
 
         var now = DateTimeOffset.UtcNow;
         var deviceId = string.Empty;

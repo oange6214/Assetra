@@ -52,7 +52,8 @@ internal static class AppStartupTasks
                         {
                             _ = Task.Run(async () =>
                             {
-                                try { await currency.RefreshRatesAsync().ConfigureAwait(false); }
+                                try
+                                { await currency.RefreshRatesAsync().ConfigureAwait(false); }
                                 catch (Exception retryEx)
                                 {
                                     Log.Warning(retryEx, "User-triggered FX refresh retry failed");
@@ -109,7 +110,8 @@ internal static class AppStartupTasks
                 // for CPU. FX backfill isn't time-sensitive.
                 await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
                 var refresher = provider.GetService<Assetra.Application.Fx.FxRateHistoryRefresher>();
-                if (refresher is null) return;
+                if (refresher is null)
+                    return;
                 var settings = provider.GetService<IAppSettingsService>()?.Current;
                 var baseCcy = string.IsNullOrWhiteSpace(settings?.BaseCurrency)
                     ? "TWD" : settings!.BaseCurrency;

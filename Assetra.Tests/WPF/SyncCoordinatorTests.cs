@@ -1,12 +1,12 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using Moq;
 using Assetra.Application.Sync;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.WPF;
@@ -22,7 +22,8 @@ public class SyncCoordinatorTests : IDisposable
 
     public void Dispose()
     {
-        if (File.Exists(_metaPath)) File.Delete(_metaPath);
+        if (File.Exists(_metaPath))
+            File.Delete(_metaPath);
     }
 
     private SyncCoordinator CreateCoordinator(IAppSettingsService settings) =>
@@ -79,7 +80,9 @@ public class SyncCoordinatorTests : IDisposable
         var coord = CreateCoordinator(mock.Object);
 
         // Network call will fail but the bootstrap should run before it.
-        try { await coord.SyncAsync("pass"); } catch { /* expected — invalid backend */ }
+        try
+        { await coord.SyncAsync("pass"); }
+        catch { /* expected — invalid backend */ }
 
         Assert.NotNull(saved);
         Assert.False(string.IsNullOrEmpty(saved!.SyncDeviceId));
@@ -107,7 +110,9 @@ public class SyncCoordinatorTests : IDisposable
             .Returns(Task.CompletedTask);
 
         var coord = CreateCoordinator(mock.Object);
-        try { await coord.SyncAsync("pass"); } catch { /* expected */ }
+        try
+        { await coord.SyncAsync("pass"); }
+        catch { /* expected */ }
 
         Assert.Equal(0, saveCalls);
     }

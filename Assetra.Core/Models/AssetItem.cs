@@ -6,26 +6,26 @@ namespace Assetra.Core.Models;
 /// UUIDs from the old tables are preserved so all Trade FK columns remain valid.
 /// </summary>
 public sealed record AssetItem(
-    Guid          Id,
-    string        Name,
+    Guid Id,
+    string Name,
     FinancialType Type,
-    Guid?         GroupId,
-    string        Currency,
-    DateOnly      CreatedDate,
-    bool          IsActive = true,
-    DateTime?     UpdatedAt = null,
+    Guid? GroupId,
+    string Currency,
+    DateOnly CreatedDate,
+    bool IsActive = true,
+    DateTime? UpdatedAt = null,
     // Loan amortization metadata — null for non-loan liabilities
-    decimal?      LoanAnnualRate  = null,
-    int?          LoanTermMonths  = null,
-    DateOnly?     LoanStartDate   = null,
-    decimal?      LoanHandlingFee = null,
+    decimal? LoanAnnualRate = null,
+    int? LoanTermMonths = null,
+    DateOnly? LoanStartDate = null,
+    decimal? LoanHandlingFee = null,
     LiabilitySubtype? LiabilitySubtype = null,
-    int?          BillingDay      = null,
-    int?          DueDay          = null,
-    decimal?      CreditLimit     = null,
-    string?       IssuerName      = null,
+    int? BillingDay = null,
+    int? DueDay = null,
+    decimal? CreditLimit = null,
+    string? IssuerName = null,
     // Free-form user-facing label for preset categorization (e.g., 房貸/車貸/數位活存)
-    string?       Subtype         = null)
+    string? Subtype = null)
 {
     public bool IsLoan => LoanAnnualRate.HasValue && LoanTermMonths.HasValue && LoanStartDate.HasValue;
     public bool IsCreditCard => LiabilitySubtype == Models.LiabilitySubtype.CreditCard;

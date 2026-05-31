@@ -28,10 +28,14 @@ public partial class ImportView : UserControl
 
     private async void OnDrop(object sender, DragEventArgs e)
     {
-        if (DataContext is not ImportViewModel vm) return;
-        if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] files) return;
-        if (files.Length == 0) return;
+        if (DataContext is not ImportViewModel vm)
+            return;
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+            return;
+        if (e.Data.GetData(DataFormats.FileDrop) is not string[] files)
+            return;
+        if (files.Length == 0)
+            return;
         await vm.DropFileAsync(files[0]);
     }
 }

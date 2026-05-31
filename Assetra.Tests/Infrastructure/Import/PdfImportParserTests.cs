@@ -1,5 +1,4 @@
 using System.IO;
-using System.Threading;
 using Assetra.Core.Interfaces.Import;
 using Assetra.Core.Models.Import;
 using Assetra.Infrastructure.Import.Pdf;

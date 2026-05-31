@@ -56,15 +56,18 @@ public sealed class MoneyWeightedReturnCalculator : IMoneyWeightedReturnCalculat
         var flows = BuildFlows(all, period, entryCurrencyMap);
 
         flows = await ConvertToBaseAsync(flows, ct).ConfigureAwait(false);
-        if (flows is null) return null;
+        if (flows is null)
+            return null;
 
         var startSnap = await _snapshots.GetSnapshotAsync(period.Start).ConfigureAwait(false);
         var endSnap = await _snapshots.GetSnapshotAsync(period.End).ConfigureAwait(false);
 
         var startMv = await ConvertSnapshotMarketValueAsync(startSnap, ct).ConfigureAwait(false);
-        if (startSnap is not null && startMv is null) return null;
+        if (startSnap is not null && startMv is null)
+            return null;
         var endMv = await ConvertSnapshotMarketValueAsync(endSnap, ct).ConfigureAwait(false);
-        if (endSnap is not null && endMv is null) return null;
+        if (endSnap is not null && endMv is null)
+            return null;
 
         var withSynthetic = new List<CashFlow>(flows);
         if (startMv is > 0m)
@@ -84,9 +87,11 @@ public sealed class MoneyWeightedReturnCalculator : IMoneyWeightedReturnCalculat
     private async Task<decimal?> ConvertSnapshotMarketValueAsync(
         PortfolioDailySnapshot? snap, CancellationToken ct)
     {
-        if (snap is null) return null;
+        if (snap is null)
+            return null;
         var baseCcy = _settings?.Current.BaseCurrency;
-        if (_fx is null || string.IsNullOrWhiteSpace(baseCcy)) return snap.MarketValue;
+        if (_fx is null || string.IsNullOrWhiteSpace(baseCcy))
+            return snap.MarketValue;
         var snapCcy = string.IsNullOrWhiteSpace(snap.Currency) ? "TWD" : snap.Currency;
         if (string.Equals(snapCcy, baseCcy, StringComparison.OrdinalIgnoreCase))
             return snap.MarketValue;
@@ -102,14 +107,17 @@ public sealed class MoneyWeightedReturnCalculator : IMoneyWeightedReturnCalculat
         var flows = BuildFlows(entryTrades, period, entryCurrencyMap);
 
         flows = await ConvertToBaseAsync(flows, ct).ConfigureAwait(false);
-        if (flows is null) return null;
-        if (flows.Count < 2) return null;
+        if (flows is null)
+            return null;
+        if (flows.Count < 2)
+            return null;
         return _xirr.Compute(flows);
     }
 
     private async Task<IReadOnlyDictionary<Guid, string>> BuildEntryCurrencyMapAsync()
     {
-        if (_portfolio is null) return new Dictionary<Guid, string>();
+        if (_portfolio is null)
+            return new Dictionary<Guid, string>();
         var entries = await _portfolio.GetEntriesAsync().ConfigureAwait(false);
         return entries.ToDictionary(e => e.Id, e => string.IsNullOrWhiteSpace(e.Currency) ? string.Empty : e.Currency);
     }
@@ -117,7 +125,8 @@ public sealed class MoneyWeightedReturnCalculator : IMoneyWeightedReturnCalculat
     private async Task<List<CashFlow>?> ConvertToBaseAsync(List<CashFlow> flows, CancellationToken ct)
     {
         var baseCcy = _settings?.Current.BaseCurrency;
-        if (_fx is null || string.IsNullOrWhiteSpace(baseCcy)) return flows;
+        if (_fx is null || string.IsNullOrWhiteSpace(baseCcy))
+            return flows;
         var converted = await MultiCurrencyCashFlowConverter.ConvertAllAsync(flows, baseCcy, _fx, ct).ConfigureAwait(false);
         return converted is null ? null : converted.ToList();
     }
@@ -131,7 +140,8 @@ public sealed class MoneyWeightedReturnCalculator : IMoneyWeightedReturnCalculat
         foreach (var t in trades)
         {
             var d = PerformancePeriod.ToPeriodDate(t.TradeDate);
-            if (!period.Contains(d)) continue;
+            if (!period.Contains(d))
+                continue;
 
             var amt = t.Type switch
             {
@@ -140,7 +150,8 @@ public sealed class MoneyWeightedReturnCalculator : IMoneyWeightedReturnCalculat
                 TradeType.CashDividend => t.CashAmount ?? (decimal)t.Quantity * t.Price,
                 _ => 0m,
             };
-            if (amt == 0m) continue;
+            if (amt == 0m)
+                continue;
 
             string? ccy = null;
             if (t.PortfolioEntryId is { } eid && entryCurrency.TryGetValue(eid, out var c) && !string.IsNullOrWhiteSpace(c))

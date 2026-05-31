@@ -4,8 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
-    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel},
                                      IsDesignTimeCreatable=False}"
     Visibility="{Binding FireWidget, Converter={StaticResource NullToVisibilityConverter}}"
@@ -42,10 +42,10 @@
 
             <!--
                 已計算狀態：顯示 4 metrics 2×2 grid (P2.17 T01)：
-                  Row 0:  FIRE 目標數字 | 預估自由年份
-                  Row 1:  進度 %        | 累計投入金額
+                Row 0:  財務自由所需資產 | 預估自由年份
+                Row 1:  進度 %        | 累計投入金額
                 Audit checklist 「顯示預估自由日期、進度、投入金額、成功率」
-                — 「成功率」需要 Monte Carlo 整合，本輪用 FIRE 目標金額替代，
+                — 「成功率」需要 Monte Carlo 整合，本輪用財務自由所需資產替代，
                 兩者都告訴使用者「我要去哪 / 多遠了」的核心訊號。
             -->
             <Grid Margin="0,4,0,0" Visibility="{Binding FireWidget.HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -58,8 +58,11 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!-- FIRE 目標數字 -->
-                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
+                <!--  財務自由所需資產  -->
+                <StackPanel
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,0,8,10">
                     <TextBlock
                         FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
@@ -72,8 +75,11 @@
                         Typography.NumeralAlignment="Tabular" />
                 </StackPanel>
 
-                <!-- 預估自由年份 -->
-                <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
+                <!--  預估自由年份  -->
+                <StackPanel
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="8,0,0,10">
                     <TextBlock
                         FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
@@ -86,8 +92,11 @@
                         Typography.NumeralAlignment="Tabular" />
                 </StackPanel>
 
-                <!-- 進度 % -->
-                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
+                <!--  進度 %  -->
+                <StackPanel
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,0,8,0">
                     <TextBlock
                         FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
@@ -100,8 +109,11 @@
                         Typography.NumeralAlignment="Tabular" />
                 </StackPanel>
 
-                <!-- 累計投入金額 -->
-                <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0">
+                <!--  累計投入金額  -->
+                <StackPanel
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="8,0,0,0">
                     <TextBlock
                         FontSize="{StaticResource Font.Size.Xs}"
                         Foreground="{DynamicResource AppTextMuted}"
@@ -116,29 +128,33 @@
             </Grid>
 
             <!--  Onboarding：尚未計算過 FIRE 時，引導使用者去 Fire 頁  -->
-            <Border Padding="14,12"
-                    Background="{DynamicResource AppHover}"
-                    BorderBrush="{DynamicResource AppBorderLight}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}"
-                    Visibility="{Binding FireWidget.HasCalculatedResult, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+            <Border
+                Padding="14,12"
+                Background="{DynamicResource AppHover}"
+                BorderBrush="{DynamicResource AppBorderLight}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource Radius.Sm}"
+                Visibility="{Binding FireWidget.HasCalculatedResult, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                 <StackPanel>
-                    <TextBlock FontSize="{StaticResource Font.Size.Xs}"
-                               Foreground="{DynamicResource AppTextSecondary}"
-                               Text="{DynamicResource Dashboard.Widget.Fire.Empty}"
-                               TextWrapping="Wrap" />
-                    <Button Margin="0,8,0,0"
-                            Padding="10,4"
-                            HorizontalAlignment="Left"
-                            Command="{Binding NavigateToFireCommand}"
-                            Content="{DynamicResource Dashboard.Widget.Fire.CalculateNow}"
-                            Style="{StaticResource AppSecondaryButton}" />
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Dashboard.Widget.Fire.Empty}"
+                        TextWrapping="Wrap" />
+                    <Button
+                        Margin="0,8,0,0"
+                        Padding="10,4"
+                        HorizontalAlignment="Left"
+                        Command="{Binding NavigateToFireCommand}"
+                        Content="{DynamicResource Dashboard.Widget.Fire.CalculateNow}"
+                        Style="{StaticResource AppSecondaryButton}" />
                 </StackPanel>
             </Border>
 
-            <TextBlock Style="{StaticResource DashboardWidgetFooter}"
-                       Text="{DynamicResource Dashboard.Widget.Fire.OpenLink}"
-                       Visibility="{Binding FireWidget.HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock
+                Style="{StaticResource DashboardWidgetFooter}"
+                Text="{DynamicResource Dashboard.Widget.Fire.OpenLink}"
+                Visibility="{Binding FireWidget.HasCalculatedResult, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <TextBlock.InputBindings>
                     <MouseBinding Command="{Binding NavigateToFireCommand}" MouseAction="LeftClick" />
                 </TextBlock.InputBindings>

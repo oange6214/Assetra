@@ -1,4 +1,3 @@
-using System.Globalization;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Sync;
 using Assetra.Infrastructure.Sync;

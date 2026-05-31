@@ -1,4 +1,3 @@
-using System.Threading;
 using Assetra.Core.Models.Import;
 using Assetra.Infrastructure.Import.Pdf;
 using Xunit;

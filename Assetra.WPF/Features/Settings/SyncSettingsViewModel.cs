@@ -1,4 +1,3 @@
-using Assetra.Application.Sync;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;

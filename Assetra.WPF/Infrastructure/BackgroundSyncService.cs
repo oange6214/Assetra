@@ -77,7 +77,9 @@ public sealed class BackgroundSyncService : BackgroundService, IBackgroundSyncSi
     public void RequestImmediateSync()
     {
         // Try-release — if the slot is already 1, do nothing (already pending).
-        try { _immediateSync.Release(); } catch (System.Threading.SemaphoreFullException) { }
+        try
+        { _immediateSync.Release(); }
+        catch (System.Threading.SemaphoreFullException) { }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

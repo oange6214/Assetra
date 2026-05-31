@@ -16,7 +16,8 @@ public class JsonSyncMetadataStoreTests : IDisposable
 
     public void Dispose()
     {
-        if (File.Exists(_path)) File.Delete(_path);
+        if (File.Exists(_path))
+            File.Delete(_path);
     }
 
     [Fact]

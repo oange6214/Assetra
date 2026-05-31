@@ -46,7 +46,7 @@
                                                 Padding="{TemplateBinding Padding}"
                                                 Background="{TemplateBinding Background}"
                                                 CornerRadius="4">
-                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">

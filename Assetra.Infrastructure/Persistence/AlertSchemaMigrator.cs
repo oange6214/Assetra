@@ -80,7 +80,8 @@ internal static class AlertSchemaMigrator
         // Probe sqlite_master first so we don't throw a first-chance "no such table" exception
         // on the common fresh-install path (legacy `alerts` table absent).
         cmd.CommandText = "SELECT 1 FROM sqlite_master WHERE type='table' AND name='alerts' LIMIT 1;";
-        if (cmd.ExecuteScalar() is null) return;
+        if (cmd.ExecuteScalar() is null)
+            return;
 
         cmd.CommandText = """
             INSERT OR IGNORE INTO alert SELECT * FROM alerts;

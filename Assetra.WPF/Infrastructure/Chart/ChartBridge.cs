@@ -1,6 +1,6 @@
 using System.Text.Json;
-using Microsoft.Web.WebView2.Core;
 using Assetra.Core.Models;
+using Microsoft.Web.WebView2.Core;
 
 namespace Assetra.WPF.Infrastructure.Chart;
 

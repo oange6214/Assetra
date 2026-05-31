@@ -18,7 +18,8 @@ public partial class TrendsView : UserControl
     /// </summary>
     private void TrendsView_Loaded(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not PortfolioHistoryViewModel vm) return;
+        if (DataContext is not PortfolioHistoryViewModel vm)
+            return;
         // ChangePeriodCommand 接受 "30" / "90" / "180" / "365" / "All" 字串。
         // SelectedDays = 0 (AllPeriodDays sentinel) 對應 "All"，其餘對應 number。
         var param = vm.SelectedDays == 0 ? "All" : vm.SelectedDays.ToString();

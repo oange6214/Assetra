@@ -36,11 +36,13 @@ public sealed class JsonSyncMetadataStore : ISyncMetadataStore, IDisposable
         await _gate.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            if (!File.Exists(_path)) return SyncMetadata.Empty(_defaultDeviceId);
+            if (!File.Exists(_path))
+                return SyncMetadata.Empty(_defaultDeviceId);
             await using var fs = File.OpenRead(_path);
             var dto = await JsonSerializer.DeserializeAsync<MetadataDto>(fs, JsonOptions, ct)
                 .ConfigureAwait(false);
-            if (dto is null) return SyncMetadata.Empty(_defaultDeviceId);
+            if (dto is null)
+                return SyncMetadata.Empty(_defaultDeviceId);
             return new SyncMetadata(
                 DeviceId: string.IsNullOrEmpty(dto.DeviceId) ? _defaultDeviceId : dto.DeviceId,
                 LastSyncAt: dto.LastSyncAt,

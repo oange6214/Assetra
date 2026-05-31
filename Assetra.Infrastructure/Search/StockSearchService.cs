@@ -78,8 +78,10 @@ public sealed class StockSearchService : IStockSearchService
     /// </summary>
     public bool IsEtf(string symbol)
     {
-        if (string.IsNullOrEmpty(symbol)) return false;
-        if (_etfSet.Contains(symbol)) return true;
+        if (string.IsNullOrEmpty(symbol))
+            return false;
+        if (_etfSet.Contains(symbol))
+            return true;
         return IsEtfCodePattern(symbol);
     }
 
@@ -89,7 +91,8 @@ public sealed class StockSearchService : IStockSearchService
     /// </summary>
     public bool IsBondEtf(string symbol)
     {
-        if (!IsEtf(symbol)) return false;
+        if (!IsEtf(symbol))
+            return false;
         return symbol.EndsWith('B') || symbol.EndsWith('b');
     }
 
@@ -99,7 +102,8 @@ public sealed class StockSearchService : IStockSearchService
     /// </summary>
     private static bool IsEtfCodePattern(string symbol)
     {
-        if (symbol.Length is < 4 or > 6) return false;
+        if (symbol.Length is < 4 or > 6)
+            return false;
         return symbol.StartsWith("00", StringComparison.Ordinal);
     }
 

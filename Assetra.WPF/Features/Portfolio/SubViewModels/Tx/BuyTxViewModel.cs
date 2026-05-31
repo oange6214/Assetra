@@ -1,6 +1,6 @@
+using System.Globalization;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System.Globalization;
 
 namespace Assetra.WPF.Features.Portfolio.SubViewModels.Tx;
 

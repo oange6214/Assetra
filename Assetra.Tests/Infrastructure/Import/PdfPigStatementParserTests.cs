@@ -1,5 +1,4 @@
 using System.IO;
-using System.Threading;
 using Assetra.Core.Models.Import;
 using Assetra.Infrastructure.Import.Pdf;
 using UglyToad.PdfPig.Core;

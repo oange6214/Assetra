@@ -1,4 +1,3 @@
-using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Application.Portfolio.Services;
 using Assetra.Core.Interfaces;

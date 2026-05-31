@@ -25,8 +25,12 @@ public sealed class CategoryEndToEndSyncTests : IDisposable
 
     public void Dispose()
     {
-        try { File.Delete(_dbA); } catch { /* best effort */ }
-        try { File.Delete(_dbB); } catch { /* best effort */ }
+        try
+        { File.Delete(_dbA); }
+        catch { /* best effort */ }
+        try
+        { File.Delete(_dbB); }
+        catch { /* best effort */ }
     }
 
     [Fact]

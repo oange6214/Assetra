@@ -18,12 +18,14 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
     /// </summary>
     internal static TimeZoneInfo ResolveTimeZoneOrTaipei(string ianaOrWindowsId)
     {
-        try { return TimeZoneInfo.FindSystemTimeZoneById(ianaOrWindowsId); }
+        try
+        { return TimeZoneInfo.FindSystemTimeZoneById(ianaOrWindowsId); }
         catch (TimeZoneNotFoundException) { }
         catch (InvalidTimeZoneException) { }
         if (ianaOrWindowsId == "Asia/Taipei")
         {
-            try { return TimeZoneInfo.FindSystemTimeZoneById("Taipei Standard Time"); }
+            try
+            { return TimeZoneInfo.FindSystemTimeZoneById("Taipei Standard Time"); }
             catch { return TimeZoneInfo.Utc; }
         }
         return TimeZoneInfo.Utc;

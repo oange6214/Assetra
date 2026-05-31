@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using Assetra.Core.Interfaces;
-using Assetra.Core.Models;
 
 namespace Assetra.Application.Assistant;
 

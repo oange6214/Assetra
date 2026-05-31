@@ -15,7 +15,8 @@ public sealed class ZeroToVisibleConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is not int n) return Visibility.Collapsed;
+        if (value is not int n)
+            return Visibility.Collapsed;
         var inverse = parameter is string s && string.Equals(s, "Inverse", StringComparison.OrdinalIgnoreCase);
         if (inverse)
             return n > 0 ? Visibility.Visible : Visibility.Collapsed;

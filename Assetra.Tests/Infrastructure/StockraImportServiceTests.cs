@@ -1,7 +1,7 @@
 using System.IO;
+using Assetra.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
 using Xunit;
-using Assetra.Infrastructure.Persistence;
 
 namespace Assetra.Tests.Infrastructure;
 
@@ -19,8 +19,10 @@ public sealed class StockraImportServiceTests : IDisposable
     public void Dispose()
     {
         SqliteConnection.ClearAllPools();
-        if (File.Exists(_srcDb)) File.Delete(_srcDb);
-        if (File.Exists(_dstDb)) File.Delete(_dstDb);
+        if (File.Exists(_srcDb))
+            File.Delete(_srcDb);
+        if (File.Exists(_dstDb))
+            File.Delete(_dstDb);
     }
 
     [Fact]

@@ -1,6 +1,4 @@
-using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
-using Assetra.Core.Models;
 using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Portfolio.SubViewModels;

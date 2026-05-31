@@ -54,11 +54,13 @@ public sealed class PortfolioGroupCatalog
                     break;
                 }
             }
-            if (allMatch) return;
+            if (allMatch)
+                return;
         }
 
         _groups.Clear();
-        foreach (var g in fresh) _groups.Add(g);
+        foreach (var g in fresh)
+            _groups.Add(g);
         _loaded = true;
     }
 

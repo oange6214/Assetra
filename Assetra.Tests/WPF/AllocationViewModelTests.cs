@@ -28,7 +28,8 @@ public sealed class AllocationViewModelTests
             get => _totalCash;
             set
             {
-                if (_totalCash == value) return;
+                if (_totalCash == value)
+                    return;
                 _totalCash = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TotalCash)));
             }

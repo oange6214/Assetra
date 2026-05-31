@@ -2,14 +2,14 @@
     x:Class="Assetra.WPF.Shell.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:alerts="clr-namespace:Assetra.WPF.Features.Alerts"
     xmlns:beh="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
+    xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
     xmlns:chrome="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:alerts="clr-namespace:Assetra.WPF.Features.Alerts"
-    xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
     xmlns:goals="clr-namespace:Assetra.WPF.Features.Goals"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:recurring="clr-namespace:Assetra.WPF.Features.Recurring"
     xmlns:settingsCtrls="clr-namespace:Assetra.WPF.Features.Settings.Controls"
@@ -844,43 +844,54 @@
                 </Grid.RowDefinitions>
 
                 <!--  Header  -->
-                <Border Grid.Row="0"
-                        Padding="20,14"
-                        BorderBrush="{DynamicResource AppBorderLight}"
-                        BorderThickness="0,0,0,1">
+                <Border
+                    Grid.Row="0"
+                    Padding="20,14"
+                    BorderBrush="{DynamicResource AppBorderLight}"
+                    BorderThickness="0,0,0,1">
                     <DockPanel>
-                        <Button Width="28" Height="28" Padding="0"
-                                Command="{Binding ToggleShortcutsHelpCommand}"
-                                DockPanel.Dock="Right"
-                                Style="{StaticResource AppIconButton}">
-                            <ds:AppIcon FontSize="12"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Symbol="Dismiss24" />
+                        <Button
+                            Width="28"
+                            Height="28"
+                            Padding="0"
+                            Command="{Binding ToggleShortcutsHelpCommand}"
+                            DockPanel.Dock="Right"
+                            Style="{StaticResource AppIconButton}">
+                            <ds:AppIcon
+                                FontSize="12"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Symbol="Dismiss24" />
                         </Button>
                         <StackPanel>
-                            <TextBlock FontSize="{StaticResource Font.Size.Sm}"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppTextPrimary}"
-                                       Text="{DynamicResource Shortcuts.Title}" />
-                            <TextBlock Margin="0,2,0,0"
-                                       FontSize="{StaticResource Font.Size.Xs}"
-                                       Foreground="{DynamicResource AppTextMuted}"
-                                       Text="{DynamicResource Shortcuts.Subtitle}" />
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.Title}" />
+                            <TextBlock
+                                Margin="0,2,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Shortcuts.Subtitle}" />
                         </StackPanel>
                     </DockPanel>
                 </Border>
 
                 <!--  Shortcut list  -->
-                <ScrollViewer Grid.Row="1" Padding="20,12" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer
+                    Grid.Row="1"
+                    Padding="20,12"
+                    VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <!--  Group: Navigation  -->
-                        <TextBlock Margin="0,0,0,8"
-                                   FontFamily="{StaticResource Font.Family.UI}"
-                                   FontSize="{StaticResource Font.Size.2Xs}"
-                                   FontWeight="{StaticResource Font.Weight.Medium}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Opacity="0.72"
-                                   Text="{DynamicResource Shortcuts.Group.Navigation}" />
+                        <TextBlock
+                            Margin="0,0,0,8"
+                            FontFamily="{StaticResource Font.Family.UI}"
+                            FontSize="{StaticResource Font.Size.2Xs}"
+                            FontWeight="{StaticResource Font.Weight.Medium}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Opacity="0.72"
+                            Text="{DynamicResource Shortcuts.Group.Navigation}" />
 
                         <!--
                             Row template:  DockPanel  [chip chip] (right-docked)  |  description (fill)
@@ -891,108 +902,240 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.NavFinancial}" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.NavFinancial}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="1" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="1" />
+                                </Border>
                             </StackPanel>
                         </Grid>
                         <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.NavPortfolio}" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.NavPortfolio}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="2" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="2" />
+                                </Border>
                             </StackPanel>
                         </Grid>
                         <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.NavTransactions}" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.NavTransactions}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="3" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="3" />
+                                </Border>
                             </StackPanel>
                         </Grid>
                         <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.NavReports}" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.NavReports}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="4" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="4" />
+                                </Border>
                             </StackPanel>
                         </Grid>
                         <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.NavCategories}" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.NavCategories}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="5" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="5" />
+                                </Border>
                             </StackPanel>
                         </Grid>
                         <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.NavAssistant}" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.NavAssistant}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="6" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="6" />
+                                </Border>
                             </StackPanel>
                         </Grid>
                         <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.GoBack}" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.GoBack}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Alt" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="←" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Alt" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="←" />
+                                </Border>
                             </StackPanel>
                         </Grid>
                         <Grid Margin="0,0,0,16">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.GoForward}" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.GoForward}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Alt" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="→" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Alt" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="→" />
+                                </Border>
                             </StackPanel>
                         </Grid>
 
                         <!--  Group: Action  -->
-                        <TextBlock Margin="0,0,0,8"
-                                   FontFamily="{StaticResource Font.Family.UI}"
-                                   FontSize="{StaticResource Font.Size.2Xs}"
-                                   FontWeight="{StaticResource Font.Weight.Medium}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Opacity="0.72"
-                                   Text="{DynamicResource Shortcuts.Group.Action}" />
+                        <TextBlock
+                            Margin="0,0,0,8"
+                            FontFamily="{StaticResource Font.Family.UI}"
+                            FontSize="{StaticResource Font.Size.2Xs}"
+                            FontWeight="{StaticResource Font.Weight.Medium}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Opacity="0.72"
+                            Text="{DynamicResource Shortcuts.Group.Action}" />
                         <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.GlobalSearch}" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.GlobalSearch}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="K" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="K" />
+                                </Border>
                             </StackPanel>
                         </Grid>
                         <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.CommandPalette}" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.CommandPalette}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Shift" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="K" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Shift" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="K" />
+                                </Border>
                             </StackPanel>
                         </Grid>
                         <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.AddTransaction}" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.AddTransaction}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="N" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="N" />
+                                </Border>
                             </StackPanel>
                         </Grid>
                         <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Sm}" Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Shortcuts.ToggleHelp}" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Shortcuts.ToggleHelp}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" /></Border>
-                                <Border Style="{StaticResource AppKbdChip}"><TextBlock Style="{StaticResource AppKbdChipText}" Text="/" /></Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="Ctrl" />
+                                </Border>
+                                <Border Style="{StaticResource AppKbdChip}">
+                                    <TextBlock Style="{StaticResource AppKbdChipText}" Text="/" />
+                                </Border>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -1051,55 +1194,71 @@
             Visibility="{Binding IsAddWatchlistOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border Background="#80000000">
                 <Border.InputBindings>
-                    <MouseBinding MouseAction="LeftClick" Command="{Binding CloseAddWatchlistDialogCommand}" />
+                    <MouseBinding Command="{Binding CloseAddWatchlistDialogCommand}" MouseAction="LeftClick" />
                 </Border.InputBindings>
             </Border>
-            <Border Width="420" Padding="24,20,24,20"
-                    HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Md}">
+            <Border
+                Width="420"
+                Padding="24,20,24,20"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource AppCardBackground}"
+                BorderBrush="{DynamicResource AppBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource Radius.Md}">
                 <!--
                     Grid 而不是 StackPanel — 把 close 按鈕用 absolute positioning
                     釘在卡片右上角；表單內容仍放在中央 StackPanel。
                 -->
                 <Grid>
-                    <!-- Top-right close button. Negative margin 讓它「貼齊」卡片邊緣，
-                         保留 32x32 hit area 但視覺上看起來是邊角的浮動 icon。 -->
-                    <Button HorizontalAlignment="Right" VerticalAlignment="Top"
-                            Margin="0,-4,-8,0"
-                            Width="32" Height="32" Padding="0"
-                            Panel.ZIndex="5"
-                            Command="{Binding CloseAddWatchlistDialogCommand}"
-                            Style="{StaticResource AppIconButton}"
-                            ToolTip="{DynamicResource Common.Close}">
-                        <ds:AppIcon FontSize="13" Foreground="{DynamicResource AppTextMuted}" Symbol="Dismiss24" />
+                    <!--
+                        Top-right close button. Negative margin 讓它「貼齊」卡片邊緣，
+                        保留 32x32 hit area 但視覺上看起來是邊角的浮動 icon。
+                    -->
+                    <Button
+                        Width="32"
+                        Height="32"
+                        Margin="0,-4,-8,0"
+                        Padding="0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Panel.ZIndex="5"
+                        Command="{Binding CloseAddWatchlistDialogCommand}"
+                        Style="{StaticResource AppIconButton}"
+                        ToolTip="{DynamicResource Common.Close}">
+                        <ds:AppIcon
+                            FontSize="13"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Symbol="Dismiss24" />
                     </Button>
 
                     <StackPanel Margin="0,0,32,0">
-                        <!-- 標題 + 描述 -->
-                        <TextBlock Margin="0,0,0,6"
-                                   FontSize="{StaticResource Font.Size.Lg}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{DynamicResource Portfolio.Watchlist.AddTitle}" />
-                        <TextBlock Margin="0,0,0,18"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{DynamicResource Portfolio.Watchlist.AddHint}"
-                                   TextWrapping="Wrap" />
+                        <!--  標題 + 描述  -->
+                        <TextBlock
+                            Margin="0,0,0,6"
+                            FontSize="{StaticResource Font.Size.Lg}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Portfolio.Watchlist.AddTitle}" />
+                        <TextBlock
+                            Margin="0,0,0,18"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.Watchlist.AddHint}"
+                            TextWrapping="Wrap" />
 
-                        <!-- 類型 -->
-                        <TextBlock Margin="0,0,0,4"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextSecondary}"
-                                   Text="{DynamicResource Portfolio.Watchlist.AssetType}" />
-                        <ComboBox Margin="0,0,0,12"
-                                  ItemsSource="{Binding WatchlistAssetTypeOptions}"
-                                  SelectedItem="{Binding WatchlistAssetType, Mode=TwoWay}"
-                                  Style="{StaticResource FormComboBox}">
+                        <!--  類型  -->
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Watchlist.AssetType}" />
+                        <ComboBox
+                            Margin="0,0,0,12"
+                            ItemsSource="{Binding WatchlistAssetTypeOptions}"
+                            SelectedItem="{Binding WatchlistAssetType, Mode=TwoWay}"
+                            Style="{StaticResource FormComboBox}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Converter={StaticResource AssetTypeToLocalizedNameConverter}}" />
@@ -1107,54 +1266,71 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
 
-                        <!-- 代號 -->
-                        <TextBlock Margin="0,0,0,4"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextSecondary}"
-                                   Text="{DynamicResource Portfolio.Watchlist.Symbol}" />
-                        <TextBox Margin="0,0,0,12"
-                                 FontFamily="{StaticResource Font.Family.Base}"
-                                 Style="{StaticResource AppTextBox}"
-                                 Text="{Binding WatchlistSymbol, UpdateSourceTrigger=PropertyChanged}" />
+                        <!--  代號  -->
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Watchlist.Symbol}" />
+                        <TextBox
+                            Margin="0,0,0,12"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            Style="{StaticResource AppTextBox}"
+                            Text="{Binding WatchlistSymbol, UpdateSourceTrigger=PropertyChanged}" />
 
-                        <!-- 名稱 -->
-                        <TextBlock Margin="0,0,0,4"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextSecondary}"
-                                   Text="{DynamicResource Portfolio.Watchlist.Name}" />
-                        <TextBox Margin="0,0,0,12"
-                                 Style="{StaticResource AppTextBox}"
-                                 Text="{Binding WatchlistName, UpdateSourceTrigger=PropertyChanged}" />
+                        <!--  名稱  -->
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Watchlist.Name}" />
+                        <TextBox
+                            Margin="0,0,0,12"
+                            Style="{StaticResource AppTextBox}"
+                            Text="{Binding WatchlistName, UpdateSourceTrigger=PropertyChanged}" />
 
-                        <!-- 幣別 -->
-                        <TextBlock Margin="0,0,0,4"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextSecondary}"
-                                   Text="{DynamicResource Portfolio.Watchlist.Currency}" />
-                        <ComboBox Margin="0,0,0,4"
-                                  ItemsSource="{Binding WatchlistCurrencyOptions}"
-                                  SelectedItem="{Binding WatchlistCurrency, Mode=TwoWay}"
-                                  Style="{StaticResource FormComboBox}" />
+                        <!--  幣別  -->
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Watchlist.Currency}" />
+                        <ComboBox
+                            Margin="0,0,0,4"
+                            ItemsSource="{Binding WatchlistCurrencyOptions}"
+                            SelectedItem="{Binding WatchlistCurrency, Mode=TwoWay}"
+                            Style="{StaticResource FormComboBox}" />
 
-                        <TextBlock Margin="0,10,0,0"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppDown}"
-                                   Text="{Binding WatchlistError}"
-                                   Visibility="{Binding WatchlistError, Converter={StaticResource StringToVisibilityConverter}}" />
+                        <TextBlock
+                            Margin="0,10,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppDown}"
+                            Text="{Binding WatchlistError}"
+                            Visibility="{Binding WatchlistError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-                        <!-- 動作列：拉高到 36，間距加大，更現代 -->
-                        <StackPanel Margin="0,22,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
-                            <Button Height="36" MinWidth="84" Margin="0,0,10,0" Padding="16,0"
-                                    Command="{Binding CloseAddWatchlistDialogCommand}"
-                                    Content="{DynamicResource Portfolio.Cancel}"
-                                    Style="{StaticResource AppSecondaryButton}" />
-                            <Button Height="36" MinWidth="84" Padding="16,0"
-                                    Command="{Binding ConfirmAddWatchlistCommand}"
-                                    Content="{DynamicResource Portfolio.Watchlist.AddButton}"
-                                    Style="{StaticResource AppPrimaryButton}" />
+                        <!--  動作列：拉高到 36，間距加大，更現代  -->
+                        <StackPanel
+                            Margin="0,22,0,0"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal">
+                            <Button
+                                Height="36"
+                                MinWidth="84"
+                                Margin="0,0,10,0"
+                                Padding="16,0"
+                                Command="{Binding CloseAddWatchlistDialogCommand}"
+                                Content="{DynamicResource Portfolio.Cancel}"
+                                Style="{StaticResource AppSecondaryButton}" />
+                            <Button
+                                Height="36"
+                                MinWidth="84"
+                                Padding="16,0"
+                                Command="{Binding ConfirmAddWatchlistCommand}"
+                                Content="{DynamicResource Portfolio.Watchlist.AddButton}"
+                                Style="{StaticResource AppPrimaryButton}" />
                         </StackPanel>
                     </StackPanel>
                 </Grid>
@@ -1472,11 +1648,11 @@
             PhysicalAsset / Categories / Recurring / Alerts). Moved here so the
             AppDialogOverlay backdrop dims the NavRail + title bar like 新增負債
             (AddAssetDialog) and 新增投資 (AddWatchlistDialog) already do.
-
+            
             Each block:
-              - Sits at MainWindow root grid level → Panel.ZIndex above NavRailView (0)
-              - DataContext = the page's VM (exposed on MainViewModel)
-              - Visibility bound to that VM's IsFormOpen / IsDeleteConfirmOpen flag
+            - Sits at MainWindow root grid level → Panel.ZIndex above NavRailView (0)
+            - DataContext = the page's VM (exposed on MainViewModel)
+            - Visibility bound to that VM's IsFormOpen / IsDeleteConfirmOpen flag
         -->
 
         <!--  不動產 (RealEstate) — 新增 / 編輯表單  -->
@@ -1522,7 +1698,10 @@
                         </Button>
                     </Grid>
 
-                    <UniformGrid Grid.Row="1" Columns="2" Rows="5">
+                    <UniformGrid
+                        Grid.Row="1"
+                        Columns="2"
+                        Rows="5">
                         <StackPanel Margin="0,0,12,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.Name}" />
                             <TextBox Style="{StaticResource AppTextBox}" Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
@@ -1533,8 +1712,9 @@
                         </StackPanel>
                         <StackPanel Margin="0,0,12,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.PurchasePrice}" />
-                            <TextBox Style="{StaticResource AppTextBox}"
+                            <TextBox
                                 beh:ThousandSeparatorBehavior.IsEnabled="True"
+                                Style="{StaticResource AppTextBox}"
                                 Text="{Binding FormPurchasePrice, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,0,12">
@@ -1547,14 +1727,16 @@
                         </StackPanel>
                         <StackPanel Margin="0,0,12,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.CurrentValue}" />
-                            <TextBox Style="{StaticResource AppTextBox}"
+                            <TextBox
                                 beh:ThousandSeparatorBehavior.IsEnabled="True"
+                                Style="{StaticResource AppTextBox}"
                                 Text="{Binding FormCurrentValue, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,0,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource RealEstate.Form.MortgageBalance}" />
-                            <TextBox Style="{StaticResource AppTextBox}"
+                            <TextBox
                                 beh:ThousandSeparatorBehavior.IsEnabled="True"
+                                Style="{StaticResource AppTextBox}"
                                 Text="{Binding FormMortgageBalance, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,12,12">
@@ -1593,9 +1775,7 @@
                             Content="{DynamicResource Common.Cancel}"
                             Style="{StaticResource AppSecondaryButton}" />
                         <Button Command="{Binding SaveCommand}" Style="{StaticResource AppPrimaryButton}">
-                            <TextBlock
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Text="{DynamicResource Common.Save}" />
+                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Common.Save}" />
                         </Button>
                     </StackPanel>
                 </Grid>
@@ -1645,7 +1825,10 @@
                         </Button>
                     </Grid>
 
-                    <UniformGrid Grid.Row="1" Columns="2" Rows="6">
+                    <UniformGrid
+                        Grid.Row="1"
+                        Columns="2"
+                        Rows="6">
                         <StackPanel Margin="0,0,12,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.Name}" />
                             <TextBox Style="{StaticResource AppTextBox}" Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
@@ -1669,20 +1852,23 @@
                         </StackPanel>
                         <StackPanel Margin="0,0,12,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.FaceValue}" />
-                            <TextBox Style="{StaticResource AppTextBox}"
+                            <TextBox
                                 beh:ThousandSeparatorBehavior.IsEnabled="True"
+                                Style="{StaticResource AppTextBox}"
                                 Text="{Binding FormFaceValue, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,0,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.CashValue}" />
-                            <TextBox Style="{StaticResource AppTextBox}"
+                            <TextBox
                                 beh:ThousandSeparatorBehavior.IsEnabled="True"
+                                Style="{StaticResource AppTextBox}"
                                 Text="{Binding FormCurrentCashValue, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,12,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Insurance.Form.AnnualPremium}" />
-                            <TextBox Style="{StaticResource AppTextBox}"
+                            <TextBox
                                 beh:ThousandSeparatorBehavior.IsEnabled="True"
+                                Style="{StaticResource AppTextBox}"
                                 Text="{Binding FormAnnualPremium, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,0,12">
@@ -1729,9 +1915,7 @@
                             Content="{DynamicResource Common.Cancel}"
                             Style="{StaticResource AppSecondaryButton}" />
                         <Button Command="{Binding SaveCommand}" Style="{StaticResource AppPrimaryButton}">
-                            <TextBlock
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Text="{DynamicResource Common.Save}" />
+                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Common.Save}" />
                         </Button>
                     </StackPanel>
                 </Grid>
@@ -1759,9 +1943,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
-                    <TextBlock
-                        Grid.Row="1"
-                        Style="{StaticResource AppDialogSubtitle}">
+                    <TextBlock Grid.Row="1" Style="{StaticResource AppDialogSubtitle}">
                         <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
                         <Run Text="{Binding DeleteTargetName}" />
                         <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />
@@ -1825,7 +2007,10 @@
                         </Button>
                     </Grid>
 
-                    <UniformGrid Grid.Row="1" Columns="2" Rows="6">
+                    <UniformGrid
+                        Grid.Row="1"
+                        Columns="2"
+                        Rows="6">
                         <StackPanel Margin="0,0,12,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Name}" />
                             <TextBox Style="{StaticResource AppTextBox}" Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
@@ -1845,8 +2030,9 @@
                         </StackPanel>
                         <StackPanel Margin="0,0,0,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource Retirement.Form.Balance}" />
-                            <TextBox Style="{StaticResource AppTextBox}"
+                            <TextBox
                                 beh:ThousandSeparatorBehavior.IsEnabled="True"
+                                Style="{StaticResource AppTextBox}"
                                 Text="{Binding FormBalance, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,12,12">
@@ -1901,9 +2087,7 @@
                             Content="{DynamicResource Common.Cancel}"
                             Style="{StaticResource AppSecondaryButton}" />
                         <Button Command="{Binding SaveCommand}" Style="{StaticResource AppPrimaryButton}">
-                            <TextBlock
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Text="{DynamicResource Common.Save}" />
+                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Common.Save}" />
                         </Button>
                     </StackPanel>
                 </Grid>
@@ -1931,9 +2115,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
-                    <TextBlock
-                        Grid.Row="1"
-                        Style="{StaticResource AppDialogSubtitle}">
+                    <TextBlock Grid.Row="1" Style="{StaticResource AppDialogSubtitle}">
                         <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
                         <Run Text="{Binding DeleteTargetName}" />
                         <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />
@@ -1997,7 +2179,10 @@
                         </Button>
                     </Grid>
 
-                    <UniformGrid Grid.Row="1" Columns="2" Rows="5">
+                    <UniformGrid
+                        Grid.Row="1"
+                        Columns="2"
+                        Rows="5">
                         <StackPanel Margin="0,0,12,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource PhysicalAsset.Form.Name}" />
                             <TextBox Style="{StaticResource AppTextBox}" Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
@@ -2017,8 +2202,9 @@
                         </StackPanel>
                         <StackPanel Margin="0,0,0,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource PhysicalAsset.Form.Cost}" />
-                            <TextBox Style="{StaticResource AppTextBox}"
+                            <TextBox
                                 beh:ThousandSeparatorBehavior.IsEnabled="True"
+                                Style="{StaticResource AppTextBox}"
                                 Text="{Binding FormAcquisitionCost, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,12,12">
@@ -2031,8 +2217,9 @@
                         </StackPanel>
                         <StackPanel Margin="0,0,0,12">
                             <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource PhysicalAsset.Form.CurrentValue}" />
-                            <TextBox Style="{StaticResource AppTextBox}"
+                            <TextBox
                                 beh:ThousandSeparatorBehavior.IsEnabled="True"
+                                Style="{StaticResource AppTextBox}"
                                 Text="{Binding FormCurrentValue, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,12,12">
@@ -2067,9 +2254,7 @@
                             Content="{DynamicResource Common.Cancel}"
                             Style="{StaticResource AppSecondaryButton}" />
                         <Button Command="{Binding SaveCommand}" Style="{StaticResource AppPrimaryButton}">
-                            <TextBlock
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Text="{DynamicResource Common.Save}" />
+                            <TextBlock Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Text="{DynamicResource Common.Save}" />
                         </Button>
                     </StackPanel>
                 </Grid>
@@ -2097,9 +2282,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
-                    <TextBlock
-                        Grid.Row="1"
-                        Style="{StaticResource AppDialogSubtitle}">
+                    <TextBlock Grid.Row="1" Style="{StaticResource AppDialogSubtitle}">
                         <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
                         <Run Text="{Binding DeleteTargetName}" />
                         <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />
@@ -2176,9 +2359,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
-                    <TextBlock
-                        Grid.Row="1"
-                        Style="{StaticResource AppDialogSubtitle}">
+                    <TextBlock Grid.Row="1" Style="{StaticResource AppDialogSubtitle}">
                         <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
                         <Run Text="{Binding DeleteTargetName}" />
                         <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />
@@ -2245,9 +2426,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
-                    <TextBlock
-                        Grid.Row="1"
-                        Style="{StaticResource AppDialogSubtitle}">
+                    <TextBlock Grid.Row="1" Style="{StaticResource AppDialogSubtitle}">
                         <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
                         <Run Text="{Binding DeleteTargetName}" />
                         <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />

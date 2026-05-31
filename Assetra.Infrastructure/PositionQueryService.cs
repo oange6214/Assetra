@@ -20,7 +20,8 @@ public sealed class PositionQueryService : IPositionQueryService
             .Where(t => t.PortfolioEntryId == portfolioEntryId)
             .OrderBy(t => t.TradeDate)
             .ToList();
-        if (trades.Count == 0) return null;
+        if (trades.Count == 0)
+            return null;
         return Project(portfolioEntryId, trades);
     }
 
@@ -87,7 +88,8 @@ public sealed class PositionQueryService : IPositionQueryService
         decimal sellFees)
     {
         var snap = await GetPositionAsync(portfolioEntryId).ConfigureAwait(false);
-        if (snap is null || snap.Quantity <= 0m) return 0m;
+        if (snap is null || snap.Quantity <= 0m)
+            return 0m;
 
         var cogs = snap.TotalCost * (sellQty / snap.Quantity);
         var proceeds = (sellPrice * sellQty) - sellFees;

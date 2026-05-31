@@ -1,8 +1,8 @@
-using Moq;
 using Assetra.Application.Sync;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models.Sync;
 using Assetra.WPF.Features.Settings;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.WPF;

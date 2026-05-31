@@ -1,7 +1,7 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Windows;
 using System.Windows.Media;
+using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
@@ -10,7 +10,6 @@ using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
-using Assetra.WPF.Infrastructure;
 
 namespace Assetra.WPF.Features.Portfolio;
 
@@ -50,8 +49,8 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
 
         _portfolio.PropertyChanged += OnPortfolioPropertyChanged;
         ((INotifyCollectionChanged)_portfolio.Positions).CollectionChanged += OnPositionsChanged;
-        ((INotifyCollectionChanged)_portfolio.Trades).CollectionChanged    += OnTradesChanged;
-        _portfolio.History.PropertyChanged     += OnHistoryPropertyChanged;
+        ((INotifyCollectionChanged)_portfolio.Trades).CollectionChanged += OnTradesChanged;
+        _portfolio.History.PropertyChanged += OnHistoryPropertyChanged;
 
         if (themeService is not null)
         {
@@ -112,40 +111,40 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
         // refactored to named handlers so Dispose actually unsubscribes.
         _portfolio.PropertyChanged -= OnPortfolioPropertyChanged;
         ((INotifyCollectionChanged)_portfolio.Positions).CollectionChanged -= OnPositionsChanged;
-        ((INotifyCollectionChanged)_portfolio.Trades).CollectionChanged    -= OnTradesChanged;
-        _portfolio.History.PropertyChanged     -= OnHistoryPropertyChanged;
+        ((INotifyCollectionChanged)_portfolio.Trades).CollectionChanged -= OnTradesChanged;
+        _portfolio.History.PropertyChanged -= OnHistoryPropertyChanged;
         if (_themeService is not null && _themeChangedHandler is not null)
             _themeService.ThemeChanged -= _themeChangedHandler;
     }
 
     // Hero card
-    public decimal NetWorth             => _portfolio.NetWorth;
-    public string  NetWorthDisplay      => $"NT${NetWorth:N0}";
-    public decimal DayPnl               => _portfolio.DayPnl;
-    public string  DayPnlDisplay        => $"NT${Math.Abs(DayPnl):N0}";
-    public string  SignedDayPnlDisplay  => DayPnl >= 0 ? $"+NT${DayPnl:N0}" : $"-NT${Math.Abs(DayPnl):N0}";
-    public string  DayPnlPercentDisplay => _portfolio.DayPnlPercentDisplay;
-    public bool    IsDayPnlPositive     => _portfolio.IsDayPnlPositive;
-    public bool    HasDayPnl            => _portfolio.HasDayPnl;
+    public decimal NetWorth => _portfolio.NetWorth;
+    public string NetWorthDisplay => $"NT${NetWorth:N0}";
+    public decimal DayPnl => _portfolio.DayPnl;
+    public string DayPnlDisplay => $"NT${Math.Abs(DayPnl):N0}";
+    public string SignedDayPnlDisplay => DayPnl >= 0 ? $"+NT${DayPnl:N0}" : $"-NT${Math.Abs(DayPnl):N0}";
+    public string DayPnlPercentDisplay => _portfolio.DayPnlPercentDisplay;
+    public bool IsDayPnlPositive => _portfolio.IsDayPnlPositive;
+    public bool HasDayPnl => _portfolio.HasDayPnl;
 
     // Investment metric cards
-    public decimal TotalMarketValue      => _portfolio.TotalMarketValue;
-    public string  TotalMarketValueDisplay => $"NT${TotalMarketValue:N0}";
-    public decimal TotalCost             => _portfolio.TotalCost;
-    public string  TotalCostDisplay      => $"NT${TotalCost:N0}";
-    public decimal TotalPnl              => _portfolio.TotalPnl;
-    public string  TotalPnlDisplay       => $"NT${TotalPnl:N0}";
-    public decimal TotalPnlPercent       => _portfolio.TotalPnlPercent;
-    public bool    IsTotalPositive       => _portfolio.IsTotalPositive;
+    public decimal TotalMarketValue => _portfolio.TotalMarketValue;
+    public string TotalMarketValueDisplay => $"NT${TotalMarketValue:N0}";
+    public decimal TotalCost => _portfolio.TotalCost;
+    public string TotalCostDisplay => $"NT${TotalCost:N0}";
+    public decimal TotalPnl => _portfolio.TotalPnl;
+    public string TotalPnlDisplay => $"NT${TotalPnl:N0}";
+    public decimal TotalPnlPercent => _portfolio.TotalPnlPercent;
+    public bool IsTotalPositive => _portfolio.IsTotalPositive;
 
     // Global financial metrics. Kept for compatibility, but the investment
     // dashboard no longer binds to them; FinancialOverview owns that story.
-    public decimal TotalAssets           => _portfolio.TotalAssets;
-    public string  TotalAssetsDisplay    => $"NT${TotalAssets:N0}";
-    public decimal TotalLiabilities      => _portfolio.TotalLiabilities;
-    public string  TotalLiabilitiesDisplay => $"NT${TotalLiabilities:N0}";
-    public decimal DebtRatioValue        => _portfolio.Financial.DebtRatioValue;
-    public decimal LeverageRatio         => _portfolio.NetWorth > 0
+    public decimal TotalAssets => _portfolio.TotalAssets;
+    public string TotalAssetsDisplay => $"NT${TotalAssets:N0}";
+    public decimal TotalLiabilities => _portfolio.TotalLiabilities;
+    public string TotalLiabilitiesDisplay => $"NT${TotalLiabilities:N0}";
+    public decimal DebtRatioValue => _portfolio.Financial.DebtRatioValue;
+    public decimal LeverageRatio => _portfolio.NetWorth > 0
         ? _portfolio.TotalAssets / _portfolio.NetWorth
         : 0m;
 
@@ -189,11 +188,11 @@ public sealed partial class DashboardViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var accentColor    = GetSkColor("AppAccent",        "#0078D4");
-        var fillColor      = accentColor.WithAlpha(32);
-        var labelColor     = GetSkColor("AppTextSecondary", "#9E9E9E");
+        var accentColor = GetSkColor("AppAccent", "#0078D4");
+        var fillColor = accentColor.WithAlpha(32);
+        var labelColor = GetSkColor("AppTextSecondary", "#9E9E9E");
         // P2.16 — Grid 降到 30% alpha (跟 PortfolioHistoryViewModel 一致)。
-        var separatorColor = GetSkColor("AppBorderLight",   "#2E2E2E").WithAlpha(76);
+        var separatorColor = GetSkColor("AppBorderLight", "#2E2E2E").WithAlpha(76);
 
         // 若 snapshot 有 NW 三組件，使用 Cash + Equity − Liability；否則 fallback MV
         var points = snapshots

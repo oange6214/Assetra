@@ -81,12 +81,13 @@ public readonly record struct Money : IComparable<Money>
 
     public static Money operator /(Money m, decimal scalar)
     {
-        if (scalar == 0m) throw new DivideByZeroException();
+        if (scalar == 0m)
+            throw new DivideByZeroException();
         return new Money(m.Amount / scalar, m.Currency);
     }
 
-    public static bool operator <(Money a, Money b) { EnsureSameCurrency(a, b); return a.Amount <  b.Amount; }
-    public static bool operator >(Money a, Money b) { EnsureSameCurrency(a, b); return a.Amount >  b.Amount; }
+    public static bool operator <(Money a, Money b) { EnsureSameCurrency(a, b); return a.Amount < b.Amount; }
+    public static bool operator >(Money a, Money b) { EnsureSameCurrency(a, b); return a.Amount > b.Amount; }
     public static bool operator <=(Money a, Money b) { EnsureSameCurrency(a, b); return a.Amount <= b.Amount; }
     public static bool operator >=(Money a, Money b) { EnsureSameCurrency(a, b); return a.Amount >= b.Amount; }
 

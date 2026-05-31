@@ -11,11 +11,11 @@ public sealed record MonthEndReport(
     IReadOnlyList<CategorySpendSummary> OverBudgetCategories,
     IReadOnlyList<UpcomingRecurringItem> Upcoming)
 {
-    public decimal IncomeDelta   => Current.TotalIncome  - (Previous?.TotalIncome  ?? 0m);
-    public decimal ExpenseDelta  => Current.TotalExpense - (Previous?.TotalExpense ?? 0m);
-    public decimal NetDelta      => Current.NetCashFlow  - (Previous?.NetCashFlow  ?? 0m);
-    public bool    HasAlerts     => OverBudgetCategories.Count > 0;
-    public decimal SavingsRate   => Current.TotalIncome > 0
+    public decimal IncomeDelta => Current.TotalIncome - (Previous?.TotalIncome ?? 0m);
+    public decimal ExpenseDelta => Current.TotalExpense - (Previous?.TotalExpense ?? 0m);
+    public decimal NetDelta => Current.NetCashFlow - (Previous?.NetCashFlow ?? 0m);
+    public bool HasAlerts => OverBudgetCategories.Count > 0;
+    public decimal SavingsRate => Current.TotalIncome > 0
         ? Current.NetCashFlow / Current.TotalIncome
         : 0m;
 }

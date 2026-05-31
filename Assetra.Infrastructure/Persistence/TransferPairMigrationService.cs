@@ -45,7 +45,8 @@ public sealed class TransferPairMigrationService
                         t.Note.StartsWith("轉帳 →", StringComparison.Ordinal))
             .ToList();
 
-        if (withdrawals.Count == 0) return;  // nothing to do
+        if (withdrawals.Count == 0)
+            return;  // nothing to do
 
         // Build deposit lookup by TradeDate for O(n) matching
         var depositsByDate = all
@@ -59,7 +60,8 @@ public sealed class TransferPairMigrationService
 
         foreach (var w in withdrawals)
         {
-            if (processed.Contains(w.Id) || w.CashAccountId is null) continue;
+            if (processed.Contains(w.Id) || w.CashAccountId is null)
+                continue;
 
             // ── parse note: "轉帳 → {dstName} [— {userNote}]" ────────────────
             var afterArrow = w.Note!["轉帳 → ".Length..];
@@ -68,18 +70,20 @@ public sealed class TransferPairMigrationService
             var separator = afterArrow.IndexOf(" — ", StringComparison.Ordinal);
             if (separator >= 0)
             {
-                dstName  = afterArrow[..separator];
+                dstName = afterArrow[..separator];
                 userNote = afterArrow[(separator + 3)..];
-                if (string.IsNullOrWhiteSpace(userNote)) userNote = null;
+                if (string.IsNullOrWhiteSpace(userNote))
+                    userNote = null;
             }
             else
             {
-                dstName  = afterArrow;
+                dstName = afterArrow;
                 userNote = null;
             }
 
             // ── find matching deposit on same date ────────────────────────────
-            if (!depositsByDate.TryGetValue(w.TradeDate, out var candidates)) continue;
+            if (!depositsByDate.TryGetValue(w.TradeDate, out var candidates))
+                continue;
 
             // Deposit note: "轉帳 ← {srcName} [— {userNote}]"
             // srcName of the deposit must equal w.Name (the withdrawal source account name)
@@ -89,28 +93,31 @@ public sealed class TransferPairMigrationService
                 d.CashAccountId.HasValue &&
                 d.Note!.StartsWith($"轉帳 ← {srcName}", StringComparison.Ordinal));
 
-            if (deposit is null) continue;
+            if (deposit is null)
+                continue;
 
             // ── only migrate same-amount (same-currency) pairs ────────────────
-            if (w.CashAmount is not { } amount || amount <= 0) continue;
-            if (deposit.CashAmount != amount) continue;
+            if (w.CashAmount is not { } amount || amount <= 0)
+                continue;
+            if (deposit.CashAmount != amount)
+                continue;
 
             // ── create native Transfer (no balance side-effects) ──────────────
             var transfer = new Trade(
-                Id:               Guid.NewGuid(),
-                Symbol:           srcName,
-                Exchange:         string.Empty,
-                Name:             $"{srcName} → {dstName}",
-                Type:             TradeType.Transfer,
-                TradeDate:        w.TradeDate,
-                Price:            0,
-                Quantity:         1,
-                RealizedPnl:      null,
-                RealizedPnlPct:   null,
-                CashAmount:       amount,
-                CashAccountId:    w.CashAccountId,
-                ToCashAccountId:  deposit.CashAccountId,
-                Note:             userNote);
+                Id: Guid.NewGuid(),
+                Symbol: srcName,
+                Exchange: string.Empty,
+                Name: $"{srcName} → {dstName}",
+                Type: TradeType.Transfer,
+                TradeDate: w.TradeDate,
+                Price: 0,
+                Quantity: 1,
+                RealizedPnl: null,
+                RealizedPnlPct: null,
+                CashAmount: amount,
+                CashAccountId: w.CashAccountId,
+                ToCashAccountId: deposit.CashAccountId,
+                Note: userNote);
 
             await _trades.AddAsync(transfer).ConfigureAwait(false);
             await _trades.RemoveAsync(w.Id).ConfigureAwait(false);

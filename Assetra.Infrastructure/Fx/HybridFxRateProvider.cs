@@ -38,7 +38,8 @@ public sealed class HybridFxRateProvider : IFxRateProvider
     {
         // History service short-circuits same-currency to 1.0 and missing-input to null.
         var hist = await _history.GetRateAsync(asOf, from, to, ct).ConfigureAwait(false);
-        if (hist is not null) return hist;
+        if (hist is not null)
+            return hist;
 
         // Fall back to the legacy provider (manual / cached live rates).
         return await _legacy.GetRateAsync(from, to, asOf, ct).ConfigureAwait(false);

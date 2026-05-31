@@ -81,7 +81,7 @@ public sealed class TreemapPanel : Panel
     protected override Size MeasureOverride(Size availableSize)
     {
         var size = new Size(
-            double.IsInfinity(availableSize.Width)  ? 0 : availableSize.Width,
+            double.IsInfinity(availableSize.Width) ? 0 : availableSize.Width,
             double.IsInfinity(availableSize.Height) ? 0 : availableSize.Height);
 
         foreach (UIElement child in Children)
@@ -117,10 +117,10 @@ public sealed class TreemapPanel : Panel
             // Using AwayFromZero so .5 values always round the same direction —
             // default "banker's rounding" can push two adjacent edges in opposite
             // directions, widening one gap to 3 px while shrinking the next to 1 px.
-            double x1 = Math.Round(r.X           + halfGap, MidpointRounding.AwayFromZero);
-            double y1 = Math.Round(r.Y           + halfGap, MidpointRounding.AwayFromZero);
+            double x1 = Math.Round(r.X + halfGap, MidpointRounding.AwayFromZero);
+            double y1 = Math.Round(r.Y + halfGap, MidpointRounding.AwayFromZero);
             double x2 = Math.Round(r.X + r.Width - halfGap, MidpointRounding.AwayFromZero);
-            double y2 = Math.Round(r.Y + r.Height- halfGap, MidpointRounding.AwayFromZero);
+            double y2 = Math.Round(r.Y + r.Height - halfGap, MidpointRounding.AwayFromZero);
 
             Children[i].Arrange(new Rect(x1, y1, Math.Max(0d, x2 - x1), Math.Max(0d, y2 - y1)));
         }
@@ -137,10 +137,10 @@ public sealed class TreemapPanel : Panel
             return weights.Select(_ => new Rect()).ToList();
 
         // ── Perceptual scaling ──────────────────────────────────────────────
-        double exp        = Math.Clamp(ScalePower, 0.1, 1.0);
-        var    scaled     = weights.Select(w => Math.Pow(Math.Max(w / totalW, 0d), exp)).ToList();
-        var    scaledTotal = scaled.Sum();
-        var    areas      = (scaledTotal > 0
+        double exp = Math.Clamp(ScalePower, 0.1, 1.0);
+        var scaled = weights.Select(w => Math.Pow(Math.Max(w / totalW, 0d), exp)).ToList();
+        var scaledTotal = scaled.Sum();
+        var areas = (scaledTotal > 0
             ? scaled.Select(s => s / scaledTotal * W * H)
             : weights.Select(w => w / totalW * W * H)).ToList();
 
@@ -174,36 +174,42 @@ public sealed class TreemapPanel : Panel
         Rect container, int start, int end)
     {
         int count = end - start;
-        if (count <= 0) return;
-        if (count == 1) { rects[start] = container; return; }
+        if (count <= 0)
+            return;
+        if (count == 1)
+        { rects[start] = container; return; }
 
         double total = 0;
-        for (int i = start; i < end; i++) total += areas[i];
-        if (total <= 0) { for (int i = start; i < end; i++) rects[i] = new Rect(); return; }
+        for (int i = start; i < end; i++)
+            total += areas[i];
+        if (total <= 0)
+        { for (int i = start; i < end; i++) rects[i] = new Rect(); return; }
 
         // ── Find the column split point ─────────────────────────────────────
         // If the first item ≥ 45 % of display area it gets its own column (dominant tile).
         // Threshold is 45 % rather than 50 % because perceptual scaling compresses the
         // dominant item: a 69 % real holding becomes ~49 % display area, which would
         // otherwise spill a second item into the left column and break the clean look.
-        int    colSplit = start + 1;
+        int colSplit = start + 1;
         if (areas[start] / total < 0.45)
         {
-            double half    = total / 2;
+            double half = total / 2;
             double running = 0;
             for (int i = start; i < end - 1; i++)
             {
-                running  += areas[i];
-                colSplit  = i + 1;
-                if (running >= half) break;
+                running += areas[i];
+                colSplit = i + 1;
+                if (running >= half)
+                    break;
             }
         }
 
         double leftSum = 0;
-        for (int i = start; i < colSplit; i++) leftSum += areas[i];
+        for (int i = start; i < colSplit; i++)
+            leftSum += areas[i];
         double w1 = Math.Max(1d, container.Width * (leftSum / total));
 
-        var leftCol  = new Rect(container.X,      container.Y, w1,                                 container.Height);
+        var leftCol = new Rect(container.X, container.Y, w1, container.Height);
         var rightCol = new Rect(container.X + w1, container.Y, Math.Max(0d, container.Width - w1), container.Height);
 
         // ── Left column: stacked rows (dominant item, usually just one) ─────
@@ -233,44 +239,50 @@ public sealed class TreemapPanel : Panel
         Rect container, int start, int end, bool splitH)
     {
         int count = end - start;
-        if (count <= 0) return;
-        if (count == 1) { rects[start] = container; return; }
+        if (count <= 0)
+            return;
+        if (count == 1)
+        { rects[start] = container; return; }
 
         double total = 0;
-        for (int i = start; i < end; i++) total += areas[i];
-        if (total <= 0) { for (int i = start; i < end; i++) rects[i] = new Rect(); return; }
+        for (int i = start; i < end; i++)
+            total += areas[i];
+        if (total <= 0)
+        { for (int i = start; i < end; i++) rects[i] = new Rect(); return; }
 
         // Find the split point closest to 50 % of total area.
-        int    split   = start + 1;
-        double half    = total / 2;
+        int split = start + 1;
+        double half = total / 2;
         double running = 0;
         for (int i = start; i < end - 1; i++)
         {
             running += areas[i];
-            split    = i + 1;
-            if (running >= half) break;
+            split = i + 1;
+            if (running >= half)
+                break;
         }
 
         double firstSum = 0;
-        for (int i = start; i < split; i++) firstSum += areas[i];
+        for (int i = start; i < split; i++)
+            firstSum += areas[i];
         double ratio = firstSum / total;
 
         Rect first, second;
         if (splitH)   // horizontal: top | bottom
         {
             double h1 = Math.Max(1d, container.Height * ratio);
-            first  = new Rect(container.X, container.Y,      container.Width, h1);
+            first = new Rect(container.X, container.Y, container.Width, h1);
             second = new Rect(container.X, container.Y + h1, container.Width, Math.Max(0d, container.Height - h1));
         }
         else          // vertical: left | right
         {
             double w1 = Math.Max(1d, container.Width * ratio);
-            first  = new Rect(container.X,      container.Y, w1,                                 container.Height);
+            first = new Rect(container.X, container.Y, w1, container.Height);
             second = new Rect(container.X + w1, container.Y, Math.Max(0d, container.Width - w1), container.Height);
         }
 
-        AlternatingLayout(areas, rects, first,  start, split, !splitH);
-        AlternatingLayout(areas, rects, second, split, end,   !splitH);
+        AlternatingLayout(areas, rects, first, start, split, !splitH);
+        AlternatingLayout(areas, rects, second, split, end, !splitH);
     }
 
     /// <summary>

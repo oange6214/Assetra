@@ -55,7 +55,8 @@ public sealed class DefaultImportRowApplier : IImportRowApplier
         }
 
         var trade = _mapper.Map(row, sourceKind, options, sink, ruleSnapshot, categorySnapshot);
-        if (trade is null) return null;
+        if (trade is null)
+            return null;
 
         await _trades.AddAsync(trade).ConfigureAwait(false);
         return trade.Id;

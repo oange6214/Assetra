@@ -72,14 +72,24 @@ public class ConfigurableExcelParserTests
             for (var c = 0; c < rows[r].Length; c++)
             {
                 var v = rows[r][c];
-                if (v is null) continue;
+                if (v is null)
+                    continue;
                 var cell = sheet.Cell(r + 2, c + 1);
                 switch (v)
                 {
-                    case DateTime dt: cell.Value = dt; cell.Style.DateFormat.Format = "yyyy/MM/dd"; break;
-                    case decimal d: cell.Value = d; break;
-                    case string s: cell.Value = s; break;
-                    default: cell.Value = v.ToString(); break;
+                    case DateTime dt:
+                        cell.Value = dt;
+                        cell.Style.DateFormat.Format = "yyyy/MM/dd";
+                        break;
+                    case decimal d:
+                        cell.Value = d;
+                        break;
+                    case string s:
+                        cell.Value = s;
+                        break;
+                    default:
+                        cell.Value = v.ToString();
+                        break;
                 }
             }
         }

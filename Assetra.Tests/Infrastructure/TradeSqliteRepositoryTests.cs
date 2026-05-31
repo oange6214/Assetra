@@ -1,7 +1,7 @@
 using System.IO;
-using Microsoft.Data.Sqlite;
 using Assetra.Core.Models;
 using Assetra.Infrastructure.Persistence;
+using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace Assetra.Tests.Infrastructure;
@@ -74,7 +74,8 @@ public class TradeSqliteRepositoryTests : IDisposable
         var jan = MakeIncome(new DateTime(2026, 1, 10), 200m);
         var feb = MakeIncome(new DateTime(2026, 2, 10), 300m);
 
-        foreach (var t in new[] { dec, jan, feb }) await repo.AddAsync(t);
+        foreach (var t in new[] { dec, jan, feb })
+            await repo.AddAsync(t);
 
         var result = await repo.GetByPeriodAsync(
             new DateTime(2025, 12, 1), new DateTime(2026, 1, 31, 23, 59, 59));
@@ -110,7 +111,8 @@ public class TradeSqliteRepositoryTests : IDisposable
         var t3 = MakeIncome(new DateTime(2026, 1, 3), 300m, entryId: entry3);
         var orphan = MakeIncome(new DateTime(2026, 1, 4), 400m, entryId: null);
 
-        foreach (var t in new[] { t1, t2, t3, orphan }) await repo.AddAsync(t);
+        foreach (var t in new[] { t1, t2, t3, orphan })
+            await repo.AddAsync(t);
 
         var result = await repo.GetByPortfolioEntryIdsAsync(new[] { entry1, entry3 });
 

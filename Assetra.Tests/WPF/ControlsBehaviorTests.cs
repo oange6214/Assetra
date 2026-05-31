@@ -1,16 +1,13 @@
-using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Assetra.WPF.Controls;
-using Assetra.WPF.Infrastructure.Converters;
 using Assetra.WPF.Infrastructure.Behaviors;
+using Assetra.WPF.Infrastructure.Converters;
 using Xunit;
 
 namespace Assetra.Tests.WPF;
@@ -439,7 +436,8 @@ public sealed class ControlsBehaviorTests
         Exception? caught = null;
         var thread = new Thread(() =>
         {
-            try { action(); }
+            try
+            { action(); }
             catch (Exception ex) { caught = ex; }
         });
         thread.SetApartmentState(ApartmentState.STA);

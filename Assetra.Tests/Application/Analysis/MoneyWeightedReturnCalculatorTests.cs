@@ -178,7 +178,8 @@ public class MoneyWeightedReturnCalculatorTests
         }
         public Task<decimal?> ConvertAsync(decimal amount, string from, string to, DateOnly asOf, CancellationToken ct = default)
         {
-            if (string.Equals(from, to, StringComparison.OrdinalIgnoreCase)) return Task.FromResult<decimal?>(amount);
+            if (string.Equals(from, to, StringComparison.OrdinalIgnoreCase))
+                return Task.FromResult<decimal?>(amount);
             return Task.FromResult<decimal?>(_rates.TryGetValue((from.ToUpperInvariant(), to.ToUpperInvariant()), out var r) ? amount * r : null);
         }
     }

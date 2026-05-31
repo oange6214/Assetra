@@ -7,7 +7,7 @@ public sealed record AppSettings(
     string FugleApiKey = "",
     int RefreshIntervalSeconds = 10,
     bool TaiwanColorScheme = true,   // true = 漲紅跌綠（台灣慣例，預設）
-    // 貨幣
+                                     // 貨幣
     string PreferredCurrency = "TWD",
     decimal UsdTwdRate = 32.0m,      // 1 USD = N TWD（向後相容；同步至 ExchangeRates["USD"]）
     /// <summary>
@@ -17,11 +17,11 @@ public sealed record AppSettings(
     Dictionary<string, decimal>? ExchangeRates = null,
     // 語言
     string Language = "zh-TW",    // zh-TW | en-US
-    // 介面縮放
+                                  // 介面縮放
     double UiScale = 1.0,   // 0.9 = 緊湊 / 1.0 = 正常 / 1.15 = 舒適
-    // 通知
+                            // 通知
     bool AlertNotifications = true,   // 警示觸發時顯示系統通知
-    // 資產配置目標
+                                      // 資產配置目標
     /// <summary>每個資產的目標比例（0–100）。Key = Symbol（或現金帳戶名稱）。</summary>
     Dictionary<string, decimal>? TargetAllocations = null,
     // 現金管理

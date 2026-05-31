@@ -38,9 +38,11 @@ public sealed class ConcentrationAnalyzer : IConcentrationAnalyzer
 
     public async Task<IReadOnlyList<ConcentrationBucket>> AnalyzeAsync(int topN = 5, CancellationToken ct = default)
     {
-        if (topN < 1) throw new ArgumentOutOfRangeException(nameof(topN));
+        if (topN < 1)
+            throw new ArgumentOutOfRangeException(nameof(topN));
         var (buckets, total) = await BuildBucketsAsync(ct).ConfigureAwait(false);
-        if (buckets.Count == 0 || total == 0m) return Array.Empty<ConcentrationBucket>();
+        if (buckets.Count == 0 || total == 0m)
+            return Array.Empty<ConcentrationBucket>();
 
         var ordered = buckets.OrderByDescending(b => b.MarketValue).ToList();
         var top = ordered.Take(topN).ToList();
@@ -57,7 +59,8 @@ public sealed class ConcentrationAnalyzer : IConcentrationAnalyzer
     public async Task<decimal?> ComputeHhiAsync(CancellationToken ct = default)
     {
         var (buckets, total) = await BuildBucketsAsync(ct).ConfigureAwait(false);
-        if (buckets.Count == 0 || total == 0m) return null;
+        if (buckets.Count == 0 || total == 0m)
+            return null;
         var hhi = 0m;
         foreach (var b in buckets)
         {
@@ -82,8 +85,10 @@ public sealed class ConcentrationAnalyzer : IConcentrationAnalyzer
         var total = 0m;
         foreach (var e in entries.Where(x => x.IsActive))
         {
-            if (!snapshots.TryGetValue(e.Id, out var snap)) continue;
-            if (snap.Quantity <= 0 || snap.TotalCost <= 0) continue;
+            if (!snapshots.TryGetValue(e.Id, out var snap))
+                continue;
+            if (snap.Quantity <= 0 || snap.TotalCost <= 0)
+                continue;
 
             var cost = snap.TotalCost;
             if (fxEnabled
@@ -91,7 +96,8 @@ public sealed class ConcentrationAnalyzer : IConcentrationAnalyzer
                 && !string.Equals(e.Currency, baseCcy, StringComparison.OrdinalIgnoreCase))
             {
                 var converted = await _fx!.ConvertAsync(cost, e.Currency, baseCcy!, asOf, ct).ConfigureAwait(false);
-                if (converted is null) continue;
+                if (converted is null)
+                    continue;
                 cost = converted.Value;
             }
 

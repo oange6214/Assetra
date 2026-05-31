@@ -1,7 +1,7 @@
 using System.IO;
-using Microsoft.Data.Sqlite;
 using Assetra.Core.Models;
 using Assetra.Infrastructure.Persistence;
+using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace Assetra.Tests.Infrastructure;

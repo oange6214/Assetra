@@ -1,9 +1,9 @@
-using Moq;
+using System.Net.Http;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure;
 using Microsoft.Extensions.Logging.Abstractions;
-using System.Net.Http;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.Infrastructure;
@@ -53,7 +53,7 @@ public class CurrencyServiceTests
         Assert.Equal(32.0m, svc.ExchangeRates["USD"]);
         Assert.Equal(0.21m, svc.ExchangeRates["JPY"]);
         Assert.Equal(35.0m, svc.ExchangeRates["EUR"]);
-        Assert.Equal(4.1m,  svc.ExchangeRates["HKD"]);
+        Assert.Equal(4.1m, svc.ExchangeRates["HKD"]);
     }
 
     [Fact]
@@ -61,7 +61,10 @@ public class CurrencyServiceTests
     {
         var persisted = new Dictionary<string, decimal>
         {
-            ["USD"] = 33.5m, ["JPY"] = 0.22m, ["EUR"] = 36.0m, ["HKD"] = 4.3m,
+            ["USD"] = 33.5m,
+            ["JPY"] = 0.22m,
+            ["EUR"] = 36.0m,
+            ["HKD"] = 4.3m,
         };
         var svc = Create(rates: persisted);
         Assert.Equal(33.5m, svc.ExchangeRates["USD"]);

@@ -22,10 +22,12 @@ public sealed class StaticFxRateProvider : IFxRateProvider
             return 1m;
 
         var direct = await _repo.GetAsync(from, to, asOf, ct).ConfigureAwait(false);
-        if (direct is not null) return direct.Rate;
+        if (direct is not null)
+            return direct.Rate;
 
         var inverse = await _repo.GetAsync(to, from, asOf, ct).ConfigureAwait(false);
-        if (inverse is not null && inverse.Rate != 0m) return 1m / inverse.Rate;
+        if (inverse is not null && inverse.Rate != 0m)
+            return 1m / inverse.Rate;
 
         return null;
     }

@@ -1,5 +1,4 @@
 using Assetra.Core.Interfaces.MultiAsset;
-using Assetra.Core.Models.MultiAsset;
 using Assetra.WPF.Features.RealEstate;
 using Moq;
 using Xunit;
@@ -41,8 +40,8 @@ public sealed class RealEstateViewModelTests
     }
 
     [Theory]
-    [InlineData("FormPurchasePrice",   "abc", "購入金額格式錯誤")]
-    [InlineData("FormCurrentValue",    "abc", "目前市值格式錯誤")]
+    [InlineData("FormPurchasePrice", "abc", "購入金額格式錯誤")]
+    [InlineData("FormCurrentValue", "abc", "目前市值格式錯誤")]
     [InlineData("FormMortgageBalance", "abc", "房貸餘額格式錯誤")]
     public async Task SaveAsync_InvalidNumber_SetsFormError(string fieldName, string badValue, string expectedError)
     {

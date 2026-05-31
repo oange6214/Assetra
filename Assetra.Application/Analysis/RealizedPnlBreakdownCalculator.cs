@@ -39,13 +39,15 @@ public static class RealizedPnlBreakdownCalculator
         decimal? buyFxRate,
         decimal? sellFxRate)
     {
-        if (quantity <= 0) return null;
+        if (quantity <= 0)
+            return null;
 
         // Same-currency convention: caller passes 1.0 for both, or null for both.
         // Either way the fx component is 0 and total = market.
         var bothNull = buyFxRate is null && sellFxRate is null;
         var oneNull = buyFxRate is null ^ sellFxRate is null;
-        if (oneNull) return null; // mixed-currency with insufficient FX data — caller renders "—"
+        if (oneNull)
+            return null; // mixed-currency with insufficient FX data — caller renders "—"
 
         var buyFx = buyFxRate ?? 1m;
         var sellFx = sellFxRate ?? 1m;

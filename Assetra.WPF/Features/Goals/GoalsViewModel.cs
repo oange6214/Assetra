@@ -1,14 +1,13 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Assetra.WPF.Features.Fire;
+using Assetra.WPF.Features.PortfolioGroups;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Assetra.WPF.Features.Fire;
-using Assetra.WPF.Features.PortfolioGroups;
 
 namespace Assetra.WPF.Features.Goals;
 
@@ -118,7 +117,7 @@ public sealed partial class GoalsViewModel : ObservableObject
         ? L("Goals.Edit.Submit", "Save")
         : L("Goals.Add.Submit", "Add");
 
-    public bool HasGoals   => Goals.Count > 0;
+    public bool HasGoals => Goals.Count > 0;
     public bool HasNoGoals => IsLoaded && Goals.Count == 0;
     public int GoalCount => Goals.Count;
     public decimal TotalTarget => Goals.Sum(goal => goal.Goal.TargetAmount);
@@ -160,7 +159,8 @@ public sealed partial class GoalsViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsLoading) return;
+        if (IsLoading)
+            return;
         IsLoading = true;
         ErrorMessage = null;
         try
@@ -248,7 +248,8 @@ public sealed partial class GoalsViewModel : ObservableObject
     [RelayCommand]
     private void Edit(GoalRowViewModel? row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         AddError = null;
         EditingId = row.Id;
         IsFormOpen = true;
@@ -274,7 +275,8 @@ public sealed partial class GoalsViewModel : ObservableObject
     [RelayCommand]
     private void Remove(GoalRowViewModel? row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
 
         var template = L("Goals.Delete.ConfirmMessage", "Delete \"{0}\"? This cannot be undone.");
         var message = string.Format(CultureInfo.CurrentCulture, template, row.Goal.Name);
@@ -285,7 +287,8 @@ public sealed partial class GoalsViewModel : ObservableObject
             {
                 await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
                 _goals.Remove(row);
-                if (EditingId == row.Id) ResetAddForm();
+                if (EditingId == row.Id)
+                    ResetAddForm();
             }
             catch (Exception ex)
             {

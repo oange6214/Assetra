@@ -13,7 +13,9 @@ public sealed class EquityOhlcCacheSqliteRepositoryTests : IDisposable
 
     public void Dispose()
     {
-        try { File.Delete(_dbPath); } catch { /* best effort */ }
+        try
+        { File.Delete(_dbPath); }
+        catch { /* best effort */ }
     }
 
     [Fact]

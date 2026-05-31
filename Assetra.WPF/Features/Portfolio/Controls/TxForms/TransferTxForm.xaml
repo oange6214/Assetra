@@ -56,8 +56,11 @@
             Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.TransferSourceAmount}" />
+            Foreground="{DynamicResource AppTextSecondary}">
+            <Run Text="{DynamicResource Portfolio.Tx.TransferSourceAmount}" />
+            <Run Text=" · " />
+            <Run Text="{Binding Transfer.SourceCurrency, Mode=OneWay}" />
+        </TextBlock>
         <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Margin="0,0,0,12"
@@ -95,8 +98,11 @@
             Margin="0,0,0,6"
             FontSize="{StaticResource Font.Size.Xs}"
             FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.TransferTargetAmount}" />
+            Foreground="{DynamicResource AppTextSecondary}">
+            <Run Text="{DynamicResource Portfolio.Tx.TransferTargetAmount}" />
+            <Run Text=" · " />
+            <Run Text="{Binding Transfer.TargetCurrency, Mode=OneWay}" />
+        </TextBlock>
         <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding Transfer.TargetAmount, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
             Style="{StaticResource FormFieldError}"

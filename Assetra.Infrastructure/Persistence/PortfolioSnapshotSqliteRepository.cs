@@ -1,6 +1,6 @@
-using Microsoft.Data.Sqlite;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Microsoft.Data.Sqlite;
 
 namespace Assetra.Infrastructure.Persistence;
 

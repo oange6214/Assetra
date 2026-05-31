@@ -116,9 +116,12 @@ public sealed partial class PhysicalAssetViewModel : ObservableObject
     private async Task SaveAsync()
     {
         FormError = null;
-        if (string.IsNullOrWhiteSpace(FormName))    { FormError = "請輸入名稱"; return; }
-        if (!ParseHelpers.TryParseDecimal(FormAcquisitionCost, out var cost))   { FormError = "購入成本格式錯誤"; return; }
-        if (!ParseHelpers.TryParseDecimal(FormCurrentValue, out var current))   { FormError = "目前市值格式錯誤"; return; }
+        if (string.IsNullOrWhiteSpace(FormName))
+        { FormError = "請輸入名稱"; return; }
+        if (!ParseHelpers.TryParseDecimal(FormAcquisitionCost, out var cost))
+        { FormError = "購入成本格式錯誤"; return; }
+        if (!ParseHelpers.TryParseDecimal(FormCurrentValue, out var current))
+        { FormError = "目前市值格式錯誤"; return; }
 
         var now = DateTimeOffset.UtcNow;
         var deviceId = string.Empty;

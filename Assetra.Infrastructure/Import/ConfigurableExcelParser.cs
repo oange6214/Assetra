@@ -36,7 +36,8 @@ public sealed class ConfigurableExcelParser : IImportParser
         var mapping = _config.Mapping;
 
         var dateCol = ResolveColumn(headers, mapping.DateColumn);
-        if (dateCol is null) return Task.FromResult<IReadOnlyList<ImportPreviewRow>>(Array.Empty<ImportPreviewRow>());
+        if (dateCol is null)
+            return Task.FromResult<IReadOnlyList<ImportPreviewRow>>(Array.Empty<ImportPreviewRow>());
 
         var amountCol = ResolveColumn(headers, mapping.AmountColumn);
         var debitCol = ResolveColumn(headers, mapping.DebitColumn);
@@ -108,7 +109,8 @@ public sealed class ConfigurableExcelParser : IImportParser
         }
         var debit = ParseDecimal(debitCol is { } dc ? Cell(sheet, row, dc) : null) ?? 0m;
         var credit = ParseDecimal(creditCol is { } cc ? Cell(sheet, row, cc) : null) ?? 0m;
-        if (debit == 0m && credit == 0m) return false;
+        if (debit == 0m && credit == 0m)
+            return false;
         amount = credit - debit;
         return true;
     }
@@ -159,7 +161,8 @@ public sealed class ConfigurableExcelParser : IImportParser
     private static bool TryParseDecimal(string? text, out decimal value)
     {
         value = 0m;
-        if (string.IsNullOrWhiteSpace(text)) return false;
+        if (string.IsNullOrWhiteSpace(text))
+            return false;
         var cleaned = text.Replace(",", string.Empty).Replace("$", string.Empty)
             .Replace("NT", string.Empty).Trim();
         return decimal.TryParse(cleaned, NumberStyles.Number, CultureInfo.InvariantCulture, out value);

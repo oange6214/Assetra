@@ -147,8 +147,12 @@ public class ImportRollbackServiceTests
                 {
                     switch (m)
                     {
-                        case AddTradeMutation a: added?.Add(a.Trade); break;
-                        case RemoveTradeMutation r: removed?.Add(r.Id); break;
+                        case AddTradeMutation a:
+                            added?.Add(a.Trade);
+                            break;
+                        case RemoveTradeMutation r:
+                            removed?.Add(r.Id);
+                            break;
                     }
                 }
             })

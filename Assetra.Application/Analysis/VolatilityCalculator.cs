@@ -9,7 +9,8 @@ public sealed class VolatilityCalculator : IVolatilityCalculator
     public decimal? ComputeAnnualized(IReadOnlyList<(DateOnly Date, decimal Value)> values)
     {
         ArgumentNullException.ThrowIfNull(values);
-        if (values.Count < 2) return null;
+        if (values.Count < 2)
+            return null;
 
         var sorted = values.OrderBy(v => v.Date).ToArray();
         var returns = new List<double>(sorted.Length - 1);
@@ -17,10 +18,12 @@ public sealed class VolatilityCalculator : IVolatilityCalculator
         {
             var prev = (double)sorted[i - 1].Value;
             var cur = (double)sorted[i].Value;
-            if (prev == 0) continue;
+            if (prev == 0)
+                continue;
             returns.Add(cur / prev - 1.0);
         }
-        if (returns.Count < 2) return null;
+        if (returns.Count < 2)
+            return null;
 
         var mean = returns.Average();
         var sumSq = returns.Sum(r => (r - mean) * (r - mean));

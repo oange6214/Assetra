@@ -4,8 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
-    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel},
                                      IsDesignTimeCreatable=False}"
     Visibility="{Binding AssistantWidget.InsightCards.Count, Converter={StaticResource ZeroToVisibleConverter}, ConverterParameter=Inverse}"
@@ -75,16 +75,21 @@
                                         TextWrapping="NoWrap" />
                                 </StackPanel>
                                 <!--  ✕ 關閉本條：Command 走到 AssistantWidget.DismissInsightCommand  -->
-                                <Button Grid.Column="1"
-                                        Width="22" Height="22" Padding="0"
-                                        VerticalAlignment="Top"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Command="{Binding DataContext.AssistantWidget.DismissInsightCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding}"
-                                        ToolTip="{DynamicResource Dashboard.Widget.Assistant.Dismiss}">
-                                    <ds:AppIcon Symbol="Dismiss24" FontSize="12"
-                                                Foreground="{DynamicResource AppTextMuted}" />
+                                <Button
+                                    Grid.Column="1"
+                                    Width="22"
+                                    Height="22"
+                                    Padding="0"
+                                    VerticalAlignment="Top"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Command="{Binding DataContext.AssistantWidget.DismissInsightCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    ToolTip="{DynamicResource Dashboard.Widget.Assistant.Dismiss}">
+                                    <ds:AppIcon
+                                        FontSize="12"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Symbol="Dismiss24" />
                                 </Button>
                             </Grid>
                         </Border>
@@ -99,8 +104,7 @@
                 TextWrapping="Wrap"
                 Visibility="{Binding AssistantWidget.InsightCards.Count, Converter={StaticResource ZeroToVisibleConverter}}" />
 
-            <TextBlock Style="{StaticResource DashboardWidgetFooter}"
-                       Text="{DynamicResource Dashboard.Widget.Assistant.OpenLink}">
+            <TextBlock Style="{StaticResource DashboardWidgetFooter}" Text="{DynamicResource Dashboard.Widget.Assistant.OpenLink}">
                 <TextBlock.InputBindings>
                     <MouseBinding Command="{Binding NavigateToAssistantCommand}" MouseAction="LeftClick" />
                 </TextBlock.InputBindings>

@@ -1,11 +1,9 @@
-using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
 using Assetra.Application.Sync;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models;
-using Assetra.Core.Models.Sync;
 using Assetra.Infrastructure.Sync;
 using Assetra.Infrastructure.Sync.Http;
 
@@ -97,7 +95,8 @@ public sealed class SyncCoordinator
         }
         finally
         {
-            if (_httpClientFactory is null) http.Dispose();
+            if (_httpClientFactory is null)
+                http.Dispose();
         }
     }
 

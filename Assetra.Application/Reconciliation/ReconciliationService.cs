@@ -188,7 +188,8 @@ public sealed class ReconciliationService : IReconciliationService
             int? bestIdx = null;
             for (int ti = 0; ti < trades.Count; ti++)
             {
-                if (matchedTradeIdx.Contains(ti)) continue;
+                if (matchedTradeIdx.Contains(ti))
+                    continue;
                 if (matcher.IsMatch(row, trades[ti]))
                 {
                     bestIdx = ti;
@@ -214,7 +215,8 @@ public sealed class ReconciliationService : IReconciliationService
 
         for (int ti = 0; ti < trades.Count; ti++)
         {
-            if (matchedTradeIdx.Contains(ti)) continue;
+            if (matchedTradeIdx.Contains(ti))
+                continue;
             diffs.Add(NewDiff(sessionId, ReconciliationDiffKind.Extra, statementRow: null, trade: trades[ti]));
         }
 

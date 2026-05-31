@@ -43,7 +43,7 @@ public sealed class PhysicalAssetViewModelTests
 
     [Theory]
     [InlineData("FormAcquisitionCost", "abc", "購入成本格式錯誤")]
-    [InlineData("FormCurrentValue",    "abc", "目前市值格式錯誤")]
+    [InlineData("FormCurrentValue", "abc", "目前市值格式錯誤")]
     public async Task SaveAsync_InvalidNumber_SetsFormError(string fieldName, string badValue, string expectedError)
     {
         var vm = CreateVm();

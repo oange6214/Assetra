@@ -72,7 +72,8 @@ public static class PortfolioEventDetectionService
         IReadOnlyList<PortfolioDailySnapshot> snapshots)
     {
         ArgumentNullException.ThrowIfNull(snapshots);
-        if (snapshots.Count == 0) return Array.Empty<PortfolioEvent>();
+        if (snapshots.Count == 0)
+            return Array.Empty<PortfolioEvent>();
 
         var events = new List<PortfolioEvent>();
         var byYear = snapshots.GroupBy(s => s.SnapshotDate.Year).OrderBy(g => g.Key);

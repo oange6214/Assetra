@@ -109,7 +109,8 @@ public partial class MainWindow : Window
                 if (list.Items.Count > 0)
                 {
                     list.SelectedIndex = Math.Min(list.SelectedIndex + 1, list.Items.Count - 1);
-                    if (list.SelectedItem is not null) list.ScrollIntoView(list.SelectedItem);
+                    if (list.SelectedItem is not null)
+                        list.ScrollIntoView(list.SelectedItem);
                 }
                 e.Handled = true;
                 break;
@@ -117,18 +118,19 @@ public partial class MainWindow : Window
                 if (list.Items.Count > 0)
                 {
                     list.SelectedIndex = list.SelectedIndex <= 0 ? 0 : list.SelectedIndex - 1;
-                    if (list.SelectedItem is not null) list.ScrollIntoView(list.SelectedItem);
+                    if (list.SelectedItem is not null)
+                        list.ScrollIntoView(list.SelectedItem);
                 }
                 e.Handled = true;
                 break;
             case Key.Enter:
-                {
-                    var pick = list.SelectedItem ?? (list.Items.Count > 0 ? list.Items[0] : null);
-                    if (pick is CommandPaletteEntry entry)
-                        _viewModel.ExecuteCommandPaletteEntryCommand.Execute(entry);
-                    e.Handled = true;
-                    break;
-                }
+            {
+                var pick = list.SelectedItem ?? (list.Items.Count > 0 ? list.Items[0] : null);
+                if (pick is CommandPaletteEntry entry)
+                    _viewModel.ExecuteCommandPaletteEntryCommand.Execute(entry);
+                e.Handled = true;
+                break;
+            }
             case Key.Escape:
                 _viewModel.ToggleCommandPaletteCommand.Execute(null);
                 e.Handled = true;

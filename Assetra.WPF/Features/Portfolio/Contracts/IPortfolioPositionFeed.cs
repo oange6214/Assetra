@@ -51,14 +51,14 @@ public interface IPortfolioPositionFeed : INotifyPropertyChanged
     // (they get sensible zeroes). The concrete PortfolioViewModel overrides all
     // with real values; consumers that depend on these (Dashboard) get the live
     // numbers without taking a hard reference to PortfolioViewModel.
-    decimal TotalPnl              => 0m;
-    decimal TotalPnlPercent       => 0m;
-    bool    IsTotalPositive       => false;
-    decimal TotalAssets           => 0m;
-    decimal TotalLiabilities      => 0m;
-    decimal NetWorth              => 0m;
-    decimal DayPnl                => 0m;
-    string  DayPnlPercentDisplay  => string.Empty;
-    bool    IsDayPnlPositive      => false;
-    bool    HasDayPnl             => false;
+    decimal TotalPnl => 0m;
+    decimal TotalPnlPercent => 0m;
+    bool IsTotalPositive => false;
+    decimal TotalAssets => 0m;
+    decimal TotalLiabilities => 0m;
+    decimal NetWorth => 0m;
+    decimal DayPnl => 0m;
+    string DayPnlPercentDisplay => string.Empty;
+    bool IsDayPnlPositive => false;
+    bool HasDayPnl => false;
 }

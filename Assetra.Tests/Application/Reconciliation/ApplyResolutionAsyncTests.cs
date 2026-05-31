@@ -54,7 +54,8 @@ public class ApplyResolutionAsyncTests
         var sessions = new FakeSessions();
         sessions.Diffs[diff.Id] = diff;
         var trades = new FakeTrades();
-        if (seedTrade is not null) trades.Store[seedTrade.Id] = seedTrade;
+        if (seedTrade is not null)
+            trades.Store[seedTrade.Id] = seedTrade;
         var applier = new FakeApplier();
         var svc = new ReconciliationService(sessions, trades, new DefaultReconciliationMatcher(), applier);
         return (svc, sessions, trades, applier);

@@ -15,34 +15,34 @@ namespace Assetra.Tests.Portfolio;
 public sealed class LiabilityMutationWorkflowServiceTests
 {
     private static AssetItem MakeLoanAsset(decimal rate = 0.025m, int term = 24) => new(
-        Id:               Guid.NewGuid(),
-        Name:             "國泰信貸",
-        Type:             FinancialType.Liability,
-        GroupId:          null,
-        Currency:         "TWD",
-        CreatedDate:      new DateOnly(2025, 1, 1),
-        IsActive:         true,
-        UpdatedAt:        null,
-        LoanAnnualRate:   rate,
-        LoanTermMonths:   term,
-        LoanStartDate:    new DateOnly(2025, 1, 1),
-        LoanHandlingFee:  null,
+        Id: Guid.NewGuid(),
+        Name: "國泰信貸",
+        Type: FinancialType.Liability,
+        GroupId: null,
+        Currency: "TWD",
+        CreatedDate: new DateOnly(2025, 1, 1),
+        IsActive: true,
+        UpdatedAt: null,
+        LoanAnnualRate: rate,
+        LoanTermMonths: term,
+        LoanStartDate: new DateOnly(2025, 1, 1),
+        LoanHandlingFee: null,
         LiabilitySubtype: LiabilitySubtype.Loan);
 
     private static AssetItem MakeCreditCardAsset(decimal? limit = null) => new(
-        Id:               Guid.NewGuid(),
-        Name:             "永豐 J Card",
-        Type:             FinancialType.Liability,
-        GroupId:          null,
-        Currency:         "TWD",
-        CreatedDate:      new DateOnly(2025, 1, 1),
-        IsActive:         true,
-        UpdatedAt:        null,
+        Id: Guid.NewGuid(),
+        Name: "永豐 J Card",
+        Type: FinancialType.Liability,
+        GroupId: null,
+        Currency: "TWD",
+        CreatedDate: new DateOnly(2025, 1, 1),
+        IsActive: true,
+        UpdatedAt: null,
         LiabilitySubtype: LiabilitySubtype.CreditCard,
-        BillingDay:       15,
-        DueDay:           5,
-        CreditLimit:      limit,
-        IssuerName:       "永豐銀行");
+        BillingDay: 15,
+        DueDay: 5,
+        CreditLimit: limit,
+        IssuerName: "永豐銀行");
 
     [Fact]
     public async Task UpdateAsync_NameChange_PersistsAndDoesNotTriggerRecompute()
@@ -80,9 +80,9 @@ public sealed class LiabilityMutationWorkflowServiceTests
         var sut = new LiabilityMutationWorkflowService(assetRepo.Object, tradeRepo.Object, recompute.Object);
 
         var result = await sut.UpdateAsync(new LiabilityUpdateRequest(
-            AssetId:          asset.Id,
-            NewAnnualRate:    0.030m,
-            NewTermMonths:    24,
+            AssetId: asset.Id,
+            NewAnnualRate: 0.030m,
+            NewTermMonths: 24,
             RecomputeSchedule: true,
             OriginalPrincipal: 1_200_000m));
 
@@ -110,9 +110,9 @@ public sealed class LiabilityMutationWorkflowServiceTests
         var sut = new LiabilityMutationWorkflowService(assetRepo.Object, tradeRepo.Object, recompute.Object);
 
         var result = await sut.UpdateAsync(new LiabilityUpdateRequest(
-            AssetId:          asset.Id,
-            NewAnnualRate:    0.030m,
-            NewTermMonths:    24,
+            AssetId: asset.Id,
+            NewAnnualRate: 0.030m,
+            NewTermMonths: 24,
             RecomputeSchedule: false,
             OriginalPrincipal: 1_200_000m));
 
@@ -133,9 +133,9 @@ public sealed class LiabilityMutationWorkflowServiceTests
         var sut = new LiabilityMutationWorkflowService(assetRepo.Object, tradeRepo.Object, recompute.Object);
 
         var result = await sut.UpdateAsync(new LiabilityUpdateRequest(
-            AssetId:          asset.Id,
-            NewAnnualRate:    0.030m,
-            NewTermMonths:    24,
+            AssetId: asset.Id,
+            NewAnnualRate: 0.030m,
+            NewTermMonths: 24,
             RecomputeSchedule: true));   // OriginalPrincipal omitted
 
         Assert.True(result.Success);
@@ -154,10 +154,10 @@ public sealed class LiabilityMutationWorkflowServiceTests
         var sut = new LiabilityMutationWorkflowService(assetRepo.Object, tradeRepo.Object, recompute.Object);
 
         var result = await sut.UpdateAsync(new LiabilityUpdateRequest(
-            AssetId:        asset.Id,
+            AssetId: asset.Id,
             NewCreditLimit: 200_000m,
-            NewBillingDay:  20,
-            NewDueDay:      10));
+            NewBillingDay: 20,
+            NewDueDay: 10));
 
         Assert.True(result.Success);
         Assert.False(result.ScheduleRecomputed);

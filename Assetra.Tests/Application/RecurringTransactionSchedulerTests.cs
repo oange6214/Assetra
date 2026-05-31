@@ -187,7 +187,8 @@ public class RecurringTransactionSchedulerTests
         public Task UpdateAsync(RecurringTransaction r, CancellationToken ct = default)
         {
             var idx = Store.FindIndex(x => x.Id == r.Id);
-            if (idx >= 0) Store[idx] = r;
+            if (idx >= 0)
+                Store[idx] = r;
             return Task.CompletedTask;
         }
         public Task RemoveAsync(Guid id, CancellationToken ct = default)
@@ -210,7 +211,8 @@ public class RecurringTransactionSchedulerTests
         public Task UpdateAsync(PendingRecurringEntry e, CancellationToken ct = default)
         {
             var idx = Store.FindIndex(x => x.Id == e.Id);
-            if (idx >= 0) Store[idx] = e;
+            if (idx >= 0)
+                Store[idx] = e;
             return Task.CompletedTask;
         }
         public Task RemoveAsync(Guid id, CancellationToken ct = default)
@@ -233,7 +235,8 @@ public class RecurringTransactionSchedulerTests
         public Task ReplaceAsync(Trade original, Trade replacement)
         {
             var idx = Recorded.FindIndex(t => t.Id == original.Id);
-            if (idx >= 0) Recorded[idx] = replacement;
+            if (idx >= 0)
+                Recorded[idx] = replacement;
             return Task.CompletedTask;
         }
     }

@@ -20,6 +20,24 @@ public class FireCalculatorServiceTests
     }
 
     [Fact]
+    public void Calculate_BasicMode_UsesCurrentFormulaAndYearZeroBalance()
+    {
+        var result = _svc.Calculate(new FireInputs(
+            CurrentNetWorth: 1_000_000m,
+            AnnualExpenses: 600_000m,
+            AnnualSavings: 300_000m,
+            ExpectedAnnualReturn: 0.05m,
+            WithdrawalRate: 0.04m,
+            MaxYears: 80));
+
+        Assert.Equal(15_000_000m, result.FireNumber);
+        Assert.Equal(1_000_000m, result.WealthPath[0]);
+        Assert.NotNull(result.YearsToFire);
+        Assert.Equal(result.WealthPath[result.YearsToFire.Value], result.ProjectedNetWorthAtFire);
+        Assert.True(result.ProjectedNetWorthAtFire >= result.FireNumber);
+    }
+
+    [Fact]
     public void Calculate_AlreadyAtFire_ReturnsZeroYears()
     {
         var result = _svc.Calculate(new FireInputs(

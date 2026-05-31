@@ -58,7 +58,8 @@ public static class EscapeKeyCommandBehavior
         element.Dispatcher.BeginInvoke(
             (Action)(() =>
             {
-                if (!element.IsVisible) return;
+                if (!element.IsVisible)
+                    return;
                 Keyboard.Focus(element);
             }),
             DispatcherPriority.Input);

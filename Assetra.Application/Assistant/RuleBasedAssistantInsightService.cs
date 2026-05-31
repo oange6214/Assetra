@@ -59,9 +59,11 @@ public sealed class RuleBasedAssistantInsightService : IAssistantInsightService
 
     private async Task AddBudgetInsightsAsync(List<AssistantInsight> insights, DateOnly today, CancellationToken ct)
     {
-        if (_budgets is null || _trades is null) return;
+        if (_budgets is null || _trades is null)
+            return;
         var monthly = await _budgets.GetByPeriodAsync(today.Year, today.Month, ct).ConfigureAwait(false);
-        if (monthly.Count == 0) return;
+        if (monthly.Count == 0)
+            return;
 
         var trades = await _trades.GetAllAsync(ct).ConfigureAwait(false);
         var monthStart = new DateTime(today.Year, today.Month, 1);
@@ -81,7 +83,8 @@ public sealed class RuleBasedAssistantInsightService : IAssistantInsightService
         {
             var spent = spendByCategory.TryGetValue(b.CategoryId!.Value, out var s) ? s : 0m;
             var ratio = spent / b.Amount;
-            if (ratio < 0.8m) continue;
+            if (ratio < 0.8m)
+                continue;
             var severity = ratio >= 1m ? AssistantInsightSeverity.Critical : AssistantInsightSeverity.Warning;
             insights.Add(new AssistantInsight(
                 Severity: severity,
@@ -93,15 +96,18 @@ public sealed class RuleBasedAssistantInsightService : IAssistantInsightService
 
     private async Task AddRecurringInsightsAsync(List<AssistantInsight> insights, DateOnly today, CancellationToken ct)
     {
-        if (_recurring is null) return;
+        if (_recurring is null)
+            return;
         var active = await _recurring.GetActiveAsync(ct).ConfigureAwait(false);
-        if (active.Count == 0) return;
+        if (active.Count == 0)
+            return;
 
         var horizon = today.AddDays(7);
         foreach (var r in active.Where(r => r.NextDueAt.HasValue))
         {
             var due = DateOnly.FromDateTime(r.NextDueAt!.Value);
-            if (due > horizon || due < today) continue;
+            if (due > horizon || due < today)
+                continue;
             insights.Add(new AssistantInsight(
                 Severity: AssistantInsightSeverity.Info,
                 Title: $"訂閱即將到期：{r.Name}",
@@ -112,7 +118,8 @@ public sealed class RuleBasedAssistantInsightService : IAssistantInsightService
 
     private async Task AddMonthDeltaInsightAsync(List<AssistantInsight> insights, DateOnly today, CancellationToken ct)
     {
-        if (_trades is null) return;
+        if (_trades is null)
+            return;
         var trades = await _trades.GetAllAsync(ct).ConfigureAwait(false);
         var thisMonthStart = new DateTime(today.Year, today.Month, 1);
         var lastMonthStart = thisMonthStart.AddMonths(-1);
@@ -120,10 +127,12 @@ public sealed class RuleBasedAssistantInsightService : IAssistantInsightService
         var lastNet = NetCashFlow(trades, lastMonthStart, thisMonthStart);
 
         // Only generate insight if last month had meaningful activity.
-        if (Math.Abs(lastNet) < 10_000m) return;
+        if (Math.Abs(lastNet) < 10_000m)
+            return;
         var delta = thisNet - lastNet;
         var ratio = delta / Math.Abs(lastNet);
-        if (ratio >= -0.30m) return;  // not a >= 30% drop
+        if (ratio >= -0.30m)
+            return;  // not a >= 30% drop
         insights.Add(new AssistantInsight(
             Severity: AssistantInsightSeverity.Warning,
             Title: $"本月淨現金流下滑 {Math.Abs(ratio):P0}",

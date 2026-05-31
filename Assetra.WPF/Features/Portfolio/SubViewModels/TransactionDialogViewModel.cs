@@ -1,11 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
 using System.Reactive.Linq;
 using Assetra.Application.Fx;
 using Assetra.Application.Portfolio.Contracts;
-using Assetra.Application.Portfolio.Dtos;
-using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Core.Trading;
@@ -311,7 +308,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         get
         {
             var allowed = ResolveAvailableTypeKeys(SelectedAsset);
-            if (allowed.Count == 0) return Array.Empty<TradeTypeOption>();
+            if (allowed.Count == 0)
+                return Array.Empty<TradeTypeOption>();
             return _allTradeTypes.Where(o => allowed.Contains(o.Key)).ToList();
         }
     }
@@ -332,7 +330,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// </summary>
     private static IReadOnlySet<string> ResolveAvailableTypeKeys(TxAssetSubject? asset)
     {
-        if (asset is null) return new HashSet<string>(StringComparer.Ordinal);
+        if (asset is null)
+            return new HashSet<string>(StringComparer.Ordinal);
         return asset.Kind switch
         {
             TxAssetKind.Stock => new HashSet<string>(StringComparer.Ordinal)
@@ -394,12 +393,14 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             !string.Equals(value, selectedCurrency, StringComparison.OrdinalIgnoreCase))
         {
             _suppressCurrencyDirty = true;
-            try { TxCurrency = selectedCurrency; }
+            try
+            { TxCurrency = selectedCurrency; }
             finally { _suppressCurrencyDirty = false; }
             return;
         }
 
-        if (!_suppressCurrencyDirty) _userTouchedCurrency = true;
+        if (!_suppressCurrencyDirty)
+            _userTouchedCurrency = true;
 
         // Buy.InstrumentCurrency is the selected instrument's currency, not the
         // cash-account debit currency. Only use TxCurrency as a fallback before an
@@ -439,11 +440,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         get
         {
             var fromService = _getSupportedCurrencies?.Invoke();
-            if (fromService is { Count: > 0 }) return fromService;
+            if (fromService is { Count: > 0 })
+                return fromService;
             // Fallback：從目前 assets 看到的幣別 union 出來 + TWD/USD 保底
             var set = new System.Collections.Generic.SortedSet<string>(StringComparer.OrdinalIgnoreCase) { "TWD", "USD" };
             foreach (var a in AvailableAssets)
-                if (!string.IsNullOrWhiteSpace(a.Currency)) set.Add(a.Currency.ToUpperInvariant());
+                if (!string.IsNullOrWhiteSpace(a.Currency))
+                    set.Add(a.Currency.ToUpperInvariant());
             return set.ToList();
         }
     }
@@ -465,7 +468,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(TxTypePickerHintKey));
         OnPropertyChanged(nameof(IsTxCurrencyEditable));
 
-        if (value is null) return;
+        if (value is null)
+            return;
 
         // P2.5 — 「+ 新增資產」 sentinel 被選到 → 重置 SelectedAsset 並觸發新增資產流程。
         // 重置必須先做，避免下次再選到同一個 sentinel 不會 raise PropertyChanged。
@@ -481,7 +485,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             !string.IsNullOrWhiteSpace(value.Currency))
         {
             _suppressCurrencyDirty = true;
-            try { TxCurrency = value.Currency.ToUpperInvariant(); }
+            try
+            { TxCurrency = value.Currency.ToUpperInvariant(); }
             finally { _suppressCurrencyDirty = false; }
         }
 
@@ -512,7 +517,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// </summary>
     private void SyncSelectedAssetIntoBuyState(TxAssetSubject? asset)
     {
-        if (asset is null) return;
+        if (asset is null)
+            return;
 
         // Kind → Buy.AssetType (string "stock" / "fund" / "metal" / "bond" / "crypto")
         var nextAssetType = asset.Kind switch
@@ -540,7 +546,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             && !string.Equals(AddAssetDialog.AddSymbol, asset.Symbol, StringComparison.OrdinalIgnoreCase))
         {
             AddAssetDialog.SuppressSuggestions = true;
-            try { AddAssetDialog.AddSymbol = asset.Symbol; }
+            try
+            { AddAssetDialog.AddSymbol = asset.Symbol; }
             finally { AddAssetDialog.SuppressSuggestions = false; AddAssetDialog.IsSuggestionsOpen = false; }
         }
     }
@@ -583,13 +590,17 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// </summary>
     private bool AssetMatchesSearch(object obj)
     {
-        if (obj is not TxAssetSubject a) return false;
-        if (a.Id == AddNewAssetSentinelId) return true;
+        if (obj is not TxAssetSubject a)
+            return false;
+        if (a.Id == AddNewAssetSentinelId)
+            return true;
 
         var q = AssetSearchText;
-        if (string.IsNullOrWhiteSpace(q)) return true;
+        if (string.IsNullOrWhiteSpace(q))
+            return true;
 
-        if (a.GroupKey == "Portfolio.Tx.Asset.Group.Recent") return false;
+        if (a.GroupKey == "Portfolio.Tx.Asset.Group.Recent")
+            return false;
 
         return Contains(a.PrimaryName, q)
             || Contains(a.SecondaryLine, q)
@@ -683,11 +694,14 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         {
             foreach (var id in recentIds)
             {
-                if (id == Guid.Empty || id == AddNewAssetSentinelId) continue;
+                if (id == Guid.Empty || id == AddNewAssetSentinelId)
+                    continue;
                 var match = regular.FirstOrDefault(a => a.Id == id);
-                if (match is null) continue;
+                if (match is null)
+                    continue;
                 final.Add(match with { GroupKey = "Portfolio.Tx.Asset.Group.Recent" });
-                if (final.Count >= Core.Models.AppSettings.MaxRecentlyUsedAssets) break;
+                if (final.Count >= Core.Models.AppSettings.MaxRecentlyUsedAssets)
+                    break;
             }
         }
 
@@ -726,7 +740,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             var hit = assets.FirstOrDefault(a =>
                 a.Kind is TxAssetKind.Stock or TxAssetKind.Fund or TxAssetKind.Crypto or TxAssetKind.Metal or TxAssetKind.Bond
                 && a.Id == entryId);
-            if (hit is not null) return hit;
+            if (hit is not null)
+                return hit;
         }
         // 2. Buy / Sell / Dividend：走 symbol
         if (row.Type is TradeType.Buy or TradeType.Sell or TradeType.CashDividend or TradeType.StockDividend
@@ -734,14 +749,16 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         {
             var hit = assets.FirstOrDefault(a =>
                 string.Equals(a.Symbol, row.Symbol, StringComparison.OrdinalIgnoreCase));
-            if (hit is not null) return hit;
+            if (hit is not null)
+                return hit;
         }
         // 3. Cash flow → CashAccount by CashAccountId
         if (row.Type is TradeType.Deposit or TradeType.Withdrawal or TradeType.Income or TradeType.CashDividend
             && row.CashAccountId is { } cashId)
         {
             var hit = assets.FirstOrDefault(a => a.Kind == TxAssetKind.CashAccount && a.Id == cashId);
-            if (hit is not null) return hit;
+            if (hit is not null)
+                return hit;
         }
         // 4. Loan / CreditCard → Liability
         // P5.16 — 雙路徑 lookup：先嘗試 LiabilityAssetId (GUID) 精確比對，
@@ -756,7 +773,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             {
                 var hit = assets.FirstOrDefault(a =>
                     a.Kind == TxAssetKind.Liability && a.Id == liabId);
-                if (hit is not null) return hit;
+                if (hit is not null)
+                    return hit;
             }
 
             // 4b. Fallback：以 Label 字串比對（Loan 走 LoanLabel，CreditCard 走 row.Name）
@@ -766,7 +784,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 var hit = assets.FirstOrDefault(a =>
                     a.Kind == TxAssetKind.Liability
                     && string.Equals(a.PrimaryName, label, StringComparison.OrdinalIgnoreCase));
-                if (hit is not null) return hit;
+                if (hit is not null)
+                    return hit;
             }
         }
         return null;
@@ -779,7 +798,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             IsInvestmentAssetKind(a.Kind) &&
             a.GroupKey != "Portfolio.Tx.Asset.Group.Recent" &&
             a.Id == row.Id);
-        if (hit is not null) return hit;
+        if (hit is not null)
+            return hit;
 
         if (string.IsNullOrWhiteSpace(row.Symbol))
             return null;
@@ -790,6 +810,25 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             string.Equals(a.Symbol, row.Symbol, StringComparison.OrdinalIgnoreCase) &&
             (string.IsNullOrWhiteSpace(row.Currency) ||
              string.Equals(a.Currency, row.Currency, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private TxAssetSubject? ResolveAssetSubjectForLiability(LiabilityRowViewModel row)
+    {
+        var assets = AvailableAssets;
+        if (row.AssetId is { } assetId)
+        {
+            var hit = assets.FirstOrDefault(a =>
+                a.Kind == TxAssetKind.Liability &&
+                a.GroupKey != "Portfolio.Tx.Asset.Group.Recent" &&
+                a.Id == assetId);
+            if (hit is not null)
+                return hit;
+        }
+
+        return assets.FirstOrDefault(a =>
+            a.Kind == TxAssetKind.Liability &&
+            a.GroupKey != "Portfolio.Tx.Asset.Group.Recent" &&
+            string.Equals(a.PrimaryName, row.Label, StringComparison.OrdinalIgnoreCase));
     }
 
     private static TxAssetKind MapAssetType(Core.Models.AssetType t) => t switch
@@ -957,7 +996,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         var defaultDisc = _getDefaultCommissionDiscount?.Invoke() ?? 1.0m;
         // 0.1 ~ 1.0 區間外的歷史壞值直接回 1.0；TextBox 用 "1.0" / "0.6" 等顯示格式。
-        if (defaultDisc <= 0m || defaultDisc > 1m) defaultDisc = 1.0m;
+        if (defaultDisc <= 0m || defaultDisc > 1m)
+            defaultDisc = 1.0m;
         TxCommissionDiscount = defaultDisc.ToString("0.##");
     }
 
@@ -1276,7 +1316,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     internal void ReplaceCashAccountSuggestions(IEnumerable<string> names)
     {
         _cashAccountSuggestions.Clear();
-        foreach (var n in names) _cashAccountSuggestions.Add(n);
+        foreach (var n in names)
+            _cashAccountSuggestions.Add(n);
     }
 
     // ── Transfer destination — same coexistence pattern as TxCashAccountName ──────────
@@ -1323,7 +1364,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     internal void ReplacePositionSuggestions(IEnumerable<PositionSuggestion> suggestions)
     {
         _positionSuggestions.Clear();
-        foreach (var s in suggestions) _positionSuggestions.Add(s);
+        foreach (var s in suggestions)
+            _positionSuggestions.Add(s);
     }
 
     /// <summary>
@@ -1565,9 +1607,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         get
         {
-            if (!Buy.IsTotalMode) return "0";
-            if (!ParseHelpers.TryParseDecimal(Buy.TotalCost, out var total) || total <= 0) return "0";
-            if (!ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) || qty <= 0) return "0";
+            if (!Buy.IsTotalMode)
+                return "0";
+            if (!ParseHelpers.TryParseDecimal(Buy.TotalCost, out var total) || total <= 0)
+                return "0";
+            if (!ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) || qty <= 0)
+                return "0";
             return (total / qty).ToString("N4").TrimEnd('0').TrimEnd('.');
         }
     }
@@ -1942,7 +1987,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxAmount = string.Empty;
         TxNote = string.Empty;
         _suppressCategoryAutoTracking = true;
-        try { TxCategoryId = null; } finally { _suppressCategoryAutoTracking = false; }
+        try
+        { TxCategoryId = null; }
+        finally { _suppressCategoryAutoTracking = false; }
         _txCategoryAutoMatched = false;
         // 新增（非編輯）時帶入使用者在現金頁設定的預設帳戶
         TxCashAccount = state.TxCashAccount;
@@ -2058,6 +2105,27 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         }
     }
 
+    internal void OpenTxDialogForLiability(LiabilityRowViewModel row, string txType)
+    {
+        OpenTxDialog();
+
+        var asset = ResolveAssetSubjectForLiability(row);
+        if (asset is not null)
+        {
+            SelectedAsset = asset;
+            IsAssetContextLocked = true;
+        }
+
+        if (row.IsCreditCard)
+            CreditCard.Card = row;
+        else
+            Loan.Label = row.Label;
+
+        TxType = string.IsNullOrWhiteSpace(txType)
+            ? row.IsCreditCard ? "creditCardPayment" : "loanRepay"
+            : txType;
+    }
+
     /// <summary>
     /// Portfolio-Groups-Refactor P3 — 確保 group catalog 已載入，並依情境設定
     /// <see cref="SelectedPortfolioGroup"/>。restoreFromEditTradeId 指定時試圖
@@ -2065,7 +2133,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// </summary>
     private async Task EnsureGroupsLoadedAsync(Guid? restoreFromEditTradeId, Guid? preferredGroupId = null)
     {
-        if (GroupCatalog is null) return;
+        if (GroupCatalog is null)
+            return;
         try
         {
             await GroupCatalog.EnsureLoadedAsync().ConfigureAwait(true);

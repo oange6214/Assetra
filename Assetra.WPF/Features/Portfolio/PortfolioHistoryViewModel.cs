@@ -54,7 +54,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// 自動 push 最新 snapshot list。儀表板「報酬日曆」tab 透過 Binding 顯示。
     /// </summary>
     public Assetra.WPF.Features.FinancialOverview.Calendar.ReturnCalendarViewModel
-        ReturnCalendar { get; } = new();
+        ReturnCalendar
+    { get; } = new();
 
     // Chart series
     [ObservableProperty] private ISeries[] _valueSeries = [];
@@ -218,10 +219,12 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         IReadOnlyList<Trade> allTrades = [];
         if (_trades is not null)
         {
-            try { allTrades = await _trades.GetAllAsync(); }
+            try
+            { allTrades = await _trades.GetAllAsync(); }
             catch (Exception ex) when (ex is not OperationCanceledException) { allTrades = []; }
         }
-        try { ReturnCalendar.UpdatePortfolioData(_allSnapshots, allTrades); }
+        try
+        { ReturnCalendar.UpdatePortfolioData(_allSnapshots, allTrades); }
         catch (Exception ex) when (ex is not OperationCanceledException) { /* swallow */ }
         await RefreshChartAsync();
     }
@@ -238,7 +241,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     [RelayCommand]
     private async Task ChangePeriod(string? period)
     {
-        if (string.IsNullOrWhiteSpace(period)) return;
+        if (string.IsNullOrWhiteSpace(period))
+            return;
 
         // 任何 preset 都先清掉 custom range
         CustomStartDate = null;
@@ -367,7 +371,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         // 進階：TWR refine 報酬率（涵蓋現金流影響）— 用 cleaned series 而非 raw filtered，
         // 避免領頭低值點把 segment return 放大到幾千 %。
         var twrRefined = await TryComputeTwrAsync(series).ConfigureAwait(false);
-        if (twrRefined.HasValue) KpiReturnPct = twrRefined.Value;
+        if (twrRefined.HasValue)
+            KpiReturnPct = twrRefined.Value;
 
         // 最大回撤（只在有 IDrawdownCalculator 時計算）
         KpiMaxDrawdownPct = _drawdown is not null && series.Count >= 2
@@ -453,7 +458,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var customRows = new List<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow>();
         foreach (var symbol in custom.Take(4))
         {
-            if (string.IsNullOrWhiteSpace(symbol)) continue;
+            if (string.IsNullOrWhiteSpace(symbol))
+                continue;
             var twr = await SafeBenchmarkAsync(symbol, period).ConfigureAwait(false);
             customRows.Add(new Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow(
                 Symbol: symbol,
@@ -578,10 +584,12 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         foreach (var snapshot in snapshots.OrderBy(s => s.SnapshotDate))
         {
             var value = await ConvertMarketValueToBaseAsync(snapshot);
-            if (value is null) continue;
+            if (value is null)
+                continue;
             raw.Add((snapshot.SnapshotDate.ToDateTime(TimeOnly.MinValue), value.Value));
         }
-        if (raw.Count == 0) return [];
+        if (raw.Count == 0)
+            return [];
 
         // ── 跳過「期初建倉」假象點 ─────────────────────────────────────
         // 問題：建倉日前後快照從 $0 跳到 $8.8M，會讓 KPI 區間報酬率算成「無限大」

@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.IO;
-using Assetra.Application.Import;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Import;
 using Assetra.Core.Models;
@@ -106,7 +105,8 @@ public sealed partial class ImportViewModel : ObservableObject
     {
         get
         {
-            if (!DetectedFormat.HasValue) return string.Empty;
+            if (!DetectedFormat.HasValue)
+                return string.Empty;
             var key = $"Import.Format.{DetectedFormat.Value}";
             return _localization?.Get(key, DetectedFormat.Value.ToString()) ?? DetectedFormat.Value.ToString();
         }
@@ -192,7 +192,8 @@ public sealed partial class ImportViewModel : ObservableObject
     [RelayCommand]
     private async Task RollbackAsync(ImportHistoryRowViewModel? row)
     {
-        if (row is null || row.IsRolledBack || IsWorking) return;
+        if (row is null || row.IsRolledBack || IsWorking)
+            return;
 
         IsWorking = true;
         try
@@ -241,13 +242,15 @@ public sealed partial class ImportViewModel : ObservableObject
     [RelayCommand]
     public async Task DropFileAsync(string? path)
     {
-        if (string.IsNullOrWhiteSpace(path)) return;
+        if (string.IsNullOrWhiteSpace(path))
+            return;
         await ProcessFileAsync(path).ConfigureAwait(true);
     }
 
     private async Task ProcessFileAsync(string path)
     {
-        if (IsWorking) return;
+        if (IsWorking)
+            return;
         IsWorking = true;
         ErrorMessage = null;
         StatusMessage = null;
@@ -384,7 +387,8 @@ public sealed partial class ImportViewModel : ObservableObject
     /// </summary>
     private async Task PopulatePdfPreviewAsync(string path)
     {
-        if (_pdfPreviewParser is null) return;
+        if (_pdfPreviewParser is null)
+            return;
         try
         {
             IReadOnlyList<PdfPage> pages;
@@ -448,7 +452,8 @@ public sealed partial class ImportViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanApply))]
     private async Task ApplyAsync()
     {
-        if (_currentBatch is null || SelectedCashAccount is null) return;
+        if (_currentBatch is null || SelectedCashAccount is null)
+            return;
 
         Interlocked.Increment(ref _conflictRefreshVersion);
         IsWorking = true;

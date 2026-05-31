@@ -130,12 +130,18 @@ public sealed partial class RetirementViewModel : ObservableObject
     private async Task SaveAsync()
     {
         FormError = null;
-        if (string.IsNullOrWhiteSpace(FormName))    { FormError = "請輸入名稱"; return; }
-        if (!ParseHelpers.TryParseDecimal(FormBalance, out var balance))         { FormError = "餘額格式錯誤"; return; }
-        if (!ParseHelpers.TryParseDecimal(FormEmployeeRate, out var empRate))    { FormError = "員工提撥率格式錯誤"; return; }
-        if (!ParseHelpers.TryParseDecimal(FormEmployerRate, out var erRate))     { FormError = "雇主提撥率格式錯誤"; return; }
-        if (!int.TryParse(FormYearsOfService, out var years))        { FormError = "年資格式錯誤"; return; }
-        if (!int.TryParse(FormLegalWithdrawalAge, out var withAge))  { FormError = "法定提領年齡格式錯誤"; return; }
+        if (string.IsNullOrWhiteSpace(FormName))
+        { FormError = "請輸入名稱"; return; }
+        if (!ParseHelpers.TryParseDecimal(FormBalance, out var balance))
+        { FormError = "餘額格式錯誤"; return; }
+        if (!ParseHelpers.TryParseDecimal(FormEmployeeRate, out var empRate))
+        { FormError = "員工提撥率格式錯誤"; return; }
+        if (!ParseHelpers.TryParseDecimal(FormEmployerRate, out var erRate))
+        { FormError = "雇主提撥率格式錯誤"; return; }
+        if (!int.TryParse(FormYearsOfService, out var years))
+        { FormError = "年資格式錯誤"; return; }
+        if (!int.TryParse(FormLegalWithdrawalAge, out var withAge))
+        { FormError = "法定提領年齡格式錯誤"; return; }
 
         var now = _time.GetUtcNow();
         var deviceId = CurrentDeviceId();
@@ -226,12 +232,16 @@ public sealed partial class RetirementViewModel : ObservableObject
     private async Task ProjectAsync(RetirementRowViewModel row)
     {
         ProjResult = null;
-        if (!int.TryParse(ProjCurrentAge, out var age))                    { ProjResult = "目前年齡格式錯誤"; return; }
-        if (!ParseHelpers.TryParseDecimal(ProjAnnualReturnRate, out var rate))         { ProjResult = "年化報酬率格式錯誤"; return; }
-        if (!ParseHelpers.TryParseDecimal(ProjAnnualContribution, out var annualCon))  { ProjResult = "年提撥金額格式錯誤"; return; }
+        if (!int.TryParse(ProjCurrentAge, out var age))
+        { ProjResult = "目前年齡格式錯誤"; return; }
+        if (!ParseHelpers.TryParseDecimal(ProjAnnualReturnRate, out var rate))
+        { ProjResult = "年化報酬率格式錯誤"; return; }
+        if (!ParseHelpers.TryParseDecimal(ProjAnnualContribution, out var annualCon))
+        { ProjResult = "年提撥金額格式錯誤"; return; }
 
         var p = await _projection.ProjectAsync(row.Id, age, rate, annualCon).ConfigureAwait(true);
-        if (p is null) { ProjResult = "找不到帳戶"; return; }
+        if (p is null)
+        { ProjResult = "找不到帳戶"; return; }
 
         ProjResult = $"{row.Name}: {p.YearsToWithdrawal} 年後預期 {p.ProjectedBalance:N0}（累計提撥 {p.TotalContributions:N0}）";
     }

@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Assetra.Application.Portfolio.Contracts;
@@ -257,16 +256,19 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     // 上限 AppSettings.MaxRecentlyUsedAssets。失敗不影響交易主流程。
     private async Task RecordRecentAssetAsync(Guid id)
     {
-        if (_settingsService is null || id == Guid.Empty) return;
+        if (_settingsService is null || id == Guid.Empty)
+            return;
         try
         {
             var current = _settingsService.Current.RecentlyUsedAssetIds ?? new List<Guid>();
             var updated = new List<Guid>(AppSettings.MaxRecentlyUsedAssets) { id };
             foreach (var existing in current)
             {
-                if (existing == id || existing == Guid.Empty) continue;
+                if (existing == id || existing == Guid.Empty)
+                    continue;
                 updated.Add(existing);
-                if (updated.Count >= AppSettings.MaxRecentlyUsedAssets) break;
+                if (updated.Count >= AppSettings.MaxRecentlyUsedAssets)
+                    break;
             }
             var settings = _settingsService.Current with { RecentlyUsedAssetIds = updated };
             await _settingsService.SaveAsync(settings);
@@ -1248,7 +1250,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     [RelayCommand]
     private void BeginTxForSelectedCash(string txType)
     {
-        if (SelectedCashRow is null || string.IsNullOrEmpty(txType)) return;
+        if (SelectedCashRow is null || string.IsNullOrEmpty(txType))
+            return;
         Transaction.OpenTxDialog();
         Transaction.TxType = txType;
         Transaction.TxCashAccount = SelectedCashRow;
@@ -1263,11 +1266,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     [RelayCommand]
     private void BeginTxForSelectedLiability(string txType)
     {
-        if (SelectedLiabilityRow is null || string.IsNullOrEmpty(txType)) return;
-        Transaction.OpenTxDialog();
-        Transaction.TxType = txType;
-        if (SelectedLiabilityRow.IsLoan)
-            Transaction.Loan.Label = SelectedLiabilityRow.Label;
+        if (SelectedLiabilityRow is null || string.IsNullOrEmpty(txType))
+            return;
+        Transaction.OpenTxDialogForLiability(SelectedLiabilityRow, txType);
     }
 
     /// <summary>開啟新增現金帳戶對話框（由現金 tab 的「新增帳戶」按鈕呼叫）。</summary>
@@ -1379,10 +1380,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     /// </summary>
     private async Task EagerLoadLoanSchedulesAsync()
     {
-        if (Loan is null) return;
+        if (Loan is null)
+            return;
         foreach (var row in Liabilities.Where(l => l.IsLoan && !l.IsScheduleLoaded).ToList())
         {
-            try { await Loan.LoadLoanScheduleAsync(row); }
+            try
+            { await Loan.LoadLoanScheduleAsync(row); }
             catch { /* 單筆失敗不影響整體；該列維持 — 顯示 */ }
         }
     }

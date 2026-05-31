@@ -22,8 +22,10 @@ public partial class TradesTabPanel : UserControl
     // EventSetter on DataGridRow — sender IS the row, DataContext is the trade item.
     private void OnRowClick(object sender, MouseButtonEventArgs e)
     {
-        if (DataContext is not PortfolioViewModel vm) return;
-        if (sender is not DataGridRow { DataContext: { } item }) return;
+        if (DataContext is not PortfolioViewModel vm)
+            return;
+        if (sender is not DataGridRow { DataContext: { } item })
+            return;
 
         TryOpenTradeEditor(vm, item);
 

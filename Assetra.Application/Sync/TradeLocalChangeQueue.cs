@@ -33,7 +33,8 @@ public sealed class TradeLocalChangeQueue : ILocalChangeQueue, IManualConflictDr
     {
         ArgumentNullException.ThrowIfNull(conflicts);
         ct.ThrowIfCancellationRequested();
-        lock (_lock) _manual.AddRange(conflicts);
+        lock (_lock)
+            _manual.AddRange(conflicts);
         return Task.CompletedTask;
     }
 

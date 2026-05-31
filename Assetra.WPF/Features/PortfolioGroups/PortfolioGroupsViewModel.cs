@@ -83,7 +83,8 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsLoading) return;
+        if (IsLoading)
+            return;
         IsLoading = true;
         try
         {
@@ -115,7 +116,8 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
     [RelayCommand]
     private void StartEdit(PortfolioGroupRowViewModel? row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         EditingId = row.Id;
         FormName = row.Name;
         FormDescription = row.Description ?? string.Empty;
@@ -176,7 +178,8 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
     [RelayCommand]
     private void Remove(PortfolioGroupRowViewModel? row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         if (row.IsSystem)
         {
             ErrorMessage = "預設群組無法刪除（可重新命名）";
@@ -191,7 +194,8 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
                 await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
                 _groups.Remove(row);
                 await RefreshCatalogAsync().ConfigureAwait(true);
-                if (EditingId == row.Id) ResetForm();
+                if (EditingId == row.Id)
+                    ResetForm();
             }
             catch (Exception ex)
             {

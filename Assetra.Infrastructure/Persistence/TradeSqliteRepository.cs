@@ -1,10 +1,10 @@
 using System.Globalization;
-using Microsoft.Data.Sqlite;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Sync;
 using Assetra.Infrastructure.Sync;
+using Microsoft.Data.Sqlite;
 
 namespace Assetra.Infrastructure.Persistence;
 
@@ -196,7 +196,8 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
     public async Task<IReadOnlyList<Trade>> GetByPortfolioEntryIdsAsync(
         IReadOnlyCollection<Guid> entryIds, CancellationToken ct = default)
     {
-        if (entryIds.Count == 0) return Array.Empty<Trade>();
+        if (entryIds.Count == 0)
+            return Array.Empty<Trade>();
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
@@ -473,7 +474,8 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
     public async Task ApplyAtomicAsync(IReadOnlyList<TradeMutation> mutations, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(mutations);
-        if (mutations.Count == 0) return;
+        if (mutations.Count == 0)
+            return;
 
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
@@ -618,7 +620,8 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
     public async Task MarkPushedAsync(IReadOnlyList<Guid> ids, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
-        if (ids.Count == 0) return;
+        if (ids.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
@@ -637,14 +640,16 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
     public async Task ApplyRemoteAsync(IReadOnlyList<SyncEnvelope> envelopes, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(envelopes);
-        if (envelopes.Count == 0) return;
+        if (envelopes.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
 
         foreach (var env in envelopes)
         {
-            if (env.EntityType != TradeSyncMapper.EntityType) continue;
+            if (env.EntityType != TradeSyncMapper.EntityType)
+                continue;
 
             await using (var probe = conn.CreateCommand())
             {

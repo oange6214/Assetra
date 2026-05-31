@@ -1,9 +1,8 @@
-using Moq;
-using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Application.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.Portfolio;

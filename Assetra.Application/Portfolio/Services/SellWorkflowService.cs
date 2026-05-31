@@ -125,7 +125,8 @@ public sealed class SellWorkflowService : ISellWorkflowService
         string instrumentCurrency,
         CancellationToken ct)
     {
-        if (_fxHistory is null) return (null, null);
+        if (_fxHistory is null)
+            return (null, null);
 
         // Hard-code base = "TWD" for now. P4.5c can take an IAppSettingsService dep
         // and read BaseCurrency dynamically. Most users in scope are TWD-base.
@@ -149,7 +150,8 @@ public sealed class SellWorkflowService : ISellWorkflowService
             .Where(t => t.Type == TradeType.Buy)
             .OrderBy(t => t.TradeDate)
             .FirstOrDefault();
-        if (earliestBuy is null) return (null, null);
+        if (earliestBuy is null)
+            return (null, null);
 
         var buyDate = DateOnly.FromDateTime(earliestBuy.TradeDate);
         var sellDate = DateOnly.FromDateTime(sellTradeDate);

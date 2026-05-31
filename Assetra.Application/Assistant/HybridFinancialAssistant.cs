@@ -76,7 +76,8 @@ public sealed class HybridFinancialAssistant : IFinancialAssistant
 
     private async Task<string> BuildGroundedContextAsync(CancellationToken ct)
     {
-        if (_tools is null || _tools.Tools.Count == 0) return string.Empty;
+        if (_tools is null || _tools.Tools.Count == 0)
+            return string.Empty;
         var snippets = new List<string>();
         // Phase 3.5 MVP: invoke ALL tools (each returns a short snapshot string
         // — total context << 1k chars). A future revision routes per-query:

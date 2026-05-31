@@ -21,7 +21,9 @@ public sealed class AssetSqliteRepositorySyncTests : IDisposable
     public void Dispose()
     {
         SqliteConnection.ClearAllPools();
-        try { File.Delete(_dbPath); } catch { /* best effort */ }
+        try
+        { File.Delete(_dbPath); }
+        catch { /* best effort */ }
     }
 
     private AssetSqliteRepository New(string device = "device-A")

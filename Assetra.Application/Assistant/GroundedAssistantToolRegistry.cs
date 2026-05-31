@@ -63,7 +63,8 @@ public sealed class GroundedAssistantToolRegistry : IAssistantToolRegistry
             InvokeAsync: async ct =>
             {
                 var liab = await _balances.GetAllLiabilitySnapshotsAsync().ConfigureAwait(false);
-                if (liab.Count == 0) return "No outstanding liabilities";
+                if (liab.Count == 0)
+                    return "No outstanding liabilities";
                 var lines = liab
                     .OrderByDescending(kv => kv.Value.Balance.Amount)
                     .Select(kv => $"{kv.Key}: {kv.Value.Balance.Amount:N0} / {kv.Value.OriginalAmount.Amount:N0}");
@@ -79,7 +80,8 @@ public sealed class GroundedAssistantToolRegistry : IAssistantToolRegistry
                 {
                     var today = _time.GetUtcNow().LocalDateTime;
                     var budgets = await _budgets.GetByPeriodAsync(today.Year, today.Month, ct).ConfigureAwait(false);
-                    if (budgets.Count == 0) return "No budgets configured for this month";
+                    if (budgets.Count == 0)
+                        return "No budgets configured for this month";
                     var lines = budgets.Select(b =>
                         $"{(b.CategoryId?.ToString()[..8] ?? "all")}: {b.Amount:N0} {b.Currency}");
                     return string.Join("; ", lines);

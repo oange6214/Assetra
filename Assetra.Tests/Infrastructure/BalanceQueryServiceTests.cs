@@ -327,7 +327,8 @@ public class BalanceQueryServiceTests
         public Task UpdateAsync(Trade t, CancellationToken ct = default)
         {
             var i = Store.FindIndex(x => x.Id == t.Id);
-            if (i >= 0) Store[i] = t;
+            if (i >= 0)
+                Store[i] = t;
             return Task.CompletedTask;
         }
         public Task RemoveAsync(Guid id, CancellationToken ct = default) { Store.RemoveAll(x => x.Id == id); return Task.CompletedTask; }
@@ -346,8 +347,12 @@ public class BalanceQueryServiceTests
             {
                 switch (m)
                 {
-                    case AddTradeMutation add: Store.Add(add.Trade); break;
-                    case RemoveTradeMutation rem: Store.RemoveAll(t => t.Id == rem.Id); break;
+                    case AddTradeMutation add:
+                        Store.Add(add.Trade);
+                        break;
+                    case RemoveTradeMutation rem:
+                        Store.RemoveAll(t => t.Id == rem.Id);
+                        break;
                 }
             }
             return Task.CompletedTask;

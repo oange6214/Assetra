@@ -17,7 +17,7 @@
         + 無 shadow，跟新的 AppCardSummary (BorderLight + Radius.2Xl) 並排時邊框
         粗細不齊、圓角大小不一造成「card 不一致」視覺破綻。
         現在 FormCard 跟 AppCardSummary 視覺完全等價 — 70+ 使用點自動同步升級。
-
+        
         P3.7 — Shadow.Card 拿掉。CSS `box-shadow: 0 14px 36px` 在 mockup HTML
         是 spread+falloff 自然浮起感，但 WPF DropShadowEffect 在 14px ShadowDepth
         會渲染成 card 下方一條明顯「色塊」帶狀 — 視覺很詭異。
@@ -46,16 +46,16 @@
         ════════════════════════════════════════════════════════════
         AppCard*：dashboard / overview 區域用的卡片組件。跟 FormCard
         差異：
-          - 圓角用 Radius.Md (不是 Lg) — dashboard 卡片密集，過大圓
-            角會破壞視覺對齊
-          - Border 用 AppBorderLight (Layer2) — 跟 Hero/Summary tier
-            lightening 一致
+        - 圓角用 Radius.Md (不是 Lg) — dashboard 卡片密集，過大圓
+        角會破壞視覺對齊
+        - Border 用 AppBorderLight (Layer2) — 跟 Hero/Summary tier
+        lightening 一致
         AppCardHero    : 高 emphasis card (e.g. 淨資產 hero) — accent
-                         邊框，padding 較大
+        邊框，padding 較大
         AppCardSummary : 中 emphasis (公式列, KPI rows) — 標準 padding
-                         + light border
+        + light border
         AppCardSubtle  : 低 emphasis (analytics widgets) — light border
-                         + 16,14 padding
+        + 16,14 padding
         Hero / Summary / Subtle 視覺差用 padding + border 顏色拉開，
         而不是塞滿色塊（過工業）。
     -->
@@ -65,7 +65,7 @@
         baseline：radius=18 (Radius.2Xl) + 統一 padding 20。Hero / Summary /
         Subtle 差異現在只在 Padding + Margin（hierarchy 用 padding 大小 + margin
         區隔），其餘視覺一致 — 所有頁面看起來像同家公司做的核心 token。
-
+        
         P3.7 — Shadow.Card 拿掉（CSS box-shadow → WPF DropShadowEffect
         渲染成下方「色塊」帶狀很詭異）。Calm + Minimal 設計感靠 border + bg
         contrast 區分卡片就足夠，符合 mockup「Wealth Platform」 sophisticated 風格。

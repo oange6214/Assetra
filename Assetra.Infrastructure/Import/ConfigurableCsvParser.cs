@@ -80,11 +80,14 @@ public sealed class ConfigurableCsvParser : IImportParser
     private ImportPreviewRow? TryBuildRow(CsvReader csv, int rowIndex)
     {
         var dateText = Field(csv, _config.DateColumn);
-        if (string.IsNullOrWhiteSpace(dateText)) return null;
+        if (string.IsNullOrWhiteSpace(dateText))
+            return null;
 
-        if (!TryParseDate(dateText, out var date)) return null;
+        if (!TryParseDate(dateText, out var date))
+            return null;
 
-        if (!TryResolveAmount(csv, out var amount)) return null;
+        if (!TryResolveAmount(csv, out var amount))
+            return null;
 
         return new ImportPreviewRow(
             RowIndex: rowIndex,
@@ -111,7 +114,8 @@ public sealed class ConfigurableCsvParser : IImportParser
         var debit = ParseDecimal(Field(csv, _config.DebitColumn)) ?? 0m;
         var credit = ParseDecimal(Field(csv, _config.CreditColumn)) ?? 0m;
 
-        if (debit == 0m && credit == 0m) return false;
+        if (debit == 0m && credit == 0m)
+            return false;
 
         amount = credit - debit;
         return true;
@@ -138,7 +142,8 @@ public sealed class ConfigurableCsvParser : IImportParser
 
     private static string? Field(CsvReader csv, string? column)
     {
-        if (string.IsNullOrEmpty(column)) return null;
+        if (string.IsNullOrEmpty(column))
+            return null;
 
         try
         {
@@ -156,7 +161,8 @@ public sealed class ConfigurableCsvParser : IImportParser
     private static bool TryParseDecimal(string? text, out decimal value)
     {
         value = 0m;
-        if (string.IsNullOrWhiteSpace(text)) return false;
+        if (string.IsNullOrWhiteSpace(text))
+            return false;
 
         var cleaned = text.Replace(",", string.Empty).Replace("$", string.Empty)
             .Replace("NT", string.Empty).Trim();

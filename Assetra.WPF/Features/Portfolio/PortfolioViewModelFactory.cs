@@ -5,11 +5,8 @@ using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.DomainServices;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Analysis;
-using Assetra.Infrastructure;
-using Assetra.WPF.Features.Portfolio.Controls;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Features.PortfolioGroups;
-using Assetra.WPF.Features.Snackbar;
 using Assetra.WPF.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 

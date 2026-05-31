@@ -35,7 +35,8 @@ internal static class ParseHelpers
     /// </summary>
     public static bool TryParseInt(string? s, out int value)
     {
-        if (string.IsNullOrWhiteSpace(s)) { value = 0; return false; }
+        if (string.IsNullOrWhiteSpace(s))
+        { value = 0; return false; }
         return int.TryParse(s, NumberStyles.Integer | NumberStyles.AllowThousands,
                             CultureInfo.InvariantCulture, out value);
     }

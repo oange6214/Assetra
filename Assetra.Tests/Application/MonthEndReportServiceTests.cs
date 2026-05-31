@@ -54,9 +54,9 @@ public class MonthEndReportServiceTests
         var recurring = new FakeRecurringRepo();
 
         var today = DateTime.Today;
-        recurring.Store.Add(MakeRecurring("Soon",  today.AddDays(3)));
+        recurring.Store.Add(MakeRecurring("Soon", today.AddDays(3)));
         recurring.Store.Add(MakeRecurring("Later", today.AddDays(20)));
-        recurring.Store.Add(MakeRecurring("Past",  today.AddDays(-1)));
+        recurring.Store.Add(MakeRecurring("Past", today.AddDays(-1)));
 
         var summary = new MonthlyBudgetSummaryService(trades, budgets, categories);
         var svc = new MonthEndReportService(summary, recurring);
@@ -153,8 +153,8 @@ public class MonthEndReportServiceTests
 
         var today = DateTime.Today;
         recurring.Store.Add(MakeRecurring("Day10", today.AddDays(10)));
-        recurring.Store.Add(MakeRecurring("Day2",  today.AddDays(2)));
-        recurring.Store.Add(MakeRecurring("Day7",  today.AddDays(7)));
+        recurring.Store.Add(MakeRecurring("Day2", today.AddDays(2)));
+        recurring.Store.Add(MakeRecurring("Day7", today.AddDays(7)));
 
         var summary = new MonthlyBudgetSummaryService(trades, budgets, categories);
         var svc = new MonthEndReportService(summary, recurring);
@@ -162,8 +162,8 @@ public class MonthEndReportServiceTests
         var report = await svc.BuildAsync(today.Year, today.Month);
 
         Assert.Equal(3, report.Upcoming.Count);
-        Assert.Equal("Day2",  report.Upcoming[0].Name);
-        Assert.Equal("Day7",  report.Upcoming[1].Name);
+        Assert.Equal("Day2", report.Upcoming[0].Name);
+        Assert.Equal("Day7", report.Upcoming[1].Name);
         Assert.Equal("Day10", report.Upcoming[2].Name);
     }
 
@@ -208,8 +208,12 @@ public class MonthEndReportServiceTests
             {
                 switch (m)
                 {
-                    case AddTradeMutation add: Store.Add(add.Trade); break;
-                    case RemoveTradeMutation rem: Store.RemoveAll(t => t.Id == rem.Id); break;
+                    case AddTradeMutation add:
+                        Store.Add(add.Trade);
+                        break;
+                    case RemoveTradeMutation rem:
+                        Store.RemoveAll(t => t.Id == rem.Id);
+                        break;
                 }
             }
             return Task.CompletedTask;

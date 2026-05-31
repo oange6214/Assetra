@@ -195,7 +195,7 @@ public sealed class CategoriesViewModelTests
 
     private sealed class FakeCategoryRepo(List<ExpenseCategory> seed) : ICategoryRepository
     {
-        private readonly List<ExpenseCategory> _store = [..seed];
+        private readonly List<ExpenseCategory> _store = [.. seed];
         public List<Guid> RemovedIds { get; } = [];
 
         public Task<IReadOnlyList<ExpenseCategory>> GetAllAsync(CancellationToken ct = default) =>
@@ -213,7 +213,8 @@ public sealed class CategoriesViewModelTests
         public Task UpdateAsync(ExpenseCategory category, CancellationToken ct = default)
         {
             var index = _store.FindIndex(x => x.Id == category.Id);
-            if (index >= 0) _store[index] = category;
+            if (index >= 0)
+                _store[index] = category;
             return Task.CompletedTask;
         }
 
@@ -230,7 +231,7 @@ public sealed class CategoriesViewModelTests
 
     private sealed class FakeRuleRepo(List<AutoCategorizationRule> seed) : IAutoCategorizationRuleRepository
     {
-        private readonly List<AutoCategorizationRule> _store = [..seed];
+        private readonly List<AutoCategorizationRule> _store = [.. seed];
 
         public Task<IReadOnlyList<AutoCategorizationRule>> GetAllAsync(CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<AutoCategorizationRule>>(_store.ToList());
@@ -247,7 +248,8 @@ public sealed class CategoriesViewModelTests
         public Task UpdateAsync(AutoCategorizationRule rule, CancellationToken ct = default)
         {
             var index = _store.FindIndex(x => x.Id == rule.Id);
-            if (index >= 0) _store[index] = rule;
+            if (index >= 0)
+                _store[index] = rule;
             return Task.CompletedTask;
         }
 
@@ -260,7 +262,7 @@ public sealed class CategoriesViewModelTests
 
     private sealed class FakeBudgetRepo(List<Budget> seed) : IBudgetRepository
     {
-        private readonly List<Budget> _store = [..seed];
+        private readonly List<Budget> _store = [.. seed];
 
         public Task<IReadOnlyList<Budget>> GetAllAsync(CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<Budget>>(_store.ToList());
@@ -277,7 +279,8 @@ public sealed class CategoriesViewModelTests
         public Task UpdateAsync(Budget budget, CancellationToken ct = default)
         {
             var index = _store.FindIndex(x => x.Id == budget.Id);
-            if (index >= 0) _store[index] = budget;
+            if (index >= 0)
+                _store[index] = budget;
             return Task.CompletedTask;
         }
 
@@ -312,8 +315,12 @@ public sealed class CategoriesViewModelTests
             {
                 switch (m)
                 {
-                    case AddTradeMutation add: Store.Add(add.Trade); break;
-                    case RemoveTradeMutation rem: Store.RemoveAll(t => t.Id == rem.Id); break;
+                    case AddTradeMutation add:
+                        Store.Add(add.Trade);
+                        break;
+                    case RemoveTradeMutation rem:
+                        Store.RemoveAll(t => t.Id == rem.Id);
+                        break;
                 }
             }
             return Task.CompletedTask;

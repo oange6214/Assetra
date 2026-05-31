@@ -298,7 +298,8 @@ public partial class PortfolioViewModel
 
     private (decimal? roi, decimal? xirr) ComputeAssetReturn(DateOnly? windowStart)
     {
-        if (SelectedPositionRow is not { } row) return (null, null);
+        if (SelectedPositionRow is not { } row)
+            return (null, null);
 
         var ordered = Trades
             .Where(t => string.Equals(t.Symbol, row.Symbol, StringComparison.OrdinalIgnoreCase) &&
@@ -306,11 +307,13 @@ public partial class PortfolioViewModel
                          t.Type == TradeType.CashDividend || t.Type == TradeType.StockDividend))
             .OrderBy(t => t.TradeDate)
             .ToList();
-        if (ordered.Count == 0) return (null, null);
+        if (ordered.Count == 0)
+            return (null, null);
 
         var firstTradeDate = DateOnly.FromDateTime(ordered[0].TradeDate);
         // 1Y / 3Y 視窗：若第一筆交易晚於視窗起點，視為無足夠歷史 → "—"
-        if (windowStart is { } ws && ws < firstTradeDate) return (null, null);
+        if (windowStart is { } ws && ws < firstTradeDate)
+            return (null, null);
 
         var actualStart = windowStart ?? firstTradeDate;
 
@@ -319,7 +322,8 @@ public partial class PortfolioViewModel
         foreach (var t in ordered)
         {
             var date = DateOnly.FromDateTime(t.TradeDate);
-            if (date >= actualStart) break;
+            if (date >= actualStart)
+                break;
             switch (t.Type)
             {
                 case TradeType.Buy:
@@ -542,7 +546,8 @@ public partial class PortfolioViewModel
     private void OpenEditLiability(LiabilityRowViewModel? row)
     {
         var target = row ?? SelectedLiabilityRow;
-        if (target is null) return;
+        if (target is null)
+            return;
         EditLiabilityDialog.Open(target);
     }
 

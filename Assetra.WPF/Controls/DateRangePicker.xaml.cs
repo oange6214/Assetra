@@ -57,7 +57,8 @@ public partial class DateRangePicker : UserControl, INotifyPropertyChanged
         get => _isPopupOpen;
         set
         {
-            if (_isPopupOpen == value) return;
+            if (_isPopupOpen == value)
+                return;
             _isPopupOpen = value;
             // 開啟時如果已有起始，跳到那個月
             if (value && StartDate is { } s)
@@ -72,7 +73,8 @@ public partial class DateRangePicker : UserControl, INotifyPropertyChanged
         get => _leftMonth;
         set
         {
-            if (_leftMonth == value) return;
+            if (_leftMonth == value)
+                return;
             _leftMonth = value;
             RaisePropertyChanged();
             RaisePropertyChanged(nameof(RightMonth));
@@ -92,7 +94,8 @@ public partial class DateRangePicker : UserControl, INotifyPropertyChanged
     {
         get
         {
-            if (StartDate is null && EndDate is null) return Placeholder;
+            if (StartDate is null && EndDate is null)
+                return Placeholder;
             var a = StartDate?.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture) ?? "…";
             var b = EndDate?.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture) ?? "…";
             return $"{a} - {b}";
@@ -169,7 +172,8 @@ public partial class DateRangePicker : UserControl, INotifyPropertyChanged
 
     private void DayCell_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button btn || btn.DataContext is not DayCell cell) return;
+        if (sender is not Button btn || btn.DataContext is not DayCell cell)
+            return;
         var d = cell.Date;
 
         if (StartDate is null || EndDate is not null)

@@ -25,7 +25,7 @@ public partial class RecurringViewModel : ObservableObject
     public int EnabledSubscriptionCount => _subscriptions.Count(row => row.IsEnabled);
     public int DisabledSubscriptionCount => _subscriptions.Count(row => !row.IsEnabled);
     public int PendingCount => _pending.Count;
-    public bool HasPending  => _pending.Count > 0;
+    public bool HasPending => _pending.Count > 0;
     public bool HasNoPending => _pending.Count == 0;
     public string PendingBadge => _pending.Count > 99 ? "99+" : _pending.Count.ToString();
 
@@ -41,7 +41,7 @@ public partial class RecurringViewModel : ObservableObject
     [ObservableProperty] private string _deleteTargetName = string.Empty;
     private RecurringRowViewModel? _pendingDelete;
     public bool HasNoSubscriptions => _subscriptions.Count == 0;
-    public bool HasSubscriptions   => _subscriptions.Count > 0;
+    public bool HasSubscriptions => _subscriptions.Count > 0;
 
     // Add subscription form
     [ObservableProperty] private string _addName = string.Empty;
@@ -205,7 +205,8 @@ public partial class RecurringViewModel : ObservableObject
     [RelayCommand]
     private async Task ToggleEnabledAsync(RecurringRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         row.IsEnabled = !row.IsEnabled;
         await _recurringRepo.UpdateAsync(row.ToModel()).ConfigureAwait(true);
         RefreshSubscriptionSummary();
@@ -214,7 +215,8 @@ public partial class RecurringViewModel : ObservableObject
     [RelayCommand]
     private async Task DeleteSubscriptionAsync(RecurringRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         await _pendingRepo.RemoveByRecurringSourceAsync(row.Id).ConfigureAwait(true);
         await _recurringRepo.RemoveAsync(row.Id).ConfigureAwait(true);
         foreach (var pending in _pending.Where(x => x.RecurringSourceId == row.Id).ToList())
@@ -227,7 +229,8 @@ public partial class RecurringViewModel : ObservableObject
     [RelayCommand]
     private void RequestDeleteSubscription(RecurringRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         _pendingDelete = row;
         DeleteTargetName = row.Name;
         IsDeleteConfirmOpen = true;
@@ -255,7 +258,8 @@ public partial class RecurringViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanRunScheduler))]
     private async Task RunSchedulerAsync()
     {
-        if (IsBusy) return;
+        if (IsBusy)
+            return;
         IsBusy = true;
         try
         {
@@ -275,7 +279,8 @@ public partial class RecurringViewModel : ObservableObject
     [RelayCommand]
     private async Task ConfirmPendingAsync(PendingRecurringRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         await _scheduler.ConfirmAsync(row.Id).ConfigureAwait(true);
         _pending.Remove(row);
         _snackbar.Success(GetString("Recurring.Pending.Toast.Confirmed", "已確認"));
@@ -284,7 +289,8 @@ public partial class RecurringViewModel : ObservableObject
     [RelayCommand]
     private async Task SkipPendingAsync(PendingRecurringRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         await _scheduler.SkipAsync(row.Id).ConfigureAwait(true);
         _pending.Remove(row);
         _snackbar.Success(GetString("Recurring.Pending.Toast.Skipped", "已略過"));

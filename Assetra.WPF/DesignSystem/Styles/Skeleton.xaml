@@ -10,20 +10,20 @@
         Skeleton 是 async data fetch 還沒到位前的 placeholder shape，比空白
         (spinner / 突然出現的數字) 更接近現代 financial UI 的「資料一定會到、
         正在路上」的視覺承諾。
-
+        
         三個 primitive：
-          AppSkeletonRect  : 通用矩形佔位 (e.g. Hero 金額) — 由 caller 指定
-                             Width / Height
-          AppSkeletonLine  : 單行文字佔位 (e.g. body line) — Height 固定 12
-          AppSkeletonCard  : Card 形狀佔位 (e.g. summary metric) — Height 固定 56
-
+        AppSkeletonRect  : 通用矩形佔位 (e.g. Hero 金額) — 由 caller 指定
+        Width / Height
+        AppSkeletonLine  : 單行文字佔位 (e.g. body line) — Height 固定 12
+        AppSkeletonCard  : Card 形狀佔位 (e.g. summary metric) — Height 固定 56
+        
         所有 primitive 都有 EventTrigger Loaded → Storyboard 跑 Opacity
         1.0 → 0.45 → 1.0 (0.9 sec) infinite，呈現 subtle pulse。
-
+        
         Theme：背景用 AppHover (Layer3 dark / NavySubtle light) — 比 page
         background 稍微亮但不到 surface，傳遞「這裡有東西、還沒到」的視覺
         重量。
-
+        
         ── P2.17 T08 — Reduced-motion ──
         Motion.SkeletonPulseDuration 是 Duration token，預設 0:0:0.9s。
         App.xaml.cs 在 startup 時若偵測到 SystemParameters.MenuAnimation=False
@@ -40,7 +40,7 @@
         <Style.Triggers>
             <EventTrigger RoutedEvent="Loaded">
                 <BeginStoryboard>
-                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                    <Storyboard AutoReverse="True" RepeatBehavior="Forever">
                         <DoubleAnimation
                             Storyboard.TargetProperty="Opacity"
                             From="1.0"

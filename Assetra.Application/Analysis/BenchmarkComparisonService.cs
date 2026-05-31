@@ -27,14 +27,17 @@ public sealed class BenchmarkComparisonService : IBenchmarkComparisonService
             : ChartPeriod.TwoYears;
 
         var candles = await _history.GetHistoryAsync(sym, exch, chartPeriod, ct).ConfigureAwait(false);
-        if (candles.Count < 2) return null;
+        if (candles.Count < 2)
+            return null;
 
         var inRange = candles.Where(c => c.Date >= period.Start && c.Date <= period.End).ToList();
-        if (inRange.Count < 2) return null;
+        if (inRange.Count < 2)
+            return null;
 
         var startPx = inRange.OrderBy(c => c.Date).First().Close;
         var endPx = inRange.OrderByDescending(c => c.Date).First().Close;
-        if (startPx == 0) return null;
+        if (startPx == 0)
+            return null;
 
         return (endPx - startPx) / startPx;
     }

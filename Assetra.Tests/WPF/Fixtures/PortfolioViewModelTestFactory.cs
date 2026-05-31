@@ -1,9 +1,9 @@
 using System.Reactive.Concurrency;
-using Moq;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Infrastructure;
+using Moq;
 
 namespace Assetra.Tests.WPF.Fixtures;
 

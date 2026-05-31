@@ -1,6 +1,5 @@
 using Assetra.Application.Loans.Contracts;
 using Assetra.Core.Interfaces;
-using Assetra.Core.Models;
 using Assetra.Core.Services;
 
 namespace Assetra.Application.Loans.Services;
@@ -45,12 +44,12 @@ public sealed class LoanScheduleRecomputeService : ILoanScheduleRecomputeService
         var existing = await _scheduleRepo.GetByAssetAsync(request.AssetId).ConfigureAwait(false);
 
         var combined = AmortizationService.RecomputeUnpaidTail(
-            assetId:                  request.AssetId,
-            originalPrincipal:        request.OriginalPrincipal,
-            newAnnualRate:            request.NewAnnualRate,
-            newTermMonths:            request.NewTermMonths,
+            assetId: request.AssetId,
+            originalPrincipal: request.OriginalPrincipal,
+            newAnnualRate: request.NewAnnualRate,
+            newTermMonths: request.NewTermMonths,
             originalFirstPaymentDate: asset.LoanStartDate.Value,
-            existingEntries:          existing);
+            existingEntries: existing);
 
         // Replace strategy: delete-all then bulk-insert. Paid rows are inserted
         // back verbatim (same Id, TradeId, PaidAt) so their TradeId FK still
@@ -61,8 +60,8 @@ public sealed class LoanScheduleRecomputeService : ILoanScheduleRecomputeService
         var paidCount = existing.Count(e => e.IsPaid);
         var remainingPrincipal = combined.Where(e => !e.IsPaid).Sum(e => e.PrincipalAmount);
         return new LoanScheduleRecomputeResult(
-            PreservedPaidCount:     paidCount,
+            PreservedPaidCount: paidCount,
             RegeneratedUnpaidCount: combined.Count - paidCount,
-            RemainingPrincipal:     remainingPrincipal);
+            RemainingPrincipal: remainingPrincipal);
     }
 }

@@ -1,5 +1,4 @@
 using System.Globalization;
-using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
@@ -78,7 +77,8 @@ public partial class PortfolioViewModel
         if (int.TryParse(daysRaw, out var days) && days is 7 or 30 or 90)
         {
             DailyPnlPeriodDays = days;
-            if (IsKpiDayChangeExpanded) RebuildDailyPnlChart();
+            if (IsKpiDayChangeExpanded)
+                RebuildDailyPnlChart();
         }
     }
 
@@ -89,10 +89,12 @@ public partial class PortfolioViewModel
     [RelayCommand]
     private void ToggleKpiPanel(string? key)
     {
-        if (string.IsNullOrEmpty(key)) { ExpandedKpiPanel = null; return; }
+        if (string.IsNullOrEmpty(key))
+        { ExpandedKpiPanel = null; return; }
         ExpandedKpiPanel = ExpandedKpiPanel == key ? null : key;
 
-        if (ExpandedKpiPanel == "daychange") RebuildDailyPnlChart();
+        if (ExpandedKpiPanel == "daychange")
+            RebuildDailyPnlChart();
         else if (ExpandedKpiPanel is "marketvalue" or "cost" or "pnl")
             RebuildPositionPieCharts();
     }
@@ -319,9 +321,12 @@ public partial class PortfolioViewModel
                 downs.Add(null);
                 continue;
             }
-            if (delta > 0) { ups.Add(delta); downs.Add(null); }
-            else if (delta < 0) { ups.Add(null); downs.Add(delta); }
-            else { ups.Add(null); downs.Add(null); }
+            if (delta > 0)
+            { ups.Add(delta); downs.Add(null); }
+            else if (delta < 0)
+            { ups.Add(null); downs.Add(delta); }
+            else
+            { ups.Add(null); downs.Add(null); }
         }
 
         var upColor = GetSkColor("AppUp", "#EF4444");    // 紅（漲）

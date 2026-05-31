@@ -3,7 +3,6 @@ using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Import;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Import;
-using Assetra.Core.DomainServices;
 
 namespace Assetra.Application.Import;
 

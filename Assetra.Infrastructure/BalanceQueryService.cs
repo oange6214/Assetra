@@ -56,7 +56,8 @@ public sealed class BalanceQueryService : IBalanceQueryService
             if (t.CashAccountId is { } src)
             {
                 var delta = PrimaryCashDelta(t);
-                if (delta != 0) Accumulate(amounts, src, delta);
+                if (delta != 0)
+                    Accumulate(amounts, src, delta);
             }
             if (t.Type == TradeType.Transfer && t.ToCashAccountId is { } dst)
             {
@@ -81,7 +82,8 @@ public sealed class BalanceQueryService : IBalanceQueryService
         foreach (var t in trades)
         {
             var label = GetLiabilityLabel(t);
-            if (string.IsNullOrWhiteSpace(label)) continue;
+            if (string.IsNullOrWhiteSpace(label))
+                continue;
             (decimal Balance, decimal Original) current = amounts.TryGetValue(label, out var snap) ? snap : (0m, 0m);
             amounts[label] = t.Type switch
             {
@@ -113,14 +115,16 @@ public sealed class BalanceQueryService : IBalanceQueryService
 
     private async Task<string> ResolveCurrencyAsync(Guid cashAccountId)
     {
-        if (_assets is null) return IBalanceQueryService.DefaultCurrency;
+        if (_assets is null)
+            return IBalanceQueryService.DefaultCurrency;
         var item = await _assets.GetByIdAsync(cashAccountId).ConfigureAwait(false);
         return string.IsNullOrWhiteSpace(item?.Currency) ? IBalanceQueryService.DefaultCurrency : item!.Currency;
     }
 
     private async Task<string> ResolveLiabilityCurrencyAsync(string loanLabel)
     {
-        if (_assets is null) return IBalanceQueryService.DefaultCurrency;
+        if (_assets is null)
+            return IBalanceQueryService.DefaultCurrency;
         var liabilities = await _assets.GetItemsByTypeAsync(FinancialType.Liability).ConfigureAwait(false);
         var match = liabilities.FirstOrDefault(a => string.Equals(a.Name, loanLabel, StringComparison.Ordinal));
         return string.IsNullOrWhiteSpace(match?.Currency) ? IBalanceQueryService.DefaultCurrency : match!.Currency;
@@ -128,7 +132,8 @@ public sealed class BalanceQueryService : IBalanceQueryService
 
     private async Task<IReadOnlyDictionary<Guid, string>> BuildCurrencyMapAsync()
     {
-        if (_assets is null) return new Dictionary<Guid, string>();
+        if (_assets is null)
+            return new Dictionary<Guid, string>();
         var assets = await _assets.GetItemsByTypeAsync(FinancialType.Asset).ConfigureAwait(false);
         return assets
             .Where(a => !string.IsNullOrWhiteSpace(a.Currency))
@@ -137,12 +142,14 @@ public sealed class BalanceQueryService : IBalanceQueryService
 
     private async Task<IReadOnlyDictionary<string, string>> BuildLiabilityCurrencyMapAsync()
     {
-        if (_assets is null) return new Dictionary<string, string>(StringComparer.Ordinal);
+        if (_assets is null)
+            return new Dictionary<string, string>(StringComparer.Ordinal);
         var liabs = await _assets.GetItemsByTypeAsync(FinancialType.Liability).ConfigureAwait(false);
         var dict = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var l in liabs)
         {
-            if (string.IsNullOrWhiteSpace(l.Currency)) continue;
+            if (string.IsNullOrWhiteSpace(l.Currency))
+                continue;
             dict[l.Name] = l.Currency;
         }
         return dict;
@@ -176,13 +183,14 @@ public sealed class BalanceQueryService : IBalanceQueryService
         decimal balance = 0m, original = 0m;
         foreach (var t in trades)
         {
-            if (!string.Equals(GetLiabilityLabel(t), loanLabel, StringComparison.Ordinal)) continue;
+            if (!string.Equals(GetLiabilityLabel(t), loanLabel, StringComparison.Ordinal))
+                continue;
             switch (t.Type)
             {
                 case TradeType.LoanBorrow:
                 {
                     var amt = t.CashAmount ?? 0m;
-                    balance  += amt;
+                    balance += amt;
                     original += amt;
                     break;
                 }
@@ -210,17 +218,17 @@ public sealed class BalanceQueryService : IBalanceQueryService
     /// </summary>
     internal static decimal PrimaryCashDelta(Trade t) => t.Type switch
     {
-        TradeType.Income       => +(t.CashAmount ?? 0m),
+        TradeType.Income => +(t.CashAmount ?? 0m),
         TradeType.CashDividend => +(t.CashAmount ?? 0m),
-        TradeType.Deposit      => +(t.CashAmount ?? 0m),
-        TradeType.Withdrawal   => -(t.CashAmount ?? 0m),
-        TradeType.LoanBorrow   => +(t.CashAmount ?? 0m) - (t.Commission ?? 0m),
-        TradeType.LoanRepay    => -(t.CashAmount ?? 0m),   // 全部付款從現金扣
+        TradeType.Deposit => +(t.CashAmount ?? 0m),
+        TradeType.Withdrawal => -(t.CashAmount ?? 0m),
+        TradeType.LoanBorrow => +(t.CashAmount ?? 0m) - (t.Commission ?? 0m),
+        TradeType.LoanRepay => -(t.CashAmount ?? 0m),   // 全部付款從現金扣
         TradeType.CreditCardPayment => -(t.CashAmount ?? 0m),
-        TradeType.Transfer     => -(t.CashAmount ?? 0m),   // 來源帳戶減少
-        TradeType.Buy          => -BuyCashAmount(t),
-        TradeType.Sell         => +SellCashAmount(t),
-        _                      => 0m,
+        TradeType.Transfer => -(t.CashAmount ?? 0m),   // 來源帳戶減少
+        TradeType.Buy => -BuyCashAmount(t),
+        TradeType.Sell => +SellCashAmount(t),
+        _ => 0m,
     };
 
     private static decimal BuyCashAmount(Trade t) =>

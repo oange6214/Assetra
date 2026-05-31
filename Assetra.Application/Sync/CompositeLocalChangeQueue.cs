@@ -43,7 +43,8 @@ public sealed class CompositeLocalChangeQueue : ILocalChangeQueue, IManualConfli
     public async Task MarkPushedAsync(IReadOnlyList<Guid> entityIds, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(entityIds);
-        if (entityIds.Count == 0) return;
+        if (entityIds.Count == 0)
+            return;
         // entityId alone doesn't carry EntityType, so broadcast to all queues — each store filters by id.
         // Cost is bounded (a couple of UPDATE ... WHERE id = ? per queue).
         foreach (var q in _queues.Values)
@@ -56,12 +57,14 @@ public sealed class CompositeLocalChangeQueue : ILocalChangeQueue, IManualConfli
     public async Task ApplyRemoteAsync(IReadOnlyList<SyncEnvelope> envelopes, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(envelopes);
-        if (envelopes.Count == 0) return;
+        if (envelopes.Count == 0)
+            return;
 
         foreach (var group in envelopes.GroupBy(e => e.EntityType))
         {
             ct.ThrowIfCancellationRequested();
-            if (!_queues.TryGetValue(group.Key, out var q)) continue;
+            if (!_queues.TryGetValue(group.Key, out var q))
+                continue;
             await q.ApplyRemoteAsync(group.ToList(), ct).ConfigureAwait(false);
         }
     }
@@ -69,12 +72,14 @@ public sealed class CompositeLocalChangeQueue : ILocalChangeQueue, IManualConfli
     public async Task RecordManualConflictAsync(IReadOnlyList<SyncConflict> conflicts, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(conflicts);
-        if (conflicts.Count == 0) return;
+        if (conflicts.Count == 0)
+            return;
 
         foreach (var group in conflicts.GroupBy(c => c.Local.EntityType))
         {
             ct.ThrowIfCancellationRequested();
-            if (!_queues.TryGetValue(group.Key, out var q)) continue;
+            if (!_queues.TryGetValue(group.Key, out var q))
+                continue;
             await q.RecordManualConflictAsync(group.ToList(), ct).ConfigureAwait(false);
         }
     }

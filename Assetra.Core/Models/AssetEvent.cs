@@ -6,12 +6,12 @@ namespace Assetra.Core.Models;
 /// CashAccountId is only set for Transaction events.
 /// </summary>
 public sealed record AssetEvent(
-    Guid           Id,
-    Guid           AssetId,
+    Guid Id,
+    Guid AssetId,
     AssetEventType EventType,
-    DateTime       EventDate,
-    decimal?       Amount,
-    decimal?       Quantity,
-    string?        Note,
-    Guid?          CashAccountId,
-    DateTime       CreatedAt);
+    DateTime EventDate,
+    decimal? Amount,
+    decimal? Quantity,
+    string? Note,
+    Guid? CashAccountId,
+    DateTime CreatedAt);

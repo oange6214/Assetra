@@ -2,7 +2,6 @@ using System.IO;
 using Assetra.Application.Sync;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models;
-using Assetra.Core.Models.Sync;
 using Assetra.Infrastructure.Persistence;
 using Assetra.Infrastructure.Sync;
 using Microsoft.Data.Sqlite;
@@ -33,8 +32,12 @@ public sealed class SyncEndToEndIntegrationTests : IDisposable
     public void Dispose()
     {
         SqliteConnection.ClearAllPools();
-        try { File.Delete(_dbA); } catch { }
-        try { File.Delete(_dbB); } catch { }
+        try
+        { File.Delete(_dbA); }
+        catch { }
+        try
+        { File.Delete(_dbB); }
+        catch { }
     }
 
     [Fact]

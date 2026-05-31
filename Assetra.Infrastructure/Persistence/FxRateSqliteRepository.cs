@@ -27,7 +27,8 @@ public sealed class FxRateSqliteRepository : IFxRateRepository
     public async Task UpsertManyAsync(IReadOnlyList<FxRate> rates, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(rates);
-        if (rates.Count == 0) return;
+        if (rates.Count == 0)
+            return;
 
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
@@ -66,7 +67,8 @@ public sealed class FxRateSqliteRepository : IFxRateRepository
         cmd.Parameters.AddWithValue("$t", t);
         cmd.Parameters.AddWithValue("$d", asOf.ToString("yyyy-MM-dd"));
         await using var r = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
-        if (!await r.ReadAsync(ct).ConfigureAwait(false)) return null;
+        if (!await r.ReadAsync(ct).ConfigureAwait(false))
+            return null;
         return new FxRate(r.GetString(0), r.GetString(1),
             (decimal)r.GetDouble(3), DateOnly.Parse(r.GetString(2)));
     }

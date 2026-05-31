@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-尚未開始。
+### FIRE planning
+
+- FIRE 從單純 FIRE number calculator 擴充為 scenario-based planning module，支援 Basic / Advanced 模式、情境新增 / 儲存 / 複製 / 刪除 / 設為預設。
+- Advanced mode 新增目前年齡、預期壽命、退休後年支出與通膨率輸入，並保存到 FIRE scenario。
+- FIRE 結果加入退休提領路徑、Monte Carlo 成功率、風險提示與可追溯的財務目標同步備註。
+- 新增 `docs/guides/FIRE-Planning.md`，整理 FIRE 使用方式、公式、情境管理與結果解讀。
 
 ---
 

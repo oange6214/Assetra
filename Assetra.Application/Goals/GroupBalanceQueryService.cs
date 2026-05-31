@@ -34,7 +34,8 @@ public sealed class GroupBalanceQueryService : IGroupBalanceQueryService
             // null group_id 視為 DefaultGroup（schema migration backfill 保證新 row 都有值，
             // 但 null check 是防禦：避免讀到未跑 backfill 的 row 而漏算 default group）。
             var tradeGroup = t.PortfolioGroupId ?? PortfolioGroup.DefaultId;
-            if (tradeGroup != groupId) continue;
+            if (tradeGroup != groupId)
+                continue;
             total += SignedCashDelta(t);
         }
         return total;

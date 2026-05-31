@@ -24,7 +24,8 @@ public static class ThousandSeparatorBehavior
 
     private static void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is not TextBox tb) return;
+        if (d is not TextBox tb)
+            return;
         if ((bool)e.NewValue)
         {
             tb.TextChanged -= OnTextChanged;
@@ -57,13 +58,15 @@ public static class ThousandSeparatorBehavior
 
     private static void OnTextChanged(object sender, TextChangedEventArgs e)
     {
-        if (_isFormatting || sender is not TextBox tb) return;
+        if (_isFormatting || sender is not TextBox tb)
+            return;
         FormatTextBox(tb);
     }
 
     private static void OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (_isFormatting || sender is not TextBox tb) return;
+        if (_isFormatting || sender is not TextBox tb)
+            return;
         FormatTextBox(tb);
     }
 
@@ -73,14 +76,16 @@ public static class ThousandSeparatorBehavior
         try
         {
             var text = tb.Text;
-            if (string.IsNullOrEmpty(text)) return;
+            if (string.IsNullOrEmpty(text))
+                return;
 
             // Raw caret = position ignoring commas already in the text.
             var caretIndex = Math.Clamp(tb.CaretIndex, 0, text.Length);
             var rawCaret = text[..caretIndex].Replace(",", "").Length;
 
             var formatted = Format(text);
-            if (formatted == text) return;
+            if (formatted == text)
+                return;
 
             tb.Text = formatted;
 
@@ -119,10 +124,12 @@ public static class ThousandSeparatorBehavior
 
         var sb = new StringBuilder();
         var offset = intPart.Length % 3;
-        if (offset > 0) sb.Append(intPart[..offset]);
+        if (offset > 0)
+            sb.Append(intPart[..offset]);
         for (var i = offset; i < intPart.Length; i += 3)
         {
-            if (i > 0) sb.Append(',');
+            if (i > 0)
+                sb.Append(',');
             sb.Append(intPart, i, 3);
         }
 

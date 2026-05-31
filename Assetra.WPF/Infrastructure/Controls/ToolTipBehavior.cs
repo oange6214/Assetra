@@ -56,9 +56,9 @@ public static class ToolTipBehavior
 
         var pos = e.GetPosition(fe);
 
-        toolTip.Placement       = PlacementMode.Relative;
+        toolTip.Placement = PlacementMode.Relative;
         toolTip.PlacementTarget = fe;
         toolTip.HorizontalOffset = pos.X + 14;
-        toolTip.VerticalOffset   = pos.Y + 14;
+        toolTip.VerticalOffset = pos.Y + 14;
     }
 }

@@ -37,7 +37,7 @@ internal static class AppBootstrapper
             .AddImportContext(paths.DbPath)
             .AddReconciliationContext(paths.DbPath)
             .AddMultiAssetContext(paths.DbPath)
-            .AddFireContext()
+            .AddFireContext(paths.DbPath)
             .AddMonteCarloContext()
             .AddAssistantContext(paths.DbPath)
             .AddAssetraSync(paths.DataDir)

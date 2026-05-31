@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Goals"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:GoalsViewModel}, IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:GoalsViewModel},
+                                     IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
     <!--
@@ -16,9 +17,7 @@
     <Grid>
 
         <!--  財務目標 — 新增 / 編輯表單  -->
-        <Grid
-            Style="{StaticResource AppDialogOverlay}"
-            Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Style="{StaticResource AppDialogOverlay}" Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border
                 Width="640"
                 MaxWidth="720"
@@ -37,18 +36,14 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Style="{StaticResource AppDialogHeader}">
-                        <TextBlock
-                            Style="{StaticResource AppDialogTitle}"
-                            Text="{Binding FormTitle}" />
+                        <TextBlock Style="{StaticResource AppDialogTitle}" Text="{Binding FormTitle}" />
                         <TextBlock
                             Style="{StaticResource AppDialogSubtitle}"
                             Text="{DynamicResource Goals.Form.Hint}"
                             TextWrapping="Wrap" />
                     </StackPanel>
 
-                    <Border
-                        Grid.Row="1"
-                        Style="{StaticResource FormSection}">
+                    <Border Grid.Row="1" Style="{StaticResource FormSection}">
                         <Grid>
                             <Grid.Resources>
                                 <Style x:Key="FormFieldLabel" TargetType="TextBlock">
@@ -87,9 +82,7 @@
                                 Grid.Column="0"
                                 Margin="0,0,0,14">
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Target}" />
-                                <TextBox
-                                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                                    Text="{Binding AddTargetAmount, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding AddTargetAmount, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
 
                             <StackPanel
@@ -97,9 +90,7 @@
                                 Grid.Column="2"
                                 Margin="0,0,0,14">
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.Current}" />
-                                <TextBox
-                                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                                    Text="{Binding AddCurrentAmount, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding AddCurrentAmount, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
 
                             <StackPanel Grid.Row="2" Grid.Column="0">
@@ -124,8 +115,8 @@
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.LinkedAssetClass}" />
                                 <ComboBox
                                     ItemsSource="{Binding LinkedAssetClassOptions}"
-                                    SelectedValuePath="Value"
                                     SelectedValue="{Binding AddLinkedAssetClass, Mode=TwoWay}"
+                                    SelectedValuePath="Value"
                                     Style="{StaticResource FormComboBox}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
@@ -140,9 +131,7 @@
                                     Text="{DynamicResource Goals.Add.LinkedAssetClass.Hint}"
                                     TextWrapping="Wrap" />
 
-                                <StackPanel
-                                    Margin="0,14,0,0"
-                                    Visibility="{Binding IsGroupSelectorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <StackPanel Margin="0,14,0,0" Visibility="{Binding IsGroupSelectorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Goals.Add.PortfolioGroup}" />
                                     <ComboBox
                                         DisplayMemberPath="Name"
@@ -190,9 +179,7 @@
         </Grid>
 
         <!--  財務目標 — 刪除確認  -->
-        <Grid
-            Style="{StaticResource AppDialogOverlay}"
-            Visibility="{Binding IsConfirmDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Style="{StaticResource AppDialogOverlay}" Visibility="{Binding IsConfirmDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"

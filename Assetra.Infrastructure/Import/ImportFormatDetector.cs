@@ -29,7 +29,8 @@ public sealed class ImportFormatDetector : IImportFormatDetector
         // 1) 檔名指紋
         foreach (var cfg in CsvParserConfigs.All)
         {
-            if (cfg.Format == ImportFormat.Generic) continue;
+            if (cfg.Format == ImportFormat.Generic)
+                continue;
             if (cfg.FileNameSignature.Any(s => lowerName.Contains(s.ToLowerInvariant())))
             {
                 return cfg.Format;
@@ -51,11 +52,13 @@ public sealed class ImportFormatDetector : IImportFormatDetector
             ? ReadExcelHeader(content)
             : await ReadCsvHeaderAsync(content, ct).ConfigureAwait(false);
 
-        if (headerKeywords.Count == 0) return null;
+        if (headerKeywords.Count == 0)
+            return null;
 
         foreach (var cfg in CsvParserConfigs.All)
         {
-            if (cfg.Format == ImportFormat.Generic) continue;
+            if (cfg.Format == ImportFormat.Generic)
+                continue;
             if (cfg.HeaderSignature.Count > 0
                 && cfg.HeaderSignature.All(sig => headerKeywords.Contains(sig)))
             {
@@ -81,10 +84,12 @@ public sealed class ImportFormatDetector : IImportFormatDetector
         // 嘗試 UTF-8 與 Big5（台灣銀行最常見的兩種編碼）
         foreach (var enc in new[] { Encoding.UTF8, Encoding.GetEncoding("big5") })
         {
-            if (content.CanSeek) content.Position = origin;
+            if (content.CanSeek)
+                content.Position = origin;
             using var reader = new StreamReader(content, enc, leaveOpen: true);
             var line = await reader.ReadLineAsync(ct).ConfigureAwait(false);
-            if (string.IsNullOrEmpty(line)) continue;
+            if (string.IsNullOrEmpty(line))
+                continue;
 
             foreach (var cell in line.Split(','))
             {
@@ -92,7 +97,8 @@ public sealed class ImportFormatDetector : IImportFormatDetector
             }
         }
 
-        if (content.CanSeek) content.Position = origin;
+        if (content.CanSeek)
+            content.Position = origin;
         return bag;
     }
 
@@ -112,7 +118,8 @@ public sealed class ImportFormatDetector : IImportFormatDetector
         }
         finally
         {
-            if (content.CanSeek) content.Position = origin;
+            if (content.CanSeek)
+                content.Position = origin;
         }
     }
 
@@ -130,7 +137,8 @@ public sealed class ImportFormatDetector : IImportFormatDetector
             for (var c = 1; c <= lastCol; c++)
             {
                 var v = row.Cell(c).GetString().Trim();
-                if (!string.IsNullOrEmpty(v)) bag.Add(v);
+                if (!string.IsNullOrEmpty(v))
+                    bag.Add(v);
             }
         }
         catch
@@ -139,7 +147,8 @@ public sealed class ImportFormatDetector : IImportFormatDetector
         }
         finally
         {
-            if (content.CanSeek) content.Position = origin;
+            if (content.CanSeek)
+                content.Position = origin;
         }
 
         return bag;

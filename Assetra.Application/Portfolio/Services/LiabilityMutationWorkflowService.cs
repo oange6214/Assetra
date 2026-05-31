@@ -50,16 +50,16 @@ public sealed class LiabilityMutationWorkflowService : ILiabilityMutationWorkflo
         // Build updated record using the with-expression so unspecified fields stay put.
         var updated = existing with
         {
-            Name             = string.IsNullOrWhiteSpace(request.NewName) ? existing.Name : request.NewName.Trim(),
-            IssuerName       = request.NewIssuerName ?? existing.IssuerName,
-            Subtype          = request.NewSubtype ?? existing.Subtype,
-            LoanAnnualRate   = request.NewAnnualRate ?? existing.LoanAnnualRate,
-            LoanTermMonths   = request.NewTermMonths ?? existing.LoanTermMonths,
-            LoanHandlingFee  = request.NewHandlingFee ?? existing.LoanHandlingFee,
-            CreditLimit      = request.NewCreditLimit ?? existing.CreditLimit,
-            BillingDay       = request.NewBillingDay ?? existing.BillingDay,
-            DueDay           = request.NewDueDay ?? existing.DueDay,
-            UpdatedAt        = DateTime.UtcNow,
+            Name = string.IsNullOrWhiteSpace(request.NewName) ? existing.Name : request.NewName.Trim(),
+            IssuerName = request.NewIssuerName ?? existing.IssuerName,
+            Subtype = request.NewSubtype ?? existing.Subtype,
+            LoanAnnualRate = request.NewAnnualRate ?? existing.LoanAnnualRate,
+            LoanTermMonths = request.NewTermMonths ?? existing.LoanTermMonths,
+            LoanHandlingFee = request.NewHandlingFee ?? existing.LoanHandlingFee,
+            CreditLimit = request.NewCreditLimit ?? existing.CreditLimit,
+            BillingDay = request.NewBillingDay ?? existing.BillingDay,
+            DueDay = request.NewDueDay ?? existing.DueDay,
+            UpdatedAt = DateTime.UtcNow,
         };
 
         await _assetRepository.UpdateItemAsync(updated).ConfigureAwait(false);
@@ -82,16 +82,16 @@ public sealed class LiabilityMutationWorkflowService : ILiabilityMutationWorkflo
 
         var recomputeResult = await _loanScheduleRecompute!.RecomputeAsync(
             new LoanScheduleRecomputeRequest(
-                AssetId:           request.AssetId,
+                AssetId: request.AssetId,
                 OriginalPrincipal: request.OriginalPrincipal!.Value,
-                NewAnnualRate:     updated.LoanAnnualRate!.Value,
-                NewTermMonths:     updated.LoanTermMonths!.Value),
+                NewAnnualRate: updated.LoanAnnualRate!.Value,
+                NewTermMonths: updated.LoanTermMonths!.Value),
             ct).ConfigureAwait(false);
 
         return new LiabilityUpdateResult(
-            Success:                true,
-            ScheduleRecomputed:     true,
-            PreservedPaidCount:     recomputeResult.PreservedPaidCount,
+            Success: true,
+            ScheduleRecomputed: true,
+            PreservedPaidCount: recomputeResult.PreservedPaidCount,
             RegeneratedUnpaidCount: recomputeResult.RegeneratedUnpaidCount);
     }
 }

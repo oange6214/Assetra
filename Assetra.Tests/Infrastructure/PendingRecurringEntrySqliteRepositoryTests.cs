@@ -18,7 +18,8 @@ public class PendingRecurringEntrySqliteRepositoryTests : IDisposable
     public void Dispose()
     {
         SqliteConnection.ClearAllPools();
-        if (File.Exists(_dbPath)) File.Delete(_dbPath);
+        if (File.Exists(_dbPath))
+            File.Delete(_dbPath);
     }
 
     private static PendingRecurringEntry Sample(PendingStatus status = PendingStatus.Pending) => new(

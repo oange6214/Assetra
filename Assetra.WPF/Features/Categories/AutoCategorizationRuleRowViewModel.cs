@@ -108,8 +108,10 @@ public partial class AutoCategorizationRuleRowViewModel : ObservableObject
     public AutoCategorizationScope ResolveEditAppliesTo()
     {
         var scope = AutoCategorizationScope.None;
-        if (EditAppliesToManual) scope |= AutoCategorizationScope.Manual;
-        if (EditAppliesToImport) scope |= AutoCategorizationScope.Import;
+        if (EditAppliesToManual)
+            scope |= AutoCategorizationScope.Manual;
+        if (EditAppliesToImport)
+            scope |= AutoCategorizationScope.Import;
         return scope == AutoCategorizationScope.None ? AutoCategorizationScope.Both : scope;
     }
 
@@ -136,7 +138,8 @@ public partial class AutoCategorizationRuleRowViewModel : ObservableObject
 
     private bool EvaluateLiveTest(string? input, bool isMemo)
     {
-        if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(EditKeyword)) return false;
+        if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(EditKeyword))
+            return false;
         var preview = new AutoCategorizationRule(
             Id: Guid.Empty,
             KeywordPattern: EditKeyword,

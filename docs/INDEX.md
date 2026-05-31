@@ -63,6 +63,8 @@
   - 未來可拆分的業務 context 邊界。
 
 ## Planning
+- [Assetra Complete FIRE Plan](planning/Assetra-Complete-FIRE-Plan.md)
+  - 將目前 FIRE 計算器擴充為完整 FIRE 規劃模組的實作計畫，包含 Basic / Advanced 模式、情境儲存、退休提領、成功率、財務目標同步與驗收規則。
 - [Assetra US Market Data Plan](planning/Assetra-US-Market-Data-Plan.md)
   - 台股與美股共存的 market data 架構計畫，包含 symbol directory、quote provider、quota、cache、trading calendar、FX valuation 與導入 phase。
 - [Assetra Fluent + Carbon UI Plan](planning/Assetra-Fluent-Carbon-UI-Plan.md)
@@ -85,6 +87,8 @@ context 與架構決策仍可讀：
 3. [Changelog v0.22.0](releases/CHANGELOG.md) — 完整變更摘要
 
 ## Guides
+- [FIRE Planning](guides/FIRE-Planning.md)
+  - FIRE Basic / Advanced 模式、情境儲存、淨資產來源、退休提領路徑與同步到財務目標的使用方式。
 - [Fugle API Key Setup](guides/Fugle-API-Key-Setup.md)
   - Fugle API key 申請與設定方式。
 - [Cloud Sync Setup](guides/Cloud-Sync-Setup.md)

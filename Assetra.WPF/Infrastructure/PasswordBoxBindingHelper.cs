@@ -42,7 +42,8 @@ public static class PasswordBoxBindingHelper
 
     private static void OnBoundPasswordChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is not PasswordBox pb) return;
+        if (d is not PasswordBox pb)
+            return;
 
         // Hook the PasswordChanged event exactly once.
         pb.PasswordChanged -= HandlePasswordChanged;
@@ -57,7 +58,8 @@ public static class PasswordBoxBindingHelper
 
     private static void HandlePasswordChanged(object sender, RoutedEventArgs e)
     {
-        if (sender is not PasswordBox pb) return;
+        if (sender is not PasswordBox pb)
+            return;
         SetUpdating(pb, true);
         try
         {

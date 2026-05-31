@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace Assetra.WPF.Infrastructure;

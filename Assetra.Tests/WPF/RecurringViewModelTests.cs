@@ -151,7 +151,8 @@ public sealed class RecurringViewModelTests
         public Task UpdateAsync(RecurringTransaction recurring, CancellationToken ct = default)
         {
             var index = Store.FindIndex(r => r.Id == recurring.Id);
-            if (index >= 0) Store[index] = recurring;
+            if (index >= 0)
+                Store[index] = recurring;
             return Task.CompletedTask;
         }
 
@@ -185,7 +186,8 @@ public sealed class RecurringViewModelTests
         public Task UpdateAsync(PendingRecurringEntry entry, CancellationToken ct = default)
         {
             var index = Entries.FindIndex(x => x.Id == entry.Id);
-            if (index >= 0) Entries[index] = entry;
+            if (index >= 0)
+                Entries[index] = entry;
             return Task.CompletedTask;
         }
 

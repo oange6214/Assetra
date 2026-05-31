@@ -65,7 +65,8 @@ public sealed partial class AuditLogViewModel : ObservableObject
     {
         get
         {
-            if (SelectedEntry is null) return new TradeDetailViewModel(string.Empty, snapshot: null);
+            if (SelectedEntry is null)
+                return new TradeDetailViewModel(string.Empty, snapshot: null);
             var current = TradeSnapshotParser.TryParse(SelectedEntry.RawTradeJson);
             var previous = ResolvePreviousForDiff(SelectedEntry);
             return new TradeDetailViewModel(SelectedEntry.RawTradeJson, current, previous);
@@ -106,7 +107,8 @@ public sealed partial class AuditLogViewModel : ObservableObject
     [RelayCommand]
     private void RequestRestore(AuditRowViewModel? row)
     {
-        if (row is null || _restore is null) return;
+        if (row is null || _restore is null)
+            return;
         SelectedEntry = row;
         PendingRestore = row;
     }
@@ -118,7 +120,8 @@ public sealed partial class AuditLogViewModel : ObservableObject
     private async Task ConfirmRestoreAsync()
     {
         var row = PendingRestore;
-        if (row is null || _restore is null) return;
+        if (row is null || _restore is null)
+            return;
         try
         {
             var newId = await _restore.RestoreAsync(row.RawTradeJson).ConfigureAwait(true);
@@ -134,7 +137,8 @@ public sealed partial class AuditLogViewModel : ObservableObject
     [RelayCommand]
     private void SetChip(string? chip)
     {
-        if (string.IsNullOrWhiteSpace(chip)) return;
+        if (string.IsNullOrWhiteSpace(chip))
+            return;
         ActiveChip = chip;
         EntriesView.Refresh();
     }
@@ -144,24 +148,29 @@ public sealed partial class AuditLogViewModel : ObservableObject
 
     private bool FilterEntry(object obj)
     {
-        if (obj is not AuditRowViewModel row) return false;
+        if (obj is not AuditRowViewModel row)
+            return false;
 
         // Chip filter
         switch (ActiveChip)
         {
             case "Delete":
-                if (!row.Action.Equals("delete", StringComparison.OrdinalIgnoreCase)) return false;
+                if (!row.Action.Equals("delete", StringComparison.OrdinalIgnoreCase))
+                    return false;
                 break;
             case "Edit":
-                if (!row.Action.Contains("edit", StringComparison.OrdinalIgnoreCase)) return false;
+                if (!row.Action.Contains("edit", StringComparison.OrdinalIgnoreCase))
+                    return false;
                 break;
             case "24h":
-                if ((DateTime.UtcNow - row.RawRecordedAtUtc).TotalHours > 24) return false;
+                if ((DateTime.UtcNow - row.RawRecordedAtUtc).TotalHours > 24)
+                    return false;
                 break;
         }
 
         var q = FilterText?.Trim();
-        if (string.IsNullOrEmpty(q)) return true;
+        if (string.IsNullOrEmpty(q))
+            return true;
         return row.Action.Contains(q, StringComparison.OrdinalIgnoreCase)
             || row.TradeIdShort.Contains(q, StringComparison.OrdinalIgnoreCase)
             || row.Note.Contains(q, StringComparison.OrdinalIgnoreCase)
@@ -176,15 +185,19 @@ public sealed partial class AuditLogViewModel : ObservableObject
     /// </summary>
     private Trade? ResolvePreviousForDiff(AuditRowViewModel row)
     {
-        if (!row.Action.Contains("edit", StringComparison.OrdinalIgnoreCase)) return null;
+        if (!row.Action.Contains("edit", StringComparison.OrdinalIgnoreCase))
+            return null;
 
         // Find the most recent older audit row for the same TradeId (older = earlier RecordedAt).
         AuditRowViewModel? older = null;
         foreach (var e in _entries)
         {
-            if (e.TradeId != row.TradeId) continue;
-            if (e.RawRecordedAtUtc >= row.RawRecordedAtUtc) continue;
-            if (older is null || e.RawRecordedAtUtc > older.RawRecordedAtUtc) older = e;
+            if (e.TradeId != row.TradeId)
+                continue;
+            if (e.RawRecordedAtUtc >= row.RawRecordedAtUtc)
+                continue;
+            if (older is null || e.RawRecordedAtUtc > older.RawRecordedAtUtc)
+                older = e;
         }
         return older is null ? null : TradeSnapshotParser.TryParse(older.RawTradeJson);
     }
@@ -192,7 +205,8 @@ public sealed partial class AuditLogViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (_audit is null || IsLoading) return;
+        if (_audit is null || IsLoading)
+            return;
         IsLoading = true;
         ErrorMessage = string.Empty;
         try

@@ -16,8 +16,8 @@ T20-T24 保留作 reference，但不再屬於「待辦」性質。
 
 ## 🟢 High CP (1-2h each)
 
-- [x] **T01** — FIRE widget 4 metrics（FIRE 目標 / 預估自由年份 / 完成進度 / 累計投入）
-  - 「成功率」 audit 提的需要 Monte Carlo 整合，本輪用 FIRE 目標金額替代
+- [x] **T01** — FIRE widget 4 metrics（財務自由所需資產 / 預估自由年份 / 完成進度 / 累計投入）
+  - 「成功率」 audit 提的需要 Monte Carlo 整合，本輪用財務自由所需資產替代
 - [x] **T02** — Skeleton 擴展剩餘 Summary tier cards（總負債 ✅ / 淨資產 mini ✅ / 資產組成 暫不加 — 它是分項列表複雜）
 - [x] **T03** — Per-type TxForms label margin 4 → 6（8 forms, 43 occurrences）
 - [x] **T04** — Keyboard shortcuts help dialog（Ctrl+/）— 列 13 個現有快捷鍵
@@ -48,7 +48,7 @@ T20-T24 保留作 reference，但不再屬於「待辦」性質。
 
 (每完成一項 append 一行：`✅ Txx — 簡述 (commit hash)`)
 
-✅ T01 — FIRE widget 4 metrics (FIRE 目標 / 預估自由年份 / 完成進度 / 累計投入)
+✅ T01 — FIRE widget 4 metrics (財務自由所需資產 / 預估自由年份 / 完成進度 / 累計投入)
 ✅ T02 — Skeleton 擴展到總負債 + 淨資產 mini cards
 ✅ T03 — TxForms label margin 4→6 (8 forms, 43 occurrences)
 ✅ T04 — Ctrl+/ Keyboard shortcuts help dialog + AppKbdChip style

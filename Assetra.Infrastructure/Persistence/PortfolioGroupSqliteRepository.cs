@@ -117,7 +117,8 @@ public sealed class PortfolioGroupSqliteRepository : IPortfolioGroupRepository, 
     public async Task RemoveAsync(Guid id, CancellationToken ct = default)
     {
         var existing = await GetByIdAsync(id, ct).ConfigureAwait(false);
-        if (existing is null) return;
+        if (existing is null)
+            return;
         if (existing.IsSystem)
             throw new InvalidOperationException($"Portfolio group '{existing.Name}' is system-protected and cannot be deleted.");
 
@@ -141,14 +142,14 @@ public sealed class PortfolioGroupSqliteRepository : IPortfolioGroupRepository, 
     }
 
     private static PortfolioGroup MapGroup(SqliteDataReader r) => new(
-        Id:                    Guid.Parse(r.GetString(0)),
-        Name:                  r.GetString(1),
-        ColorHex:              r.IsDBNull(2) ? null : r.GetString(2),
-        Description:           r.IsDBNull(3) ? null : r.GetString(3),
-        IconKey:               r.IsDBNull(4) ? null : r.GetString(4),
-        SortOrder:             r.GetInt32(5),
-        DefaultCashAccountId:  r.IsDBNull(6) ? null : Guid.Parse(r.GetString(6)),
-        IsSystem:              r.GetInt32(7) != 0);
+        Id: Guid.Parse(r.GetString(0)),
+        Name: r.GetString(1),
+        ColorHex: r.IsDBNull(2) ? null : r.GetString(2),
+        Description: r.IsDBNull(3) ? null : r.GetString(3),
+        IconKey: r.IsDBNull(4) ? null : r.GetString(4),
+        SortOrder: r.GetInt32(5),
+        DefaultCashAccountId: r.IsDBNull(6) ? null : Guid.Parse(r.GetString(6)),
+        IsSystem: r.GetInt32(7) != 0);
 
     private static void BindGroupParams(SqliteCommand cmd, PortfolioGroup g)
     {
@@ -196,7 +197,8 @@ public sealed class PortfolioGroupSqliteRepository : IPortfolioGroupRepository, 
     public async Task MarkPushedAsync(IReadOnlyList<Guid> ids, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
-        if (ids.Count == 0) return;
+        if (ids.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
@@ -215,14 +217,16 @@ public sealed class PortfolioGroupSqliteRepository : IPortfolioGroupRepository, 
     public async Task ApplyRemoteAsync(IReadOnlyList<SyncEnvelope> envelopes, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(envelopes);
-        if (envelopes.Count == 0) return;
+        if (envelopes.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
 
         foreach (var env in envelopes)
         {
-            if (env.EntityType != PortfolioGroupSyncMapper.EntityType) continue;
+            if (env.EntityType != PortfolioGroupSyncMapper.EntityType)
+                continue;
 
             await using (var probe = conn.CreateCommand())
             {
@@ -234,10 +238,12 @@ public sealed class PortfolioGroupSqliteRepository : IPortfolioGroupRepository, 
                 {
                     var existingVer = pr.GetInt64(0);
                     var existingSystem = pr.GetInt32(1) != 0;
-                    if (existingVer >= env.Version.Version) continue; // backwards
+                    if (existingVer >= env.Version.Version)
+                        continue; // backwards
                     // Defense: if local row is system-protected, ignore remote
                     // tombstone — prevents another device from deleting our default group.
-                    if (existingSystem && env.Deleted) continue;
+                    if (existingSystem && env.Deleted)
+                        continue;
                 }
             }
 

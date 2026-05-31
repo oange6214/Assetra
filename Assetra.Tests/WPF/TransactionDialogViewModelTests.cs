@@ -1,14 +1,13 @@
 using System.Collections.ObjectModel;
-using Moq;
 using Assetra.Application.Fx;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
-using Assetra.Infrastructure;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Features.PortfolioGroups;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.WPF;
@@ -124,6 +123,50 @@ public class TransactionDialogViewModelTests
             CurrentPrice = 46m,
         };
 
+    private static LiabilityRowViewModel MakeLoanLiability(
+        string name = "台新 7y",
+        string currency = "TWD")
+    {
+        var asset = new AssetItem(
+            Guid.NewGuid(),
+            name,
+            FinancialType.Liability,
+            GroupId: null,
+            currency,
+            DateOnly.FromDateTime(DateTime.Today),
+            LoanAnnualRate: 0.025m,
+            LoanTermMonths: 84,
+            LoanStartDate: DateOnly.FromDateTime(DateTime.Today.AddMonths(-3)));
+
+        return new LiabilityRowViewModel(
+            name,
+            new LiabilitySnapshot(new Money(2_000_000m, currency), new Money(2_500_000m, currency)),
+            asset);
+    }
+
+    private static LiabilityRowViewModel MakeCreditCardLiability(
+        string name = "富邦 J 卡",
+        string currency = "TWD")
+    {
+        var asset = new AssetItem(
+            Guid.NewGuid(),
+            name,
+            FinancialType.Liability,
+            GroupId: null,
+            currency,
+            DateOnly.FromDateTime(DateTime.Today),
+            LiabilitySubtype: LiabilitySubtype.CreditCard,
+            BillingDay: 5,
+            DueDay: 20,
+            CreditLimit: 80_000m,
+            IssuerName: "Fubon");
+
+        return new LiabilityRowViewModel(
+            name,
+            new LiabilitySnapshot(new Money(12_000m, currency), new Money(12_000m, currency)),
+            asset);
+    }
+
     [Fact]
     public void OpenTxDialog_ShowsDefaultCashAccountNameWhenDefaultAccountExists()
     {
@@ -201,6 +244,44 @@ public class TransactionDialogViewModelTests
         Assert.Same(position, vm.Div.Position);
         Assert.NotNull(vm.SelectedAsset);
         Assert.Equal(position.Id, vm.SelectedAsset.Id);
+    }
+
+    [Fact]
+    public void OpenTxDialogForLiability_LoanRepayPreselectsLoanAssetAndLocksAssetSelector()
+    {
+        var liability = MakeLoanLiability();
+        var vm = CreateVm(liabilities: new ObservableCollection<LiabilityRowViewModel> { liability });
+
+        vm.OpenTxDialogForLiability(liability, "loanRepay");
+
+        Assert.True(vm.IsTxDialogOpen);
+        Assert.True(vm.IsAssetContextLocked);
+        Assert.False(vm.ShowAssetSelector);
+        Assert.Equal("loanRepay", vm.TxType);
+        Assert.NotNull(vm.SelectedAsset);
+        Assert.Equal(TxAssetKind.Liability, vm.SelectedAsset.Kind);
+        Assert.Equal(liability.AssetId, vm.SelectedAsset.Id);
+        Assert.Equal(liability.Label, vm.SelectedAsset.PrimaryName);
+        Assert.Equal(liability.Label, vm.Loan.Label);
+    }
+
+    [Fact]
+    public void OpenTxDialogForLiability_CreditCardPaymentPreselectsCardAndLocksAssetSelector()
+    {
+        var liability = MakeCreditCardLiability();
+        var vm = CreateVm(liabilities: new ObservableCollection<LiabilityRowViewModel> { liability });
+
+        vm.OpenTxDialogForLiability(liability, "creditCardPayment");
+
+        Assert.True(vm.IsTxDialogOpen);
+        Assert.True(vm.IsAssetContextLocked);
+        Assert.False(vm.ShowAssetSelector);
+        Assert.Equal("creditCardPayment", vm.TxType);
+        Assert.NotNull(vm.SelectedAsset);
+        Assert.Equal(TxAssetKind.Liability, vm.SelectedAsset.Kind);
+        Assert.Equal(liability.AssetId, vm.SelectedAsset.Id);
+        Assert.Equal(liability.Label, vm.SelectedAsset.PrimaryName);
+        Assert.Same(liability, vm.CreditCard.Card);
     }
 
     [Fact]

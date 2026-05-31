@@ -7,7 +7,8 @@
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Recurring"
-    d:DataContext="{d:DesignInstance Type={x:Type vm:RecurringViewModel}, IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:RecurringViewModel},
+                                     IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
     <!--
@@ -18,9 +19,7 @@
     <Grid>
 
         <!--  訂閱排程 — 新增表單  -->
-        <Grid
-            Style="{StaticResource AppDialogOverlay}"
-            Visibility="{Binding IsAddFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Style="{StaticResource AppDialogOverlay}" Visibility="{Binding IsAddFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border
                 Width="680"
                 MaxWidth="760"
@@ -40,9 +39,7 @@
 
                     <Grid Margin="0,0,0,16">
                         <StackPanel Margin="0,4,40,0">
-                            <TextBlock
-                                Style="{StaticResource AppDialogTitle}"
-                                Text="{DynamicResource Recurring.AddForm.Title}" />
+                            <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Recurring.AddForm.Title}" />
                             <TextBlock
                                 Style="{StaticResource AppDialogSubtitle}"
                                 Text="{DynamicResource Recurring.AddForm.Hint}"
@@ -62,9 +59,7 @@
                         </Button>
                     </Grid>
 
-                    <Border
-                        Grid.Row="1"
-                        Style="{StaticResource FormSection}">
+                    <Border Grid.Row="1" Style="{StaticResource FormSection}">
                         <Grid>
                             <Grid.Resources>
                                 <Style x:Key="FormFieldLabel" TargetType="TextBlock">
@@ -102,9 +97,7 @@
                                 Grid.ColumnSpan="3"
                                 Margin="0,0,0,14">
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Recurring.Field.Name}" />
-                                <TextBox
-                                    Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}"
-                                    ToolTip="{DynamicResource Recurring.NameHint}" />
+                                <TextBox Text="{Binding AddName, UpdateSourceTrigger=PropertyChanged}" ToolTip="{DynamicResource Recurring.NameHint}" />
                             </StackPanel>
 
                             <StackPanel
@@ -158,8 +151,8 @@
                                 Margin="0,0,0,14">
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Recurring.Field.StartDate}" />
                                 <DatePicker
-                                    MinHeight="40"
                                     MinWidth="132"
+                                    MinHeight="40"
                                     HorizontalContentAlignment="Left"
                                     SelectedDate="{Binding AddStartDate, Mode=TwoWay}"
                                     Style="{StaticResource AppDatePicker}" />
@@ -210,9 +203,7 @@
                                 Grid.Column="0"
                                 Margin="0,0,0,14">
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Recurring.Field.Interval}" />
-                                <TextBox
-                                    Text="{Binding AddInterval, UpdateSourceTrigger=PropertyChanged}"
-                                    ToolTip="{DynamicResource Recurring.IntervalHint}" />
+                                <TextBox Text="{Binding AddInterval, UpdateSourceTrigger=PropertyChanged}" ToolTip="{DynamicResource Recurring.IntervalHint}" />
                             </StackPanel>
 
                             <StackPanel
@@ -243,7 +234,10 @@
                                 </ComboBox>
                             </StackPanel>
 
-                            <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3">
+                            <StackPanel
+                                Grid.Row="4"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="3">
                                 <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Recurring.Field.Note}" />
                                 <TextBox Text="{Binding AddNote, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
@@ -281,9 +275,7 @@
         </Grid>
 
         <!--  訂閱排程 — 刪除確認  -->
-        <Grid
-            Style="{StaticResource AppDialogOverlay}"
-            Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Style="{StaticResource AppDialogOverlay}" Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
@@ -297,9 +289,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Style="{StaticResource AppDialogTitle}" Text="{DynamicResource Common.DeleteConfirmTitle}" />
-                    <TextBlock
-                        Grid.Row="1"
-                        Style="{StaticResource AppDialogSubtitle}">
+                    <TextBlock Grid.Row="1" Style="{StaticResource AppDialogSubtitle}">
                         <Run Text="{DynamicResource Common.DeleteConfirmPrefix}" />
                         <Run Text="{Binding DeleteTargetName}" />
                         <Run Text="{DynamicResource Common.DeleteConfirmSuffix}" />

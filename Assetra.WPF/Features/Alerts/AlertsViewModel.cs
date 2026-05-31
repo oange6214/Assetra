@@ -231,7 +231,8 @@ public partial class AlertsViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void RequestRemoveRule(AlertRowViewModel row)
     {
-        if (row is null) return;
+        if (row is null)
+            return;
         _pendingDelete = row;
         DeleteTargetName = $"{row.Symbol} {row.ConditionText}";
         IsDeleteConfirmOpen = true;

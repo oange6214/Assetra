@@ -39,10 +39,12 @@ public static class PerformanceFlowBuilder
         foreach (var trade in trades)
         {
             var date = PerformancePeriod.ToPeriodDate(trade.TradeDate);
-            if (!period.Contains(date)) continue;
+            if (!period.Contains(date))
+                continue;
 
             var amount = ResolveAmount(trade, scope);
-            if (amount == 0m) continue;
+            if (amount == 0m)
+                continue;
 
             string? currency = null;
             if (trade.PortfolioEntryId is { } entryId

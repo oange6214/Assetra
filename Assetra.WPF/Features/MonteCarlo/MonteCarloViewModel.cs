@@ -56,14 +56,22 @@ public sealed partial class MonteCarloViewModel : ObservableObject
             return;
 
         ErrorMessage = null;
-        if (!ParseHelpers.TryParseDecimal(InitialBalance, out var init))      { ErrorMessage = L("MonteCarlo.Error.InitialInvalid",     "起始餘額格式錯誤"); return; }
-        if (!ParseHelpers.TryParseDecimal(AnnualWithdrawal, out var wd))      { ErrorMessage = L("MonteCarlo.Error.WithdrawalInvalid",  "年提領格式錯誤");   return; }
-        if (!ParseHelpers.TryParseDecimal(MeanReturn, out var mu) || mu <= -1m) { ErrorMessage = L("MonteCarlo.Error.MeanInvalid",     "平均報酬率必須 > -100%"); return; }
-        if (!ParseHelpers.TryParseDecimal(StdDev, out var sigma) || sigma < 0) { ErrorMessage = L("MonteCarlo.Error.StdDevInvalid",    "標準差必須 ≥ 0");   return; }
-        if (!ParseHelpers.TryParseInt(Years, out var years) || years <= 0)    { ErrorMessage = L("MonteCarlo.Error.YearsInvalid",      "年數必須 > 0");    return; }
-        if (years > MonteCarloInputs.MaxYears) { ErrorMessage = string.Format(L("MonteCarlo.Error.YearsMax", "年數必須 ≤ {0}"), MonteCarloInputs.MaxYears); return; }
-        if (!ParseHelpers.TryParseInt(SimulationCount, out var count) || count <= 0) { ErrorMessage = L("MonteCarlo.Error.CountInvalid", "模擬次數必須 > 0"); return; }
-        if (count > MonteCarloInputs.MaxSimulationCount) { ErrorMessage = string.Format(L("MonteCarlo.Error.CountMax", "模擬次數必須 ≤ {0:N0}"), MonteCarloInputs.MaxSimulationCount); return; }
+        if (!ParseHelpers.TryParseDecimal(InitialBalance, out var init))
+        { ErrorMessage = L("MonteCarlo.Error.InitialInvalid", "起始餘額格式錯誤"); return; }
+        if (!ParseHelpers.TryParseDecimal(AnnualWithdrawal, out var wd))
+        { ErrorMessage = L("MonteCarlo.Error.WithdrawalInvalid", "年提領格式錯誤"); return; }
+        if (!ParseHelpers.TryParseDecimal(MeanReturn, out var mu) || mu <= -1m)
+        { ErrorMessage = L("MonteCarlo.Error.MeanInvalid", "平均報酬率必須 > -100%"); return; }
+        if (!ParseHelpers.TryParseDecimal(StdDev, out var sigma) || sigma < 0)
+        { ErrorMessage = L("MonteCarlo.Error.StdDevInvalid", "標準差必須 ≥ 0"); return; }
+        if (!ParseHelpers.TryParseInt(Years, out var years) || years <= 0)
+        { ErrorMessage = L("MonteCarlo.Error.YearsInvalid", "年數必須 > 0"); return; }
+        if (years > MonteCarloInputs.MaxYears)
+        { ErrorMessage = string.Format(L("MonteCarlo.Error.YearsMax", "年數必須 ≤ {0}"), MonteCarloInputs.MaxYears); return; }
+        if (!ParseHelpers.TryParseInt(SimulationCount, out var count) || count <= 0)
+        { ErrorMessage = L("MonteCarlo.Error.CountInvalid", "模擬次數必須 > 0"); return; }
+        if (count > MonteCarloInputs.MaxSimulationCount)
+        { ErrorMessage = string.Format(L("MonteCarlo.Error.CountMax", "模擬次數必須 ≤ {0:N0}"), MonteCarloInputs.MaxSimulationCount); return; }
 
         IsRunning = true;
         try

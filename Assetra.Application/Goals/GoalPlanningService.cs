@@ -30,7 +30,8 @@ public static class GoalPlanningService
     {
         ArgumentOutOfRangeException.ThrowIfNegative(annualReturnRate);
 
-        if (targetAmount <= 0m) return 0m;
+        if (targetAmount <= 0m)
+            return 0m;
         if (months <= 0)
         {
             return currentAmount >= targetAmount ? 0m : null;
@@ -81,8 +82,10 @@ public static class GoalPlanningService
     {
         ArgumentOutOfRangeException.ThrowIfNegative(annualReturnRate);
 
-        if (targetAmount <= 0m || currentAmount >= targetAmount) return 0;
-        if (monthlyContribution <= 0m && annualReturnRate == 0m) return null;
+        if (targetAmount <= 0m || currentAmount >= targetAmount)
+            return 0;
+        if (monthlyContribution <= 0m && annualReturnRate == 0m)
+            return null;
 
         var r = (double)annualReturnRate / 12.0;
         var pv = (double)currentAmount;
@@ -104,7 +107,8 @@ public static class GoalPlanningService
                 balance *= (1.0 + r);
                 balance += pmt;
             }
-            if (balance >= fv) return month;
+            if (balance >= fv)
+                return month;
         }
         return null;
     }

@@ -4,8 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
-    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel},
                                      IsDesignTimeCreatable=False}"
     Visibility="{Binding HasNoGoals, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
@@ -59,19 +59,23 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock
-                                Grid.Row="0" Grid.Column="0"
+                                Grid.Row="0"
+                                Grid.Column="0"
                                 FontSize="{StaticResource Font.Size.Sm}"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{Binding Name}"
                                 TextTrimming="CharacterEllipsis" />
                             <TextBlock
-                                Grid.Row="0" Grid.Column="1"
+                                Grid.Row="0"
+                                Grid.Column="1"
                                 FontSize="{StaticResource Font.Size.Xs}"
                                 FontWeight="SemiBold"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{Binding ProgressDisplay}" />
                             <ProgressBar
-                                Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="2"
                                 Height="4"
                                 Margin="0,4,0,0"
                                 Maximum="100"
@@ -89,8 +93,7 @@
                 Hero「點此設定 →」承擔，視覺更乾淨。
             -->
 
-            <TextBlock Style="{StaticResource DashboardWidgetFooter}"
-                       Text="{DynamicResource Dashboard.Widget.SeeMore}">
+            <TextBlock Style="{StaticResource DashboardWidgetFooter}" Text="{DynamicResource Dashboard.Widget.SeeMore}">
                 <TextBlock.InputBindings>
                     <MouseBinding Command="{Binding NavigateToGoalsCommand}" MouseAction="LeftClick" />
                 </TextBlock.InputBindings>

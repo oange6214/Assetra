@@ -72,7 +72,8 @@ public sealed class FxRateHistorySqliteRepository : IFxRateHistoryRepository
         IReadOnlyCollection<FxRateHistoryEntry> entries, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(entries);
-        if (entries.Count == 0) return;
+        if (entries.Count == 0)
+            return;
 
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
@@ -112,7 +113,8 @@ public sealed class FxRateHistorySqliteRepository : IFxRateHistoryRepository
     {
         if (string.IsNullOrWhiteSpace(baseCcy) || string.IsNullOrWhiteSpace(quoteCcy))
             return Array.Empty<FxRateHistoryEntry>();
-        if (from > to) (from, to) = (to, from);
+        if (from > to)
+            (from, to) = (to, from);
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
@@ -136,10 +138,10 @@ public sealed class FxRateHistorySqliteRepository : IFxRateHistoryRepository
     }
 
     private static FxRateHistoryEntry Map(SqliteDataReader r) => new(
-        Date:           DateOnly.Parse(r.GetString(0)),
-        BaseCurrency:   r.GetString(1),
-        QuoteCurrency:  r.GetString(2),
-        Rate:           (decimal)r.GetDouble(3),
-        Source:         r.GetString(4),
-        IngestedAt:     DateTimeOffset.Parse(r.GetString(5)));
+        Date: DateOnly.Parse(r.GetString(0)),
+        BaseCurrency: r.GetString(1),
+        QuoteCurrency: r.GetString(2),
+        Rate: (decimal)r.GetDouble(3),
+        Source: r.GetString(4),
+        IngestedAt: DateTimeOffset.Parse(r.GetString(5)));
 }

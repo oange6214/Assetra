@@ -118,7 +118,8 @@ internal static class CategorySchemaMigrator
         probe.CommandText = "SELECT 1 FROM pragma_table_info('expense_category') WHERE name = $name;";
         probe.Parameters.AddWithValue("$name", column);
         var exists = probe.ExecuteScalar() is not null;
-        if (exists) return;
+        if (exists)
+            return;
 
         using var alter = conn.CreateCommand();
         alter.Transaction = tx;

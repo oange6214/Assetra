@@ -218,9 +218,9 @@
                 自動解到 sub-VM 屬性。
             -->
             <txforms:CrossCurrencyOverlay
-                DataContext="{Binding Div}"
                 ActualCashAmountHint="{DynamicResource Portfolio.Tx.DivActualCashAmountHint}"
                 ActualCashAmountLabel="{DynamicResource Portfolio.Tx.DivActualCashAmount}"
+                DataContext="{Binding Div}"
                 FetchFxRateCommand="{Binding DataContext.FetchDividendFxRateCommand, ElementName=Root}"
                 GroupName="TxDivSettlementInputMode" />
         </StackPanel>

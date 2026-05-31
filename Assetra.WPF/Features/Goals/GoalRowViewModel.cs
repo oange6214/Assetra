@@ -1,5 +1,5 @@
-using Assetra.Core.Models;
 using Assetra.Core.Interfaces;
+using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.Goals;
@@ -35,22 +35,23 @@ public sealed partial class GoalRowViewModel : ObservableObject
         _localization = localization;
     }
 
-    public Guid Id            => Goal.Id;
-    public string Name        => Goal.Name;
-    public string? Notes      => Goal.Notes;
+    public Guid Id => Goal.Id;
+    public string Name => Goal.Name;
+    public string? Notes => Goal.Notes;
 
-    public string TargetDisplay    => FormatAmount(Goal.TargetAmount);
-    public string CurrentDisplay   => FormatAmount(Goal.CurrentAmount);
+    public string TargetDisplay => FormatAmount(Goal.TargetAmount);
+    public string CurrentDisplay => FormatAmount(Goal.CurrentAmount);
     public string RemainingDisplay => FormatAmount(Goal.Remaining);
 
     public decimal ProgressPercent => Goal.ProgressPercent;
-    public string  ProgressDisplay => $"{ProgressPercent:F1}%";
+    public string ProgressDisplay => $"{ProgressPercent:F1}%";
 
     public string DeadlineDisplay
     {
         get
         {
-            if (Goal.Deadline is not { } d) return "—";
+            if (Goal.Deadline is not { } d)
+                return "—";
             var days = Goal.DaysRemaining ?? 0;
             return days >= 0
                 ? $"{d:yyyy-MM-dd} ({FormatDaysRemaining(days)})"
@@ -58,18 +59,21 @@ public sealed partial class GoalRowViewModel : ObservableObject
         }
     }
 
-    public bool   IsAchieved => Goal.IsAchieved;
+    public bool IsAchieved => Goal.IsAchieved;
 
     /// <summary>"achieved" | "ontrack" | "warning" | "overdue" — XAML triggers.</summary>
     public string StatusTag
     {
         get
         {
-            if (IsAchieved) return "achieved";
+            if (IsAchieved)
+                return "achieved";
             if (Goal.DaysRemaining is { } d)
             {
-                if (d < 0) return "overdue";
-                if (d <= 30 && ProgressPercent < 80m) return "warning";
+                if (d < 0)
+                    return "overdue";
+                if (d <= 30 && ProgressPercent < 80m)
+                    return "warning";
             }
             return "ontrack";
         }

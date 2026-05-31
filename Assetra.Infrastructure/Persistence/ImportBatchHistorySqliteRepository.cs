@@ -124,7 +124,8 @@ public sealed class ImportBatchHistorySqliteRepository : IImportBatchHistoryRepo
             }
         }
 
-        if (header is null) return null;
+        if (header is null)
+            return null;
 
         var entries = new List<ImportBatchEntry>();
         await using (var cmd = conn.CreateCommand())
@@ -170,7 +171,8 @@ public sealed class ImportBatchHistorySqliteRepository : IImportBatchHistoryRepo
         {
             var json = reader.GetString(0);
             var row = System.Text.Json.JsonSerializer.Deserialize<ImportPreviewRow>(json);
-            if (row is not null) rows.Add(row);
+            if (row is not null)
+                rows.Add(row);
         }
         return rows;
     }

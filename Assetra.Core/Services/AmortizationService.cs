@@ -33,16 +33,18 @@ public static class AmortizationService
     /// or remaining principal ≤ 0).</para>
     /// </summary>
     public static IReadOnlyList<LoanScheduleEntry> RecomputeUnpaidTail(
-        Guid                                    assetId,
-        decimal                                 originalPrincipal,
-        decimal                                 newAnnualRate,
-        int                                     newTermMonths,
-        DateOnly                                originalFirstPaymentDate,
-        IReadOnlyList<LoanScheduleEntry>        existingEntries)
+        Guid assetId,
+        decimal originalPrincipal,
+        decimal newAnnualRate,
+        int newTermMonths,
+        DateOnly originalFirstPaymentDate,
+        IReadOnlyList<LoanScheduleEntry> existingEntries)
     {
         ArgumentNullException.ThrowIfNull(existingEntries);
-        if (newAnnualRate < 0)  throw new ArgumentOutOfRangeException(nameof(newAnnualRate));
-        if (newTermMonths <= 0) throw new ArgumentOutOfRangeException(nameof(newTermMonths));
+        if (newAnnualRate < 0)
+            throw new ArgumentOutOfRangeException(nameof(newAnnualRate));
+        if (newTermMonths <= 0)
+            throw new ArgumentOutOfRangeException(nameof(newTermMonths));
 
         var paid = existingEntries.Where(e => e.IsPaid).OrderBy(e => e.Period).ToList();
         var paidCount = paid.Count;
@@ -78,15 +80,18 @@ public static class AmortizationService
     }
 
     public static IReadOnlyList<LoanScheduleEntry> Generate(
-        Guid     assetId,
-        decimal  principal,
-        decimal  annualRate,
-        int      termMonths,
+        Guid assetId,
+        decimal principal,
+        decimal annualRate,
+        int termMonths,
         DateOnly firstPaymentDate)
     {
-        if (principal <= 0)   throw new ArgumentOutOfRangeException(nameof(principal));
-        if (annualRate < 0)   throw new ArgumentOutOfRangeException(nameof(annualRate));
-        if (termMonths <= 0)  throw new ArgumentOutOfRangeException(nameof(termMonths));
+        if (principal <= 0)
+            throw new ArgumentOutOfRangeException(nameof(principal));
+        if (annualRate < 0)
+            throw new ArgumentOutOfRangeException(nameof(annualRate));
+        if (termMonths <= 0)
+            throw new ArgumentOutOfRangeException(nameof(termMonths));
 
         var r = annualRate / 12m;
 
@@ -102,29 +107,29 @@ public static class AmortizationService
             monthlyPayment = Math.Round(principal * r * factor / (factor - 1m), 0, MidpointRounding.AwayFromZero);
         }
 
-        var entries  = new List<LoanScheduleEntry>(termMonths);
+        var entries = new List<LoanScheduleEntry>(termMonths);
         var remaining = principal;
 
         for (var i = 1; i <= termMonths; i++)
         {
-            var interest      = Math.Round(remaining * r, 0, MidpointRounding.AwayFromZero);
-            bool isLast       = i == termMonths;
+            var interest = Math.Round(remaining * r, 0, MidpointRounding.AwayFromZero);
+            bool isLast = i == termMonths;
             var principalPart = isLast ? remaining : monthlyPayment - interest;
-            var total         = principalPart + interest;
-            remaining        -= principalPart;
+            var total = principalPart + interest;
+            remaining -= principalPart;
 
             entries.Add(new LoanScheduleEntry(
-                Id:              Guid.NewGuid(),
-                AssetId:         assetId,
-                Period:          i,
-                DueDate:         firstPaymentDate.AddMonths(i - 1),
-                TotalAmount:     total,
+                Id: Guid.NewGuid(),
+                AssetId: assetId,
+                Period: i,
+                DueDate: firstPaymentDate.AddMonths(i - 1),
+                TotalAmount: total,
                 PrincipalAmount: principalPart,
-                InterestAmount:  interest,
-                Remaining:       Math.Max(0m, remaining),
-                IsPaid:          false,
-                PaidAt:          null,
-                TradeId:         null));
+                InterestAmount: interest,
+                Remaining: Math.Max(0m, remaining),
+                IsPaid: false,
+                PaidAt: null,
+                TradeId: null));
         }
 
         return entries;

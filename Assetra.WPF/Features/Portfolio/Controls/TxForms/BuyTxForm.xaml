@@ -19,7 +19,7 @@
             類別現在由統一資產選擇器決定（SelectedAsset.Kind → Buy.AssetType，
             由 SyncSelectedAssetIntoBuyState() 同步）。使用者選 NVDA 即 Stock，
             選 Vanguard Total World Stock 即 Fund — 不必再 dropdown 選一次。
-
+            
             同樣地，「代號」輸入框也拿掉 — Symbol 由 SelectedAsset.Symbol 帶。
             非 Stock 子表單（Non-stock / Crypto）下面仍保留自己的 Name / Symbol
             輸入欄位作為過渡，直到 + 新增資產 CTA 完整接上前不動。
@@ -43,9 +43,9 @@
 
                 <!--
                     P2.4 reorganization — 對齊使用者提供的參考設計：
-                      Row 1: 數量 | 價格輸入模式 toggle [單價/總額]   ← 2 欄平排
-                      Row 2: 單位價格 / 總價值 (label 隨 toggle 切換)，右上 inline 「⚡ 取得市價」link
-                      Row 3: 即時計算 mirror — 單價模式顯示「總計: X」、總額模式顯示「單位價格: X」
+                    Row 1: 數量 | 價格輸入模式 toggle [單價/總額]   ← 2 欄平排
+                    Row 2: 單位價格 / 總價值 (label 隨 toggle 切換)，右上 inline 「⚡ 取得市價」link
+                    Row 3: 即時計算 mirror — 單價模式顯示「總計: X」、總額模式顯示「單位價格: X」
                     Bindings 仍走 Buy.PriceMode / AddAssetDialog.AddPrice / Buy.TotalCost
                     （沒有 lift 到 parent VM 的 facade，因為 sub-VM 已是同一個 dialog DataContext 可訪問），
                     所以下游 ConfirmBuyAsync 邏輯不受影響。
@@ -197,8 +197,10 @@
                     </Button>
                 </Grid>
 
-                <!--  單一 input — 依 PriceMode 切換 binding。Total mode 用 Buy.TotalCost，
-                     Unit mode 用 AddAssetDialog.AddPrice。兩個 TextBox 互相疊著、由 Visibility 切換。  -->
+                <!--
+                    單一 input — 依 PriceMode 切換 binding。Total mode 用 Buy.TotalCost，
+                    Unit mode 用 AddAssetDialog.AddPrice。兩個 TextBox 互相疊著、由 Visibility 切換。
+                -->
                 <TextBox
                     behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                     IsEnabled="{Binding AreEconomicFieldsEditable}"
@@ -502,9 +504,9 @@
                     Label / Hint），其餘 binding 透過 DataContext=Buy 自動解到 sub-VM 屬性。
                 -->
                 <txforms:CrossCurrencyOverlay
-                    DataContext="{Binding Buy}"
                     ActualCashAmountHint="{DynamicResource Portfolio.Tx.ActualCashAmountHint}"
                     ActualCashAmountLabel="{DynamicResource Portfolio.Tx.ActualCashAmount}"
+                    DataContext="{Binding Buy}"
                     FetchFxRateCommand="{Binding DataContext.FetchBuyFxRateCommand, ElementName=Root}"
                     GroupName="TxBuySettlementInputMode" />
 

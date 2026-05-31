@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows.Data;
-using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -54,7 +51,8 @@ public partial class MainViewModel
     [RelayCommand]
     private void ExecuteCommandPaletteEntry(CommandPaletteEntry? entry)
     {
-        if (entry is null) return;
+        if (entry is null)
+            return;
         IsCommandPaletteOpen = false;
         RecordCommandPaletteRecent(entry.TitleKey);
         entry.Execute.Invoke();
@@ -64,7 +62,8 @@ public partial class MainViewModel
     {
         // 已存在 → 移到頭；不在 → 加到頭；超 limit → 砍尾。
         var existing = _commandPaletteRecentTitleKeys.Find(titleKey);
-        if (existing is not null) _commandPaletteRecentTitleKeys.Remove(existing);
+        if (existing is not null)
+            _commandPaletteRecentTitleKeys.Remove(existing);
         _commandPaletteRecentTitleKeys.AddFirst(titleKey);
         while (_commandPaletteRecentTitleKeys.Count > CommandPaletteRecentLimit)
             _commandPaletteRecentTitleKeys.RemoveLast();
@@ -93,7 +92,8 @@ public partial class MainViewModel
             foreach (var titleKey in _commandPaletteRecentTitleKeys)
             {
                 var match = _commandPaletteAllEntries.FirstOrDefault(e => e.TitleKey == titleKey);
-                if (match is null) continue;
+                if (match is null)
+                    continue;
                 _commandPaletteResults.Add(match with { GroupKey = recentGroupKey });
             }
         }

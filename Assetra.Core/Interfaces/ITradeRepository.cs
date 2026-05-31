@@ -24,7 +24,8 @@ public interface ITradeRepository
     async Task<IReadOnlyList<Trade>> GetByPortfolioEntryIdsAsync(
         IReadOnlyCollection<Guid> entryIds, CancellationToken ct = default)
     {
-        if (entryIds.Count == 0) return Array.Empty<Trade>();
+        if (entryIds.Count == 0)
+            return Array.Empty<Trade>();
         var set = entryIds.ToHashSet();
         var all = await GetAllAsync(ct).ConfigureAwait(false);
         return all.Where(t => t.PortfolioEntryId.HasValue && set.Contains(t.PortfolioEntryId.Value)).ToList();
