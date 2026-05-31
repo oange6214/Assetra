@@ -1,9 +1,9 @@
-using Microsoft.Data.Sqlite;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Sync;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Sync;
 using Assetra.Infrastructure.Sync;
+using Microsoft.Data.Sqlite;
 
 namespace Assetra.Infrastructure.Persistence;
 
@@ -164,6 +164,77 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// 建立資金帳戶，並處理 (name, currency) 唯一索引把「已封存 / 已軟刪除」列也算進去的情況：
+    /// 同名同幣別若已存在且仍啟用 → 回報 <see cref="AccountCreateStatus.DuplicateActive"/>（不更動）；
+    /// 若為封存 / 墓碑 → 就地復活成全新啟用帳戶並套用 <paramref name="item"/> 設定（沿用既有列 Id）；
+    /// 都沒有 → 直接新增。整段在同一條連線上完成。
+    /// </summary>
+    public async Task<AccountCreateOutcome> CreateOrReviveAccountAsync(AssetItem item, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+
+        // 1. 查既有同名同幣別的 Asset 列——含已封存 / 已軟刪除（不過濾 is_deleted / is_active）。
+        Guid? existingId = null;
+        var existingActive = false;
+        var existingDeleted = false;
+        await using (var sel = conn.CreateCommand())
+        {
+            sel.CommandText =
+                "SELECT id, is_active, is_deleted FROM asset " +
+                "WHERE name = $n AND currency = $c AND asset_type = 'Asset' LIMIT 1;";
+            sel.Parameters.AddWithValue("$n", item.Name);
+            sel.Parameters.AddWithValue("$c", item.Currency);
+            await using var r = await sel.ExecuteReaderAsync(ct).ConfigureAwait(false);
+            if (await r.ReadAsync(ct).ConfigureAwait(false))
+            {
+                existingId = Guid.Parse(r.GetString(0));
+                existingActive = r.GetInt64(1) != 0;
+                existingDeleted = r.GetInt64(2) != 0;
+            }
+        }
+
+        // 2a. 沒有 → 直接新增。
+        if (existingId is null)
+        {
+            await using var ins = conn.CreateCommand();
+            ins.CommandText = InsertItemSql;
+            BindItem(ins, item);
+            StampSyncParams(ins);
+            await ins.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+            return new AccountCreateOutcome(item.Id, AccountCreateStatus.Created);
+        }
+
+        // 2b. 已存在且仍啟用 → 真正的重複，交由上層決定如何提示，這裡不更動。
+        if (existingActive && !existingDeleted)
+            return new AccountCreateOutcome(existingId.Value, AccountCreateStatus.DuplicateActive);
+
+        // 2c. 封存 / 墓碑 → 就地復活成全新啟用帳戶（沿用既有列 Id，套用本次設定）。
+        var revived = item with { Id = existingId.Value };
+        await using (var up = conn.CreateCommand())
+        {
+            up.CommandText = """
+                UPDATE asset SET
+                    name=$name, asset_type=$type, group_id=$grp, currency=$cur, created_date=$dt,
+                    is_active=1, is_deleted=0, updated_at=$ua,
+                    loan_annual_rate=$lar, loan_term_months=$ltm, loan_start_date=$lsd, loan_handling_fee=$lhf,
+                    liability_subtype=$lst, billing_day=$bill, due_day=$due, credit_limit=$limit,
+                    issuer_name=$issuer, subtype=$sub,
+                    version = version + 1,
+                    last_modified_at = $now,
+                    last_modified_by_device = $device,
+                    is_pending_push = 1
+                WHERE id=$id;
+                """;
+            BindItem(up, revived);
+            StampSyncParams(up);
+            await up.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        }
+        return new AccountCreateOutcome(existingId.Value, AccountCreateStatus.Revived);
+    }
+
     public async Task UpdateItemAsync(AssetItem item)
     {
         ArgumentNullException.ThrowIfNull(item);
@@ -236,17 +307,11 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
         using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
 
-        // 1. Try existing live row (resurrect tombstones too).
-        Guid? existing = null;
-        using (var sel = conn.CreateCommand())
-        {
-            sel.CommandText = "SELECT id FROM asset WHERE name = $n AND currency = $c AND asset_type = 'Asset' LIMIT 1";
-            sel.Parameters.AddWithValue("$n", name);
-            sel.Parameters.AddWithValue("$c", currency);
-            var r = await sel.ExecuteScalarAsync(ct).ConfigureAwait(false);
-            if (r is not null && r is not DBNull) existing = Guid.Parse((string)r);
-        }
-        if (existing.HasValue) return existing.Value;
+        // 1. Try an existing row of any state. Archived / soft-deleted matches are revived in
+        //    place so the caller never records a trade against a hidden (tombstoned) account.
+        var existing = await FindAndReviveAccountRowAsync(conn, name, currency, ct).ConfigureAwait(false);
+        if (existing.HasValue)
+            return existing.Value;
 
         // 2. Insert new (stamp sync metadata).
         var id = Guid.NewGuid();
@@ -271,14 +336,57 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
         }
         catch (SqliteException ex) when (ex.SqliteErrorCode == 19 /* SQLITE_CONSTRAINT */ )
         {
-            using var sel2 = conn.CreateCommand();
-            sel2.CommandText = "SELECT id FROM asset WHERE name = $n AND currency = $c AND asset_type = 'Asset' LIMIT 1";
-            sel2.Parameters.AddWithValue("$n", name);
-            sel2.Parameters.AddWithValue("$c", currency);
-            var r2 = await sel2.ExecuteScalarAsync(ct).ConfigureAwait(false);
-            if (r2 is string s) return Guid.Parse(s);
+            // Lost a race, or a hidden row reserved the (name, currency) slot — re-find and revive.
+            var raced = await FindAndReviveAccountRowAsync(conn, name, currency, ct).ConfigureAwait(false);
+            if (raced.HasValue)
+                return raced.Value;
             throw;
         }
+    }
+
+    /// <summary>
+    /// 依 (name, currency) 找一筆 asset_type='Asset' 列（不限狀態）；若是已封存 / 已軟刪除，
+    /// 就地復活（is_active=1、is_deleted=0、bump version、待推送）後回傳其 Id。沒有則回傳 null。
+    /// </summary>
+    private async Task<Guid?> FindAndReviveAccountRowAsync(
+        SqliteConnection conn, string name, string currency, CancellationToken ct)
+    {
+        Guid id;
+        bool isActive, isDeleted;
+        using (var sel = conn.CreateCommand())
+        {
+            sel.CommandText =
+                "SELECT id, is_active, is_deleted FROM asset " +
+                "WHERE name = $n AND currency = $c AND asset_type = 'Asset' LIMIT 1;";
+            sel.Parameters.AddWithValue("$n", name);
+            sel.Parameters.AddWithValue("$c", currency);
+            using var r = await sel.ExecuteReaderAsync(ct).ConfigureAwait(false);
+            if (!await r.ReadAsync(ct).ConfigureAwait(false))
+                return null;
+            id = Guid.Parse(r.GetString(0));
+            isActive = r.GetInt64(1) != 0;
+            isDeleted = r.GetInt64(2) != 0;
+        }
+
+        if (isDeleted || !isActive)
+        {
+            using var up = conn.CreateCommand();
+            up.CommandText = """
+                UPDATE asset SET
+                    is_active = 1,
+                    is_deleted = 0,
+                    updated_at = $now,
+                    version = version + 1,
+                    last_modified_at = $now,
+                    last_modified_by_device = $device,
+                    is_pending_push = 1
+                WHERE id = $id;
+                """;
+            up.Parameters.AddWithValue("$id", id.ToString());
+            StampSyncParams(up);
+            await up.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        }
+        return id;
     }
 
     public async Task ArchiveItemAsync(Guid id)
@@ -401,7 +509,8 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
     {
         var idList = assetIds.Distinct().ToList();
         var result = new Dictionary<Guid, AssetEvent>();
-        if (idList.Count == 0) return result;
+        if (idList.Count == 0)
+            return result;
 
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
@@ -473,7 +582,8 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
     public async Task MarkPushedAsync(IReadOnlyList<Guid> ids, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
-        if (ids.Count == 0) return;
+        if (ids.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
@@ -492,14 +602,16 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
     public async Task ApplyRemoteAsync(IReadOnlyList<SyncEnvelope> envelopes, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(envelopes);
-        if (envelopes.Count == 0) return;
+        if (envelopes.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
 
         foreach (var env in envelopes)
         {
-            if (env.EntityType != AssetSyncMapper.EntityType) continue;
+            if (env.EntityType != AssetSyncMapper.EntityType)
+                continue;
 
             await using (var probe = conn.CreateCommand())
             {
@@ -630,26 +742,26 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
 
     private static void BindGroup(SqliteCommand cmd, AssetGroup g)
     {
-        cmd.Parameters.AddWithValue("$id",   g.Id.ToString());
+        cmd.Parameters.AddWithValue("$id", g.Id.ToString());
         cmd.Parameters.AddWithValue("$name", g.Name);
         cmd.Parameters.AddWithValue("$type", g.Type.ToString());
         cmd.Parameters.AddWithValue("$icon", g.Icon is not null ? (object)g.Icon : DBNull.Value);
         cmd.Parameters.AddWithValue("$sort", g.SortOrder);
-        cmd.Parameters.AddWithValue("$sys",  g.IsSystem ? 1 : 0);
-        cmd.Parameters.AddWithValue("$dt",   g.CreatedDate.ToString("yyyy-MM-dd"));
+        cmd.Parameters.AddWithValue("$sys", g.IsSystem ? 1 : 0);
+        cmd.Parameters.AddWithValue("$dt", g.CreatedDate.ToString("yyyy-MM-dd"));
     }
 
     private static void BindEvent(SqliteCommand cmd, AssetEvent evt)
     {
-        cmd.Parameters.AddWithValue("$id",    evt.Id.ToString());
-        cmd.Parameters.AddWithValue("$aid",   evt.AssetId.ToString());
+        cmd.Parameters.AddWithValue("$id", evt.Id.ToString());
+        cmd.Parameters.AddWithValue("$aid", evt.AssetId.ToString());
         cmd.Parameters.AddWithValue("$etype", evt.EventType.ToString());
-        cmd.Parameters.AddWithValue("$dt",    evt.EventDate.ToUniversalTime().ToString("o"));
-        cmd.Parameters.AddWithValue("$amt",   evt.Amount.HasValue   ? (object)(double)evt.Amount.Value   : DBNull.Value);
-        cmd.Parameters.AddWithValue("$qty",   evt.Quantity.HasValue ? (object)(double)evt.Quantity.Value : DBNull.Value);
-        cmd.Parameters.AddWithValue("$note",  evt.Note is not null  ? (object)evt.Note                  : DBNull.Value);
+        cmd.Parameters.AddWithValue("$dt", evt.EventDate.ToUniversalTime().ToString("o"));
+        cmd.Parameters.AddWithValue("$amt", evt.Amount.HasValue ? (object)(double)evt.Amount.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$qty", evt.Quantity.HasValue ? (object)(double)evt.Quantity.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$note", evt.Note is not null ? (object)evt.Note : DBNull.Value);
         cmd.Parameters.AddWithValue("$cacct", evt.CashAccountId.HasValue ? (object)evt.CashAccountId.Value.ToString() : DBNull.Value);
-        cmd.Parameters.AddWithValue("$cat",   evt.CreatedAt.ToString("o"));
+        cmd.Parameters.AddWithValue("$cat", evt.CreatedAt.ToString("o"));
     }
 
     private static AssetItem MapItem(SqliteDataReader r)
@@ -662,9 +774,9 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
             if (!string.IsNullOrEmpty(s) && DateTime.TryParse(s, out var dt))
                 updatedAt = dt;
         }
-        decimal? loanAnnualRate  = r.IsDBNull(8)  ? null : (decimal)r.GetDouble(8);
-        int?     loanTermMonths  = r.IsDBNull(9)  ? null : r.GetInt32(9);
-        DateOnly? loanStartDate  = r.IsDBNull(10) ? null : DateOnly.Parse(r.GetString(10));
+        decimal? loanAnnualRate = r.IsDBNull(8) ? null : (decimal)r.GetDouble(8);
+        int? loanTermMonths = r.IsDBNull(9) ? null : r.GetInt32(9);
+        DateOnly? loanStartDate = r.IsDBNull(10) ? null : DateOnly.Parse(r.GetString(10));
         decimal? loanHandlingFee = r.IsDBNull(11) ? null : (decimal)r.GetDouble(11);
         LiabilitySubtype? liabilitySubtype = r.IsDBNull(12) ? null : Enum.Parse<LiabilitySubtype>(r.GetString(12));
         int? billingDay = r.IsDBNull(13) ? null : r.GetInt32(13);
@@ -695,17 +807,17 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
 
     private static void BindItem(SqliteCommand cmd, AssetItem i)
     {
-        cmd.Parameters.AddWithValue("$id",   i.Id.ToString());
+        cmd.Parameters.AddWithValue("$id", i.Id.ToString());
         cmd.Parameters.AddWithValue("$name", i.Name);
         cmd.Parameters.AddWithValue("$type", i.Type.ToString());
-        cmd.Parameters.AddWithValue("$grp",  i.GroupId.HasValue ? (object)i.GroupId.Value.ToString() : DBNull.Value);
-        cmd.Parameters.AddWithValue("$cur",  i.Currency);
-        cmd.Parameters.AddWithValue("$dt",   i.CreatedDate.ToString("yyyy-MM-dd"));
-        cmd.Parameters.AddWithValue("$ia",  i.IsActive ? 1 : 0);
-        cmd.Parameters.AddWithValue("$ua",  (i.UpdatedAt ?? DateTime.UtcNow).ToString("o"));
-        cmd.Parameters.AddWithValue("$lar", i.LoanAnnualRate.HasValue  ? (object)(double)i.LoanAnnualRate.Value  : DBNull.Value);
-        cmd.Parameters.AddWithValue("$ltm", i.LoanTermMonths.HasValue  ? (object)i.LoanTermMonths.Value          : DBNull.Value);
-        cmd.Parameters.AddWithValue("$lsd", i.LoanStartDate.HasValue   ? (object)i.LoanStartDate.Value.ToString("yyyy-MM-dd") : DBNull.Value);
+        cmd.Parameters.AddWithValue("$grp", i.GroupId.HasValue ? (object)i.GroupId.Value.ToString() : DBNull.Value);
+        cmd.Parameters.AddWithValue("$cur", i.Currency);
+        cmd.Parameters.AddWithValue("$dt", i.CreatedDate.ToString("yyyy-MM-dd"));
+        cmd.Parameters.AddWithValue("$ia", i.IsActive ? 1 : 0);
+        cmd.Parameters.AddWithValue("$ua", (i.UpdatedAt ?? DateTime.UtcNow).ToString("o"));
+        cmd.Parameters.AddWithValue("$lar", i.LoanAnnualRate.HasValue ? (object)(double)i.LoanAnnualRate.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$ltm", i.LoanTermMonths.HasValue ? (object)i.LoanTermMonths.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$lsd", i.LoanStartDate.HasValue ? (object)i.LoanStartDate.Value.ToString("yyyy-MM-dd") : DBNull.Value);
         cmd.Parameters.AddWithValue("$lhf", i.LoanHandlingFee.HasValue ? (object)(double)i.LoanHandlingFee.Value : DBNull.Value);
         cmd.Parameters.AddWithValue("$lst", i.LiabilitySubtype.HasValue ? (object)i.LiabilitySubtype.Value.ToString() : DBNull.Value);
         cmd.Parameters.AddWithValue("$bill", i.BillingDay.HasValue ? (object)i.BillingDay.Value : DBNull.Value);
@@ -764,7 +876,8 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
     public async Task MarkGroupPushedAsync(IReadOnlyList<Guid> ids, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
-        if (ids.Count == 0) return;
+        if (ids.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
@@ -783,14 +896,16 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
     public async Task ApplyGroupRemoteAsync(IReadOnlyList<SyncEnvelope> envelopes, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(envelopes);
-        if (envelopes.Count == 0) return;
+        if (envelopes.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
 
         foreach (var env in envelopes)
         {
-            if (env.EntityType != AssetGroupSyncMapper.EntityType) continue;
+            if (env.EntityType != AssetGroupSyncMapper.EntityType)
+                continue;
 
             // Protect system groups: never let remote tombstone delete a seeded system group.
             await using (var probe = conn.CreateCommand())
@@ -803,8 +918,10 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
                 {
                     var existingVersion = rr.GetInt64(0);
                     var isSystem = rr.GetInt32(1) != 0;
-                    if (existingVersion >= env.Version.Version) continue;
-                    if (isSystem && env.Deleted) continue;
+                    if (existingVersion >= env.Version.Version)
+                        continue;
+                    if (isSystem && env.Deleted)
+                        continue;
                 }
             }
 
@@ -896,7 +1013,8 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
     public async Task MarkEventPushedAsync(IReadOnlyList<Guid> ids, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
-        if (ids.Count == 0) return;
+        if (ids.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
@@ -915,14 +1033,16 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
     public async Task ApplyEventRemoteAsync(IReadOnlyList<SyncEnvelope> envelopes, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(envelopes);
-        if (envelopes.Count == 0) return;
+        if (envelopes.Count == 0)
+            return;
         await using var conn = new SqliteConnection(_connectionString);
         await conn.OpenAsync(ct).ConfigureAwait(false);
         await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(ct).ConfigureAwait(false);
 
         foreach (var env in envelopes)
         {
-            if (env.EntityType != AssetEventSyncMapper.EntityType) continue;
+            if (env.EntityType != AssetEventSyncMapper.EntityType)
+                continue;
 
             bool existsLocally = false;
             await using (var probe = conn.CreateCommand())
@@ -934,7 +1054,8 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
                 if (existing is not null)
                 {
                     existsLocally = true;
-                    if (Convert.ToInt64(existing) >= env.Version.Version) continue;
+                    if (Convert.ToInt64(existing) >= env.Version.Version)
+                        continue;
                 }
             }
 
@@ -942,7 +1063,8 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
             {
                 // Skip tombstones for unknown ids: asset_event has FK to asset(id), so we cannot
                 // insert a phantom tombstone row. A delete of "nothing" is a no-op.
-                if (!existsLocally) continue;
+                if (!existsLocally)
+                    continue;
 
                 // Tombstone of an existing row: ON CONFLICT path keeps original asset_id.
                 await using var del = conn.CreateCommand();

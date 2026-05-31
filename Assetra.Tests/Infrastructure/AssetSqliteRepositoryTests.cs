@@ -1,7 +1,7 @@
 using System.IO;
-using Microsoft.Data.Sqlite;
 using Assetra.Core.Models;
 using Assetra.Infrastructure.Persistence;
+using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace Assetra.Tests.Infrastructure;
@@ -67,6 +67,123 @@ public class AssetSqliteRepositoryTests : IDisposable
 
         var groups = await repo.GetGroupsAsync();
         Assert.Equal("更新名稱", groups.First(g => g.Id == group.Id).Name);
+    }
+
+    // ── CreateOrRevive：同名同幣別「已刪除/已封存」帳戶不可阻擋重建（蝦皮 crash repro）─────────
+
+    [Fact]
+    public async Task CreateOrRevive_WhenSoftDeletedSameNameCurrencyExists_RevivesAsActiveAccount()
+    {
+        // 重現「蝦皮」當機：先前被軟刪除（is_deleted=1）的同名同幣別帳戶，因 (name,currency)
+        // 唯一索引把墓碑列也算進去，導致裸 INSERT 撞 UNIQUE → SQLite Error 19。
+        // CreateOrRevive 應改為「就地復活」成全新啟用帳戶，而非丟例外。
+        var repo = new AssetSqliteRepository(_dbPath);
+        var original = new AssetItem(
+            Guid.NewGuid(), "蝦皮", FinancialType.Asset, null, "TWD",
+            new DateOnly(2026, 1, 1), Subtype: "電子支付");
+        await repo.AddItemAsync(original);
+        await repo.DeleteItemAsync(original.Id);   // soft delete → tombstone
+
+        var fresh = new AssetItem(
+            Guid.NewGuid(), "蝦皮", FinancialType.Asset, null, "TWD",
+            new DateOnly(2026, 5, 30), Subtype: "電子支付");
+        var outcome = await repo.CreateOrReviveAccountAsync(fresh);
+
+        Assert.Equal(AccountCreateStatus.Revived, outcome.Status);
+        Assert.Equal(original.Id, outcome.Id);     // 沿用既有列，而非 fresh.Id
+
+        var revived = await repo.GetByIdAsync(outcome.Id);   // GetById 會過濾 is_deleted=0
+        Assert.NotNull(revived);                              // 不再是墓碑、查得到
+        Assert.True(revived!.IsActive);
+        Assert.Equal("蝦皮", revived.Name);
+
+        var items = await repo.GetItemsAsync();
+        Assert.Single(items, i => i.Name == "蝦皮" && i.Currency == "TWD");
+    }
+
+    [Fact]
+    public async Task CreateOrRevive_WhenNoExisting_CreatesNew()
+    {
+        var repo = new AssetSqliteRepository(_dbPath);
+        var item = new AssetItem(
+            Guid.NewGuid(), "中信", FinancialType.Asset, null, "TWD", new DateOnly(2026, 1, 1));
+
+        var outcome = await repo.CreateOrReviveAccountAsync(item);
+
+        Assert.Equal(AccountCreateStatus.Created, outcome.Status);
+        Assert.Equal(item.Id, outcome.Id);
+        Assert.NotNull(await repo.GetByIdAsync(item.Id));
+    }
+
+    [Fact]
+    public async Task CreateOrRevive_WhenActiveDuplicateExists_ReportsDuplicateActiveWithoutSecondRow()
+    {
+        var repo = new AssetSqliteRepository(_dbPath);
+        var live = new AssetItem(
+            Guid.NewGuid(), "玉山", FinancialType.Asset, null, "TWD", new DateOnly(2026, 1, 1));
+        await repo.AddItemAsync(live);
+
+        var dup = new AssetItem(
+            Guid.NewGuid(), "玉山", FinancialType.Asset, null, "TWD", new DateOnly(2026, 5, 30));
+        var outcome = await repo.CreateOrReviveAccountAsync(dup);
+
+        Assert.Equal(AccountCreateStatus.DuplicateActive, outcome.Status);
+        Assert.Equal(live.Id, outcome.Id);          // 指向既有啟用帳戶
+        var items = await repo.GetItemsAsync();
+        Assert.Single(items, i => i.Name == "玉山");  // 沒有產生第二列
+    }
+
+    // ── FindOrCreate：找到墓碑/封存列必須「真的復活」，而非回傳隱形帳戶 Id ────────────────
+
+    [Fact]
+    public async Task FindOrCreate_WhenSoftDeletedMatchExists_RevivesAndReturnsSameId()
+    {
+        // 修正前的隱患：FindOrCreate 找到墓碑會回傳其 Id 卻沒把 is_deleted 設回 0，
+        // 導致轉帳/存入記到一筆指向「已刪除、列表看不到」帳戶的交易。
+        var repo = new AssetSqliteRepository(_dbPath);
+        var original = new AssetItem(
+            Guid.NewGuid(), "悠遊付", FinancialType.Asset, null, "TWD", new DateOnly(2026, 1, 1));
+        await repo.AddItemAsync(original);
+        await repo.DeleteItemAsync(original.Id);   // soft delete → tombstone
+
+        var id = await repo.FindOrCreateAccountAsync("悠遊付", "TWD");
+
+        Assert.Equal(original.Id, id);             // 沿用墓碑列
+        var revived = await repo.GetByIdAsync(id); // GetById 過濾 is_deleted=0
+        Assert.NotNull(revived);                   // 已不再隱形
+        Assert.True(revived!.IsActive);
+    }
+
+    [Fact]
+    public async Task FindOrCreate_WhenArchivedMatchExists_RevivesToActive()
+    {
+        var repo = new AssetSqliteRepository(_dbPath);
+        var original = new AssetItem(
+            Guid.NewGuid(), "一卡通", FinancialType.Asset, null, "TWD", new DateOnly(2026, 1, 1));
+        await repo.AddItemAsync(original);
+        await repo.ArchiveItemAsync(original.Id);  // is_active = 0
+
+        var id = await repo.FindOrCreateAccountAsync("一卡通", "TWD");
+
+        Assert.Equal(original.Id, id);
+        var revived = await repo.GetByIdAsync(id);
+        Assert.NotNull(revived);
+        Assert.True(revived!.IsActive);            // 已取消封存
+    }
+
+    [Fact]
+    public async Task FindOrCreate_WhenLiveMatchExists_ReturnsSameIdWithoutDuplicating()
+    {
+        var repo = new AssetSqliteRepository(_dbPath);
+        var original = new AssetItem(
+            Guid.NewGuid(), "街口", FinancialType.Asset, null, "TWD", new DateOnly(2026, 1, 1));
+        await repo.AddItemAsync(original);
+
+        var id = await repo.FindOrCreateAccountAsync("街口", "TWD");
+
+        Assert.Equal(original.Id, id);
+        var items = await repo.GetItemsAsync();
+        Assert.Single(items, i => i.Name == "街口");
     }
 
     [Fact]

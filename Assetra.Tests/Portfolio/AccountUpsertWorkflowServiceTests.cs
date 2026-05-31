@@ -1,8 +1,9 @@
-using Moq;
+using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Application.Portfolio.Services;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.Portfolio;
@@ -14,9 +15,10 @@ public sealed class AccountUpsertWorkflowServiceTests
     {
         var repo = new Mock<IAssetRepository>();
         AssetItem? saved = null;
-        repo.Setup(r => r.AddItemAsync(It.IsAny<AssetItem>()))
-            .Callback<AssetItem>(item => saved = item)
-            .Returns(Task.CompletedTask);
+        repo.Setup(r => r.CreateOrReviveAccountAsync(It.IsAny<AssetItem>(), It.IsAny<CancellationToken>()))
+            .Callback<AssetItem, CancellationToken>((item, _) => saved = item)
+            .ReturnsAsync((AssetItem item, CancellationToken _) =>
+                new AccountCreateOutcome(item.Id, AccountCreateStatus.Created));
         repo.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
             .ReturnsAsync(() => saved);
 
@@ -27,6 +29,41 @@ public sealed class AccountUpsertWorkflowServiceTests
         Assert.Equal("Rich Bank", saved!.Name);
         Assert.Equal(FinancialType.Asset, saved.Type);
         Assert.Equal("USD", result.Account.Currency);
+    }
+
+    [Fact]
+    public async Task CreateAsync_WhenRepoRevivesTombstone_ReturnsRevivedAccount()
+    {
+        // 復活情境：repo 回報 Revived + 既有列 Id；workflow 應回讀並回傳該啟用帳戶（蝦皮 fix）。
+        var existingId = Guid.NewGuid();
+        var repo = new Mock<IAssetRepository>();
+        repo.Setup(r => r.CreateOrReviveAccountAsync(It.IsAny<AssetItem>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AccountCreateOutcome(existingId, AccountCreateStatus.Revived));
+        var revived = new AssetItem(
+            existingId, "蝦皮", FinancialType.Asset, null, "TWD",
+            new DateOnly(2026, 5, 30), IsActive: true, Subtype: "電子支付");
+        repo.Setup(r => r.GetByIdAsync(existingId)).ReturnsAsync(revived);
+
+        var service = new AccountUpsertWorkflowService(repo.Object);
+        var result = await service.CreateAsync(
+            new CreateAccountRequest("蝦皮", "TWD", new DateOnly(2026, 5, 30), Subtype: "電子支付"));
+
+        Assert.Equal(existingId, result.Account.Id);
+        Assert.True(result.Account.IsActive);
+    }
+
+    [Fact]
+    public async Task CreateAsync_WhenActiveDuplicate_ThrowsDuplicateAccountException()
+    {
+        // 仍啟用中的同名同幣別帳戶 → 丟領域例外，由 UI 轉成友善提示（而非 SQLite 例外 crash）。
+        var repo = new Mock<IAssetRepository>();
+        repo.Setup(r => r.CreateOrReviveAccountAsync(It.IsAny<AssetItem>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AccountCreateOutcome(Guid.NewGuid(), AccountCreateStatus.DuplicateActive));
+
+        var service = new AccountUpsertWorkflowService(repo.Object);
+
+        await Assert.ThrowsAsync<DuplicateAccountException>(() =>
+            service.CreateAsync(new CreateAccountRequest("富邦", "TWD", new DateOnly(2026, 5, 30))));
     }
 
     [Fact]

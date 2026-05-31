@@ -2,8 +2,6 @@ using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
-using Assetra.Core.Trading;
-using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -238,7 +236,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
         }
         _closePriceCts?.Cancel();
         _closePriceCts = new CancellationTokenSource();
-        _ = FetchClosePriceAsync(AddSymbol.Trim().ToUpper(), AddBuyDate, _closePriceCts.Token);
+        _ = FetchClosePriceAsync(AddSymbol.Trim().ToUpper(), AddBuyDate, _closePriceCts.Token, allowOverwrite: false);
     }
 
     /// <summary>
@@ -248,17 +246,18 @@ public partial class AddAssetDialogViewModel : ObservableObject
     [CommunityToolkit.Mvvm.Input.RelayCommand]
     private void FetchMarketPrice()
     {
-        if (string.IsNullOrWhiteSpace(AddSymbol)) return;
+        if (string.IsNullOrWhiteSpace(AddSymbol))
+            return;
         _closePriceCts?.Cancel();
         _closePriceCts = new CancellationTokenSource();
         var previousSuppress = SuppressClosePriceAutoFill;
         SuppressClosePriceAutoFill = false;
-        _ = FetchClosePriceAsync(AddSymbol.Trim().ToUpper(), AddBuyDate, _closePriceCts.Token)
+        _ = FetchClosePriceAsync(AddSymbol.Trim().ToUpper(), AddBuyDate, _closePriceCts.Token, allowOverwrite: true)
             .ContinueWith(_ => SuppressClosePriceAutoFill = previousSuppress,
                 TaskScheduler.FromCurrentSynchronizationContext());
     }
 
-    private async Task FetchClosePriceAsync(string symbol, DateTime buyDate, CancellationToken ct)
+    private async Task FetchClosePriceAsync(string symbol, DateTime buyDate, CancellationToken ct, bool allowOverwrite)
     {
         try
         {
@@ -272,7 +271,8 @@ public partial class AddAssetDialogViewModel : ObservableObject
 
             if (result.HasPrice && result.Price.HasValue)
             {
-                AddPrice = result.Price.Value.ToString("0.##");
+                if (allowOverwrite || string.IsNullOrWhiteSpace(AddPrice))
+                    AddPrice = result.Price.Value.ToString("0.##");
                 ClosePriceHint = result.Hint;
             }
             else
@@ -467,7 +467,8 @@ public partial class AddAssetDialogViewModel : ObservableObject
     [RelayCommand]
     private void SelectLiabilityType(string kind)
     {
-        if (string.IsNullOrEmpty(kind)) return;
+        if (string.IsNullOrEmpty(kind))
+            return;
 
         var sep = kind.IndexOf(':');
         var baseType = sep < 0 ? kind : kind[..sep];
@@ -854,31 +855,47 @@ public partial class AddAssetDialogViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(AddAccountName))
         { AddError = "請輸入帳戶名稱"; return; }
 
-        // Balance is a projection over the trade journal — a fresh account starts at 0
-        // and only gains value once the user records a Deposit / Income / etc. trade.
-        var created = await _accountUpsertWorkflow.CreateAsync(new CreateAccountRequest(
-            AddAccountName.Trim(),
-            // User's selected currency (was hard-coded "TWD"). Falls back to
-            // "TWD" if the picker default was somehow cleared.
-            string.IsNullOrWhiteSpace(AddAccountCurrency) ? "TWD" : AddAccountCurrency,
-            DateOnly.FromDateTime(DateTime.Today),
-            Subtype: string.IsNullOrWhiteSpace(AddSubtype) ? null : AddSubtype.Trim()));
-
-        if (AddInitialDepositEnabled)
+        try
         {
-            if (_transactionWorkflow is null)
-            { AddError = "初始存入功能尚未就緒"; return; }
-            if (!ParseHelpers.TryParseDecimal(AddInitialDepositAmount, out var initialAmount) || initialAmount <= 0)
-            { AddError = "初始存入金額無效"; return; }
+            // Balance is a projection over the trade journal — a fresh account starts at 0
+            // and only gains value once the user records a Deposit / Income / etc. trade.
+            var created = await _accountUpsertWorkflow.CreateAsync(new CreateAccountRequest(
+                AddAccountName.Trim(),
+                // User's selected currency (was hard-coded "TWD"). Falls back to
+                // "TWD" if the picker default was somehow cleared.
+                string.IsNullOrWhiteSpace(AddAccountCurrency) ? "TWD" : AddAccountCurrency,
+                DateOnly.FromDateTime(DateTime.Today),
+                Subtype: string.IsNullOrWhiteSpace(AddSubtype) ? null : AddSubtype.Trim()));
 
-            await _transactionWorkflow.RecordCashFlowAsync(new CashFlowTransactionRequest(
-                TradeType.Deposit,
-                initialAmount,
-                (AddInitialDepositDate ?? DateTime.Today).Date,
-                created.Account.Id,
-                created.Account.Name,
-                string.IsNullOrWhiteSpace(AddInitialDepositNote) ? null : AddInitialDepositNote.Trim(),
-                0m));
+            if (AddInitialDepositEnabled)
+            {
+                if (_transactionWorkflow is null)
+                { AddError = "初始存入功能尚未就緒"; return; }
+                if (!ParseHelpers.TryParseDecimal(AddInitialDepositAmount, out var initialAmount) || initialAmount <= 0)
+                { AddError = "初始存入金額無效"; return; }
+
+                await _transactionWorkflow.RecordCashFlowAsync(new CashFlowTransactionRequest(
+                    TradeType.Deposit,
+                    initialAmount,
+                    (AddInitialDepositDate ?? DateTime.Today).Date,
+                    created.Account.Id,
+                    created.Account.Name,
+                    string.IsNullOrWhiteSpace(AddInitialDepositNote) ? null : AddInitialDepositNote.Trim(),
+                    0m));
+            }
+        }
+        catch (DuplicateAccountException)
+        {
+            // 同名同幣別且仍啟用中的帳戶——友善提示，不關 dialog，讓使用者改名。
+            AddError = "已有同名同幣別的帳戶，請改用其他名稱。";
+            return;
+        }
+        catch (Exception ex)
+        {
+            // 任何其他持久化錯誤都不該變成 user-unhandled crash（對齊編輯帳戶的處理）。
+            Log.Error(ex, "[AddAssetDialog] AddAccount failed for {Name}", AddAccountName);
+            AddError = ex.Message;
+            return;
         }
 
         AddAccountName = string.Empty;

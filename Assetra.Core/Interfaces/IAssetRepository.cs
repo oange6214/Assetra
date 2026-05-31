@@ -10,31 +10,48 @@ public interface IAssetRepository
 {
     // ── Groups ───────────────────────────────────────────────────────────────
     Task<IReadOnlyList<AssetGroup>> GetGroupsAsync();
-    Task                            AddGroupAsync(AssetGroup group);
-    Task                            UpdateGroupAsync(AssetGroup group);
-    Task                            DeleteGroupAsync(Guid id);
+    Task AddGroupAsync(AssetGroup group);
+    Task UpdateGroupAsync(AssetGroup group);
+    Task DeleteGroupAsync(Guid id);
 
     // ── Items ────────────────────────────────────────────────────────────────
-    Task<IReadOnlyList<AssetItem>>  GetItemsAsync();
-    Task<IReadOnlyList<AssetItem>>  GetItemsByTypeAsync(FinancialType type);
-    Task<AssetItem?>                GetByIdAsync(Guid id);
-    Task                            AddItemAsync(AssetItem item);
-    Task                            UpdateItemAsync(AssetItem item);
-    Task                            DeleteItemAsync(Guid id);
-    Task<Guid>                      FindOrCreateAccountAsync(string name, string currency, CancellationToken ct = default);
-    Task                            ArchiveItemAsync(Guid id);
+    Task<IReadOnlyList<AssetItem>> GetItemsAsync();
+    Task<IReadOnlyList<AssetItem>> GetItemsByTypeAsync(FinancialType type);
+    Task<AssetItem?> GetByIdAsync(Guid id);
+    Task AddItemAsync(AssetItem item);
+    Task UpdateItemAsync(AssetItem item);
+    Task DeleteItemAsync(Guid id);
+    Task<Guid> FindOrCreateAccountAsync(string name, string currency, CancellationToken ct = default);
+
+    /// <summary>
+    /// 建立資金帳戶（asset_type='Asset'），並正確處理唯一索引 (name, currency) 會把
+    /// 「已封存 / 已軟刪除」列一併算入的情況：
+    /// <list type="bullet">
+    ///   <item>不存在同名同幣別 → 直接新增（<see cref="AccountCreateStatus.Created"/>）。</item>
+    ///   <item>存在但已封存或已軟刪除 → 就地復活成全新啟用帳戶並套用 <paramref name="item"/> 的設定
+    ///         （<see cref="AccountCreateStatus.Revived"/>，沿用既有列 Id）。</item>
+    ///   <item>存在且仍啟用中 → 視為重複、不更動（<see cref="AccountCreateStatus.DuplicateActive"/>）。</item>
+    /// </list>
+    /// 預設實作給沒有「軟刪除」概念的 in-memory 假儲存庫使用（直接新增）；SQLite 實作覆寫為單一連線的原子操作。
+    /// </summary>
+    async Task<AccountCreateOutcome> CreateOrReviveAccountAsync(AssetItem item, CancellationToken ct = default)
+    {
+        await AddItemAsync(item).ConfigureAwait(false);
+        return new AccountCreateOutcome(item.Id, AccountCreateStatus.Created);
+    }
+    Task ArchiveItemAsync(Guid id);
     /// <summary>把封存的帳戶取消封存（is_active = 1）。</summary>
-    Task                            UnarchiveItemAsync(Guid id);
+    Task UnarchiveItemAsync(Guid id);
     /// <summary>Count of Trade rows referencing <paramref name="id"/>. 0 means safe to hard-delete.</summary>
-    Task<int>                       HasTradeReferencesAsync(Guid id, CancellationToken ct = default);
+    Task<int> HasTradeReferencesAsync(Guid id, CancellationToken ct = default);
 
     // ── Events ───────────────────────────────────────────────────────────────
     Task<IReadOnlyList<AssetEvent>> GetEventsAsync(Guid assetId);
-    Task                            AddEventAsync(AssetEvent evt);
-    Task                            DeleteEventAsync(Guid id);
+    Task AddEventAsync(AssetEvent evt);
+    Task DeleteEventAsync(Guid id);
 
     /// <summary>Returns the most recent Valuation event for <paramref name="assetId"/>, or null.</summary>
-    Task<AssetEvent?>               GetLatestValuationAsync(Guid assetId);
+    Task<AssetEvent?> GetLatestValuationAsync(Guid assetId);
 
     /// <summary>
     /// 批次取得多個 asset 的最新 Valuation event。預設實作 fallback 為逐筆呼叫 <see cref="GetLatestValuationAsync"/>，
@@ -49,7 +66,8 @@ public interface IAssetRepository
         {
             ct.ThrowIfCancellationRequested();
             var evt = await GetLatestValuationAsync(id).ConfigureAwait(false);
-            if (evt is not null) result[id] = evt;
+            if (evt is not null)
+                result[id] = evt;
         }
         return result;
     }

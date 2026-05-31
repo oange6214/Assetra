@@ -26,18 +26,24 @@ public sealed class AccountUpsertWorkflowService : IAccountUpsertWorkflowService
         ct.ThrowIfCancellationRequested();
 
         var subtype = string.IsNullOrWhiteSpace(request.Subtype) ? null : request.Subtype.Trim();
+        var name = request.Name.Trim();
         var account = new AssetItem(
             Guid.NewGuid(),
-            request.Name.Trim(),
+            name,
             FinancialType.Asset,
             ResolveGroupIdForSubtype(subtype),
             request.Currency,
             request.CreatedDate,
             Subtype: subtype);
 
-        await _assetRepository.AddItemAsync(account).ConfigureAwait(false);
-        var persisted = await _assetRepository.GetByIdAsync(account.Id).ConfigureAwait(false);
-        return new AccountUpsertResult(persisted ?? account);
+        // 用 CreateOrRevive 而非裸 AddItem：同名同幣別的「已刪除/已封存」帳戶會被就地復活，
+        // 避免撞上 (name, currency) 唯一索引（該索引把墓碑列也算進去）而丟出未處理的 SQLite 例外。
+        var outcome = await _assetRepository.CreateOrReviveAccountAsync(account, ct).ConfigureAwait(false);
+        if (outcome.Status == AccountCreateStatus.DuplicateActive)
+            throw new DuplicateAccountException(name, request.Currency);
+
+        var persisted = await _assetRepository.GetByIdAsync(outcome.Id).ConfigureAwait(false);
+        return new AccountUpsertResult(persisted ?? account with { Id = outcome.Id });
     }
 
     public async Task<AccountUpsertResult> UpdateAsync(UpdateAccountRequest request, CancellationToken ct = default)
