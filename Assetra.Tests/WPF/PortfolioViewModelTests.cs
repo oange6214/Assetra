@@ -2331,6 +2331,37 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task EditTrade_NativeTransfer_LocksSourceButKeepsFieldsEditable()
+    {
+        // WHY: 編輯既有轉帳不該讓使用者不小心改掉來源帳戶 → 來源鎖定為唯讀摘要；
+        //      但金額/轉入帳戶等仍要能改（native transfer 非 meta-only）。
+        var (vm, assetRepo, tradeRepo) = await CreateVmWithCashAsync(50_000m);
+        var secondAccount = new AssetItem(
+            Guid.NewGuid(), "Richart USD", FinancialType.Asset, null, "USD",
+            DateOnly.FromDateTime(DateTime.Today));
+        assetRepo.Store.Add(secondAccount);
+        await SeedCashBaselineAsync(tradeRepo, secondAccount.Id, secondAccount.Name, 30_000m);
+        await vm.LoadAsync();
+
+        var src = vm.CashAccounts.First(c => c.Name == "永豐 USD");
+        var dst = vm.CashAccounts.First(c => c.Name == "Richart USD");
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: src.Name, Exchange: string.Empty,
+            Name: src.Name, Type: TradeType.Transfer,
+            TradeDate: DateTime.UtcNow,
+            Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
+            CashAmount: 30_000m, CashAccountId: src.Id, ToCashAccountId: dst.Id, Note: "seed transfer"));
+        await vm.LoadTradesAsyncForTest();
+        var original = vm.Trades.First(t => t.Type == TradeType.Transfer);
+
+        vm.Transaction.EditTradeCommand.Execute(original);
+
+        Assert.True(vm.Transaction.IsAssetContextLocked);       // 來源鎖定（顯示為唯讀摘要）
+        Assert.False(vm.Transaction.ShowAssetSelector);          // 上方「選擇資產」選擇器隱藏
+        Assert.True(vm.Transaction.AreEconomicFieldsEditable);   // 金額/轉入帳戶等仍可改
+    }
+
+    [Fact]
     public async Task CreateRevision_ForCashDividend_PreservesOriginalAndCreatesNewRecord()
     {
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);

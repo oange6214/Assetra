@@ -753,7 +753,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 return hit;
         }
         // 3. Cash flow → CashAccount by CashAccountId
-        if (row.Type is TradeType.Deposit or TradeType.Withdrawal or TradeType.Income or TradeType.CashDividend
+        if (row.Type is TradeType.Deposit or TradeType.Withdrawal or TradeType.Income or TradeType.CashDividend or TradeType.Transfer
             && row.CashAccountId is { } cashId)
         {
             var hit = assets.FirstOrDefault(a => a.Kind == TxAssetKind.CashAccount && a.Id == cashId);
@@ -2431,6 +2431,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                     ? CashAccounts.FirstOrDefault(c => c.Id == txSrcAcc) : null;
                 Transfer.Target = row.ToCashAccountId is { } txDstAcc
                     ? CashAccounts.FirstOrDefault(c => c.Id == txDstAcc) : null;
+                // 編輯既有轉帳時鎖定來源：上方「選擇資產」改為唯讀摘要，避免不小心把這筆轉帳的來源
+                // 改成別的帳戶（要換來源請刪除後重記）。金額／轉入帳戶／日期等其餘欄位仍可編輯。
+                IsAssetContextLocked = true;
                 break;
 
             // P5.16 — 補上信用卡兩個 type 的 restore case。原本 switch 漏這兩個 case
