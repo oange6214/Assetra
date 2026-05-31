@@ -26,31 +26,8 @@
                 TextWrapping="Wrap" />
         </Border>
 
-        <TextBlock
-            Margin="0,0,0,6"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.TransferSourceAccount}" />
-        <ComboBox
-            Margin="0,0,0,4"
-            DisplayMemberPath="Name"
-            IsEditable="True"
-            IsTextSearchEnabled="True"
-            ItemsSource="{Binding CashAccounts}"
-            SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
-            Style="{StaticResource FormComboBox}"
-            Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-            <ComboBox.Resources>
-                <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
-            </ComboBox.Resources>
-        </ComboBox>
-        <TextBlock
-            Margin="0,2,0,8"
-            FontSize="{StaticResource Font.Size.Xs}"
-            Foreground="{DynamicResource AppAccent}"
-            Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
-            Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <!--  來源帳戶已由 dialog 上方「選擇資產」決定（轉帳只在選到資金帳戶時可選，cascade 會把它設成 TxCashAccount），
+              故此處不再重複顯示來源帳戶選擇器，避免與「選擇資產」重複。  -->
 
         <TextBlock
             Margin="0,0,0,6"
