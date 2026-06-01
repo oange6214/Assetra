@@ -2538,7 +2538,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             // 手動覆蓋路徑：還原 TxFee，折扣維持前面 EditTrade 設定的 "1.0" 預設
             TxFee = Math.Round(com, 0).ToString("F0");
         }
-        // 兩者皆 null（legacy 交易）：保持預設值
+        else
+        {
+            // Commission == 0 / null（「成交總額已含手續費」的原始輸入，或 legacy 無手續費）：
+            // 明確設 TxFee = "0"。否則每股價格模式會用「折扣 × 標準費率」重新估一筆手續費，
+            // 把編輯前的總成本灌大（編輯既有交易應保留原記錄金額，不重算手續費）。
+            TxFee = "0";
+        }
     }
 
     [RelayCommand]

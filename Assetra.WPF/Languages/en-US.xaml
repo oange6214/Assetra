@@ -225,7 +225,7 @@
     <sys:String x:Key="Portfolio.TradeHistory.UnitPrice">Unit Price</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Total">Total</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Commission">Commission</sys:String>
-    <sys:String x:Key="Portfolio.TradeHistory.GrossAmount">Value</sys:String>
+    <sys:String x:Key="Portfolio.TradeHistory.GrossAmount">Amount</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Note">Note</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Empty">No trades recorded yet</sys:String>
     <sys:String x:Key="Portfolio.TradeHistory.Summary.Inflow">Inflow</sys:String>

@@ -2635,6 +2635,27 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task EditTrade_ZeroCommissionBuy_DoesNotReintroduceAutoFee()
+    {
+        // WHY: 編輯「無手續費」(Commission=0，如成交總額已含手續費) 的買入時，不該用
+        //      「折扣 × 標準費率」重新估一筆手續費把總成本灌大；TxFee 應還原為 "0"。
+        var (vm, _, tradeRepo) = await CreateVmWithCashAsync(0m);
+        var entryId = Guid.NewGuid();
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: "00919", Exchange: "TWSE", Name: "群益台灣精選高息",
+            Type: TradeType.Buy, TradeDate: DateTime.UtcNow,
+            Price: 21.9814m, Quantity: 20000,
+            RealizedPnl: null, RealizedPnlPct: null,
+            Commission: 0m, PortfolioEntryId: entryId));
+        await vm.LoadTradesAsyncForTest();
+
+        var buyRow = vm.Trades.First(t => t.Type == TradeType.Buy);
+        vm.Transaction.EditTradeCommand.Execute(buyRow);
+
+        Assert.Equal("0", vm.Transaction.TxFee);
+    }
+
+    [Fact]
     public async Task EditTrade_LegacyBuyWithoutLink_OpensWithEditableEconomicFields()
     {
         // Source-of-truth pass (commit 6836323): legacy Buy trades (no PortfolioEntryId
