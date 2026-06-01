@@ -2008,6 +2008,27 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task ConfirmTx_Income_WhenNotUseCashAccount_RecordsWithoutTouchingBalance()
+    {
+        // WHY: 收入「存入帳戶」取消勾選＝不連動現金——仍記錄一筆收入，但不影響任何帳戶餘額。
+        var (vm, _, _) = await CreateVmWithCashAsync(0m);
+        vm.AddAssetDialog.AddAssetType = "cash";
+        vm.AddAssetDialog.AddAccountName = "現金";
+        await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
+
+        vm.Transaction.TxType = "income";
+        vm.Transaction.TxAmount = "10000";
+        vm.Transaction.TxCashAccount = vm.CashAccounts.First();
+        vm.Transaction.TxUseCashAccount = false;   // 不連動
+
+        await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
+
+        Assert.Empty(vm.Transaction.TxError);
+        Assert.Equal(0m, vm.CashAccounts[0].Balance);     // 餘額不變
+        Assert.Single(vm.Trades.Where(t => t.IsIncome));  // 仍記錄一筆收入
+    }
+
+    [Fact]
     public async Task TradeRowViewModel_PortfolioEntryId_RoundTripsThroughRepository()
     {
         // Guards the schema round-trip: the new column must persist and come back.
