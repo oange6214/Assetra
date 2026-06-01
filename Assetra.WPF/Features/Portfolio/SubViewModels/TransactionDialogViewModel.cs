@@ -1903,6 +1903,18 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         switch (e.PropertyName)
         {
             case nameof(BuyTxViewModel.PriceMode):
+                // 切換到「成交總額」模式時回填總額，否則欄位是空的 0.00（編輯既有交易最明顯）。
+                // 回填值要保住「總成本」不變：
+                //   已含手續費 → 用含費總額 (AddTotalCost)；總額模式會把手續費視為 0、總成本＝此值。
+                //   未含手續費 → 用 單價 × 數量（成交金額）；手續費另計加在上面，總成本一致。
+                if (Buy.IsTotalMode &&
+                    ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var switchPrice) && switchPrice > 0 &&
+                    ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var switchQty) && switchQty > 0)
+                {
+                    Buy.TotalCost = Buy.TotalIncludesFee && AddAssetDialog.AddTotalCost > 0
+                        ? AddAssetDialog.AddTotalCost.ToString("0.##")
+                        : (switchPrice * switchQty).ToString("0.##");
+                }
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
                 OnPropertyChanged(nameof(TxBuyComputedUnitPriceDisplay));
                 break;

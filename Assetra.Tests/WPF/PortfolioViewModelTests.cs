@@ -2972,6 +2972,21 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public void SwitchingBuyToTotalMode_BackfillsTotalFromPriceTimesQuantity()
+    {
+        // WHY: 編輯/輸入單價後切到「成交總額」模式，總額欄不該是空的 0.00。
+        //      未含手續費時應帶入 單價 × 數量（成交金額），手續費另計、總成本不變。
+        var (vm, _) = CreateVm([]);
+        vm.Transaction.AddAssetDialog.AddPrice = "21.9814";
+        vm.Transaction.AddAssetDialog.AddQuantity = "20000";
+        vm.Transaction.Buy.TotalIncludesFee = false;  // 未含手續費 → 回填成交金額(gross)
+
+        vm.Transaction.Buy.PriceMode = "total";
+
+        Assert.Equal("439628", vm.Transaction.Buy.TotalCost);
+    }
+
+    [Fact]
     public void TxDivInputMode_Toggle_FlipsBoolPredicates()
     {
         var portfolioRepo = new Mock<IPortfolioRepository>();
