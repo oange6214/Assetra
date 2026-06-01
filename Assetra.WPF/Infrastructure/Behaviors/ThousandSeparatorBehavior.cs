@@ -119,6 +119,15 @@ public static class ThousandSeparatorBehavior
         var intPart = dotIdx >= 0 ? body[..dotIdx] : body;
         var fracPart = dotIdx >= 0 ? body[dotIdx..] : string.Empty;
 
+        // 去掉多餘前導 0（"00123" → "123"；"000" → "0"），避免 textbox 出現 "00,123,…"。
+        // 整數位數 ≤ 1（"0"、單一數字、或小數情況的空字串）不動，保留 "0.5" / ".5"。
+        if (intPart.Length > 1)
+        {
+            intPart = intPart.TrimStart('0');
+            if (intPart.Length == 0)
+                intPart = "0";
+        }
+
         if (intPart.Length <= 3)
             return (negative ? "-" : "") + intPart + fracPart;
 

@@ -237,6 +237,26 @@ public sealed class ControlsBehaviorTests
     }
 
     [Fact]
+    public void ThousandSeparatorBehavior_StripsLeadingZeros()
+    {
+        // WHY: "00123456789" 之類前導 0 不該保留（之前會顯示 "00,123,456,789"）。
+        StaRun(() =>
+        {
+            var textBox = new TextBox();
+            ThousandSeparatorBehavior.SetIsEnabled(textBox, true);
+
+            textBox.Text = "00123456789";
+            Assert.Equal("123,456,789", textBox.Text);
+
+            textBox.Text = "000";
+            Assert.Equal("0", textBox.Text);
+
+            textBox.Text = "0.5";          // 小數情況的單一 0 要保留
+            Assert.Equal("0.5", textBox.Text);
+        });
+    }
+
+    [Fact]
     public void ThousandSeparatorBehavior_AlignsNumericInputToTheRight()
     {
         StaRun(() =>
@@ -287,28 +307,30 @@ public sealed class ControlsBehaviorTests
         var zh = File.ReadAllText(GetLanguagePath("zh-TW.xaml"));
         var en = File.ReadAllText(GetLanguagePath("en-US.xaml"));
 
-        Assert.Contains("成交金額輸入方式", zh);
+        Assert.Contains("成交明細輸入", zh);
         Assert.Contains("每股價格", zh);
         Assert.Contains("成交總額", zh);
         Assert.Contains("帳戶扣款", zh);
-        Assert.Contains("實際扣款金額", zh);
-        Assert.Contains("使用帳戶明細金額", zh);
-        Assert.Contains("用匯率估算", zh);
-        Assert.Contains("此區只影響資金帳戶流水，不改變上方成交金額。", zh);
+        Assert.Contains("帳戶扣款金額", zh);
+        Assert.Contains("依帳戶明細", zh);
+        Assert.Contains("依匯率估算", zh);
+        Assert.Contains("此欄只影響資金帳戶流水", zh);
+        Assert.Contains("成交價或成交總額仍用來保存投資成本", zh);
         Assert.DoesNotContain(">結算與匯率<", zh);
         Assert.DoesNotContain(">扣款與匯率<", zh);
         Assert.DoesNotContain(">依明細金額<", zh);
         Assert.DoesNotContain(">複委託請填<", zh);
         Assert.DoesNotContain("跨幣別交易（複委託）", zh);
 
-        Assert.Contains("Trade amount input", en);
+        Assert.Contains("Trade detail input", en);
         Assert.Contains("Per-share price", en);
         Assert.Contains("Trade total", en);
         Assert.Contains("Account debit", en);
-        Assert.Contains("Actual debit amount", en);
-        Assert.Contains("Use account statement amount", en);
+        Assert.Contains("Account debit amount", en);
+        Assert.Contains("Account statement", en);
         Assert.Contains("FX estimate", en);
-        Assert.Contains("This section only affects the cash-account movement, not the trade amount above.", en);
+        Assert.Contains("This only affects the funds-account movement", en);
+        Assert.Contains("price or trade total still preserves investment cost", en);
         Assert.DoesNotContain(">Settlement and FX<", en);
         Assert.DoesNotContain(">Cash settlement and FX<", en);
         Assert.DoesNotContain(">Required for sub-brokerage<", en);
