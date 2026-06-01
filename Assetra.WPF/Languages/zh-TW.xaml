@@ -651,6 +651,7 @@
     <sys:String x:Key="Portfolio.Tx.ProceedsAccount">入帳帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tx.LoanDisbursementAccount">撥款帳戶</sys:String>
     <sys:String x:Key="Portfolio.Tx.NoCashLink">不連動</sys:String>
+    <sys:String x:Key="Portfolio.Tx.IncomeNoCashLinkHint">收入會存入上方所選帳戶；取消勾選＝只記錄收入、不影響現金餘額。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Stock">股票</sys:String>
     <sys:String x:Key="Portfolio.Tx.Group">所屬群組</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivPerShare">每股股利（元）</sys:String>

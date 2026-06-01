@@ -26,37 +26,20 @@
             Text="{Binding TxAmountError}"
             Visibility="{Binding TxAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-        <!--  帳戶  -->
-        <TextBlock
-            Margin="0,0,0,6"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{Binding TxCashAccountLabel}" />
-        <ComboBox
+        <!--  存入帳戶 — 帳戶由上方「選擇資產」決定，不再重複選一次；
+              取消勾選＝此筆收入不連動現金（只記錄、不影響任何帳戶餘額）。  -->
+        <CheckBox
             Margin="0,0,0,4"
-            DisplayMemberPath="Name"
-            IsEditable="True"
-            IsTextSearchEnabled="True"
-            ItemsSource="{Binding CashAccounts}"
-            SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
-            Style="{StaticResource FormComboBox}"
-            Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-            <ComboBox.Resources>
-                <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
-            </ComboBox.Resources>
-        </ComboBox>
-        <TextBlock
-            Margin="0,2,0,4"
+            Content="{Binding TxUseCashAccountLabel}"
             FontSize="{StaticResource Font.Size.Xs}"
-            Foreground="{DynamicResource AppAccent}"
-            Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
-            Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            Foreground="{DynamicResource AppTextSecondary}"
+            IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
         <TextBlock
             Margin="0,2,0,12"
             FontSize="{StaticResource Font.Size.Xs}"
             Foreground="{DynamicResource AppTextMuted}"
-            Text="{DynamicResource Portfolio.Tx.NoCashLink}" />
+            Text="{DynamicResource Portfolio.Tx.IncomeNoCashLinkHint}"
+            TextWrapping="Wrap" />
 
         <!--  手續費  -->
         <TextBlock

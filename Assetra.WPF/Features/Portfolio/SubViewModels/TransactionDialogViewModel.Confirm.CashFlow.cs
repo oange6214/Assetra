@@ -17,7 +17,8 @@ public partial class TransactionDialogViewModel
         if (feeError is not null)
         { TxError = feeError; return; }
 
-        var cashAccId = await ResolveCashAccountIdAsync();
+        // 「計入現金餘額」勾選時才連動現金帳戶；取消勾選＝不連動（只記錄收入、不影響任何餘額）。
+        var cashAccId = TxUseCashAccount ? await ResolveCashAccountIdAsync() : null;
         // AccountName drives the trade-list 資產 column. Prefer the resolved
         // ResolveCashAccountIdAsync row (covers the typed-but-not-yet-persisted
         // case where TxCashAccount is null but TxCashAccountName is set);

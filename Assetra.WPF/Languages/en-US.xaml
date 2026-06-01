@@ -653,6 +653,7 @@
     <sys:String x:Key="Portfolio.Tx.ProceedsAccount">Proceeds account</sys:String>
     <sys:String x:Key="Portfolio.Tx.LoanDisbursementAccount">Disbursement account</sys:String>
     <sys:String x:Key="Portfolio.Tx.NoCashLink">No Linkage</sys:String>
+    <sys:String x:Key="Portfolio.Tx.IncomeNoCashLinkHint">Income is deposited into the account selected above; uncheck to record the income without affecting any cash balance.</sys:String>
     <sys:String x:Key="Portfolio.Tx.Stock">Stock</sys:String>
     <sys:String x:Key="Portfolio.Tx.Group">Portfolio Group</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivPerShare">Dividend / Share</sys:String>
