@@ -510,6 +510,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         //    照舊運作但 BuyTxForm 不必再暴露 AssetType ComboBox + Symbol 輸入框。
         SyncSelectedAssetIntoBuyState(value);
         SyncSelectedAssetIntoPositionState(value);
+        SyncSelectedAssetIntoLiabilityState(value);
     }
 
     /// <summary>
@@ -569,6 +570,30 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Sell.Position = position;
         Div.Position = position;          // 現金股利
         Div.StockPosition = position;     // 股票股利
+    }
+
+    /// <summary>
+    /// 負債類資產選好後，把對應信用卡灌進 <see cref="CreditCard"/>.Card，
+    /// 讓信用卡消費/還款表單不必再用「信用卡」下拉重複選一次（與 OpenTxDialogForLiability 一致）。
+    /// 貸款（Loan.Label）另由 <see cref="SyncSelectedAssetIntoLoanState"/> 處理。
+    /// </summary>
+    private void SyncSelectedAssetIntoLiabilityState(TxAssetSubject? asset)
+    {
+        if (asset is null || asset.Kind != TxAssetKind.Liability)
+            return;
+        // 信用卡：CreditCardOptions 只含信用卡負債；subject.Id 對應負債的 AssetId（見 1.3 subject building）。
+        // legacy 信用卡 (AssetId=null → subject Id=Guid.Empty) 不自動對應，屬罕見舊資料。
+        var card = CreditCardOptions.FirstOrDefault(c => c.AssetId == asset.Id);
+        if (card is not null)
+        {
+            CreditCard.Card = card;
+            return;
+        }
+        // 貸款：把所選貸款負債的名稱帶進 Loan.Label，讓「貸款名稱」反映上方「選擇資產」並觸發
+        // 還款自動帶入。ConfirmLoanAsync 以名稱識別貸款（可建新），故仍保留可編輯、不隱藏。
+        var loan = Liabilities.FirstOrDefault(l => l.AssetId == asset.Id && l.IsLoan);
+        if (loan is not null)
+            Loan.Label = loan.Label;
     }
 
     /// <summary>

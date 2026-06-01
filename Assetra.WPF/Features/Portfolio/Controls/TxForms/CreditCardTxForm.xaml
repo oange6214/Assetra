@@ -23,18 +23,8 @@
                 TextWrapping="Wrap" />
         </Border>
 
-        <TextBlock
-            Margin="0,0,0,6"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.CreditCard}" />
-        <ComboBox
-            Margin="0,0,0,12"
-            DisplayMemberPath="Label"
-            ItemsSource="{Binding CreditCardOptions}"
-            SelectedItem="{Binding CreditCard.Card, Mode=TwoWay}"
-            Style="{StaticResource FormComboBox}" />
+        <!--  信用卡已由上方「選擇資產」決定（信用卡消費/還款只在選到信用卡負債時可選，cascade 會把它設成
+              CreditCard.Card），故此處不再重複顯示信用卡選擇器，避免與「選擇資產」重複。  -->
 
         <Grid Margin="0,0,0,12">
             <Grid.ColumnDefinitions>
