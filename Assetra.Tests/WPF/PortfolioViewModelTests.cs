@@ -2987,6 +2987,20 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public void TypingBuyTotalCost_IsNotRewrittenByPriceSyncLoop()
+    {
+        // WHY: 在「成交總額」輸入後，TotalCost↔AddPrice 互相回寫的迴圈會把使用者輸入改掉
+        //      （搭配千分位 + 每鍵觸發甚至會放大成另一個數字）。輸入值必須原封不動保留。
+        var (vm, _) = CreateVm([]);
+        vm.Transaction.AddAssetDialog.AddQuantity = "11000";
+        vm.Transaction.Buy.PriceMode = "total";
+
+        vm.Transaction.Buy.TotalCost = "123456789";
+
+        Assert.Equal("123456789", vm.Transaction.Buy.TotalCost);
+    }
+
+    [Fact]
     public void TxDivInputMode_Toggle_FlipsBoolPredicates()
     {
         var portfolioRepo = new Mock<IPortfolioRepository>();

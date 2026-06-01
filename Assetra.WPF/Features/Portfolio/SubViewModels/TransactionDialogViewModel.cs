@@ -153,6 +153,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     // overwrite FxSourceLabel = "manual" during automated fills.
     private bool _suppressSellFxManualTracking;
     private bool _suppressDividendFxManualTracking;
+    // Total-mode 防回寫迴圈：成交總額 → 單價(AddPrice) 同步時設旗標，讓單價變動的「反推回總額」
+    // 寫回路徑跳過，否則 TotalCost↔AddPrice 互寫 + 千分位行為 + 每鍵觸發會把使用者輸入改掉/放大。
+    private bool _suppressBuyTotalRewrite;
     private readonly Action _rebuildTotals;
     private readonly Func<string, string, string> _localize;
 
@@ -224,7 +227,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 // 反推 TotalCost 寫進可見 TextBox。Unit mode 不必處理 (AddPrice 本身就是
                 // 使用者輸入的欄位)。AddQuantity 變動也走這條 — 使用者改數量後 TotalCost
                 // 會跟著校正，跟改 unit price 是對稱的。
-                if (Buy.IsTotalMode &&
+                if (!_suppressBuyTotalRewrite &&
+                    Buy.IsTotalMode &&
                     e.PropertyName is nameof(AddAssetDialog.AddPrice) or nameof(AddAssetDialog.AddQuantity) &&
                     ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var price) && price > 0 &&
                     ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) && qty > 0)
@@ -1923,7 +1927,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                     ParseHelpers.TryParseDecimal(Buy.TotalCost, out var total) && total > 0 &&
                     ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) && qty > 0)
                 {
-                    AddAssetDialog.AddPrice = (total / qty).ToString("F4");
+                    // 防迴圈：設定 AddPrice 時暫停「AddPrice → 反推回 TotalCost」的寫回路徑，
+                    // 否則會把使用者剛輸入的成交總額改掉（甚至被千分位 + 每鍵觸發放大）。
+                    _suppressBuyTotalRewrite = true;
+                    try { AddAssetDialog.AddPrice = (total / qty).ToString("F4"); }
+                    finally { _suppressBuyTotalRewrite = false; }
                 }
                 Buy.TotalCostError = ValidatePositiveDecimalOrEmpty(Buy.TotalCost);
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
