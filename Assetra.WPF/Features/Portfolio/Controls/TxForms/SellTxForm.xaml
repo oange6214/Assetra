@@ -13,35 +13,8 @@
 
     <!--  ======== 賣出欄位 ========  -->
     <StackPanel Visibility="{Binding TxTypeIsSell, Converter={StaticResource BooleanToVisibilityConverter}}">
-        <StackPanel Visibility="{Binding ShowInvestmentPositionPicker, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
-                Margin="0,0,0,6"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Tx.SellPosition}" />
-            <ComboBox
-                Margin="0,0,0,12"
-                IsEnabled="{Binding AreEconomicFieldsEditable}"
-                ItemsSource="{Binding Positions}"
-                SelectedItem="{Binding Sell.Position, Mode=TwoWay}"
-                Style="{StaticResource FormComboBox}">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock
-                                Margin="0,0,8,0"
-                                FontFamily="{StaticResource Font.Family.Base}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppAccent}"
-                                Text="{Binding Symbol}"
-                                Typography.NumeralAlignment="Tabular" />
-                            <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{Binding Name}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-        </StackPanel>
+        <!--  股票已由上方「選擇資產」決定（賣出只在選到投資持倉時可選，cascade 會把它設成
+              Sell.Position），故此處不再重複顯示持倉選擇器，避免與「選擇資產」重複。  -->
 
         <TextBlock
             Margin="0,0,0,6"

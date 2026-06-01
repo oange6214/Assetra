@@ -150,6 +150,28 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task SelectingInvestmentAsset_SyncsSellAndDividendPosition()
+    {
+        // WHY: 賣出/現金股利移除「股票」下拉後，持倉改由上方「選擇資產」cascade 設定；
+        //      若沒設好，confirm 會找不到持倉、預覽也算不出來。
+        var (vm, _) = CreateVm([MakeEntry("2330")]);
+        await vm.LoadAsync();
+        var pos = vm.Positions.Single(p => p.Symbol == "2330");
+
+        vm.Transaction.SelectedAsset = new TxAssetSubject(
+            Kind: TxAssetKind.Stock,
+            Id: pos.Id,
+            PrimaryName: pos.Name,
+            SecondaryLine: "TWD",
+            GroupKey: "Portfolio.Tx.Asset.Group.Investment",
+            Currency: "TWD");
+
+        Assert.Equal(pos.Id, vm.Transaction.Sell.Position?.Id);
+        Assert.Equal(pos.Id, vm.Transaction.Div.Position?.Id);        // 現金股利
+        Assert.Equal(pos.Id, vm.Transaction.Div.StockPosition?.Id);   // 股票股利
+    }
+
+    [Fact]
     public async Task LoadAsync_UsesPortfolioEntryGroupForPositionRow()
     {
         var groupId = Guid.NewGuid();

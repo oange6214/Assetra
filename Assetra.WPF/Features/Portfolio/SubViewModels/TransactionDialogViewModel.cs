@@ -509,6 +509,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         // 4. P2.5 — 把選的資產 sync 進 Buy / AddAssetDialog 內部欄位，讓下游 ConfirmBuyAsync
         //    照舊運作但 BuyTxForm 不必再暴露 AssetType ComboBox + Symbol 輸入框。
         SyncSelectedAssetIntoBuyState(value);
+        SyncSelectedAssetIntoPositionState(value);
     }
 
     /// <summary>
@@ -550,6 +551,24 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             { AddAssetDialog.AddSymbol = asset.Symbol; }
             finally { AddAssetDialog.SuppressSuggestions = false; AddAssetDialog.IsSuggestionsOpen = false; }
         }
+    }
+
+    /// <summary>
+    /// 投資類資產選好後，把對應持倉灌進 <see cref="Sell"/>.Position 與 <see cref="Div"/>.Position，
+    /// 讓「賣出」「現金股利」表單不必再用「股票」下拉重複選一次（與「買入」對齊）。
+    /// 每個投資持倉在統一選擇器各對應一個 subject（subject.Id == position.Id），故可直接 by-Id 對應。
+    /// 非投資類（現金 / 負債）不動，對應表單本來就不顯示持倉選擇器。
+    /// </summary>
+    private void SyncSelectedAssetIntoPositionState(TxAssetSubject? asset)
+    {
+        if (asset is null || !IsInvestmentAssetKind(asset.Kind))
+            return;
+        var position = Positions.FirstOrDefault(p => p.Id == asset.Id);
+        if (position is null)
+            return;
+        Sell.Position = position;
+        Div.Position = position;          // 現金股利
+        Div.StockPosition = position;     // 股票股利
     }
 
     /// <summary>
