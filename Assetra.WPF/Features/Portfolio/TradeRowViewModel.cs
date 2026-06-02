@@ -62,6 +62,13 @@ public sealed class TradeRowViewModel : ObservableObject
     // ── 轉帳欄位（Transfer）──────────────────────────────────────────────
     /// <summary>Transfer：目標現金帳戶。</summary>
     public Guid? ToCashAccountId { get; }
+
+    /// <summary>
+    /// True = 此 row 以「轉帳目標帳戶（收款方）視角」呈現，<see cref="TotalAmount"/> 轉為正（流入）。
+    /// 預設 false（來源帳戶視角，流出 −）。目標帳戶歷史列表由 SelectedCashTrades 投影出帶此旗標的副本，
+    /// 因此同一筆轉帳在來源帳戶顯示 −、在目標帳戶顯示 +。
+    /// </summary>
+    public bool IncomingTransferView { get; }
     /// <summary>信用卡等負債資產 Id。</summary>
     public Guid? LiabilityAssetId { get; }
 
@@ -217,7 +224,9 @@ public sealed class TradeRowViewModel : ObservableObject
         TradeType.Sell => +SellCashAmount(),
         TradeType.CashDividend => +(CashAmount ?? (Price * Quantity)),
         TradeType.Income or TradeType.Deposit or TradeType.LoanBorrow => +(CashAmount ?? 0),
-        TradeType.Withdrawal or TradeType.LoanRepay or TradeType.Transfer => -(CashAmount ?? 0),
+        TradeType.Withdrawal or TradeType.LoanRepay => -(CashAmount ?? 0),
+        // 轉帳預設以「來源帳戶視角」呈現（流出 −）；目標帳戶歷史列表以「收款視角」呈現（流入 +）。
+        TradeType.Transfer => IncomingTransferView ? +(CashAmount ?? 0) : -(CashAmount ?? 0),
         // 信用卡列以「卡帳戶視角」呈現：消費＝卡幫你付出去（−）；繳款＝你還錢給卡（+）。
         TradeType.CreditCardCharge => -(CashAmount ?? 0),
         TradeType.CreditCardPayment => +(CashAmount ?? 0),
@@ -324,8 +333,21 @@ public sealed class TradeRowViewModel : ObservableObject
         OnPropertyChanged(nameof(TotalAmount));
     }
 
-    public TradeRowViewModel(Trade t)
+    private readonly Trade _source;
+
+    /// <summary>
+    /// 以「轉帳目標帳戶（收款方）視角」重新投影此 row：<see cref="TotalAmount"/> 轉為正（流入）。
+    /// 非轉帳、或已是收款視角，則回傳自身（避免無謂配置）。
+    /// </summary>
+    internal TradeRowViewModel AsIncomingTransferView() =>
+        Type == TradeType.Transfer && !IncomingTransferView
+            ? new TradeRowViewModel(_source, incomingTransferView: true)
+            : this;
+
+    public TradeRowViewModel(Trade t, bool incomingTransferView = false)
     {
+        _source = t;
+        IncomingTransferView = incomingTransferView;
         Id = t.Id;
         Symbol = t.Symbol;
         Name = t.Name;

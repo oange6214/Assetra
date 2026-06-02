@@ -2405,6 +2405,61 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public void TradeRowViewModel_Transfer_SignFlipsForIncomingPerspective()
+    {
+        // WHY: 同一筆轉帳，來源帳戶視角為流出（−），目標帳戶（收款方）視角為流入（+）。
+        var t = new Trade(
+            Id: Guid.NewGuid(), Symbol: "永豐", Exchange: string.Empty,
+            Name: "永豐 → 蝦皮", Type: TradeType.Transfer, TradeDate: DateTime.UtcNow,
+            Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
+            CashAmount: 50_000m, CashAccountId: Guid.NewGuid(), ToCashAccountId: Guid.NewGuid());
+
+        var source = new TradeRowViewModel(t);
+        Assert.False(source.IncomingTransferView);
+        Assert.Equal(-50_000m, source.TotalAmount);          // 來源：流出
+
+        var incoming = source.AsIncomingTransferView();
+        Assert.NotSame(source, incoming);                    // 產生副本，不污染原 row
+        Assert.True(incoming.IncomingTransferView);
+        Assert.Equal(50_000m, incoming.TotalAmount);         // 收款：流入
+    }
+
+    [Fact]
+    public async Task SelectedCashTrades_OnTargetAccount_ShowsIncomingTransferAsPositive()
+    {
+        // WHY: 轉帳的目標帳戶（收款方）的交易記錄也要看得到這筆、且金額為正（流入）。
+        //      之前只用 CashAccountId 過濾 → 目標帳戶看不到轉入紀錄（錢看起來沒進來、實際餘額已正確）。
+        var (vm, assetRepo, tradeRepo) = await CreateVmWithCashAsync(50_000m);
+        var secondAccount = new AssetItem(
+            Guid.NewGuid(), "Richart USD", FinancialType.Asset, null, "USD",
+            DateOnly.FromDateTime(DateTime.Today));
+        assetRepo.Store.Add(secondAccount);
+        await SeedCashBaselineAsync(tradeRepo, secondAccount.Id, secondAccount.Name, 30_000m);
+        await vm.LoadAsync();
+
+        var src = vm.CashAccounts.First(c => c.Name == "永豐 USD");
+        var dst = vm.CashAccounts.First(c => c.Name == "Richart USD");
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: src.Name, Exchange: string.Empty,
+            Name: $"{src.Name} → {dst.Name}", Type: TradeType.Transfer, TradeDate: DateTime.UtcNow,
+            Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
+            CashAmount: 30_000m, CashAccountId: src.Id, ToCashAccountId: dst.Id, Note: "轉帳"));
+        await vm.LoadTradesAsyncForTest();
+
+        // 目標帳戶（收款方）：看得到、且為流入（+）
+        vm.SelectedCashRow = dst;
+        var atTarget = vm.SelectedCashTrades.Single(t => t.IsTransfer);
+        Assert.True(atTarget.IncomingTransferView);
+        Assert.Equal(30_000m, atTarget.TotalAmount);
+
+        // 來源帳戶：同一筆顯示為流出（−）
+        vm.SelectedCashRow = src;
+        var atSource = vm.SelectedCashTrades.Single(t => t.IsTransfer);
+        Assert.False(atSource.IncomingTransferView);
+        Assert.Equal(-30_000m, atSource.TotalAmount);
+    }
+
+    [Fact]
     public async Task CreateRevision_ForCashDividend_PreservesOriginalAndCreatesNewRecord()
     {
         var (vm, _, tradeRepo) = await CreateVmWithCashAsync(10_000m);
@@ -2907,12 +2962,13 @@ public class PortfolioViewModelTests
     [Fact]
     public async Task TxBuyTotalCost_TotalMode_AutoComputesUnitPrice()
     {
-        // 在 total mode 下輸入總額 90,200 + 數量 5,000 → AddPrice 自動回算 18.0400
+        // 在 total mode 下輸入總額 90,200 + 數量 5,000 → AddPrice 自動回算 18.04
+        // （高精度反推、不補尾零；重點是數值正確，避免 90,200/5,000 被 F4 round-trip 改值）
         var (vm, _, _, _) = await CreateVmWithLiabilityAsync(0m, 0m);
         vm.AddAssetDialog.AddQuantity = "5000";
         vm.Transaction.Buy.PriceMode = "total";
         vm.Transaction.Buy.TotalCost = "90200";
-        Assert.Equal("18.0400", vm.AddAssetDialog.AddPrice);
+        Assert.Equal("18.04", vm.AddAssetDialog.AddPrice);
     }
 
     [Fact]
@@ -3019,6 +3075,22 @@ public class PortfolioViewModelTests
         vm.Transaction.Buy.TotalCost = "123456789";
 
         Assert.Equal("123456789", vm.Transaction.Buy.TotalCost);
+    }
+
+    [Fact]
+    public void BuyTotalMode_PreservesEnteredTotal_NoRoundTripError()
+    {
+        // WHY: 成交總額 123,456,789 不該被「4 位小數單價 × 數量」round-trip 成 123,456,790。
+        //      高精度反推單價後，試算的成交金額/總成本要等於使用者輸入的總額。
+        var (vm, _) = CreateVm([]);
+        vm.Transaction.AddAssetDialog.AddQuantity = "20000";
+        vm.Transaction.Buy.PriceMode = "total";
+        vm.Transaction.Buy.TotalIncludesFee = true;   // 已含手續費 → 成交金額 = 總成本 = 輸入總額
+
+        vm.Transaction.Buy.TotalCost = "123456789";
+
+        Assert.Equal(123456789m, vm.Transaction.AddAssetDialog.AddGrossAmount);
+        Assert.Equal(123456789m, vm.Transaction.AddAssetDialog.AddTotalCost);
     }
 
     [Fact]

@@ -168,8 +168,15 @@ public partial class PortfolioViewModel
     // Cash account stats + filtered trades
     public IEnumerable<TradeRowViewModel> SelectedCashTrades =>
         SelectedCashRow is { } r
-            ? Trades.Where(t => t.CashAccountId == r.Id)
-                    .OrderByDescending(t => t.TradeDate)
+            ? Trades
+                .Where(t => t.CashAccountId == r.Id ||
+                            (t.IsTransfer && t.ToCashAccountId == r.Id))
+                // 目標帳戶（收款方）的轉帳改以「收款視角」呈現（金額為正）；來源帳戶維持流出 −。
+                .Select(t => t.IsTransfer && t.ToCashAccountId == r.Id && t.CashAccountId != r.Id
+                    ? t.AsIncomingTransferView()
+                    : t)
+                .OrderByDescending(t => t.TradeDate)
+                .ToList()
             : [];
 
     public decimal SelectedCashTotalDeposits =>
