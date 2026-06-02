@@ -257,6 +257,20 @@ public sealed class ControlsBehaviorTests
     }
 
     [Fact]
+    public void ThousandSeparatorBehavior_ComputeCaretIndex_KeepsCaretWhenLeadingZeroStripped()
+    {
+        // WHY: 在 "439,628" 最前面打 "0"（原字串 "0439,628"，caret 在剛打的 0 之後 = index 1），
+        // Format 去掉前導 0 → "439,628"。游標應回到最前面 (0)，不可因多算了被去掉的 0 而跳到 "4" 之後。
+        Assert.Equal(0, ThousandSeparatorBehavior.ComputeCaretIndex("0439,628", 1, "439,628"));
+
+        // caret 在最後 → 去掉前導 0 後仍停在最後
+        Assert.Equal(7, ThousandSeparatorBehavior.ComputeCaretIndex("0439628", 7, "439,628"));
+
+        // 一般輸入（無前導 0、caret 在最後）→ 對應到格式化後尾端（逗號不計入 rawCaret）
+        Assert.Equal(6, ThousandSeparatorBehavior.ComputeCaretIndex("22211", 5, "22,211"));
+    }
+
+    [Fact]
     public void ThousandSeparatorBehavior_AlignsNumericInputToTheRight()
     {
         StaRun(() =>

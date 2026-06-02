@@ -60,6 +60,12 @@ public static class ThousandSeparatorBehavior
     {
         if (_isFormatting || sender is not TextBox tb)
             return;
+
+        // 變更若來自 undo/redo，就不要再重新格式化，否則會把使用者剛還原的內容又格式化回去，
+        // 形成「Ctrl+Z 沒反應」的迴圈。讓原生 undo/redo 的結果原樣保留。
+        if (e.UndoAction is UndoAction.Undo or UndoAction.Redo)
+            return;
+
         FormatTextBox(tb);
     }
 
@@ -79,31 +85,46 @@ public static class ThousandSeparatorBehavior
             if (string.IsNullOrEmpty(text))
                 return;
 
-            // Raw caret = position ignoring commas already in the text.
             var caretIndex = Math.Clamp(tb.CaretIndex, 0, text.Length);
-            var rawCaret = text[..caretIndex].Replace(",", "").Length;
 
             var formatted = Format(text);
             if (formatted == text)
                 return;
 
+            var newCaret = ComputeCaretIndex(text, caretIndex, formatted);
             tb.Text = formatted;
-
-            // Walk the formatted string and count non-comma chars until rawCaret reached.
-            var newCaret = 0;
-            var counted = 0;
-            while (newCaret < formatted.Length && counted < rawCaret)
-            {
-                if (formatted[newCaret] != ',')
-                    counted++;
-                newCaret++;
-            }
-            tb.CaretIndex = Math.Min(newCaret, formatted.Length);
+            tb.CaretIndex = newCaret;
         }
         finally
         {
             _isFormatting = false;
         }
+    }
+
+    /// <summary>
+    /// 把原字串的游標位置映射到格式化後的字串。rawCaret = 原字串去掉逗號後、caret 之前的字元數。
+    /// Format 可能去掉前導 0（significant 字元變少，且都在最前面）；若被去掉的字元落在 caret 之前，
+    /// rawCaret 會多算導致游標往右跳，因此先扣掉「caret 之前被去掉的字元數」再映射。
+    /// </summary>
+    internal static int ComputeCaretIndex(string original, int caretIndex, string formatted)
+    {
+        var clamped = Math.Clamp(caretIndex, 0, original.Length);
+        var rawCaret = original[..clamped].Replace(",", "").Length;
+
+        var removed = original.Replace(",", "").Length - formatted.Replace(",", "").Length;
+        if (removed > 0)
+            rawCaret -= Math.Min(rawCaret, removed);
+
+        var newCaret = 0;
+        var counted = 0;
+        while (newCaret < formatted.Length && counted < rawCaret)
+        {
+            if (formatted[newCaret] != ',')
+                counted++;
+            newCaret++;
+        }
+
+        return Math.Min(newCaret, formatted.Length);
     }
 
     private static string Format(string text)
