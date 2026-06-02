@@ -1929,8 +1929,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 {
                     // 防迴圈：設定 AddPrice 時暫停「AddPrice → 反推回 TotalCost」的寫回路徑，
                     // 否則會把使用者剛輸入的成交總額改掉（甚至被千分位 + 每鍵觸發放大）。
+                    // 用高精度（非 F4）反推單價，否則 單價(4位) × 數量 會把總額 round-trip 掉
+                    // （例：123,456,789 → 6172.8395 → 123,456,790）。每股價格的顯示另由
+                    // TxBuyComputedUnitPriceDisplay 格式化，不受此精度影響。
                     _suppressBuyTotalRewrite = true;
-                    try { AddAssetDialog.AddPrice = (total / qty).ToString("F4"); }
+                    try { AddAssetDialog.AddPrice = (total / qty).ToString("0.##########"); }
                     finally { _suppressBuyTotalRewrite = false; }
                 }
                 Buy.TotalCostError = ValidatePositiveDecimalOrEmpty(Buy.TotalCost);
