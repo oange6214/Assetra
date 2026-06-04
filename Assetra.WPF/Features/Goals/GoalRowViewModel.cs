@@ -22,6 +22,9 @@ public sealed partial class GoalRowViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(DeadlineDisplay))]
     [NotifyPropertyChangedFor(nameof(IsAchieved))]
     [NotifyPropertyChangedFor(nameof(StatusTag))]
+    [NotifyPropertyChangedFor(nameof(IsFireSynced))]
+    [NotifyPropertyChangedFor(nameof(TrackingSourceKind))]
+    [NotifyPropertyChangedFor(nameof(TrackingSourceLabel))]
     private FinancialGoal _goal;
 
     public GoalRowViewModel(
@@ -60,6 +63,38 @@ public sealed partial class GoalRowViewModel : ObservableObject
     }
 
     public bool IsAchieved => Goal.IsAchieved;
+    public bool IsFireSynced => IsFireGoal(Goal);
+
+    public string TrackingSourceKind
+    {
+        get
+        {
+            if (IsFireSynced)
+                return "fire";
+            if (Goal.PortfolioGroupId.HasValue)
+                return "portfolioGroup";
+            if (!string.IsNullOrWhiteSpace(Goal.LinkedAssetClass))
+                return "assetClass";
+            return "manual";
+        }
+    }
+
+    public string TrackingSourceLabel
+    {
+        get
+        {
+            if (IsFireSynced)
+                return L("Goals.Tracking.Fire", "FIRE sync");
+            if (Goal.PortfolioGroupId.HasValue)
+                return L("Goals.Tracking.PortfolioGroup", "Portfolio group");
+            if (!string.IsNullOrWhiteSpace(Goal.LinkedAssetClass))
+            {
+                var prefix = L("Goals.Tracking.Auto", "Auto-tracked");
+                return $"{prefix}: {FormatAssetClass(Goal.LinkedAssetClass)}";
+            }
+            return L("Goals.Tracking.Manual", "Manual");
+        }
+    }
 
     /// <summary>"achieved" | "ontrack" | "warning" | "overdue" — XAML triggers.</summary>
     public string StatusTag
@@ -85,6 +120,9 @@ public sealed partial class GoalRowViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentDisplay));
         OnPropertyChanged(nameof(RemainingDisplay));
         OnPropertyChanged(nameof(DeadlineDisplay));
+        OnPropertyChanged(nameof(IsFireSynced));
+        OnPropertyChanged(nameof(TrackingSourceKind));
+        OnPropertyChanged(nameof(TrackingSourceLabel));
     }
 
     private string FormatAmount(decimal value) =>
@@ -95,6 +133,24 @@ public sealed partial class GoalRowViewModel : ObservableObject
         var template = L("Goals.Deadline.DaysRemaining", "{0}d");
         return string.Format(template, days);
     }
+
+    private string FormatAssetClass(string? assetClass) =>
+        assetClass switch
+        {
+            "NetWorth" => L("Goals.LinkedAssetClass.NetWorth", "Net worth"),
+            "TotalAssets" => L("Goals.LinkedAssetClass.TotalAssets", "Total assets"),
+            "Investments" => L("Goals.LinkedAssetClass.Investments", "Investments"),
+            "Cash" => L("Goals.LinkedAssetClass.Cash", "Cash"),
+            "RealEstate" => L("Goals.LinkedAssetClass.RealEstate", "Real estate"),
+            "Retirement" => L("Goals.LinkedAssetClass.Retirement", "Retirement"),
+            "Physical" => L("Goals.LinkedAssetClass.Physical", "Physical assets"),
+            _ => assetClass ?? string.Empty,
+        };
+
+    private static bool IsFireGoal(FinancialGoal goal) =>
+        string.Equals(goal.Name, "FIRE", StringComparison.OrdinalIgnoreCase)
+        || (!string.IsNullOrWhiteSpace(goal.Notes)
+            && goal.Notes.TrimStart().StartsWith("Generated from FIRE", StringComparison.OrdinalIgnoreCase));
 
     private string L(string key, string fallback) =>
         _localization?.Get(key, fallback) ?? fallback;

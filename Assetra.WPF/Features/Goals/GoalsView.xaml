@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:models="clr-namespace:Assetra.Core.Models;assembly=Assetra.Core"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Goals"
     d:DataContext="{d:DesignInstance Type={x:Type vm:GoalsViewModel}}"
     d:DesignHeight="776"
@@ -138,7 +139,13 @@
                 Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <Grid Grid.Row="3" Style="{StaticResource PageContentGrid}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
                     <StackPanel
+                        Grid.ColumnSpan="2"
                         Style="{StaticResource EmptyStatePanel}"
                         Visibility="{Binding HasNoGoals, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ds:AppIcon Style="{StaticResource EmptyStateIcon}" Symbol="Target24" />
@@ -165,6 +172,7 @@
                     </StackPanel>
 
                     <ScrollViewer
+                        Grid.Column="0"
                         HorizontalScrollBarVisibility="Disabled"
                         VerticalScrollBarVisibility="Auto"
                         Visibility="{Binding HasGoals, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -194,20 +202,43 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
 
-                                        <TextBlock
+                                        <StackPanel
                                             Grid.Row="0"
                                             Grid.Column="0"
-                                            FontSize="{DynamicResource Font.Size.Md}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding Name}"
-                                            TextTrimming="CharacterEllipsis" />
+                                            Orientation="Horizontal">
+                                            <TextBlock
+                                                VerticalAlignment="Center"
+                                                FontSize="{DynamicResource Font.Size.Md}"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding Name}"
+                                                TextTrimming="CharacterEllipsis" />
+                                            <TextBlock
+                                                Margin="8,0,0,0"
+                                                MaxWidth="190"
+                                                VerticalAlignment="Center"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Text="{Binding TrackingSourceLabel}"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTip="{Binding TrackingSourceLabel}" />
+                                        </StackPanel>
 
                                         <StackPanel
                                             Grid.Row="0"
                                             Grid.Column="1"
                                             VerticalAlignment="Center"
                                             Orientation="Horizontal">
+                                            <Button
+                                                Width="30"
+                                                Height="30"
+                                                Margin="0,0,4,0"
+                                                Command="{Binding DataContext.OpenGoalDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource AppIconButton}"
+                                                ToolTip="{DynamicResource Goals.Detail.Open}">
+                                                <ds:AppIcon FontSize="14" Symbol="Info24" />
+                                            </Button>
                                             <Button
                                                 Width="30"
                                                 Height="30"
@@ -316,6 +347,657 @@
                         </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
+
+                    <Border
+                        Grid.Column="1"
+                        Width="420"
+                        Margin="16,0,0,0"
+                        Padding="18"
+                        behaviors:EscapeKeyCommandBehavior.Command="{Binding CloseGoalDetailCommand}"
+                        Style="{StaticResource FormCard}"
+                        Visibility="{Binding IsGoalDetailOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid DataContext="{Binding SelectedGoal}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <DockPanel>
+                                <Button
+                                    DockPanel.Dock="Right"
+                                    Command="{Binding DataContext.CloseGoalDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    Style="{StaticResource AppIconButton}"
+                                    ToolTip="{DynamicResource Goals.Detail.Close}">
+                                    <ds:AppIcon FontSize="14" Symbol="Dismiss24" />
+                                </Button>
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontSize="{DynamicResource Font.Size.Md}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{DynamicResource Goals.Detail.Title}" />
+                            </DockPanel>
+
+                            <StackPanel Grid.Row="1" Margin="0,18,0,0">
+                                <TextBlock
+                                    FontSize="{DynamicResource Font.Size.Xl}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding Name}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <TextBlock
+                                    Margin="0,6,0,0"
+                                    MaxWidth="260"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{Binding TrackingSourceLabel}"
+                                    TextTrimming="CharacterEllipsis"
+                                    ToolTip="{Binding TrackingSourceLabel}" />
+                                <Border
+                                    Margin="0,12,0,0"
+                                    Padding="12"
+                                    Background="{DynamicResource AppAccentSubtle}"
+                                    BorderBrush="{DynamicResource AppBorderLight}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Visibility="{Binding DataContext.SelectedDetailHasFireSource, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{DynamicResource Goals.Detail.Fire.SourceTitle}" />
+                                        <UniformGrid Grid.Row="1" Columns="3" Margin="0,8,0,0">
+                                            <StackPanel Margin="0,0,10,0">
+                                                <TextBlock
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource Goals.Detail.Fire.RequiredAssets}" />
+                                                <TextBlock
+                                                    Margin="0,3,0,0"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding DataContext.SelectedDetailFireRequiredAssetsDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,10,0">
+                                                <TextBlock
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource Goals.Detail.Fire.Scenario}" />
+                                                <TextBlock
+                                                    Margin="0,3,0,0"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding DataContext.SelectedDetailFireScenarioDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource Goals.Detail.Fire.LastSynced}" />
+                                                <TextBlock
+                                                    Margin="0,3,0,0"
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding DataContext.SelectedDetailFireLastSyncDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                        </UniformGrid>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+
+                            <UniformGrid
+                                Grid.Row="2"
+                                Margin="0,18,0,0"
+                                Columns="2"
+                                Rows="2">
+                                <StackPanel Margin="0,0,12,14">
+                                    <TextBlock
+                                        FontSize="{DynamicResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{DynamicResource Goals.Add.Current}" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontSize="{DynamicResource Font.Size.Lg}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding DataContext.SelectedDetailCurrentDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Typography.NumeralAlignment="Tabular" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,0,14">
+                                    <TextBlock
+                                        FontSize="{DynamicResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{DynamicResource Goals.Add.Target}" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontSize="{DynamicResource Font.Size.Lg}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding DataContext.SelectedDetailTargetDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Typography.NumeralAlignment="Tabular" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock
+                                        FontSize="{DynamicResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{DynamicResource Goals.Remaining}" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontSize="{DynamicResource Font.Size.Lg}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding DataContext.SelectedDetailRemainingDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Typography.NumeralAlignment="Tabular" />
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock
+                                        FontSize="{DynamicResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{DynamicResource Goals.Add.Deadline}" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding DataContext.SelectedDetailDeadlineDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        TextTrimming="CharacterEllipsis"
+                                        Typography.NumeralAlignment="Tabular" />
+                                </StackPanel>
+                            </UniformGrid>
+
+                            <StackPanel Grid.Row="3" Margin="0,16,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        FontSize="{DynamicResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{DynamicResource Goals.OverallProgress}" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppAccent}"
+                                        Text="{Binding DataContext.SelectedDetailProgressDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Typography.NumeralAlignment="Tabular" />
+                                </Grid>
+                                <ProgressBar
+                                    Height="8"
+                                    Margin="0,8,0,0"
+                                    Foreground="{Binding StatusTag, Converter={StaticResource StatusTagToBrushConverter}}"
+                                    Maximum="100"
+                                    Value="{Binding DataContext.SelectedDetailProgressPercent, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}" />
+                                <TextBlock
+                                    Margin="0,12,0,0"
+                                    FontSize="{DynamicResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{DynamicResource Goals.Detail.NextAction}" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding DataContext.SelectedDetailNextActionDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel
+                                Grid.Row="4"
+                                Margin="0,18,0,0"
+                                Visibility="{Binding Notes, Converter={StaticResource StringToVisibilityConverter}}">
+                                <TextBlock
+                                    FontSize="{DynamicResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{DynamicResource Goals.Add.Notes}" />
+                                <TextBlock
+                                    Margin="0,6,0,0"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding Notes}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <ScrollViewer
+                                Grid.Row="5"
+                                Margin="0,22,0,0"
+                                HorizontalScrollBarVisibility="Disabled"
+                                VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,12"
+                                        Style="{StaticResource PageErrorText}"
+                                        Text="{Binding DataContext.GoalDetailError, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Visibility="{Binding DataContext.GoalDetailError, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource StringToVisibilityConverter}}" />
+
+                                    <StackPanel Margin="0,0,0,16">
+                                        <TextBlock
+                                            FontSize="{DynamicResource Font.Size.Sm}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{DynamicResource Goals.Planning.Title}" />
+                                        <UniformGrid
+                                            Margin="0,10,0,0"
+                                            Columns="2"
+                                            Rows="2">
+                                            <StackPanel Margin="0,0,12,12">
+                                                <TextBlock
+                                                    FontSize="{DynamicResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource Goals.Planning.RequiredMonthly}" />
+                                                <TextBlock
+                                                    Margin="0,4,0,0"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding DataContext.SelectedRequiredMonthlyContributionDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    Typography.NumeralAlignment="Tabular" />
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,0,12">
+                                                <TextBlock
+                                                    FontSize="{DynamicResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource Goals.Planning.CurrentMonthly}" />
+                                                <TextBlock
+                                                    Margin="0,4,0,0"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding DataContext.SelectedMonthlyFundingDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    Typography.NumeralAlignment="Tabular" />
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,12,0">
+                                                <TextBlock
+                                                    FontSize="{DynamicResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource Goals.Planning.MonthlyGap}" />
+                                                <TextBlock
+                                                    Margin="0,4,0,0"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding DataContext.SelectedMonthlyFundingGapDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    Typography.NumeralAlignment="Tabular" />
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock
+                                                    FontSize="{DynamicResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource Goals.Planning.ProjectedCompletion}" />
+                                                <TextBlock
+                                                    Margin="0,4,0,0"
+                                                    FontFamily="{StaticResource Font.Family.Base}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding DataContext.SelectedProjectedCompletionDisplay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    Typography.NumeralAlignment="Tabular" />
+                                            </StackPanel>
+                                        </UniformGrid>
+                                        <TextBlock
+                                            Margin="0,8,0,0"
+                                            FontSize="{DynamicResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppWarning}"
+                                            Text="{Binding DataContext.GoalPlanningWarning, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            TextWrapping="Wrap"
+                                            Visibility="{Binding DataContext.HasGoalPlanningWarning, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    </StackPanel>
+
+                                    <Separator Margin="0,0,0,16" />
+
+                                    <TextBlock
+                                        FontSize="{DynamicResource Font.Size.Sm}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{DynamicResource Goals.Detail.Milestones}" />
+                                    <StackPanel Margin="0,10,0,12">
+                                        <TextBlock
+                                            Style="{StaticResource FormFieldLabel}"
+                                            Text="{DynamicResource Goals.Detail.Milestone.Label}" />
+                                        <TextBox
+                                            Style="{StaticResource AppTextBox}"
+                                            Text="{Binding DataContext.SelectedMilestoneLabel, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        <Grid Margin="0,10,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="12" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock
+                                                    Style="{StaticResource FormFieldLabel}"
+                                                    Text="{DynamicResource Goals.Detail.Milestone.Amount}" />
+                                                <TextBox
+                                                    HorizontalContentAlignment="Right"
+                                                    Style="{StaticResource AppMoneyTextBox}"
+                                                    Text="{Binding DataContext.SelectedMilestoneTargetAmount, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock
+                                                    Style="{StaticResource FormFieldLabel}"
+                                                    Text="{DynamicResource Goals.Detail.Milestone.Date}" />
+                                                <DatePicker
+                                                    SelectedDate="{Binding DataContext.SelectedMilestoneTargetDate, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                                                    Style="{StaticResource AppDatePicker}" />
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Button
+                                            Margin="0,10,0,0"
+                                            HorizontalAlignment="Right"
+                                            Command="{Binding DataContext.AddSelectedMilestoneCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Content="{Binding DataContext.SelectedMilestoneSubmitText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Style="{StaticResource AppSecondaryButton}" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        Margin="0,8,0,0"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{DynamicResource Goals.Detail.Milestones.Empty}"
+                                        Visibility="{Binding DataContext.HasSelectedMilestones, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                    <ItemsControl
+                                        Margin="0,8,0,0"
+                                        ItemsSource="{Binding DataContext.SelectedMilestones, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Visibility="{Binding DataContext.HasSelectedMilestones, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type vm:GoalMilestoneRowViewModel}">
+                                                <Grid Margin="0,0,0,12">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="8" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel>
+                                                        <TextBlock
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding Label}"
+                                                            TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock
+                                                            Margin="0,4,0,0"
+                                                            FontSize="{DynamicResource Font.Size.Xs}"
+                                                            Foreground="{DynamicResource AppTextSecondary}"
+                                                            Text="{Binding TargetDateDisplay}" />
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                                                        <TextBlock
+                                                            FontFamily="{StaticResource Font.Family.Base}"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding TargetAmountDisplay}"
+                                                            Typography.NumeralAlignment="Tabular" />
+                                                        <Border
+                                                            Margin="0,6,0,0"
+                                                            HorizontalAlignment="Right"
+                                                            Style="{StaticResource StatusBadge.Muted}">
+                                                            <TextBlock
+                                                                Style="{StaticResource StatusBadge.Text}"
+                                                                Text="{Binding StatusDisplay}" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <StackPanel
+                                                        Grid.Column="3"
+                                                        VerticalAlignment="Center"
+                                                        Orientation="Horizontal">
+                                                        <Button
+                                                            Width="30"
+                                                            Height="30"
+                                                            Margin="0,0,4,0"
+                                                            Command="{Binding DataContext.EditSelectedMilestoneCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource AppIconButton}"
+                                                            ToolTip="{DynamicResource Goals.Detail.EditMilestone}">
+                                                            <ds:AppIcon FontSize="14" Symbol="Edit24" />
+                                                        </Button>
+                                                        <Button
+                                                            Width="30"
+                                                            Height="30"
+                                                            Command="{Binding DataContext.RemoveSelectedMilestoneCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource AppIconButton}"
+                                                            ToolTip="{DynamicResource Goals.Detail.RemoveMilestone}">
+                                                            <ds:AppIcon FontSize="14" Symbol="Dismiss24" />
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <Separator Margin="0,12,0,16" />
+
+                                    <TextBlock
+                                        FontSize="{DynamicResource Font.Size.Sm}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{DynamicResource Goals.Detail.FundingRules}" />
+                                    <StackPanel Margin="0,10,0,12">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="12" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock
+                                                    Style="{StaticResource FormFieldLabel}"
+                                                    Text="{DynamicResource Goals.Detail.Funding.Amount}" />
+                                                <TextBox
+                                                    HorizontalContentAlignment="Right"
+                                                    Style="{StaticResource AppMoneyTextBox}"
+                                                    Text="{Binding DataContext.SelectedFundingAmount, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock
+                                                    Style="{StaticResource FormFieldLabel}"
+                                                    Text="{DynamicResource Goals.Detail.Funding.Frequency}" />
+                                                <ComboBox
+                                                    ItemsSource="{Binding DataContext.FundingFrequencyOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    SelectedItem="{Binding DataContext.SelectedFundingFrequency, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                                                    Style="{StaticResource FormComboBox}">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock>
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Monthly}" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding}" Value="{x:Static models:RecurrenceFrequency.Daily}">
+                                                                                <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Daily}" />
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding}" Value="{x:Static models:RecurrenceFrequency.Weekly}">
+                                                                                <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Weekly}" />
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding}" Value="{x:Static models:RecurrenceFrequency.BiWeekly}">
+                                                                                <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.BiWeekly}" />
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding}" Value="{x:Static models:RecurrenceFrequency.Quarterly}">
+                                                                                <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Quarterly}" />
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding}" Value="{x:Static models:RecurrenceFrequency.Yearly}">
+                                                                                <Setter Property="Text" Value="{DynamicResource Recurring.Frequency.Yearly}" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Grid Margin="0,10,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="12" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock
+                                                    Style="{StaticResource FormFieldLabel}"
+                                                    Text="{DynamicResource Goals.Detail.Funding.StartDate}" />
+                                                <DatePicker
+                                                    SelectedDate="{Binding DataContext.SelectedFundingStartDate, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                                                    Style="{StaticResource AppDatePicker}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock
+                                                    Style="{StaticResource FormFieldLabel}"
+                                                    Text="{DynamicResource Goals.Detail.Funding.EndDate}" />
+                                                <DatePicker
+                                                    SelectedDate="{Binding DataContext.SelectedFundingEndDate, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                                                    Style="{StaticResource AppDatePicker}" />
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Button
+                                            Margin="0,10,0,0"
+                                            HorizontalAlignment="Right"
+                                            Command="{Binding DataContext.AddSelectedFundingRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Content="{Binding DataContext.SelectedFundingRuleSubmitText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Style="{StaticResource AppSecondaryButton}" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        Margin="0,8,0,0"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{DynamicResource Goals.Detail.FundingRules.Empty}"
+                                        Visibility="{Binding DataContext.HasSelectedFundingRules, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                    <ItemsControl
+                                        Margin="0,8,0,0"
+                                        ItemsSource="{Binding DataContext.SelectedFundingRules, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Visibility="{Binding DataContext.HasSelectedFundingRules, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type vm:GoalFundingRuleRowViewModel}">
+                                                <Grid Margin="0,0,0,12">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="8" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel>
+                                                        <TextBlock
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding AmountDisplay}"
+                                                            Typography.NumeralAlignment="Tabular" />
+                                                        <TextBlock
+                                                            Margin="0,4,0,0"
+                                                            FontSize="{DynamicResource Font.Size.Xs}"
+                                                            Foreground="{DynamicResource AppTextSecondary}"
+                                                            Text="{Binding DateRangeDisplay}" />
+                                                        <TextBlock
+                                                            Margin="0,4,0,0"
+                                                            FontSize="{DynamicResource Font.Size.Xs}"
+                                                            Foreground="{DynamicResource AppTextSecondary}">
+                                                            <Run Text="{DynamicResource Goals.Detail.Funding.Source}" />
+                                                            <Run Text=": " />
+                                                            <Run Text="{Binding SourceAccountDisplay}" />
+                                                        </TextBlock>
+                                                        <TextBlock
+                                                            Margin="0,4,0,0"
+                                                            FontSize="{DynamicResource Font.Size.Xs}"
+                                                            Foreground="{DynamicResource AppTextSecondary}">
+                                                            <Run Text="{DynamicResource Goals.Detail.Funding.Next}" />
+                                                            <Run Text=": " />
+                                                            <Run Text="{Binding NextContributionDisplay}" />
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                                                        <TextBlock
+                                                            HorizontalAlignment="Right"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding FrequencyDisplay}" />
+                                                        <Border
+                                                            Margin="0,6,0,0"
+                                                            HorizontalAlignment="Right"
+                                                            Style="{StaticResource StatusBadge.Muted}">
+                                                            <TextBlock
+                                                                Style="{StaticResource StatusBadge.Text}"
+                                                                Text="{Binding StatusDisplay}" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <StackPanel
+                                                        Grid.Column="3"
+                                                        VerticalAlignment="Center"
+                                                        Orientation="Horizontal">
+                                                        <Button
+                                                            Width="30"
+                                                            Height="30"
+                                                            Margin="0,0,4,0"
+                                                            Command="{Binding DataContext.EditSelectedFundingRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource AppIconButton}"
+                                                            ToolTip="{DynamicResource Goals.Detail.EditFundingRule}">
+                                                            <ds:AppIcon FontSize="14" Symbol="Edit24" />
+                                                        </Button>
+                                                        <Button
+                                                            Width="30"
+                                                            Height="30"
+                                                            Command="{Binding DataContext.RemoveSelectedFundingRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource AppIconButton}"
+                                                            ToolTip="{DynamicResource Goals.Detail.RemoveFundingRule}">
+                                                            <ds:AppIcon FontSize="14" Symbol="Dismiss24" />
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <StackPanel
+                                Grid.Row="6"
+                                Margin="0,22,0,0"
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal">
+                                <Button
+                                    Margin="0,0,8,0"
+                                    Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    Style="{StaticResource AppSecondaryButton}">
+                                    <StackPanel Style="{StaticResource AppButtonContent}">
+                                        <ds:AppIcon
+                                            Style="{StaticResource AppButtonLeadingIcon}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                            Symbol="Edit24" />
+                                        <TextBlock
+                                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                            Text="{DynamicResource Goals.Edit.Action}" />
+                                    </StackPanel>
+                                </Button>
+                                <Button
+                                    Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    Style="{StaticResource AppDangerButton}">
+                                    <TextBlock
+                                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                        Text="{DynamicResource Goals.Delete.ConfirmTitle}" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </Grid>
         <!-- Dialogs (新增/編輯 + 刪除確認) 外提到 MainWindow.xaml → GoalsDialogsHost。VM property 仍是 GoalsViewModel.IsFormOpen / IsConfirmDialogOpen。-->
         </Grid>

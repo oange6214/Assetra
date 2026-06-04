@@ -53,7 +53,9 @@ public sealed record FinancialGoal(
     Guid? PortfolioGroupId = null)
 {
     /// <summary>True 當此 goal 啟用 auto-tracking（非 manual）。</summary>
-    public bool IsAutoTracked => !string.IsNullOrWhiteSpace(LinkedAssetClass);
+    public bool IsAutoTracked =>
+        !string.IsNullOrWhiteSpace(LinkedAssetClass)
+        || PortfolioGroupId.HasValue;
 
     /// <summary>
     /// Manual mode 的進度（≤ 100%）。Auto mode 時 caller 應用 dashboard 值算，

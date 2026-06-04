@@ -23,8 +23,10 @@
                 TextWrapping="Wrap" />
         </Border>
 
-        <!--  信用卡已由上方「選擇資產」決定（信用卡消費/還款只在選到信用卡負債時可選，cascade 會把它設成
-              CreditCard.Card），故此處不再重複顯示信用卡選擇器，避免與「選擇資產」重複。  -->
+        <!--
+            信用卡已由上方「選擇資產」決定（信用卡消費/還款只在選到信用卡負債時可選，cascade 會把它設成
+            CreditCard.Card），故此處不再重複顯示信用卡選擇器，避免與「選擇資產」重複。
+        -->
 
         <Grid Margin="0,0,0,12">
             <Grid.ColumnDefinitions>

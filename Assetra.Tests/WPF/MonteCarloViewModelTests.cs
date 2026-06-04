@@ -31,6 +31,30 @@ public sealed class MonteCarloViewModelTests
         Assert.False(vm.HasResult);
     }
 
+    [Fact]
+    public async Task Run_NegativeInitialBalance_SetsError()
+    {
+        var vm = CreateVm();
+        vm.InitialBalance = "-1";
+
+        await vm.RunCommand.ExecuteAsync(null);
+
+        Assert.Equal("起始餘額必須 ≥ 0", vm.ErrorMessage);
+        Assert.False(vm.HasResult);
+    }
+
+    [Fact]
+    public async Task Run_NegativeAnnualWithdrawal_SetsError()
+    {
+        var vm = CreateVm();
+        vm.AnnualWithdrawal = "-1";
+
+        await vm.RunCommand.ExecuteAsync(null);
+
+        Assert.Equal("年提領必須 ≥ 0", vm.ErrorMessage);
+        Assert.False(vm.HasResult);
+    }
+
     [Theory]
     [InlineData("-1.5", "平均報酬率必須 > -100%")]   // mu <= -1
     [InlineData("-2", "平均報酬率必須 > -100%")]
@@ -94,9 +118,90 @@ public sealed class MonteCarloViewModelTests
         Assert.Equal(8_500_000m, vm.MedianEnding);
         Assert.Equal(5_000_000m, vm.P10Ending);
         Assert.Equal(12_000_000m, vm.P90Ending);
+        Assert.Null(vm.MedianDepletionYear);
+        Assert.Equal("未耗盡", vm.MedianDepletionYearDisplay);
         Assert.Equal(3, vm.MedianPath.Count);
         Assert.Equal(0, vm.MedianPath[0].Year);
         Assert.Equal(10_000_000m, vm.MedianPath[0].Balance);
+    }
+
+    [Fact]
+    public async Task Run_Success_PopulatesMedianPathTilesWithChangeAndTone()
+    {
+        var simulator = new Mock<IMonteCarloSimulator>();
+        var path = new decimal[] { 10_000_000m, 9_500_000m, 9_600_000m, 0m };
+        simulator.Setup(s => s.Simulate(It.IsAny<MonteCarloInputs>()))
+                 .Returns(new MonteCarloResult(0.35m, 0m, 0m, 12_000_000m, path));
+        var vm = CreateVm(simulator);
+
+        await vm.RunCommand.ExecuteAsync(null);
+
+        Assert.Equal(4, vm.MedianPathTiles.Count);
+        Assert.Equal(0, vm.MedianPathTiles[0].Year);
+        Assert.Equal(10_000_000m, vm.MedianPathTiles[0].Balance);
+        Assert.Null(vm.MedianPathTiles[0].Change);
+        Assert.Equal(MonteCarloPathTone.Neutral, vm.MedianPathTiles[0].Tone);
+        Assert.Equal(-500_000m, vm.MedianPathTiles[1].Change);
+        Assert.Equal(MonteCarloPathTone.Negative, vm.MedianPathTiles[1].Tone);
+        Assert.Equal(100_000m, vm.MedianPathTiles[2].Change);
+        Assert.Equal(MonteCarloPathTone.Positive, vm.MedianPathTiles[2].Tone);
+        Assert.Equal(MonteCarloPathTone.Depleted, vm.MedianPathTiles[3].Tone);
+    }
+
+    [Fact]
+    public async Task Run_WithDepletedPaths_PopulatesDepletionYearDisplay()
+    {
+        var simulator = new Mock<IMonteCarloSimulator>();
+        simulator.Setup(s => s.Simulate(It.IsAny<MonteCarloInputs>()))
+                 .Returns(new MonteCarloResult(
+                     SuccessRate: 0.35m,
+                     MedianEndingBalance: 0m,
+                     P10EndingBalance: 0m,
+                     P90EndingBalance: 1_000_000m,
+                     MedianBalancePath: Array.Empty<decimal>(),
+                     MedianDepletionYear: 12));
+        var vm = CreateVm(simulator);
+
+        await vm.RunCommand.ExecuteAsync(null);
+
+        Assert.Equal(12, vm.MedianDepletionYear);
+        Assert.Equal("中位第 12 年", vm.MedianDepletionYearDisplay);
+    }
+
+    [Fact]
+    public async Task Run_SimulatorThrows_SetsFriendlyError()
+    {
+        var simulator = new Mock<IMonteCarloSimulator>();
+        simulator.Setup(s => s.Simulate(It.IsAny<MonteCarloInputs>()))
+                 .Throws(new ArgumentOutOfRangeException("Years", "Invalid range."));
+        var vm = CreateVm(simulator);
+
+        await vm.RunCommand.ExecuteAsync(null);
+
+        Assert.Equal("模擬失敗，請檢查輸入參數後再試一次", vm.ErrorMessage);
+        Assert.False(vm.HasResult);
+        Assert.False(vm.IsRunning);
+    }
+
+    [Fact]
+    public async Task Run_SimulatorThrows_ClearsMedianPathTiles()
+    {
+        var simulator = new Mock<IMonteCarloSimulator>();
+        simulator.SetupSequence(s => s.Simulate(It.IsAny<MonteCarloInputs>()))
+                 .Returns(new MonteCarloResult(
+                     0.85m,
+                     8_500_000m,
+                     5_000_000m,
+                     12_000_000m,
+                     new decimal[] { 10_000_000m, 9_500_000m }))
+                 .Throws(new ArgumentOutOfRangeException("Years", "Invalid range."));
+        var vm = CreateVm(simulator);
+
+        await vm.RunCommand.ExecuteAsync(null);
+        await vm.RunCommand.ExecuteAsync(null);
+
+        Assert.False(vm.HasResult);
+        Assert.Empty(vm.MedianPathTiles);
     }
 
     [Fact]

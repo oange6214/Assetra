@@ -2,11 +2,11 @@
     x:Class="Assetra.WPF.Features.FinancialOverview.FinancialOverviewView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.FinancialOverview"
-    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
-    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:widgets="clr-namespace:Assetra.WPF.Features.FinancialOverview.Widgets"
     d:DataContext="{d:DesignInstance Type={x:Type vm:FinancialOverviewViewModel}}"
     d:DesignHeight="800"
@@ -21,9 +21,7 @@
         gutter 一致。
     -->
     <Grid Style="{StaticResource PageRootGrid}">
-        <ScrollViewer
-            Margin="0"
-            VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Margin="0" VerticalScrollBarVisibility="Auto">
             <StackPanel>
 
                 <!--
@@ -64,7 +62,7 @@
                                 P2.15 E — IsLoading=True 時改顯示 AppSkeletonRect placeholder
                                 取代直接 binding 突然出現的數字，pulse 動畫傳遞「資料正在路上」。
                             -->
-                            <Grid Margin="0,4,0,8" Height="56">
+                            <Grid Height="56" Margin="0,4,0,8">
                                 <TextBlock
                                     VerticalAlignment="Center"
                                     Foreground="{DynamicResource AppTextPrimary}"
@@ -84,7 +82,10 @@
                             <StackPanel Visibility="{Binding HasGoalTarget, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Grid Height="6" Margin="0,0,0,4">
                                     <Border Background="{DynamicResource AppBorder}" CornerRadius="3" />
-                                    <Border HorizontalAlignment="Left" Background="{DynamicResource AppAccent}" CornerRadius="3">
+                                    <Border
+                                        HorizontalAlignment="Left"
+                                        Background="{DynamicResource AppAccent}"
+                                        CornerRadius="3">
                                         <Border.Width>
                                             <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
                                                 <Binding Path="HeroGoalProgressValue" />
@@ -94,16 +95,18 @@
                                     </Border>
                                 </Grid>
                                 <DockPanel LastChildFill="False">
-                                    <TextBlock DockPanel.Dock="Left"
-                                               FontSize="{StaticResource Font.Size.Xs}"
-                                               Foreground="{DynamicResource AppTextMuted}">
+                                    <TextBlock
+                                        DockPanel.Dock="Left"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextMuted}">
                                         <Run Text="{DynamicResource FinancialOverview.Hero.GoalProgress}" />
                                         <Run Text=" " />
                                         <Run Text="{Binding HeroGoalProgressDisplay, Mode=OneWay}" />
                                     </TextBlock>
-                                    <TextBlock DockPanel.Dock="Right"
-                                               FontSize="{StaticResource Font.Size.Xs}"
-                                               Foreground="{DynamicResource AppTextMuted}">
+                                    <TextBlock
+                                        DockPanel.Dock="Right"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextMuted}">
                                         <Run Text="{DynamicResource FinancialOverview.Hero.GoalLabel}" />
                                         <Run Text=": " />
                                         <Run Text="{Binding HeroGoalTargetDisplay, Mode=OneWay}" />
@@ -185,9 +188,10 @@
                     -->
                     <Border Grid.Column="0" Style="{StaticResource AppCardSummary}">
                         <StackPanel>
-                            <TextBlock FontSize="{StaticResource Font.Size.Xs}"
-                                       Foreground="{DynamicResource AppTextMuted}"
-                                       Text="{DynamicResource FinancialOverview.Header.TotalAssets}" />
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource FinancialOverview.Header.TotalAssets}" />
                             <!--
                                 綁 BalanceSheetTotalAssetsDisplay 而非 TotalAssetsDisplay。
                                 後者只是 asset_item 表的 cash + 手動 entry，會漏 Physical /
@@ -196,82 +200,99 @@
                                 P2.16 H — IsLoading=True 時 skeleton 取代，等資料載完才顯示
                                 真實數字 (跟 Hero card 一致的 loading 體驗)。
                             -->
-                            <Grid Margin="0,4,0,0" Height="24">
-                                <Border Width="120" Height="18"
-                                        HorizontalAlignment="Left" VerticalAlignment="Center"
-                                        Style="{StaticResource AppSkeletonRect}"
-                                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                <TextBlock FontFamily="{StaticResource Font.Family.Base}"
-                                       FontSize="{StaticResource Font.Size.Lg}"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppTextPrimary}"
-                                       Text="{Binding BalanceSheetTotalAssetsDisplay}"
-                                       Typography.NumeralAlignment="Tabular"
-                                       Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                            <Grid Height="24" Margin="0,4,0,0">
+                                <Border
+                                    Width="120"
+                                    Height="18"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource AppSkeletonRect}"
+                                    Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <TextBlock
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Lg}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding BalanceSheetTotalAssetsDisplay}"
+                                    Typography.NumeralAlignment="Tabular"
+                                    Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                             </Grid>
                         </StackPanel>
                     </Border>
                     <!--  − operator  -->
-                    <TextBlock Grid.Column="1"
-                               Margin="12,0"
-                               VerticalAlignment="Center"
-                               FontSize="{StaticResource Font.Size.Lg}"
-                               FontWeight="Bold"
-                               Foreground="{DynamicResource AppTextMuted}"
-                               Text="−" />
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="12,0"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Lg}"
+                        FontWeight="Bold"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="−" />
                     <!--  總負債 — P2.14 migrated to AppCardSummary，T02 加 skeleton  -->
                     <Border Grid.Column="2" Style="{StaticResource AppCardSummary}">
                         <StackPanel>
-                            <TextBlock FontSize="{StaticResource Font.Size.Xs}"
-                                       Foreground="{DynamicResource AppTextMuted}"
-                                       Text="{DynamicResource FinancialOverview.Header.Liabilities}" />
-                            <Grid Margin="0,4,0,0" Height="24">
-                                <Border Width="120" Height="18"
-                                        HorizontalAlignment="Left" VerticalAlignment="Center"
-                                        Style="{StaticResource AppSkeletonRect}"
-                                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                <TextBlock FontFamily="{StaticResource Font.Family.Base}"
-                                           FontSize="{StaticResource Font.Size.Lg}"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource AppDown}"
-                                           Text="{Binding TotalLiabilitiesDisplay}"
-                                           Typography.NumeralAlignment="Tabular"
-                                           Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource FinancialOverview.Header.Liabilities}" />
+                            <Grid Height="24" Margin="0,4,0,0">
+                                <Border
+                                    Width="120"
+                                    Height="18"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource AppSkeletonRect}"
+                                    Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <TextBlock
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Lg}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppDown}"
+                                    Text="{Binding TotalLiabilitiesDisplay}"
+                                    Typography.NumeralAlignment="Tabular"
+                                    Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                             </Grid>
                         </StackPanel>
                     </Border>
                     <!--  = operator  -->
-                    <TextBlock Grid.Column="3"
-                               Margin="12,0"
-                               VerticalAlignment="Center"
-                               FontSize="{StaticResource Font.Size.Lg}"
-                               FontWeight="Bold"
-                               Foreground="{DynamicResource AppTextMuted}"
-                               Text="=" />
+                    <TextBlock
+                        Grid.Column="3"
+                        Margin="12,0"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Lg}"
+                        FontWeight="Bold"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="=" />
                     <!--
                         淨資產 (re-displayed compact for visual closure of equation)
                         — 用 AppCardSummary 但 override BorderBrush 成 AppAccent 強調這
                         是公式結果。
                     -->
-                    <Border Grid.Column="4"
-                            BorderBrush="{DynamicResource AppAccent}"
-                            Style="{StaticResource AppCardSummary}">
+                    <Border
+                        Grid.Column="4"
+                        BorderBrush="{DynamicResource AppAccent}"
+                        Style="{StaticResource AppCardSummary}">
                         <StackPanel>
-                            <TextBlock FontSize="{StaticResource Font.Size.Xs}"
-                                       Foreground="{DynamicResource AppTextMuted}"
-                                       Text="{DynamicResource FinancialOverview.Header.NetWorth}" />
-                            <Grid Margin="0,4,0,0" Height="24">
-                                <Border Width="120" Height="18"
-                                        HorizontalAlignment="Left" VerticalAlignment="Center"
-                                        Style="{StaticResource AppSkeletonRect}"
-                                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                <TextBlock FontFamily="{StaticResource Font.Family.Base}"
-                                           FontSize="{StaticResource Font.Size.Lg}"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource AppAccent}"
-                                           Text="{Binding BalanceSheetNetWorthDisplay}"
-                                           Typography.NumeralAlignment="Tabular"
-                                           Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource FinancialOverview.Header.NetWorth}" />
+                            <Grid Height="24" Margin="0,4,0,0">
+                                <Border
+                                    Width="120"
+                                    Height="18"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource AppSkeletonRect}"
+                                    Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <TextBlock
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Lg}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppAccent}"
+                                    Text="{Binding BalanceSheetNetWorthDisplay}"
+                                    Typography.NumeralAlignment="Tabular"
+                                    Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                             </Grid>
                         </StackPanel>
                     </Border>
@@ -282,15 +303,15 @@
 
                 <!--
                     Plan A 重排（v0.x）：
-                      1. AssetClassFocusWidget — 主要導航入口（現金/負債/不動產/...），
-                         上移到 KPI 緊鄰下方，使用者一進頁面就能跳到目標資產類
-                      2. TodaysMoversWidget — 每日掃視（盤中誰漲誰跌）
-                      3. InvestmentFocusWidget — 投資 drill-down 含 30d sparkline
-                      4. AssistantWidget — 洞察提醒（沒洞察時整段隱藏）
-                      5. GoalsWidget + FireWidget — 長期規劃，並排
-                      6. 資產 / 收支 expander — 詳細列表
+                    1. AssetClassFocusWidget — 主要導航入口（現金/負債/不動產/...），
+                    上移到 KPI 緊鄰下方，使用者一進頁面就能跳到目標資產類
+                    2. TodaysMoversWidget — 每日掃視（盤中誰漲誰跌）
+                    3. InvestmentFocusWidget — 投資 drill-down 含 30d sparkline
+                    4. AssistantWidget — 洞察提醒（沒洞察時整段隱藏）
+                    5. GoalsWidget + FireWidget — 長期規劃，並排
+                    6. 資產 / 收支 expander — 詳細列表
                     移除：原本 KPI 下方獨立「30 天投資組合趨勢」sparkline 區塊 —
-                      與 InvestmentFocusWidget 內畫的線是同一張，重複佔空間。
+                    與 InvestmentFocusWidget 內畫的線是同一張，重複佔空間。
                 -->
 
                 <!--
@@ -306,25 +327,28 @@
                     P2.14 — 資產組成 Analytics card migrated to AppCardSummary。Margin
                     local override (style default Margin 是 0)，因為下方還有 widgets list。
                 -->
-                <Border Margin="0,0,0,16"
-                        Style="{StaticResource AppCardSummary}"
-                        Visibility="{Binding HasCompositionData, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Border
+                    Margin="0,0,0,16"
+                    Style="{StaticResource AppCardSummary}"
+                    Visibility="{Binding HasCompositionData, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel>
                         <DockPanel Margin="0,0,0,10">
-                            <TextBlock DockPanel.Dock="Left"
-                                       VerticalAlignment="Center"
-                                       FontSize="{StaticResource Font.Size.Sm}"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppTextPrimary}"
-                                       Text="{DynamicResource FinancialOverview.Composition.Heading}" />
-                            <TextBlock DockPanel.Dock="Right"
-                                       VerticalAlignment="Center"
-                                       FontFamily="{StaticResource Font.Family.Base}"
-                                       FontSize="{StaticResource Font.Size.Sm}"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppTextPrimary}"
-                                       Text="{Binding CompositionTotalDisplay, Mode=OneWay}"
-                                       Typography.NumeralAlignment="Tabular" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                DockPanel.Dock="Left"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource FinancialOverview.Composition.Heading}" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                DockPanel.Dock="Right"
+                                FontFamily="{StaticResource Font.Family.Base}"
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{Binding CompositionTotalDisplay, Mode=OneWay}"
+                                Typography.NumeralAlignment="Tabular" />
                         </DockPanel>
 
                         <!--  Real stacked bar with per-segment proportional widths  -->
@@ -338,9 +362,10 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="{Binding ColorHex, Converter={StaticResource HexToBrushConverter}}"
-                                                Margin="0,0,1,0"
-                                                ToolTip="{Binding NameKey, Converter={StaticResource ResourceKeyToStringConverter}}">
+                                        <Border
+                                            Margin="0,0,1,0"
+                                            Background="{Binding ColorHex, Converter={StaticResource HexToBrushConverter}}"
+                                            ToolTip="{Binding NameKey, Converter={StaticResource ResourceKeyToStringConverter}}">
                                             <Border.Width>
                                                 <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
                                                     <Binding Path="Percent" />
@@ -366,39 +391,48 @@
                                             <ColumnDefinition Width="16" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Grid.Column="0" Width="10" Height="10"
-                                                VerticalAlignment="Center"
-                                                Background="{Binding ColorHex, Converter={StaticResource HexToBrushConverter}}"
-                                                CornerRadius="2" />
-                                        <TextBlock Grid.Column="2"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="{StaticResource Font.Size.Xs}"
-                                                   Foreground="{DynamicResource AppTextSecondary}"
-                                                   Text="{Binding NameKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
-                                        <TextBlock Grid.Column="3"
-                                                   VerticalAlignment="Center"
-                                                   FontFamily="{StaticResource Font.Family.Base}"
-                                                   FontSize="{StaticResource Font.Size.Xs}"
-                                                   Foreground="{DynamicResource AppTextMuted}"
-                                                   Text="{Binding PercentDisplay}"
-                                                   Typography.NumeralAlignment="Tabular" />
-                                        <TextBlock Grid.Column="5"
-                                                   VerticalAlignment="Center"
-                                                   FontFamily="{StaticResource Font.Family.Base}"
-                                                   FontSize="{StaticResource Font.Size.Xs}"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource AppTextPrimary}"
-                                                   Text="{Binding ValueDisplay}"
-                                                   Typography.NumeralAlignment="Tabular" />
+                                        <Border
+                                            Grid.Column="0"
+                                            Width="10"
+                                            Height="10"
+                                            VerticalAlignment="Center"
+                                            Background="{Binding ColorHex, Converter={StaticResource HexToBrushConverter}}"
+                                            CornerRadius="2" />
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            VerticalAlignment="Center"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{Binding NameKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{Binding PercentDisplay}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                        <TextBlock
+                                            Grid.Column="5"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource AppTextPrimary}"
+                                            Text="{Binding ValueDisplay}"
+                                            Typography.NumeralAlignment="Tabular" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
                         <!--  Liabilities standalone (red, separated visually) — 只在有負債時顯示  -->
-                        <StackPanel Margin="0,12,0,0"
-                                    Visibility="{Binding HasLiabilities, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <Border Height="3" Margin="0,0,0,6" Background="{DynamicResource AppBorder}" CornerRadius="1.5" />
+                        <StackPanel Margin="0,12,0,0" Visibility="{Binding HasLiabilities, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Border
+                                Height="3"
+                                Margin="0,0,0,6"
+                                Background="{DynamicResource AppBorder}"
+                                CornerRadius="1.5" />
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="12" />
@@ -408,30 +442,36 @@
                                     <ColumnDefinition Width="16" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Width="10" Height="10"
-                                        VerticalAlignment="Center"
-                                        Background="{DynamicResource AppDown}"
-                                        CornerRadius="2" />
-                                <TextBlock Grid.Column="2"
-                                           VerticalAlignment="Center"
-                                           FontSize="{StaticResource Font.Size.Xs}"
-                                           Foreground="{DynamicResource AppTextSecondary}"
-                                           Text="{DynamicResource FinancialOverview.Composition.Liability}" />
-                                <TextBlock Grid.Column="3"
-                                           VerticalAlignment="Center"
-                                           FontFamily="{StaticResource Font.Family.Base}"
-                                           FontSize="{StaticResource Font.Size.Xs}"
-                                           Foreground="{DynamicResource AppTextMuted}"
-                                           Text="{Binding LiabilityShareDisplay}"
-                                           Typography.NumeralAlignment="Tabular" />
-                                <TextBlock Grid.Column="5"
-                                           VerticalAlignment="Center"
-                                           FontFamily="{StaticResource Font.Family.Base}"
-                                           FontSize="{StaticResource Font.Size.Xs}"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource AppDown}"
-                                           Text="{Binding CompositionLiabilityDisplay}"
-                                           Typography.NumeralAlignment="Tabular" />
+                                <Border
+                                    Grid.Column="0"
+                                    Width="10"
+                                    Height="10"
+                                    VerticalAlignment="Center"
+                                    Background="{DynamicResource AppDown}"
+                                    CornerRadius="2" />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{DynamicResource FinancialOverview.Composition.Liability}" />
+                                <TextBlock
+                                    Grid.Column="3"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{Binding LiabilityShareDisplay}"
+                                    Typography.NumeralAlignment="Tabular" />
+                                <TextBlock
+                                    Grid.Column="5"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{StaticResource Font.Family.Base}"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppDown}"
+                                    Text="{Binding CompositionLiabilityDisplay}"
+                                    Typography.NumeralAlignment="Tabular" />
                             </Grid>
                         </StackPanel>
                     </StackPanel>
@@ -446,76 +486,74 @@
                 -->
                 <DockPanel Margin="0,0,0,16" LastChildFill="True">
                     <Button
-                        DockPanel.Dock="Right"
                         Width="32"
                         Height="32"
                         Margin="8,0,0,0"
                         Padding="0"
                         VerticalAlignment="Top"
                         Command="{Binding OpenKpiEditorCommand}"
+                        DockPanel.Dock="Right"
                         Style="{StaticResource AppIconButton}"
                         ToolTip="{DynamicResource Settings.OverviewKpis.Title}">
-                        <ds:AppIcon Symbol="Settings24" FontSize="{StaticResource Font.Size.Md}" />
+                        <ds:AppIcon FontSize="{StaticResource Font.Size.Md}" Symbol="Settings24" />
                     </Button>
-                    <ItemsControl
-                        Margin="-4,0,-4,0"
-                        ItemsSource="{Binding KpiCards}">
+                    <ItemsControl Margin="-4,0,-4,0" ItemsSource="{Binding KpiCards}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <UniformGrid Rows="1" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Margin="4,0" Style="{StaticResource FormCard}">
-                        <StackPanel>
-                            <TextBlock
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Text="{Binding LabelKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
-                            <TextBlock
-                                Margin="0,8,0,0"
-                                FontFamily="{StaticResource Font.Family.Base}"
-                                FontSize="{StaticResource Font.Size.Lg}"
-                                FontWeight="SemiBold"
-                                Text="{Binding ValueDisplay}"
-                                Typography.NumeralAlignment="Tabular">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Tone}" Value="Up">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Tone}" Value="Down">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Tone}" Value="Accent">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                            <!--
-                                Optional secondary line — 例：負債比率 27.1% 下方顯示
-                                「槓桿比 1.37」副值。HasSecondary=false 時 TextBlock 不渲染。
-                            -->
-                            <TextBlock
-                                Margin="0,4,0,0"
-                                FontFamily="{StaticResource Font.Family.Base}"
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Typography.NumeralAlignment="Tabular"
-                                Visibility="{Binding HasSecondary, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <Run Text="{Binding SecondaryLabelKey, Converter={StaticResource ResourceKeyToStringConverter}, Mode=OneWay}" />
-                                <Run Text=" " />
-                                <Run Text="{Binding SecondaryValueDisplay, Mode=OneWay}" />
-                            </TextBlock>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="4,0" Style="{StaticResource FormCard}">
+                                    <StackPanel>
+                                        <TextBlock
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{Binding LabelKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                        <TextBlock
+                                            Margin="0,8,0,0"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Lg}"
+                                            FontWeight="SemiBold"
+                                            Text="{Binding ValueDisplay}"
+                                            Typography.NumeralAlignment="Tabular">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Tone}" Value="Up">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Tone}" Value="Down">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Tone}" Value="Accent">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <!--
+                                            Optional secondary line — 例：負債比率 27.1% 下方顯示
+                                            「槓桿比 1.37」副值。HasSecondary=false 時 TextBlock 不渲染。
+                                        -->
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Typography.NumeralAlignment="Tabular"
+                                            Visibility="{Binding HasSecondary, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Run Text="{Binding SecondaryLabelKey, Converter={StaticResource ResourceKeyToStringConverter}, Mode=OneWay}" />
+                                            <Run Text=" " />
+                                            <Run Text="{Binding SecondaryValueDisplay, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </DockPanel>
 
@@ -525,13 +563,13 @@
                     保留檔案但不再被引用，避免訊息分散。
                 -->
 
-                <!--  ↓ 投資焦點：總市值 / 成本 / 總損益 + 淨值走勢 + 今日漲跌 (merged) -->
+                <!--  ↓ 投資焦點：總市值 / 成本 / 總損益 + 淨值走勢 + 今日漲跌 (merged)  -->
                 <widgets:InvestmentFocusWidget />
 
-                <!--  ↓ 助手洞察：有洞察才顯示（widget 內部 visibility 控制） -->
+                <!--  ↓ 助手洞察：有洞察才顯示（widget 內部 visibility 控制）  -->
                 <widgets:AssistantWidget />
 
-                <!--  ↓ 目標 / FIRE 並排 -->
+                <!--  ↓ 目標 / FIRE 並排  -->
                 <Grid Margin="0,0,0,4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -545,9 +583,9 @@
                     Removed (v2 consolidation 2026-05-13)：資產 / 投資 / 負債 三個
                     Expander 已從總覽移除。理由：
                     - 跟 ❹ 資產組成 view 嚴重重複（後者是 aggregated stacked bar
-                      + legend，前者是 grouped flat list — 同樣資料兩種呈現）
+                    + legend，前者是 grouped flat list — 同樣資料兩種呈現）
                     - 每個 tab 分頁本身已有 DataGrid 細部資料，drill-down 走
-                      navigation 即可，不需要 dashboard inline 全展開
+                    navigation 即可，不需要 dashboard inline 全展開
                     - 減少 scroll 高度 ~600px，視覺集中
                 -->
 
@@ -555,13 +593,9 @@
         </ScrollViewer>
 
         <!--  ── KPI selector dialog ──────────────────────────────────────  -->
-        <Grid
-            behaviors:EscapeKeyCommandBehavior.Command="{Binding CloseKpiEditorCommand}"
-            Visibility="{Binding IsKpiEditorOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid behaviors:EscapeKeyCommandBehavior.Command="{Binding CloseKpiEditorCommand}" Visibility="{Binding IsKpiEditorOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <!--  Backdrop  -->
-            <Border
-                Background="{DynamicResource AppModalOverlay}"
-                MouseDown="KpiEditorBackdrop_MouseDown" />
+            <Border Background="{DynamicResource AppModalOverlay}" MouseDown="KpiEditorBackdrop_MouseDown" />
             <!--  Card  -->
             <Border
                 MaxWidth="520"
@@ -603,8 +637,7 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <CheckBox Grid.Column="0"
-                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}">
+                                        <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}">
                                             <StackPanel>
                                                 <TextBlock
                                                     FontSize="{StaticResource Font.Size.Sm}"
@@ -620,22 +653,34 @@
                                             </StackPanel>
                                         </CheckBox>
                                         <!--  v2：reorder（▲▼）— 按勾選順序排會混亂，用上下鈕較直覺。  -->
-                                        <Button Grid.Column="1" Width="28" Height="28" Padding="0"
-                                                Margin="0,0,4,0"
-                                                Style="{StaticResource AppIconButton}"
-                                                Command="{Binding DataContext.MoveKpiUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                CommandParameter="{Binding}"
-                                                ToolTip="{DynamicResource FinancialOverview.Kpi.MoveUp}">
-                                            <ds:AppIcon Symbol="ChevronUp24" FontSize="14"
-                                                        Foreground="{DynamicResource AppTextSecondary}" />
+                                        <Button
+                                            Grid.Column="1"
+                                            Width="28"
+                                            Height="28"
+                                            Margin="0,0,4,0"
+                                            Padding="0"
+                                            Command="{Binding DataContext.MoveKpiUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource AppIconButton}"
+                                            ToolTip="{DynamicResource FinancialOverview.Kpi.MoveUp}">
+                                            <ds:AppIcon
+                                                FontSize="14"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Symbol="ChevronUp24" />
                                         </Button>
-                                        <Button Grid.Column="2" Width="28" Height="28" Padding="0"
-                                                Style="{StaticResource AppIconButton}"
-                                                Command="{Binding DataContext.MoveKpiDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                CommandParameter="{Binding}"
-                                                ToolTip="{DynamicResource FinancialOverview.Kpi.MoveDown}">
-                                            <ds:AppIcon Symbol="ChevronDown24" FontSize="14"
-                                                        Foreground="{DynamicResource AppTextSecondary}" />
+                                        <Button
+                                            Grid.Column="2"
+                                            Width="28"
+                                            Height="28"
+                                            Padding="0"
+                                            Command="{Binding DataContext.MoveKpiDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource AppIconButton}"
+                                            ToolTip="{DynamicResource FinancialOverview.Kpi.MoveDown}">
+                                            <ds:AppIcon
+                                                FontSize="14"
+                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                Symbol="ChevronDown24" />
                                         </Button>
                                     </Grid>
                                 </DataTemplate>
@@ -644,10 +689,13 @@
                     </ScrollViewer>
 
                     <!--  Footer  -->
-                    <DockPanel Grid.Row="2" Margin="0,16,0,0" LastChildFill="False">
+                    <DockPanel
+                        Grid.Row="2"
+                        Margin="0,16,0,0"
+                        LastChildFill="False">
                         <TextBlock
-                            DockPanel.Dock="Left"
                             VerticalAlignment="Center"
+                            DockPanel.Dock="Left"
                             FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextMuted}">
                             <Run Text="{Binding KpiSelectedCount, Mode=OneWay}" />
@@ -662,8 +710,8 @@
                             MinHeight="32"
                             Margin="0,0,0,0"
                             Padding="14,0"
-                            DockPanel.Dock="Right"
                             Command="{Binding SaveKpiSelectionCommand}"
+                            DockPanel.Dock="Right"
                             Style="{StaticResource AppPrimaryButton}">
                             <TextBlock Style="{StaticResource AppButtonText}" Text="{DynamicResource Common.Save}" />
                         </Button>
@@ -672,8 +720,8 @@
                             MinHeight="32"
                             Margin="0,0,8,0"
                             Padding="14,0"
-                            DockPanel.Dock="Right"
                             Command="{Binding CloseKpiEditorCommand}"
+                            DockPanel.Dock="Right"
                             Style="{StaticResource AppSecondaryButton}">
                             <TextBlock Style="{StaticResource AppButtonText}" Text="{DynamicResource Common.Cancel}" />
                         </Button>

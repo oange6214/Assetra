@@ -1,10 +1,15 @@
+using System.Diagnostics;
 using System.Globalization;
+using System.Text;
+using System.Windows;
+using System.Windows.Threading;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Fire;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Fire;
 using Assetra.Core.Models.MonteCarlo;
 using Assetra.WPF.Features.Fire;
+using Assetra.WPF.Infrastructure.Converters;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using Moq;
@@ -49,8 +54,8 @@ public sealed class FireViewModelTests
     }
 
     [Theory]
-    [InlineData("not-a-number", "目前淨資產格式錯誤")]
-    [InlineData("", "目前淨資產格式錯誤")]
+    [InlineData("not-a-number", "目前淨資產需為 0 或以上的數字，系統會用它估算 FIRE 進度。")]
+    [InlineData("", "目前淨資產需為 0 或以上的數字，系統會用它估算 FIRE 進度。")]
     public void Calculate_InvalidNetWorth_SetsErrorMessage(string input, string expectedFallback)
     {
         var vm = CreateVm();
@@ -70,7 +75,7 @@ public sealed class FireViewModelTests
 
         vm.CalculateCommand.Execute(null);
 
-        Assert.Equal("年支出格式錯誤", vm.ErrorMessage);
+        Assert.Equal("年支出必須大於 0，因為財務自由所需資產會由年支出推算。", vm.ErrorMessage);
     }
 
     [Fact]
@@ -457,6 +462,38 @@ public sealed class FireViewModelTests
     }
 
     [Fact]
+    public async Task DeleteScenarioCommand_DoesNotDeleteExistingFireGoal()
+    {
+        var scenario = CreateScenario("Base", isDefault: true);
+        var scenarios = new Mock<IFireScenarioRepository>();
+        scenarios.SetupSequence(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new[] { scenario })
+            .ReturnsAsync(Array.Empty<FireScenario>());
+        scenarios.Setup(r => r.DeleteAsync(scenario.Id, It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var goals = new Mock<IFinancialGoalRepository>();
+        goals.Setup(g => g.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new[]
+            {
+                new FinancialGoal(
+                    Guid.NewGuid(),
+                    "FIRE",
+                    15_000_000m,
+                    1_000_000m,
+                    null,
+                    "Base"),
+            });
+        var vm = CreateVm(goals: goals, scenarios: scenarios);
+
+        await vm.LoadScenariosAsync();
+        await vm.DeleteScenarioCommand.ExecuteAsync(null);
+
+        scenarios.Verify(r => r.DeleteAsync(scenario.Id, It.IsAny<CancellationToken>()), Times.Once);
+        goals.Verify(g => g.RemoveAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
     public async Task IsAdvancedMode_DoesNotClearSelectedScenario()
     {
         var scenario = CreateScenario("Base", isDefault: true);
@@ -483,7 +520,7 @@ public sealed class FireViewModelTests
 
         vm.CalculateCommand.Execute(null);
 
-        Assert.Equal("安全提領率必須大於 0 且不超過 100%", vm.ErrorMessage);
+        Assert.Equal("安全提領率必須大於 0 且不超過 100%，例如 0.04 代表 4%。", vm.ErrorMessage);
         Assert.False(vm.HasCalculatedResult);
     }
 
@@ -506,6 +543,85 @@ public sealed class FireViewModelTests
         Assert.Equal(3, vm.WealthPath.Count);
         Assert.Equal(0, vm.WealthPath[0].Year);
         Assert.Equal(1_000_000m, vm.WealthPath[0].NetWorth);
+    }
+
+    [Fact]
+    public void Calculate_Success_PopulatesWealthPathTilesWithChangeAndTone()
+    {
+        var calc = new Mock<IFireCalculatorService>();
+        var path = new decimal[] { 1_000_000m, 950_000m, 1_050_000m, 0m };
+        calc.Setup(c => c.Calculate(It.IsAny<FireInputs>()))
+            .Returns(new FireProjection(15_000_000m, 18, 15_500_000m, path));
+        var vm = CreateVm(calc);
+
+        vm.CalculateCommand.Execute(null);
+
+        Assert.Equal(4, vm.WealthPathTiles.Count);
+        Assert.Equal(0, vm.WealthPathTiles[0].Year);
+        Assert.Equal(1_000_000m, vm.WealthPathTiles[0].Balance);
+        Assert.Null(vm.WealthPathTiles[0].Change);
+        Assert.Equal(FirePathTone.Neutral, vm.WealthPathTiles[0].Tone);
+        Assert.Equal(-50_000m, vm.WealthPathTiles[1].Change);
+        Assert.Equal(FirePathTone.Negative, vm.WealthPathTiles[1].Tone);
+        Assert.Equal(100_000m, vm.WealthPathTiles[2].Change);
+        Assert.Equal(FirePathTone.Positive, vm.WealthPathTiles[2].Tone);
+        Assert.Equal(FirePathTone.Depleted, vm.WealthPathTiles[3].Tone);
+    }
+
+    [Fact]
+    public async Task CalculatePlanningAsync_AdvancedScenario_PopulatesDrawdownPathTiles()
+    {
+        var scenario = CreateScenario(
+            "Base",
+            isDefault: true,
+            mode: FireScenarioMode.Advanced,
+            currentAge: 45,
+            lifeExpectancyAge: 47);
+        var scenarios = new Mock<IFireScenarioRepository>();
+        scenarios.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new[] { scenario });
+        scenarios.Setup(r => r.GetCashFlowEventsAsync(scenario.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<FireCashFlowEvent>());
+        var planning = new Mock<IFirePlanningService>();
+        planning.Setup(p => p.Project(It.IsAny<FireScenario>(), It.IsAny<IReadOnlyList<FireCashFlowEvent>>(), It.IsAny<int>(), It.IsAny<int>()))
+            .Returns(new FirePlanningProjection(
+                RequiredAssets: 15_000_000m,
+                YearsToFire: 1,
+                FireYear: 2027,
+                ProjectedNetWorthAtFire: 15_500_000m,
+                RequiredMonthlySavings: 0m,
+                MonteCarloSuccessRate: null,
+                AccumulationPath: new[] { new Assetra.Core.Models.Fire.FireWealthPoint(0, 1_000_000m) },
+                DrawdownPath: Array.Empty<FireDrawdownPoint>(),
+                Warnings: Array.Empty<FireProjectionWarning>()));
+        var drawdown = new Mock<IFireDrawdownService>();
+        drawdown.Setup(d => d.ProjectDrawdown(
+                15_500_000m,
+                scenario.AnnualExpenses,
+                scenario.ExpectedAnnualReturn,
+                45,
+                47))
+            .Returns(new FireDrawdownProjection(
+                DrawdownPath: new[]
+                {
+                    new FireDrawdownPoint(2027, 46, 15_500_000m, 500_000m, 600_000m, -600_000m, 15_400_000m),
+                    new FireDrawdownPoint(2028, 47, 15_400_000m, 450_000m, 600_000m, -600_000m, 15_250_000m),
+                },
+                Warnings: Array.Empty<FireProjectionWarning>()));
+        var vm = CreateVm(scenarios: scenarios, planning: planning, drawdown: drawdown);
+
+        await vm.LoadScenariosAsync();
+        await vm.CalculatePlanningCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, vm.DrawdownPathTiles.Count);
+        Assert.Equal(2027, vm.DrawdownPathTiles[0].Year);
+        Assert.Equal(46, vm.DrawdownPathTiles[0].Age);
+        Assert.Equal(15_400_000m, vm.DrawdownPathTiles[0].Balance);
+        Assert.Equal(600_000m, vm.DrawdownPathTiles[0].Withdrawal);
+        Assert.Null(vm.DrawdownPathTiles[0].Change);
+        Assert.Equal(FirePathTone.Neutral, vm.DrawdownPathTiles[0].Tone);
+        Assert.Equal(-150_000m, vm.DrawdownPathTiles[1].Change);
+        Assert.Equal(FirePathTone.Negative, vm.DrawdownPathTiles[1].Tone);
     }
 
     [Fact]
@@ -592,6 +708,70 @@ public sealed class FireViewModelTests
 
         Assert.True(vm.HasCalculatedResult);
         Assert.Equal("—", vm.YearsToFire);
+    }
+
+    [Fact]
+    public void FireView_LoadAndCalculate_HasNoBindingErrors()
+    {
+        StaRun(() =>
+        {
+            EnsureFireViewResources();
+            var calc = new Mock<IFireCalculatorService>();
+            calc.Setup(c => c.Calculate(It.IsAny<FireInputs>()))
+                .Returns(new FireProjection(
+                    15_000_000m,
+                    8,
+                    15_433_298m,
+                    new[] { 8_506_900m, 9_487_452m, 10_546_448m, 11_690_164m }));
+            var vm = CreateVm(calc);
+            vm.CurrentNetWorth = "8,506,900";
+            vm.AnnualExpenses = "600,000";
+            vm.AnnualSavings = "300,000";
+            vm.ExpectedAnnualReturn = "0.05";
+            vm.WithdrawalRate = "0.04";
+
+            var bindingFailures = new List<string>();
+            using var listener = new BindingTraceListener(bindingFailures);
+            var bindingSource = PresentationTraceSources.DataBindingSource;
+            var previousLevel = bindingSource.Switch.Level;
+            bindingSource.Switch.Level = SourceLevels.Error;
+            bindingSource.Listeners.Add(listener);
+
+            Window? window = null;
+            try
+            {
+                var view = new FireView { DataContext = vm };
+                window = new Window
+                {
+                    Content = view,
+                    Width = 1280,
+                    Height = 900,
+                    WindowStartupLocation = WindowStartupLocation.Manual,
+                    Left = -10_000,
+                    Top = -10_000,
+                    ShowInTaskbar = false,
+                    WindowStyle = WindowStyle.None
+                };
+
+                window.Show();
+                PumpDispatcher();
+                vm.CalculateCommand.Execute(null);
+                PumpDispatcher();
+            }
+            finally
+            {
+                if (window is not null)
+                {
+                    window.Close();
+                    PumpDispatcher();
+                }
+
+                bindingSource.Listeners.Remove(listener);
+                bindingSource.Switch.Level = previousLevel;
+            }
+
+            Assert.True(bindingFailures.Count == 0, string.Join(Environment.NewLine, bindingFailures));
+        });
     }
 
     [Fact]
@@ -719,5 +899,132 @@ public sealed class FireViewModelTests
             IsDefault: isDefault,
             CreatedAt: now,
             UpdatedAt: now);
+    }
+
+    private static void StaRun(Action action)
+    {
+        Exception? error = null;
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
+                action();
+            }
+            catch (Exception ex)
+            {
+                error = ex;
+            }
+            finally
+            {
+                Dispatcher.CurrentDispatcher.InvokeShutdown();
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        if (error is not null)
+        {
+            throw error;
+        }
+    }
+
+    private static void EnsureFireViewResources()
+    {
+        var app = System.Windows.Application.Current ?? new System.Windows.Application();
+        if (System.Windows.Application.ResourceAssembly is null)
+        {
+            System.Windows.Application.ResourceAssembly = typeof(FireView).Assembly;
+        }
+
+        var resources = app.Resources;
+        AddMissing(resources, "BooleanToVisibilityConverter", new System.Windows.Controls.BooleanToVisibilityConverter());
+        AddMissing(resources, "BoolToVisibilityConverter", new System.Windows.Controls.BooleanToVisibilityConverter());
+        AddMissing(resources, "InverseBooleanToVisibilityConverter", new InverseBooleanToVisibilityConverter());
+        AddMissing(resources, "NullToVisibilityConverter", new NullToVisibilityConverter());
+        AddMissing(resources, "BooleanToBrushConverter", new BooleanToBrushConverter());
+        AddMissing(resources, "StringToVisibilityConverter", new StringToVisibilityConverter());
+        AddMissing(resources, "EnumToBoolConverter", new EnumToBoolConverter());
+        AddMissing(resources, "HexToBrushConverter", new HexToBrushConverter());
+        AddMissing(resources, "HexToTintBrushConverter", new HexToTintBrushConverter());
+        AddMissing(resources, "EqualityConverter", new StringEqualityConverter());
+        AddMissing(resources, "StatusTagToBrushConverter", new StatusTagToBrushConverter());
+        AddMissing(resources, "PercentToWidthConverter", new PercentToWidthConverter());
+        AddMissing(resources, "SubtractDoubleConverter", new SubtractDoubleConverter());
+        AddMissing(resources, "CurrencyConverter", new CurrencyConverter());
+        AddMissing(resources, "DateDisplayConverter", new DateDisplayConverter());
+        AddMissing(resources, "TradeTypeConverter", new TradeTypeConverter());
+        AddMissing(resources, "ResourceKeyToStringConverter", new ResourceKeyToStringConverter());
+        AddMissing(resources, "AssetTypeToLocalizedNameConverter", new AssetTypeToLocalizedNameConverter());
+        AddMissing(resources, "ZeroToVisibleConverter", new ZeroToVisibleConverter());
+        AddMissing(resources, "NonZeroDecimalToVisibilityConverter", new NonZeroDecimalToVisibilityConverter());
+        AddMissing(resources, "WidthScaleThresholdToBooleanConverter", new WidthScaleThresholdToBooleanConverter());
+        AddMissing(resources, "WidthScaleThresholdToVisibilityConverter", new WidthScaleThresholdToVisibilityConverter());
+        AddMissing(resources, "InverseWidthScaleThresholdToVisibilityConverter", new InverseWidthScaleThresholdToVisibilityConverter());
+        AddMissing(resources, "AdaptivePanelWidthConverter", new AdaptivePanelWidthConverter());
+        AddMissing(resources, "SparklineSeriesConverter", new SparklineSeriesConverter());
+        AddMissing(resources, "PercentToDashArrayConverter", new PercentToDashArrayConverter());
+
+        MergeOnce(resources, "pack://application:,,,/Assetra.WPF;component/DesignSystem/Tokens.xaml");
+        MergeOnce(resources, "pack://application:,,,/Assetra.WPF;component/DesignSystem/Themes/Dark.xaml");
+        MergeOnce(resources, "pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles/Focus.xaml");
+        MergeOnce(resources, "pack://application:,,,/Assetra.WPF;component/DesignSystem/Styles.xaml");
+        MergeOnce(resources, "pack://application:,,,/Assetra.WPF;component/Resources/AppResources.xaml");
+        MergeOnce(resources, "pack://application:,,,/Assetra.WPF;component/Languages/zh-TW.xaml");
+    }
+
+    private static void AddMissing(ResourceDictionary resources, string key, object value)
+    {
+        if (!resources.Contains(key))
+        {
+            resources.Add(key, value);
+        }
+    }
+
+    private static void MergeOnce(ResourceDictionary resources, string source)
+    {
+        if (resources.MergedDictionaries.Any(dictionary =>
+                string.Equals(dictionary.Source?.OriginalString, source, StringComparison.OrdinalIgnoreCase)))
+        {
+            return;
+        }
+
+        resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(source, UriKind.Absolute) });
+    }
+
+    private static void PumpDispatcher()
+    {
+        Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+    }
+
+    private sealed class BindingTraceListener(List<string> failures) : TraceListener
+    {
+        private readonly StringBuilder _line = new();
+
+        public override void Write(string? message)
+        {
+            if (!string.IsNullOrEmpty(message))
+            {
+                _line.Append(message);
+            }
+        }
+
+        public override void WriteLine(string? message)
+        {
+            if (!string.IsNullOrEmpty(message))
+            {
+                _line.Append(message);
+            }
+
+            var text = _line.ToString();
+            _line.Clear();
+
+            if (text.Contains("System.Windows.Data Error", StringComparison.Ordinal))
+            {
+                failures.Add(text);
+            }
+        }
     }
 }

@@ -167,10 +167,12 @@
                                 Margin="0,0,8,0"
                                 Command="{Binding CancelEditCommand}"
                                 Content="{DynamicResource Goals.Edit.Cancel}"
+                                IsCancel="True"
                                 Style="{StaticResource AppSecondaryButton}" />
                             <Button
                                 Command="{Binding AddCommand}"
                                 Content="{Binding SubmitText}"
+                                IsDefault="True"
                                 Style="{StaticResource AppPrimaryButton}" />
                         </StackPanel>
                     </Border>
@@ -200,6 +202,7 @@
                             Margin="0,0,8,0"
                             Command="{Binding ConfirmDialogNoCommand}"
                             Content="{DynamicResource Common.Cancel}"
+                            IsCancel="True"
                             Style="{StaticResource AppSecondaryButton}" />
                         <Button
                             Command="{Binding ConfirmDialogYesCommand}"

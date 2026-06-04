@@ -14,6 +14,10 @@ public sealed class MonteCarloSimulator : IMonteCarloSimulator
     public MonteCarloResult Simulate(MonteCarloInputs inputs)
     {
         ArgumentNullException.ThrowIfNull(inputs);
+        if (inputs.InitialBalance < 0)
+            throw new ArgumentOutOfRangeException(nameof(inputs.InitialBalance), "InitialBalance must be non-negative.");
+        if (inputs.AnnualWithdrawal < 0)
+            throw new ArgumentOutOfRangeException(nameof(inputs.AnnualWithdrawal), "AnnualWithdrawal must be non-negative.");
         if (inputs.Years <= 0)
             throw new ArgumentOutOfRangeException(nameof(inputs.Years), "Years must be positive.");
         if (inputs.Years > MonteCarloInputs.MaxYears)
@@ -40,6 +44,7 @@ public sealed class MonteCarloSimulator : IMonteCarloSimulator
 
         // [simIndex][year] : balance path; year 0 = initial.
         var paths = new double[inputs.SimulationCount][];
+        var depletionYears = new List<int>();
         int successCount = 0;
 
         for (int s = 0; s < inputs.SimulationCount; s++)
@@ -48,6 +53,7 @@ public sealed class MonteCarloSimulator : IMonteCarloSimulator
             path[0] = initial;
             var balance = initial;
             bool depleted = false;
+            int? depletionYear = null;
 
             for (int y = 1; y <= inputs.Years; y++)
             {
@@ -57,12 +63,15 @@ public sealed class MonteCarloSimulator : IMonteCarloSimulator
                 {
                     balance = 0;
                     depleted = true;
+                    depletionYear ??= y;
                 }
                 path[y] = balance;
             }
             paths[s] = path;
             if (!depleted)
                 successCount++;
+            else if (depletionYear is int year)
+                depletionYears.Add(year);
         }
 
         var endings = paths.Select(p => p[inputs.Years]).OrderBy(v => v).ToArray();
@@ -87,7 +96,8 @@ public sealed class MonteCarloSimulator : IMonteCarloSimulator
             MedianEndingBalance: (decimal)p50,
             P10EndingBalance: (decimal)p10,
             P90EndingBalance: (decimal)p90,
-            MedianBalancePath: medianPath);
+            MedianBalancePath: medianPath,
+            MedianDepletionYear: MedianDepletionYear(depletionYears));
     }
 
     private static double NextLogNormalSimpleReturn(Random rng, double logMean, double logStdDev)
@@ -118,5 +128,15 @@ public sealed class MonteCarloSimulator : IMonteCarloSimulator
             return 0;
         var idx = (int)Math.Clamp(Math.Round(p * (sorted.Length - 1)), 0, sorted.Length - 1);
         return sorted[idx];
+    }
+
+    private static int? MedianDepletionYear(List<int> depletionYears)
+    {
+        if (depletionYears.Count == 0)
+            return null;
+
+        depletionYears.Sort();
+        var idx = (int)Math.Clamp(Math.Round(0.5 * (depletionYears.Count - 1)), 0, depletionYears.Count - 1);
+        return depletionYears[idx];
     }
 }

@@ -88,6 +88,13 @@
                     </StackPanel>
                 </UniformGrid>
 
+                <TextBlock
+                    Margin="0,8,0,0"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Text="{DynamicResource MonteCarlo.Assumption}"
+                    TextWrapping="Wrap" />
+
                 <StackPanel Style="{StaticResource PageActionBar}">
                     <TextBlock
                         Margin="0,0,8,0"
@@ -130,7 +137,7 @@
                 Style="{StaticResource ListContentHost}"
                 Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel>
-                    <UniformGrid Columns="4">
+                    <UniformGrid Columns="5">
                     <Border
                         Margin="0,0,12,0"
                         Style="{StaticResource MetricCard}">
@@ -171,6 +178,7 @@
                         </StackPanel>
                     </Border>
                     <Border
+                        Margin="0,0,12,0"
                         Style="{StaticResource MetricCard}">
                         <StackPanel>
                             <TextBlock
@@ -182,30 +190,76 @@
                                 Typography.NumeralAlignment="Tabular" />
                         </StackPanel>
                     </Border>
+                    <Border Style="{StaticResource MetricCard}">
+                        <StackPanel>
+                            <TextBlock
+                                Style="{StaticResource MetricLabel}"
+                                Text="{DynamicResource MonteCarlo.Result.DepletionYear}" />
+                            <TextBlock
+                                Style="{StaticResource MetricValue}"
+                                Text="{Binding MedianDepletionYearDisplay}"
+                                Typography.NumeralAlignment="Tabular" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Text="{DynamicResource MonteCarlo.Result.DepletionYear.Help}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
                 </UniformGrid>
 
                     <StackPanel Margin="0,16,0,0">
-                    <TextBlock
-                        Margin="0,0,0,8"
-                        FontSize="{StaticResource Font.Size.Md}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextPrimary}"
-                        Text="{DynamicResource MonteCarlo.Path.Title}" />
-                    <ItemsControl ItemsSource="{Binding MedianPath}">
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Md}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource MonteCarlo.Path.Title}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Text="{DynamicResource MonteCarlo.Path.TileHint}"
+                            TextWrapping="Wrap" />
+                    </Grid>
+
+                    <ItemsControl ItemsSource="{Binding MedianPathTiles}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:MonteCarloPathPoint}">
+                            <DataTemplate DataType="{x:Type vm:MonteCarloYearTile}">
                                 <Border
-                                    Margin="0,0,0,8"
-                                    Padding="14"
+                                    x:Name="TileChrome"
+                                    Width="132"
+                                    Height="92"
+                                    Margin="0,0,8,8"
+                                    Padding="10"
                                     Background="{DynamicResource AppSurface}"
                                     BorderBrush="{DynamicResource AppBorderLight}"
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource Radius.Md}">
                                     <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Border
+                                            x:Name="TileAccent"
+                                            Height="3"
+                                            Margin="-10,-10,-10,8"
+                                            VerticalAlignment="Top"
+                                            Background="{DynamicResource AppNeutral}"
+                                            CornerRadius="{StaticResource Radius.Sm}" />
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock
                                                 FontSize="{StaticResource Font.Size.Xs}"
@@ -218,16 +272,80 @@
                                                 Text="{Binding Year}" />
                                         </StackPanel>
                                         <TextBlock
-                                            Grid.Column="1"
+                                            Grid.Row="1"
+                                            VerticalAlignment="Center"
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{Binding Balance, StringFormat=N0}"
                                             Typography.NumeralAlignment="Tabular" />
+                                        <TextBlock
+                                            x:Name="TileChange"
+                                            Grid.Row="2"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{Binding Change, StringFormat={}{0:+#,0;-#,0;0}, TargetNullValue=—}"
+                                            Typography.NumeralAlignment="Tabular" />
                                     </Grid>
                                 </Border>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Tone}" Value="{x:Static vm:MonteCarloPathTone.Positive}">
+                                        <Setter TargetName="TileAccent" Property="Background" Value="{DynamicResource AppUp}" />
+                                        <Setter TargetName="TileChrome" Property="BorderBrush" Value="{DynamicResource AppUp}" />
+                                        <Setter TargetName="TileChange" Property="Foreground" Value="{DynamicResource AppUp}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Tone}" Value="{x:Static vm:MonteCarloPathTone.Negative}">
+                                        <Setter TargetName="TileAccent" Property="Background" Value="{DynamicResource AppDown}" />
+                                        <Setter TargetName="TileChrome" Property="BorderBrush" Value="{DynamicResource AppDown}" />
+                                        <Setter TargetName="TileChange" Property="Foreground" Value="{DynamicResource AppDown}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Tone}" Value="{x:Static vm:MonteCarloPathTone.Depleted}">
+                                        <Setter TargetName="TileChrome" Property="Background" Value="{DynamicResource AppSurfaceAlt}" />
+                                        <Setter TargetName="TileChrome" Property="Opacity" Value="0.72" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
+                    <Expander
+                        Margin="0,8,0,0"
+                        Header="{DynamicResource MonteCarlo.Path.DetailTitle}"
+                        Style="{StaticResource AppExpander}">
+                        <ItemsControl Margin="12,0,12,12" ItemsSource="{Binding MedianPath}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:MonteCarloPathPoint}">
+                                    <Border
+                                        Padding="0,8"
+                                        BorderBrush="{DynamicResource AppBorderLight}"
+                                        BorderThickness="0,0,0,1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock
+                                                    FontSize="{StaticResource Font.Size.Xs}"
+                                                    Foreground="{DynamicResource AppTextSecondary}"
+                                                    Text="{DynamicResource MonteCarlo.Path.Year}" />
+                                                <TextBlock
+                                                    Margin="8,0,0,0"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding Year}" />
+                                            </StackPanel>
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding Balance, StringFormat=N0}"
+                                                Typography.NumeralAlignment="Tabular" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
                 </StackPanel>
                 </StackPanel>
             </ScrollViewer>

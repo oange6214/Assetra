@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Goals planning
+
+- 財務目標補強為完整 planning workflow：detail drawer 顯示目標進度、下一步建議、里程碑、撥款規則與 FIRE 來源資訊。
+- 財務總覽 Goals widget 新增目標數、最近期限、需注意目標與最高進度摘要，與 Goals 頁面狀態保持一致。
+- 目標卡片追蹤來源改為輕量 inline text，避免「手動輸入」以重色 badge 顯示造成視覺干擾。
+- 新增 `docs/guides/Goals-Planning.md`，整理財務目標使用方式、追蹤來源、detail drawer、里程碑、撥款規則與 FIRE 同步。
+
 ### FIRE planning
 
 - FIRE 從單純 FIRE number calculator 擴充為 scenario-based planning module，支援 Basic / Advanced 模式、情境新增 / 儲存 / 複製 / 刪除 / 設為預設。

@@ -195,6 +195,12 @@ public sealed partial class FireViewModel : ObservableObject
         set => IsAdvancedMode = !value;
     }
 
+    partial void OnIsAdvancedModeChanged(bool value)
+    {
+        if (!value && SelectedPathTab == FirePathTab.Drawdown)
+            SelectedPathTab = FirePathTab.Wealth;
+    }
+
     public bool HasPlanningWarnings => PlanningResult?.Warnings.Count > 0;
 
     public bool HasDrawdownPath => PlanningResult?.DrawdownPath.Count > 0;
@@ -252,6 +258,37 @@ public sealed partial class FireViewModel : ObservableObject
 
     private readonly ObservableCollection<FireWealthPoint> _wealthPath = [];
     public ReadOnlyObservableCollection<FireWealthPoint> WealthPath { get; }
+
+    private readonly ObservableCollection<FireWealthPathTile> _wealthPathTiles = [];
+    public ReadOnlyObservableCollection<FireWealthPathTile> WealthPathTiles { get; }
+
+    private readonly ObservableCollection<FireDrawdownPathTile> _drawdownPathTiles = [];
+    public ReadOnlyObservableCollection<FireDrawdownPathTile> DrawdownPathTiles { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsWealthPathTab))]
+    [NotifyPropertyChangedFor(nameof(IsDrawdownPathTab))]
+    private FirePathTab _selectedPathTab = FirePathTab.Wealth;
+
+    public bool IsWealthPathTab
+    {
+        get => SelectedPathTab == FirePathTab.Wealth;
+        set
+        {
+            if (value)
+                SelectedPathTab = FirePathTab.Wealth;
+        }
+    }
+
+    public bool IsDrawdownPathTab
+    {
+        get => SelectedPathTab == FirePathTab.Drawdown;
+        set
+        {
+            if (value)
+                SelectedPathTab = FirePathTab.Drawdown;
+        }
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasWealthPathChart))]
@@ -339,6 +376,8 @@ public sealed partial class FireViewModel : ObservableObject
         _drawdownService = drawdownService;
         _monteCarloService = monteCarloService;
         WealthPath = new ReadOnlyObservableCollection<FireWealthPoint>(_wealthPath);
+        WealthPathTiles = new ReadOnlyObservableCollection<FireWealthPathTile>(_wealthPathTiles);
+        DrawdownPathTiles = new ReadOnlyObservableCollection<FireDrawdownPathTile>(_drawdownPathTiles);
     }
 
     /// <summary>
@@ -559,6 +598,7 @@ public sealed partial class FireViewModel : ObservableObject
             _wealthPath.Clear();
             foreach (var point in PlanningResult.AccumulationPath)
                 _wealthPath.Add(new FireWealthPoint(point.Year, point.NetWorth));
+            RefreshWealthPathTiles();
             RefreshWealthPathChart();
         }
         catch (ArgumentOutOfRangeException ex)
@@ -608,6 +648,7 @@ public sealed partial class FireViewModel : ObservableObject
         ProjectedNetWorthAtFire = 0m;
         HasCalculatedResult = false;
         _wealthPath.Clear();
+        RefreshWealthPathTiles();
         RefreshWealthPathChart();
     }
 
@@ -618,27 +659,27 @@ public sealed partial class FireViewModel : ObservableObject
 
         if (!TryParseDecimal(CurrentNetWorth, out var netWorth))
         {
-            ErrorMessage = L("Fire.Error.NetWorthInvalid", "目前淨資產格式錯誤");
+            ErrorMessage = L("Fire.Error.NetWorthInvalid", "目前淨資產需為 0 或以上的數字，系統會用它估算 FIRE 進度。");
             return false;
         }
         if (!TryParseDecimal(AnnualExpenses, out var expenses))
         {
-            ErrorMessage = L("Fire.Error.ExpensesInvalid", "年支出格式錯誤");
+            ErrorMessage = L("Fire.Error.ExpensesInvalid", "年支出必須大於 0，因為財務自由所需資產會由年支出推算。");
             return false;
         }
         if (!TryParseDecimal(AnnualSavings, out var savings))
         {
-            ErrorMessage = L("Fire.Error.SavingsInvalid", "年儲蓄格式錯誤");
+            ErrorMessage = L("Fire.Error.SavingsInvalid", "年儲蓄不可為負數，系統會用它估算每年累積速度。");
             return false;
         }
         if (!TryParseDecimal(ExpectedAnnualReturn, out var expectedReturn))
         {
-            ErrorMessage = L("Fire.Error.ReturnInvalid", "預期報酬率格式錯誤");
+            ErrorMessage = L("Fire.Error.ReturnInvalid", "預期年化報酬率格式錯誤，請輸入 0.05 代表 5%。");
             return false;
         }
         if (!TryParseDecimal(WithdrawalRate, out var withdrawalRate))
         {
-            ErrorMessage = L("Fire.Error.WithdrawalInvalid", "提領率格式錯誤");
+            ErrorMessage = L("Fire.Error.WithdrawalInvalid", "安全提領率必須大於 0 且不超過 100%，例如 0.04 代表 4%。");
             return false;
         }
 
@@ -650,7 +691,7 @@ public sealed partial class FireViewModel : ObservableObject
         {
             if (!TryParseOptionalInt(CurrentAge, out currentAge) || currentAge is < 0)
             {
-                ErrorMessage = L("Fire.Error.CurrentAgeInvalid", "目前年齡格式錯誤");
+                ErrorMessage = L("Fire.Error.CurrentAgeInvalid", "目前年齡需為 0 或以上的整數，才能估算退休提領路徑。");
                 return false;
             }
 
@@ -660,32 +701,32 @@ public sealed partial class FireViewModel : ObservableObject
             }
             else if (!TryParseOptionalInt(LifeExpectancyAge, out lifeExpectancyAge) || lifeExpectancyAge is <= 0)
             {
-                ErrorMessage = L("Fire.Error.LifeExpectancyInvalid", "預期壽命格式錯誤");
+                ErrorMessage = L("Fire.Error.LifeExpectancyInvalid", "預期壽命需為整數，且必須大於目前年齡。");
                 return false;
             }
 
             if (currentAge.HasValue && lifeExpectancyAge.HasValue && lifeExpectancyAge <= currentAge)
             {
-                ErrorMessage = L("Fire.Error.LifeExpectancyAfterAge", "預期壽命必須大於目前年齡");
+                ErrorMessage = L("Fire.Error.LifeExpectancyAfterAge", "預期壽命必須大於目前年齡，才能估算退休後資產是否足夠。");
                 return false;
             }
 
             if (!TryParseOptionalDecimal(RetirementAnnualExpenses, out retirementAnnualExpenses) || retirementAnnualExpenses is <= 0m)
             {
-                ErrorMessage = L("Fire.Error.RetirementExpensesInvalid", "退休後年支出格式錯誤");
+                ErrorMessage = L("Fire.Error.RetirementExpensesInvalid", "若填寫退休後年支出，金額必須大於 0，系統會用它估算提領路徑。");
                 return false;
             }
 
             if (!TryParseOptionalDecimal(InflationRate, out inflationRate))
             {
-                ErrorMessage = L("Fire.Error.InflationInvalid", "通膨率格式錯誤");
+                ErrorMessage = L("Fire.Error.InflationInvalid", "通膨率格式錯誤，名目報酬模式請輸入 0.02 代表 2%。");
                 return false;
             }
 
             inflationRate ??= 0.02m;
             if (inflationRate <= -1m)
             {
-                ErrorMessage = L("Fire.Error.InflationInvalid", "通膨率格式錯誤");
+                ErrorMessage = L("Fire.Error.InflationInvalid", "通膨率格式錯誤，名目報酬模式請輸入 0.02 代表 2%。");
                 return false;
             }
         }
@@ -779,15 +820,15 @@ public sealed partial class FireViewModel : ObservableObject
         ErrorMessage = null;
         HasCalculatedResult = false;
         if (!TryParseDecimal(CurrentNetWorth, out var nw))
-        { ErrorMessage = L("Fire.Error.NetWorthInvalid", "目前淨資產格式錯誤"); return; }
+        { ErrorMessage = L("Fire.Error.NetWorthInvalid", "目前淨資產需為 0 或以上的數字，系統會用它估算 FIRE 進度。"); return; }
         if (!TryParseDecimal(AnnualExpenses, out var exp))
-        { ErrorMessage = L("Fire.Error.ExpensesInvalid", "年支出格式錯誤"); return; }
+        { ErrorMessage = L("Fire.Error.ExpensesInvalid", "年支出必須大於 0，因為財務自由所需資產會由年支出推算。"); return; }
         if (!TryParseDecimal(AnnualSavings, out var sav))
-        { ErrorMessage = L("Fire.Error.SavingsInvalid", "年儲蓄格式錯誤"); return; }
+        { ErrorMessage = L("Fire.Error.SavingsInvalid", "年儲蓄不可為負數，系統會用它估算每年累積速度。"); return; }
         if (!TryParseDecimal(ExpectedAnnualReturn, out var r))
-        { ErrorMessage = L("Fire.Error.ReturnInvalid", "預期報酬率格式錯誤"); return; }
+        { ErrorMessage = L("Fire.Error.ReturnInvalid", "預期年化報酬率格式錯誤，請輸入 0.05 代表 5%。"); return; }
         if (!TryParseDecimal(WithdrawalRate, out var w))
-        { ErrorMessage = L("Fire.Error.WithdrawalInvalid", "提領率格式錯誤"); return; }
+        { ErrorMessage = L("Fire.Error.WithdrawalInvalid", "安全提領率必須大於 0 且不超過 100%，例如 0.04 代表 4%。"); return; }
 
         FireProjection result;
         try
@@ -808,7 +849,42 @@ public sealed partial class FireViewModel : ObservableObject
         _wealthPath.Clear();
         for (int i = 0; i < result.WealthPath.Count; i++)
             _wealthPath.Add(new FireWealthPoint(i, result.WealthPath[i]));
+        RefreshWealthPathTiles();
         RefreshWealthPathChart();
+    }
+
+    partial void OnPlanningResultChanged(FirePlanningProjection? value)
+    {
+        RefreshDrawdownPathTiles(value?.DrawdownPath ?? Array.Empty<FireDrawdownPoint>());
+        if (SelectedPathTab == FirePathTab.Drawdown && value?.DrawdownPath.Count is null or 0)
+            SelectedPathTab = FirePathTab.Wealth;
+    }
+
+    private void RefreshWealthPathTiles()
+    {
+        _wealthPathTiles.Clear();
+        for (var i = 0; i < _wealthPath.Count; i++)
+        {
+            var point = _wealthPath[i];
+            var previous = i > 0 ? _wealthPath[i - 1].NetWorth : (decimal?)null;
+            _wealthPathTiles.Add(new FireWealthPathTile(point.Year, point.NetWorth, previous));
+        }
+    }
+
+    private void RefreshDrawdownPathTiles(IReadOnlyList<FireDrawdownPoint> path)
+    {
+        _drawdownPathTiles.Clear();
+        for (var i = 0; i < path.Count; i++)
+        {
+            var point = path[i];
+            var previous = i > 0 ? path[i - 1].EndingBalance : (decimal?)null;
+            _drawdownPathTiles.Add(new FireDrawdownPathTile(
+                point.Year,
+                point.Age,
+                point.EndingBalance,
+                point.AnnualWithdrawal,
+                previous));
+        }
     }
 
     private void RefreshWealthPathChart()
@@ -863,7 +939,7 @@ public sealed partial class FireViewModel : ObservableObject
         ErrorMessage = null;
         if (!TryParseDecimal(CurrentNetWorth, out var current))
         {
-            ErrorMessage = L("Fire.Error.NetWorthInvalid", "目前淨資產格式錯誤");
+            ErrorMessage = L("Fire.Error.NetWorthInvalid", "目前淨資產需為 0 或以上的數字，系統會用它估算 FIRE 進度。");
             return;
         }
 
@@ -964,17 +1040,64 @@ public sealed partial class FireViewModel : ObservableObject
 
     private static string ToFriendlyError(string? paramName) => paramName switch
     {
-        nameof(FireInputs.CurrentNetWorth) => "目前淨資產不可為負數",
-        nameof(FireInputs.AnnualExpenses) => "年支出必須大於 0",
-        nameof(FireInputs.AnnualSavings) => "年儲蓄不可為負數",
-        nameof(FireInputs.ExpectedAnnualReturn) => "預期報酬率必須大於 -100%",
-        nameof(FireInputs.WithdrawalRate) => "安全提領率必須大於 0 且不超過 100%",
+        nameof(FireInputs.CurrentNetWorth) => "目前淨資產需為 0 或以上的數字，系統會用它估算 FIRE 進度。",
+        nameof(FireInputs.AnnualExpenses) => "年支出必須大於 0，因為財務自由所需資產會由年支出推算。",
+        nameof(FireInputs.AnnualSavings) => "年儲蓄不可為負數，系統會用它估算每年累積速度。",
+        nameof(FireInputs.ExpectedAnnualReturn) => "預期年化報酬率必須大於 -100%，請輸入 0.05 代表 5%。",
+        nameof(FireInputs.WithdrawalRate) => "安全提領率必須大於 0 且不超過 100%，例如 0.04 代表 4%。",
         nameof(FireInputs.MaxYears) => "模擬年數必須大於 0",
         _ => "FIRE 輸入值無效",
     };
 }
 
 public sealed record FireWealthPoint(int Year, decimal NetWorth);
+
+public sealed record FireWealthPathTile(int Year, decimal Balance, decimal? PreviousBalance)
+{
+    public decimal? Change => PreviousBalance.HasValue ? Balance - PreviousBalance.Value : null;
+
+    public FirePathTone Tone => Balance <= 0m
+        ? FirePathTone.Depleted
+        : Change switch
+        {
+            > 0m => FirePathTone.Positive,
+            < 0m => FirePathTone.Negative,
+            _ => FirePathTone.Neutral,
+        };
+}
+
+public sealed record FireDrawdownPathTile(
+    int Year,
+    int? Age,
+    decimal Balance,
+    decimal Withdrawal,
+    decimal? PreviousBalance)
+{
+    public decimal? Change => PreviousBalance.HasValue ? Balance - PreviousBalance.Value : null;
+
+    public FirePathTone Tone => Balance <= 0m
+        ? FirePathTone.Depleted
+        : Change switch
+        {
+            > 0m => FirePathTone.Positive,
+            < 0m => FirePathTone.Negative,
+            _ => FirePathTone.Neutral,
+        };
+}
+
+public enum FirePathTone
+{
+    Neutral,
+    Positive,
+    Negative,
+    Depleted,
+}
+
+public enum FirePathTab
+{
+    Wealth,
+    Drawdown,
+}
 
 public sealed class FireScenarioRowViewModel(FireScenario scenario)
 {

@@ -8,9 +8,11 @@ namespace Assetra.Core.Models.MonteCarlo;
 /// <param name="P10EndingBalance">期末餘額 10 百分位（保守情境）。</param>
 /// <param name="P90EndingBalance">期末餘額 90 百分位（樂觀情境）。</param>
 /// <param name="MedianBalancePath">中位數情境下每年餘額（從第 0 年到結束）。</param>
+/// <param name="MedianDepletionYear">失敗路徑中的中位資金耗盡年份；若沒有失敗路徑則為 null。</param>
 public sealed record MonteCarloResult(
     decimal SuccessRate,
     decimal MedianEndingBalance,
     decimal P10EndingBalance,
     decimal P90EndingBalance,
-    IReadOnlyList<decimal> MedianBalancePath);
+    IReadOnlyList<decimal> MedianBalancePath,
+    int? MedianDepletionYear = null);

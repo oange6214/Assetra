@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
+using Assetra.Application.Goals;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Features.Fire;
@@ -17,6 +18,9 @@ namespace Assetra.WPF.Features.Goals;
 public sealed partial class GoalsViewModel : ObservableObject
 {
     private readonly IFinancialGoalRepository _repository;
+    private readonly IGoalMilestoneRepository? _milestoneRepository;
+    private readonly IGoalFundingRuleRepository? _fundingRuleRepository;
+    private readonly IGoalProgressAmountProvider? _progressAmountProvider;
     private readonly ICurrencyService? _currency;
     private readonly ILocalizationService? _localization;
 
@@ -37,6 +41,10 @@ public sealed partial class GoalsViewModel : ObservableObject
 
     private readonly ObservableCollection<GoalRowViewModel> _goals = [];
     public ReadOnlyObservableCollection<GoalRowViewModel> Goals { get; }
+    private readonly ObservableCollection<GoalMilestoneRowViewModel> _selectedMilestones = [];
+    public ReadOnlyObservableCollection<GoalMilestoneRowViewModel> SelectedMilestones { get; }
+    private readonly ObservableCollection<GoalFundingRuleRowViewModel> _selectedFundingRules = [];
+    public ReadOnlyObservableCollection<GoalFundingRuleRowViewModel> SelectedFundingRules { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasGoals))]
@@ -45,12 +53,17 @@ public sealed partial class GoalsViewModel : ObservableObject
 
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string? _errorMessage;
+    [ObservableProperty] private bool _isGoalDetailLoading;
+    [ObservableProperty] private string? _goalDetailError;
 
     // ── In-app confirm dialog (mirrors PortfolioViewModel for consistency) ──
     [ObservableProperty] private bool _isConfirmDialogOpen;
     [ObservableProperty] private string _confirmDialogMessage = string.Empty;
     private Func<Task>? _confirmDialogAction;
     private bool _isFormattingAmountInput;
+    private Guid? _addPortfolioGroupId;
+    private Guid? _editingSelectedMilestoneId;
+    private Guid? _editingSelectedFundingRuleId;
 
     [RelayCommand]
     private async Task ConfirmDialogYes()
@@ -130,23 +143,109 @@ public sealed partial class GoalsViewModel : ObservableObject
     public string TotalCurrentDisplay => FormatAmount(TotalCurrent);
     public string TotalRemainingDisplay => FormatAmount(TotalRemaining);
     public string OverallProgressDisplay => $"{OverallProgressPercent:F1}%";
+    public bool HasSelectedMilestones => SelectedMilestones.Count > 0;
+    public bool HasSelectedFundingRules => SelectedFundingRules.Count > 0;
+    public IReadOnlyList<RecurrenceFrequency> FundingFrequencyOptions { get; } =
+    [
+        RecurrenceFrequency.Daily,
+        RecurrenceFrequency.Weekly,
+        RecurrenceFrequency.BiWeekly,
+        RecurrenceFrequency.Monthly,
+        RecurrenceFrequency.Quarterly,
+        RecurrenceFrequency.Yearly,
+    ];
+    public string SelectedRequiredMonthlyContributionDisplay =>
+        _selectedRequiredMonthlyContribution is { } value ? FormatAmount(value) : "—";
+    public string SelectedMonthlyFundingDisplay => FormatAmount(_selectedMonthlyFunding);
+    public string SelectedMonthlyFundingGapDisplay =>
+        _selectedMonthlyFundingGap is { } value ? FormatAmount(value) : "—";
+    public string SelectedProjectedCompletionDisplay =>
+        _selectedProjectedCompletionMonths switch
+        {
+            null => "—",
+            0 => L("Goals.Planning.Projected.Achieved", "Achieved"),
+            _ => string.Format(
+                CultureInfo.CurrentCulture,
+                L("Goals.Planning.Projected.Months", "{0} months"),
+                _selectedProjectedCompletionMonths.Value),
+        };
+    public bool HasGoalPlanningWarning => !string.IsNullOrWhiteSpace(GoalPlanningWarning);
+    public string SelectedDetailCurrentDisplay => SelectedGoal is null ? "—" : FormatAmount(SelectedDetailCurrentAmount);
+    public string SelectedDetailTargetDisplay => SelectedGoal?.TargetDisplay ?? "—";
+    public string SelectedDetailRemainingDisplay => SelectedGoal is null
+        ? "—"
+        : FormatAmount(Math.Max(0m, SelectedGoal.Goal.TargetAmount - SelectedDetailCurrentAmount));
+    public string SelectedDetailDeadlineDisplay => SelectedGoal?.DeadlineDisplay ?? "—";
+    public decimal SelectedDetailProgressPercent => SelectedGoal?.Goal.TargetAmount > 0m
+        ? Math.Min(100m, SelectedDetailCurrentAmount / SelectedGoal.Goal.TargetAmount * 100m)
+        : 0m;
+    public string SelectedDetailProgressDisplay => $"{SelectedDetailProgressPercent:F1}%";
+    public string SelectedDetailNextActionDisplay => BuildSelectedDetailNextAction();
+    public bool SelectedDetailHasFireSource => SelectedGoal?.IsFireSynced == true;
+    public string SelectedDetailFireRequiredAssetsDisplay => SelectedGoal?.TargetDisplay ?? "—";
+    public string SelectedDetailFireScenarioDisplay =>
+        ExtractFireScenarioName(SelectedGoal?.Goal.Notes)
+        ?? L("Goals.Detail.Fire.Scenario.Calculator", "FIRE calculator");
+    public string SelectedDetailFireLastSyncDisplay =>
+        L("Goals.Detail.Fire.LastSyncUnavailable", "Not recorded");
+
+    private decimal? _selectedRequiredMonthlyContribution;
+    private decimal _selectedMonthlyFunding;
+    private decimal? _selectedMonthlyFundingGap;
+    private int? _selectedProjectedCompletionMonths;
+    private decimal? _selectedPlanningCurrentAmount;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsGoalDetailOpen))]
+    [NotifyPropertyChangedFor(nameof(SelectedDetailHasFireSource))]
+    private GoalRowViewModel? _selectedGoal;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasGoalPlanningWarning))]
+    private string? _goalPlanningWarning;
+
+    [ObservableProperty] private string _selectedMilestoneLabel = string.Empty;
+    [ObservableProperty] private string _selectedMilestoneTargetAmount = string.Empty;
+    [ObservableProperty] private DateTime? _selectedMilestoneTargetDate = DateTime.Today;
+    [ObservableProperty] private string _selectedFundingAmount = string.Empty;
+    [ObservableProperty] private RecurrenceFrequency _selectedFundingFrequency = RecurrenceFrequency.Monthly;
+    [ObservableProperty] private DateTime? _selectedFundingStartDate = DateTime.Today;
+    [ObservableProperty] private DateTime? _selectedFundingEndDate;
+
+    public bool IsGoalDetailOpen => SelectedGoal is not null;
+    public string SelectedMilestoneSubmitText => _editingSelectedMilestoneId.HasValue
+        ? L("Goals.Detail.SaveMilestone", "Save milestone")
+        : L("Goals.Detail.AddMilestone", "Add milestone");
+    public string SelectedFundingRuleSubmitText => _editingSelectedFundingRuleId.HasValue
+        ? L("Goals.Detail.SaveFundingRule", "Save funding rule")
+        : L("Goals.Detail.AddFundingRule", "Add funding rule");
 
     public GoalsViewModel(
         IFinancialGoalRepository repository,
         ICurrencyService? currency = null,
         ILocalizationService? localization = null,
-        PortfolioGroupCatalog? groupCatalog = null)
+        PortfolioGroupCatalog? groupCatalog = null,
+        IGoalMilestoneRepository? milestoneRepository = null,
+        IGoalFundingRuleRepository? fundingRuleRepository = null,
+        IGoalProgressAmountProvider? progressAmountProvider = null)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
+        _milestoneRepository = milestoneRepository;
+        _fundingRuleRepository = fundingRuleRepository;
+        _progressAmountProvider = progressAmountProvider;
         _currency = currency;
         _localization = localization;
         GroupCatalog = groupCatalog;
         Goals = new ReadOnlyObservableCollection<GoalRowViewModel>(_goals);
+        SelectedMilestones = new ReadOnlyObservableCollection<GoalMilestoneRowViewModel>(_selectedMilestones);
+        SelectedFundingRules = new ReadOnlyObservableCollection<GoalFundingRuleRowViewModel>(_selectedFundingRules);
         _goals.CollectionChanged += (_, _) =>
         {
             RefreshGoalSummary();
         };
+        _selectedMilestones.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSelectedMilestones));
+        _selectedFundingRules.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSelectedFundingRules));
         if (_currency is not null)
             _currency.CurrencyChanged += OnCurrencyChanged;
         if (_localization is not null)
@@ -218,7 +317,7 @@ public sealed partial class GoalsViewModel : ObservableObject
             // Auto-track mode：空字串 / "Manual" 都 normalise 為 null（manual）。
             string.IsNullOrWhiteSpace(AddLinkedAssetClass) ? null : AddLinkedAssetClass,
             // Portfolio-Groups-Refactor P5 — 設定後優先於 LinkedAssetClass。
-            AddPortfolioGroup?.Id);
+            _addPortfolioGroupId);
 
         try
         {
@@ -261,7 +360,28 @@ public sealed partial class GoalsViewModel : ObservableObject
         AddLinkedAssetClass = row.Goal.LinkedAssetClass ?? string.Empty;
         // Portfolio-Groups-Refactor P5 — 還原 group 選擇。
         AddPortfolioGroup = GroupCatalog?.FindById(row.Goal.PortfolioGroupId);
+        _addPortfolioGroupId = AddPortfolioGroup?.Id ?? row.Goal.PortfolioGroupId;
     }
+
+    [RelayCommand]
+    private async Task OpenGoalDetail(GoalRowViewModel? row)
+    {
+        if (row is null)
+            return;
+
+        SelectedGoal = row;
+        await LoadSelectedGoalDetailAsync(row.Id).ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private void CloseGoalDetail()
+    {
+        SelectedGoal = null;
+        ClearSelectedGoalDetail();
+    }
+
+    partial void OnAddPortfolioGroupChanged(PortfolioGroup? value) =>
+        _addPortfolioGroupId = value?.Id;
 
     partial void OnAddTargetAmountChanged(string value) =>
         FormatAmountInput(value, formatted => AddTargetAmount = formatted);
@@ -269,8 +389,249 @@ public sealed partial class GoalsViewModel : ObservableObject
     partial void OnAddCurrentAmountChanged(string value) =>
         FormatAmountInput(value, formatted => AddCurrentAmount = formatted);
 
+    partial void OnSelectedMilestoneTargetAmountChanged(string value) =>
+        FormatAmountInput(value, formatted => SelectedMilestoneTargetAmount = formatted);
+
+    partial void OnSelectedFundingAmountChanged(string value) =>
+        FormatAmountInput(value, formatted => SelectedFundingAmount = formatted);
+
+    partial void OnSelectedGoalChanged(GoalRowViewModel? value)
+    {
+        AddSelectedMilestoneCommand.NotifyCanExecuteChanged();
+        AddSelectedFundingRuleCommand.NotifyCanExecuteChanged();
+        NotifySelectedGoalDetailDisplayChanged();
+    }
+
     [RelayCommand]
     private void CancelEdit() => ResetAddForm();
+
+    [RelayCommand(CanExecute = nameof(CanAddSelectedMilestone))]
+    private async Task AddSelectedMilestone()
+    {
+        GoalDetailError = null;
+        if (SelectedGoal?.Goal is not { } goal)
+        {
+            GoalDetailError = L("Goals.Detail.Error.NoGoal", "Select a goal first.");
+            return;
+        }
+        if (_milestoneRepository is null)
+        {
+            GoalDetailError = L("Goals.Detail.Error.RepositoryUnavailable", "Goal detail storage is unavailable.");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(SelectedMilestoneLabel))
+        {
+            GoalDetailError = L("Goals.Detail.Error.MilestoneRequired", "Enter a milestone label.");
+            return;
+        }
+        if (!TryParseAmount(SelectedMilestoneTargetAmount, out var amount) || amount <= 0m)
+        {
+            GoalDetailError = L("Goals.Detail.Error.MilestoneAmountInvalid", "Milestone amount must be greater than 0.");
+            return;
+        }
+        if (SelectedMilestoneTargetDate is not { } targetDate)
+        {
+            GoalDetailError = L("Goals.Detail.Error.MilestoneDateRequired", "Select a milestone date.");
+            return;
+        }
+
+        var editingRow = _editingSelectedMilestoneId is { } editId
+            ? _selectedMilestones.FirstOrDefault(row => row.Milestone.Id == editId)
+            : null;
+        if (_editingSelectedMilestoneId.HasValue && editingRow is null)
+        {
+            GoalDetailError = L("Goals.Detail.Error.MilestoneMissing", "The selected milestone no longer exists.");
+            ResetSelectedMilestoneForm();
+            return;
+        }
+
+        var milestone = new GoalMilestone(
+            _editingSelectedMilestoneId ?? Guid.NewGuid(),
+            goal.Id,
+            DateOnly.FromDateTime(targetDate),
+            amount,
+            SelectedMilestoneLabel.Trim(),
+            editingRow?.Milestone.IsAchieved ?? false);
+
+        try
+        {
+            var row = new GoalMilestoneRowViewModel(milestone, _currency, _localization, SelectedDetailCurrentAmount);
+            if (editingRow is not null)
+            {
+                await _milestoneRepository.UpdateAsync(milestone).ConfigureAwait(true);
+                _selectedMilestones[_selectedMilestones.IndexOf(editingRow)] = row;
+            }
+            else
+            {
+                await _milestoneRepository.AddAsync(milestone).ConfigureAwait(true);
+                _selectedMilestones.Add(row);
+            }
+
+            ResetSelectedMilestoneForm();
+        }
+        catch (Exception ex)
+        {
+            GoalDetailError = ex.Message;
+        }
+    }
+
+    private bool CanAddSelectedMilestone() =>
+        SelectedGoal is not null && _milestoneRepository is not null;
+
+    [RelayCommand]
+    private void EditSelectedMilestone(GoalMilestoneRowViewModel? row)
+    {
+        if (row is null)
+            return;
+
+        _editingSelectedMilestoneId = row.Milestone.Id;
+        SelectedMilestoneLabel = row.Milestone.Label;
+        SelectedMilestoneTargetAmount = row.Milestone.TargetAmount.ToString("N0", CultureInfo.CurrentCulture);
+        SelectedMilestoneTargetDate = row.Milestone.TargetDate.ToDateTime(TimeOnly.MinValue);
+        OnPropertyChanged(nameof(SelectedMilestoneSubmitText));
+    }
+
+    [RelayCommand(CanExecute = nameof(CanRemoveSelectedMilestone))]
+    private async Task RemoveSelectedMilestone(GoalMilestoneRowViewModel? row)
+    {
+        if (row is null || _milestoneRepository is null)
+            return;
+
+        GoalDetailError = null;
+        try
+        {
+            await _milestoneRepository.RemoveAsync(row.Milestone.Id).ConfigureAwait(true);
+            _selectedMilestones.Remove(row);
+            if (_editingSelectedMilestoneId == row.Milestone.Id)
+                ResetSelectedMilestoneForm();
+        }
+        catch (Exception ex)
+        {
+            GoalDetailError = ex.Message;
+        }
+    }
+
+    private bool CanRemoveSelectedMilestone(GoalMilestoneRowViewModel? row) =>
+        row is not null && _milestoneRepository is not null;
+
+    [RelayCommand(CanExecute = nameof(CanAddSelectedFundingRule))]
+    private async Task AddSelectedFundingRule()
+    {
+        GoalDetailError = null;
+        if (SelectedGoal?.Goal is not { } goal)
+        {
+            GoalDetailError = L("Goals.Detail.Error.NoGoal", "Select a goal first.");
+            return;
+        }
+        if (_fundingRuleRepository is null)
+        {
+            GoalDetailError = L("Goals.Detail.Error.RepositoryUnavailable", "Goal detail storage is unavailable.");
+            return;
+        }
+        if (!TryParseAmount(SelectedFundingAmount, out var amount) || amount <= 0m)
+        {
+            GoalDetailError = L("Goals.Detail.Error.FundingAmountInvalid", "Funding amount must be greater than 0.");
+            return;
+        }
+        if (SelectedFundingStartDate is not { } startDateValue)
+        {
+            GoalDetailError = L("Goals.Detail.Error.FundingStartDateRequired", "Select a funding start date.");
+            return;
+        }
+
+        var startDate = DateOnly.FromDateTime(startDateValue);
+        var endDate = SelectedFundingEndDate is { } endDateValue
+            ? DateOnly.FromDateTime(endDateValue)
+            : (DateOnly?)null;
+        if (endDate is { } end && end < startDate)
+        {
+            GoalDetailError = L("Goals.Detail.Error.FundingEndDateInvalid", "Funding end date must be after the start date.");
+            return;
+        }
+
+        var editingRow = _editingSelectedFundingRuleId is { } editId
+            ? _selectedFundingRules.FirstOrDefault(row => row.Rule.Id == editId)
+            : null;
+        if (_editingSelectedFundingRuleId.HasValue && editingRow is null)
+        {
+            GoalDetailError = L("Goals.Detail.Error.FundingRuleMissing", "The selected funding rule no longer exists.");
+            ResetSelectedFundingRuleForm();
+            return;
+        }
+
+        var rule = new GoalFundingRule(
+            _editingSelectedFundingRuleId ?? Guid.NewGuid(),
+            goal.Id,
+            amount,
+            SelectedFundingFrequency,
+            editingRow?.Rule.SourceCashAccountId,
+            startDate,
+            endDate,
+            editingRow?.Rule.IsEnabled ?? true);
+
+        try
+        {
+            var row = new GoalFundingRuleRowViewModel(rule, _currency, _localization);
+            if (editingRow is not null)
+            {
+                await _fundingRuleRepository.UpdateAsync(rule).ConfigureAwait(true);
+                _selectedFundingRules[_selectedFundingRules.IndexOf(editingRow)] = row;
+            }
+            else
+            {
+                await _fundingRuleRepository.AddAsync(rule).ConfigureAwait(true);
+                _selectedFundingRules.Add(row);
+            }
+
+            ResetSelectedFundingRuleForm();
+            UpdateSelectedGoalPlanning(DateOnly.FromDateTime(DateTime.Today));
+        }
+        catch (Exception ex)
+        {
+            GoalDetailError = ex.Message;
+        }
+    }
+
+    private bool CanAddSelectedFundingRule() =>
+        SelectedGoal is not null && _fundingRuleRepository is not null;
+
+    [RelayCommand]
+    private void EditSelectedFundingRule(GoalFundingRuleRowViewModel? row)
+    {
+        if (row is null)
+            return;
+
+        _editingSelectedFundingRuleId = row.Rule.Id;
+        SelectedFundingAmount = row.Rule.Amount.ToString("N0", CultureInfo.CurrentCulture);
+        SelectedFundingFrequency = row.Rule.Frequency;
+        SelectedFundingStartDate = row.Rule.StartDate.ToDateTime(TimeOnly.MinValue);
+        SelectedFundingEndDate = row.Rule.EndDate?.ToDateTime(TimeOnly.MinValue);
+        OnPropertyChanged(nameof(SelectedFundingRuleSubmitText));
+    }
+
+    [RelayCommand(CanExecute = nameof(CanRemoveSelectedFundingRule))]
+    private async Task RemoveSelectedFundingRule(GoalFundingRuleRowViewModel? row)
+    {
+        if (row is null || _fundingRuleRepository is null)
+            return;
+
+        GoalDetailError = null;
+        try
+        {
+            await _fundingRuleRepository.RemoveAsync(row.Rule.Id).ConfigureAwait(true);
+            _selectedFundingRules.Remove(row);
+            if (_editingSelectedFundingRuleId == row.Rule.Id)
+                ResetSelectedFundingRuleForm();
+            UpdateSelectedGoalPlanning(DateOnly.FromDateTime(DateTime.Today));
+        }
+        catch (Exception ex)
+        {
+            GoalDetailError = ex.Message;
+        }
+    }
+
+    private bool CanRemoveSelectedFundingRule(GoalFundingRuleRowViewModel? row) =>
+        row is not null && _fundingRuleRepository is not null;
 
     [RelayCommand]
     private void Remove(GoalRowViewModel? row)
@@ -287,6 +648,8 @@ public sealed partial class GoalsViewModel : ObservableObject
             {
                 await _repository.RemoveAsync(row.Id).ConfigureAwait(true);
                 _goals.Remove(row);
+                if (SelectedGoal?.Id == row.Id)
+                    CloseGoalDetail();
                 if (EditingId == row.Id)
                     ResetAddForm();
             }
@@ -307,6 +670,7 @@ public sealed partial class GoalsViewModel : ObservableObject
         AddNotes = string.Empty;
         AddLinkedAssetClass = string.Empty;
         AddPortfolioGroup = null;
+        _addPortfolioGroupId = null;
         AddError = null;
         IsFormOpen = false;
     }
@@ -331,6 +695,247 @@ public sealed partial class GoalsViewModel : ObservableObject
             return;
         }
         _goals.Add(new GoalRowViewModel(goal, _currency, _localization));
+    }
+
+    private async Task LoadSelectedGoalDetailAsync(Guid goalId)
+    {
+        ClearSelectedGoalDetail();
+        GoalDetailError = null;
+
+        IsGoalDetailLoading = true;
+        try
+        {
+            if (SelectedGoal?.Goal is { } goal)
+                _selectedPlanningCurrentAmount = await ResolvePlanningCurrentAmountAsync(goal).ConfigureAwait(true);
+
+            if (_milestoneRepository is not null)
+            {
+                var milestones = await _milestoneRepository.GetByGoalAsync(goalId).ConfigureAwait(true);
+                foreach (var milestone in milestones)
+                    _selectedMilestones.Add(new GoalMilestoneRowViewModel(milestone, _currency, _localization, SelectedDetailCurrentAmount));
+            }
+
+            if (_fundingRuleRepository is not null)
+            {
+                var fundingRules = await _fundingRuleRepository.GetByGoalAsync(goalId).ConfigureAwait(true);
+                foreach (var rule in fundingRules)
+                    _selectedFundingRules.Add(new GoalFundingRuleRowViewModel(rule, _currency, _localization));
+            }
+
+            UpdateSelectedGoalPlanning(DateOnly.FromDateTime(DateTime.Today));
+        }
+        catch (Exception ex)
+        {
+            GoalDetailError = ex.Message;
+        }
+        finally
+        {
+            IsGoalDetailLoading = false;
+        }
+    }
+
+    private void ClearSelectedGoalDetail()
+    {
+        _selectedMilestones.Clear();
+        _selectedFundingRules.Clear();
+        ResetSelectedMilestoneForm();
+        ResetSelectedFundingRuleForm();
+        _selectedPlanningCurrentAmount = null;
+        GoalDetailError = null;
+        ClearSelectedGoalPlanning();
+        IsGoalDetailLoading = false;
+    }
+
+    private void ResetSelectedMilestoneForm()
+    {
+        _editingSelectedMilestoneId = null;
+        SelectedMilestoneLabel = string.Empty;
+        SelectedMilestoneTargetAmount = string.Empty;
+        SelectedMilestoneTargetDate = DateTime.Today;
+        OnPropertyChanged(nameof(SelectedMilestoneSubmitText));
+    }
+
+    private void ResetSelectedFundingRuleForm()
+    {
+        _editingSelectedFundingRuleId = null;
+        SelectedFundingAmount = string.Empty;
+        SelectedFundingFrequency = RecurrenceFrequency.Monthly;
+        SelectedFundingStartDate = DateTime.Today;
+        SelectedFundingEndDate = null;
+        OnPropertyChanged(nameof(SelectedFundingRuleSubmitText));
+    }
+
+    private async Task<decimal> ResolvePlanningCurrentAmountAsync(FinancialGoal goal)
+    {
+        if (!goal.IsAutoTracked || _progressAmountProvider is null)
+            return goal.CurrentAmount;
+
+        var resolved = await _progressAmountProvider.GetCurrentAmountAsync(goal).ConfigureAwait(true);
+        return resolved ?? goal.CurrentAmount;
+    }
+
+    private void UpdateSelectedGoalPlanning(DateOnly today)
+    {
+        ClearSelectedGoalPlanning();
+
+        if (SelectedGoal?.Goal is not { } goal)
+            return;
+
+        var currentAmount = _selectedPlanningCurrentAmount ?? goal.CurrentAmount;
+        _selectedMonthlyFunding = CalculateMonthlyFunding(today);
+        if (goal.TargetAmount <= 0m)
+        {
+            GoalPlanningWarning = L("Goals.Planning.Warning.ZeroTarget", "Target amount is not set.");
+            NotifyGoalPlanningDisplayChanged();
+            return;
+        }
+
+        _selectedProjectedCompletionMonths = GoalPlanningService.MonthsToReachTarget(
+            currentAmount,
+            goal.TargetAmount,
+            annualReturnRate: 0m,
+            monthlyContribution: _selectedMonthlyFunding);
+
+        if (currentAmount >= goal.TargetAmount)
+        {
+            _selectedRequiredMonthlyContribution = 0m;
+            _selectedMonthlyFundingGap = 0m;
+            GoalPlanningWarning = L("Goals.Planning.Warning.Achieved", "This goal is already reached.");
+            NotifyGoalPlanningDisplayChanged();
+            return;
+        }
+
+        if (goal.Deadline is not { } deadline)
+        {
+            GoalPlanningWarning = L("Goals.Planning.Warning.NoDeadline", "Set a deadline to calculate the required monthly contribution.");
+            NotifyGoalPlanningDisplayChanged();
+            return;
+        }
+
+        var months = MonthsUntilDeadline(today, deadline);
+        var requiredMonthly = GoalPlanningService.RequiredMonthlyContribution(
+            currentAmount,
+            goal.TargetAmount,
+            annualReturnRate: 0m,
+            months);
+
+        _selectedRequiredMonthlyContribution = requiredMonthly;
+        _selectedMonthlyFundingGap = requiredMonthly is { } required
+            ? Math.Max(required - _selectedMonthlyFunding, 0m)
+            : null;
+        if (requiredMonthly is null)
+            GoalPlanningWarning = L("Goals.Planning.Warning.DeadlinePassed", "The deadline has passed before this goal was reached.");
+
+        NotifyGoalPlanningDisplayChanged();
+    }
+
+    private decimal CalculateMonthlyFunding(DateOnly today) =>
+        SelectedFundingRules
+            .Select(row => row.Rule)
+            .Where(rule => rule.IsEnabled && (rule.EndDate is null || rule.EndDate >= today))
+            .Sum(rule => MonthlyEquivalent(rule.Amount, rule.Frequency));
+
+    private static decimal MonthlyEquivalent(decimal amount, RecurrenceFrequency frequency) =>
+        frequency switch
+        {
+            RecurrenceFrequency.Daily => amount * 365.2425m / 12m,
+            RecurrenceFrequency.Weekly => amount * 52.1429m / 12m,
+            RecurrenceFrequency.BiWeekly => amount * 26.0714m / 12m,
+            RecurrenceFrequency.Monthly => amount,
+            RecurrenceFrequency.Quarterly => amount / 3m,
+            RecurrenceFrequency.Yearly => amount / 12m,
+            _ => amount,
+        };
+
+    private static int MonthsUntilDeadline(DateOnly today, DateOnly deadline)
+    {
+        if (deadline < today)
+            return 0;
+        return (deadline.Year - today.Year) * 12 + deadline.Month - today.Month + 1;
+    }
+
+    private void ClearSelectedGoalPlanning()
+    {
+        _selectedRequiredMonthlyContribution = null;
+        _selectedMonthlyFunding = 0m;
+        _selectedMonthlyFundingGap = null;
+        _selectedProjectedCompletionMonths = null;
+        GoalPlanningWarning = null;
+        NotifyGoalPlanningDisplayChanged();
+    }
+
+    private void NotifyGoalPlanningDisplayChanged()
+    {
+        OnPropertyChanged(nameof(SelectedRequiredMonthlyContributionDisplay));
+        OnPropertyChanged(nameof(SelectedMonthlyFundingDisplay));
+        OnPropertyChanged(nameof(SelectedMonthlyFundingGapDisplay));
+        OnPropertyChanged(nameof(SelectedProjectedCompletionDisplay));
+        NotifySelectedGoalDetailDisplayChanged();
+    }
+
+    private decimal SelectedDetailCurrentAmount =>
+        _selectedPlanningCurrentAmount ?? SelectedGoal?.Goal.CurrentAmount ?? 0m;
+
+    private string BuildSelectedDetailNextAction()
+    {
+        if (SelectedGoal?.Goal is not { } goal)
+            return "—";
+
+        var currentAmount = SelectedDetailCurrentAmount;
+        if (goal.TargetAmount <= 0m)
+            return L("Goals.Detail.NextAction.SetTarget", "Set a target amount to get a useful next step.");
+        if (currentAmount >= goal.TargetAmount)
+            return L("Goals.Detail.NextAction.Achieved", "Goal reached. Review or archive it when you are done.");
+        if (goal.Deadline is null)
+            return L("Goals.Detail.NextAction.SetDeadline", "Set a deadline so Assetra can calculate the monthly contribution.");
+        if (_selectedRequiredMonthlyContribution is null)
+            return L("Goals.Detail.NextAction.DeadlinePassed", "Update the deadline or increase funding to recover this goal.");
+        if (_selectedMonthlyFunding <= 0m && _selectedRequiredMonthlyContribution > 0m)
+        {
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                L("Goals.Detail.NextAction.CreateFundingRule", "Create a funding rule of {0}/month."),
+                FormatAmount(_selectedRequiredMonthlyContribution.Value));
+        }
+        if (_selectedMonthlyFundingGap is > 0m)
+        {
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                L("Goals.Detail.NextAction.AddMonthly", "Add {0}/month to stay on target."),
+                FormatAmount(_selectedMonthlyFundingGap.Value));
+        }
+
+        return L("Goals.Detail.NextAction.OnTrack", "Current funding is on track for the deadline.");
+    }
+
+    private void NotifySelectedGoalDetailDisplayChanged()
+    {
+        OnPropertyChanged(nameof(SelectedDetailCurrentDisplay));
+        OnPropertyChanged(nameof(SelectedDetailTargetDisplay));
+        OnPropertyChanged(nameof(SelectedDetailRemainingDisplay));
+        OnPropertyChanged(nameof(SelectedDetailDeadlineDisplay));
+        OnPropertyChanged(nameof(SelectedDetailProgressPercent));
+        OnPropertyChanged(nameof(SelectedDetailProgressDisplay));
+        OnPropertyChanged(nameof(SelectedDetailNextActionDisplay));
+        OnPropertyChanged(nameof(SelectedDetailHasFireSource));
+        OnPropertyChanged(nameof(SelectedDetailFireRequiredAssetsDisplay));
+        OnPropertyChanged(nameof(SelectedDetailFireScenarioDisplay));
+        OnPropertyChanged(nameof(SelectedDetailFireLastSyncDisplay));
+    }
+
+    private static string? ExtractFireScenarioName(string? notes)
+    {
+        const string prefix = "Generated from FIRE scenario \"";
+        if (string.IsNullOrWhiteSpace(notes))
+            return null;
+
+        var trimmed = notes.Trim();
+        if (!trimmed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var start = prefix.Length;
+        var end = trimmed.IndexOf('"', start);
+        return end > start ? trimmed[start..end] : null;
     }
 
     private static bool TryParseAmount(string? input, out decimal value)
@@ -410,6 +1015,7 @@ public sealed partial class GoalsViewModel : ObservableObject
         OnPropertyChanged(nameof(TotalTargetDisplay));
         OnPropertyChanged(nameof(TotalCurrentDisplay));
         OnPropertyChanged(nameof(TotalRemainingDisplay));
+        NotifyGoalPlanningDisplayChanged();
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
@@ -421,6 +1027,7 @@ public sealed partial class GoalsViewModel : ObservableObject
         OnPropertyChanged(nameof(TotalTargetDisplay));
         OnPropertyChanged(nameof(TotalCurrentDisplay));
         OnPropertyChanged(nameof(TotalRemainingDisplay));
+        NotifyGoalPlanningDisplayChanged();
     }
 
     private void RefreshGoalSummary()

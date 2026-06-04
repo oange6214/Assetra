@@ -40,6 +40,59 @@
                     Text="{DynamicResource Dashboard.Widget.Goals.Heading}" />
             </DockPanel>
 
+            <UniformGrid Columns="4" Margin="0,12,0,10">
+                <StackPanel Margin="0,0,10,0">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Dashboard.Widget.Goals.TotalActive}" />
+                    <TextBlock
+                        Margin="0,3,0,0"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding GoalsWidgetTotalActiveGoalsDisplay}" />
+                </StackPanel>
+                <StackPanel Margin="0,0,10,0">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Dashboard.Widget.Goals.NearestDeadline}" />
+                    <TextBlock
+                        Margin="0,3,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding GoalsWidgetNearestDeadlineDisplay}"
+                        TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <StackPanel Margin="0,0,10,0">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Dashboard.Widget.Goals.Attention}" />
+                    <TextBlock
+                        Margin="0,3,0,0"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding GoalsWidgetAttentionGoalsDisplay}" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Dashboard.Widget.Goals.TopProgress}" />
+                    <TextBlock
+                        Margin="0,3,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding GoalsWidgetTopProgressDisplay}"
+                        TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </UniformGrid>
+
             <!--  前 3 個目標：用 CollectionViewSource 切較難，先用 ItemsControl + MaxHeight 限制視覺密度  -->
             <ItemsControl ItemsSource="{Binding TopThreeGoals}">
                 <ItemsControl.ItemsPanel>

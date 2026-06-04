@@ -440,7 +440,7 @@ Validation must explain the business rule:
 - Read: `Assetra.Application/Fire/FireCalculatorService.cs`
 - Read: `Assetra.Core/Models/Fire/FireInputs.cs`
 
-- [ ] Add a regression test that proves Basic mode remains unchanged.
+- [x] Add a regression test that proves Basic mode remains unchanged.
 
 ```csharp
 [Fact]
@@ -459,7 +459,7 @@ public void Calculate_BasicMode_UsesAnnualExpensesDividedByWithdrawalRate()
 }
 ```
 
-- [ ] Run:
+- [x] Run:
 
 ```powershell
 dotnet test Assetra.Tests\Assetra.Tests.csproj --filter FullyQualifiedName~Assetra.Tests.Application.Fire
@@ -483,10 +483,10 @@ git commit -m "test: lock basic FIRE calculator behavior"
 - Create: `Assetra.Core/Models/Fire/FirePlanningProjection.cs`
 - Create: `Assetra.Core/Models/Fire/FireProjectionWarning.cs`
 
-- [ ] Add the enums and records from the Domain Model Draft.
-- [ ] Ensure all records are immutable.
-- [ ] Keep `FireInputs` and `FireProjection` unchanged.
-- [ ] Run:
+- [x] Add the enums and records from the Domain Model Draft.
+- [x] Ensure all records are immutable.
+- [x] Keep `FireInputs` and `FireProjection` unchanged.
+- [x] Run:
 
 ```powershell
 dotnet build Assetra.slnx
@@ -509,7 +509,7 @@ git commit -m "feat: add FIRE planning models"
 - Create: `Assetra.Application/Fire/FirePlanningService.cs`
 - Create: `Assetra.Tests/Application/Fire/FirePlanningServiceTests.cs`
 
-- [ ] Write a test for Basic-equivalent Advanced projection.
+- [x] Write a test for Basic-equivalent Advanced projection.
 
 ```csharp
 [Fact]
@@ -530,7 +530,7 @@ public void Project_BasicEquivalentScenario_MatchesRequiredAssetsFormula()
 }
 ```
 
-- [ ] Write a test for nominal mode requiring inflation.
+- [x] Write a test for nominal mode requiring inflation.
 
 ```csharp
 [Fact]
@@ -545,8 +545,8 @@ public void Project_NominalModeWithoutInflation_ReturnsWarning()
 }
 ```
 
-- [ ] Implement the smallest deterministic projection that passes the tests.
-- [ ] Run:
+- [x] Implement the smallest deterministic projection that passes the tests.
+- [x] Run:
 
 ```powershell
 dotnet test Assetra.Tests\Assetra.Tests.csproj --filter FullyQualifiedName~Assetra.Tests.Application.Fire.FirePlanningServiceTests
@@ -569,7 +569,7 @@ git commit -m "feat: add deterministic FIRE planning service"
 - Create: `Assetra.Application/Fire/FireDrawdownService.cs`
 - Create: `Assetra.Tests/Application/Fire/FireDrawdownServiceTests.cs`
 
-- [ ] Write a test that a portfolio survives to life expectancy.
+- [x] Write a test that a portfolio survives to life expectancy.
 
 ```csharp
 [Fact]
@@ -588,9 +588,9 @@ public void ProjectDrawdown_WhenBalanceLastsToLifeExpectancy_DoesNotWarn()
 }
 ```
 
-- [ ] Write a test that a portfolio depletion warning is returned.
-- [ ] Implement yearly drawdown points.
-- [ ] Run:
+- [x] Write a test that a portfolio depletion warning is returned.
+- [x] Implement yearly drawdown points.
+- [x] Run:
 
 ```powershell
 dotnet test Assetra.Tests\Assetra.Tests.csproj --filter FullyQualifiedName~Assetra.Tests.Application.Fire.FireDrawdownServiceTests
@@ -614,7 +614,7 @@ git commit -m "feat: add FIRE drawdown projection"
 - Modify: Assetra SQLite schema/migration file currently responsible for app tables.
 - Create: `Assetra.Tests/Infrastructure/FireScenarioSqliteRepositoryTests.cs`
 
-- [ ] Add schema:
+- [x] Add schema:
 
 ```sql
 CREATE TABLE IF NOT EXISTS fire_scenario (
@@ -660,10 +660,10 @@ CREATE TABLE IF NOT EXISTS fire_cash_flow_event (
 );
 ```
 
-- [ ] Repository test: save default scenario and load it after reopening the database.
-- [ ] Repository test: replacing the default scenario clears previous `IsDefault`.
-- [ ] Repository test: deleting a scenario cascades its cash-flow events.
-- [ ] Run:
+- [x] Repository test: save default scenario and load it after reopening the database.
+- [x] Repository test: replacing the default scenario clears previous `IsDefault`.
+- [x] Repository test: deleting a scenario cascades its cash-flow events.
+- [x] Run:
 
 ```powershell
 dotnet test Assetra.Tests\Assetra.Tests.csproj --filter FullyQualifiedName~FireScenarioSqliteRepositoryTests
@@ -686,7 +686,7 @@ git commit -m "feat: persist FIRE scenarios"
 - Modify: `Assetra.WPF/Infrastructure/FireServiceCollectionExtensions.cs`
 - Modify: `Assetra.Tests/WPF/FireViewModelTests.cs`
 
-- [ ] Add constructor dependencies:
+- [x] Add constructor dependencies:
 
 ```csharp
 IFirePlanningService planningService,
@@ -694,8 +694,8 @@ IFireScenarioRepository scenarioRepository,
 IFireDrawdownService drawdownService
 ```
 
-- [ ] Keep existing `IFireCalculatorService` dependency until Basic compatibility is fully covered.
-- [ ] Add state:
+- [x] Keep existing `IFireCalculatorService` dependency until Basic compatibility is fully covered.
+- [x] Add state:
 
 ```csharp
 ObservableCollection<FireScenarioRowViewModel> Scenarios
@@ -704,7 +704,7 @@ bool IsAdvancedMode
 FirePlanningProjection? PlanningResult
 ```
 
-- [ ] Add commands:
+- [x] Add commands:
 
 ```csharp
 LoadScenariosAsyncCommand
@@ -716,10 +716,10 @@ SetDefaultScenarioAsyncCommand
 CalculatePlanningAsyncCommand
 ```
 
-- [ ] Test: default scenario loads automatically.
-- [ ] Test: app net worth source fills current net worth but manual override is preserved.
-- [ ] Test: switching Basic/Advanced does not clear saved scenario data.
-- [ ] Run:
+- [x] Test: default scenario loads automatically.
+- [x] Test: app net worth source fills current net worth but manual override is preserved.
+- [x] Test: switching Basic/Advanced does not clear saved scenario data.
+- [x] Run:
 
 ```powershell
 dotnet test Assetra.Tests\Assetra.Tests.csproj --filter FullyQualifiedName~Assetra.Tests.WPF.FireViewModelTests
@@ -741,20 +741,20 @@ git commit -m "feat: add FIRE scenario view model"
 - Modify: `Assetra.WPF/Features/Fire/FireView.xaml`
 - Modify: localization dictionaries under `Assetra.WPF/Resources`
 
-- [ ] Add scenario toolbar at the top.
-- [ ] Add Basic / Advanced segmented control.
-- [ ] Keep Basic mode compact.
-- [ ] Place Advanced assumptions behind grouped sections.
-- [ ] Rename `FIRE 目標金額` display to `財務自由所需資產`.
-- [ ] Add formula helper near the result:
+- [x] Add scenario toolbar at the top.
+- [x] Add Basic / Advanced segmented control.
+- [x] Keep Basic mode compact.
+- [x] Place Advanced assumptions behind grouped sections.
+- [x] Rename `FIRE 目標金額` display to `財務自由所需資產`.
+- [x] Add formula helper near the result:
 
 ```text
 年支出 ÷ 安全提領率 = 財務自由所需資產
 ```
 
-- [ ] Add drawdown result section in Advanced mode.
-- [ ] Add warnings panel only when warnings exist.
-- [ ] Run:
+- [x] Add drawdown result section in Advanced mode.
+- [x] Add warnings panel only when warnings exist.
+- [x] Run:
 
 ```powershell
 dotnet build Assetra.slnx
@@ -780,17 +780,17 @@ git commit -m "feat: redesign FIRE planning view"
 - Modify: `Assetra.WPF/Features/Fire/FireViewModel.cs`
 - Modify: `Assetra.WPF/Features/Fire/FireView.xaml`
 
-- [ ] Add deterministic random seed support for tests.
-- [ ] Test: same seed produces same success rate.
-- [ ] Test: lower withdrawal and higher initial balance increases success probability.
-- [ ] Show success probability only in Advanced mode.
-- [ ] Add helper text:
+- [x] Add deterministic random seed support for tests.
+- [x] Test: same seed produces same success rate.
+- [x] Test: lower withdrawal and higher initial balance increases success probability.
+- [x] Show success probability only in Advanced mode.
+- [x] Add helper text:
 
 ```text
 成功率是根據多次隨機報酬路徑估算，適合比較情境，不是保證結果。
 ```
 
-- [ ] Run:
+- [x] Run:
 
 ```powershell
 dotnet test Assetra.Tests\Assetra.Tests.csproj --filter FullyQualifiedName~Assetra.Tests.Application.Fire.FireMonteCarloServiceTests
@@ -813,16 +813,16 @@ git commit -m "feat: add FIRE success probability"
 - Modify: `Assetra.Tests/WPF/FireViewModelTests.cs`
 - Modify if necessary: financial goal models/repositories.
 
-- [ ] Sync to Goals should save:
+- [x] Sync to Goals should save:
   - Goal name.
   - Required assets.
   - Current net worth.
   - Scenario id or scenario name in notes/metadata.
   - Target date when `YearsToFire` is known.
-- [ ] Test: syncing a scenario creates a FIRE goal with the required assets.
-- [ ] Test: syncing again updates existing FIRE goal instead of duplicating.
-- [ ] Test: deleting a scenario does not delete a financial goal silently.
-- [ ] Run:
+- [x] Test: syncing a scenario creates a FIRE goal with the required assets.
+- [x] Test: syncing again updates existing FIRE goal instead of duplicating.
+- [x] Test: deleting a scenario does not delete a financial goal silently.
+- [x] Run:
 
 ```powershell
 dotnet test Assetra.Tests\Assetra.Tests.csproj --filter FullyQualifiedName~Assetra.Tests.WPF.FireViewModelTests
@@ -845,14 +845,14 @@ git commit -m "feat: sync FIRE scenarios to goals"
 - Modify: `docs/INDEX.md`
 - Modify: `docs/releases/CHANGELOG.md`
 
-- [ ] Explain Basic mode.
-- [ ] Explain Advanced mode.
-- [ ] Explain `財務自由所需資產`.
-- [ ] Explain real vs nominal returns.
-- [ ] Explain drawdown and success probability.
-- [ ] Explain how FIRE syncs to financial goals.
-- [ ] Add release note entry.
-- [ ] Run:
+- [x] Explain Basic mode.
+- [x] Explain Advanced mode.
+- [x] Explain `財務自由所需資產`.
+- [x] Explain real vs nominal returns.
+- [x] Explain drawdown and success probability.
+- [x] Explain how FIRE syncs to financial goals.
+- [x] Add release note entry.
+- [x] Run:
 
 ```powershell
 rg -n "FIRE 目標金額|FireNumber" docs Assetra.WPF Assetra.Application Assetra.Core
@@ -871,19 +871,19 @@ git commit -m "docs: document FIRE planning"
 
 ## Acceptance Criteria
 
-- [ ] Basic mode returns the same result as the current calculator for the same inputs.
-- [ ] `AnnualExpenses = 600,000` and `WithdrawalRate = 0.04` displays `財務自由所需資產 = 15,000,000`.
-- [ ] `年支出` and `年儲蓄` show monthly helper values under the inputs.
-- [ ] The user can save at least one FIRE scenario and it survives app restart.
-- [ ] The user can mark one scenario as default.
-- [ ] App net worth can be used as the current net worth source.
-- [ ] Manual net worth override remains possible.
-- [ ] Advanced mode clearly separates real return from nominal return plus inflation.
-- [ ] Drawdown shows whether assets last until life expectancy.
-- [ ] Monte Carlo success probability is visible only when stochastic assumptions are available.
-- [ ] Sync to financial goals does not create duplicate FIRE goals.
-- [ ] Validation messages explain why the input is invalid.
-- [ ] The FIRE page has no WPF binding errors after loading and calculating.
+- [x] Basic mode returns the same result as the current calculator for the same inputs.
+- [x] `AnnualExpenses = 600,000` and `WithdrawalRate = 0.04` displays `財務自由所需資產 = 15,000,000`.
+- [x] `年支出` and `年儲蓄` show monthly helper values under the inputs.
+- [x] The user can save at least one FIRE scenario and it survives app restart.
+- [x] The user can mark one scenario as default.
+- [x] App net worth can be used as the current net worth source.
+- [x] Manual net worth override remains possible.
+- [x] Advanced mode clearly separates real return from nominal return plus inflation.
+- [x] Drawdown shows whether assets last until life expectancy.
+- [x] Monte Carlo success probability is visible only when stochastic assumptions are available.
+- [x] Sync to financial goals does not create duplicate FIRE goals.
+- [x] Validation messages explain why the input is invalid.
+- [x] The FIRE page has no WPF binding errors after loading and calculating.
 
 ---
 

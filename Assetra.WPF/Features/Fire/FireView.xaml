@@ -347,25 +347,51 @@
                         </StackPanel>
                     </Border>
 
-                    <StackPanel Margin="0,16,0,0">
-                        <Border Style="{StaticResource FormCard}">
-                            <Grid>
+                    <Border
+                        Margin="0,16,0,0"
+                        Style="{StaticResource FormCard}">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock
+                                        FontSize="{StaticResource Font.Size.Md}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{DynamicResource Fire.Path.SectionTitle}" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{DynamicResource Fire.Path.TileHint}"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <RadioButton
+                                        Content="{DynamicResource Fire.Path.Title}"
+                                        IsChecked="{Binding IsWealthPathTab, Mode=TwoWay}"
+                                        Style="{StaticResource AppSegmentButton}" />
+                                    <RadioButton
+                                        Margin="8,0,0,0"
+                                        Content="{DynamicResource Fire.Advanced.Drawdown}"
+                                        IsChecked="{Binding IsDrawdownPathTab, Mode=TwoWay}"
+                                        Style="{StaticResource AppSegmentButton}"
+                                        Visibility="{Binding IsAdvancedMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Visibility="{Binding IsWealthPathTab, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
-                                <TextBlock
-                                    Margin="0,0,0,8"
-                                    FontSize="{StaticResource Font.Size.Md}"
-                                    FontWeight="SemiBold"
-                                    Foreground="{DynamicResource AppTextPrimary}"
-                                    Text="{DynamicResource Fire.Path.Title}" />
                                 <Grid
-                                    Grid.Row="1"
-                                    Height="260"
-                                    Margin="0,2,0,16"
+                                    Height="220"
+                                    Margin="0,0,0,16"
                                     Visibility="{Binding HasWealthPathChart, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <lvc:CartesianChart
                                         Background="Transparent"
@@ -375,112 +401,298 @@
                                         XAxes="{Binding WealthPathChartXAxes}"
                                         YAxes="{Binding WealthPathChartYAxes}" />
                                 </Grid>
-                                <Border
-                                    Grid.Row="2"
-                                    Padding="0,0,0,8"
-                                    BorderBrush="{DynamicResource AppBorder}"
-                                    BorderThickness="0,0,0,1">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Style="{StaticResource Form.HelperText}" Text="{DynamicResource Fire.Path.Year}" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            Style="{StaticResource Form.HelperText}"
-                                            Text="{DynamicResource Fire.Path.NetWorth}" />
-                                    </Grid>
-                                </Border>
-                                <ItemsControl Grid.Row="3" ItemsSource="{Binding WealthPath}">
+                                <ItemsControl Grid.Row="1" ItemsSource="{Binding WealthPathTiles}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
-                                        <DataTemplate DataType="{x:Type vm:FireWealthPoint}">
+                                        <DataTemplate DataType="{x:Type vm:FireWealthPathTile}">
                                             <Border
-                                                Padding="0,10"
-                                                BorderBrush="{DynamicResource AppBorder}"
-                                                BorderThickness="0,0,0,1">
+                                                x:Name="TileChrome"
+                                                Width="132"
+                                                Height="92"
+                                                Margin="0,0,8,8"
+                                                Padding="10"
+                                                Background="{DynamicResource AppSurface}"
+                                                BorderBrush="{DynamicResource AppBorderLight}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource Radius.Md}">
                                                 <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="*" />
+                                                        <RowDefinition Height="Auto" />
+                                                    </Grid.RowDefinitions>
+                                                    <Border
+                                                        x:Name="TileAccent"
+                                                        Height="3"
+                                                        Margin="-10,-10,-10,8"
+                                                        VerticalAlignment="Top"
+                                                        Background="{DynamicResource AppNeutral}"
+                                                        CornerRadius="{StaticResource Radius.Sm}" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock
+                                                            FontSize="{StaticResource Font.Size.Xs}"
+                                                            Foreground="{DynamicResource AppTextSecondary}"
+                                                            Text="{DynamicResource Fire.Path.Year}" />
+                                                        <TextBlock
+                                                            Margin="8,0,0,0"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding Year}" />
+                                                    </StackPanel>
                                                     <TextBlock
+                                                        Grid.Row="1"
+                                                        VerticalAlignment="Center"
                                                         FontWeight="SemiBold"
                                                         Foreground="{DynamicResource AppTextPrimary}"
-                                                        Text="{Binding Year}" />
+                                                        Text="{Binding Balance, StringFormat=N0}"
+                                                        Typography.NumeralAlignment="Tabular" />
                                                     <TextBlock
-                                                        Grid.Column="1"
-                                                        FontWeight="SemiBold"
-                                                        Foreground="{DynamicResource AppTextPrimary}"
-                                                        Text="{Binding NetWorth, StringFormat=N0}"
+                                                        x:Name="TileChange"
+                                                        Grid.Row="2"
+                                                        FontSize="{StaticResource Font.Size.Xs}"
+                                                        Foreground="{DynamicResource AppTextSecondary}"
+                                                        Text="{Binding Change, StringFormat={}{0:+#,0;-#,0;0}, TargetNullValue=—}"
                                                         Typography.NumeralAlignment="Tabular" />
                                                 </Grid>
                                             </Border>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding Tone}" Value="{x:Static vm:FirePathTone.Positive}">
+                                                    <Setter TargetName="TileAccent" Property="Background" Value="{DynamicResource AppUp}" />
+                                                    <Setter TargetName="TileChrome" Property="BorderBrush" Value="{DynamicResource AppUp}" />
+                                                    <Setter TargetName="TileChange" Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Tone}" Value="{x:Static vm:FirePathTone.Negative}">
+                                                    <Setter TargetName="TileAccent" Property="Background" Value="{DynamicResource AppDown}" />
+                                                    <Setter TargetName="TileChrome" Property="BorderBrush" Value="{DynamicResource AppDown}" />
+                                                    <Setter TargetName="TileChange" Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Tone}" Value="{x:Static vm:FirePathTone.Depleted}">
+                                                    <Setter TargetName="TileChrome" Property="Background" Value="{DynamicResource AppSurfaceAlt}" />
+                                                    <Setter TargetName="TileChrome" Property="Opacity" Value="0.72" />
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
+                                <Expander
+                                    Grid.Row="2"
+                                    Margin="0,8,0,0"
+                                    Header="{DynamicResource Fire.Path.DetailTitle}"
+                                    Style="{StaticResource AppExpander}">
+                                    <ItemsControl Margin="12,0,12,12" ItemsSource="{Binding WealthPath}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type vm:FireWealthPoint}">
+                                                <Border
+                                                    Padding="0,8"
+                                                    BorderBrush="{DynamicResource AppBorderLight}"
+                                                    BorderThickness="0,0,0,1">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock
+                                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                                Foreground="{DynamicResource AppTextSecondary}"
+                                                                Text="{DynamicResource Fire.Path.Year}" />
+                                                            <TextBlock
+                                                                Margin="8,0,0,0"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                                Text="{Binding Year}" />
+                                                        </StackPanel>
+                                                        <TextBlock
+                                                            Grid.Column="1"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding NetWorth, StringFormat=N0}"
+                                                            Typography.NumeralAlignment="Tabular" />
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Expander>
                             </Grid>
-                        </Border>
 
-                        <Border
-                            Margin="0,16,0,0"
-                            Style="{StaticResource FormCard}"
-                            Visibility="{Binding IsAdvancedMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <StackPanel>
-                                <TextBlock
-                                    Margin="0,0,0,8"
-                                    FontSize="{StaticResource Font.Size.Md}"
-                                    FontWeight="SemiBold"
-                                    Foreground="{DynamicResource AppTextPrimary}"
-                                    Text="{DynamicResource Fire.Advanced.Drawdown}" />
-                                <StackPanel
+                            <Grid Visibility="{Binding IsDrawdownPathTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <UniformGrid
+                                    Columns="2"
                                     Margin="0,0,0,12"
                                     Visibility="{Binding HasDrawdownPath, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Fire.Result.SuccessRate}" />
-                                    <TextBlock Style="{StaticResource MetricValue}" Text="{Binding MonteCarloSuccessRateDisplay}" />
-                                    <TextBlock
-                                        Margin="0,6,0,0"
-                                        Style="{StaticResource Form.HelperText}"
-                                        Text="{DynamicResource Fire.Result.SuccessRate.Hint}"
-                                        TextWrapping="Wrap" />
-                                </StackPanel>
+                                    <Border Margin="0,0,8,0" Style="{StaticResource MetricCard}">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Fire.Result.SuccessRate}" />
+                                            <TextBlock Style="{StaticResource MetricValue}" Text="{Binding MonteCarloSuccessRateDisplay}" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Margin="0,0,0,0" Style="{StaticResource MetricCard}">
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Style="{StaticResource Form.HelperText}"
+                                            Text="{DynamicResource Fire.Result.SuccessRate.Hint}"
+                                            TextWrapping="Wrap" />
+                                    </Border>
+                                </UniformGrid>
                                 <TextBlock
                                     Style="{StaticResource Form.HelperText}"
                                     Text="{DynamicResource Fire.Advanced.EmptyDrawdown}"
                                     TextWrapping="Wrap"
                                     Visibility="{Binding HasDrawdownPath, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                                 <ItemsControl
-                                    ItemsSource="{Binding PlanningResult.DrawdownPath}"
+                                    Grid.Row="1"
+                                    ItemsSource="{Binding DrawdownPathTiles}"
                                     Visibility="{Binding HasDrawdownPath, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
-                                        <DataTemplate DataType="{x:Type fire:FireDrawdownPoint}">
-                                            <Grid Margin="0,0,0,8">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <StackPanel>
+                                        <DataTemplate DataType="{x:Type vm:FireDrawdownPathTile}">
+                                            <Border
+                                                x:Name="TileChrome"
+                                                Width="156"
+                                                Height="112"
+                                                Margin="0,0,8,8"
+                                                Padding="10"
+                                                Background="{DynamicResource AppSurface}"
+                                                BorderBrush="{DynamicResource AppBorderLight}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource Radius.Md}">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="*" />
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="Auto" />
+                                                    </Grid.RowDefinitions>
+                                                    <Border
+                                                        x:Name="TileAccent"
+                                                        Height="3"
+                                                        Margin="-10,-10,-10,8"
+                                                        VerticalAlignment="Top"
+                                                        Background="{DynamicResource AppNeutral}"
+                                                        CornerRadius="{StaticResource Radius.Sm}" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock
+                                                            FontSize="{StaticResource Font.Size.Xs}"
+                                                            Foreground="{DynamicResource AppTextSecondary}"
+                                                            Text="{DynamicResource Fire.Path.Year}" />
+                                                        <TextBlock
+                                                            Margin="8,0,0,0"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding Year}" />
+                                                        <TextBlock
+                                                            Margin="8,0,0,0"
+                                                            FontSize="{StaticResource Font.Size.Xs}"
+                                                            Foreground="{DynamicResource AppTextSecondary}"
+                                                            Text="{Binding Age, StringFormat=({0})}" />
+                                                    </StackPanel>
                                                     <TextBlock
+                                                        Grid.Row="1"
+                                                        VerticalAlignment="Center"
                                                         FontWeight="SemiBold"
                                                         Foreground="{DynamicResource AppTextPrimary}"
-                                                        Text="{Binding Year}" />
+                                                        Text="{Binding Balance, StringFormat=N0}"
+                                                        Typography.NumeralAlignment="Tabular" />
+                                                    <Grid Grid.Row="2">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock
+                                                            FontSize="{StaticResource Font.Size.Xs}"
+                                                            Foreground="{DynamicResource AppTextSecondary}"
+                                                            Text="{DynamicResource Fire.Path.Withdrawal}" />
+                                                        <TextBlock
+                                                            Grid.Column="1"
+                                                            FontSize="{StaticResource Font.Size.Xs}"
+                                                            Foreground="{DynamicResource AppTextSecondary}"
+                                                            Text="{Binding Withdrawal, StringFormat=N0}"
+                                                            Typography.NumeralAlignment="Tabular" />
+                                                    </Grid>
                                                     <TextBlock
-                                                        Style="{StaticResource Form.HelperText}"
-                                                        Text="{Binding AnnualWithdrawal, StringFormat=提領 {0:N0}}" />
-                                                </StackPanel>
-                                                <TextBlock
-                                                    Grid.Column="1"
-                                                    FontWeight="SemiBold"
-                                                    Foreground="{DynamicResource AppTextPrimary}"
-                                                    Text="{Binding EndingBalance, StringFormat=N0}"
-                                                    Typography.NumeralAlignment="Tabular" />
-                                            </Grid>
+                                                        x:Name="TileChange"
+                                                        Grid.Row="3"
+                                                        FontSize="{StaticResource Font.Size.Xs}"
+                                                        Foreground="{DynamicResource AppTextSecondary}"
+                                                        Text="{Binding Change, StringFormat={}{0:+#,0;-#,0;0}, TargetNullValue=—}"
+                                                        Typography.NumeralAlignment="Tabular" />
+                                                </Grid>
+                                            </Border>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding Tone}" Value="{x:Static vm:FirePathTone.Positive}">
+                                                    <Setter TargetName="TileAccent" Property="Background" Value="{DynamicResource AppUp}" />
+                                                    <Setter TargetName="TileChrome" Property="BorderBrush" Value="{DynamicResource AppUp}" />
+                                                    <Setter TargetName="TileChange" Property="Foreground" Value="{DynamicResource AppUp}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Tone}" Value="{x:Static vm:FirePathTone.Negative}">
+                                                    <Setter TargetName="TileAccent" Property="Background" Value="{DynamicResource AppDown}" />
+                                                    <Setter TargetName="TileChrome" Property="BorderBrush" Value="{DynamicResource AppDown}" />
+                                                    <Setter TargetName="TileChange" Property="Foreground" Value="{DynamicResource AppDown}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Tone}" Value="{x:Static vm:FirePathTone.Depleted}">
+                                                    <Setter TargetName="TileChrome" Property="Background" Value="{DynamicResource AppSurfaceAlt}" />
+                                                    <Setter TargetName="TileChrome" Property="Opacity" Value="0.72" />
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
+                                <Expander
+                                    Grid.Row="2"
+                                    Margin="0,8,0,0"
+                                    Header="{DynamicResource Fire.Path.DrawdownDetailTitle}"
+                                    Style="{StaticResource AppExpander}"
+                                    Visibility="{Binding HasDrawdownPath, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ItemsControl Margin="12,0,12,12" ItemsSource="{Binding PlanningResult.DrawdownPath}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type fire:FireDrawdownPoint}">
+                                                <Border
+                                                    Padding="0,8"
+                                                    BorderBrush="{DynamicResource AppBorderLight}"
+                                                    BorderThickness="0,0,0,1">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel>
+                                                            <TextBlock
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                                Text="{Binding Year}" />
+                                                            <TextBlock
+                                                                Style="{StaticResource Form.HelperText}"
+                                                                Text="{Binding AnnualWithdrawal, StringFormat=提領 {0:N0}}" />
+                                                        </StackPanel>
+                                                        <TextBlock
+                                                            Grid.Column="1"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource AppTextPrimary}"
+                                                            Text="{Binding EndingBalance, StringFormat=N0}"
+                                                            Typography.NumeralAlignment="Tabular" />
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Expander>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

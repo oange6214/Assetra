@@ -24,11 +24,17 @@ public sealed partial class MonteCarloViewModel : ObservableObject
     [ObservableProperty] private decimal _medianEnding;
     [ObservableProperty] private decimal _p10Ending;
     [ObservableProperty] private decimal _p90Ending;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MedianDepletionYearDisplay))]
+    private int? _medianDepletionYear;
     [ObservableProperty] private bool _isRunning;
     [ObservableProperty] private bool _hasResult;
 
     private readonly ObservableCollection<MonteCarloPathPoint> _medianPath = [];
     public ReadOnlyObservableCollection<MonteCarloPathPoint> MedianPath { get; }
+
+    private readonly ObservableCollection<MonteCarloYearTile> _medianPathTiles = [];
+    public ReadOnlyObservableCollection<MonteCarloYearTile> MedianPathTiles { get; }
 
     private readonly ILocalizationService? _localization;
 
@@ -40,10 +46,16 @@ public sealed partial class MonteCarloViewModel : ObservableObject
         _simulator = simulator;
         _localization = localization;
         MedianPath = new ReadOnlyObservableCollection<MonteCarloPathPoint>(_medianPath);
+        MedianPathTiles = new ReadOnlyObservableCollection<MonteCarloYearTile>(_medianPathTiles);
     }
 
     private string L(string key, string fallback) =>
         _localization?.Get(key, fallback) ?? fallback;
+
+    public string MedianDepletionYearDisplay =>
+        MedianDepletionYear is int year
+            ? string.Format(L("MonteCarlo.Result.DepletionYear.Value", "中位第 {0} 年"), year)
+            : L("MonteCarlo.Result.DepletionYear.None", "未耗盡");
 
     private bool CanRun() => !IsRunning;
 
@@ -58,8 +70,12 @@ public sealed partial class MonteCarloViewModel : ObservableObject
         ErrorMessage = null;
         if (!ParseHelpers.TryParseDecimal(InitialBalance, out var init))
         { ErrorMessage = L("MonteCarlo.Error.InitialInvalid", "起始餘額格式錯誤"); return; }
+        if (init < 0m)
+        { ErrorMessage = L("MonteCarlo.Error.InitialNegative", "起始餘額必須 ≥ 0"); return; }
         if (!ParseHelpers.TryParseDecimal(AnnualWithdrawal, out var wd))
         { ErrorMessage = L("MonteCarlo.Error.WithdrawalInvalid", "年提領格式錯誤"); return; }
+        if (wd < 0m)
+        { ErrorMessage = L("MonteCarlo.Error.WithdrawalNegative", "年提領必須 ≥ 0"); return; }
         if (!ParseHelpers.TryParseDecimal(MeanReturn, out var mu) || mu <= -1m)
         { ErrorMessage = L("MonteCarlo.Error.MeanInvalid", "平均報酬率必須 > -100%"); return; }
         if (!ParseHelpers.TryParseDecimal(StdDev, out var sigma) || sigma < 0)
@@ -83,12 +99,28 @@ public sealed partial class MonteCarloViewModel : ObservableObject
             MedianEnding = result.MedianEndingBalance;
             P10Ending = result.P10EndingBalance;
             P90Ending = result.P90EndingBalance;
+            MedianDepletionYear = result.MedianDepletionYear;
 
             _medianPath.Clear();
+            _medianPathTiles.Clear();
             for (int i = 0; i < result.MedianBalancePath.Count; i++)
+            {
                 _medianPath.Add(new MonteCarloPathPoint(i, result.MedianBalancePath[i]));
+                _medianPathTiles.Add(new MonteCarloYearTile(
+                    i,
+                    result.MedianBalancePath[i],
+                    i > 0 ? result.MedianBalancePath[i - 1] : null));
+            }
 
             HasResult = true;
+        }
+        catch (Exception)
+        {
+            ErrorMessage = L("MonteCarlo.Error.RunFailed", "模擬失敗，請檢查輸入參數後再試一次");
+            HasResult = false;
+            MedianDepletionYear = null;
+            _medianPath.Clear();
+            _medianPathTiles.Clear();
         }
         finally
         {
@@ -98,3 +130,26 @@ public sealed partial class MonteCarloViewModel : ObservableObject
 }
 
 public sealed record MonteCarloPathPoint(int Year, decimal Balance);
+
+public sealed record MonteCarloYearTile(int Year, decimal Balance, decimal? PreviousBalance)
+{
+    public decimal? Change => PreviousBalance is decimal previous ? Balance - previous : null;
+
+    public MonteCarloPathTone Tone =>
+        Balance <= 0m
+            ? MonteCarloPathTone.Depleted
+            : Change switch
+            {
+                > 0m => MonteCarloPathTone.Positive,
+                < 0m => MonteCarloPathTone.Negative,
+                _ => MonteCarloPathTone.Neutral,
+            };
+}
+
+public enum MonteCarloPathTone
+{
+    Neutral,
+    Positive,
+    Negative,
+    Depleted,
+}

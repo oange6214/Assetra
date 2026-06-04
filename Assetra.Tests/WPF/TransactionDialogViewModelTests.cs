@@ -299,6 +299,156 @@ public class TransactionDialogViewModelTests
         Assert.Null(vm.SelectedAsset);
     }
 
+    [Fact]
+    public void EditTrade_TransferPreselectsSourceCashAccountAndHydratesTypePicker()
+    {
+        var source = MakeCashAccount("台新 Richart", "TWD");
+        var target = MakeCashAccount("富邦", "TWD");
+        var row = new TradeRowViewModel(new Trade(
+            Id: Guid.NewGuid(),
+            Symbol: string.Empty,
+            Exchange: string.Empty,
+            Name: $"{source.Name} → {target.Name}",
+            Type: TradeType.Transfer,
+            TradeDate: new DateTime(2026, 5, 27),
+            Price: 0m,
+            Quantity: 0,
+            RealizedPnl: null,
+            RealizedPnlPct: null,
+            CashAmount: 200_000m,
+            CashAccountId: source.Id,
+            ToCashAccountId: target.Id));
+        var vm = CreateVm(
+            trades: new ObservableCollection<TradeRowViewModel> { row },
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { source, target });
+
+        vm.EditTradeCommand.Execute(row);
+
+        Assert.Equal("transfer", vm.TxType);
+        Assert.NotNull(vm.SelectedAsset);
+        Assert.Equal(TxAssetKind.CashAccount, vm.SelectedAsset.Kind);
+        Assert.Equal(source.Id, vm.SelectedAsset.Id);
+        Assert.Same(source, vm.TxCashAccount);
+        Assert.Same(target, vm.Transfer.Target);
+        Assert.Equal("200000", vm.TxAmount);
+        Assert.True(vm.CanSelectTxType);
+        Assert.Contains(vm.AvailableTradeTypes, t => t.Key == "transfer");
+    }
+
+    [Theory]
+    [InlineData(TradeType.Buy, "buy")]
+    [InlineData(TradeType.CashDividend, "cashDiv")]
+    [InlineData(TradeType.StockDividend, "stockDiv")]
+    public void EditTrade_InvestmentRowsPreselectAssetAndHydrateTypePicker(
+        TradeType tradeType,
+        string expectedTxType)
+    {
+        var position = MakePosition();
+        var cash = MakeCashAccount("富邦", "TWD");
+        var row = new TradeRowViewModel(new Trade(
+            Id: Guid.NewGuid(),
+            Symbol: position.Symbol,
+            Exchange: position.Exchange,
+            Name: position.Name,
+            Type: tradeType,
+            TradeDate: new DateTime(2026, 5, 27),
+            Price: 35m,
+            Quantity: tradeType == TradeType.StockDividend ? 100 : 10,
+            RealizedPnl: null,
+            RealizedPnlPct: null,
+            CashAmount: tradeType == TradeType.CashDividend ? 500m : null,
+            CashAccountId: tradeType == TradeType.CashDividend ? cash.Id : null,
+            PortfolioEntryId: position.Id));
+        var vm = CreateVm(
+            trades: new ObservableCollection<TradeRowViewModel> { row },
+            positions: new ObservableCollection<PortfolioRowViewModel> { position },
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { cash });
+
+        vm.EditTradeCommand.Execute(row);
+
+        Assert.Equal(expectedTxType, vm.TxType);
+        Assert.NotNull(vm.SelectedAsset);
+        Assert.Equal(position.Id, vm.SelectedAsset.Id);
+        Assert.Contains(vm.AvailableTradeTypes, t => t.Key == expectedTxType);
+    }
+
+    [Theory]
+    [InlineData(TradeType.Deposit, "deposit")]
+    [InlineData(TradeType.Withdrawal, "withdrawal")]
+    [InlineData(TradeType.Income, "income")]
+    public void EditTrade_CashFlowRowsPreselectCashAccountAndHydrateTypePicker(
+        TradeType tradeType,
+        string expectedTxType)
+    {
+        var account = MakeCashAccount("台新 Richart", "TWD");
+        var row = new TradeRowViewModel(new Trade(
+            Id: Guid.NewGuid(),
+            Symbol: string.Empty,
+            Exchange: string.Empty,
+            Name: account.Name,
+            Type: tradeType,
+            TradeDate: new DateTime(2026, 5, 27),
+            Price: 0m,
+            Quantity: 0,
+            RealizedPnl: null,
+            RealizedPnlPct: null,
+            CashAmount: 1_000m,
+            CashAccountId: account.Id));
+        var vm = CreateVm(
+            trades: new ObservableCollection<TradeRowViewModel> { row },
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { account });
+
+        vm.EditTradeCommand.Execute(row);
+
+        Assert.Equal(expectedTxType, vm.TxType);
+        Assert.NotNull(vm.SelectedAsset);
+        Assert.Equal(TxAssetKind.CashAccount, vm.SelectedAsset.Kind);
+        Assert.Equal(account.Id, vm.SelectedAsset.Id);
+        Assert.Contains(vm.AvailableTradeTypes, t => t.Key == expectedTxType);
+    }
+
+    [Theory]
+    [InlineData(TradeType.LoanBorrow, "loanBorrow")]
+    [InlineData(TradeType.LoanRepay, "loanRepay")]
+    [InlineData(TradeType.CreditCardCharge, "creditCardCharge")]
+    [InlineData(TradeType.CreditCardPayment, "creditCardPayment")]
+    public void EditTrade_LiabilityRowsPreselectLiabilityAndHydrateTypePicker(
+        TradeType tradeType,
+        string expectedTxType)
+    {
+        var liability = tradeType is TradeType.LoanBorrow or TradeType.LoanRepay
+            ? MakeLoanLiability("台新 7y")
+            : MakeCreditCardLiability("富邦 J 卡");
+        var cash = MakeCashAccount("富邦", "TWD");
+        var row = new TradeRowViewModel(new Trade(
+            Id: Guid.NewGuid(),
+            Symbol: string.Empty,
+            Exchange: string.Empty,
+            Name: liability.Label,
+            Type: tradeType,
+            TradeDate: new DateTime(2026, 5, 27),
+            Price: 0m,
+            Quantity: 0,
+            RealizedPnl: null,
+            RealizedPnlPct: null,
+            CashAmount: 1_000m,
+            CashAccountId: cash.Id,
+            LoanLabel: tradeType is TradeType.LoanBorrow or TradeType.LoanRepay ? liability.Label : null,
+            LiabilityAssetId: liability.AssetId));
+        var vm = CreateVm(
+            trades: new ObservableCollection<TradeRowViewModel> { row },
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { cash },
+            liabilities: new ObservableCollection<LiabilityRowViewModel> { liability });
+
+        vm.EditTradeCommand.Execute(row);
+
+        Assert.Equal(expectedTxType, vm.TxType);
+        Assert.NotNull(vm.SelectedAsset);
+        Assert.Equal(TxAssetKind.Liability, vm.SelectedAsset.Kind);
+        Assert.Equal(liability.AssetId, vm.SelectedAsset.Id);
+        Assert.Contains(vm.AvailableTradeTypes, t => t.Key == expectedTxType);
+    }
+
     // ── Mode flags (TxType change) ───────────────────────────────────────────
 
     [Fact]

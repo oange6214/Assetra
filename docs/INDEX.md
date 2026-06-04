@@ -63,6 +63,8 @@
   - 未來可拆分的業務 context 邊界。
 
 ## Planning
+- [Assetra Complete Goals Plan](planning/Assetra-Complete-Goals-Plan.md)
+  - 將目前財務目標 CRUD 擴充為完整目標規劃模組的實作計畫，包含追蹤來源、目標 detail drawer、里程碑、撥款規則、達標計算、FIRE 同步與驗收規則。
 - [Assetra Complete FIRE Plan](planning/Assetra-Complete-FIRE-Plan.md)
   - 將目前 FIRE 計算器擴充為完整 FIRE 規劃模組的實作計畫，包含 Basic / Advanced 模式、情境儲存、退休提領、成功率、財務目標同步與驗收規則。
 - [Assetra US Market Data Plan](planning/Assetra-US-Market-Data-Plan.md)
@@ -87,6 +89,8 @@ context 與架構決策仍可讀：
 3. [Changelog v0.22.0](releases/CHANGELOG.md) — 完整變更摘要
 
 ## Guides
+- [Goals Planning](guides/Goals-Planning.md)
+  - 財務目標追蹤方式、detail drawer、里程碑、撥款規則、規劃 helper、FIRE 同步與財務總覽 widget 的使用方式。
 - [FIRE Planning](guides/FIRE-Planning.md)
   - FIRE Basic / Advanced 模式、情境儲存、淨資產來源、退休提領路徑與同步到財務目標的使用方式。
 - [Fugle API Key Setup](guides/Fugle-API-Key-Setup.md)

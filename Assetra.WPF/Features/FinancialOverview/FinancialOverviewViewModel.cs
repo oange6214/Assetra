@@ -423,6 +423,62 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
     public bool HasNoGoals => GoalsWidget is null || GoalsWidget.Goals.Count == 0;
 
+    public string GoalsWidgetTotalActiveGoalsDisplay =>
+        (GoalsWidget?.Goals.Count ?? 0).ToString("N0", CultureInfo.CurrentCulture);
+
+    public string GoalsWidgetNearestDeadlineDisplay
+    {
+        get
+        {
+            var next = GoalsWidget?.Goals
+                .Where(g => !g.IsAchieved)
+                .Select(g => new { Goal = g, Deadline = g.Goal.Deadline })
+                .Where(g => g.Deadline.HasValue)
+                .OrderBy(g => g.Deadline)
+                .FirstOrDefault();
+            if (next is null)
+                return "—";
+
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                "{0} · {1:yyyy-MM-dd}",
+                next.Goal.Name,
+                next.Deadline.GetValueOrDefault());
+        }
+    }
+
+    public string GoalsWidgetAttentionGoalsDisplay
+    {
+        get
+        {
+            var count = GoalsWidget?.Goals.Count(g => g.StatusTag is "warning" or "overdue") ?? 0;
+            return count.ToString("N0", CultureInfo.CurrentCulture);
+        }
+    }
+
+    public string GoalsWidgetTopProgressDisplay
+    {
+        get
+        {
+            var goal = GoalsWidget?.Goals
+                .OrderByDescending(g => g.ProgressPercent)
+                .ThenBy(g => g.Goal.Deadline ?? DateOnly.MaxValue)
+                .FirstOrDefault();
+            return goal is null ? "—" : $"{goal.Name} · {goal.ProgressDisplay}";
+        }
+    }
+
+    private void NotifyGoalsWidgetSummaryChanged()
+    {
+        OnPropertyChanged(nameof(TopThreeGoals));
+        OnPropertyChanged(nameof(HasNoGoals));
+        OnPropertyChanged(nameof(GoalsWidgetTotalActiveGoalsDisplay));
+        OnPropertyChanged(nameof(GoalsWidgetNearestDeadlineDisplay));
+        OnPropertyChanged(nameof(GoalsWidgetAttentionGoalsDisplay));
+        OnPropertyChanged(nameof(GoalsWidgetTopProgressDisplay));
+        RaiseCompositionChanged();
+    }
+
     // ── Today's Movers widget（盤中 / 收盤後即時損益）─────────────────────────
     /// <summary>
     /// 今日漲幅前 3 名 — 從 PortfolioRef.Positions 過濾 DayChange > 0，按
@@ -586,9 +642,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         {
             ncc.CollectionChanged += (_, _) =>
             {
-                OnPropertyChanged(nameof(TopThreeGoals));
-                OnPropertyChanged(nameof(HasNoGoals));
-                RaiseCompositionChanged();
+                NotifyGoalsWidgetSummaryChanged();
                 // Portfolio-Groups-Refactor P5 — refresh per-group cache when goals collection changes.
                 _ = RefreshGroupNetValuesAsync();
             };
@@ -599,10 +653,10 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         {
             GoalsWidget.PropertyChanged += (_, ge) =>
             {
-                if (ge.PropertyName is "TotalTarget" or "TotalCurrent"
-                    or "OverallProgressPercent" or "TotalTargetDisplay")
+                if (ge.PropertyName is "GoalCount" or "TotalTarget" or "TotalCurrent"
+                    or "OverallProgressPercent" or "TotalTargetDisplay" or "OverallProgressDisplay")
                 {
-                    RaiseCompositionChanged();
+                    NotifyGoalsWidgetSummaryChanged();
                 }
             };
         }

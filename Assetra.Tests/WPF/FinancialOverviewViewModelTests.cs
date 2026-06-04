@@ -2,8 +2,10 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
+using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Features.FinancialOverview;
+using Assetra.WPF.Features.Goals;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.Contracts;
 using Moq;
@@ -138,6 +140,40 @@ public sealed class FinancialOverviewViewModelTests
         feed.TotalMarketValue = 9999m;
 
         Assert.Equal(9999m, feed.TotalMarketValue);
+    }
+
+    [Fact]
+    public async Task GoalsWidgetSummary_ProjectsGoalRiskAndTopProgress()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var repo = new Mock<IFinancialGoalRepository>();
+        repo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+            [
+                new FinancialGoal(Guid.NewGuid(), "House", 200_000m, 40_000m, today.AddDays(10), null),
+                new FinancialGoal(Guid.NewGuid(), "Emergency", 100_000m, 50_000m, today.AddDays(20), null),
+                new FinancialGoal(Guid.NewGuid(), "Trip", 100_000m, 90_000m, today.AddDays(90), null),
+            ]);
+        var goals = new GoalsViewModel(repo.Object);
+
+        try
+        {
+            await goals.LoadAsync();
+            var vm = new FinancialOverviewViewModel(
+                new Mock<IFinancialOverviewQueryService>().Object,
+                new StubFeed(),
+                goalsWidget: goals);
+
+            Assert.Equal("3", vm.GoalsWidgetTotalActiveGoalsDisplay);
+            Assert.StartsWith("House · ", vm.GoalsWidgetNearestDeadlineDisplay);
+            Assert.Contains(today.AddDays(10).ToString("yyyy-MM-dd"), vm.GoalsWidgetNearestDeadlineDisplay);
+            Assert.Equal("2", vm.GoalsWidgetAttentionGoalsDisplay);
+            Assert.Equal("Trip · 90.0%", vm.GoalsWidgetTopProgressDisplay);
+        }
+        finally
+        {
+            CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default.UnregisterAll(goals);
+        }
     }
 
     // ── v2 tests：focus visibility + KPI reorder edge cases ──

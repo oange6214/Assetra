@@ -68,6 +68,26 @@ public sealed class MonteCarloSimulatorTests
         Assert.Equal(1m, result.SuccessRate);
         var expectedFinal = 1_000_000d * Math.Pow(1.05, 10);
         Assert.InRange((double)result.MedianEndingBalance, expectedFinal - 1, expectedFinal + 1);
+        Assert.Null(result.MedianDepletionYear);
+    }
+
+    [Fact]
+    public void Simulate_DepletedPaths_ReportMedianDepletionYear()
+    {
+        var sim = new MonteCarloSimulator();
+        var inputs = new MonteCarloInputs(
+            InitialBalance: 100m,
+            AnnualWithdrawal: 200m,
+            MeanAnnualReturn: 0m,
+            AnnualReturnStdDev: 0m,
+            Years: 5,
+            SimulationCount: 10,
+            RandomSeed: 7);
+
+        var result = sim.Simulate(inputs);
+
+        Assert.Equal(0m, result.SuccessRate);
+        Assert.Equal(1, result.MedianDepletionYear);
     }
 
     [Fact]
@@ -83,6 +103,24 @@ public sealed class MonteCarloSimulatorTests
     {
         var sim = new MonteCarloSimulator();
         var inputs = DefaultInputs() with { SimulationCount = 0 };
+        Assert.Throws<ArgumentOutOfRangeException>(() => sim.Simulate(inputs));
+    }
+
+    [Fact]
+    public void Simulate_NegativeInitialBalance_Throws()
+    {
+        var sim = new MonteCarloSimulator();
+        var inputs = DefaultInputs() with { InitialBalance = -1m };
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => sim.Simulate(inputs));
+    }
+
+    [Fact]
+    public void Simulate_NegativeAnnualWithdrawal_Throws()
+    {
+        var sim = new MonteCarloSimulator();
+        var inputs = DefaultInputs() with { AnnualWithdrawal = -1m };
+
         Assert.Throws<ArgumentOutOfRangeException>(() => sim.Simulate(inputs));
     }
 

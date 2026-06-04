@@ -16,6 +16,11 @@ internal static class GoalsServiceCollectionExtensions
         services.AddSingleton<GoalSqliteRepository>(_ => new GoalSqliteRepository(dbPath));
         services.AddSingleton<IFinancialGoalRepository>(sp => sp.GetRequiredService<GoalSqliteRepository>());
         services.AddSingleton<IFinancialGoalSyncStore>(sp => sp.GetRequiredService<GoalSqliteRepository>());
+        services.AddSingleton<GoalMilestoneSqliteRepository>(_ => new GoalMilestoneSqliteRepository(dbPath));
+        services.AddSingleton<IGoalMilestoneRepository>(sp => sp.GetRequiredService<GoalMilestoneSqliteRepository>());
+        services.AddSingleton<GoalFundingRuleSqliteRepository>(_ => new GoalFundingRuleSqliteRepository(dbPath));
+        services.AddSingleton<IGoalFundingRuleRepository>(sp => sp.GetRequiredService<GoalFundingRuleSqliteRepository>());
+        services.AddSingleton<IGoalProgressAmountProvider, GoalProgressAmountProvider>();
         services.AddSingleton<GoalsViewModel>();
         return services;
     }
