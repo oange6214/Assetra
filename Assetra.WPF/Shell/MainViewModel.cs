@@ -9,6 +9,7 @@ using Assetra.WPF.Features.Fire;
 using Assetra.WPF.Features.Goals;
 using Assetra.WPF.Features.Import;
 using Assetra.WPF.Features.Insurance;
+using Assetra.WPF.Features.Calculators;
 using Assetra.WPF.Features.MonteCarlo;
 using Assetra.WPF.Features.PhysicalAsset;
 using Assetra.WPF.Features.Portfolio;
@@ -52,6 +53,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public PhysicalAssetViewModel PhysicalAsset { get; }
     public FireViewModel Fire { get; }
     public MonteCarloViewModel MonteCarlo { get; }
+    public CalculatorsViewModel Calculators { get; }
     public SettingsViewModel Settings { get; }
     public SnackbarViewModel Snackbar { get; }
     public Features.Assistant.AssistantViewModel Assistant { get; }
@@ -269,6 +271,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         PhysicalAssetViewModel physicalAsset,
         FireViewModel fire,
         MonteCarloViewModel monteCarlo,
+        CalculatorsViewModel calculators,
         SettingsViewModel settings,
         SnackbarViewModel snackbar,
         Features.Assistant.AssistantViewModel assistant,
@@ -297,6 +300,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         PhysicalAsset = physicalAsset;
         Fire = fire;
         MonteCarlo = monteCarlo;
+        Calculators = calculators;
         Settings = settings;
         Snackbar = snackbar;
         Assistant = assistant;

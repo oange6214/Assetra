@@ -11,6 +11,7 @@ public enum NavSection
     Reports,
     Fire,
     MonteCarlo,
+    Calculators,
     RealEstate,
     Insurance,
     Retirement,

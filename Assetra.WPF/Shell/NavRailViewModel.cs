@@ -116,6 +116,7 @@ public partial class NavRailViewModel : ObservableObject
                     new NavLeafVm { Section = NavSection.Goals,      LabelResourceKey = "Nav.Goals",       IconSymbol = "Target24",     ToolTipResourceKey = "Nav.Goals" },
                     new NavLeafVm { Section = NavSection.Fire,       LabelResourceKey = "Fire.Title",      IconSymbol = "Flash24",      ToolTipResourceKey = "Fire.Title" },
                     new NavLeafVm { Section = NavSection.MonteCarlo, LabelResourceKey = "MonteCarlo.Title", IconSymbol = "Calculator24", ToolTipResourceKey = "MonteCarlo.Title" },
+                    new NavLeafVm { Section = NavSection.Calculators, LabelResourceKey = "Calc.Title", IconSymbol = "Calculator24", ToolTipResourceKey = "Calc.Title" },
                 },
             },
             // 「工具」群組：診斷類項目（拆自 Nav.Overview），與日常分析語意分開。

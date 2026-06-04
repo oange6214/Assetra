@@ -6,6 +6,7 @@
     xmlns:assistant="clr-namespace:Assetra.WPF.Features.Assistant"
     xmlns:auditlog="clr-namespace:Assetra.WPF.Features.AuditLog"
     xmlns:cal="clr-namespace:Assetra.WPF.Features.FinancialOverview.Calendar"
+    xmlns:calculators="clr-namespace:Assetra.WPF.Features.Calculators"
     xmlns:cashaccts="clr-namespace:Assetra.WPF.Features.CashAccounts"
     xmlns:categories="clr-namespace:Assetra.WPF.Features.Categories"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -523,6 +524,10 @@
             <montecarlo:MonteCarloView DataContext="{Binding MonteCarlo}" />
         </DataTemplate>
 
+        <DataTemplate x:Key="CalculatorsContentTemplate">
+            <calculators:CalculatorsView DataContext="{Binding Calculators}" />
+        </DataTemplate>
+
         <DataTemplate x:Key="SettingsContentTemplate">
             <settings:SettingsView DataContext="{Binding Settings}" />
         </DataTemplate>
@@ -775,6 +780,9 @@
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.MonteCarlo}">
                             <Setter Property="ContentTemplate" Value="{StaticResource MonteCarloContentTemplate}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Calculators}">
+                            <Setter Property="ContentTemplate" Value="{StaticResource CalculatorsContentTemplate}" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Settings}">
                             <Setter Property="ContentTemplate" Value="{StaticResource SettingsContentTemplate}" />
