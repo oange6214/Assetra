@@ -40,7 +40,7 @@ public sealed class LoanAmortizationService
     {
         var s = Calculate(i);
         if (month <= 0) return i.Principal;
-        if (month >= s.Rows.Count) return 0m;
+        if (month > s.Rows.Count) return 0m;
         return s.Rows[month - 1].EndBalance;
     }
 }
