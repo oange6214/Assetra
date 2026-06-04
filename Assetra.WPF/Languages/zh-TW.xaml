@@ -2068,4 +2068,82 @@
     <sys:String x:Key="MonteCarlo.Path.DetailTitle">詳細年度資料</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Year">年度</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Median">中位數餘額</sys:String>
+
+    <!--  理財試算  -->
+    <sys:String x:Key="Calc.Title">理財試算</sys:String>
+    <sys:String x:Key="Calc.Tab.Loan">貸款計算</sys:String>
+    <sys:String x:Key="Calc.Tab.Latte">拿鐵因子</sys:String>
+    <sys:String x:Key="Calc.Tab.Rule72">72 法則</sys:String>
+    <sys:String x:Key="Calc.Tab.RentVsBuy">租 vs 買</sys:String>
+    <sys:String x:Key="Calc.Calculate">計算</sys:String>
+    <sys:String x:Key="Calc.Empty.Hint">填入參數後點擊「計算」以查看結果</sys:String>
+
+    <!--  貸款計算  -->
+    <sys:String x:Key="Calc.Loan.Input.Principal">本金</sys:String>
+    <sys:String x:Key="Calc.Loan.Input.Rate">年利率（%）</sys:String>
+    <sys:String x:Key="Calc.Loan.Input.Months">期數（月）</sys:String>
+    <sys:String x:Key="Calc.Loan.Result.Monthly">每月還款</sys:String>
+    <sys:String x:Key="Calc.Loan.Result.TotalPayment">總還款金額</sys:String>
+    <sys:String x:Key="Calc.Loan.Result.TotalInterest">總利息</sys:String>
+    <sys:String x:Key="Calc.Loan.Result.Schedule">攤還明細</sys:String>
+    <sys:String x:Key="Calc.Loan.Col.Month">期</sys:String>
+    <sys:String x:Key="Calc.Loan.Col.BeginBalance">期初餘額</sys:String>
+    <sys:String x:Key="Calc.Loan.Col.Payment">月付</sys:String>
+    <sys:String x:Key="Calc.Loan.Col.Principal">本金</sys:String>
+    <sys:String x:Key="Calc.Loan.Col.Interest">利息</sys:String>
+    <sys:String x:Key="Calc.Loan.Col.EndBalance">期末餘額</sys:String>
+    <sys:String x:Key="Calc.Loan.Error.Principal">本金格式錯誤</sys:String>
+    <sys:String x:Key="Calc.Loan.Error.Rate">利率格式錯誤</sys:String>
+    <sys:String x:Key="Calc.Loan.Error.Months">期數格式錯誤</sys:String>
+
+    <!--  拿鐵因子  -->
+    <sys:String x:Key="Calc.Latte.Input.Amount">每次金額</sys:String>
+    <sys:String x:Key="Calc.Latte.Input.Frequency">頻率</sys:String>
+    <sys:String x:Key="Calc.Latte.Input.Return">年報酬率（%）</sys:String>
+    <sys:String x:Key="Calc.Latte.Input.Years">年數</sys:String>
+    <sys:String x:Key="Calc.Latte.Result.Contributed">累積投入</sys:String>
+    <sys:String x:Key="Calc.Latte.Result.FV">複利後總值</sys:String>
+    <sys:String x:Key="Calc.Latte.Result.Gain">多賺</sys:String>
+    <sys:String x:Key="Calc.Latte.Error.Amount">金額格式錯誤</sys:String>
+    <sys:String x:Key="Calc.Latte.Error.Rate">報酬率格式錯誤</sys:String>
+    <sys:String x:Key="Calc.Latte.Error.Years">年數格式錯誤</sys:String>
+
+    <!--  72 法則  -->
+    <sys:String x:Key="Calc.Rule72.Input.Rate">年報酬率（%）</sys:String>
+    <sys:String x:Key="Calc.Rule72.Input.Years">目標年數</sys:String>
+    <sys:String x:Key="Calc.Rule72.Result.DoublingYears">翻倍年數</sys:String>
+    <sys:String x:Key="Calc.Rule72.Result.RequiredRate">所需年報酬率（%）</sys:String>
+    <sys:String x:Key="Calc.Rule72.Result.DoublingTable">翻倍對照表</sys:String>
+    <sys:String x:Key="Calc.Rule72.Result.2x">翻 2 倍</sys:String>
+    <sys:String x:Key="Calc.Rule72.Result.4x">翻 4 倍</sys:String>
+    <sys:String x:Key="Calc.Rule72.Result.8x">翻 8 倍</sys:String>
+    <sys:String x:Key="Calc.Rule72.Error.BothInvalid">請輸入有效的年報酬率或年數</sys:String>
+
+    <!--  租 vs 買  -->
+    <sys:String x:Key="Calc.RentVsBuy.Input.HomePrice">房價</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.DownPayment">頭期款</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.MortgageRate">房貸年利率（%）</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.LoanYears">貸款年限</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.HoldingCost">年持有成本率（%）</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.Appreciation">年增值率（%）</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.Rent">月租金</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.RentIncrease">年租金漲幅（%）</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.CompareYears">比較年數</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BuyCost">買房淨成本</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.RentCost">租房淨成本</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.Winner">結論</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BreakEven">損益兩平年</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BuyCheaper">買房較划算</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.RentCheaper">租房較划算</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BreakEvenFmt">第 {0} 年</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.NoBreakEven">期間內未達損益兩平</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.HomePrice">房價格式錯誤</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.DownPayment">頭期款格式錯誤</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.MortgageRate">房貸利率格式錯誤</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.LoanYears">貸款年數格式錯誤</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.HoldingCost">持有成本率格式錯誤</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.Appreciation">增值率格式錯誤</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.Rent">月租格式錯誤</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.RentIncrease">租金漲幅格式錯誤</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.CompareYears">比較年數格式錯誤</sys:String>
 </ResourceDictionary>

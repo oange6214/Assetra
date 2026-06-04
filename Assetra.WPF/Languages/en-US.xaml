@@ -2063,4 +2063,82 @@
     <sys:String x:Key="MonteCarlo.Path.DetailTitle">Detailed yearly data</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Year">Year</sys:String>
     <sys:String x:Key="MonteCarlo.Path.Median">Median Balance</sys:String>
+
+    <!--  Financial Calculators  -->
+    <sys:String x:Key="Calc.Title">Calculators</sys:String>
+    <sys:String x:Key="Calc.Tab.Loan">Loan</sys:String>
+    <sys:String x:Key="Calc.Tab.Latte">Latte Factor</sys:String>
+    <sys:String x:Key="Calc.Tab.Rule72">Rule of 72</sys:String>
+    <sys:String x:Key="Calc.Tab.RentVsBuy">Rent vs Buy</sys:String>
+    <sys:String x:Key="Calc.Calculate">Calculate</sys:String>
+    <sys:String x:Key="Calc.Empty.Hint">Enter values and click Calculate to see results</sys:String>
+
+    <!--  Loan Calculator  -->
+    <sys:String x:Key="Calc.Loan.Input.Principal">Principal</sys:String>
+    <sys:String x:Key="Calc.Loan.Input.Rate">Annual Rate (%)</sys:String>
+    <sys:String x:Key="Calc.Loan.Input.Months">Months</sys:String>
+    <sys:String x:Key="Calc.Loan.Result.Monthly">Monthly Payment</sys:String>
+    <sys:String x:Key="Calc.Loan.Result.TotalPayment">Total Payment</sys:String>
+    <sys:String x:Key="Calc.Loan.Result.TotalInterest">Total Interest</sys:String>
+    <sys:String x:Key="Calc.Loan.Result.Schedule">Amortization Schedule</sys:String>
+    <sys:String x:Key="Calc.Loan.Col.Month">Mo.</sys:String>
+    <sys:String x:Key="Calc.Loan.Col.BeginBalance">Begin Bal.</sys:String>
+    <sys:String x:Key="Calc.Loan.Col.Payment">Payment</sys:String>
+    <sys:String x:Key="Calc.Loan.Col.Principal">Principal</sys:String>
+    <sys:String x:Key="Calc.Loan.Col.Interest">Interest</sys:String>
+    <sys:String x:Key="Calc.Loan.Col.EndBalance">End Bal.</sys:String>
+    <sys:String x:Key="Calc.Loan.Error.Principal">Invalid principal</sys:String>
+    <sys:String x:Key="Calc.Loan.Error.Rate">Invalid rate</sys:String>
+    <sys:String x:Key="Calc.Loan.Error.Months">Invalid months</sys:String>
+
+    <!--  Latte Factor  -->
+    <sys:String x:Key="Calc.Latte.Input.Amount">Amount per Spend</sys:String>
+    <sys:String x:Key="Calc.Latte.Input.Frequency">Frequency</sys:String>
+    <sys:String x:Key="Calc.Latte.Input.Return">Annual Return (%)</sys:String>
+    <sys:String x:Key="Calc.Latte.Input.Years">Years</sys:String>
+    <sys:String x:Key="Calc.Latte.Result.Contributed">Total Contributed</sys:String>
+    <sys:String x:Key="Calc.Latte.Result.FV">Future Value</sys:String>
+    <sys:String x:Key="Calc.Latte.Result.Gain">Gain</sys:String>
+    <sys:String x:Key="Calc.Latte.Error.Amount">Invalid amount</sys:String>
+    <sys:String x:Key="Calc.Latte.Error.Rate">Invalid return rate</sys:String>
+    <sys:String x:Key="Calc.Latte.Error.Years">Invalid years</sys:String>
+
+    <!--  Rule of 72  -->
+    <sys:String x:Key="Calc.Rule72.Input.Rate">Annual Rate (%)</sys:String>
+    <sys:String x:Key="Calc.Rule72.Input.Years">Target Years</sys:String>
+    <sys:String x:Key="Calc.Rule72.Result.DoublingYears">Doubling Years</sys:String>
+    <sys:String x:Key="Calc.Rule72.Result.RequiredRate">Required Rate (%)</sys:String>
+    <sys:String x:Key="Calc.Rule72.Result.DoublingTable">Multiples Table</sys:String>
+    <sys:String x:Key="Calc.Rule72.Result.2x">2×</sys:String>
+    <sys:String x:Key="Calc.Rule72.Result.4x">4×</sys:String>
+    <sys:String x:Key="Calc.Rule72.Result.8x">8×</sys:String>
+    <sys:String x:Key="Calc.Rule72.Error.BothInvalid">Enter a valid rate or target years</sys:String>
+
+    <!--  Rent vs Buy  -->
+    <sys:String x:Key="Calc.RentVsBuy.Input.HomePrice">Home Price</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.DownPayment">Down Payment</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.MortgageRate">Mortgage Rate (%)</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.LoanYears">Loan Years</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.HoldingCost">Annual Holding Cost (%)</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.Appreciation">Annual Appreciation (%)</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.Rent">Monthly Rent</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.RentIncrease">Annual Rent Increase (%)</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.CompareYears">Compare Years</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BuyCost">Buy Net Cost</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.RentCost">Rent Net Cost</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.Winner">Verdict</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BreakEven">Break-Even Year</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BuyCheaper">Buying is cheaper</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.RentCheaper">Renting is cheaper</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BreakEvenFmt">Year {0}</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.NoBreakEven">No break-even in period</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.HomePrice">Invalid home price</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.DownPayment">Invalid down payment</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.MortgageRate">Invalid mortgage rate</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.LoanYears">Invalid loan years</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.HoldingCost">Invalid holding cost rate</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.Appreciation">Invalid appreciation rate</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.Rent">Invalid monthly rent</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.RentIncrease">Invalid rent increase rate</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.CompareYears">Invalid compare years</sys:String>
 </ResourceDictionary>
