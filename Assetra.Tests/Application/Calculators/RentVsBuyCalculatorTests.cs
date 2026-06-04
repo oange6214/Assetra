@@ -22,4 +22,16 @@ public class RentVsBuyCalculatorTests
         var r = New().Calculate(new(8_000_000m, 1_600_000m, 0.02m, 30, 0.01m, 0m, 25_000m, 0m, 10));
         Assert.Equal(25_000m * 12 * 10, r.RentNetCost);
     }
+    [Fact] // WHY: 若買方淨成本在比較期間內從未低於租方，損益兩平年應為 null
+    public void HighRentAndLowAppreciation_NoBreakEvenYear()
+    {
+        // Very high rent relative to buy costs, but zero appreciation — buy never becomes cheaper
+        var r = New().Calculate(new(
+            HomePrice: 10_000_000m, DownPayment: 5_000_000m, MortgageAnnualRate: 0.03m, LoanYears: 30,
+            AnnualHoldingCostRate: 0.02m, AnnualAppreciation: 0m,
+            MonthlyRent: 5_000m, AnnualRentIncrease: 0m, CompareYears: 30));
+        // Very cheap rent vs expensive buy with zero appreciation → buy never wins
+        Assert.Null(r.BreakEvenYear);
+        Assert.False(r.BuyCheaper);
+    }
 }

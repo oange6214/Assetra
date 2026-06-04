@@ -7,7 +7,8 @@ public sealed class RentVsBuyCalculator
 
     public RentVsBuyResult Calculate(RentVsBuyInputs i)
     {
-        if (i.HomePrice <= 0 || i.CompareYears <= 0) throw new ArgumentOutOfRangeException();
+        if (i.HomePrice <= 0) throw new ArgumentOutOfRangeException(nameof(i.HomePrice));
+        if (i.CompareYears <= 0) throw new ArgumentOutOfRangeException(nameof(i.CompareYears));
         var loanAmount = i.HomePrice - i.DownPayment;
         var loanInputs = new LoanAmortizationInputs(loanAmount <= 0 ? 1m : loanAmount, i.MortgageAnnualRate, i.LoanYears * 12);
         var monthlyPayment = loanAmount <= 0 ? 0m : _loan.Calculate(loanInputs).MonthlyPayment;
