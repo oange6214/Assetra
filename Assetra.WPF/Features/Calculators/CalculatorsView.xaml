@@ -1,0 +1,38 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Calculators.CalculatorsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:calc="clr-namespace:Assetra.WPF.Features.Calculators"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Calculators"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:CalculatorsViewModel}, IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <TabControl
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        HorizontalContentAlignment="Stretch"
+        VerticalContentAlignment="Stretch"
+        Background="Transparent"
+        BorderThickness="0">
+        <TabControl.ItemContainerStyle>
+            <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="{x:Type TabItem}">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            </Style>
+        </TabControl.ItemContainerStyle>
+        <TabItem Header="{DynamicResource Calc.Tab.Loan}">
+            <calc:LoanCalcView DataContext="{Binding Loan}" />
+        </TabItem>
+        <TabItem Header="{DynamicResource Calc.Tab.Latte}">
+            <calc:LatteFactorCalcView DataContext="{Binding Latte}" />
+        </TabItem>
+        <TabItem Header="{DynamicResource Calc.Tab.Rule72}">
+            <calc:RuleOf72CalcView DataContext="{Binding Rule72}" />
+        </TabItem>
+        <TabItem Header="{DynamicResource Calc.Tab.RentVsBuy}">
+            <calc:RentVsBuyCalcView DataContext="{Binding RentVsBuy}" />
+        </TabItem>
+    </TabControl>
+</UserControl>

@@ -1,0 +1,109 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Calculators.LatteFactorCalcView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Calculators"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:LatteFactorCalcViewModel}, IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <Grid Style="{StaticResource PageRootGrid}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Padding="20" Style="{StaticResource FormCard}">
+            <StackPanel>
+                <UniformGrid Columns="4" Style="{StaticResource PageFormGrid}">
+                    <StackPanel Style="{StaticResource FormField}">
+                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.Latte.Input.Amount}" />
+                        <TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            Style="{StaticResource AppTextBox}"
+                            Text="{Binding AmountPerSpend, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Style="{StaticResource FormField}">
+                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.Latte.Input.Frequency}" />
+                        <ComboBox
+                            ItemsSource="{Binding Frequencies}"
+                            SelectedItem="{Binding SelectedFrequency}"
+                            Style="{StaticResource AppComboBox}" />
+                    </StackPanel>
+                    <StackPanel Style="{StaticResource FormField}">
+                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.Latte.Input.Return}" />
+                        <TextBox
+                            Style="{StaticResource AppTextBox}"
+                            Text="{Binding AnnualReturnPercent, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Style="{StaticResource FormFieldLast}">
+                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.Latte.Input.Years}" />
+                        <TextBox
+                            Style="{StaticResource AppTextBox}"
+                            Text="{Binding Years, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </UniformGrid>
+                <StackPanel Style="{StaticResource PageActionBar}">
+                    <Button
+                        Command="{Binding CalculateCommand}"
+                        Content="{DynamicResource Calc.Calculate}"
+                        Style="{StaticResource AppPrimaryButton}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <TextBlock
+            Grid.Row="1"
+            Style="{StaticResource PageErrorText}"
+            Text="{Binding ErrorMessage}"
+            Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+
+        <Grid Grid.Row="2" Margin="{StaticResource PageContentTopGapMargin}" Style="{StaticResource PageContentGrid}">
+            <StackPanel
+                Style="{StaticResource EmptyStatePanel}"
+                Visibility="{Binding HasResult, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Calc.Empty.Hint}" />
+                <Button
+                    Command="{Binding CalculateCommand}"
+                    Content="{DynamicResource Calc.Calculate}"
+                    HorizontalAlignment="Center"
+                    Style="{StaticResource AppEmptyStatePrimaryAction}" />
+            </StackPanel>
+
+            <StackPanel Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <UniformGrid Columns="3">
+                    <Border Margin="0,0,12,0" Style="{StaticResource MetricCard}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Calc.Latte.Result.Contributed}" />
+                            <TextBlock
+                                Style="{StaticResource MetricValue}"
+                                Text="{Binding TotalContributed}"
+                                Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </Border>
+                    <Border Margin="0,0,12,0" Style="{StaticResource MetricCard}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Calc.Latte.Result.FV}" />
+                            <TextBlock
+                                Style="{StaticResource MetricValue}"
+                                Text="{Binding FutureValue}"
+                                Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource MetricCard}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Calc.Latte.Result.Gain}" />
+                            <TextBlock
+                                Style="{StaticResource MetricValue}"
+                                Text="{Binding Gain}"
+                                Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
