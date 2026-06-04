@@ -100,3 +100,30 @@ public class RentVsBuyCalcViewModelTests
         Assert.NotEmpty(vm.WinnerLabel);
     }
 }
+
+public class RuleOf72CalcViewModelTests
+{
+    private static RuleOf72CalcViewModel Create() => new(new RuleOf72Calculator());
+
+    [Fact] // WHY: 壞輸入不應產生結果，且必須有錯誤訊息
+    public void BadInput_NonNumericRate_SetsError()
+    {
+        var vm = Create();
+        vm.AnnualRatePercent = "abc";
+        vm.CalculateCommand.Execute(null);
+        Assert.NotNull(vm.ErrorMessage);
+        Assert.False(vm.HasResult);
+    }
+
+    [Fact] // WHY: 給 6% 年報酬率，翻倍年數應為 12 年（72/6）
+    public void ValidRate_ReturnsCorrectDoublingYears()
+    {
+        var vm = Create();
+        vm.AnnualRatePercent = "6";
+        vm.CalculateCommand.Execute(null);
+        Assert.True(vm.HasResult);
+        Assert.Null(vm.ErrorMessage);
+        // DoublingYears = 72/6 = 12
+        Assert.Contains("12", vm.DoublingYears);
+    }
+}
