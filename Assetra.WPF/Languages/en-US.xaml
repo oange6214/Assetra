@@ -1960,6 +1960,7 @@
     <!-- v0.25 FIRE Calculator -->
     <sys:String x:Key="Fire.Title">FIRE</sys:String>
     <sys:String x:Key="Fire.Input.NetWorth">Current Net Worth</sys:String>
+    <sys:String x:Key="Fire.Input.NetWorth.Refresh">Re-fetch current net worth</sys:String>
     <sys:String x:Key="Fire.Input.Group">Linked portfolio group</sys:String>
     <sys:String x:Key="Fire.Input.Group.Hint">Picking a group auto-fills the current net worth from that bucket's running total (you can override). The saved FIRE goal remembers this link.</sys:String>
     <sys:String x:Key="Fire.Input.AnnualExpenses">Annual Expenses</sys:String>

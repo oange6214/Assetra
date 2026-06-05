@@ -128,7 +128,22 @@
                     Columns="5"
                     Style="{StaticResource PageFormGrid}">
                     <StackPanel Style="{StaticResource FormField}">
-                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Fire.Input.NetWorth}" />
+                        <DockPanel LastChildFill="False">
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Style="{StaticResource FormFieldLabel}"
+                                Text="{DynamicResource Fire.Input.NetWorth}" />
+                            <Button
+                                DockPanel.Dock="Right"
+                                Command="{Binding RefreshCurrentNetWorthCommand}"
+                                Style="{StaticResource AppIconButton}"
+                                ToolTip="{DynamicResource Fire.Input.NetWorth.Refresh}">
+                                <ds:AppIcon
+                                    FontSize="13"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Symbol="ArrowSync24" />
+                            </Button>
+                        </DockPanel>
                         <TextBox
                             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                             Style="{StaticResource AppTextBox}"

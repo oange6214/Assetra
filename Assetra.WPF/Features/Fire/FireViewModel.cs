@@ -412,6 +412,40 @@ public sealed partial class FireViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Manual re-fetch of the live current net worth into the input field. Unlike the
+    /// one-time auto-load (<see cref="LoadCurrentNetWorthAsync"/>), this is an explicit user
+    /// action, so it bypasses the load/edit guards and overwrites whatever is in the field.
+    /// Re-pulls from the active source: the selected portfolio group, else the app-wide net
+    /// worth provider.
+    /// </summary>
+    [RelayCommand]
+    private async Task RefreshCurrentNetWorthAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            if (SelectedGroup is not null)
+            {
+                // ApplyGroupNetWorthAsync already writes CurrentNetWorth via
+                // SetCurrentNetWorthFromSource, so this fully handles the group case.
+                await ApplyGroupNetWorthAsync(SelectedGroup).ConfigureAwait(true);
+            }
+            else if (_appNetWorthProvider is not null)
+            {
+                var netWorth = await _appNetWorthProvider.GetCurrentNetWorthAsync(ct).ConfigureAwait(true);
+                SetCurrentNetWorthFromSource(netWorth);
+                _hasLoadedAppNetWorth = true;
+            }
+
+            // The value now reflects the live source again, not a manual edit.
+            _isCurrentNetWorthUserEdited = false;
+        }
+        catch
+        {
+            // Silent — FIRE stays usable with manual input. Mirrors LoadCurrentNetWorthAsync.
+        }
+    }
+
     [RelayCommand]
     public async Task LoadScenariosAsync(CancellationToken ct = default)
     {

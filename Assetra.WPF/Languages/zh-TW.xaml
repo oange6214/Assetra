@@ -1965,6 +1965,7 @@
     <!--  v0.25 FIRE 計算機  -->
     <sys:String x:Key="Fire.Title">FIRE</sys:String>
     <sys:String x:Key="Fire.Input.NetWorth">目前淨資產</sys:String>
+    <sys:String x:Key="Fire.Input.NetWorth.Refresh">重新抓取目前淨資產</sys:String>
     <sys:String x:Key="Fire.Input.Group">選擇投資組合群組</sys:String>
     <sys:String x:Key="Fire.Input.Group.Hint">選擇群組後會自動把該 bucket 的累計淨值填入「目前淨資產」，可直接覆寫。儲存為 Goal 時會記住此群組連結。</sys:String>
     <sys:String x:Key="Fire.Input.AnnualExpenses">年支出</sys:String>
