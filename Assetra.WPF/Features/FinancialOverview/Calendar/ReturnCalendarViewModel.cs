@@ -413,20 +413,18 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
         var downColor = GetSkColor("AppDown", "#22C55E");  // 綠（跌）
         var labelColor = GetSkColor("AppTextSecondary", "#787B86");
 
-        // 一個 day 一格；正值放 ups[i]，負值放 downs[i]，其餘為 null。
-        // 用兩個 ColumnSeries 著色（紅漲綠跌），對齊台灣 broker app 慣例。
+        // 一個 day 一格；正值放 ups[i]，負值放 downs[i]，另一邊填 0。
+        // 用兩個 StackedColumnSeries 著色（紅漲綠跌），對齊台灣 broker app 慣例。
+        // 堆疊系列同一 category 只畫一根置中、滿格的柱；每日 up/down 只有一邊非 0，
+        // 所以可見柱顏色正確且不會被另一系列往左右錯位（避免 LiveCharts 自動 dodge）。
         var ups = new List<double?>(daysInMonth);
         var downs = new List<double?>(daysInMonth);
         for (var day = 1; day <= daysInMonth; day++)
         {
             var cell = _cells.FirstOrDefault(c => c.IsCurrentMonth && c.Day == day);
             var v = cell?.Delta is decimal d ? (double)d : 0d;
-            if (v > 0)
-            { ups.Add(v); downs.Add(null); }
-            else if (v < 0)
-            { ups.Add(null); downs.Add(v); }
-            else
-            { ups.Add(null); downs.Add(null); }
+            ups.Add(v > 0 ? v : 0d);
+            downs.Add(v < 0 ? v : 0d);
         }
 
         var tooltipFormatter = (LiveChartsCore.Kernel.ChartPoint chartPoint) =>
@@ -437,7 +435,7 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
 
         MonthlyBarSeries =
         [
-            new ColumnSeries<double?>
+            new StackedColumnSeries<double?>
             {
                 Values = ups,
                 Padding = 1,
@@ -447,7 +445,7 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
                 Stroke = null,
                 YToolTipLabelFormatter = tooltipFormatter,
             },
-            new ColumnSeries<double?>
+            new StackedColumnSeries<double?>
             {
                 Values = downs,
                 Padding = 1,
@@ -469,6 +467,12 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
                 LabelsPaint = new SolidColorPaint(labelColor),
                 SeparatorsPaint = null,
                 TicksPaint = null,
+                // 釘住整月範圍：series 以 0-based index 對應 day 1..daysInMonth
+                //（index 0 = day 1）。category 柱置中於整數位置，各佔 ±0.5，
+                // 故 [-0.5, daysInMonth-0.5] 剛好涵蓋第一天到最後一天。否則 LiveCharts
+                // 會自動縮放到有資料的範圍（稀疏月份只顯示前幾天）。
+                MinLimit = -0.5,
+                MaxLimit = daysInMonth - 0.5,
             }
         ];
 
