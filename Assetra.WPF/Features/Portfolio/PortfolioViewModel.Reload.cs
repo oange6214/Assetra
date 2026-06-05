@@ -26,9 +26,6 @@ public partial class PortfolioViewModel
     private void OnAccountChanged(object? sender, EventArgs e)
         => _ = ReloadAfterAccountChangedAsync();
 
-    private void OnLoanChanged(object? sender, EventArgs e)
-        => _ = ReloadAfterLoanChangedAsync();
-
     /// <summary>
     /// Called by <see cref="SellPanelViewModel.SellCompleted"/> to refresh all
     /// position, trade, balance, and totals state after a successful sell.
@@ -49,7 +46,7 @@ public partial class PortfolioViewModel
     {
         await LoadPositionsAsync();
         await LoadTradesAsync();
-        await ReloadAccountBalancesAsync();
+        await ReloadAccountBalancesAndSelectedLiabilityScheduleAsync();
         RebuildTotals();
     }
 
@@ -61,7 +58,7 @@ public partial class PortfolioViewModel
     {
         await LoadPositionsAsync();
         await LoadTradesAsync();
-        await ReloadAccountBalancesAsync();
+        await ReloadAccountBalancesAndSelectedLiabilityScheduleAsync();
         RebuildTotals();
     }
 
@@ -77,17 +74,6 @@ public partial class PortfolioViewModel
         // 但 LoadCashAccountsAsync / RebuildTotals 不會觸發 TotalMarketValue 通知。
         // 主動 raise TotalCash PropertyChanged（即使數值未變）讓 FinancialOverview 重新載入。
         OnPropertyChanged(nameof(TotalCash));
-    }
-
-    /// <summary>
-    /// Called by <see cref="SubViewModels.LoanDialogViewModel.LoanChanged"/> to refresh
-    /// trades, account balances, and totals after a successful loan payment.
-    /// </summary>
-    private async Task ReloadAfterLoanChangedAsync()
-    {
-        await LoadTradesAsync();
-        await ReloadAccountBalancesAsync();
-        RebuildTotals();
     }
 
     /// <summary>
@@ -233,6 +219,30 @@ public partial class PortfolioViewModel
         ApplyCashAccounts(loaded);
         ApplyLiabilities(loaded);
         // Caller must invoke RebuildTotals() after this to keep RecalcFinancialSummary up-to-date.
+    }
+
+    private async Task ReloadAccountBalancesAndSelectedLiabilityScheduleAsync()
+    {
+        var selectedAssetId = SelectedLiabilityRow?.AssetId;
+        var selectedLabel = SelectedLiabilityRow?.Label;
+
+        await ReloadAccountBalancesAsync();
+
+        if (selectedAssetId is null && string.IsNullOrWhiteSpace(selectedLabel))
+            return;
+
+        var refreshed = selectedAssetId.HasValue
+            ? Liabilities.FirstOrDefault(l => l.AssetId == selectedAssetId.Value)
+            : null;
+        refreshed ??= Liabilities.FirstOrDefault(l =>
+            string.Equals(l.Label, selectedLabel, StringComparison.Ordinal));
+
+        if (refreshed is null)
+            return;
+
+        SelectedLiabilityRow = refreshed;
+        if (refreshed.IsLoan)
+            await Loan.LoadLoanScheduleAsync(refreshed);
     }
 
     /// <summary>

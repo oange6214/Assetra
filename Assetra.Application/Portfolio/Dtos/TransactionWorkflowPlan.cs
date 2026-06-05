@@ -68,7 +68,8 @@ public sealed record LoanTransactionRequest(
     decimal? AmortAnnualRate = null,
     int? AmortTermMonths = null,
     DateOnly? FirstPaymentDate = null,
-    string? Subtype = null);
+    string? Subtype = null,
+    Guid? LoanScheduleEntryId = null);
 
 public sealed record TransferTransactionRequest(
     Guid SourceCashAccountId,

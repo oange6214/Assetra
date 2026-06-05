@@ -434,11 +434,12 @@
     <sys:String x:Key="Portfolio.Loan.Status">狀態</sys:String>
     <sys:String x:Key="Portfolio.Loan.Paid">已繳</sys:String>
     <sys:String x:Key="Portfolio.Loan.Unpaid">未繳</sys:String>
-    <sys:String x:Key="Portfolio.Loan.ConfirmPayment">確認繳款</sys:String>
+    <sys:String x:Key="Portfolio.Loan.ConfirmPayment">建立還款交易</sys:String>
     <sys:String x:Key="Portfolio.Loan.PaymentPending">待繳款</sys:String>
     <sys:String x:Key="Portfolio.Loan.PaymentConfirmed">已繳清</sys:String>
     <sys:String x:Key="Portfolio.Loan.PaidPrincipal">已還本金</sys:String>
     <sys:String x:Key="Portfolio.Loan.PaidInterest">已還利息</sys:String>
+    <sys:String x:Key="Portfolio.Loan.PaymentAmount">扣款金額</sys:String>
     <sys:String x:Key="Portfolio.Loan.RemainingBalance">剩餘本金</sys:String>
     <sys:String x:Key="Portfolio.Loan.NoSchedule">無攤還表資料</sys:String>
     <sys:String x:Key="Portfolio.Loan.Rate">年利率</sys:String>
@@ -448,6 +449,7 @@
     <sys:String x:Key="Portfolio.Detail.TotalDeposits">總存入</sys:String>
     <sys:String x:Key="Portfolio.Detail.TotalWithdrawals">總提款</sys:String>
     <sys:String x:Key="Portfolio.Detail.TotalBorrows">總借款</sys:String>
+    <sys:String x:Key="Portfolio.Detail.PrincipalBalance">本金餘額</sys:String>
     <sys:String x:Key="Portfolio.Detail.RemainingDebt">剩餘債務</sys:String>
     <sys:String x:Key="Common.MarketValue">市值</sys:String>
     <sys:String x:Key="Common.TotalPnL">淨損益</sys:String>

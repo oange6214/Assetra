@@ -36,4 +36,32 @@ public sealed class TradeDeletionWorkflowServiceTests
         tradeRepo.Verify(r => r.RemoveAsync(It.IsAny<Guid>()), Times.Never);
         portfolioRepo.Verify(r => r.RemoveAsync(It.IsAny<Guid>()), Times.Never);
     }
+
+    [Fact]
+    public async Task DeleteAsync_LoanRepay_ClearsLinkedSchedulePayment()
+    {
+        var tradeRepo = new Mock<ITradeRepository>();
+        var portfolioRepo = new Mock<IPortfolioRepository>();
+        var positionQuery = new Mock<IPositionQueryService>();
+        var scheduleRepo = new Mock<ILoanScheduleRepository>();
+        var tradeId = Guid.NewGuid();
+
+        var service = new TradeDeletionWorkflowService(
+            tradeRepo.Object,
+            portfolioRepo.Object,
+            positionQuery.Object,
+            loanScheduleRepository: scheduleRepo.Object);
+
+        var result = await service.DeleteAsync(new TradeDeletionRequest(
+            tradeId,
+            TradeType.LoanRepay,
+            string.Empty,
+            1,
+            PortfolioEntryId: null));
+
+        Assert.True(result.Success);
+        scheduleRepo.Verify(r => r.ClearPaidByTradeIdAsync(tradeId), Times.Once);
+        tradeRepo.Verify(r => r.RemoveChildrenAsync(tradeId), Times.Once);
+        tradeRepo.Verify(r => r.RemoveAsync(tradeId), Times.Once);
+    }
 }

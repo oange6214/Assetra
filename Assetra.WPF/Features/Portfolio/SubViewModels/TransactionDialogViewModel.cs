@@ -363,6 +363,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     [ObservableProperty] private string _revisionReplacePromptError = string.Empty;
     [ObservableProperty] private bool _isDeleteConfirmOpen;
     [ObservableProperty] private string _deleteTargetName = string.Empty;
+    [ObservableProperty] private Guid? _txLoanScheduleEntryId;
     private Guid? _revisionSourceTradeId;
     private bool _preserveRevisionSourceOnClose;
 
@@ -2028,6 +2029,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         IsAssetContextLocked = false;
         var state = _tradeDialogController.CreateOpenState(_getDefaultCashAccount());
         EditingTradeId = null;
+        TxLoanScheduleEntryId = null;
         TxType = "buy";
         TxDate = state.TxDate;
         TxError = string.Empty;
@@ -2193,6 +2195,19 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             : txType;
     }
 
+    internal void OpenTxDialogForLoanSchedule(LiabilityRowViewModel row, LoanScheduleRowViewModel entry)
+    {
+        OpenTxDialogForLiability(row, "loanRepay");
+
+        TxLoanScheduleEntryId = entry.Id;
+        TxDate = entry.DueDate.ToDateTime(TimeOnly.MinValue);
+        Loan.Principal = entry.PrincipalAmount.ToString("F0");
+        Loan.InterestPaid = entry.InterestAmount > 0
+            ? entry.InterestAmount.ToString("F0")
+            : string.Empty;
+        TxUseCashAccount = true;
+    }
+
     /// <summary>
     /// Portfolio-Groups-Refactor P3 — 確保 group catalog 已載入，並依情境設定
     /// <see cref="SelectedPortfolioGroup"/>。restoreFromEditTradeId 指定時試圖
@@ -2227,6 +2242,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         IsRevisionMode = false;
         IsAssetContextLocked = false;
+        TxLoanScheduleEntryId = null;
         // P2.7 — 編輯模式不需要殘留的搜尋字串干擾 picker。
         AssetSearchText = string.Empty;
         // 資產清單可能在 dialog 上次關閉後有變動 — 進編輯模式前也重建 cache 一次，

@@ -928,7 +928,7 @@
                                             </StackPanel>
                                         </Border>
 
-                                        <!--  Right: 剩餘債務 (current outstanding balance + paid progress bar)  -->
+                                        <!--  Right: 貸款顯示本金餘額；信用卡顯示剩餘債務  -->
                                         <Border
                                             Grid.Column="2"
                                             Padding="14,12"
@@ -939,8 +939,18 @@
                                             <StackPanel>
                                                 <TextBlock
                                                     FontSize="{StaticResource Font.Size.Xs}"
-                                                    Foreground="{DynamicResource AppTextSecondary}"
-                                                    Text="{DynamicResource Portfolio.Detail.RemainingDebt}" />
+                                                    Foreground="{DynamicResource AppTextSecondary}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Detail.RemainingDebt}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SelectedLiabilityRow.IsLoan, FallbackValue=False}" Value="True">
+                                                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Detail.PrincipalBalance}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                                 <TextBlock
                                                     Margin="0,6,0,10"
                                                     FontFamily="{StaticResource Font.Family.Base}"
@@ -1317,7 +1327,7 @@
                                                             <TextBlock
                                                                 FontSize="{StaticResource Font.Size.Xs}"
                                                                 Foreground="{DynamicResource AppTextSecondary}"
-                                                                Text="{DynamicResource Portfolio.TradeHistory.GrossAmount}" />
+                                                                Text="{DynamicResource Portfolio.Loan.PaymentAmount}" />
                                                             <TextBlock
                                                                 Margin="0,2,0,0"
                                                                 FontFamily="{StaticResource Font.Family.Base}"

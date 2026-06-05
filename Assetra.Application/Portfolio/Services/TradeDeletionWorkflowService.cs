@@ -11,6 +11,7 @@ public sealed class TradeDeletionWorkflowService : ITradeDeletionWorkflowService
     private readonly ITradeRepository _tradeRepository;
     private readonly IPortfolioRepository _portfolioRepository;
     private readonly IPositionQueryService _positionQueryService;
+    private readonly ILoanScheduleRepository? _loanScheduleRepository;
 
     /// <summary>
     /// Optional. When supplied, every successful deletion writes a JSON snapshot
@@ -23,12 +24,14 @@ public sealed class TradeDeletionWorkflowService : ITradeDeletionWorkflowService
         ITradeRepository tradeRepository,
         IPortfolioRepository portfolioRepository,
         IPositionQueryService positionQueryService,
-        ITradeAuditRepository? auditRepository = null)
+        ITradeAuditRepository? auditRepository = null,
+        ILoanScheduleRepository? loanScheduleRepository = null)
     {
         _tradeRepository = tradeRepository;
         _portfolioRepository = portfolioRepository;
         _positionQueryService = positionQueryService;
         _auditRepository = auditRepository;
+        _loanScheduleRepository = loanScheduleRepository;
     }
 
     public async Task<TradeDeletionResult> DeleteAsync(
@@ -47,8 +50,17 @@ public sealed class TradeDeletionWorkflowService : ITradeDeletionWorkflowService
         await ApplyTradeRemovalOnPositionAsync(request, ct).ConfigureAwait(false);
         await _tradeRepository.RemoveChildrenAsync(request.TradeId).ConfigureAwait(false);
         await _tradeRepository.RemoveAsync(request.TradeId).ConfigureAwait(false);
+        await ClearLinkedLoanSchedulePaymentAsync(request).ConfigureAwait(false);
 
         return new TradeDeletionResult(Success: true);
+    }
+
+    private async Task ClearLinkedLoanSchedulePaymentAsync(TradeDeletionRequest request)
+    {
+        if (request.TradeType != TradeType.LoanRepay || _loanScheduleRepository is null)
+            return;
+
+        await _loanScheduleRepository.ClearPaidByTradeIdAsync(request.TradeId).ConfigureAwait(false);
     }
 
     private async Task TryWriteAuditAsync(Guid tradeId, TradeDeletionReason reason, CancellationToken ct)

@@ -62,6 +62,7 @@ internal sealed class PortfolioViewModelFactory
             CreditCardTransaction: sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
             LoanPayment: sp.GetRequiredService<ILoanPaymentWorkflowService>(),
             LoanMutation: sp.GetRequiredService<ILoanMutationWorkflowService>(),
+            AddAsset: sp.GetRequiredService<IAddAssetWorkflowService>(),
             CategoryRepository: sp.GetRequiredService<ICategoryRepository>(),
             AutoCategorizationRuleRepository: sp.GetRequiredService<IAutoCategorizationRuleRepository>(),
             AddAssetDialog: new AddAssetDialogViewModel(

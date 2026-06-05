@@ -117,4 +117,39 @@ public sealed class LoanMutationWorkflowServiceTests
         loanRepo.Verify(r => r.DeleteByAssetAsync(addedAsset!.Id), Times.Once);
         assetRepo.Verify(r => r.DeleteItemAsync(addedAsset!.Id), Times.Once);
     }
+
+    [Fact]
+    public async Task RecordAsync_LoanRepayWithScheduleEntryId_MarksSchedulePaidWithNewTrade()
+    {
+        var assetRepo = new Mock<IAssetRepository>();
+        var loanRepo = new Mock<ILoanScheduleRepository>();
+        var txService = new Mock<ITransactionService>();
+        Trade? recordedTrade = null;
+        var scheduleEntryId = Guid.NewGuid();
+        var tradeDate = new DateTime(2026, 5, 30, 8, 0, 0, DateTimeKind.Utc);
+
+        txService.Setup(r => r.RecordAsync(It.IsAny<Trade>()))
+            .Callback<Trade>(trade => recordedTrade = trade)
+            .Returns(Task.CompletedTask);
+
+        var service = new LoanMutationWorkflowService(
+            assetRepo.Object,
+            loanRepo.Object,
+            txService.Object);
+
+        await service.RecordAsync(new LoanTransactionRequest(
+            TradeType.LoanRepay,
+            25_978m,
+            tradeDate,
+            "台新 7y A",
+            Guid.NewGuid(),
+            null,
+            0m,
+            Principal: 22_833m,
+            InterestPaid: 3_145m,
+            LoanScheduleEntryId: scheduleEntryId));
+
+        Assert.NotNull(recordedTrade);
+        loanRepo.Verify(r => r.MarkPaidAsync(scheduleEntryId, tradeDate, recordedTrade!.Id), Times.Once);
+    }
 }

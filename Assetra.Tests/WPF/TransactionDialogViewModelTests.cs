@@ -266,6 +266,40 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
+    public void OpenTxDialogForLoanSchedule_PrefillsScheduleEntryAndLocksLoanAsset()
+    {
+        var liability = MakeLoanLiability();
+        var scheduleEntry = new LoanScheduleRowViewModel(new LoanScheduleEntry(
+            Guid.NewGuid(),
+            liability.AssetId!.Value,
+            23,
+            new DateOnly(2026, 5, 30),
+            25_978m,
+            22_833m,
+            3_145m,
+            1_000_000m,
+            IsPaid: false,
+            PaidAt: null,
+            TradeId: null));
+        liability.ReplaceSchedule([scheduleEntry]);
+        liability.IsScheduleLoaded = true;
+        var vm = CreateVm(liabilities: new ObservableCollection<LiabilityRowViewModel> { liability });
+
+        vm.OpenTxDialogForLoanSchedule(liability, scheduleEntry);
+
+        Assert.True(vm.IsTxDialogOpen);
+        Assert.True(vm.IsAssetContextLocked);
+        Assert.False(vm.ShowAssetSelector);
+        Assert.Equal("loanRepay", vm.TxType);
+        Assert.Equal(liability.AssetId, vm.SelectedAsset?.Id);
+        Assert.Equal(liability.Label, vm.Loan.Label);
+        Assert.Equal("22833", vm.Loan.Principal);
+        Assert.Equal("3145", vm.Loan.InterestPaid);
+        Assert.Equal(new DateTime(2026, 5, 30), vm.TxDate);
+        Assert.Equal(scheduleEntry.Id, vm.TxLoanScheduleEntryId);
+    }
+
+    [Fact]
     public void OpenTxDialogForLiability_CreditCardPaymentPreselectsCardAndLocksAssetSelector()
     {
         var liability = MakeCreditCardLiability();

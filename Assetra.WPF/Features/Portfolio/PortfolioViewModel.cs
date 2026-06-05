@@ -300,7 +300,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 RebuildRealizedPnl();
                 TradeFilter.RefreshTradesView();
                 NotifyTradeDependentDetailPropertiesChanged();
-                await ReloadAccountBalancesAsync();
+                await ReloadAccountBalancesAndSelectedLiabilityScheduleAsync();
                 RebuildTotals();
             }
             catch (Exception ex)
@@ -443,7 +443,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         var creditCardTransactionWorkflow = services.CreditCardTransaction ?? new NullCreditCardTransactionWorkflowService();
         var sellWorkflow = services.Sell ?? new NullSellWorkflowService();
         var tradeMetadataWorkflow = services.TradeMetadata ?? new NullTradeMetadataWorkflowService();
-        var loanPaymentWorkflow = services.LoanPayment ?? new NullLoanPaymentWorkflowService();
         var loanScheduleService = services.LoanSchedule;
 
         // Build the AddAssetDialog sub-VM. Tx-dialog field delegates are wired below after
@@ -543,14 +542,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         // Build the Loan sub-VM with delegates into parent state.
         Loan = services.Loan ?? new SubViewModels.LoanDialogViewModel(
             new SubViewModels.LoanDialogDependencies(
-                LoanPayment: loanPaymentWorkflow,
                 LoanSchedule: loanScheduleService,
                 GetSelectedLiabilityRow: () => SelectedLiabilityRow,
-                GetTxCashAccountId: () => Transaction.TxCashAccount?.Id,
-                LoadTradesAsync: LoadTradesAsync,
-                ReloadAccountBalancesAsync: ReloadAccountBalancesAsync,
-                RebuildTotals: RebuildTotals));
-        Loan.LoanChanged += OnLoanChanged;
+                OpenLoanRepaymentTrade: (row, entry) => Transaction.OpenTxDialogForLoanSchedule(row, entry)));
 
         // Edit-liability dialog: built lazily here so it can share the same
         // workflow service + snackbar without an extra DI override.
@@ -651,7 +645,11 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 : null),
             HistoryQuery = services.HistoryQuery ?? new PortfolioHistoryQueryService(repositories.Snapshot),
             TradeDeletionWorkflow = services.TradeDeletionWorkflow ?? (repositories.Trade is not null && positionQuery is not null
-                ? new TradeDeletionWorkflowService(repositories.Trade, repositories.Portfolio, positionQuery)
+                ? new TradeDeletionWorkflowService(
+                    repositories.Trade,
+                    repositories.Portfolio,
+                    positionQuery,
+                    loanScheduleRepository: repositories.LoanSchedule)
                 : null),
             PositionDeletionWorkflow = services.PositionDeletionWorkflow ?? (repositories.Trade is not null
                 ? new PositionDeletionWorkflowService(repositories.Trade, repositories.Portfolio)
@@ -1429,7 +1427,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         Transaction.TransactionCompleted -= OnTransactionCompleted;
         Transaction.TradeDeleted -= OnTradeDeleted;
         Account.AccountChanged -= OnAccountChanged;
-        Loan.LoanChanged -= OnLoanChanged;
         TradeFilter.Dispose();
         _disposables.Dispose();
     }

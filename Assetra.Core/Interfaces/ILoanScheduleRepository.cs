@@ -7,5 +7,8 @@ public interface ILoanScheduleRepository
     Task<IReadOnlyList<LoanScheduleEntry>> GetByAssetAsync(Guid assetId);
     Task BulkInsertAsync(IEnumerable<LoanScheduleEntry> entries);
     Task MarkPaidAsync(Guid id, DateTime paidAt, Guid tradeId);
+    Task ClearPaidByTradeIdAsync(Guid tradeId);
+    Task ClearPaidWithoutActiveTradeAsync(Guid assetId);
+    Task ReconcilePaidFromActiveRepaymentsAsync(Guid assetId);
     Task DeleteByAssetAsync(Guid assetId);
 }

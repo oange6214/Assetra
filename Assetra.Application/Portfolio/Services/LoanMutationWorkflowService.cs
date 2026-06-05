@@ -102,12 +102,19 @@ public sealed class LoanMutationWorkflowService : ILoanMutationWorkflowService
         var writtenTrades = new List<Trade>();
         var assetAdded = false;
         var scheduleTouched = false;
+        Guid? paidScheduleTradeId = null;
 
         try
         {
             ct.ThrowIfCancellationRequested();
             await _transactionService.RecordAsync(mainTrade).ConfigureAwait(false);
             writtenTrades.Add(mainTrade);
+
+            if (request.Type == TradeType.LoanRepay && request.LoanScheduleEntryId is { } scheduleEntryId)
+            {
+                await _loanScheduleRepository.MarkPaidAsync(scheduleEntryId, request.TradeDate, mainTrade.Id).ConfigureAwait(false);
+                paidScheduleTradeId = mainTrade.Id;
+            }
 
             if (feeTrade is not null)
             {
@@ -132,7 +139,12 @@ public sealed class LoanMutationWorkflowService : ILoanMutationWorkflowService
         {
             try
             {
-                await RollBackLoanArtifactsAsync(liabilityAsset, assetAdded, scheduleTouched, writtenTrades).ConfigureAwait(false);
+                await RollBackLoanArtifactsAsync(
+                    liabilityAsset,
+                    assetAdded,
+                    scheduleTouched,
+                    writtenTrades,
+                    paidScheduleTradeId).ConfigureAwait(false);
             }
             catch (Exception cleanupEx)
             {
@@ -151,9 +163,16 @@ public sealed class LoanMutationWorkflowService : ILoanMutationWorkflowService
         AssetItem? liabilityAsset,
         bool assetAdded,
         bool scheduleTouched,
-        IReadOnlyList<Trade> writtenTrades)
+        IReadOnlyList<Trade> writtenTrades,
+        Guid? paidScheduleTradeId)
     {
         List<Exception>? cleanupErrors = null;
+
+        if (paidScheduleTradeId.HasValue)
+        {
+            AddCleanupError(await TryCleanupAsync(
+                () => _loanScheduleRepository.ClearPaidByTradeIdAsync(paidScheduleTradeId.Value)).ConfigureAwait(false));
+        }
 
         if (liabilityAsset is not null && scheduleTouched)
         {

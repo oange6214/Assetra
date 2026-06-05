@@ -436,12 +436,13 @@
     <sys:String x:Key="Portfolio.Loan.Status">Status</sys:String>
     <sys:String x:Key="Portfolio.Loan.Paid">Paid</sys:String>
     <sys:String x:Key="Portfolio.Loan.Unpaid">Unpaid</sys:String>
-    <sys:String x:Key="Portfolio.Loan.ConfirmPayment">Confirm Payment</sys:String>
+    <sys:String x:Key="Portfolio.Loan.ConfirmPayment">Create Repayment Trade</sys:String>
     <sys:String x:Key="Portfolio.Loan.PaymentPending">Pending</sys:String>
     <sys:String x:Key="Portfolio.Loan.PaymentConfirmed">Paid</sys:String>
     <sys:String x:Key="Portfolio.Loan.PaidPrincipal">Principal Paid</sys:String>
     <sys:String x:Key="Portfolio.Loan.PaidInterest">Interest Paid</sys:String>
-    <sys:String x:Key="Portfolio.Loan.RemainingBalance">Remaining Balance</sys:String>
+    <sys:String x:Key="Portfolio.Loan.PaymentAmount">Payment amount</sys:String>
+    <sys:String x:Key="Portfolio.Loan.RemainingBalance">Remaining principal</sys:String>
     <sys:String x:Key="Portfolio.Loan.NoSchedule">No schedule available</sys:String>
     <sys:String x:Key="Portfolio.Loan.Rate">Annual Rate</sys:String>
     <sys:String x:Key="Portfolio.Loan.Term">Term</sys:String>
@@ -450,6 +451,7 @@
     <sys:String x:Key="Portfolio.Detail.TotalDeposits">Total deposits</sys:String>
     <sys:String x:Key="Portfolio.Detail.TotalWithdrawals">Total withdrawals</sys:String>
     <sys:String x:Key="Portfolio.Detail.TotalBorrows">Total borrowed</sys:String>
+    <sys:String x:Key="Portfolio.Detail.PrincipalBalance">Principal balance</sys:String>
     <sys:String x:Key="Portfolio.Detail.RemainingDebt">Remaining debt</sys:String>
     <sys:String x:Key="Common.MarketValue">Market value</sys:String>
     <sys:String x:Key="Common.TotalPnL">Net P&amp;L</sys:String>

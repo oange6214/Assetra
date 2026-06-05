@@ -77,7 +77,8 @@ public partial class TransactionDialogViewModel
             interestPaid,
             amortAnnualRate,
             amortTermMonths,
-            amortAnnualRate.HasValue && amortTermMonths.HasValue ? DateOnly.FromDateTime(Loan.StartDate) : null));
+            amortAnnualRate.HasValue && amortTermMonths.HasValue ? DateOnly.FromDateTime(Loan.StartDate) : null,
+            LoanScheduleEntryId: type == TradeType.LoanRepay ? TxLoanScheduleEntryId : null));
 
         await AfterTxSuccessAsync(
             reloadLiabilities: amortAnnualRate.HasValue,
@@ -89,6 +90,9 @@ public partial class TransactionDialogViewModel
     /// from the next unpaid amortization entry of the selected loan label.</summary>
     private async Task AutoFillLoanRepayAsync(string label)
     {
+        if (TxLoanScheduleEntryId.HasValue)
+            return;
+
         if (string.IsNullOrWhiteSpace(label))
             return;
 

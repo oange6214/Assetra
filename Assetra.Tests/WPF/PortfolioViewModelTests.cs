@@ -2,6 +2,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Data;
+using Assetra.Application.Loans.Services;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Application.Portfolio.Services;
@@ -1334,6 +1335,115 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task RemoveTrade_LoanRepay_ReloadsOpenLoanSchedule()
+    {
+        // Regression: the open liability detail panel must treat trades as the source of
+        // truth. Deleting a repayment trade should immediately unlock the linked schedule row.
+        var loanAssetId = Guid.NewGuid();
+        const string loanLabel = "台新 7y A";
+        var repayTradeId = Guid.NewGuid();
+        var scheduleEntryId = Guid.NewGuid();
+        var linkedTradeStillExists = true;
+
+        var portfolioRepo = new Mock<IPortfolioRepository>();
+        portfolioRepo.Setup(r => r.GetEntriesAsync()).ReturnsAsync([]);
+
+        var assetRepo = new FakeAssetRepo();
+        assetRepo.Store.Add(new AssetItem(
+            loanAssetId,
+            loanLabel,
+            FinancialType.Liability,
+            GroupId: null,
+            Currency: "TWD",
+            CreatedDate: new DateOnly(2025, 1, 1),
+            LoanAnnualRate: 0.025m,
+            LoanTermMonths: 84,
+            LoanStartDate: new DateOnly(2025, 1, 1)));
+
+        var tradeRepo = new FakeTradeRepo();
+        await tradeRepo.AddAsync(new Trade(
+            Id: Guid.NewGuid(), Symbol: loanLabel, Exchange: string.Empty,
+            Name: loanLabel, Type: TradeType.LoanBorrow,
+            TradeDate: new DateTime(2025, 1, 1),
+            Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
+            CashAmount: 2_000_000m, LoanLabel: loanLabel, LiabilityAssetId: loanAssetId));
+        await tradeRepo.AddAsync(new Trade(
+            Id: repayTradeId, Symbol: loanLabel, Exchange: string.Empty,
+            Name: loanLabel, Type: TradeType.LoanRepay,
+            TradeDate: new DateTime(2026, 5, 30),
+            Price: 0, Quantity: 1, RealizedPnl: null, RealizedPnlPct: null,
+            CashAmount: 25_978m, LoanLabel: loanLabel, LiabilityAssetId: loanAssetId,
+            Principal: 22_833m, InterestPaid: 3_145m));
+
+        var scheduleRepo = new Mock<ILoanScheduleRepository>();
+        scheduleRepo.Setup(r => r.ClearPaidWithoutActiveTradeAsync(loanAssetId))
+            .Returns(Task.CompletedTask);
+        scheduleRepo.Setup(r => r.ReconcilePaidFromActiveRepaymentsAsync(loanAssetId))
+            .Returns(Task.CompletedTask);
+        scheduleRepo.Setup(r => r.ClearPaidByTradeIdAsync(It.IsAny<Guid>()))
+            .Callback<Guid>(id =>
+            {
+                if (id == repayTradeId)
+                    linkedTradeStillExists = false;
+            })
+            .Returns(Task.CompletedTask);
+        scheduleRepo.Setup(r => r.GetByAssetAsync(loanAssetId))
+            .ReturnsAsync(() =>
+            {
+                var paid = linkedTradeStillExists;
+                return
+                [
+                    new LoanScheduleEntry(
+                        scheduleEntryId, loanAssetId, 23, new DateOnly(2026, 5, 30),
+                        25_978m, 22_833m, 3_145m, 1_900_000m,
+                        paid, paid ? new DateTime(2026, 5, 30) : null,
+                        paid ? repayTradeId : null)
+                ];
+            });
+
+        var search = new Mock<IStockSearchService>();
+        var (snapshotSvc, snapshotRepo) = SnapshotStubs();
+        var (logRepo, backfill) = BackfillStubs(snapshotRepo);
+        var txService = new TransactionService(tradeRepo);
+        var balanceQuery = new BalanceQueryService(tradeRepo);
+        var positionQuery = PositionQueryMock(new Dictionary<Guid, PositionSnapshot>());
+
+        var vm = new PortfolioViewModel(
+            new PortfolioRepositories(
+                portfolioRepo.Object, snapshotRepo.Object, logRepo.Object,
+                Trade: tradeRepo, Asset: assetRepo, LoanSchedule: scheduleRepo.Object),
+            new PortfolioServices(
+                SilentStockService().Object,
+                search.Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                TransactionWorkflow: new TransactionWorkflowService(txService),
+                BalanceQuery: balanceQuery,
+                PositionQuery: positionQuery.Object,
+                LoanSchedule: new LoanScheduleService(scheduleRepo.Object),
+                TradeDeletionWorkflow: new TradeDeletionWorkflowService(
+                    tradeRepo,
+                    portfolioRepo.Object,
+                    positionQuery.Object,
+                    loanScheduleRepository: scheduleRepo.Object)),
+            new PortfolioUiServices(ImmediateScheduler.Instance));
+
+        await vm.LoadAsync();
+        var row = vm.Liabilities.Single(l => l.AssetId == loanAssetId);
+        vm.SelectedLiabilityRow = row;
+        await vm.Loan.LoadLoanScheduleAsync(row);
+        Assert.True(row.ScheduleEntries.Single().IsPaid);
+
+        var trade = vm.Trades.Single(t => t.Id == repayTradeId);
+        vm.RemoveTradeCommand.Execute(trade);
+        await vm.ConfirmDialogYesCommand.ExecuteAsync(null);
+
+        var refreshed = vm.Liabilities.Single(l => l.AssetId == loanAssetId);
+        Assert.Same(refreshed, vm.SelectedLiabilityRow);
+        Assert.True(refreshed.IsScheduleLoaded);
+        Assert.False(refreshed.ScheduleEntries.Single().IsPaid);
+    }
+
+    [Fact]
     public async Task ConfirmTx_LoanBorrow_AlsoGrowsOriginalAmount()
     {
         // Regression for the 3,988,000 vs 1,994,000 report: LoanBorrow must grow OriginalAmount
@@ -2623,6 +2733,60 @@ public class PortfolioViewModelTests
         Assert.False(vm.Transaction.IsRevisionReplacePromptOpen);
         Assert.False(vm.Transaction.IsEditMode);
         Assert.True(string.IsNullOrEmpty(vm.Transaction.RevisionReplacePromptError));
+    }
+
+    [Fact]
+    public async Task ConfirmAddWatchlist_UsesInjectedAddAssetWorkflow()
+    {
+        // WHY: the title-bar "新增投資" flow is separate from AddAssetDialog.
+        // Production DI must inject the same add-asset workflow into PortfolioViewModel,
+        // otherwise every symbol, including valid US ETFs, shows "服務未就緒".
+        var portfolioRepo = new Mock<IPortfolioRepository>();
+        portfolioRepo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(Array.Empty<PortfolioEntry>());
+
+        var search = new Mock<IStockSearchService>();
+        search.Setup(s => s.GetExchange("EUV")).Returns("NASDAQ");
+        search.Setup(s => s.GetName("EUV")).Returns("EUV");
+
+        var workflow = new Mock<IAddAssetWorkflowService>();
+        workflow
+            .Setup(w => w.EnsureStockEntryAsync(It.IsAny<EnsureStockEntryRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EnsureStockEntryRequest request, CancellationToken _) =>
+                new PortfolioEntry(
+                    Guid.NewGuid(),
+                    request.Symbol,
+                    request.Exchange ?? "NASDAQ",
+                    request.AssetType,
+                    request.Name ?? request.Symbol,
+                    request.Currency ?? "USD"));
+
+        var (snapshotSvc, snapshotRepo) = SnapshotStubs();
+        var (logRepo, backfill) = BackfillStubs(snapshotRepo);
+        var vm = new PortfolioViewModel(
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: new FakeTradeRepo()),
+            new PortfolioServices(
+                SilentStockService().Object,
+                search.Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                AddAsset: workflow.Object),
+            new PortfolioUiServices(ImmediateScheduler.Instance));
+
+        vm.OpenAddWatchlistDialogCommand.Execute(null);
+        vm.WatchlistSymbol = "EUV";
+        vm.WatchlistAssetType = AssetType.Etf;
+        vm.WatchlistCurrency = "USD";
+
+        await vm.ConfirmAddWatchlistCommand.ExecuteAsync(null);
+
+        Assert.Empty(vm.WatchlistError);
+        Assert.False(vm.IsAddWatchlistOpen);
+        workflow.Verify(w => w.EnsureStockEntryAsync(
+            It.Is<EnsureStockEntryRequest>(r =>
+                r.Symbol == "EUV"
+                && r.Exchange == "NASDAQ"
+                && r.AssetType == AssetType.Etf
+                && r.Currency == "USD"),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
