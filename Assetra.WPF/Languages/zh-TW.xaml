@@ -2072,13 +2072,12 @@
     <!--  理財試算  -->
     <sys:String x:Key="Calc.Title">理財試算</sys:String>
     <sys:String x:Key="Calc.Tab.Loan">貸款計算</sys:String>
-    <sys:String x:Key="Calc.Tab.Latte">拿鐵因子</sys:String>
-    <sys:String x:Key="Calc.Tab.Rule72">72 法則</sys:String>
     <sys:String x:Key="Calc.Tab.RentVsBuy">租 vs 買</sys:String>
     <sys:String x:Key="Calc.Calculate">計算</sys:String>
     <sys:String x:Key="Calc.Empty.Hint">填入參數後點擊「計算」以查看結果</sys:String>
 
     <!--  貸款計算  -->
+    <sys:String x:Key="Calc.Loan.Subtitle">算出每月還款、總利息與完整攤還表——借款或比較房貸方案前，先看清真實成本。</sys:String>
     <sys:String x:Key="Calc.Loan.Input.Principal">本金</sys:String>
     <sys:String x:Key="Calc.Loan.Input.Rate">年利率（%）</sys:String>
     <sys:String x:Key="Calc.Loan.Input.Months">期數（月）</sys:String>
@@ -2096,30 +2095,8 @@
     <sys:String x:Key="Calc.Loan.Error.Rate">利率格式錯誤</sys:String>
     <sys:String x:Key="Calc.Loan.Error.Months">期數格式錯誤</sys:String>
 
-    <!--  拿鐵因子  -->
-    <sys:String x:Key="Calc.Latte.Input.Amount">每次金額</sys:String>
-    <sys:String x:Key="Calc.Latte.Input.Frequency">頻率</sys:String>
-    <sys:String x:Key="Calc.Latte.Input.Return">年報酬率（%）</sys:String>
-    <sys:String x:Key="Calc.Latte.Input.Years">年數</sys:String>
-    <sys:String x:Key="Calc.Latte.Result.Contributed">累積投入</sys:String>
-    <sys:String x:Key="Calc.Latte.Result.FV">複利後總值</sys:String>
-    <sys:String x:Key="Calc.Latte.Result.Gain">多賺</sys:String>
-    <sys:String x:Key="Calc.Latte.Error.Amount">金額格式錯誤</sys:String>
-    <sys:String x:Key="Calc.Latte.Error.Rate">報酬率格式錯誤</sys:String>
-    <sys:String x:Key="Calc.Latte.Error.Years">年數格式錯誤</sys:String>
-
-    <!--  72 法則  -->
-    <sys:String x:Key="Calc.Rule72.Input.Rate">年報酬率（%）</sys:String>
-    <sys:String x:Key="Calc.Rule72.Input.Years">目標年數</sys:String>
-    <sys:String x:Key="Calc.Rule72.Result.DoublingYears">翻倍年數</sys:String>
-    <sys:String x:Key="Calc.Rule72.Result.RequiredRate">所需年報酬率（%）</sys:String>
-    <sys:String x:Key="Calc.Rule72.Result.DoublingTable">翻倍對照表</sys:String>
-    <sys:String x:Key="Calc.Rule72.Result.2x">翻 2 倍</sys:String>
-    <sys:String x:Key="Calc.Rule72.Result.4x">翻 4 倍</sys:String>
-    <sys:String x:Key="Calc.Rule72.Result.8x">翻 8 倍</sys:String>
-    <sys:String x:Key="Calc.Rule72.Error.BothInvalid">請輸入有效的年報酬率或年數</sys:String>
-
     <!--  租 vs 買  -->
+    <sys:String x:Key="Calc.RentVsBuy.Subtitle">比較長期下來租屋與買房的淨成本，並找出買方開始划算的損益兩平年。</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.HomePrice">房價</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.DownPayment">頭期款</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.MortgageRate">房貸年利率（%）</sys:String>

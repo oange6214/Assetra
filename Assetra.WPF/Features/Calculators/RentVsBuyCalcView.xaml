@@ -13,10 +13,19 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Padding="20" Style="{StaticResource FormCard}">
+        <!-- Subtitle -->
+        <TextBlock Grid.Row="0"
+                   Margin="0,0,0,12"
+                   Foreground="{DynamicResource AppTextSecondary}"
+                   FontSize="{StaticResource Font.Size.Sm}"
+                   Text="{DynamicResource Calc.RentVsBuy.Subtitle}"
+                   TextWrapping="Wrap" />
+
+        <Border Grid.Row="1" Padding="20" Style="{StaticResource FormCard}">
             <StackPanel>
                 <UniformGrid Columns="5" Style="{StaticResource PageFormGrid}">
                     <StackPanel Style="{StaticResource FormField}">
@@ -89,12 +98,12 @@
         </Border>
 
         <TextBlock
-            Grid.Row="1"
+            Grid.Row="2"
             Style="{StaticResource PageErrorText}"
             Text="{Binding ErrorMessage}"
             Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
 
-        <Grid Grid.Row="2" Margin="{StaticResource PageContentTopGapMargin}" Style="{StaticResource PageContentGrid}">
+        <Grid Grid.Row="3" Margin="{StaticResource PageContentTopGapMargin}" Style="{StaticResource PageContentGrid}">
             <StackPanel
                 Style="{StaticResource EmptyStatePanel}"
                 Visibility="{Binding HasResult, Converter={StaticResource InverseBooleanToVisibilityConverter}}">

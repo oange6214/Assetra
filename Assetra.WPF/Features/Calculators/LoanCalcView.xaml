@@ -13,11 +13,20 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <!-- Subtitle -->
+        <TextBlock Grid.Row="0"
+                   Margin="0,0,0,12"
+                   Foreground="{DynamicResource AppTextSecondary}"
+                   FontSize="{StaticResource Font.Size.Sm}"
+                   Text="{DynamicResource Calc.Loan.Subtitle}"
+                   TextWrapping="Wrap" />
+
         <!-- Input card -->
-        <Border Grid.Row="0" Padding="20" Style="{StaticResource FormCard}">
+        <Border Grid.Row="1" Padding="20" Style="{StaticResource FormCard}">
             <StackPanel>
                 <UniformGrid Columns="3" Style="{StaticResource PageFormGrid}">
                     <StackPanel Style="{StaticResource FormField}">
@@ -51,13 +60,13 @@
 
         <!-- Error -->
         <TextBlock
-            Grid.Row="1"
+            Grid.Row="2"
             Style="{StaticResource PageErrorText}"
             Text="{Binding ErrorMessage}"
             Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
 
         <!-- Results -->
-        <Grid Grid.Row="2" Margin="{StaticResource PageContentTopGapMargin}" Style="{StaticResource PageContentGrid}">
+        <Grid Grid.Row="3" Margin="{StaticResource PageContentTopGapMargin}" Style="{StaticResource PageContentGrid}">
             <!-- Empty state -->
             <StackPanel
                 Style="{StaticResource EmptyStatePanel}"

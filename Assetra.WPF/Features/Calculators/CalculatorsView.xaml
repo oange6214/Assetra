@@ -25,12 +25,6 @@
         <TabItem Header="{DynamicResource Calc.Tab.Loan}">
             <calc:LoanCalcView DataContext="{Binding Loan}" />
         </TabItem>
-        <TabItem Header="{DynamicResource Calc.Tab.Latte}">
-            <calc:LatteFactorCalcView DataContext="{Binding Latte}" />
-        </TabItem>
-        <TabItem Header="{DynamicResource Calc.Tab.Rule72}">
-            <calc:RuleOf72CalcView DataContext="{Binding Rule72}" />
-        </TabItem>
         <TabItem Header="{DynamicResource Calc.Tab.RentVsBuy}">
             <calc:RentVsBuyCalcView DataContext="{Binding RentVsBuy}" />
         </TabItem>

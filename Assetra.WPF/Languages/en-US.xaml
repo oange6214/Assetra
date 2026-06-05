@@ -2067,13 +2067,12 @@
     <!--  Financial Calculators  -->
     <sys:String x:Key="Calc.Title">Calculators</sys:String>
     <sys:String x:Key="Calc.Tab.Loan">Loan</sys:String>
-    <sys:String x:Key="Calc.Tab.Latte">Latte Factor</sys:String>
-    <sys:String x:Key="Calc.Tab.Rule72">Rule of 72</sys:String>
     <sys:String x:Key="Calc.Tab.RentVsBuy">Rent vs Buy</sys:String>
     <sys:String x:Key="Calc.Calculate">Calculate</sys:String>
     <sys:String x:Key="Calc.Empty.Hint">Enter values and click Calculate to see results</sys:String>
 
     <!--  Loan Calculator  -->
+    <sys:String x:Key="Calc.Loan.Subtitle">Monthly payment, total interest, and a full amortization schedule — see the real cost before borrowing or comparing loan options.</sys:String>
     <sys:String x:Key="Calc.Loan.Input.Principal">Principal</sys:String>
     <sys:String x:Key="Calc.Loan.Input.Rate">Annual Rate (%)</sys:String>
     <sys:String x:Key="Calc.Loan.Input.Months">Months</sys:String>
@@ -2091,30 +2090,8 @@
     <sys:String x:Key="Calc.Loan.Error.Rate">Invalid rate</sys:String>
     <sys:String x:Key="Calc.Loan.Error.Months">Invalid months</sys:String>
 
-    <!--  Latte Factor  -->
-    <sys:String x:Key="Calc.Latte.Input.Amount">Amount per Spend</sys:String>
-    <sys:String x:Key="Calc.Latte.Input.Frequency">Frequency</sys:String>
-    <sys:String x:Key="Calc.Latte.Input.Return">Annual Return (%)</sys:String>
-    <sys:String x:Key="Calc.Latte.Input.Years">Years</sys:String>
-    <sys:String x:Key="Calc.Latte.Result.Contributed">Total Contributed</sys:String>
-    <sys:String x:Key="Calc.Latte.Result.FV">Future Value</sys:String>
-    <sys:String x:Key="Calc.Latte.Result.Gain">Gain</sys:String>
-    <sys:String x:Key="Calc.Latte.Error.Amount">Invalid amount</sys:String>
-    <sys:String x:Key="Calc.Latte.Error.Rate">Invalid return rate</sys:String>
-    <sys:String x:Key="Calc.Latte.Error.Years">Invalid years</sys:String>
-
-    <!--  Rule of 72  -->
-    <sys:String x:Key="Calc.Rule72.Input.Rate">Annual Rate (%)</sys:String>
-    <sys:String x:Key="Calc.Rule72.Input.Years">Target Years</sys:String>
-    <sys:String x:Key="Calc.Rule72.Result.DoublingYears">Doubling Years</sys:String>
-    <sys:String x:Key="Calc.Rule72.Result.RequiredRate">Required Rate (%)</sys:String>
-    <sys:String x:Key="Calc.Rule72.Result.DoublingTable">Multiples Table</sys:String>
-    <sys:String x:Key="Calc.Rule72.Result.2x">2×</sys:String>
-    <sys:String x:Key="Calc.Rule72.Result.4x">4×</sys:String>
-    <sys:String x:Key="Calc.Rule72.Result.8x">8×</sys:String>
-    <sys:String x:Key="Calc.Rule72.Error.BothInvalid">Enter a valid rate or target years</sys:String>
-
     <!--  Rent vs Buy  -->
+    <sys:String x:Key="Calc.RentVsBuy.Subtitle">Compare the long-run net cost of renting versus buying, and find the year buying pulls ahead.</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.HomePrice">Home Price</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.DownPayment">Down Payment</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.MortgageRate">Mortgage Rate (%)</sys:String>

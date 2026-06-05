@@ -1,5 +1,4 @@
 using Assetra.Application.Calculators;
-using Assetra.Core.Models.Calculators;
 using Assetra.WPF.Features.Calculators;
 using Xunit;
 
@@ -31,36 +30,6 @@ public class LoanCalcViewModelTests
         Assert.Null(vm.ErrorMessage);
         Assert.Equal(12, vm.Schedule.Count);
         Assert.NotEmpty(vm.MonthlyPayment);
-    }
-}
-
-public class LatteFactorCalcViewModelTests
-{
-    private static LatteFactorCalcViewModel Create() => new(new LatteFactorCalculator());
-
-    [Fact] // WHY: 壞輸入不應產生結果，且必須有錯誤訊息
-    public void BadInput_NegativeAmount_SetsError()
-    {
-        var vm = Create();
-        vm.AmountPerSpend = "-50";
-        vm.CalculateCommand.Execute(null);
-        Assert.NotNull(vm.ErrorMessage);
-        Assert.False(vm.HasResult);
-    }
-
-    [Fact] // WHY: 合法輸入必須顯示 FV > 投入（有報酬時）
-    public void ValidInput_WithReturn_FvAboveContributed()
-    {
-        var vm = Create();
-        vm.AmountPerSpend = "100";
-        vm.AnnualReturnPercent = "6";
-        vm.Years = "20";
-        vm.SelectedFrequency = LatteFrequency.Monthly;
-        vm.CalculateCommand.Execute(null);
-        Assert.True(vm.HasResult);
-        Assert.Null(vm.ErrorMessage);
-        Assert.NotEmpty(vm.FutureValue);
-        Assert.NotEmpty(vm.TotalContributed);
     }
 }
 
@@ -98,32 +67,5 @@ public class RentVsBuyCalcViewModelTests
         Assert.NotEmpty(vm.BuyNetCost);
         Assert.NotEmpty(vm.RentNetCost);
         Assert.NotEmpty(vm.WinnerLabel);
-    }
-}
-
-public class RuleOf72CalcViewModelTests
-{
-    private static RuleOf72CalcViewModel Create() => new(new RuleOf72Calculator());
-
-    [Fact] // WHY: 壞輸入不應產生結果，且必須有錯誤訊息
-    public void BadInput_NonNumericRate_SetsError()
-    {
-        var vm = Create();
-        vm.AnnualRatePercent = "abc";
-        vm.CalculateCommand.Execute(null);
-        Assert.NotNull(vm.ErrorMessage);
-        Assert.False(vm.HasResult);
-    }
-
-    [Fact] // WHY: 給 6% 年報酬率，翻倍年數應為 12 年（72/6）
-    public void ValidRate_ReturnsCorrectDoublingYears()
-    {
-        var vm = Create();
-        vm.AnnualRatePercent = "6";
-        vm.CalculateCommand.Execute(null);
-        Assert.True(vm.HasResult);
-        Assert.Null(vm.ErrorMessage);
-        // DoublingYears = 72/6 = 12
-        Assert.Contains("12", vm.DoublingYears);
     }
 }
