@@ -265,9 +265,19 @@ public sealed partial class GoalsViewModel : ObservableObject
         try
         {
             var goals = await _repository.GetAllAsync().ConfigureAwait(true);
-            _goals.Clear();
-            foreach (var g in goals)
-                _goals.Add(new GoalRowViewModel(g, _currency, _localization));
+
+            // LoadAsync can run on a background thread: the dashboard prefetches goals via
+            // AsyncHelpers.SafeFireAndForget on IPortfolioPositionFeed price ticks, which fire
+            // on the quote-fetch worker thread. WPF's CollectionView throws NotSupportedException
+            // on cross-thread edits, so marshal the bound-collection mutation to the UI thread
+            // (mirrors FinancialOverviewViewModel.RebuildKpiCards). Application.Current is null in
+            // headless / unit-test hosts, so we mutate inline there.
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is not null && !dispatcher.CheckAccess())
+                await dispatcher.InvokeAsync(() => ApplyLoadedGoals(goals));
+            else
+                ApplyLoadedGoals(goals);
+
             IsLoaded = true;
         }
         catch (Exception ex)
@@ -278,6 +288,13 @@ public sealed partial class GoalsViewModel : ObservableObject
         {
             IsLoading = false;
         }
+    }
+
+    private void ApplyLoadedGoals(IReadOnlyList<FinancialGoal> goals)
+    {
+        _goals.Clear();
+        foreach (var g in goals)
+            _goals.Add(new GoalRowViewModel(g, _currency, _localization));
     }
 
     [RelayCommand]

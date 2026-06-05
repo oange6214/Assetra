@@ -38,6 +38,30 @@ public sealed class GoalsViewModelTests
         }
     }
 
+    [Fact] // WHY: 儀表板會在背景報價執行緒上 fire-and-forget 呼叫 LoadAsync（GoalsWidget 預取）。
+           // LoadAsync 必須能在非 UI 執行緒被呼叫而仍正確載入，不可拋出或留空集合。
+    public async Task LoadAsync_InvokedFromBackgroundThread_PopulatesGoals()
+    {
+        var storedGoal = new FinancialGoal(Guid.NewGuid(), "Emergency fund", 100_000m, 20_000m, null, null);
+        var repo = new Mock<IFinancialGoalRepository>();
+        repo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([storedGoal]);
+
+        var vm = new GoalsViewModel(repo.Object);
+        try
+        {
+            await Task.Run(() => vm.LoadAsync());
+
+            Assert.True(vm.IsLoaded);
+            Assert.Null(vm.ErrorMessage);
+            Assert.NotEmpty(vm.Goals);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(vm);
+        }
+    }
+
     [Theory]
     [InlineData("abc")]
     [InlineData("-1")]
