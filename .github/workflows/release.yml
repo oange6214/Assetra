@@ -52,6 +52,33 @@ jobs:
           --mainExe Assetra.WPF.exe
           --outputDir releases/
 
+      - name: Validate Velopack output
+        shell: pwsh
+        run: |
+          $releaseDir = Join-Path $PWD "releases"
+          if (-not (Test-Path $releaseDir)) {
+            throw "Velopack output directory was not created: $releaseDir"
+          }
+
+          $assetNames = @(Get-ChildItem -Path $releaseDir -File | ForEach-Object { $_.Name })
+          $missing = New-Object System.Collections.Generic.List[string]
+
+          foreach ($name in @("RELEASES", "releases.win.json", "Assetra-win-Setup.exe", "Assetra-win-Portable.zip")) {
+            if ($assetNames -notcontains $name) {
+              $missing.Add($name)
+            }
+          }
+
+          if (-not ($assetNames | Where-Object { $_ -like "Assetra-*-full.nupkg" })) {
+            $missing.Add("Assetra-*-full.nupkg")
+          }
+
+          if ($missing.Count -gt 0) {
+            Write-Host "Velopack output files:"
+            Get-ChildItem -Path $releaseDir -Force | Select-Object Name, Length | Format-Table -AutoSize
+            throw "Missing required Velopack update assets: $($missing -join ', ')"
+          }
+
       - name: Upload to GitHub Releases
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -63,3 +90,42 @@ jobs:
           --tag ${{ github.ref_name }}
           --token ${{ secrets.GITHUB_TOKEN }}
           --outputDir releases/
+
+      - name: Validate GitHub release assets
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $assetNames = @()
+          $missing = @()
+
+          for ($attempt = 1; $attempt -le 6; $attempt++) {
+            $assetNames = @(gh release view $tag --repo $env:GITHUB_REPOSITORY --json assets --jq ".assets[].name")
+            $missing = New-Object System.Collections.Generic.List[string]
+
+            foreach ($name in @("RELEASES", "releases.win.json", "Assetra-win-Setup.exe", "Assetra-win-Portable.zip")) {
+              if ($assetNames -notcontains $name) {
+                $missing.Add($name)
+              }
+            }
+
+            if (-not ($assetNames | Where-Object { $_ -like "Assetra-*-full.nupkg" })) {
+              $missing.Add("Assetra-*-full.nupkg")
+            }
+
+            if ($missing.Count -eq 0) {
+              break
+            }
+
+            if ($attempt -lt 6) {
+              Write-Host "Required release assets not visible yet; retrying in 5 seconds..."
+              Start-Sleep -Seconds 5
+            }
+          }
+
+          if ($missing.Count -gt 0) {
+            Write-Host "GitHub release assets:"
+            $assetNames | ForEach-Object { Write-Host " - $_" }
+            throw "GitHub release $tag is missing required Velopack update assets: $($missing -join ', ')"
+          }
