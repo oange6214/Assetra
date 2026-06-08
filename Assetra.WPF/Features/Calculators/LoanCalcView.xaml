@@ -9,12 +9,16 @@
     d:DataContext="{d:DesignInstance Type={x:Type vm:LoanCalcViewModel}, IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
-    <Grid Style="{StaticResource PageRootGrid}">
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <Grid Style="{StaticResource PageRootGrid}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- Subtitle -->
@@ -80,9 +84,7 @@
             </StackPanel>
 
             <!-- Result content -->
-            <ScrollViewer
-                Style="{StaticResource ListContentHost}"
-                Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel>
                     <!-- Summary metrics -->
                     <UniformGrid Columns="3">
@@ -160,7 +162,9 @@
                         </DataGrid>
                     </Expander>
                 </StackPanel>
-            </ScrollViewer>
+            </StackPanel>
         </Grid>
-    </Grid>
+        <Border Grid.Row="4" Height="32" />
+        </Grid>
+    </ScrollViewer>
 </UserControl>

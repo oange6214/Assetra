@@ -48,8 +48,8 @@ public class RentVsBuyCalcViewModelTests
         Assert.False(vm.HasResult);
     }
 
-    [Fact] // WHY: 合法輸入必須產生租/買淨成本，且能判斷誰划算
-    public void ValidInput_ProducesBuyAndRentCosts()
+    [Fact] // WHY: 合法輸入必須產生租/買期末淨值，且能判斷誰的淨值較高
+    public void ValidInput_ProducesEndingNetWorthComparison()
     {
         var vm = Create();
         vm.HomePrice = "10000000";
@@ -60,12 +60,16 @@ public class RentVsBuyCalcViewModelTests
         vm.AppreciationRatePercent = "4";
         vm.MonthlyRent = "30000";
         vm.RentIncreasePercent = "2";
+        vm.InvestmentReturnPercent = "2";
         vm.CompareYears = "30";
+        vm.PurchaseCostRatePercent = "1";
+        vm.SellCostRatePercent = "1";
         vm.CalculateCommand.Execute(null);
         Assert.True(vm.HasResult);
         Assert.Null(vm.ErrorMessage);
-        Assert.NotEmpty(vm.BuyNetCost);
-        Assert.NotEmpty(vm.RentNetCost);
+        Assert.NotEmpty(vm.BuyerEndingNetWorth);
+        Assert.NotEmpty(vm.RenterEndingNetWorth);
+        Assert.NotEmpty(vm.NetWorthDifference);
         Assert.NotEmpty(vm.WinnerLabel);
     }
 }

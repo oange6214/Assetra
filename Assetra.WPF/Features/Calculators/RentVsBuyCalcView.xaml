@@ -4,17 +4,42 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Calculators"
     d:DataContext="{d:DesignInstance Type={x:Type vm:RentVsBuyCalcViewModel}, IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
-    <Grid Style="{StaticResource PageRootGrid}">
+    <UserControl.Resources>
+        <Style x:Key="RentVsBuyFieldHelp" TargetType="{x:Type Border}">
+            <Setter Property="Width" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Margin" Value="4,0,0,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="ToolTipService.InitialShowDelay" Value="250" />
+            <Setter Property="ToolTipService.ShowDuration" Value="20000" />
+        </Style>
+
+        <Style x:Key="RentVsBuyFieldHelpIcon" BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
+            <Setter Property="Symbol" Value="Info24" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <Grid Style="{StaticResource PageRootGrid}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- Subtitle -->
@@ -27,65 +52,154 @@
 
         <Border Grid.Row="1" Padding="20" Style="{StaticResource FormCard}">
             <StackPanel>
-                <UniformGrid Columns="5" Style="{StaticResource PageFormGrid}">
+                <TextBlock Style="{StaticResource Form.SectionHeader}" Text="{DynamicResource Calc.RentVsBuy.Section.Buy}" />
+                <UniformGrid Columns="4" Style="{StaticResource PageFormGrid}">
                     <StackPanel Style="{StaticResource FormField}">
-                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.HomePrice}" />
+                        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.HomePrice}" />
+                            <Border Style="{StaticResource RentVsBuyFieldHelp}" ToolTip="{DynamicResource Calc.RentVsBuy.Help.HomePrice}">
+                                <ds:AppIcon Style="{StaticResource RentVsBuyFieldHelpIcon}" />
+                            </Border>
+                        </StackPanel>
                         <TextBox
                             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                             Style="{StaticResource AppTextBox}"
                             Text="{Binding HomePrice, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Style="{StaticResource FormField}">
-                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.DownPayment}" />
+                        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.DownPayment}" />
+                            <Border Style="{StaticResource RentVsBuyFieldHelp}" ToolTip="{DynamicResource Calc.RentVsBuy.Help.DownPayment}">
+                                <ds:AppIcon Style="{StaticResource RentVsBuyFieldHelpIcon}" />
+                            </Border>
+                        </StackPanel>
                         <TextBox
                             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                             Style="{StaticResource AppTextBox}"
                             Text="{Binding DownPayment, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Style="{StaticResource FormField}">
-                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.MortgageRate}" />
+                        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.MortgageRate}" />
+                            <Border Style="{StaticResource RentVsBuyFieldHelp}" ToolTip="{DynamicResource Calc.RentVsBuy.Help.MortgageRate}">
+                                <ds:AppIcon Style="{StaticResource RentVsBuyFieldHelpIcon}" />
+                            </Border>
+                        </StackPanel>
                         <TextBox
                             Style="{StaticResource AppTextBox}"
                             Text="{Binding MortgageRatePercent, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Style="{StaticResource FormField}">
-                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.LoanYears}" />
+                    <StackPanel Style="{StaticResource FormFieldLast}">
+                        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.LoanYears}" />
+                            <Border Style="{StaticResource RentVsBuyFieldHelp}" ToolTip="{DynamicResource Calc.RentVsBuy.Help.LoanYears}">
+                                <ds:AppIcon Style="{StaticResource RentVsBuyFieldHelpIcon}" />
+                            </Border>
+                        </StackPanel>
                         <TextBox
                             Style="{StaticResource AppTextBox}"
                             Text="{Binding LoanYears, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <StackPanel Style="{StaticResource FormFieldLast}">
-                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.HoldingCost}" />
+                </UniformGrid>
+                <UniformGrid Columns="4" Margin="0,12,0,0" Style="{StaticResource PageFormGrid}">
+                    <StackPanel Style="{StaticResource FormField}">
+                        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.HoldingCost}" />
+                            <Border Style="{StaticResource RentVsBuyFieldHelp}" ToolTip="{DynamicResource Calc.RentVsBuy.Help.HoldingCost}">
+                                <ds:AppIcon Style="{StaticResource RentVsBuyFieldHelpIcon}" />
+                            </Border>
+                        </StackPanel>
                         <TextBox
                             Style="{StaticResource AppTextBox}"
                             Text="{Binding HoldingCostRatePercent, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                </UniformGrid>
-                <UniformGrid Columns="4" Margin="0,12,0,0" Style="{StaticResource PageFormGrid}">
                     <StackPanel Style="{StaticResource FormField}">
-                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.Appreciation}" />
+                        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.Appreciation}" />
+                            <Border Style="{StaticResource RentVsBuyFieldHelp}" ToolTip="{DynamicResource Calc.RentVsBuy.Help.Appreciation}">
+                                <ds:AppIcon Style="{StaticResource RentVsBuyFieldHelpIcon}" />
+                            </Border>
+                        </StackPanel>
                         <TextBox
                             Style="{StaticResource AppTextBox}"
                             Text="{Binding AppreciationRatePercent, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
+                </UniformGrid>
+
+                <Border Style="{StaticResource Form.SectionGap}" />
+                <TextBlock Style="{StaticResource Form.SectionHeader}" Text="{DynamicResource Calc.RentVsBuy.Section.Rent}" />
+                <UniformGrid Columns="4" Style="{StaticResource PageFormGrid}">
                     <StackPanel Style="{StaticResource FormField}">
-                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.Rent}" />
+                        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.Rent}" />
+                            <Border Style="{StaticResource RentVsBuyFieldHelp}" ToolTip="{DynamicResource Calc.RentVsBuy.Help.Rent}">
+                                <ds:AppIcon Style="{StaticResource RentVsBuyFieldHelpIcon}" />
+                            </Border>
+                        </StackPanel>
                         <TextBox
                             behaviors:ThousandSeparatorBehavior.IsEnabled="True"
                             Style="{StaticResource AppTextBox}"
                             Text="{Binding MonthlyRent, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Style="{StaticResource FormField}">
-                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.RentIncrease}" />
+                        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.RentIncrease}" />
+                            <Border Style="{StaticResource RentVsBuyFieldHelp}" ToolTip="{DynamicResource Calc.RentVsBuy.Help.RentIncrease}">
+                                <ds:AppIcon Style="{StaticResource RentVsBuyFieldHelpIcon}" />
+                            </Border>
+                        </StackPanel>
                         <TextBox
                             Style="{StaticResource AppTextBox}"
                             Text="{Binding RentIncreasePercent, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Style="{StaticResource FormFieldLast}">
-                        <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.CompareYears}" />
+                        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.InvestmentReturn}" />
+                            <Border Style="{StaticResource RentVsBuyFieldHelp}" ToolTip="{DynamicResource Calc.RentVsBuy.Help.InvestmentReturn}">
+                                <ds:AppIcon Style="{StaticResource RentVsBuyFieldHelpIcon}" />
+                            </Border>
+                        </StackPanel>
+                        <TextBox
+                            Style="{StaticResource AppTextBox}"
+                            Text="{Binding InvestmentReturnPercent, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </UniformGrid>
+
+                <Border Style="{StaticResource Form.SectionGap}" />
+                <TextBlock Style="{StaticResource Form.SectionHeader}" Text="{DynamicResource Calc.RentVsBuy.Section.Compare}" />
+                <UniformGrid Columns="4" Style="{StaticResource PageFormGrid}">
+                    <StackPanel Style="{StaticResource FormField}">
+                        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.CompareYears}" />
+                            <Border Style="{StaticResource RentVsBuyFieldHelp}" ToolTip="{DynamicResource Calc.RentVsBuy.Help.CompareYears}">
+                                <ds:AppIcon Style="{StaticResource RentVsBuyFieldHelpIcon}" />
+                            </Border>
+                        </StackPanel>
                         <TextBox
                             Style="{StaticResource AppTextBox}"
                             Text="{Binding CompareYears, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Style="{StaticResource FormField}">
+                        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.PurchaseCost}" />
+                            <Border Style="{StaticResource RentVsBuyFieldHelp}" ToolTip="{DynamicResource Calc.RentVsBuy.Help.PurchaseCost}">
+                                <ds:AppIcon Style="{StaticResource RentVsBuyFieldHelpIcon}" />
+                            </Border>
+                        </StackPanel>
+                        <TextBox
+                            Style="{StaticResource AppTextBox}"
+                            Text="{Binding PurchaseCostRatePercent, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Style="{StaticResource FormFieldLast}">
+                        <StackPanel Margin="0,0,0,4" Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource FormFieldLabel}" Text="{DynamicResource Calc.RentVsBuy.Input.SellCost}" />
+                            <Border Style="{StaticResource RentVsBuyFieldHelp}" ToolTip="{DynamicResource Calc.RentVsBuy.Help.SellCost}">
+                                <ds:AppIcon Style="{StaticResource RentVsBuyFieldHelpIcon}" />
+                            </Border>
+                        </StackPanel>
+                        <TextBox
+                            Style="{StaticResource AppTextBox}"
+                            Text="{Binding SellCostRatePercent, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </UniformGrid>
                 <StackPanel Style="{StaticResource PageActionBar}">
@@ -116,39 +230,72 @@
             </StackPanel>
 
             <StackPanel Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <UniformGrid Columns="4">
+                <Border Margin="0,0,0,12" Padding="16" Style="{StaticResource FormCard}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Calc.RentVsBuy.Result.Summary}" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            Style="{StaticResource MetricValue}"
+                            Text="{Binding WinnerLabel}" />
+                        <TextBlock
+                            Margin="0,8,0,0"
+                            Style="{StaticResource Form.HelperText}"
+                            Text="{Binding ResultExplanation}" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            Style="{StaticResource Form.HelperText}"
+                            Text="{DynamicResource Calc.RentVsBuy.Result.DifferenceHelp}" />
+                    </StackPanel>
+                </Border>
+
+                <UniformGrid Columns="3">
                     <Border Margin="0,0,12,0" Style="{StaticResource MetricCard}">
                         <StackPanel>
-                            <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Calc.RentVsBuy.Result.BuyCost}" />
+                            <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Calc.RentVsBuy.Result.BuyerNetWorth}" />
                             <TextBlock
                                 Style="{StaticResource MetricValue}"
-                                Text="{Binding BuyNetCost}"
+                                Text="{Binding BuyerEndingNetWorth}"
                                 Typography.NumeralAlignment="Tabular" />
                         </StackPanel>
                     </Border>
                     <Border Margin="0,0,12,0" Style="{StaticResource MetricCard}">
                         <StackPanel>
-                            <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Calc.RentVsBuy.Result.RentCost}" />
+                            <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Calc.RentVsBuy.Result.RenterNetWorth}" />
                             <TextBlock
                                 Style="{StaticResource MetricValue}"
-                                Text="{Binding RentNetCost}"
+                                Text="{Binding RenterEndingNetWorth}"
                                 Typography.NumeralAlignment="Tabular" />
                         </StackPanel>
                     </Border>
                     <Border Margin="0,0,12,0" Style="{StaticResource MetricCard}">
                         <StackPanel>
-                            <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Calc.RentVsBuy.Result.Winner}" />
-                            <TextBlock Style="{StaticResource MetricValue}" Text="{Binding WinnerLabel}" />
+                            <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Calc.RentVsBuy.Result.NetWorthDifference}" />
+                            <TextBlock
+                                Style="{StaticResource MetricValue}"
+                                Text="{Binding NetWorthDifference}"
+                                Typography.NumeralAlignment="Tabular" />
                         </StackPanel>
                     </Border>
+                </UniformGrid>
+
+                <UniformGrid Columns="2" Margin="0,12,0,0">
                     <Border Style="{StaticResource MetricCard}">
                         <StackPanel>
                             <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Calc.RentVsBuy.Result.BreakEven}" />
                             <TextBlock Style="{StaticResource MetricValue}" Text="{Binding BreakEvenYear}" />
+                            <TextBlock Style="{StaticResource Form.HelperText}" Text="{Binding BreakEvenExplanation}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Margin="12,0,0,0" Style="{StaticResource MetricCard}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource MetricLabel}" Text="{DynamicResource Calc.RentVsBuy.Result.Model}" />
+                            <TextBlock Style="{StaticResource Form.HelperText}" Text="{DynamicResource Calc.RentVsBuy.Result.ModelHelp}" />
                         </StackPanel>
                     </Border>
                 </UniformGrid>
             </StackPanel>
         </Grid>
-    </Grid>
+        <Border Grid.Row="4" Height="32" />
+        </Grid>
+    </ScrollViewer>
 </UserControl>

@@ -2099,7 +2099,10 @@
     <sys:String x:Key="Calc.Loan.Error.Months">期數格式錯誤</sys:String>
 
     <!--  租 vs 買  -->
-    <sys:String x:Key="Calc.RentVsBuy.Subtitle">比較長期下來租屋與買房的淨成本，並找出買方開始划算的損益兩平年。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Subtitle">比較「買房後的期末淨值」與「租屋並把差額拿去投資的期末淨值」。這不是單純比支出，而是在估算哪個選擇讓資產留下更多。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Section.Buy">買房條件</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Section.Rent">租屋與投資假設</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Section.Compare">比較期間與交易成本</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.HomePrice">房價</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.DownPayment">頭期款</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.MortgageRate">房貸年利率（%）</sys:String>
@@ -2109,14 +2112,40 @@
     <sys:String x:Key="Calc.RentVsBuy.Input.Rent">月租金</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.RentIncrease">年租金漲幅（%）</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.CompareYears">比較年數</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.InvestmentReturn">租方投資年報酬率（%）</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.PurchaseCost">買入成本率（%）</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.SellCost">出售成本率（%）</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.HomePrice">影響房屋未來市值、貸款金額與持有成本。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.DownPayment">買方先投入；租方假設把這筆錢拿去投資。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.MortgageRate">用來估算每月房貸與期末剩餘貸款。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.LoanYears">貸款越長，每月壓力較低，但總利息通常較高。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.HoldingCost">房屋稅、管理費、修繕、保險等每年成本。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.Appreciation">房價每年成長率；會提高買方期末房屋市值。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.Rent">租方每月支出；也會影響每月可投資差額。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.RentIncrease">租金每年調漲率；提高租方未來租金支出。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.InvestmentReturn">租方把頭期款與租買現金流差額拿去投資的假設報酬。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.CompareYears">要比較幾年後的期末淨值。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.PurchaseCost">契稅、代書、仲介、裝修等買入一次性成本。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.SellCost">未來賣房時可能產生的仲介、稅費與交易成本。</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Result.BuyCost">買房淨成本</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Result.RentCost">租房淨成本</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BuyerNetWorth">買方期末淨值</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.RenterNetWorth">租方期末淨值</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.NetWorthDifference">淨值差（買方 - 租方）</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Result.Winner">結論</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Result.BreakEven">損益兩平年</sys:String>
-    <sys:String x:Key="Calc.RentVsBuy.Result.BuyCheaper">買房較划算</sys:String>
-    <sys:String x:Key="Calc.RentVsBuy.Result.RentCheaper">租房較划算</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.Summary">決策摘要</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.Model">模型說明</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.ModelHelp">買方淨值約等於房屋市值減剩餘貸款與出售成本；租方淨值是假設把頭期款、買入成本與每月租買現金流差額投入資產後的結果。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.DifferenceHelp">淨值差為「買方期末淨值 - 租方期末淨值」；正數代表買房較高，負數代表租屋並投資較高。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BuyCheaper">買房期末淨值較高</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.RentCheaper">租屋期末淨值較高</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BuyExplanation">比較 {0} 年後，買房期末淨值比租屋多 {1}。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.RentExplanation">比較 {0} 年後，租屋並投資期末淨值比買房多 {1}。</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Result.BreakEvenFmt">第 {0} 年</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Result.NoBreakEven">期間內未達損益兩平</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BreakEvenExplanation">第 {0} 年起，買房期末淨值首次追上或超過租屋。</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.NoBreakEvenExplanation">在 {0} 年比較期間內，買房期末淨值尚未追上租屋並投資。</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Error.HomePrice">房價格式錯誤</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Error.DownPayment">頭期款格式錯誤</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Error.MortgageRate">房貸利率格式錯誤</sys:String>
@@ -2126,4 +2155,7 @@
     <sys:String x:Key="Calc.RentVsBuy.Error.Rent">月租格式錯誤</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Error.RentIncrease">租金漲幅格式錯誤</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Error.CompareYears">比較年數格式錯誤</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.InvestmentReturn">投資報酬率格式錯誤</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.PurchaseCost">買入成本率格式錯誤</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.SellCost">出售成本率格式錯誤</sys:String>
 </ResourceDictionary>

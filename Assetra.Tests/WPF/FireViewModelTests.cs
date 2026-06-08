@@ -903,32 +903,7 @@ public sealed class FireViewModelTests
 
     private static void StaRun(Action action)
     {
-        Exception? error = null;
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
-                action();
-            }
-            catch (Exception ex)
-            {
-                error = ex;
-            }
-            finally
-            {
-                Dispatcher.CurrentDispatcher.InvokeShutdown();
-            }
-        });
-
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
-
-        if (error is not null)
-        {
-            throw error;
-        }
+        WpfTestHost.Run(action);
     }
 
     private static void EnsureFireViewResources()

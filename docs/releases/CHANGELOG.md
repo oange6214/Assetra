@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+---
+
+## v0.29.0 - 2026-06-05
+
+這版主要收斂投資資產、交易記錄、FIRE / Goals planning、理財試算與跨幣別資料流，並修正多個會影響資料可信度的互動問題。
+
+### Investment assets and allocation
+
+- 投資資產支援使用者自訂群組 workflow，可建立群組、指派資產、依群組檢視與管理。
+- 投資資產列表與側邊面板補強跨幣別顯示，原幣與基準幣別金額分層更清楚。
+- 配置概覽重構為更聚焦的 allocation insight layout，減少左右重複清單，並用 donut / ranking 呈現占比。
+- 資產趨勢與報酬日曆修正真實淨值、整月 X 軸與堆疊視覺，降低誤讀。
+
+### Transactions and settlement
+
+- 新增 / 編輯交易支援跨幣別結算與匯率記錄，買入、賣出與配息流程共用 settlement architecture。
+- 編輯交易修正多種 legacy 類型未正確帶入選擇資產、信用卡、負債或帳戶的問題。
+- 成交總額與每股價格模式修正 round-trip 回寫造成價格被改動的問題。
+- 轉帳交易在收款方視角正確顯示轉入與正向金額。
+- 貸款還款與攤還表同步邏輯修正，避免刪除交易後攤還狀態殘留。
+
+### Planning and calculators
+
 ### Goals planning
 
 - 財務目標補強為完整 planning workflow：detail drawer 顯示目標進度、下一步建議、里程碑、撥款規則與 FIRE 來源資訊。
@@ -15,6 +38,17 @@
 - Advanced mode 新增目前年齡、預期壽命、退休後年支出與通膨率輸入，並保存到 FIRE scenario。
 - FIRE 結果加入退休提領路徑、Monte Carlo 成功率、風險提示與可追溯的財務目標同步備註。
 - 新增 `docs/guides/FIRE-Planning.md`，整理 FIRE 使用方式、公式、情境管理與結果解讀。
+
+- Monte Carlo 結果改用小格路徑檢視，提升長年期資料的掃讀性。
+- 理財試算聚焦貸款計算與租 vs 買，移除較弱的拿鐵因子與 72 法則。
+- 租 vs 買改為比較「買房期末淨值」與「租屋並投資期末淨值」，納入頭期款、買入成本、出售成本、持有成本、租方投資報酬與每月現金流差額。
+- 貸款試算補齊攤還表邊界條件與測試。
+
+### UX and documentation
+
+- Title bar 的單一「新增紀錄」重構為情境化新增入口，降低新使用者不知道資料會出現在哪個頁面的困惑。
+- NavRail 與多頁面 layout 持續收斂為 Fluent-first / Carbon-assisted design system。
+- 文件整理與規劃文件歸檔，保留目前可執行的 UI / market data / planning docs。
 
 ---
 

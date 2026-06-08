@@ -2094,7 +2094,10 @@
     <sys:String x:Key="Calc.Loan.Error.Months">Invalid months</sys:String>
 
     <!--  Rent vs Buy  -->
-    <sys:String x:Key="Calc.RentVsBuy.Subtitle">Compare the long-run net cost of renting versus buying, and find the year buying pulls ahead.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Subtitle">Compare the ending net worth of buying a home against renting and investing the cash-flow difference. This estimates which choice leaves more assets, not just which one costs less.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Section.Buy">Buying assumptions</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Section.Rent">Renting and investing assumptions</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Section.Compare">Comparison period and transaction costs</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.HomePrice">Home Price</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.DownPayment">Down Payment</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.MortgageRate">Mortgage Rate (%)</sys:String>
@@ -2104,14 +2107,40 @@
     <sys:String x:Key="Calc.RentVsBuy.Input.Rent">Monthly Rent</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.RentIncrease">Annual Rent Increase (%)</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Input.CompareYears">Compare Years</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.InvestmentReturn">Renter Investment Return (%)</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.PurchaseCost">Purchase Cost Rate (%)</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Input.SellCost">Sell Cost Rate (%)</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.HomePrice">Affects future home value, loan amount, and annual holding costs.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.DownPayment">Paid upfront by the buyer; invested by the renter in the rent scenario.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.MortgageRate">Used to estimate monthly mortgage payments and the remaining loan balance.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.LoanYears">Longer terms lower monthly payments but usually increase total interest.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.HoldingCost">Property tax, maintenance, insurance, management fees, and other yearly ownership costs.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.Appreciation">Expected annual home price growth; raises the buyer's ending home value.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.Rent">Monthly rent paid by the renter; also affects the monthly cash-flow difference.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.RentIncrease">Expected yearly rent increase.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.InvestmentReturn">Assumed return for investing the down payment and rent-vs-buy cash-flow difference.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.CompareYears">How many years into the future to compare ending net worth.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.PurchaseCost">One-time costs such as taxes, agent fees, closing costs, and renovation.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Help.SellCost">Estimated agent fees, taxes, and transaction costs deducted when selling.</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Result.BuyCost">Buy Net Cost</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Result.RentCost">Rent Net Cost</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BuyerNetWorth">Buyer Ending Net Worth</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.RenterNetWorth">Renter Ending Net Worth</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.NetWorthDifference">Net Worth Difference (Buyer - Renter)</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Result.Winner">Verdict</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Result.BreakEven">Break-Even Year</sys:String>
-    <sys:String x:Key="Calc.RentVsBuy.Result.BuyCheaper">Buying is cheaper</sys:String>
-    <sys:String x:Key="Calc.RentVsBuy.Result.RentCheaper">Renting is cheaper</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.Summary">Decision summary</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.Model">Model notes</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.ModelHelp">Buyer net worth is roughly home value minus remaining loan and sell costs; renter net worth invests the down payment, purchase costs, and monthly cash-flow difference.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.DifferenceHelp">Net worth difference = buyer ending net worth - renter ending net worth. Positive means buying is higher; negative means renting and investing is higher.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BuyCheaper">Buying has higher ending net worth</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.RentCheaper">Renting has higher ending net worth</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BuyExplanation">After {0} years, buying ends {1} ahead of renting.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.RentExplanation">After {0} years, renting and investing ends {1} ahead of buying.</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Result.BreakEvenFmt">Year {0}</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Result.NoBreakEven">No break-even in period</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.BreakEvenExplanation">Starting in year {0}, buying first catches up with or exceeds renting.</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Result.NoBreakEvenExplanation">Buying does not catch up with renting and investing within the {0}-year comparison period.</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Error.HomePrice">Invalid home price</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Error.DownPayment">Invalid down payment</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Error.MortgageRate">Invalid mortgage rate</sys:String>
@@ -2121,4 +2150,7 @@
     <sys:String x:Key="Calc.RentVsBuy.Error.Rent">Invalid monthly rent</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Error.RentIncrease">Invalid rent increase rate</sys:String>
     <sys:String x:Key="Calc.RentVsBuy.Error.CompareYears">Invalid compare years</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.InvestmentReturn">Invalid investment return rate</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.PurchaseCost">Invalid purchase cost rate</sys:String>
+    <sys:String x:Key="Calc.RentVsBuy.Error.SellCost">Invalid sell cost rate</sys:String>
 </ResourceDictionary>
