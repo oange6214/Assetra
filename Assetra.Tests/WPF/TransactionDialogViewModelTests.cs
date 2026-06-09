@@ -406,6 +406,94 @@ public class TransactionDialogViewModelTests
         Assert.Contains(vm.AvailableTradeTypes, t => t.Key == expectedTxType);
     }
 
+    // ── Q02: editing a trade whose asset is no longer in the live view ───────────
+    // Closed/empty lots are excluded from Positions by HideEmptyPositions, so editing a
+    // Sell/Buy/StockDividend on such a lot used to leave SelectedAsset null (asset-subject
+    // resolution searched only the live collections) — which ALSO blanked the type picker,
+    // since AvailableTradeTypes is filtered by SelectedAsset.Kind. The fix synthesizes an
+    // investment subject from the trade row and injects it into AvailableAssets so the
+    // ComboBox can render it (SelectedItem ∈ ItemsSource) and the type picker re-populates.
+
+    [Theory]
+    [InlineData(TradeType.Sell, "sell")]
+    [InlineData(TradeType.Buy, "buy")]
+    [InlineData(TradeType.StockDividend, "stockDiv")]
+    public void EditTrade_InvestmentRowWithClosedPosition_StillPreselectsAssetAndType(
+        TradeType tradeType,
+        string expectedTxType)
+    {
+        // Position deliberately omitted from `positions` (simulating a closed/empty lot),
+        // but the trade still carries its Symbol + PortfolioEntryId link.
+        var entryId = Guid.NewGuid();
+        var row = new TradeRowViewModel(new Trade(
+            Id: Guid.NewGuid(),
+            Symbol: "2330",
+            Exchange: "TWSE",
+            Name: "台積電",
+            Type: tradeType,
+            TradeDate: new DateTime(2026, 5, 27),
+            Price: 600m,
+            Quantity: tradeType == TradeType.StockDividend ? 100 : 10,
+            RealizedPnl: null,
+            RealizedPnlPct: null,
+            CashAmount: tradeType == TradeType.Sell ? 6_000m : null,
+            PortfolioEntryId: entryId));
+        var vm = CreateVm(trades: new ObservableCollection<TradeRowViewModel> { row });
+
+        vm.EditTradeCommand.Execute(row);
+
+        Assert.Equal(expectedTxType, vm.TxType);
+        Assert.NotNull(vm.SelectedAsset);
+        // Synthesized subject is investment-kind with the row's symbol — NOT null, NOT a wrong kind.
+        Assert.True(vm.SelectedAsset.Kind is TxAssetKind.Stock or TxAssetKind.Fund
+            or TxAssetKind.Crypto or TxAssetKind.Metal or TxAssetKind.Bond);
+        Assert.Equal("2330", vm.SelectedAsset.Symbol);
+        // The synthesized subject must be in the picker's source so the ComboBox renders it.
+        Assert.Contains(vm.AvailableAssets, a => ReferenceEquals(a, vm.SelectedAsset));
+        // Type picker is hydrated (not blank) and contains the expected type.
+        Assert.True(vm.CanSelectTxType);
+        Assert.Contains(vm.AvailableTradeTypes, t => t.Key == expectedTxType);
+    }
+
+    [Fact]
+    public void EditTrade_CashDividendWithClosedPosition_PreselectsInvestmentNotCashAccount()
+    {
+        // The trade has a CashAccountId (where the dividend was paid in), and the cash account
+        // still exists — but the underlying position is closed and absent from `positions`.
+        // The symbol lookup misses; resolution must NOT fall through to the CashAccount branch
+        // (which would mis-resolve to a CashAccount-kind subject and blank the cashDiv type),
+        // but instead synthesize the investment subject.
+        var cash = MakeCashAccount("富邦", "TWD");
+        var row = new TradeRowViewModel(new Trade(
+            Id: Guid.NewGuid(),
+            Symbol: "0056",
+            Exchange: "TWSE",
+            Name: "元大高股息",
+            Type: TradeType.CashDividend,
+            TradeDate: new DateTime(2026, 5, 27),
+            Price: 0m,
+            Quantity: 10,
+            RealizedPnl: null,
+            RealizedPnlPct: null,
+            CashAmount: 500m,
+            CashAccountId: cash.Id,
+            PortfolioEntryId: Guid.NewGuid()));
+        var vm = CreateVm(
+            trades: new ObservableCollection<TradeRowViewModel> { row },
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { cash });
+
+        vm.EditTradeCommand.Execute(row);
+
+        Assert.Equal("cashDiv", vm.TxType);
+        Assert.NotNull(vm.SelectedAsset);
+        Assert.NotEqual(TxAssetKind.CashAccount, vm.SelectedAsset.Kind);
+        Assert.Equal("0056", vm.SelectedAsset.Symbol);
+        Assert.Contains(vm.AvailableAssets, a => ReferenceEquals(a, vm.SelectedAsset));
+        // Type picker not blank — contains the cashDiv key.
+        Assert.True(vm.CanSelectTxType);
+        Assert.Contains(vm.AvailableTradeTypes, t => t.Key == "cashDiv");
+    }
+
     [Theory]
     [InlineData(TradeType.Deposit, "deposit")]
     [InlineData(TradeType.Withdrawal, "withdrawal")]

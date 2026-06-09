@@ -367,6 +367,14 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private Guid? _revisionSourceTradeId;
     private bool _preserveRevisionSourceOnClose;
 
+    // Q02 — the trade row currently being edited, kept so BuildAvailableAssets can inject a
+    // synthesized subject for an asset that's no longer in the live Positions/CashAccounts/
+    // Liabilities view (e.g. a CLOSED lot excluded by HideEmptyPositions). The asset picker
+    // ComboBox renders blank unless SelectedItem ∈ ItemsSource, so the synthesized subject must
+    // be part of AvailableAssets — not just assigned to SelectedAsset. Edit-only: OpenTxDialog
+    // clears it so the create path never carries a synthesized entry and the next open is clean.
+    private TradeRowViewModel? _editingTradeRow;
+
     // Phase 2.1 — asset selector state. P2.2 adds the cascade below.
     [ObservableProperty] private TxAssetSubject? _selectedAsset;
 
@@ -731,6 +739,17 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 Currency: liab.BalanceAsMoney.Currency));
         }
 
+        // Q02 — 編輯一筆標的已不在 live view 的交易（例：已平倉持倉被 HideEmptyPositions 排除）時，
+        // 合成該交易的 subject 併入 regular，否則 picker ComboBox 因 SelectedItem ∉ ItemsSource 而空白、
+        // AvailableTradeTypes 也因 SelectedAsset.Kind 過濾不到而清空。已存在等價 subject（同 Kind+Id/Symbol）
+        // 時優先用真的那筆，不重複加入。
+        if (_editingTradeRow is { } editingRow &&
+            SynthesizeAssetSubject(editingRow) is { } synthesized &&
+            !regular.Any(a => IsSameSubject(a, synthesized)))
+        {
+            regular.Add(synthesized);
+        }
+
         // Step 2：拼成最終 list = 最近使用 group → regular 三大群 → 新增資產 sentinel。
         var final = new List<TxAssetSubject>(regular.Count + Core.Models.AppSettings.MaxRecentlyUsedAssets + 1);
 
@@ -801,8 +820,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             if (hit is not null)
                 return hit;
         }
-        // 3. Cash flow → CashAccount by CashAccountId
-        if (row.Type is TradeType.Deposit or TradeType.Withdrawal or TradeType.Income or TradeType.CashDividend or TradeType.Transfer
+        // 3. Cash flow → CashAccount by CashAccountId.
+        // Q02 — CashDividend 不在此列：它的標的是投資資產（走 step 2 的 symbol 比對），其 CashAccountId
+        // 只是入帳帳戶。若 step 2 因持倉已平倉而 miss，這裡再用 CashAccountId 命中會誤解析成 CashAccount
+        // （Kind 錯），導致 cashDiv 不在 AvailableTradeTypes、類型 picker 空白。故讓它落到 step 5 合成投資 subject。
+        if (row.Type is TradeType.Deposit or TradeType.Withdrawal or TradeType.Income or TradeType.Transfer
             && row.CashAccountId is { } cashId)
         {
             var hit = assets.FirstOrDefault(a => a.Kind == TxAssetKind.CashAccount && a.Id == cashId);
@@ -837,7 +859,89 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                     return hit;
             }
         }
+
+        // 5. Q02 — live-collection 全部 miss（標的已不在清單，如已平倉持倉）：合成一個 subject。
+        // BuildAvailableAssets 在 _editingTradeRow 設定時已把同一個合成 subject 併入 AvailableAssets，
+        // 故此處回傳的物件保證 ∈ ItemsSource（ComboBox 才渲染得出來）。先在 assets 找等價的真 subject
+        // 以優先採用真資料，找不到才用合成那筆。
+        if (SynthesizeAssetSubject(row) is { } synthesized)
+            return assets.FirstOrDefault(a => IsSameSubject(a, synthesized)) ?? synthesized;
+
         return null;
+    }
+
+    /// <summary>
+    /// Q02 — 依交易類型從 <see cref="TradeRowViewModel"/> 合成一個 <see cref="TxAssetSubject"/>，
+    /// 供 live view 找不到對應標的時 fallback 用（典型情境：已平倉/空持倉被 HideEmptyPositions 濾掉）。
+    /// Kind 對齊交易類型的標的種類：Buy/Sell/Dividend → Investment、Loan/CreditCard → Liability、
+    /// Cash flow → CashAccount。資料不足以合成（缺 Symbol/帳戶 id/標籤）時回 null。
+    /// </summary>
+    private TxAssetSubject? SynthesizeAssetSubject(TradeRowViewModel row)
+    {
+        switch (row.Type)
+        {
+            // 投資類：用 Symbol 當識別，Stock kind 涵蓋 buy/sell/cashDiv/stockDiv 四個 type（見
+            // ResolveAvailableTypeKeys）。幣別取 row.InstrumentCurrency（DB 預設 "TWD"）。
+            case TradeType.Buy or TradeType.Sell or TradeType.CashDividend or TradeType.StockDividend:
+                if (string.IsNullOrWhiteSpace(row.Symbol))
+                    return null;
+                var ccy = string.IsNullOrWhiteSpace(row.InstrumentCurrency) ? "TWD" : row.InstrumentCurrency;
+                var name = string.IsNullOrWhiteSpace(row.Name) ? row.Symbol : row.Name;
+                return new TxAssetSubject(
+                    Kind: TxAssetKind.Stock,
+                    Id: row.PortfolioEntryId ?? Guid.Empty,
+                    PrimaryName: name,
+                    SecondaryLine: $"({row.Symbol}) · {ccy}",
+                    GroupKey: "Portfolio.Tx.Asset.Group.Investment",
+                    Currency: ccy,
+                    Symbol: row.Symbol);
+
+            // 負債類：貸款以 LoanLabel 當名稱、信用卡以 row.Name；Id 取 LiabilityAssetId（沒有則哨兵 Empty）。
+            case TradeType.LoanBorrow or TradeType.LoanRepay or TradeType.CreditCardCharge or TradeType.CreditCardPayment:
+                var label = row.Type is TradeType.LoanBorrow or TradeType.LoanRepay
+                    ? row.LoanLabel ?? row.Name
+                    : row.Name;
+                if (string.IsNullOrWhiteSpace(label))
+                    return null;
+                return new TxAssetSubject(
+                    Kind: TxAssetKind.Liability,
+                    Id: row.LiabilityAssetId ?? Guid.Empty,
+                    PrimaryName: label,
+                    SecondaryLine: "DEBT",
+                    GroupKey: "Portfolio.Tx.Asset.Group.Liability",
+                    Currency: string.IsNullOrWhiteSpace(row.SettlementCurrency) ? "TWD" : row.SettlementCurrency);
+
+            // 現金流：以 CashAccountId 當識別。帳戶仍存在通常 step 3 已命中，此處覆蓋帳戶被刪等罕見情形。
+            case TradeType.Deposit or TradeType.Withdrawal or TradeType.Income or TradeType.Transfer:
+                if (row.CashAccountId is not { } accId)
+                    return null;
+                return new TxAssetSubject(
+                    Kind: TxAssetKind.CashAccount,
+                    Id: accId,
+                    PrimaryName: string.IsNullOrWhiteSpace(row.Name) ? "—" : row.Name,
+                    SecondaryLine: "CASH",
+                    GroupKey: "Portfolio.Tx.Asset.Group.Cash",
+                    Currency: string.IsNullOrWhiteSpace(row.SettlementCurrency) ? "TWD" : row.SettlementCurrency,
+                    SuggestedCashAccountId: accId);
+
+            default:
+                return null;
+        }
+    }
+
+    /// <summary>
+    /// Q02 — 兩個 subject 是否指同一資產：同 Kind 且（Id 相同且非 Empty）或（投資類 Symbol 相同）。
+    /// 用於去重，讓真實 subject 優先於合成 subject。
+    /// </summary>
+    private static bool IsSameSubject(TxAssetSubject a, TxAssetSubject b)
+    {
+        if (a.Kind != b.Kind)
+            return false;
+        if (a.Id != Guid.Empty && a.Id == b.Id)
+            return true;
+        return IsInvestmentAssetKind(a.Kind)
+            && !string.IsNullOrWhiteSpace(a.Symbol)
+            && string.Equals(a.Symbol, b.Symbol, StringComparison.OrdinalIgnoreCase);
     }
 
     private TxAssetSubject? ResolveAssetSubjectForPosition(PortfolioRowViewModel row)
@@ -2049,6 +2153,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         // P2.2 — 新 dialog 一開始重置「使用者改過 currency」標記，否則上次手動改過會延續。
         SelectedAsset = null;
         _userTouchedCurrency = false;
+        // Q02 — 非編輯路徑（含 OpenTxDialogForPosition/Liability 先呼叫本方法）清掉編輯 row，
+        // 確保 BuildAvailableAssets 不會殘留上次編輯時注入的合成 subject。
+        _editingTradeRow = null;
         // P2.7 — 上次 dialog 殘留的搜尋字串可能誤過濾掉這次的資產，先清掉再 rebuild view。
         AssetSearchText = string.Empty;
         // 資產清單可能在上次 dialog 期間有變動（新增持倉 / 帳戶 / 負債）— 重建 cache + grouped view。
@@ -2243,6 +2350,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         IsRevisionMode = false;
         IsAssetContextLocked = false;
         TxLoanScheduleEntryId = null;
+        // Q02 — 記住正在編輯的 row，讓接下來的 InvalidateAvailableAssetsCache → BuildAvailableAssets
+        // 在標的不在 live view 時併入合成 subject（必須在 invalidate 之前設，rebuild 才會包含它）。
+        _editingTradeRow = row;
         // P2.7 — 編輯模式不需要殘留的搜尋字串干擾 picker。
         AssetSearchText = string.Empty;
         // 資產清單可能在 dialog 上次關閉後有變動 — 進編輯模式前也重建 cache 一次，
