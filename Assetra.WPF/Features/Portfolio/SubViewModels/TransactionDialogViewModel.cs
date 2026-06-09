@@ -984,6 +984,14 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             string.Equals(a.PrimaryName, row.Label, StringComparison.OrdinalIgnoreCase));
     }
 
+    private TxAssetSubject? ResolveAssetSubjectForCashAccount(CashAccountRowViewModel row) =>
+        row is null
+            ? null
+            : AvailableAssets.FirstOrDefault(a =>
+                a.Kind == TxAssetKind.CashAccount &&
+                a.GroupKey != "Portfolio.Tx.Asset.Group.Recent" &&
+                a.Id == row.Id);
+
     private static TxAssetKind MapAssetType(Core.Models.AssetType t) => t switch
     {
         Core.Models.AssetType.Stock => TxAssetKind.Stock,
@@ -2300,6 +2308,27 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         TxType = string.IsNullOrWhiteSpace(txType)
             ? row.IsCreditCard ? "creditCardPayment" : "loanRepay"
             : txType;
+    }
+
+    /// <summary>
+    /// Q05 — Cash detail panel「+ 新增交易」用：開啟 Tx 對話框、預選對應的資金帳戶
+    /// subject 並鎖定統一資產選擇器（隱藏冗餘 picker），同時預填 TxCashAccount + TxType。
+    /// transfer 時鎖定來源帳戶與編輯模式一致；轉帳目標帳戶選擇器（Transfer.Target）
+    /// 由 TxTypeIsTransfer 控制顯示，與 ShowAssetSelector 無關，故鎖定後仍可選目標。
+    /// </summary>
+    internal void OpenTxDialogForCashAccount(CashAccountRowViewModel row, string txType)
+    {
+        OpenTxDialog();
+
+        var asset = ResolveAssetSubjectForCashAccount(row);
+        if (asset is not null)
+        {
+            SelectedAsset = asset;
+            IsAssetContextLocked = true;
+        }
+
+        TxCashAccount = row;
+        TxType = string.IsNullOrWhiteSpace(txType) ? "deposit" : txType;
     }
 
     internal void OpenTxDialogForLoanSchedule(LiabilityRowViewModel row, LoanScheduleRowViewModel entry)

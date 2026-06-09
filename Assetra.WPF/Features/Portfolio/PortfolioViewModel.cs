@@ -1250,9 +1250,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     {
         if (SelectedCashRow is null || string.IsNullOrEmpty(txType))
             return;
-        Transaction.OpenTxDialog();
-        Transaction.TxType = txType;
-        Transaction.TxCashAccount = SelectedCashRow;
+        Transaction.OpenTxDialogForCashAccount(SelectedCashRow, txType);
     }
 
     /// <summary>

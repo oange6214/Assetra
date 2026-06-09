@@ -266,6 +266,45 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
+    public void OpenTxDialogForCashAccount_PreselectsAccountAndLocksAssetSelector()
+    {
+        var cash = MakeCashAccount("富邦", "TWD");
+        var vm = CreateVm(cashAccounts: new ObservableCollection<CashAccountRowViewModel> { cash });
+
+        vm.OpenTxDialogForCashAccount(cash, "deposit");
+
+        Assert.True(vm.IsTxDialogOpen);
+        Assert.True(vm.IsAssetContextLocked);
+        Assert.False(vm.ShowAssetSelector);
+        Assert.NotNull(vm.SelectedAsset);
+        Assert.Equal(TxAssetKind.CashAccount, vm.SelectedAsset.Kind);
+        Assert.Equal(cash.Id, vm.SelectedAsset.Id);
+        Assert.Equal("deposit", vm.TxType);
+        Assert.Same(cash, vm.TxCashAccount);
+    }
+
+    [Fact]
+    public void OpenTxDialogForCashAccount_TransferLocksSourceAndKeepsTargetPickerAvailable()
+    {
+        var source = MakeCashAccount("台新 Richart", "TWD");
+        var target = MakeCashAccount("富邦", "TWD");
+        var vm = CreateVm(
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { source, target });
+
+        vm.OpenTxDialogForCashAccount(source, "transfer");
+
+        Assert.Equal("transfer", vm.TxType);
+        Assert.True(vm.TxTypeIsTransfer);
+        Assert.True(vm.IsAssetContextLocked);
+        // Locking the asset picker only hides the unified selector; the transfer target
+        // picker is gated by TxTypeIsTransfer and stays usable from the cash panel.
+        Assert.False(vm.ShowAssetSelector);
+        Assert.Equal(TxAssetKind.CashAccount, vm.SelectedAsset!.Kind);
+        Assert.Equal(source.Id, vm.SelectedAsset.Id);
+        Assert.Same(source, vm.TxCashAccount);
+    }
+
+    [Fact]
     public void OpenTxDialogForLoanSchedule_PrefillsScheduleEntryAndLocksLoanAsset()
     {
         var liability = MakeLoanLiability();
