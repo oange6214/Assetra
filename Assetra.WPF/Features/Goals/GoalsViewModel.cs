@@ -212,6 +212,11 @@ public sealed partial class GoalsViewModel : ObservableObject
     [ObservableProperty] private DateTime? _selectedFundingStartDate = DateTime.Today;
     [ObservableProperty] private DateTime? _selectedFundingEndDate;
 
+    // Q07 結果呈現精簡：編輯表單預設摺疊，清單保持可見。
+    // 點「編輯」時自動展開（見填好的表單）、新增/編輯成功後收合回清單。
+    [ObservableProperty] private bool _isMilestoneEditorExpanded;
+    [ObservableProperty] private bool _isFundingEditorExpanded;
+
     public bool IsGoalDetailOpen => SelectedGoal is not null;
     public string SelectedMilestoneSubmitText => _editingSelectedMilestoneId.HasValue
         ? L("Goals.Detail.SaveMilestone", "Save milestone")
@@ -485,6 +490,7 @@ public sealed partial class GoalsViewModel : ObservableObject
             }
 
             ResetSelectedMilestoneForm();
+            IsMilestoneEditorExpanded = false;
         }
         catch (Exception ex)
         {
@@ -505,6 +511,7 @@ public sealed partial class GoalsViewModel : ObservableObject
         SelectedMilestoneLabel = row.Milestone.Label;
         SelectedMilestoneTargetAmount = row.Milestone.TargetAmount.ToString("N0", CultureInfo.CurrentCulture);
         SelectedMilestoneTargetDate = row.Milestone.TargetDate.ToDateTime(TimeOnly.MinValue);
+        IsMilestoneEditorExpanded = true;
         OnPropertyChanged(nameof(SelectedMilestoneSubmitText));
     }
 
@@ -601,6 +608,7 @@ public sealed partial class GoalsViewModel : ObservableObject
             }
 
             ResetSelectedFundingRuleForm();
+            IsFundingEditorExpanded = false;
             UpdateSelectedGoalPlanning(DateOnly.FromDateTime(DateTime.Today));
         }
         catch (Exception ex)
@@ -623,6 +631,7 @@ public sealed partial class GoalsViewModel : ObservableObject
         SelectedFundingFrequency = row.Rule.Frequency;
         SelectedFundingStartDate = row.Rule.StartDate.ToDateTime(TimeOnly.MinValue);
         SelectedFundingEndDate = row.Rule.EndDate?.ToDateTime(TimeOnly.MinValue);
+        IsFundingEditorExpanded = true;
         OnPropertyChanged(nameof(SelectedFundingRuleSubmitText));
     }
 
@@ -757,6 +766,8 @@ public sealed partial class GoalsViewModel : ObservableObject
         _selectedFundingRules.Clear();
         ResetSelectedMilestoneForm();
         ResetSelectedFundingRuleForm();
+        IsMilestoneEditorExpanded = false;
+        IsFundingEditorExpanded = false;
         _selectedPlanningCurrentAmount = null;
         GoalDetailError = null;
         ClearSelectedGoalPlanning();

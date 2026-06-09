@@ -1562,6 +1562,7 @@
     <sys:String x:Key="Goals.Detail.Fire.LastSyncUnavailable">Not recorded</sys:String>
     <sys:String x:Key="Goals.Detail.Milestones">Milestones</sys:String>
     <sys:String x:Key="Goals.Detail.Milestones.Empty">No milestones yet</sys:String>
+    <sys:String x:Key="Goals.Detail.MilestoneEditor.Header">Add / edit milestone</sys:String>
     <sys:String x:Key="Goals.Detail.AddMilestone">Add milestone</sys:String>
     <sys:String x:Key="Goals.Detail.SaveMilestone">Save milestone</sys:String>
     <sys:String x:Key="Goals.Detail.EditMilestone">Edit milestone</sys:String>
@@ -1571,6 +1572,7 @@
     <sys:String x:Key="Goals.Detail.Milestone.Date">Target date</sys:String>
     <sys:String x:Key="Goals.Detail.FundingRules">Funding rules</sys:String>
     <sys:String x:Key="Goals.Detail.FundingRules.Empty">No funding rules yet</sys:String>
+    <sys:String x:Key="Goals.Detail.FundingEditor.Header">Add / edit funding rule</sys:String>
     <sys:String x:Key="Goals.Detail.AddFundingRule">Add funding rule</sys:String>
     <sys:String x:Key="Goals.Detail.SaveFundingRule">Save funding rule</sys:String>
     <sys:String x:Key="Goals.Detail.EditFundingRule">Edit funding rule</sys:String>

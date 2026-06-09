@@ -1567,6 +1567,7 @@
     <sys:String x:Key="Goals.Detail.Fire.LastSyncUnavailable">未記錄</sys:String>
     <sys:String x:Key="Goals.Detail.Milestones">里程碑</sys:String>
     <sys:String x:Key="Goals.Detail.Milestones.Empty">尚未設定里程碑</sys:String>
+    <sys:String x:Key="Goals.Detail.MilestoneEditor.Header">新增 / 編輯里程碑</sys:String>
     <sys:String x:Key="Goals.Detail.AddMilestone">新增里程碑</sys:String>
     <sys:String x:Key="Goals.Detail.SaveMilestone">儲存里程碑</sys:String>
     <sys:String x:Key="Goals.Detail.EditMilestone">編輯里程碑</sys:String>
@@ -1576,6 +1577,7 @@
     <sys:String x:Key="Goals.Detail.Milestone.Date">目標日期</sys:String>
     <sys:String x:Key="Goals.Detail.FundingRules">撥款規則</sys:String>
     <sys:String x:Key="Goals.Detail.FundingRules.Empty">尚未設定撥款規則</sys:String>
+    <sys:String x:Key="Goals.Detail.FundingEditor.Header">新增 / 編輯定期投入</sys:String>
     <sys:String x:Key="Goals.Detail.AddFundingRule">新增撥款規則</sys:String>
     <sys:String x:Key="Goals.Detail.SaveFundingRule">儲存撥款規則</sys:String>
     <sys:String x:Key="Goals.Detail.EditFundingRule">編輯撥款規則</sys:String>

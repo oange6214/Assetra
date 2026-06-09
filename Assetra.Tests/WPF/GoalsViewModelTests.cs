@@ -1067,4 +1067,190 @@ public sealed class GoalsViewModelTests
             WeakReferenceMessenger.Default.UnregisterAll(vm);
         }
     }
+
+    [Fact] // WHY: Q07 結果呈現精簡——清單預設可見，編輯表單收合。按「編輯」要自動展開
+            // 表單（讓使用者看到填好的欄位），成功儲存後收合回清單，避免表單長期佔據版面。
+    public async Task EditSelectedMilestone_ExpandsEditor_AndSuccessfulSubmitCollapsesIt()
+    {
+        var goal = new FinancialGoal(
+            Guid.NewGuid(),
+            "House fund",
+            1_000_000m,
+            250_000m,
+            new DateOnly(2027, 12, 31),
+            null);
+        var milestone = new GoalMilestone(
+            Guid.NewGuid(),
+            goal.Id,
+            new DateOnly(2026, 6, 30),
+            400_000m,
+            "First target",
+            IsAchieved: false);
+
+        var repo = new Mock<IFinancialGoalRepository>();
+        repo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([goal]);
+        var milestones = new Mock<IGoalMilestoneRepository>();
+        milestones.Setup(r => r.GetByGoalAsync(goal.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([milestone]);
+        milestones.Setup(r => r.UpdateAsync(It.IsAny<GoalMilestone>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var vm = new GoalsViewModel(repo.Object, milestoneRepository: milestones.Object);
+
+        try
+        {
+            await vm.LoadAsync();
+            await vm.OpenGoalDetailCommand.ExecuteAsync(vm.Goals[0]);
+
+            Assert.False(vm.IsMilestoneEditorExpanded);
+
+            vm.EditSelectedMilestoneCommand.Execute(vm.SelectedMilestones[0]);
+
+            Assert.True(vm.IsMilestoneEditorExpanded);
+
+            vm.SelectedMilestoneLabel = "Closing target";
+            vm.SelectedMilestoneTargetAmount = "750000";
+            vm.SelectedMilestoneTargetDate = new DateTime(2026, 12, 31);
+
+            await vm.AddSelectedMilestoneCommand.ExecuteAsync(null);
+
+            Assert.False(vm.IsMilestoneEditorExpanded);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(vm);
+        }
+    }
+
+    [Fact] // WHY: 同里程碑——定期投入編輯表單也要按「編輯」展開、成功儲存後收合，
+            // 維持「清單為主、編輯為輔」的精簡版面。
+    public async Task EditSelectedFundingRule_ExpandsEditor_AndSuccessfulSubmitCollapsesIt()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var goal = new FinancialGoal(
+            Guid.NewGuid(),
+            "House fund",
+            120_000m,
+            0m,
+            today.AddMonths(11),
+            null);
+        var fundingRule = new GoalFundingRule(
+            Guid.NewGuid(),
+            goal.Id,
+            4_000m,
+            RecurrenceFrequency.Monthly,
+            SourceCashAccountId: null,
+            today,
+            EndDate: null);
+
+        var repo = new Mock<IFinancialGoalRepository>();
+        repo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([goal]);
+        var fundingRules = new Mock<IGoalFundingRuleRepository>();
+        fundingRules.Setup(r => r.GetByGoalAsync(goal.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([fundingRule]);
+        fundingRules.Setup(r => r.UpdateAsync(It.IsAny<GoalFundingRule>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var vm = new GoalsViewModel(repo.Object, fundingRuleRepository: fundingRules.Object);
+
+        try
+        {
+            await vm.LoadAsync();
+            await vm.OpenGoalDetailCommand.ExecuteAsync(vm.Goals[0]);
+
+            Assert.False(vm.IsFundingEditorExpanded);
+
+            vm.EditSelectedFundingRuleCommand.Execute(vm.SelectedFundingRules[0]);
+
+            Assert.True(vm.IsFundingEditorExpanded);
+
+            vm.SelectedFundingAmount = "8000";
+            vm.SelectedFundingFrequency = RecurrenceFrequency.Monthly;
+            vm.SelectedFundingStartDate = DateTime.Today;
+
+            await vm.AddSelectedFundingRuleCommand.ExecuteAsync(null);
+
+            Assert.False(vm.IsFundingEditorExpanded);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(vm);
+        }
+    }
+
+    [Fact] // WHY: 切換到另一個目標時，前一個目標展開的編輯表單必須收合，
+            // 否則新目標一開啟就帶著殘留的展開狀態（與舊資料），版面與狀態都不一致。
+    public async Task OpenGoalDetail_OnDifferentGoal_ResetsBothEditorsCollapsed()
+    {
+        var goalA = new FinancialGoal(
+            Guid.NewGuid(),
+            "House fund",
+            1_000_000m,
+            250_000m,
+            new DateOnly(2027, 12, 31),
+            null);
+        var goalB = new FinancialGoal(
+            Guid.NewGuid(),
+            "Emergency fund",
+            300_000m,
+            50_000m,
+            new DateOnly(2027, 6, 30),
+            null);
+        var milestoneA = new GoalMilestone(
+            Guid.NewGuid(),
+            goalA.Id,
+            new DateOnly(2026, 6, 30),
+            400_000m,
+            "First target",
+            IsAchieved: false);
+        var fundingRuleA = new GoalFundingRule(
+            Guid.NewGuid(),
+            goalA.Id,
+            4_000m,
+            RecurrenceFrequency.Monthly,
+            SourceCashAccountId: null,
+            new DateOnly(2026, 1, 1),
+            EndDate: null);
+
+        var repo = new Mock<IFinancialGoalRepository>();
+        repo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([goalA, goalB]);
+        var milestones = new Mock<IGoalMilestoneRepository>();
+        milestones.Setup(r => r.GetByGoalAsync(goalA.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([milestoneA]);
+        milestones.Setup(r => r.GetByGoalAsync(goalB.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        var fundingRules = new Mock<IGoalFundingRuleRepository>();
+        fundingRules.Setup(r => r.GetByGoalAsync(goalA.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([fundingRuleA]);
+        fundingRules.Setup(r => r.GetByGoalAsync(goalB.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        var vm = new GoalsViewModel(
+            repo.Object,
+            milestoneRepository: milestones.Object,
+            fundingRuleRepository: fundingRules.Object);
+
+        try
+        {
+            await vm.LoadAsync();
+            await vm.OpenGoalDetailCommand.ExecuteAsync(vm.Goals[0]);
+
+            vm.EditSelectedMilestoneCommand.Execute(vm.SelectedMilestones[0]);
+            vm.EditSelectedFundingRuleCommand.Execute(vm.SelectedFundingRules[0]);
+            Assert.True(vm.IsMilestoneEditorExpanded);
+            Assert.True(vm.IsFundingEditorExpanded);
+
+            await vm.OpenGoalDetailCommand.ExecuteAsync(vm.Goals[1]);
+
+            Assert.False(vm.IsMilestoneEditorExpanded);
+            Assert.False(vm.IsFundingEditorExpanded);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(vm);
+        }
+    }
 }
