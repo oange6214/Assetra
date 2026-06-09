@@ -150,7 +150,9 @@ internal static class PortfolioServiceCollectionExtensions
             sp.GetRequiredService<IPortfolioRepository>(),
             sp.GetRequiredService<IPortfolioPositionLogRepository>(),
             sp.GetRequiredService<ITransactionService>(),
-            sp.GetRequiredService<ISymbolDirectory>()));
+            sp.GetRequiredService<ISymbolDirectory>(),
+            // 美股代號目錄（NASDAQ）：供新增投資對話框判斷目錄是否已下載。
+            sp.GetService<IRefreshableSymbolDirectory>()));
         services.AddSingleton<ITransactionWorkflowService>(sp =>
             new TransactionWorkflowService(
                 sp.GetRequiredService<ITransactionService>()));

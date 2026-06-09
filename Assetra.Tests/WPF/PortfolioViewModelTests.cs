@@ -2790,6 +2790,90 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task Watchlist_UsSymbolWithoutTwelveDataKey_ShowsFallbackNotice_ButStillAdds()
+    {
+        // WHY: 美股代號在未設定 Twelve Data 金鑰時，使用者需要被告知會走 Yahoo 後備來源
+        // （可能延遲/受限），但這只是 advisory — 加入流程必須照常完成（qty-0 entry 允許）。
+        // 沒有注入 IAppSettingsService（Settings=null）時，視同未填金鑰。
+        var portfolioRepo = new Mock<IPortfolioRepository>();
+        portfolioRepo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(Array.Empty<PortfolioEntry>());
+
+        var search = new Mock<IStockSearchService>();
+        search.Setup(s => s.GetExchange("AAPL")).Returns("NASDAQ");
+
+        var workflow = new Mock<IAddAssetWorkflowService>();
+        // 代號已知、目錄已下載 → 唯一該出現的提示是「無金鑰 → Yahoo 後備」。
+        workflow.Setup(w => w.CheckWatchlistSymbol("AAPL", It.IsAny<string?>()))
+            .Returns(new WatchlistSymbolReadiness(IsResolved: true, UsDirectoryReady: true));
+        workflow.Setup(w => w.EnsureStockEntryAsync(It.IsAny<EnsureStockEntryRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EnsureStockEntryRequest request, CancellationToken _) =>
+                new PortfolioEntry(Guid.NewGuid(), request.Symbol, request.Exchange ?? "NASDAQ"));
+
+        var (snapshotSvc, snapshotRepo) = SnapshotStubs();
+        var (logRepo, backfill) = BackfillStubs(snapshotRepo);
+        var vm = new PortfolioViewModel(
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: new FakeTradeRepo()),
+            new PortfolioServices(
+                SilentStockService().Object,
+                search.Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                AddAsset: workflow.Object),
+            new PortfolioUiServices(ImmediateScheduler.Instance));
+
+        vm.OpenAddWatchlistDialogCommand.Execute(null);
+        vm.WatchlistSymbol = "AAPL";
+
+        // Advisory notice computed on symbol change — mentions the key + fallback source.
+        Assert.False(string.IsNullOrEmpty(vm.WatchlistNotice));
+        Assert.Contains("Yahoo", vm.WatchlistNotice!);
+        Assert.Contains("金鑰", vm.WatchlistNotice!);
+
+        await vm.ConfirmAddWatchlistCommand.ExecuteAsync(null);
+
+        // Notice never blocks: the add still runs and the dialog closes.
+        Assert.Empty(vm.WatchlistError);
+        Assert.False(vm.IsAddWatchlistOpen);
+        workflow.Verify(w => w.EnsureStockEntryAsync(
+            It.Is<EnsureStockEntryRequest>(r => r.Symbol == "AAPL"),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public void Watchlist_UnresolvedSymbolWithLoadedDirectory_ShowsNotFoundNotice()
+    {
+        // WHY: 目錄已下載但查無此代號 → 軟性提示「找不到此代號」。仍不阻擋加入
+        // （目錄可能過期），只是引導使用者確認拼寫。
+        var portfolioRepo = new Mock<IPortfolioRepository>();
+        portfolioRepo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(Array.Empty<PortfolioEntry>());
+
+        var search = new Mock<IStockSearchService>();
+        search.Setup(s => s.GetExchange("ZZZZ")).Returns((string?)null);
+
+        var workflow = new Mock<IAddAssetWorkflowService>();
+        workflow.Setup(w => w.InferExchange("ZZZZ")).Returns("NASDAQ");
+        // 目錄已下載 (UsDirectoryReady) 但解析不到 (IsResolved=false) → not-found 提示。
+        workflow.Setup(w => w.CheckWatchlistSymbol("ZZZZ", It.IsAny<string?>()))
+            .Returns(new WatchlistSymbolReadiness(IsResolved: false, UsDirectoryReady: true));
+
+        var (snapshotSvc, snapshotRepo) = SnapshotStubs();
+        var (logRepo, backfill) = BackfillStubs(snapshotRepo);
+        var vm = new PortfolioViewModel(
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: new FakeTradeRepo()),
+            new PortfolioServices(
+                SilentStockService().Object,
+                search.Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                AddAsset: workflow.Object),
+            new PortfolioUiServices(ImmediateScheduler.Instance));
+
+        vm.OpenAddWatchlistDialogCommand.Execute(null);
+        vm.WatchlistSymbol = "ZZZZ";
+
+        Assert.False(string.IsNullOrEmpty(vm.WatchlistNotice));
+        Assert.Contains("找不到此代號", vm.WatchlistNotice!);
+    }
+
+    [Fact]
     public async Task ClosePriceLookup_DoesNotReplaceUserTypedUnitPrice()
     {
         // Regression: the asynchronous close-price lookup can finish after the
@@ -3637,6 +3721,9 @@ public class PortfolioViewModelTests
                 new PositionSnapshot(Guid.NewGuid(), request.Quantity, request.TotalCost, request.UnitPrice, 0m, DateOnly.FromDateTime(DateTime.Today))));
 
         public string InferExchange(string symbol) => "TWSE";
+
+        public WatchlistSymbolReadiness CheckWatchlistSymbol(string symbol, string? exchange = null) =>
+            new(IsResolved: false, UsDirectoryReady: false);
     }
 
     private sealed class NoopAccountUpsertWorkflow : IAccountUpsertWorkflowService

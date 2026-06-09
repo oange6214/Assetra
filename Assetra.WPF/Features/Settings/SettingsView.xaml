@@ -512,6 +512,14 @@
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Settings.FugleApiKeyHint}"
                                 TextWrapping="Wrap" />
+                            <!--  已選 Fugle 但未填金鑰 → 回退提示（warning 色，僅此情況顯示）  -->
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppDown}"
+                                Text="{DynamicResource Settings.Fugle.KeyMissingWarning}"
+                                TextWrapping="Wrap"
+                                Visibility="{Binding ShowFugleKeyMissingWarning, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             <TextBlock
                                 Margin="0,4,0,0"
                                 FontSize="{StaticResource Font.Size.Xs}"
@@ -568,6 +576,13 @@
                                 FontSize="{StaticResource Font.Size.Xs}"
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Text="{DynamicResource Settings.TwelveDataApiKeyHint}"
+                                TextWrapping="Wrap" />
+                            <!--  未填金鑰時的 Yahoo 後備來源說明（恆顯示，純靜態提示）  -->
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Settings.TwelveData.FallbackHint}"
                                 TextWrapping="Wrap" />
                             <TextBlock
                                 Margin="0,4,0,0"

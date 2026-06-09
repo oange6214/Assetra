@@ -114,9 +114,14 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     /// </summary>
     [ObservableProperty] private string _defaultCommissionDiscount = "1.0";
     [ObservableProperty] private string _defaultCommissionDiscountError = string.Empty;
-    [ObservableProperty] private string _quoteProvider = "official";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowFugleKeyMissingWarning))]
+    private string _quoteProvider = "official";
     [ObservableProperty] private string _historyProvider = "twse";
-    [ObservableProperty] private string _fugleApiKey = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowFugleKeyMissingWarning))]
+    private string _fugleApiKey = string.Empty;
     [ObservableProperty] private string _twelveDataApiKey = string.Empty;
     [ObservableProperty] private string _twelveDataTestStatus = string.Empty;
 
@@ -242,6 +247,15 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
     public string AppVersion { get; } = ResolveAppVersion();
     public bool IsFugleConfigured => !string.IsNullOrWhiteSpace(FugleApiKey);
+
+    /// <summary>
+    /// 已選 Fugle 即時報價來源但尚未填入 API 金鑰時為 true。XAML 在 Fugle 金鑰欄附近顯示
+    /// 一行 warning，提醒此情況會自動回退至 TWSE/TPEX 官方資料。比較不分大小寫（provider
+    /// 正規化後恆為小寫 "fugle"，仍以 OrdinalIgnoreCase 防呆）。
+    /// </summary>
+    public bool ShowFugleKeyMissingWarning =>
+        string.Equals(QuoteProvider, "fugle", StringComparison.OrdinalIgnoreCase)
+        && string.IsNullOrWhiteSpace(FugleApiKey);
     public bool IsTwelveDataConfigured => !string.IsNullOrWhiteSpace(TwelveDataApiKey);
     public bool CanTestTwelveDataConnection =>
         !IsTestingTwelveDataConnection &&

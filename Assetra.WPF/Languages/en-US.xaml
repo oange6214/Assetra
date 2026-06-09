@@ -412,6 +412,9 @@
     <sys:String x:Key="Portfolio.Watchlist.Name">Name (optional, auto-fill if blank)</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.Currency">Currency</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AddButton">Add</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.Notice.UsNoKey">For live US quotes, add a Twelve Data API key under Settings → Data Source. For now, the Yahoo fallback source will be used (may be delayed/limited).</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.Notice.SymbolNotFound">Symbol not found — please check the spelling. If it is correct, this instrument may not be supported yet.</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.Notice.DirectoryEmpty">The US symbol directory has not been downloaded yet. Update it under Settings → Data Source and try again.</sys:String>
     <sys:String x:Key="Portfolio.Liability.Empty">No liabilities yet. Click "Add Liability" to create a loan or credit card.</sys:String>
     <sys:String x:Key="Portfolio.Liability.Name">Liability name</sys:String>
     <sys:String x:Key="Portfolio.Liability.Amount">Remaining balance</sys:String>
@@ -916,6 +919,7 @@
     <sys:String x:Key="Settings.UsSymbolDirectory.Disabled">US symbol directory is not enabled.</sys:String>
     <sys:String x:Key="Settings.UsSymbolDirectory.NeverUpdated">Never updated</sys:String>
     <sys:String x:Key="Settings.FugleApiKeyHint">Paste your Fugle API key here and click Save to enable Fugle as a data source in Settings.</sys:String>
+    <sys:String x:Key="Settings.Fugle.KeyMissingWarning">Fugle is selected but no API key is set; quotes will fall back to TWSE/TPEX official data.</sys:String>
     <sys:String x:Key="Settings.DataSource.Saved">Data source settings saved</sys:String>
     <sys:String x:Key="Settings.SaveFailed">Settings could not be saved.</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Tooltip">View how to apply for and configure a Fugle API key</sys:String>
@@ -1044,6 +1048,7 @@
     <sys:String x:Key="Settings.FugleApiKey">Fugle API Key</sys:String>
     <sys:String x:Key="Settings.TwelveDataApiKey">US live quote source - Twelve Data API key</sys:String>
     <sys:String x:Key="Settings.TwelveDataApiKeyHint">Twelve Data is used only for US quotes; Taiwan quotes can independently use TWSE / TPEX official data or Fugle. Test the API key before saving it.</sys:String>
+    <sys:String x:Key="Settings.TwelveData.FallbackHint">Without an API key, US quotes can still use the Yahoo fallback source (may be delayed).</sys:String>
     <sys:String x:Key="Settings.TwelveData.Test">Test connection</sys:String>
     <sys:String x:Key="Settings.TwelveData.Quota">Today</sys:String>
     <sys:String x:Key="Settings.TwelveData.TestSucceeded">Twelve Data connection test succeeded.</sys:String>

@@ -121,6 +121,30 @@ public class SettingsViewModelTests
     }
 
     [Fact]
+    public void ShowFugleKeyMissingWarning_TrueOnlyWhenFugleSelectedAndKeyBlank()
+    {
+        // WHY: 選了 Fugle 卻沒填金鑰時會悄悄回退到 TWSE/TPEX 官方資料；warning 行讓使用者
+        // 知道為何沒套用 Fugle。其他組合（官方 provider，或 Fugle 已填金鑰）都不該顯示。
+        var vm = CreateVm();
+
+        // 預設 provider = official → 不顯示。
+        Assert.False(vm.ShowFugleKeyMissingWarning);
+
+        // 選 Fugle 但金鑰空白 → 顯示。
+        vm.QuoteProvider = "fugle";
+        Assert.True(vm.ShowFugleKeyMissingWarning);
+
+        // 補上金鑰 → 不再顯示。
+        vm.FugleApiKey = "demo-key";
+        Assert.False(vm.ShowFugleKeyMissingWarning);
+
+        // 改回官方來源（即使金鑰被清空）→ 不顯示。
+        vm.FugleApiKey = string.Empty;
+        vm.QuoteProvider = "official";
+        Assert.False(vm.ShowFugleKeyMissingWarning);
+    }
+
+    [Fact]
     public async Task SaveDataSourceSettingsCommand_TwelveDataRequiresSuccessfulTestBeforeSave()
     {
         var saved = new List<AppSettings>();

@@ -1311,6 +1311,18 @@
                             Text="{Binding WatchlistError}"
                             Visibility="{Binding WatchlistError, Converter={StaticResource StringToVisibilityConverter}}" />
 
+                        <!--
+                            非阻擋式報價可用性提示（advisory）：美股未填金鑰／代號目錄未下載／查無代號。
+                            樣式比照 QuoteSetup 提示，用次要文字色，不影響加入流程。
+                        -->
+                        <TextBlock
+                            Margin="0,8,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{Binding WatchlistNotice}"
+                            TextWrapping="Wrap"
+                            Visibility="{Binding WatchlistNotice, Converter={StaticResource StringToVisibilityConverter}}" />
+
                         <!--  動作列：拉高到 36，間距加大，更現代  -->
                         <StackPanel
                             Margin="0,22,0,0"

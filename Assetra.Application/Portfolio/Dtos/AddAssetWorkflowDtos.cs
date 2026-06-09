@@ -77,3 +77,13 @@ public sealed record ManualAssetCreateRequest(
 public sealed record ManualAssetCreateResult(
     PortfolioEntry Entry,
     PositionSnapshot Snapshot);
+
+/// <summary>
+/// 新增投資對話框「即時報價可用性」提示用的代號判定結果（純讀取、不寫入）。
+/// <para><see cref="IsResolved"/>：代號是否能在 symbol-directory 解析到（已知商品）。</para>
+/// <para><see cref="UsDirectoryReady"/>：美股代號目錄（NASDAQ 等）是否已下載且有資料。
+/// false 代表目錄尚未下載或為空，無法用來判斷美股代號是否存在。</para>
+/// </summary>
+public sealed record WatchlistSymbolReadiness(
+    bool IsResolved,
+    bool UsDirectoryReady);

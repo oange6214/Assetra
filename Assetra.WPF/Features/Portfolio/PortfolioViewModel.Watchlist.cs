@@ -21,6 +21,17 @@ public partial class PortfolioViewModel
     [ObservableProperty] private string _watchlistError = string.Empty;
     [ObservableProperty] private bool _isWatchlistSubmitting;
 
+    /// <summary>
+    /// 非阻擋式「即時報價可用性」提示（advisory）。代號變更與 Confirm 時重算；
+    /// 成功加入後清空。永遠不阻擋加入流程（與 <see cref="WatchlistError"/> 區隔）。
+    /// 內容例如：美股未填 Twelve Data 金鑰 → 將使用 Yahoo 後備；代號目錄查無此代號；
+    /// 美股代號目錄尚未下載。null/空字串時 XAML 隱藏。
+    /// </summary>
+    [ObservableProperty] private string? _watchlistNotice;
+
+    /// <summary>代號輸入框變動時即時重算提示（cheap，純記憶體判定，不打網路）。</summary>
+    partial void OnWatchlistSymbolChanged(string value) => RefreshWatchlistNotice();
+
     /// <summary>對話框「類型」ComboBox 的選項；對齊 <see cref="AssetType"/> 全部成員。</summary>
     public IReadOnlyList<AssetType> WatchlistAssetTypeOptions { get; } = new[]
     {
@@ -46,6 +57,7 @@ public partial class PortfolioViewModel
         WatchlistSymbol = string.Empty;
         WatchlistName = string.Empty;
         WatchlistError = string.Empty;
+        WatchlistNotice = null;
         WatchlistAssetType = AssetType.Stock;
         WatchlistCurrency = "TWD";
         IsAddWatchlistOpen = true;
@@ -58,6 +70,8 @@ public partial class PortfolioViewModel
     private async Task ConfirmAddWatchlist()
     {
         WatchlistError = string.Empty;
+        // Advisory：在送出前再算一次（涵蓋使用者未觸發 change 就直接按確認的情況）。
+        RefreshWatchlistNotice();
         if (_addAssetWorkflow is null)
         {
             WatchlistError = "服務未就緒";
@@ -89,6 +103,7 @@ public partial class PortfolioViewModel
                     Currency: WatchlistCurrency));
 
             IsAddWatchlistOpen = false;
+            WatchlistNotice = null;
             _snackbar?.Success("已加入投資資產");
 
             // 重新載入持倉以讓新 entry 出現（quantity=0，需取消「隱藏空倉」才看得到）
@@ -104,4 +119,65 @@ public partial class PortfolioViewModel
             IsWatchlistSubmitting = false;
         }
     }
+
+    /// <summary>
+    /// 重算 <see cref="WatchlistNotice"/>（advisory，純記憶體判定）。規則：
+    /// <list type="bullet">
+    ///   <item>空代號 → 清空提示。</item>
+    ///   <item>美股代號 + 未填 Twelve Data 金鑰 → 提示將用 Yahoo 後備。</item>
+    ///   <item>美股代號 + 代號目錄尚未下載 → 提示先更新目錄（此時不再追加「找不到」，因目錄無法判定）。</item>
+    ///   <item>代號目錄可用但查無此代號 → 提示確認拼寫。</item>
+    /// </list>
+    /// 多條同時成立時以空白合併，保持精簡。
+    /// </summary>
+    private void RefreshWatchlistNotice()
+    {
+        var symbol = (WatchlistSymbol ?? string.Empty).Trim().ToUpperInvariant();
+        if (string.IsNullOrEmpty(symbol))
+        {
+            WatchlistNotice = null;
+            return;
+        }
+
+        // 交易所判定：先用 search service 的精確對照；查無對照時用 workflow 的 InferExchange
+        // 推導（同 EnsureStockEntry 的 fallback），再以 StockExchangeRegistry 判定是否為美股。
+        var exchange = _search?.GetExchange(symbol);
+        var isUs = IsUsExchange(exchange)
+            || (string.IsNullOrEmpty(exchange) && IsUsExchange(_addAssetWorkflow?.InferExchange(symbol)));
+
+        // 代號 / 目錄就緒狀態（純讀取）。workflow 為 null（理論上不會）時退化為「無提示」。
+        var readiness = _addAssetWorkflow?.CheckWatchlistSymbol(symbol, exchange);
+
+        var parts = new List<string>(2);
+
+        // 美股未填金鑰 → 後備來源提示。金鑰是否存在以 AppSettings 為準（與 ShowQuoteProviderNotice 一致）。
+        var hasTwelveDataKey =
+            !string.IsNullOrWhiteSpace(_settingsService?.Current.TwelveDataApiKey);
+        if (isUs && !hasTwelveDataKey)
+        {
+            parts.Add(L("Portfolio.Watchlist.Notice.UsNoKey",
+                "美股即時報價建議在『設定 → 資料來源』填入 Twelve Data API 金鑰；目前將使用 Yahoo 後備來源（可能延遲/受限）。"));
+        }
+
+        if (isUs && readiness is { UsDirectoryReady: false })
+        {
+            // 目錄尚未下載：無法判斷代號是否存在，提示更新目錄，且不再追加「找不到」。
+            parts.Add(L("Portfolio.Watchlist.Notice.DirectoryEmpty",
+                "美股代號目錄尚未下載，請至『設定 → 資料來源』更新後再試。"));
+        }
+        else if (readiness is { IsResolved: false })
+        {
+            // 目錄可用（或非美股，TW 目錄恆有資料）但查無此代號。
+            parts.Add(L("Portfolio.Watchlist.Notice.SymbolNotFound",
+                "找不到此代號，請確認拼寫；若確定正確，可能此商品暫不支援。"));
+        }
+
+        WatchlistNotice = parts.Count == 0 ? null : string.Join(" ", parts);
+    }
+
+    private static bool IsUsExchange(string? exchange) =>
+        string.Equals(
+            StockExchangeRegistry.TryGet(exchange)?.Country,
+            "US",
+            StringComparison.OrdinalIgnoreCase);
 }

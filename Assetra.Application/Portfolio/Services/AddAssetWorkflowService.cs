@@ -15,6 +15,9 @@ public sealed class AddAssetWorkflowService : IAddAssetWorkflowService
     private readonly IPortfolioPositionLogRepository? _positionLogRepository;
     private readonly ITransactionService? _transactionService;
     private readonly ISymbolDirectory? _symbolDirectory;
+    // 美股代號目錄（NASDAQ 等可下載目錄）。僅用於 CheckWatchlistSymbol 判斷
+    // 「目錄是否已下載 / 有資料」，以區分「找不到代號」與「目錄尚未下載」。
+    private readonly IRefreshableSymbolDirectory? _usSymbolDirectory;
 
     public AddAssetWorkflowService(
         IStockSearchService searchService,
@@ -22,7 +25,8 @@ public sealed class AddAssetWorkflowService : IAddAssetWorkflowService
         IPortfolioRepository? portfolioRepository = null,
         IPortfolioPositionLogRepository? positionLogRepository = null,
         ITransactionService? transactionService = null,
-        ISymbolDirectory? symbolDirectory = null)
+        ISymbolDirectory? symbolDirectory = null,
+        IRefreshableSymbolDirectory? usSymbolDirectory = null)
     {
         _searchService = searchService;
         _historyProvider = historyProvider;
@@ -30,6 +34,7 @@ public sealed class AddAssetWorkflowService : IAddAssetWorkflowService
         _positionLogRepository = positionLogRepository;
         _transactionService = transactionService;
         _symbolDirectory = symbolDirectory;
+        _usSymbolDirectory = usSymbolDirectory;
     }
 
     public IReadOnlyList<StockSearchResult> SearchSymbols(string query, int maxResults = 8)
@@ -274,6 +279,18 @@ public sealed class AddAssetWorkflowService : IAddAssetWorkflowService
         if (Regex.IsMatch(s, @"^[A-Z]{1,5}(\.[A-Z])?$"))
             return "NASDAQ";
         return "TWSE";
+    }
+
+    public WatchlistSymbolReadiness CheckWatchlistSymbol(string symbol, string? exchange = null)
+    {
+        if (string.IsNullOrWhiteSpace(symbol))
+            return new WatchlistSymbolReadiness(IsResolved: false, UsDirectoryReady: false);
+
+        var normalized = symbol.Trim().ToUpperInvariant();
+        var isResolved = ResolveSymbol(normalized, exchange) is not null;
+        // 美股代號目錄「已下載且有資料」才算 ready；null（未啟用）或 Count==0（未下載）皆視為未就緒。
+        var usDirectoryReady = _usSymbolDirectory is { Count: > 0 };
+        return new WatchlistSymbolReadiness(isResolved, usDirectoryReady);
     }
 
     private StockSearchResult? ResolveSymbol(string symbol, string? exchange = null) =>

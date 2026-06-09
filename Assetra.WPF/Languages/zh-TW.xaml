@@ -410,6 +410,9 @@
     <sys:String x:Key="Portfolio.Watchlist.Name">名稱（選填，留空自動帶入）</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.Currency">幣別</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AddButton">新增</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.Notice.UsNoKey">美股即時報價建議在「設定 → 資料來源」填入 Twelve Data API 金鑰；目前將使用 Yahoo 後備來源（可能延遲/受限）。</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.Notice.SymbolNotFound">找不到此代號，請確認拼寫；若確定正確，可能此商品暫不支援。</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.Notice.DirectoryEmpty">美股代號目錄尚未下載，請至「設定 → 資料來源」更新後再試。</sys:String>
     <sys:String x:Key="Portfolio.Liability.Empty">尚未有負債項目，請按「新增負債」建立貸款或信用卡。</sys:String>
     <sys:String x:Key="Portfolio.Liability.Name">負債名稱</sys:String>
     <sys:String x:Key="Portfolio.Liability.Amount">剩餘金額</sys:String>
@@ -918,6 +921,7 @@
     <sys:String x:Key="Settings.UsSymbolDirectory.Disabled">美股代號目錄尚未啟用。</sys:String>
     <sys:String x:Key="Settings.UsSymbolDirectory.NeverUpdated">尚未更新</sys:String>
     <sys:String x:Key="Settings.FugleApiKeyHint">貼上 Fugle API Key 後按下儲存，即可在設定中選用 Fugle 資料來源。</sys:String>
+    <sys:String x:Key="Settings.Fugle.KeyMissingWarning">已選 Fugle 但尚未填入 API 金鑰，將回退至 TWSE/TPEX 官方資料。</sys:String>
     <sys:String x:Key="Settings.DataSource.Saved">資料來源設定已儲存</sys:String>
     <sys:String x:Key="Settings.SaveFailed">設定儲存失敗。</sys:String>
     <sys:String x:Key="Settings.FugleHelp.Tooltip">查看 Fugle API Key 申請與設定說明</sys:String>
@@ -1047,6 +1051,7 @@
     <sys:String x:Key="Settings.FugleApiKey">Fugle API Key</sys:String>
     <sys:String x:Key="Settings.TwelveDataApiKey">美股即時報價來源 - Twelve Data API Key</sys:String>
     <sys:String x:Key="Settings.TwelveDataApiKeyHint">Twelve Data 僅用於美股報價；台股來源可獨立選擇 TWSE / TPEX 官方或 Fugle。輸入 API Key 後需先測試再儲存。</sys:String>
+    <sys:String x:Key="Settings.TwelveData.FallbackHint">未設定金鑰時，美股報價仍可用 Yahoo 後備來源（可能延遲）。</sys:String>
     <sys:String x:Key="Settings.TwelveData.Test">測試連線</sys:String>
     <sys:String x:Key="Settings.TwelveData.Quota">今日用量</sys:String>
     <sys:String x:Key="Settings.TwelveData.TestSucceeded">Twelve Data 連線測試成功。</sys:String>

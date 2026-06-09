@@ -260,6 +260,8 @@ public partial class PortfolioViewModel
                 new PortfolioEntry(Guid.NewGuid(), request.Symbol, request.Exchange),
                 new PositionSnapshot(Guid.NewGuid(), request.Quantity, request.TotalCost, request.UnitPrice, 0m, request.AcquiredOn)));
         public string InferExchange(string symbol) => string.Empty;
+        public WatchlistSymbolReadiness CheckWatchlistSymbol(string symbol, string? exchange = null) =>
+            new(IsResolved: false, UsDirectoryReady: false);
     }
 
     private sealed class NullSellWorkflowService : ISellWorkflowService
