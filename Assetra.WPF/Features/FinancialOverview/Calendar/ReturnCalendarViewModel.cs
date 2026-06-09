@@ -659,12 +659,16 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
         {
             IEnumerable<(DateOnly? EffectiveDate, PortfolioDailySnapshot Snapshot)> candidates = group;
 
-            // v0.17+ 的 live snapshot 有 Cash/Equity/Liability breakdown；舊回補資料沒有。
-            // 一旦資料流已進入新 schema，後續缺 breakdown 的 snapshot 多半是舊回補或
-            // migration residue，不能混進報酬日曆，否則會把每日 PnL 算成不同口徑。
+            // 同一 effective date 若同時有 breakdown 與無-breakdown 候選（例：週末 breakdown
+            // snapshot 回填到前一交易日，與當日舊 migration residue 競爭），優先用 breakdown。
+            // 但若該交易日「只有」無-breakdown 候選，那是 PortfolioBackfillService 對漏記交易日的
+            // 正當回填 —— 保留它。報酬日曆的日損益用 MarketValue（與回填同口徑 Σ qty×close），
+            // 因此該日報酬可正確計算，不該被當成 residue 丟棄而留白。
             if (firstBreakdownDate.HasValue && group.Key >= firstBreakdownDate.Value)
             {
-                candidates = candidates.Where(x => HasSnapshotBreakdown(x.Snapshot));
+                var withBreakdown = candidates.Where(x => HasSnapshotBreakdown(x.Snapshot)).ToList();
+                if (withBreakdown.Count > 0)
+                    candidates = withBreakdown;
             }
 
             var chosen = candidates
