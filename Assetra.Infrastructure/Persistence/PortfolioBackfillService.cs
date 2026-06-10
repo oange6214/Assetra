@@ -111,8 +111,12 @@ public sealed class PortfolioBackfillService
                 priced++;
             }
 
-            // Only write if we got prices for at least one position
-            if (priced == 0)
+            // Only write a snapshot when EVERY reconstructed position was priced.
+            // A partial sum (some positions unpriced) understates total market value and
+            // produces garbage daily-return deltas in the calendar/trends (e.g. a day that
+            // recorded market_value≈0 while neighbours are ~11.5M). Better to leave the day
+            // blank than to persist a partial-口徑 value.
+            if (priced < positions.Count)
                 continue;
 
             var snapshot = new PortfolioDailySnapshot(
@@ -189,7 +193,9 @@ public sealed class PortfolioBackfillService
             priced++;
         }
 
-        if (priced == 0)
+        // Repair must be all-or-nothing: never overwrite with a partial-priced value
+        // (that is exactly the corruption this repair is meant to undo).
+        if (priced < positions.Count)
             return false;
 
         var snapshot = new PortfolioDailySnapshot(
