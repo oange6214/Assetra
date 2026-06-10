@@ -43,7 +43,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
 
     partial void OnTotalNetWorthChanged(decimal _) { OnPropertyChanged(nameof(TotalNetWorthDisplay)); RaiseCompositionChanged(); RebuildKpiCards(); }
     partial void OnTotalAssetsChanged(decimal _) { OnPropertyChanged(nameof(TotalAssetsDisplay)); RaiseCompositionChanged(); RebuildKpiCards(); }
-    partial void OnTotalInvestmentsChanged(decimal _) { OnPropertyChanged(nameof(TotalInvestmentsDisplay)); RaiseCompositionChanged(); RebuildKpiCards(); }
+    partial void OnTotalInvestmentsChanged(decimal _) { OnPropertyChanged(nameof(TotalInvestmentsDisplay)); OnPropertyChanged(nameof(LiabilityShareDisplay)); RaiseCompositionChanged(); RebuildKpiCards(); }
     partial void OnTotalLiabilitiesChanged(decimal _)
     {
         OnPropertyChanged(nameof(TotalLiabilitiesDisplay));
@@ -263,12 +263,13 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     public string BalanceSheetNetWorthDisplay =>
         MoneyFormatter.Format(BalanceSheetNetWorth, BaseCurrency);
 
-    /// <summary>負債佔總資產的比例（0–100% string，例「14.7%」）— 顯示在負債獨立 bar 旁。</summary>
+    /// <summary>負債佔總資產的比例（0–100% string，例「14.7%」）— 顯示在負債獨立 bar 旁。
+    /// 用 BalanceSheetTotalAssets（含不動產/退休/實物）作分母，與 Hero/公式列一致。</summary>
     public string LiabilityShareDisplay
     {
         get
         {
-            var assets = TotalAssets + TotalInvestments;
+            var assets = BalanceSheetTotalAssets;
             if (assets <= 0m)
                 return "0%";
             return (TotalLiabilities / assets * 100m).ToString("F1", CultureInfo.InvariantCulture) + "%";
@@ -348,6 +349,19 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         OnPropertyChanged(nameof(HeroTodayDeltaDisplay));
         OnPropertyChanged(nameof(HasHeroTodayDelta));
         OnPropertyChanged(nameof(IsHeroTodayPositive));
+    }
+
+    /// <summary>
+    /// 當 BalanceSheetTotalAssets/NetWorth 的「非投資/非負債」成分（不動產、退休、
+    /// 實物、現金）變動時呼叫：除了 RaiseCompositionChanged 的 Hero/公式列/composition
+    /// 通知，還要 re-raise 負債佔比並重建 KPI 卡 — 這些現在都讀 balance-sheet 全額基底，
+    /// 不會被 Total* setter 的 PropertyChanged 自動帶到。
+    /// </summary>
+    private void OnBalanceSheetCompositionChanged()
+    {
+        RaiseCompositionChanged();
+        OnPropertyChanged(nameof(LiabilityShareDisplay));
+        RebuildKpiCards();
     }
 
     /// <summary>
@@ -605,24 +619,26 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         // BalanceSheet totals depend on each focus widget's running total. When
         // a property like RealEstate.TotalCurrentValue / Retirement.TotalBalance /
         // PhysicalAsset.TotalCurrentValue changes (after add/edit/delete), refresh
-        // the Hero + 公式列 + composition view via RaiseCompositionChanged.
+        // the Hero + 公式列 + composition view, AND the KPI cards + 負債佔比 — those
+        // now read BalanceSheetTotalAssets/NetWorth (含不動產/退休/實物) so they go
+        // stale on these widgets' changes unless we rebuild here.
         if (RealEstateFocusWidget is not null)
             RealEstateFocusWidget.PropertyChanged += (_, e) =>
             {
                 if (e.PropertyName == nameof(Assetra.WPF.Features.RealEstate.RealEstateViewModel.TotalCurrentValue))
-                    RaiseCompositionChanged();
+                    OnBalanceSheetCompositionChanged();
             };
         if (RetirementFocusWidget is not null)
             RetirementFocusWidget.PropertyChanged += (_, e) =>
             {
                 if (e.PropertyName == nameof(Assetra.WPF.Features.Retirement.RetirementViewModel.TotalBalance))
-                    RaiseCompositionChanged();
+                    OnBalanceSheetCompositionChanged();
             };
         if (PhysicalAssetFocusWidget is not null)
             PhysicalAssetFocusWidget.PropertyChanged += (_, e) =>
             {
                 if (e.PropertyName == nameof(Assetra.WPF.Features.PhysicalAsset.PhysicalAssetViewModel.TotalCurrentValue))
-                    RaiseCompositionChanged();
+                    OnBalanceSheetCompositionChanged();
             };
 
         // Stock prices arrive asynchronously after Portfolio.LoadAsync() completes.
@@ -823,12 +839,19 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
             || e.PropertyName == nameof(IPortfolioPositionFeed.TotalCost))
             RebuildKpiCards();
 
-        // Hero card + composition：DayPnl / TotalCash 改動會影響 Hero 今日漲跌
-        // 以及 composition slice（現金那一格金額）。
-        if (e.PropertyName is "DayPnl" or "HasDayPnl" or "IsDayPnlPositive"
-            || e.PropertyName == nameof(IPortfolioPositionFeed.TotalCash))
+        // Hero card 今日漲跌：DayPnl 系列只影響 Hero「今日 +XXX」，不在 balance
+        // sheet 內，輕量 RaiseCompositionChanged 即可。
+        if (e.PropertyName is "DayPnl" or "HasDayPnl" or "IsDayPnlPositive")
         {
             RaiseCompositionChanged();
+        }
+
+        // TotalCash 是 BalanceSheetTotalAssets 的成分（現金那一格），改動時除了
+        // composition/Hero，也要 refresh 負債佔比 + KPI 卡（總資產/淨資產/負債比率
+        // 都讀 balance-sheet 全額基底）。
+        if (e.PropertyName == nameof(IPortfolioPositionFeed.TotalCash))
+        {
+            OnBalanceSheetCompositionChanged();
         }
     }
 
@@ -959,9 +982,12 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         return id switch
         {
             KpiMetric.NetWorth =>
-                Money(id, info.LabelKey, TotalNetWorth, KpiTone.Neutral),
+                // 與 Hero 一致：用 BalanceSheetNetWorth（含不動產/退休/實物），而非
+                // undercounting 的 TotalNetWorth（只含 asset_item + 投資 − 負債）。
+                Money(id, info.LabelKey, BalanceSheetNetWorth, KpiTone.Neutral),
             KpiMetric.TotalAssets =>
-                Money(id, info.LabelKey, TotalAssets + TotalInvestments, KpiTone.Up),
+                // 與 Hero 一致：用 BalanceSheetTotalAssets 全 balance-sheet 加總。
+                Money(id, info.LabelKey, BalanceSheetTotalAssets, KpiTone.Up),
             KpiMetric.OtherAssets =>
                 Money(id, info.LabelKey, TotalAssets, KpiTone.Neutral),
             KpiMetric.Investments =>
@@ -971,12 +997,13 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
             KpiMetric.DebtRatio =>
                 // v2：負債比率主值 + 槓桿比副值在同一張 card（兩者為同一財務事實的不同表述）。
                 // 槓桿 = 總資產 / 淨資產；淨資產 ≤ 0 時無意義，副值留空。
-                Ratio(id, info.LabelKey, TotalLiabilities, TotalAssets + TotalInvestments, KpiTone.Neutral)
+                // 與 Hero 一致：分母用 BalanceSheetTotalAssets / BalanceSheetNetWorth。
+                Ratio(id, info.LabelKey, TotalLiabilities, BalanceSheetTotalAssets, KpiTone.Neutral)
                     with
                 {
                     SecondaryLabelKey = "Portfolio.Liability.LeverageRatio",
-                    SecondaryValueDisplay = TotalNetWorth > 0m
-                            ? ((TotalAssets + TotalInvestments) / TotalNetWorth).ToString("F2", CultureInfo.InvariantCulture)
+                    SecondaryValueDisplay = BalanceSheetNetWorth > 0m
+                            ? (BalanceSheetTotalAssets / BalanceSheetNetWorth).ToString("F2", CultureInfo.InvariantCulture)
                             : string.Empty,
                 },
             KpiMetric.InvestmentPnl =>

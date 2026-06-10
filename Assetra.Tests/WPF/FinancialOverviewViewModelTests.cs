@@ -221,4 +221,100 @@ public sealed class FinancialOverviewViewModelTests
             return Task.CompletedTask;
         }
     }
+
+    // ── #3 tests：KPI/ratio family must use the full balance-sheet base ──────
+    //
+    // WHY: the Hero/公式列 use BalanceSheetTotalAssets/NetWorth (投資+現金+不動產+
+    // 退休+實物 − 負債). The KPI cards + 負債佔比 historically used the UNDERCOUNTING
+    // base「TotalAssets + TotalInvestments」, where TotalAssets only sums the
+    // asset_item table (misses RE/retirement/physical). On the same screen the
+    // debt ratio / 負債佔比 were inflated and 總資產/淨資產 disagreed with the Hero.
+    // These tests pin the base to BalanceSheetTotalAssets/NetWorth.
+    //
+    // SEAM: with PortfolioRef = null and no focus widgets injected,
+    // BalanceSheetTotalAssets collapses to exactly TotalInvestments, and
+    // BalanceSheetNetWorth to TotalInvestments − TotalLiabilities. We set
+    // TotalAssets (the undercount) to a DISTINCT non-zero value so the assertions
+    // fail under the old「TotalAssets + TotalInvestments」formula — i.e. the test
+    // can only pass with the balance-sheet base, encoding the consistency intent.
+
+    private static FinancialOverviewViewModel BuildVmWithTotals(
+        decimal totalInvestments, decimal totalAssets, decimal totalLiabilities)
+    {
+        var vm = new FinancialOverviewViewModel(
+            new Mock<IFinancialOverviewQueryService>().Object,
+            new StubFeed());
+
+        var t = typeof(FinancialOverviewViewModel);
+        t.GetProperty("TotalInvestments")!.SetValue(vm, totalInvestments);
+        t.GetProperty("TotalAssets")!.SetValue(vm, totalAssets);
+        t.GetProperty("TotalLiabilities")!.SetValue(vm, totalLiabilities);
+        return vm;
+    }
+
+    [Fact]
+    public void BalanceSheetTotals_CollapseToInvestments_WhenNoFocusWidgets()
+    {
+        // Documents the seam the other #3 tests rely on: no PortfolioRef / focus
+        // widgets ⇒ cash/RE/retirement/physical components are 0.
+        var vm = BuildVmWithTotals(totalInvestments: 800_000m, totalAssets: 200_000m, totalLiabilities: 100_000m);
+
+        Assert.Equal(800_000m, vm.BalanceSheetTotalAssets);
+        Assert.Equal(700_000m, vm.BalanceSheetNetWorth);
+    }
+
+    [Fact]
+    public void LiabilityShareDisplay_UsesBalanceSheetTotalAssets_NotUndercountBase()
+    {
+        // BalanceSheetTotalAssets = 800k ⇒ 100k / 800k = 12.5%.
+        // Old buggy base (TotalAssets + TotalInvestments = 1,000k) would give 10.0%.
+        var vm = BuildVmWithTotals(totalInvestments: 800_000m, totalAssets: 200_000m, totalLiabilities: 100_000m);
+
+        Assert.Equal("12.5%", vm.LiabilityShareDisplay);
+    }
+
+    [Fact]
+    public void DebtRatioCard_UsesBalanceSheetBase_ForRatioAndLeverage()
+    {
+        // DebtRatio is in the default KPI selection, so it is present in KpiCards
+        // without injecting settings.
+        var vm = BuildVmWithTotals(totalInvestments: 800_000m, totalAssets: 200_000m, totalLiabilities: 100_000m);
+
+        var card = vm.KpiCards.Single(c => c.Id == KpiMetric.DebtRatio);
+
+        // 負債比率 = 100k / BalanceSheetTotalAssets(800k) = 12.5% (old base → 10.0%).
+        Assert.Equal("12.5%", card.ValueDisplay);
+        // 槓桿比 = BalanceSheetTotalAssets(800k) / BalanceSheetNetWorth(700k) = 1.14
+        // (old base → 1,000k / TotalNetWorth(900k) = 1.11).
+        Assert.Equal("1.14", card.SecondaryValueDisplay);
+    }
+
+    [Fact]
+    public void DebtRatioCard_LeverageSecondaryEmpty_WhenBalanceSheetNetWorthNotPositive()
+    {
+        // Liabilities ≥ assets ⇒ BalanceSheetNetWorth ≤ 0 ⇒ leverage 副值留空。
+        var vm = BuildVmWithTotals(totalInvestments: 500_000m, totalAssets: 200_000m, totalLiabilities: 500_000m);
+
+        var card = vm.KpiCards.Single(c => c.Id == KpiMetric.DebtRatio);
+
+        Assert.Equal(string.Empty, card.SecondaryValueDisplay);
+    }
+
+    [Fact]
+    public void TotalAssetsAndNetWorth_SurfaceTheFullBalanceSheetBase_NotTheUndercount()
+    {
+        // The 總資產/淨資產 figures (Hero + 公式列, and the now-permanent NetWorth/
+        // TotalAssets KPIs) are surfaced via these display props. They must equal
+        // the balance-sheet base — NOT the undercounting「TotalAssets + TotalInvestments」
+        // (here 1,000k) nor the matching TotalNetWorth (900k).
+        var vm = BuildVmWithTotals(totalInvestments: 800_000m, totalAssets: 200_000m, totalLiabilities: 100_000m);
+
+        // 總資產 = BalanceSheetTotalAssets = 800k.
+        Assert.Contains("800,000", vm.BalanceSheetTotalAssetsDisplay);
+        Assert.DoesNotContain("1,000,000", vm.BalanceSheetTotalAssetsDisplay);
+
+        // 淨資產 = BalanceSheetNetWorth = 800k − 100k = 700k.
+        Assert.Contains("700,000", vm.BalanceSheetNetWorthDisplay);
+        Assert.DoesNotContain("900,000", vm.BalanceSheetNetWorthDisplay);
+    }
 }
