@@ -263,7 +263,11 @@ public sealed partial class GoalsViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsLoading)
+        // Idempotent one-shot load: the dashboard prefetches GoalsWidget.LoadAsync on every
+        // IPortfolioPositionFeed price tick. Without the IsLoaded gate that re-queries the repo and
+        // churns the bound collection on every tick. Row-level refresh (language/currency) happens
+        // in place via OnLanguageChanged/OnCurrencyChanged, so gating here does not block any refresh.
+        if (IsLoading || IsLoaded)
             return;
         IsLoading = true;
         ErrorMessage = null;

@@ -98,6 +98,33 @@ public sealed class GoalsViewModelTests
         }
     }
 
+    [Fact] // WHY: 儀表板每個 IPortfolioPositionFeed 報價 tick 都 fire-and-forget 預取 GoalsWidget.LoadAsync。
+           // LoadAsync 必須是一次性（IsLoaded gate）——否則每 tick 都重查 repo 並清空/重建綁定集合，純浪費。
+           // 語言/幣別的列更新走 OnLanguageChanged/OnCurrencyChanged 就地刷新，不需要重載，故 gate 安全。
+    public async Task LoadAsync_IsOneShot_SecondCallDoesNotRequery()
+    {
+        var storedGoal = new FinancialGoal(Guid.NewGuid(), "Emergency fund", 100_000m, 20_000m, null, null);
+        var repo = new Mock<IFinancialGoalRepository>();
+        repo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([storedGoal]);
+
+        var vm = new GoalsViewModel(repo.Object);
+        try
+        {
+            await vm.LoadAsync();
+            var countAfterFirst = vm.Goals.Count;
+
+            await vm.LoadAsync();
+
+            repo.Verify(r => r.GetAllAsync(It.IsAny<CancellationToken>()), Times.Once);
+            Assert.Equal(countAfterFirst, vm.Goals.Count);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(vm);
+        }
+    }
+
     [Theory]
     [InlineData("abc")]
     [InlineData("-1")]
