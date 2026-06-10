@@ -308,6 +308,106 @@ public class BalanceQueryServiceTests
         Assert.Equal(new LiabilitySnapshot(TWD(16_000m), TWD(20_000m)), all["富邦 J 卡"]);
     }
 
+    // ─── As-of-D projection (Step 1 — historical snapshot rebuild support) ──
+
+    // Dated variants: same shapes as the helpers above but with an explicit trade date so we can
+    // prove the as-of filter excludes later trades. Date convention is DateOnly.FromDateTime(TradeDate).
+    private static Trade DepositOn(Guid cashId, decimal amount, DateTime date)
+        => new(Guid.NewGuid(), "", "", "", TradeType.Deposit, date, 0m, 1, null, null,
+               CashAmount: amount, CashAccountId: cashId);
+
+    private static Trade WithdrawalOn(Guid cashId, decimal amount, DateTime date)
+        => new(Guid.NewGuid(), "", "", "", TradeType.Withdrawal, date, 0m, 1, null, null,
+               CashAmount: amount, CashAccountId: cashId);
+
+    private static Trade LoanBorrowOn(Guid cashId, string loanLabel, decimal amount, DateTime date)
+        => new(Guid.NewGuid(), "", "", "", TradeType.LoanBorrow, date, 0m, 1, null, null,
+               CashAmount: amount, CashAccountId: cashId, LoanLabel: loanLabel);
+
+    private static Trade LoanRepayOn(Guid cashId, string loanLabel, decimal principal, decimal interest, DateTime date)
+        => new(Guid.NewGuid(), "", "", "", TradeType.LoanRepay, date, 0m, 1, null, null,
+               CashAmount: principal + interest, CashAccountId: cashId,
+               LoanLabel: loanLabel, Principal: principal, InterestPaid: interest);
+
+    [Fact]
+    public async Task GetAllCashBalancesAsOf_AfterLastTrade_EqualsFullHistory()
+    {
+        // WHY: a rebuild for a date on/after the most recent trade must reproduce the live balance
+        // exactly — otherwise historical "today-1" snapshots would silently diverge from the live row.
+        var a = Guid.NewGuid();
+        var b = Guid.NewGuid();
+        var svc = Create(
+            DepositOn(a, 100_000m, new DateTime(2024, 1, 2)),
+            WithdrawalOn(a, 30_000m, new DateTime(2024, 1, 5)),
+            DepositOn(b, 50_000m, new DateTime(2024, 1, 9)));
+
+        var full = await svc.GetAllCashBalancesAsync();
+        var asOf = await svc.GetAllCashBalancesAsOfAsync(new DateOnly(2024, 1, 31)); // ≥ last trade
+
+        Assert.Equal(full.Count, asOf.Count);
+        Assert.Equal(full[a], asOf[a]);
+        Assert.Equal(full[b], asOf[b]);
+        Assert.Equal(TWD(70_000m), asOf[a]);
+        Assert.Equal(TWD(50_000m), asOf[b]);
+    }
+
+    [Fact]
+    public async Task GetAllCashBalancesAsOf_MidHistory_ExcludesLaterTrades()
+    {
+        // WHY: the whole point of as-of-D is that a trade dated AFTER D must not count toward D's balance.
+        var a = Guid.NewGuid();
+        var svc = Create(
+            DepositOn(a, 100_000m, new DateTime(2024, 1, 2)),
+            WithdrawalOn(a, 30_000m, new DateTime(2024, 1, 20))); // after the as-of date below
+
+        var asOf = await svc.GetAllCashBalancesAsOfAsync(new DateOnly(2024, 1, 10));
+
+        // Only the Jan-2 deposit counts; the Jan-20 withdrawal is in the future relative to D.
+        Assert.Equal(TWD(100_000m), asOf[a]);
+    }
+
+    [Fact]
+    public async Task GetAllCashBalancesAsOf_OnTradeDate_IncludesThatDay()
+    {
+        // WHY: as-of is inclusive (≤ D), matching "after close on day D" semantics.
+        var a = Guid.NewGuid();
+        var svc = Create(DepositOn(a, 40_000m, new DateTime(2024, 1, 10)));
+
+        var asOf = await svc.GetAllCashBalancesAsOfAsync(new DateOnly(2024, 1, 10));
+
+        Assert.Equal(TWD(40_000m), asOf[a]);
+    }
+
+    [Fact]
+    public async Task GetAllLiabilitySnapshotsAsOf_AfterLastTrade_EqualsFullHistory()
+    {
+        var cash = Guid.NewGuid();
+        var svc = Create(
+            LoanBorrowOn(cash, "台新信貸", 1_000_000m, new DateTime(2024, 1, 2)),
+            LoanRepayOn(cash, "台新信貸", principal: 100_000m, interest: 5_000m, new DateTime(2024, 1, 15)));
+
+        var full = await svc.GetAllLiabilitySnapshotsAsync();
+        var asOf = await svc.GetAllLiabilitySnapshotsAsOfAsync(new DateOnly(2024, 2, 1)); // ≥ last trade
+
+        Assert.Equal(full["台新信貸"], asOf["台新信貸"]);
+        Assert.Equal(new LiabilitySnapshot(TWD(900_000m), TWD(1_000_000m)), asOf["台新信貸"]);
+    }
+
+    [Fact]
+    public async Task GetAllLiabilitySnapshotsAsOf_MidHistory_ExcludesLaterRepay()
+    {
+        // WHY: a repayment dated after D must not reduce D's outstanding balance.
+        var cash = Guid.NewGuid();
+        var svc = Create(
+            LoanBorrowOn(cash, "台新信貸", 1_000_000m, new DateTime(2024, 1, 2)),
+            LoanRepayOn(cash, "台新信貸", principal: 100_000m, interest: 5_000m, new DateTime(2024, 1, 20)));
+
+        var asOf = await svc.GetAllLiabilitySnapshotsAsOfAsync(new DateOnly(2024, 1, 10));
+
+        // The Jan-20 repayment is in the future relative to D → balance still the full borrow.
+        Assert.Equal(new LiabilitySnapshot(TWD(1_000_000m), TWD(1_000_000m)), asOf["台新信貸"]);
+    }
+
     // ─── Fake repo ───────────────────────────────────────────────────────
 
     private sealed class FakeTradeRepo : ITradeRepository

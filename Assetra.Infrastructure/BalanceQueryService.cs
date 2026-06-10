@@ -50,6 +50,45 @@ public sealed class BalanceQueryService : IBalanceQueryService
     {
         var trades = await _trades.GetAllAsync().ConfigureAwait(false);
         var currencyMap = await BuildCurrencyMapAsync().ConfigureAwait(false);
+        return ProjectCashBalances(trades, currencyMap);
+    }
+
+    public async Task<IReadOnlyDictionary<string, LiabilitySnapshot>> GetAllLiabilitySnapshotsAsync()
+    {
+        var trades = await _trades.GetAllAsync().ConfigureAwait(false);
+        var liabilityCurrencies = await BuildLiabilityCurrencyMapAsync().ConfigureAwait(false);
+        return ProjectLiabilitySnapshots(trades, liabilityCurrencies);
+    }
+
+    public async Task<IReadOnlyDictionary<Guid, Money>> GetAllCashBalancesAsOfAsync(
+        DateOnly asOf, CancellationToken ct = default)
+    {
+        var trades = await _trades.GetAllAsync(ct).ConfigureAwait(false);
+        var currencyMap = await BuildCurrencyMapAsync().ConfigureAwait(false);
+        return ProjectCashBalances(FilterAsOf(trades, asOf), currencyMap);
+    }
+
+    public async Task<IReadOnlyDictionary<string, LiabilitySnapshot>> GetAllLiabilitySnapshotsAsOfAsync(
+        DateOnly asOf, CancellationToken ct = default)
+    {
+        var trades = await _trades.GetAllAsync(ct).ConfigureAwait(false);
+        var liabilityCurrencies = await BuildLiabilityCurrencyMapAsync().ConfigureAwait(false);
+        return ProjectLiabilitySnapshots(FilterAsOf(trades, asOf), liabilityCurrencies);
+    }
+
+    // ─── As-of-D projection (pure over an already-filtered trade list) ───────
+
+    /// <summary>
+    /// 只保留交易日 ≤ <paramref name="asOf"/> 的交易。日期以
+    /// <c>DateOnly.FromDateTime(Trade.TradeDate)</c> 為準，沿用全專案的本地日期慣例
+    /// （見 ReconciliationViewModel / PositionQueryService）。
+    /// </summary>
+    private static IReadOnlyList<Trade> FilterAsOf(IReadOnlyList<Trade> trades, DateOnly asOf) =>
+        trades.Where(t => DateOnly.FromDateTime(t.TradeDate) <= asOf).ToList();
+
+    private static IReadOnlyDictionary<Guid, Money> ProjectCashBalances(
+        IReadOnlyList<Trade> trades, IReadOnlyDictionary<Guid, string> currencyMap)
+    {
         var amounts = new Dictionary<Guid, decimal>();
         foreach (var t in trades)
         {
@@ -73,10 +112,9 @@ public sealed class BalanceQueryService : IBalanceQueryService
         return result;
     }
 
-    public async Task<IReadOnlyDictionary<string, LiabilitySnapshot>> GetAllLiabilitySnapshotsAsync()
+    private static IReadOnlyDictionary<string, LiabilitySnapshot> ProjectLiabilitySnapshots(
+        IReadOnlyList<Trade> trades, IReadOnlyDictionary<string, string> liabilityCurrencies)
     {
-        var trades = await _trades.GetAllAsync().ConfigureAwait(false);
-        var liabilityCurrencies = await BuildLiabilityCurrencyMapAsync().ConfigureAwait(false);
         // First pass: accumulate raw decimals so arithmetic stays in one currency.
         var amounts = new Dictionary<string, (decimal Balance, decimal Original)>(StringComparer.Ordinal);
         foreach (var t in trades)

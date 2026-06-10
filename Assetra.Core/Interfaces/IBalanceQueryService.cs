@@ -50,6 +50,23 @@ public interface IBalanceQueryService
     /// 一次掃過所有交易，回傳每個貸款名稱的投影餘額與原始金額。
     /// </summary>
     Task<IReadOnlyDictionary<string, LiabilitySnapshot>> GetAllLiabilitySnapshotsAsync();
+
+    /// <summary>
+    /// 與 <see cref="GetAllCashBalancesAsync"/> 相同投影，但只計入交易日 ≤ <paramref name="asOf"/>
+    /// 的交易（日期以 <c>DateOnly.FromDateTime(Trade.TradeDate)</c> 為準，沿用全專案慣例）。
+    /// 供歷史快照重建取得「過去某交易日收盤後」的現金餘額。
+    /// <para>當 <paramref name="asOf"/> ≥ 最後一筆交易日時，結果與 <see cref="GetAllCashBalancesAsync"/> 相同。</para>
+    /// </summary>
+    Task<IReadOnlyDictionary<Guid, Money>> GetAllCashBalancesAsOfAsync(
+        DateOnly asOf, CancellationToken ct = default);
+
+    /// <summary>
+    /// 與 <see cref="GetAllLiabilitySnapshotsAsync"/> 相同投影，但只計入交易日 ≤ <paramref name="asOf"/>
+    /// 的交易（同 <see cref="GetAllCashBalancesAsOfAsync"/> 的日期慣例）。
+    /// 供歷史快照重建取得「過去某交易日收盤後」的負債餘額。
+    /// </summary>
+    Task<IReadOnlyDictionary<string, LiabilitySnapshot>> GetAllLiabilitySnapshotsAsOfAsync(
+        DateOnly asOf, CancellationToken ct = default);
 }
 
 /// <summary>

@@ -57,6 +57,18 @@ internal static class PortfolioServiceCollectionExtensions
         // Domain / infrastructure services
         services.AddSingleton<PortfolioSnapshotService>();
         services.AddSingleton<PortfolioBackfillService>();
+        // Full historical snapshot rebuild (breakdown + as-of-D FX). Stage 1: no UI/command wiring.
+        // IMultiCurrencyValuationService comes from AddFxContext (same container, lazily resolved).
+        services.AddSingleton<PortfolioSnapshotRebuildService>(sp =>
+            new PortfolioSnapshotRebuildService(
+                sp.GetRequiredService<IPortfolioPositionLogRepository>(),
+                sp.GetRequiredService<IPortfolioSnapshotRepository>(),
+                sp.GetRequiredService<IStockHistoryProvider>(),
+                sp.GetRequiredService<IMultiCurrencyValuationService>(),
+                sp.GetRequiredService<IBalanceQueryService>(),
+                sp.GetRequiredService<IPortfolioRepository>(),
+                sp.GetService<IAppSettingsService>(),
+                sp.GetService<Microsoft.Extensions.Logging.ILogger<PortfolioSnapshotRebuildService>>()));
         services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
         services.AddSingleton<ITransactionService>(sp => new TransactionService(
             sp.GetRequiredService<ITradeRepository>()));

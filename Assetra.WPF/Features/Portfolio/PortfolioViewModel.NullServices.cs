@@ -26,6 +26,14 @@ public partial class PortfolioViewModel
         public Task<IReadOnlyDictionary<string, LiabilitySnapshot>> GetAllLiabilitySnapshotsAsync() =>
             Task.FromResult<IReadOnlyDictionary<string, LiabilitySnapshot>>(
                 new Dictionary<string, LiabilitySnapshot>());
+        public Task<IReadOnlyDictionary<Guid, Money>> GetAllCashBalancesAsOfAsync(
+            DateOnly asOf, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyDictionary<Guid, Money>>(
+                new Dictionary<Guid, Money>());
+        public Task<IReadOnlyDictionary<string, LiabilitySnapshot>> GetAllLiabilitySnapshotsAsOfAsync(
+            DateOnly asOf, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyDictionary<string, LiabilitySnapshot>>(
+                new Dictionary<string, LiabilitySnapshot>());
     }
 
     // Fallback when DI doesn't wire IPositionQueryService (tests that don't seed trades).
