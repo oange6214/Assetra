@@ -483,6 +483,25 @@
                             </StackPanel>
                         </StackPanel>
 
+                        <!--  B Stage 2 — 重建快照歷史（dry-run 預覽 → 確認後自動備份再寫入）  -->
+                        <StackPanel Margin="0,16,0,0">
+                            <TextBlock
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                FontWeight="SemiBold"
+                                Text="{DynamicResource Settings.Rebuild.SectionTitle}" />
+                            <TextBlock
+                                Margin="0,4,0,8"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Settings.Rebuild.SectionHint}"
+                                TextWrapping="Wrap" />
+                            <Button
+                                HorizontalAlignment="Left"
+                                Command="{Binding PreviewRebuildSnapshotHistoryCommand}"
+                                Content="{DynamicResource Settings.Rebuild.Button}"
+                                Style="{StaticResource AppSecondaryButton}" />
+                        </StackPanel>
+
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock

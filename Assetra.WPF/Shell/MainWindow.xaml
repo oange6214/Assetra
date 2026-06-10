@@ -2407,6 +2407,12 @@
             Grid.RowSpan="3"
             Panel.ZIndex="194"
             DataContext="{Binding Settings}" />
+        <!--  B Stage 2 — 重建快照歷史預覽 / 確認對話框  -->
+        <settingsCtrls:RebuildSnapshotHistoryDialog
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="196"
+            DataContext="{Binding Settings}" />
 
         <!--
             Allocation 編輯目標 overlay — 同樣已是 UserControl，外提以讓 backdrop 蓋全視窗。

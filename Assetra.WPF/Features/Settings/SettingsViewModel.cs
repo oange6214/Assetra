@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Assetra.Core.Interfaces;
+using Assetra.Infrastructure.Persistence;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -86,6 +87,9 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     private readonly IRefreshableSymbolDirectory? _usSymbolDirectory;
     private readonly ITwelveDataConnectionTester? _twelveDataTester;
     private readonly ISnackbarService? _snackbar;
+    private readonly IPortfolioSnapshotRebuildService? _rebuild;
+    private readonly IPortfolioPositionLogRepository? _positionLogs;
+    private readonly IDatabaseBackupService? _backup;
     private readonly SemaphoreSlim _saveGate = new(1, 1);
 
     public SyncSettingsViewModel Sync { get; }
@@ -299,7 +303,10 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         ISnackbarService? snackbar = null,
         IRefreshableSymbolDirectory? usSymbolDirectory = null,
         ITwelveDataConnectionTester? twelveDataTester = null,
-        Assetra.Application.Fx.FxRateHistoryRefresher? fxRefresher = null)
+        Assetra.Application.Fx.FxRateHistoryRefresher? fxRefresher = null,
+        IPortfolioSnapshotRebuildService? rebuild = null,
+        IPortfolioPositionLogRepository? positionLogs = null,
+        IDatabaseBackupService? backup = null)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(theme);
@@ -316,6 +323,9 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         _twelveDataTester = twelveDataTester;
         _snackbar = snackbar;
         _fxRefresher = fxRefresher;
+        _rebuild = rebuild;
+        _positionLogs = positionLogs;
+        _backup = backup;
         Sync = sync;
         Conflicts = conflicts;
 
@@ -904,6 +914,183 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     partial void OnIsRefreshingUsSymbolDirectoryChanged(bool value)
     {
         RefreshUsSymbolDirectoryCommand.NotifyCanExecuteChanged();
+    }
+
+    // ── B Stage 2：重建快照歷史（dry-run 預覽 → 確認後自動備份 → 實際寫入）─────────
+    // PreviewRebuild 先以 dryRun:true 跑引擎、把各狀態計數攤平到下列屬性、開啟預覽對話框；
+    // ConfirmRebuild 先備份 db、再以 dryRun:false 跑引擎寫入。所有失敗都走 snackbar。
+
+    /// <summary>預覽對話框是否開啟。XAML 用 BooleanToVisibilityConverter 綁定。</summary>
+    [ObservableProperty] private bool _isRebuildPreviewOpen;
+
+    /// <summary>備份 + 實際寫入進行中；用來 disable 確認鈕避免重複觸發。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanConfirmRebuild))]
+    private bool _isRebuildBusy;
+
+    [ObservableProperty] private DateOnly _rebuildFrom;
+    [ObservableProperty] private DateOnly _rebuildTo;
+    [ObservableProperty] private int _rebuildTotalDays;
+    [ObservableProperty] private int _rebuildRebuiltCount;
+    [ObservableProperty] private int _rebuildPreservedCount;
+    [ObservableProperty] private int _rebuildUnpriceableCount;
+    [ObservableProperty] private int _rebuildNoFxCount;
+    [ObservableProperty] private int _rebuildNoPositionsCount;
+
+    /// <summary>缺歷史匯率的天數 &gt; 0 時為 true；XAML 據此顯示「先深度刷新 FX」warning 行。</summary>
+    public bool ShowRebuildNoFxWarning => RebuildNoFxCount > 0;
+
+    partial void OnRebuildNoFxCountChanged(int value) => OnPropertyChanged(nameof(ShowRebuildNoFxWarning));
+
+    public bool CanConfirmRebuild => !IsRebuildBusy;
+
+    /// <summary>「重建 N 天 / 跳過 M 天」摘要。</summary>
+    public string RebuildSummaryDisplay
+    {
+        get
+        {
+            var skipped = RebuildTotalDays - RebuildRebuiltCount;
+            return string.Format(
+                _localization.Get("Settings.Rebuild.SummaryFormat", "將重建 {0} 天 / 跳過 {1} 天"),
+                RebuildRebuiltCount, skipped);
+        }
+    }
+
+    /// <summary>各跳過原因的細項（保留既有 / 缺價 / 缺匯率 / 無持倉）。</summary>
+    public string RebuildBreakdownDisplay => string.Format(
+        _localization.Get(
+            "Settings.Rebuild.BreakdownFormat",
+            "保留既有 {0}、缺歷史價 {1}、缺匯率 {2}、無持倉 {3}"),
+        RebuildPreservedCount, RebuildUnpriceableCount, RebuildNoFxCount, RebuildNoPositionsCount);
+
+    /// <summary>缺匯率 warning 行文字。</summary>
+    public string RebuildNoFxWarningDisplay => string.Format(
+        _localization.Get(
+            "Settings.Rebuild.NoFxWarningFormat",
+            "有 {0} 天缺歷史匯率，建議先執行「深度回填 (1 年)」再重建"),
+        RebuildNoFxCount);
+
+    public string RebuildRangeDisplay => string.Format(
+        _localization.Get("Settings.Rebuild.RangeFormat", "{0:yyyy-MM-dd} ～ {1:yyyy-MM-dd}"),
+        RebuildFrom.ToDateTime(TimeOnly.MinValue),
+        RebuildTo.ToDateTime(TimeOnly.MinValue));
+
+    partial void OnRebuildTotalDaysChanged(int value) => OnPropertyChanged(nameof(RebuildSummaryDisplay));
+    partial void OnRebuildRebuiltCountChanged(int value) => OnPropertyChanged(nameof(RebuildSummaryDisplay));
+    partial void OnRebuildPreservedCountChanged(int value) => OnPropertyChanged(nameof(RebuildBreakdownDisplay));
+    partial void OnRebuildUnpriceableCountChanged(int value) => OnPropertyChanged(nameof(RebuildBreakdownDisplay));
+    partial void OnRebuildNoPositionsCountChanged(int value) => OnPropertyChanged(nameof(RebuildBreakdownDisplay));
+
+    partial void OnRebuildFromChanged(DateOnly value) => OnPropertyChanged(nameof(RebuildRangeDisplay));
+    partial void OnRebuildToChanged(DateOnly value) => OnPropertyChanged(nameof(RebuildRangeDisplay));
+
+    partial void OnIsRebuildBusyChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanPreviewRebuild));
+        ConfirmRebuildSnapshotHistoryCommand.NotifyCanExecuteChanged();
+        PreviewRebuildSnapshotHistoryCommand.NotifyCanExecuteChanged();
+    }
+
+    /// <summary>持有 dry-run 的報告，供 confirm 步驟沿用同一個 from/to（避免 race）。</summary>
+    private SnapshotRebuildReport? _pendingRebuild;
+
+    public bool CanPreviewRebuild => !IsRebuildBusy && _rebuild is not null && _positionLogs is not null;
+
+    /// <summary>
+    /// 以 dryRun:true 跑引擎、把計數攤平到屬性、開啟預覽對話框。沒有任何 position log 時直接
+    /// 以 snackbar 提示「無資料」並返回。任何例外都走 error snackbar、不開對話框。
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanPreviewRebuild))]
+    private async Task PreviewRebuildSnapshotHistoryAsync()
+    {
+        if (_rebuild is null || _positionLogs is null || IsRebuildBusy)
+            return;
+
+        try
+        {
+            var logs = await _positionLogs.GetAllAsync().ConfigureAwait(true);
+            if (logs.Count == 0)
+            {
+                _snackbar?.Warning(_localization.Get("Settings.Rebuild.NoData", "沒有可重建的持倉歷史"));
+                return;
+            }
+
+            var from = logs.Min(l => l.LogDate);
+            var to = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
+            if (from > to)
+            {
+                _snackbar?.Warning(_localization.Get("Settings.Rebuild.NoData", "沒有可重建的持倉歷史"));
+                return;
+            }
+
+            var report = await _rebuild.RebuildAsync(from, to, dryRun: true).ConfigureAwait(true);
+            _pendingRebuild = report;
+
+            RebuildFrom = report.From;
+            RebuildTo = report.To;
+            RebuildTotalDays = report.Days.Count;
+            RebuildRebuiltCount = report.RebuiltCount;
+            RebuildPreservedCount = report.PreservedCount;
+            RebuildUnpriceableCount = report.UnpriceableCount;
+            RebuildNoFxCount = report.NoFxCount;
+            RebuildNoPositionsCount = report.NoPositionsCount;
+
+            IsRebuildPreviewOpen = true;
+        }
+        catch (Exception ex)
+        {
+            _snackbar?.Error(_localization.Get(
+                "Settings.Rebuild.PreviewFailed", "重建預覽失敗") + " " + ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// 確認重建：先備份 db、再以 dryRun:false 跑引擎寫入，成功則關閉對話框並以 snackbar 報告
+    /// 重建天數與備份檔名。失敗時 <b>不關閉</b>對話框，讓使用者看到錯誤。
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanConfirmRebuild))]
+    private async Task ConfirmRebuildSnapshotHistoryAsync()
+    {
+        if (_rebuild is null || _backup is null || _pendingRebuild is null || IsRebuildBusy)
+            return;
+
+        IsRebuildBusy = true;
+        try
+        {
+            var from = _pendingRebuild.From;
+            var to = _pendingRebuild.To;
+
+            // 先備份（WAL-safe 線上備份），再寫入。
+            var backupPath = await _backup.BackupAsync().ConfigureAwait(true);
+            var report = await _rebuild.RebuildAsync(from, to, dryRun: false).ConfigureAwait(true);
+
+            IsRebuildPreviewOpen = false;
+            _pendingRebuild = null;
+            _snackbar?.Success(string.Format(
+                _localization.Get(
+                    "Settings.Rebuild.SuccessFormat",
+                    "已重建 {0} 天快照；備份已存為 {1}"),
+                report.RebuiltCount,
+                System.IO.Path.GetFileName(backupPath)));
+        }
+        catch (Exception ex)
+        {
+            // 不關閉對話框 — 讓使用者看到錯誤。
+            _snackbar?.Error(_localization.Get(
+                "Settings.Rebuild.ConfirmFailed", "重建失敗") + " " + ex.Message);
+        }
+        finally
+        {
+            IsRebuildBusy = false;
+        }
+    }
+
+    /// <summary>取消重建：關閉對話框、清掉暫存的 dry-run 報告。</summary>
+    [RelayCommand]
+    private void CancelRebuildSnapshotHistory()
+    {
+        IsRebuildPreviewOpen = false;
+        _pendingRebuild = null;
     }
 
     private void RefreshFxDisplay()

@@ -1179,6 +1179,23 @@
     <sys:String x:Key="Settings.FxHistory.RefreshedSuccess">FX history updated</sys:String>
     <sys:String x:Key="Settings.FxHistory.RefreshedFailed">FX history refresh failed</sys:String>
 
+    <!--  B Stage 2 — Rebuild snapshot history (dry-run preview + auto backup before write)  -->
+    <sys:String x:Key="Settings.Rebuild.SectionTitle">Rebuild snapshot history</sys:String>
+    <sys:String x:Key="Settings.Rebuild.SectionHint">Recompute past daily portfolio snapshots (cash / equity / liability breakdown) from historical closes and as-of-date FX. Shows a dry-run preview first; on confirm it backs up the database before writing.</sys:String>
+    <sys:String x:Key="Settings.Rebuild.Button">Rebuild snapshot history</sys:String>
+    <sys:String x:Key="Settings.Rebuild.DialogTitle">Rebuild snapshot history</sys:String>
+    <sys:String x:Key="Settings.Rebuild.DialogSubtitle">Preview below (nothing written yet). Confirming backs up the database first, then writes for real.</sys:String>
+    <sys:String x:Key="Settings.Rebuild.RangeLabel">Rebuild range</sys:String>
+    <sys:String x:Key="Settings.Rebuild.RangeFormat">{0:yyyy-MM-dd} – {1:yyyy-MM-dd}</sys:String>
+    <sys:String x:Key="Settings.Rebuild.SummaryFormat">Will rebuild {0} days / skip {1} days</sys:String>
+    <sys:String x:Key="Settings.Rebuild.BreakdownFormat">Kept existing {0}, no price {1}, no FX {2}, no positions {3}</sys:String>
+    <sys:String x:Key="Settings.Rebuild.NoFxWarningFormat">{0} days are missing historical FX. Run "Deep backfill (1 year)" before rebuilding.</sys:String>
+    <sys:String x:Key="Settings.Rebuild.Confirm">Confirm rebuild (backs up first)</sys:String>
+    <sys:String x:Key="Settings.Rebuild.NoData">No position history to rebuild</sys:String>
+    <sys:String x:Key="Settings.Rebuild.PreviewFailed">Rebuild preview failed</sys:String>
+    <sys:String x:Key="Settings.Rebuild.ConfirmFailed">Rebuild failed</sys:String>
+    <sys:String x:Key="Settings.Rebuild.SuccessFormat">Rebuilt {0} days of snapshots; backup saved as {1}</sys:String>
+
     <!--  Categories  -->
     <sys:String x:Key="Nav.Categories">Categories</sys:String>
     <sys:String x:Key="Categories.Title">Income &amp; Expense Categories</sys:String>

@@ -1,0 +1,158 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Settings.Controls.RebuildSnapshotHistoryDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Visibility="{Binding IsRebuildPreviewOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Border Style="{StaticResource AppDialogOverlayBorder}" />
+
+        <Border
+            Width="Auto"
+            MaxWidth="520"
+            MaxHeight="560"
+            Margin="24"
+            Padding="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Style="{StaticResource FormCard}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border
+                    Grid.Row="0"
+                    Padding="20,14"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="0,0,0,1">
+                    <DockPanel>
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="{StaticResource Font.Size.Sm}"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource AppTextPrimary}"
+                                Text="{DynamicResource Settings.Rebuild.DialogTitle}" />
+                            <TextBlock
+                                Margin="0,2,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource Settings.Rebuild.DialogSubtitle}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button
+                            Width="28"
+                            Height="28"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            Command="{Binding CancelRebuildSnapshotHistoryCommand}"
+                            DockPanel.Dock="Right"
+                            IsEnabled="{Binding CanConfirmRebuild}"
+                            Style="{StaticResource AppIconButton}"
+                            ToolTip="{DynamicResource Common.Close}">
+                            <ds:AppIcon
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Symbol="Dismiss24" />
+                        </Button>
+                    </DockPanel>
+                </Border>
+
+                <ScrollViewer
+                    Grid.Row="1"
+                    Padding="20,16"
+                    VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!--  日期範圍  -->
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Settings.Rebuild.RangeLabel}" />
+                        <TextBlock
+                            Margin="0,0,0,12"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{Binding RebuildRangeDisplay}" />
+
+                        <!--  重建 / 跳過 摘要  -->
+                        <Border
+                            Margin="0,0,0,8"
+                            Padding="12"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorderLight}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Sm}">
+                            <StackPanel>
+                                <TextBlock
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding RebuildSummaryDisplay}" />
+                                <TextBlock
+                                    Margin="0,6,0,0"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{Binding RebuildBreakdownDisplay}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <!--  缺匯率 warning（NoFxCount > 0 時才顯示）  -->
+                        <Border
+                            Margin="0,4,0,0"
+                            Padding="12"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppDown}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Sm}"
+                            Visibility="{Binding ShowRebuildNoFxWarning, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <ds:AppIcon
+                                    Margin="0,0,8,0"
+                                    VerticalAlignment="Top"
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    Foreground="{DynamicResource AppDown}"
+                                    Symbol="Warning24" />
+                                <TextBlock
+                                    MaxWidth="400"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{Binding RebuildNoFxWarningDisplay}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Border
+                    Grid.Row="2"
+                    Padding="20,14"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="1,1,1,0">
+                    <DockPanel LastChildFill="False">
+                        <Button
+                            Command="{Binding ConfirmRebuildSnapshotHistoryCommand}"
+                            Content="{DynamicResource Settings.Rebuild.Confirm}"
+                            DockPanel.Dock="Right"
+                            IsEnabled="{Binding CanConfirmRebuild}"
+                            Style="{StaticResource AppPrimaryButton}" />
+                        <Button
+                            Margin="0,0,8,0"
+                            Command="{Binding CancelRebuildSnapshotHistoryCommand}"
+                            Content="{DynamicResource Common.Cancel}"
+                            DockPanel.Dock="Right"
+                            IsEnabled="{Binding CanConfirmRebuild}"
+                            Style="{StaticResource AppSecondaryButton}" />
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

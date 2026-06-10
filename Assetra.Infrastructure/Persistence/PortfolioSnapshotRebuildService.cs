@@ -33,7 +33,7 @@ namespace Assetra.Infrastructure.Persistence;
 ///
 /// <para>Stage 1 scope: pure orchestration over injected repos/providers; no UI / command wiring.</para>
 /// </summary>
-public sealed class PortfolioSnapshotRebuildService
+public sealed class PortfolioSnapshotRebuildService : IPortfolioSnapshotRebuildService
 {
     private readonly IPortfolioPositionLogRepository _logRepo;
     private readonly IPortfolioSnapshotRepository _snapshotRepo;

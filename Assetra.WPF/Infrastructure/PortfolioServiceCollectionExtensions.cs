@@ -69,6 +69,10 @@ internal static class PortfolioServiceCollectionExtensions
                 sp.GetRequiredService<IPortfolioRepository>(),
                 sp.GetService<IAppSettingsService>(),
                 sp.GetService<Microsoft.Extensions.Logging.ILogger<PortfolioSnapshotRebuildService>>()));
+        services.AddSingleton<IPortfolioSnapshotRebuildService>(sp =>
+            sp.GetRequiredService<PortfolioSnapshotRebuildService>());
+        // WAL-safe 線上備份：重建快照歷史前先備份整個 db（dbPath 與其他 repo 同一份）。
+        services.AddSingleton<IDatabaseBackupService>(_ => new SqliteDatabaseBackupService(dbPath));
         services.AddSingleton<IPortfolioSummaryService, PortfolioSummaryService>();
         services.AddSingleton<ITransactionService>(sp => new TransactionService(
             sp.GetRequiredService<ITradeRepository>()));

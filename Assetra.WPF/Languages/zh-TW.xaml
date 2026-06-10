@@ -1183,6 +1183,23 @@
     <sys:String x:Key="Settings.FxHistory.RefreshedSuccess">匯率歷史已更新</sys:String>
     <sys:String x:Key="Settings.FxHistory.RefreshedFailed">匯率歷史更新失敗</sys:String>
 
+    <!--  B Stage 2 — 重建快照歷史（dry-run 預覽 + 自動備份後寫入）  -->
+    <sys:String x:Key="Settings.Rebuild.SectionTitle">重建快照歷史</sys:String>
+    <sys:String x:Key="Settings.Rebuild.SectionHint">用歷史收盤價與當日匯率重算過去每日的資產快照（含現金／投資／負債明細）。會先顯示 dry-run 預覽，確認後才在自動備份資料庫後寫入。</sys:String>
+    <sys:String x:Key="Settings.Rebuild.Button">重建快照歷史</sys:String>
+    <sys:String x:Key="Settings.Rebuild.DialogTitle">重建快照歷史</sys:String>
+    <sys:String x:Key="Settings.Rebuild.DialogSubtitle">以下為試算結果（尚未寫入）。確認後會先自動備份資料庫，再實際寫入。</sys:String>
+    <sys:String x:Key="Settings.Rebuild.RangeLabel">重建範圍</sys:String>
+    <sys:String x:Key="Settings.Rebuild.RangeFormat">{0:yyyy-MM-dd} ～ {1:yyyy-MM-dd}</sys:String>
+    <sys:String x:Key="Settings.Rebuild.SummaryFormat">將重建 {0} 天 / 跳過 {1} 天</sys:String>
+    <sys:String x:Key="Settings.Rebuild.BreakdownFormat">保留既有 {0}、缺歷史價 {1}、缺匯率 {2}、無持倉 {3}</sys:String>
+    <sys:String x:Key="Settings.Rebuild.NoFxWarningFormat">有 {0} 天缺歷史匯率，建議先執行「深度回填 (1 年)」再重建</sys:String>
+    <sys:String x:Key="Settings.Rebuild.Confirm">確認重建（會先自動備份）</sys:String>
+    <sys:String x:Key="Settings.Rebuild.NoData">沒有可重建的持倉歷史</sys:String>
+    <sys:String x:Key="Settings.Rebuild.PreviewFailed">重建預覽失敗</sys:String>
+    <sys:String x:Key="Settings.Rebuild.ConfirmFailed">重建失敗</sys:String>
+    <sys:String x:Key="Settings.Rebuild.SuccessFormat">已重建 {0} 天快照；備份已存為 {1}</sys:String>
+
     <!--  Categories  -->
     <sys:String x:Key="Nav.Categories">收支分類</sys:String>
     <sys:String x:Key="Categories.Title">收支分類管理</sys:String>
