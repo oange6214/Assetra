@@ -62,6 +62,42 @@ public sealed class GoalsViewModelTests
         }
     }
 
+    [Fact] // WHY: UpsertGoal 透過 FireGoalSavedMessage messenger handler 變更綁定的 _goals 集合。
+           // 訊息處理器會在呼叫 Send 的執行緒上執行，未來若有背景執行緒 sender，跨執行緒變更
+           // CollectionView 會 throw。此測試保證從背景執行緒觸發 upsert 仍能完成並正確更新，不拋出。
+           // 註：測試主機 Application.Current 為 null，故走 inline path——這是契約/守門測試，
+           // 非真正的跨執行緒重現（與 LoadAsync 背景執行緒測試同樣的限制）。
+    public async Task UpsertGoal_InvokedFromBackgroundThread_UpsertsWithoutThrowing()
+    {
+        var existingGoal = new FinancialGoal(Guid.NewGuid(), "Emergency", 200_000m, 50_000m, null, null);
+        var fireGoal = new FinancialGoal(Guid.NewGuid(), "FIRE", 15_000_000m, 1_000_000m, null, null);
+        var repo = new Mock<IFinancialGoalRepository>();
+        repo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([existingGoal]);
+
+        var vm = new GoalsViewModel(repo.Object);
+        try
+        {
+            await vm.LoadAsync();
+
+            // Drive UpsertGoal exactly as production does: a FireGoalSavedMessage sent
+            // from a background thread (the messenger handler runs UpsertGoal inline).
+            await Task.Run(() =>
+                WeakReferenceMessenger.Default.Send(new FireGoalSavedMessage(fireGoal)));
+
+            Assert.True(vm.IsLoaded);
+            Assert.Null(vm.ErrorMessage);
+            Assert.Equal(2, vm.Goals.Count);
+            var fireRow = vm.Goals.Single(g => g.Id == fireGoal.Id);
+            Assert.Equal("FIRE", fireRow.Name);
+            Assert.Equal(15_000_000m, fireRow.Goal.TargetAmount);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(vm);
+        }
+    }
+
     [Theory]
     [InlineData("abc")]
     [InlineData("-1")]

@@ -710,6 +710,21 @@ public sealed partial class GoalsViewModel : ObservableObject
 
     private void UpsertGoal(FinancialGoal goal)
     {
+        // UpsertGoal mutates the bound _goals collection from the FireGoalSavedMessage
+        // messenger handler. The current sender (FireViewModel.SaveToGoalsAsync) runs on
+        // the UI thread, but messenger handlers can run on whatever thread Send is called
+        // from, and WPF's CollectionView throws NotSupportedException on cross-thread edits.
+        // Marshal the mutation to the UI thread (mirrors LoadAsync). Application.Current is
+        // null in headless / unit-test hosts, so we mutate inline there.
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher is not null && !dispatcher.CheckAccess())
+            dispatcher.Invoke(() => UpsertGoalCore(goal));
+        else
+            UpsertGoalCore(goal);
+    }
+
+    private void UpsertGoalCore(FinancialGoal goal)
+    {
         if (!IsLoaded)
             return;
 
