@@ -117,26 +117,25 @@ public sealed class ReturnCalendarViewModelTests
     }
 
     [Fact]
-    public void UpdateSnapshots_ShowsLoneBackfilledBreakdownlessTradingDayInBreakdownEra()
+    public void UpdateSnapshots_IgnoresLegacySnapshotAfterBreakdownSnapshotsBegin()
     {
-        // 06-08 is a backfilled missed trading day: a snapshot WITH MarketValue but NO breakdown,
-        // sitting between breakdown days. It must render (delta from MarketValue), not stay blank.
         var snapshots = new[]
         {
-            MakeSnapshot(new DateOnly(2026, 6, 4), 1_000m, withBreakdown: true),
-            MakeSnapshot(new DateOnly(2026, 6, 5), 1_100m, withBreakdown: true),
-            MakeSnapshot(new DateOnly(2026, 6, 8), 1_300m),                       // backfill, no breakdown
-            MakeSnapshot(new DateOnly(2026, 6, 9), 1_500m, withBreakdown: true),
+            MakeSnapshot(new DateOnly(2026, 5, 14), 1_000m, withBreakdown: true),
+            MakeSnapshot(new DateOnly(2026, 5, 15), 100m),
+            MakeSnapshot(new DateOnly(2026, 5, 18), 1_100m, withBreakdown: true),
         };
         var vm = new ReturnCalendarViewModel();
 
         vm.UpdateSnapshots(snapshots);
 
-        var day8 = vm.Cells.First(c => c.Date == new DateOnly(2026, 6, 8));
-        var day9 = vm.Cells.First(c => c.Date == new DateOnly(2026, 6, 9));
-        Assert.True(day8.HasData);
-        Assert.Equal(200m, day8.Delta);   // 1300 - 1100
-        Assert.Equal(200m, day9.Delta);   // 1500 - 1300 (prev now includes 06-08)
+        var day15 = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 15));
+        var day18 = vm.Cells.First(c => c.Date == new DateOnly(2026, 5, 18));
+        Assert.False(day15.HasData);
+        Assert.Null(day15.Delta);
+        Assert.True(day18.HasData);
+        Assert.Equal(100m, day18.Delta);
+        Assert.Equal(100m, vm.MonthlyAbsolutePnl);
     }
 
     [Fact]
