@@ -8,6 +8,7 @@ using Assetra.WPF.Features.FinancialOverview;
 using Assetra.WPF.Features.Goals;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.Contracts;
+using Microsoft.Reactive.Testing;
 using Moq;
 using Xunit;
 
@@ -140,6 +141,55 @@ public sealed class FinancialOverviewViewModelTests
         feed.TotalMarketValue = 9999m;
 
         Assert.Equal(9999m, feed.TotalMarketValue);
+    }
+
+    [Fact]
+    public void RapidQuoteTicks_CoalesceToSingleReload_WithinSampleWindow()
+    {
+        // #1 perf fix：盤中報價串流每批都 raise TotalMarketValue PropertyChanged，
+        // 原本每次都立即 LoadAsync → BuildAsync（SQLite 查詢 + 全量重建三組 accordion）。
+        // WHY this test matters：保證一連串密集 tick 被 Rx Sample 合併成「每 500ms 視窗
+        // 最多一次」重載，而不是 N 次。若有人把 Sample 換回 per-tick 直接呼叫、或拿掉
+        // 節流，BuildAsync 會被呼叫 5 次而非 1 次 → 此測試紅，正是我們要鎖住的意圖。
+        var buildCount = 0;
+        var qs = new Mock<IFinancialOverviewQueryService>();
+        qs.Setup(x => x.BuildAsync(It.IsAny<IReadOnlyList<FinancialOverviewInvestmentItem>>(), It.IsAny<CancellationToken>()))
+          .Callback(() => buildCount++)
+          .ReturnsAsync(new FinancialOverviewResult(
+              AssetGroups: [],
+              InvestmentGroups: [],
+              LiabilityGroups: [],
+              TotalAssets: 0m,
+              TotalInvestments: 0m,
+              TotalLiabilities: 0m,
+              BaseCurrency: "TWD"));
+        var feed = new StubFeed();
+
+        // Virtual-time scheduler so the 500ms Sample window is deterministic —
+        // no real delay / polling. Inject as the trailing optional ctor param.
+        var scheduler = new TestScheduler();
+        _ = new FinancialOverviewViewModel(qs.Object, feed, reloadScheduler: scheduler);
+
+        // ctor 不會自行 Load；起點計數應為 0（鎖住「建構不重載」前提，也讓下面 delta 乾淨）。
+        Assert.Equal(0, buildCount);
+
+        // 5 次密集 tick，期間「不」推進排程器 → 全部落在同一個 Sample 視窗內。
+        // StubFeed 的 setter 只在值改變時 raise，故每次給不同值。
+        feed.TotalMarketValue = 100m;
+        feed.TotalMarketValue = 200m;
+        feed.TotalMarketValue = 300m;
+        feed.TotalMarketValue = 400m;
+        feed.TotalMarketValue = 500m;
+
+        // 尚未推進排程器 → Sample 還沒放行任何一筆。
+        Assert.Equal(0, buildCount);
+
+        // 推進超過 500ms 視窗 → Sample 放行「最新值」一次，觸發單次 LoadAsync→BuildAsync。
+        // Moq 的 BuildAsync 同步完成（ReturnsAsync），SafeFireAndForget 的 continuation
+        // 在 AdvanceBy 同執行緒同步跑完，故計數在此呼叫返回後即穩定。
+        scheduler.AdvanceBy(TimeSpan.FromMilliseconds(600).Ticks);
+
+        Assert.Equal(1, buildCount);
     }
 
     [Fact]

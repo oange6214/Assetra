@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Reactive.Linq;
 using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
@@ -27,6 +28,20 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     private readonly IFinancialOverviewQueryService _queryService;
     private readonly IPortfolioPositionFeed _portfolio;
     private readonly SynchronizationContext? _uiContext;
+
+    // ── Per-tick reload throttle ──────────────────────────────────────────
+    //
+    // 報價串流盤中每批 quote 都會 raise TotalMarketValue/TotalCash PropertyChanged
+    // （背景執行緒）。原本每次都 SafeFireAndForget(LoadAsync) → 每 tick 一次
+    // SQLite 餘額/資產查詢 + 全量重建三組 accordion。盤中等於不斷重算，浪費。
+    //
+    // 改用 Rx Sample（非 Throttle）：連續 tick 流下 Throttle(debounce) 會被持續
+    // 重置而 starve；Sample 在每個視窗最多放行一次「最新值」，且 tick 停止後仍會
+    // 補發最後一筆 — 對即時儀表板才正確。500ms 對使用者無感，把爆發壓到 ≤2 次/秒。
+    // 啟動與頁面可見性的 LoadAsync 仍直接呼叫（首屏必須即時），不走此節流。
+    private readonly System.Reactive.Subjects.Subject<System.Reactive.Unit> _reloadTrigger = new();
+    private readonly System.Reactive.Concurrency.IScheduler _reloadScheduler;
+    private readonly IDisposable _reloadSubscription;
 
     // ── KPI bar ──────────────────────────────────────────────────────────
 
@@ -599,7 +614,8 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         Assetra.WPF.Features.Insurance.InsurancePolicyViewModel? insuranceFocusWidget = null,
         Assetra.WPF.Features.Retirement.RetirementViewModel? retirementFocusWidget = null,
         Assetra.WPF.Features.PhysicalAsset.PhysicalAssetViewModel? physicalAssetFocusWidget = null,
-        Assetra.Core.Interfaces.IGroupBalanceQueryService? groupBalanceService = null)
+        Assetra.Core.Interfaces.IGroupBalanceQueryService? groupBalanceService = null,
+        System.Reactive.Concurrency.IScheduler? reloadScheduler = null)
     {
         _groupBalanceService = groupBalanceService;
         _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
@@ -615,6 +631,14 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         RetirementFocusWidget = retirementFocusWidget;
         PhysicalAssetFocusWidget = physicalAssetFocusWidget;
         _uiContext = SynchronizationContext.Current;
+        _reloadScheduler = reloadScheduler ?? System.Reactive.Concurrency.Scheduler.Default;
+
+        // 報價 tick 觸發的重載走此節流：每 500ms 視窗最多放行一次最新值。
+        // 此 VM 是 application-lifetime singleton（DI 一律 AddSingleton），無人呼叫
+        // Dispose，故 subscription/Subject 隨 app 存活，不另接 IDisposable 管線。
+        _reloadSubscription = _reloadTrigger
+            .Sample(TimeSpan.FromMilliseconds(500), _reloadScheduler)
+            .Subscribe(_ => AsyncHelpers.SafeFireAndForget(LoadAsync, "FinancialOverview.Load"));
 
         // BalanceSheet totals depend on each focus widget's running total. When
         // a property like RealEstate.TotalCurrentValue / Retirement.TotalBalance /
@@ -830,7 +854,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         // 主動 raise TotalCash PropertyChanged，即使數值未變）。
         if (e.PropertyName == nameof(IPortfolioPositionFeed.TotalMarketValue)
             || e.PropertyName == nameof(IPortfolioPositionFeed.TotalCash))
-            AsyncHelpers.SafeFireAndForget(LoadAsync, "FinancialOverview.Load");
+            _reloadTrigger.OnNext(System.Reactive.Unit.Default);
 
         // Investment P&L KPI cards depend on both TotalMarketValue and TotalCost.
         // Rebuild on either so the card refreshes when price quotes land or when
